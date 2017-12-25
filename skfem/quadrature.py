@@ -524,5 +524,5 @@ def get_quadrature_line(norder):
     """Return a nth order accurate quadrature rule for line [0,1]."""
     if norder <= 1:
         norder = 2
-    X, W = np.polynomial.legendre.leggauss(np.ceil((norder + 1.0)/2.0))
+    X, W = np.polynomial.legendre.leggauss(int(np.ceil((norder + 1.0)/2.0)))
     return np.array([0.5*X + 0.5]), W/2.0

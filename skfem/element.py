@@ -46,38 +46,47 @@ class ElementGlobal(object):
 
         V=np.zeros((len(tind), N, N))
 
-        # TODO if triangle
-        v1 = mesh.p[:, mesh.t[0, tind]]
-        v2 = mesh.p[:, mesh.t[1, tind]]
-        v3 = mesh.p[:, mesh.t[2, tind]]
-
-        e1 = 0.5*(v1 + v2)
-        e2 = 0.5*(v2 + v3)
-        e3 = 0.5*(v1 + v3)
-
-        t1 = v1 - v2
-        t2 = v2 - v3
-        t3 = v1 - v3
-
-        n1 = np.array([t1[1, :], -t1[0, :]])
-        n2 = np.array([t2[1, :], -t2[0, :]])
-        n3 = np.array([t3[1, :], -t3[0, :]])
-
-        n1 /= np.linalg.norm(n1, axis=0)
-        n2 /= np.linalg.norm(n2, axis=0)
-        n3 /= np.linalg.norm(n3, axis=0)
-
-        dofvars={
-            'v1': v1,
-            'v2': v2,
-            'v3': v3,
-            'e1': e1,
-            'e2': e2,
-            'e3': e3,
-            'n1': n1,
-            'n2': n2,
-            'n3': n3,
+        if mesh.t.shape[0]==2:
+            v1 = mesh.p[:, mesh.t[0, tind]][0, :]
+            v2 = mesh.p[:, mesh.t[1, tind]][0, :]
+            dofvars = {
+                'v1': v1,
+                'v2': v2,
             }
+        elif mesh.t.shape[0]==3:
+            v1 = mesh.p[:, mesh.t[0, tind]]
+            v2 = mesh.p[:, mesh.t[1, tind]]
+            v3 = mesh.p[:, mesh.t[2, tind]]
+
+            e1 = 0.5*(v1 + v2)
+            e2 = 0.5*(v2 + v3)
+            e3 = 0.5*(v1 + v3)
+
+            t1 = v1 - v2
+            t2 = v2 - v3
+            t3 = v1 - v3
+
+            n1 = np.array([t1[1, :], -t1[0, :]])
+            n2 = np.array([t2[1, :], -t2[0, :]])
+            n3 = np.array([t3[1, :], -t3[0, :]])
+
+            n1 /= np.linalg.norm(n1, axis=0)
+            n2 /= np.linalg.norm(n2, axis=0)
+            n3 /= np.linalg.norm(n3, axis=0)
+
+            dofvars={
+                'v1': v1,
+                'v2': v2,
+                'v3': v3,
+                'e1': e1,
+                'e2': e2,
+                'e3': e3,
+                'n1': n1,
+                'n2': n2,
+                'n3': n3,
+                }
+        else:
+            raise NotImplementedError("The used mesh type not supported in ElementGlobal.")
 
         # evaluate dofs
         for itr in range(N):
@@ -96,16 +105,31 @@ class ElementGlobal(object):
         V = np.linalg.inv(V)
 
         # initialize
-        u = const_cell(0*qps[0], N)
-        du = const_cell(0*qps[0], N, self.dim)
-        ddu = const_cell(0*qps[0], N, self.dim, self.dim)
-        d4u = const_cell(0*qps[0], N, self.dim, self.dim)
+        if self.dim==1:
+            u = const_cell(0 * qps, N)
+            du = const_cell(0*qps, N)
+            ddu = const_cell(0*qps, N)
+            d4u = const_cell(0*qps, N)
+        elif self.dim==2:
+            u = const_cell(0 * qps[0], N)
+            du = const_cell(0*qps[0], N, self.dim)
+            ddu = const_cell(0*qps[0], N, self.dim, self.dim)
+            d4u = const_cell(0*qps[0], N, self.dim, self.dim)
 
         # loop over new basis
         for jtr in range(N):
             # loop over power basis
             for itr in range(N):
-                if self.dim==2:
+                if self.dim==1:
+                    u[jtr] += V[:, itr, jtr][:, None] \
+                              * self._pbasis[itr](qps)
+                    du[jtr] += V[:, itr, jtr][:, None] \
+                                  * self._pbasisdx[itr](qps)
+                    ddu[jtr] += V[:, itr, jtr][:, None] \
+                                      * self._pbasisdxx[itr](qps)
+                    d4u[jtr] += V[:, itr, jtr][:, None] \
+                                      * self._pbasisdxxxx[itr](qps)
+                elif self.dim==2:
                     u[jtr] += V[:, itr, jtr][:, None]\
                               * self._pbasis[itr](qps[0], qps[1])
                     du[jtr][0] += V[:, itr, jtr][:, None]\
@@ -126,8 +150,9 @@ class ElementGlobal(object):
                                       * self._pbasisdxxyy[itr](qps[0], qps[1])
                 else:
                     raise NotImplementedError("!")
-            ddu[jtr][1][0] = ddu[jtr][0][1]
-            d4u[jtr][1][0] = d4u[jtr][0][1]
+            if self.dim==2:
+                ddu[jtr][1][0] = ddu[jtr][0][1]
+                d4u[jtr][1][0] = d4u[jtr][0][1]
         return u, du, ddu, d4u
 
     def _pbasisNinit(self, dim, N):
@@ -136,18 +161,34 @@ class ElementGlobal(object):
             import sympy as sp
             from sympy.abc import x, y, z
             R = list(range(N+1))
-            ops={
-                '': lambda a: a,
-                'dx': lambda a: sp.diff(a, x),
-                'dy': lambda a: sp.diff(a, y),
-                'dxx': lambda a: sp.diff(a, x, 2),
-                'dyy': lambda a: sp.diff(a, y, 2),
-                'dxy': lambda a: sp.diff(sp.diff(a, x), y),
-                'dxxxx': lambda a: sp.diff(a, x, 4),
-                'dyyyy': lambda a: sp.diff(a, y, 4),
-                'dxxyy': lambda a: sp.diff(sp.diff(a, x, 2), y, 2),
-            }
-            if dim==2:
+            if dim==1:
+                ops = {
+                    '': lambda a: a,
+                    'dx': lambda a: sp.diff(a, x),
+                    'dxx': lambda a: sp.diff(a, x, 2),
+                    'dxxxx': lambda a: sp.diff(a, x, 4),
+                }
+                for name, op in ops.items():
+                    pbasis = [sp.lambdify((x), op(x**i), "numpy")
+                              for i in R]
+                    # workaround for constant shape bug in SymPy
+                    for itr in range(len(pbasis)):
+                        const = pbasis[itr](np.zeros(1))
+                        if type(const) is int:
+                            pbasis[itr] = lambda X, const=const: const*np.ones(X.shape)
+                    setattr(self,'_pbasis'+name, pbasis)
+            elif dim==2:
+                ops = {
+                    '': lambda a: a,
+                    'dx': lambda a: sp.diff(a, x),
+                    'dy': lambda a: sp.diff(a, y),
+                    'dxx': lambda a: sp.diff(a, x, 2),
+                    'dyy': lambda a: sp.diff(a, y, 2),
+                    'dxy': lambda a: sp.diff(sp.diff(a, x), y),
+                    'dxxxx': lambda a: sp.diff(a, x, 4),
+                    'dyyyy': lambda a: sp.diff(a, y, 4),
+                    'dxxyy': lambda a: sp.diff(sp.diff(a, x, 2), y, 2),
+                }
                 for name, op in ops.items():
                     pbasis = [sp.lambdify((x,y), op(x**i*y**j), "numpy")
                               for i in R for j in R if i+j<=N]
@@ -187,6 +228,38 @@ class ElementGlobalTriP0(ElementGlobal):
     def gdof(self, v, i, j):
         return [
                 lambda: self._pbasis[i]((v['v1'][0, :] + v['v2'][0, :] + v['v3'][0, :])/3.0, (v['v1'][1, :] + v['v2'][1, :] + v['v3'][1, :])/3.0),
+                ][j]()
+
+class ElementGlobalLineP1(ElementGlobal):
+    """C^1 continuous Hermite element for Euler-Bernoulli beam."""
+
+    dim = 1
+
+    def __init__(self):
+        self.maxdeg = 1
+        self.n_dofs = 1
+
+    def gdof(self, v, i, j):
+        return [
+                lambda: self._pbasis[i](v['v1']),
+                lambda: self._pbasis[i](v['v2']),
+                ][j]()
+
+class ElementGlobalLineHermite(ElementGlobal):
+    """C^1 continuous Hermite element for Euler-Bernoulli beam."""
+
+    dim = 1
+
+    def __init__(self):
+        self.maxdeg = 3
+        self.n_dofs = 2
+
+    def gdof(self, v, i, j):
+        return [
+                lambda: self._pbasis[i](v['v1']),
+                lambda: self._pbasisdx[i](v['v1']),
+                lambda: self._pbasis[i](v['v2']),
+                lambda: self._pbasisdx[i](v['v2']),
                 ][j]()
 
 class ElementGlobalTriPp(ElementGlobal):
