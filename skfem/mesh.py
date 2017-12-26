@@ -164,8 +164,10 @@ class MeshLine(Mesh):
         if p is None and t is None:
             p = np.array([[0, 1]])
             t = np.array([[0], [1]])
-        elif p is None or t is None:
-            raise Exception("Must provide p AND t or neither")
+        elif p is not None and t is None:
+            t = np.array([np.arange(np.max(p.shape)-1), np.arange(np.max(p.shape)-1)+1])
+        if len(p.shape)==1:
+            p = np.array([p]) 
         self.p = p
         self.t = t
         if validate:
@@ -213,6 +215,22 @@ class MeshLine(Mesh):
             ys.append(y2)
             ys.append(None)
         plt.plot(xs, ys, color)
+
+    def __mul__(self, other):
+        """Tensor product mesh."""
+        npx = self.p.shape[1]
+        npy = other.p.shape[1]
+        X, Y = np.meshgrid(np.sort(self.p[0, :]), np.sort(other.p[0, :]))   
+        p = np.vstack((X.flatten('F'), Y.flatten('F')))
+        ix = np.arange(npx*npy)
+        ne = (npx-1)*(npy-1)
+        t = np.zeros((4, ne))
+        ix = ix.reshape(npy, npx, order='F').copy()
+        t[0, :] = ix[0:(npy-1), 0:(npx-1)].reshape(ne, 1, order='F').copy().flatten()
+        t[1, :] = ix[1:npy, 0:(npx-1)].reshape(ne, 1, order='F').copy().flatten()
+        t[2, :] = ix[1:npy, 1:npx].reshape(ne, 1, order='F').copy().flatten()
+        t[3, :] = ix[0:(npy-1), 1:npx].reshape(ne, 1, order='F').copy().flatten()
+        return MeshQuad(p, t.astype(np.int64))
 
     def mapping(self):
         return skfem.mapping.MappingAffine(self)
