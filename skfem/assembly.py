@@ -38,7 +38,7 @@ class Assembler(object):
     def __init__(self):
         raise NotImplementedError("Assembler metaclass cannot be initialized.")
 
-    def essential_bc(self, test, bc, boundary=True, dofrows=None, check_vertices=True,
+    def essential_bc(self, test, bc=None, boundary=True, dofrows=None, check_vertices=True,
                   check_facets=True, check_edges=True):
         """Helper function for setting essential boundary conditions.
 
@@ -53,7 +53,7 @@ class Assembler(object):
             An anonymous function with Ndim arguments. If returns other than 0
             when evaluated at the DOF location, the respective DOF is included
             in the return set.
-        bc : lambda
+        bc : (OPTIONAL, default=zero function) lambda
             The boundary condition value.
         boundary : (OPTIONAL, default=True) bool
             Check only boundary DOFs. 
@@ -78,6 +78,12 @@ class Assembler(object):
         """
         if self.mesh.dim() == 1:
             raise Exception("Assembler.find_dofs not implemented for 1D mesh.")
+
+        if bc is None:
+            if self.mesh.dim() == 2:
+                bc = lambda x, y: 0*x
+            elif self.mesh.dim() == 3:
+                bc = lambda x, y, z: 0*x
 
         x = np.zeros(self.dofnum_u.N)
 
