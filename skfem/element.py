@@ -388,21 +388,33 @@ class ElementLocalHdiv(ElementLocal):
         if isinstance(X,dict):
             raise NotImplementedError("Calling ElementHdiv gbasis with dict not implemented!")
         else:
-            x={}
-            x[0]=X[0,:]
-            x[1]=X[1,:]
-            [phi,dphi]=self.lbasis(x,i)
+            dim = X.shape[0]
+            x = {}
+            x[0] = X[0, :]
+            x[1] = X[1, :]
+            if dim == 3:
+                x[2] = X[2, :]
+            [phi, dphi] = self.lbasis(x, i)
 
-        DF=mapping.DF(X,tind)
-        detDF=mapping.detDF(X,tind)
+        DF = mapping.DF(X, tind)
+        detDF = mapping.detDF(X, tind)
 
-        u={}
-        u[0]=(DF[0][0]*phi[0]+DF[0][1]*phi[1])/detDF
-        u[1]=(DF[1][0]*phi[0]+DF[1][1]*phi[1])/detDF
+        u = {}
+        if dim == 2:
+            u[0] = (DF[0][0]*phi[0] + DF[0][1]*phi[1])/detDF
+            u[1] = (DF[1][0]*phi[0] + DF[1][1]*phi[1])/detDF
+        elif dim == 3:
+            u[0] = (DF[0][0] * phi[0] + DF[0][1] * phi[1] + DF[0][2] * phi[2]) / detDF
+            u[1] = (DF[1][0] * phi[0] + DF[1][1] * phi[1] + DF[1][2] * phi[2]) / detDF
+            u[2] = (DF[2][0] * phi[0] + DF[2][1] * phi[1] + DF[2][2] * phi[2]) / detDF
 
-        du=dphi/detDF
+        du = dphi/detDF
 
-        return u,du
+        return u, du
+
+class ElementTetRT0(ElementLocalHdiv):
+    """Lowest order Raviart-Thomas element for tetrahedron."""
+    pass #TODO
 
 class ElementTriRT0(ElementLocalHdiv):
     """Lowest order Raviart-Thomas element for triangle."""

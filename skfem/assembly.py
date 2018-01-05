@@ -380,20 +380,6 @@ class AssemblerGlobal(Assembler):
         Nbfun_v = self.dofnum_v.t_dof.shape[0]
 
         # interpolate some previous discrete function at quadrature points
-        #w = {}
-        #if interp is not None:
-        #    if not isinstance(interp, dict):
-        #        raise Exception("The input solution vector(s) must be in a "
-        #                        "dictionary! Pass e.g. {0:u} instead of u.")
-        #    # interpolate the solution vectors at quadrature points
-        #    zero = 0.0*x[0]
-        #    w = {}
-        #    for k in interp:
-        #        w[k] = zero
-        #        for j in range(Nbfun_u):
-        #            jdofs = self.dofnum_u.t_dof[j, :]
-        #            w[k] += interp[k][jdofs][:, None]*self.u[j]
-
         dim = self.mesh.p.shape[0]
         zero = 0.0*x[0]
         w, dw, ddw, d4w = ({} for i in range(4))
@@ -762,6 +748,150 @@ class AssemblerGlobal(Assembler):
         else:
             return np.dot(fform(w1, dw1, ddw1,
                                 x, n, t, h)**2*np.abs(detDG), W), find
+
+class AssemblerLocalMortar(Assembler):
+    """
+    For assembling couplings on interfaces
+    """
+    def __init__(self, mortar, mesh1, mesh2, elem1, elem2=None):
+        if not isinstance(mesh1, skfem.mesh.Mesh):
+            raise Exception("Wrong parameter type")
+        if not isinstance(mesh2, skfem.mesh.Mesh):
+            raise Exception("Wrong parameter type")
+        if not isinstance(elem1, skfem.element.ElementLocal):
+            raise Exception("Wrong parameter type")
+
+        self.mortar = mortar
+        self.mortar_mapping = mortar.mapping()
+
+        # get default mapping from the mesh
+        self.mapping1 = mesh1.mapping()
+        self.mapping2 = mesh2.mapping()
+
+        self.mesh1 = mesh1
+        self.mesh2 = mesh2
+        self.elem1 = elem1
+        self.dofnum1 = Dofnum(mesh1, elem1)
+
+        # duplicate test function element type if None is given
+        if elem2 is None:
+            self.elem2 = elem1
+            self.dofnum2 = Dofnum(mesh2, elem1)
+        else:
+            self.elem2 = elem2
+            self.dofnum2 = Dofnum(mesh2, elem2)
+
+    def fasm(self, form, find=None, intorder=None):
+        """Facet assembly."""
+
+        find1 = self.mortar.f2t[0, :]
+        find2 = self.mortar.f2t[1, :]
+
+        if intorder is None:
+            intorder = self.elem1.maxdeg + self.elem2.maxdeg
+
+        ne = find1.shape[0]
+
+        # check and fix parameters of form
+        oldparams = inspect.getargspec(form).args
+
+        if 'u1' in oldparams or 'du1' in oldparams:
+            paramlist = ['u1', 'u2', 'v1', 'v2',
+                         'du1', 'du2', 'dv1', 'dv2',
+                         'x', 'h', 'n']
+            bilinear = True
+        else:
+            if 'v1' not in oldparams or 'dv1' not in oldparams:
+                raise Exception("Invalid form")
+            paramlist = ['v1', 'v2', 'dv1', 'dv2',
+                         'x', 'h', 'n']
+            bilinear = False
+
+        fform = self.fillargs(form, paramlist)
+
+        X, W = get_quadrature(self.mesh1.brefdom, intorder)
+
+        # boundary element indices
+        tind1 = self.mesh1.f2t[0, find1]
+        tind2 = self.mesh2.f2t[0, find2]
+
+        # mappings
+        x = self.mortar_mapping.G(X) # reference facet to global facet
+      
+        Y1 = self.mapping1.invF(x, tind=tind1) # global facet to ref element
+        Y2 = self.mapping2.invF(x, tind=tind2) # global facet to ref element
+
+        Nbfun1 = self.dofnum1.t_dof.shape[0]
+        Nbfun2 = self.dofnum2.t_dof.shape[0]
+
+        detDG = self.mortar_mapping.detDG(X)
+
+        # compute normal vectors
+        n = {}
+        # normals based on tind1 only
+        n = self.mapping1.normals(Y1, tind1, find1, self.mesh1.t2f)
+
+        # compute the mesh parameter from jacobian determinant
+        h = np.abs(detDG)**(1.0/(self.mesh1.dim() - 1.0))
+
+        # initialize sparse matrix structures
+        ndata = Nbfun1*Nbfun2*ne
+        data = np.zeros(4*ndata)
+        rows = np.zeros(4*ndata)
+        cols = np.zeros(4*ndata)
+
+        for j in range(Nbfun1):
+            u1, du1 = self.elem1.gbasis(self.mapping1, Y1, j, tind1)
+            u2, du2 = self.elem2.gbasis(self.mapping2, Y2, j, tind2)
+            if j == 0:
+                # these are zeros corresponding to the shapes of u,du
+                z = const_cell(0, *cell_shape(u2))
+                dz = const_cell(0, *cell_shape(du2))
+            for i in range(Nbfun2):
+                v1, dv1 = self.elem2.gbasis(self.mapping1, Y1, i, tind1)
+                v2, dv2 = self.elem2.gbasis(self.mapping2, Y2, i, tind2)
+
+                ixs1 = slice(ne*(Nbfun2*j + i),
+                             ne*(Nbfun2*j + i + 1))
+                ixs2 = slice(ne*(Nbfun2*j + i) + ndata,
+                             ne*(Nbfun2*j + i + 1) + ndata)
+                ixs3 = slice(ne*(Nbfun2*j + i) + 2*ndata,
+                             ne*(Nbfun2*j + i + 1) + 2*ndata)
+                ixs4 = slice(ne*(Nbfun2*j + i) + 3*ndata,
+                             ne*(Nbfun2*j + i + 1) + 3*ndata)
+
+                data[ixs1] = np.dot(fform(u1, z, v1, z,
+                                          du1, dz, dv1, dz,
+                                          x, h, n)*np.abs(detDG), W)
+                rows[ixs1] = self.dofnum1.t_dof[i, tind1]
+                cols[ixs1] = self.dofnum1.t_dof[j, tind1]
+
+                data[ixs2] = np.dot(fform(z, u2, z, v2,
+                                          dz, du2, dz, dv2,
+                                          x, h, n)*np.abs(detDG), W)
+                rows[ixs2] = self.dofnum2.t_dof[i, tind2] + self.dofnum1.N
+                cols[ixs2] = self.dofnum2.t_dof[j, tind2] + self.dofnum1.N
+
+                data[ixs3] = np.dot(fform(z, u2, v1, z,
+                                          dz, du2, dv1, dz,
+                                          x, h, n)*np.abs(detDG), W)
+                rows[ixs3] = self.dofnum1.t_dof[i, tind1]
+                cols[ixs3] = self.dofnum2.t_dof[j, tind2] + self.dofnum1.N
+
+                data[ixs4] = np.dot(fform(u1, z, z, v2,
+                                          du1, dz, dz, dv2,
+                                          x, h, n)*np.abs(detDG), W)
+                rows[ixs4] = self.dofnum2.t_dof[i, tind2] + self.dofnum1.N
+                cols[ixs4] = self.dofnum1.t_dof[j, tind1]
+                #ixs = slice(ne*(Nbfun_v*j + i), ne*(Nbfun_v*j + i + 1))
+
+                #data[ixs] = np.dot(fform(u, v, du, dv,
+                #                         x, h, n)*np.abs(detDG), W)
+                #rows[ixs] = self.dofnum_v.t_dof[i, tind2]
+                #cols[ixs] = self.dofnum_u.t_dof[j, tind1]
+
+        return coo_matrix((data, (rows, cols)),
+                          shape=(self.dofnum1.N + self.dofnum2.N, self.dofnum1.N + self.dofnum2.N)).tocsr()
 
 
 class AssemblerLocal(Assembler):

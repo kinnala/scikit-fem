@@ -153,6 +153,89 @@ class Mesh(object):
                    "not belonging to any element.")
             raise Exception(msg)
 
+class MeshLineMortar(Mesh):
+    """One-dimensional mortar mesh at the interface of two 2D meshes."""
+
+    refdom = "line"
+    brefdom = "point"
+
+    def __init__(self, mesh1, mesh2, rule):
+        """
+        Rule should be so that its positive only if
+        point belongs to the subset and increases
+        so that different points can be distinquished.
+        """
+        # TODO works currently only if the ending points have nodes also
+        find1 = mesh1.facets_satisfying(rule)
+        find2 = mesh2.facets_satisfying(rule)
+
+        p1_ix = mesh1.facets[:, find1].flatten()
+        p2_ix = mesh2.facets[:, find2].flatten()
+
+        p1 = mesh1.p[:, p1_ix]
+        p2 = mesh2.p[:, p2_ix]
+        _, ix = np.unique(np.concatenate((rule(p1[0, :], p1[1, :]), rule(p2[0, :], p2[1, :]))), return_index=True)
+
+        self.p = np.hstack((p1, p2))[:, ix]
+        self.facets = np.array([np.arange(np.max(self.p.shape)-1), np.arange(np.max(self.p.shape)-1)+1])
+
+        # mappings from facets to the original triangles
+        # TODO vectorize
+        self.f2t = self.facets*0
+        for itr in range(self.facets.shape[1]):
+            mx = .5*(self.p[0, self.facets[0, itr]] + self.p[0, self.facets[1, itr]])
+            my = .5*(self.p[1, self.facets[0, itr]] + self.p[1, self.facets[1, itr]])
+            val = rule(mx, my)
+            for jtr in find1:  
+                fix1 = mesh1.facets[0, jtr]
+                x1 = mesh1.p[0, fix1]
+                y1 = mesh1.p[1, fix1]
+                fix2 = mesh1.facets[1, jtr]
+                x2 = mesh1.p[0, fix2]
+                y2 = mesh1.p[1, fix2]
+                if val > rule(x1, y1) and val < rule(x2, y2):
+                    # OK
+                    self.f2t[0, itr] = jtr
+                    break
+                elif val < rule(x1, y1) and val > rule(x2, y2):
+                    # OK
+                    self.f2t[0, itr] = jtr
+                    break
+            for jtr in find2:  
+                fix1 = mesh2.facets[0, jtr]
+                x1 = mesh2.p[0, fix1]
+                y1 = mesh2.p[1, fix1]
+                fix2 = mesh2.facets[1, jtr]
+                x2 = mesh2.p[0, fix2]
+                y2 = mesh2.p[1, fix2]
+                if val > rule(x1, y1) and val < rule(x2, y2):
+                    # OK
+                    self.f2t[1, itr] = jtr
+                    break
+                elif val < rule(x1, y1) and val > rule(x2, y2):
+                    # OK
+                    self.f2t[1, itr] = jtr
+                    break
+
+    def draw(self, color='ro-'):
+        """Draw the mesh"""
+        xs = []
+        ys = []
+        for y1, y2, s, t in zip(self.p[1, self.facets[0, :]],
+                                self.p[1, self.facets[1, :]],
+                                self.p[0, self.facets[0, :]],
+                                self.p[0, self.facets[1, :]]):
+            xs.append(s)
+            xs.append(t)
+            xs.append(None)
+            ys.append(y1)
+            ys.append(y2)
+            ys.append(None)
+        plt.plot(xs, ys, color)
+
+    def mapping(self):
+        return skfem.mapping.MappingAffineMortar(self)
+
 class MeshLine(Mesh):
     """One-dimensional mesh."""
 
@@ -865,11 +948,9 @@ class MeshTri(Mesh):
         return fig
 
 
-    def draw(self, nofig=False, trinum=False):
+    def draw(self, ax=None, trinum=False):
         """Draw the mesh."""
-        if nofig:
-            fig = 0
-        else:
+        if ax is None:
             # create new figure
             fig = plt.figure()
             ax = fig.add_subplot(111)
@@ -895,7 +976,7 @@ class MeshTri(Mesh):
                 mx = .3333*(self.p[0, self.t[0, itr]] + self.p[0, self.t[1, itr]] + self.p[0, self.t[2, itr]])
                 my = .3333*(self.p[1, self.t[0, itr]] + self.p[1, self.t[1, itr]] + self.p[1, self.t[2, itr]])
                 ax.text(mx, my, str(itr))
-        return fig
+        return ax
 
     def draw_nodes(self, nodes, mark='bo'):
         """Highlight some nodes."""
@@ -922,13 +1003,14 @@ class MeshTri(Mesh):
                               vmin=zlim[0], vmax=zlim[1])
         return fig
 
-    def plot3(self, z, smooth=False):
+    def plot3(self, z, smooth=False, ax=None):
         """Visualize nodal function (3d i.e. three axes)."""
         from mpl_toolkits.mplot3d import Axes3D
-        fig = plt.figure()
+        if ax is None:
+            fig = plt.figure()
+            ax = Axes3D(fig)
         if len(z) == self.p.shape[1]:
             # use matplotlib
-            ax = Axes3D(fig)
             ts = mtri.Triangulation(self.p[0, :], self.p[1, :], self.t.T)
             ax.plot_trisurf(self.p[0, :], self.p[1, :], z,
                             triangles=ts.triangles,
@@ -940,7 +1022,6 @@ class MeshTri(Mesh):
             newpx = self.p[0, self.t].flatten(order='F')
             newpy = self.p[1, self.t].flatten(order='F')
             newz = np.vstack((z, z, z)).flatten(order='F')
-            ax = Axes3D(fig)
             ts = mtri.Triangulation(newpx, newpx, newt)
             ax.plot_trisurf(newpx, newpy, newz,
                             triangles=ts.triangles,
@@ -951,7 +1032,6 @@ class MeshTri(Mesh):
             newt = np.arange(3*nt, dtype=np.int64).reshape((nt, 3))
             newpx = self.p[0, self.t].flatten(order='F')
             newpy = self.p[1, self.t].flatten(order='F')
-            ax = Axes3D(fig)
             ts = mtri.Triangulation(newpx, newpx, newt)
             ax.plot_trisurf(newpx, newpy, z,
                             triangles=ts.triangles,
@@ -959,6 +1039,7 @@ class MeshTri(Mesh):
         else:
             raise NotImplementedError("MeshTri.plot3: not implemented for "
                                       "the given shape of input vector!")
+        return ax
 
     def _uniform_refine(self):
         """Perform a single mesh refine."""

@@ -190,6 +190,43 @@ class MappingQ1(Mapping):
             detDG=self.detB[find]
         return np.tile(detDG,(X.shape[1],1)).T
 
+class MappingAffineMortar(Mapping):
+    """Affine mappings for simplex mortar meshes."""
+    def __init__(self, mesh):
+        self.B={}
+
+        self.B[0] = mesh.p[0, mesh.facets[1, :]] - mesh.p[0, mesh.facets[0, :]]
+        self.B[1] = mesh.p[1, mesh.facets[1, :]] - mesh.p[1, mesh.facets[0, :]]
+
+        self.c={}
+
+        self.c[0] = mesh.p[0, mesh.facets[0, :]]
+        self.c[1] = mesh.p[1, mesh.facets[0, :]]
+
+        self.detB=np.sqrt(self.B[0]**2+self.B[1]**2)
+
+    def G(self, X, find=None):
+        """Mortar mapping G(X)=Bx+c."""
+        y={}
+
+        if find is None:
+            y[0] = np.outer(self.B[0],X).T+self.c[0]
+            y[1] = np.outer(self.B[1],X).T+self.c[1]
+        else:
+            y[0] = np.outer(self.B[0][find],X).T+self.c[0][find]
+            y[1] = np.outer(self.B[1][find],X).T+self.c[1][find]
+        y[0] = y[0].T
+        y[1] = y[1].T
+
+        return y
+
+    def detDG(self, X, find=None):
+        if find is None:
+            detDG=self.detB
+        else:
+            detDG=self.detB[find]
+        return np.tile(detDG,(X.shape[1],1)).T
+
 class MappingAffine(Mapping):
     """Affine mappings for simplex (=line,tri,tet) mesh."""
     def __init__(self,mesh):

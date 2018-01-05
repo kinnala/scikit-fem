@@ -17,6 +17,15 @@ def stack(block):
     """
     return sp.vstack(list(map(sp.hstack, block)))
 
+def zerosparse(mn):
+    """Return a zero sparse matrix.
+    
+    Parameters
+    ----------
+    mn : tuple of dims
+    """
+    return sp.coo_matrix(mn)
+
 def cell_shape(x, *rest):
     """Find out the shape of a cell array."""
     if isinstance(x, dict):
