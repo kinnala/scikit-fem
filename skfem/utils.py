@@ -7,25 +7,6 @@ import scipy.sparse as sp
 import scipy.sparse.linalg as spl
 from copy import deepcopy
 
-def stack(block):
-    """Stack scipy sparse matrices.
-    
-    Parameters
-    ----------
-    block : tuple of tuples
-        A 2-dim tuple array with the scipy matrices to stack.
-    """
-    return sp.vstack(list(map(sp.hstack, block)))
-
-def zerosparse(mn):
-    """Return a zero sparse matrix.
-    
-    Parameters
-    ----------
-    mn : tuple of dims
-    """
-    return sp.coo_matrix(mn)
-
 def cell_shape(x, *rest):
     """Find out the shape of a cell array."""
     if isinstance(x, dict):

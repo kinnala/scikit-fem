@@ -26,6 +26,4 @@ __all__ = ['MeshTri',
            'ElementLocalQ2',
            'direct',
            'cg',
-           'build_ilu_pc',
-           'stack',
-           'zerosparse']
+           'build_ilu_pc']

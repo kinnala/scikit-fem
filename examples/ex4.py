@@ -49,8 +49,8 @@ K12 = a12.fasm(lambda u1, u2, v1, v2, n: ((u1[0]-u2[0])*n[0] + (u1[1]-u2[1])*n[1
 f1 = a1.iasm(lambda v: -50*v[1])
 f2 = a2.iasm(lambda v: 0*v[0])
 
-Z = zerosparse((K1.shape[0], K2.shape[1]))
-K = stack(((K1, Z),(Z.T, K2))).tocsr() + 20000*K12
+import scipy.sparse
+K = scipy.sparse.bmat([[K1, None],[None, K2]]).tocsr() + 20000*K12
 
 i1 = np.arange(K1.shape[0])
 i2 = np.arange(K2.shape[0]) + K1.shape[0]
