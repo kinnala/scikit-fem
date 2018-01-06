@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Classes that represent different types of meshes.
+Mesh module contains different types of finite element meshes.
 
 Currently implemented mesh types are
 
@@ -8,6 +8,7 @@ Currently implemented mesh types are
     * :class:`skfem.mesh.MeshTet`, a tetrahedral mesh
     * :class:`skfem.mesh.MeshQuad`, a mesh consisting of quadrilaterals
     * :class:`skfem.mesh.MeshLine`, one-dimensional mesh
+    * :class:`skfem.mesh.MeshLineMortar`, interface mesh between two 2D meshes
 
 Examples
 --------
@@ -18,7 +19,8 @@ Obtain a three times refined mesh of the unit square and draw it.
 
     from skfem.mesh import MeshTri
     m = MeshTri()
-    m.refine(3)
+    for itr in range(3):
+        m.refine()
     m.draw()
     m.show()
 
@@ -39,7 +41,7 @@ class Mesh(object):
     p = np.array([])  #: The vertices of the mesh, size: dim x Npoints
     t = np.array([])  #: The element connectivity, size: verts/elem x Nelems
 
-    def __init__(self, p, t):
+    def __init__(self):
         pass
 
     def show(self):
@@ -243,7 +245,7 @@ class MeshLine(Mesh):
     brefdom = "point"
 
     def __init__(self, p=None, t=None, validate=True):
-        super(MeshLine, self).__init__(p, t)
+        super(MeshLine, self).__init__()
         if p is None and t is None:
             p = np.array([[0, 1]])
             t = np.array([[0], [1]])
@@ -326,7 +328,7 @@ class MeshQuad(Mesh):
     brefdom = "line"
 
     def __init__(self, p=None, t=None, validate=True):
-        super(MeshQuad, self).__init__(p, t)
+        super(MeshQuad, self).__init__()
         if p is None and t is None:
             p = np.array([[0, 0], [1, 0], [1, 1], [0, 1]]).T
             t = np.array([[0, 1, 2, 3]]).T
@@ -530,7 +532,7 @@ class MeshTet(Mesh):
     brefdom = "tri"
 
     def __init__(self, p=None, t=None, validate=True):
-        super(MeshTet, self).__init__(p, t)
+        super(MeshTet, self).__init__()
         if p is None and t is None:
             p = np.array([[0, 0, 0], [0, 0, 1], [0, 1, 0], [1, 0, 0],
                           [0, 1, 1], [1, 0, 1], [1, 1, 0], [1, 1, 1]]).T
@@ -790,7 +792,7 @@ class MeshTri(Mesh):
     brefdom = "line"
 
     def __init__(self, p=None, t=None, validate=True, initmesh=None, sort_t=True):
-        super(MeshTri, self).__init__(p, t)
+        super(MeshTri, self).__init__()
         if p is None and t is None:
             if initmesh is 'symmetric':
                 p = np.array([[0, 1, 1, 0, 0.5],

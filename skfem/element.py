@@ -1,10 +1,46 @@
 # -*- coding: utf-8 -*-
 """
-The finite element definitions.
+Element classes define the finite element basis functions or DOF functionals.
 
-Try for example the following actual implementations:
-    * :class:`skfem.element.ElementLocalTriP1`
-    * :class:`skfem.element.ElementLocalTriP2`
+The two major types of elements are subclasses of
+    * :class:`skfem.element.ElementLocal`
+    * :class:`skfem.element.ElementGlobal`
+
+The former are used together with :class:`skfem.assembly.AssemblerLocal`
+and the latter with :class:`skfem.assembly.AssemblerGlobal`.
+
+Moreover, the name of the element class reveals which types of
+meshes it is designed for.
+
+What follows is a list of currently supported elements. Note that new elements
+are fairly easy to add yourself.
+
+.. autosummary::
+    ElementGlobalTriDG
+    ElementGlobalTriP0
+    ElementGlobalLineP1
+    ElementGlobalLineHermite
+    ElementGlobalTriPp
+    ElementGlobalMorley
+    ElementGlobalArgyris
+    ElementTetRT0
+    ElementTriRT0
+    ElementLocalH1Vec
+    ElementLocalQ1
+    ElementLocalQ2
+    ElementLocalTriDG
+    ElementLocalTetDG
+    ElementLocalTetP0
+    ElementLocalTriP0
+    ElementLocalTriMini
+    ElementLocalTetP2
+    ElementLocalLineP2
+    ElementLocalLineP1
+    ElementLocalTriP1
+    ElementLocalTriP2
+    ElementLocalTetP1
+
+
 """
 import numpy as np
 from skfem.utils import const_cell
@@ -231,7 +267,7 @@ class ElementGlobalTriP0(ElementGlobal):
                 ][j]()
 
 class ElementGlobalLineP1(ElementGlobal):
-    """C^1 continuous Hermite element for Euler-Bernoulli beam."""
+    """Piecewise linear element in 1D."""
 
     dim = 1
 

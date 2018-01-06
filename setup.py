@@ -6,10 +6,10 @@ here = path.abspath(path.dirname(__file__))
 
 setup(
     name='scikit-fem',
-    version='0.1.1',
+    version='0.1.2',
     description='Simple finite element assemblers',
     long_description='Easy to use finite element assemblers and related tools. See Github page for more information and examples.',  # Optional
-    url='https://github.com/kinnala/skfem',
+    url='https://github.com/kinnala/scikit-fem',
     author='Tom Gustafsson',
     # https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[

@@ -1,0 +1,255 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>scikit-fem &#8212; scikit-fem 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="scikit-fem">
+<h1>scikit-fem<a class="headerlink" href="#scikit-fem" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<p>This package contains finite element assemblers. They transform bilinear and
+linear forms into sparse matrices and vectors.</p>
+<div class="section" id="module-skfem.mesh">
+<span id="mesh-module"></span><h2>Mesh module<a class="headerlink" href="#module-skfem.mesh" title="Permalink to this headline">¶</a></h2>
+<p>Mesh module contains different types of finite element meshes.</p>
+<p>Currently implemented mesh types are</p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="xref py py-class docutils literal"><span class="pre">skfem.mesh.MeshTri</span></code>, a triangular mesh</li>
+<li><code class="xref py py-class docutils literal"><span class="pre">skfem.mesh.MeshTet</span></code>, a tetrahedral mesh</li>
+<li><code class="xref py py-class docutils literal"><span class="pre">skfem.mesh.MeshQuad</span></code>, a mesh consisting of quadrilaterals</li>
+<li><code class="xref py py-class docutils literal"><span class="pre">skfem.mesh.MeshLine</span></code>, one-dimensional mesh</li>
+<li><code class="xref py py-class docutils literal"><span class="pre">skfem.mesh.MeshLineMortar</span></code>, interface mesh between two 2D meshes</li>
+</ul>
+</div></blockquote>
+<div class="section" id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<p>Obtain a three times refined mesh of the unit square and draw it.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">skfem.mesh</span> <span class="kn">import</span> <span class="n">MeshTri</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">MeshTri</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">itr</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">m</span><span class="o">.</span><span class="n">refine</span><span class="p">()</span>
+<span class="n">m</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+<span class="n">m</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="module-skfem.assembly">
+<span id="assembly-module"></span><h2>Assembly module<a class="headerlink" href="#module-skfem.assembly" title="Permalink to this headline">¶</a></h2>
+<p>Assemblers transform bilinear forms into sparse matrices
+and linear forms into vectors. Moreover, they are used
+for computing local functionals over elements and for
+assigning DOF’s to different topological entities of
+the mesh.</p>
+<p>There are currently two major assembler types.
+<code class="xref py py-class docutils literal"><span class="pre">skfem.assembly.AssemblerLocal</span></code> uses finite elements
+defined through reference element. <code class="xref py py-class docutils literal"><span class="pre">skfem.assembly.AssemblerGlobal</span></code>
+uses finite elements defined through DOF functionals. The latter
+are more general but slower.</p>
+<div class="section" id="id1">
+<h3>Examples<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>Assemble the stiffness matrix related to
+the Poisson problem using the piecewise linear elements.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">skfem.mesh</span> <span class="kn">import</span> <span class="n">MeshTri</span>
+<span class="kn">from</span> <span class="nn">skfem.assembly</span> <span class="kn">import</span> <span class="n">AssemblerLocal</span>
+<span class="kn">from</span> <span class="nn">skfem.element</span> <span class="kn">import</span> <span class="n">ElementLocalTriP1</span>
+
+<span class="n">m</span> <span class="o">=</span> <span class="n">MeshTri</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">itr</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">m</span><span class="o">.</span><span class="n">refine</span><span class="p">()</span>
+<span class="n">e</span> <span class="o">=</span> <span class="n">ElementLocalTriP1</span><span class="p">()</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">AssemblerLocal</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">bilinear_form</span><span class="p">(</span><span class="n">du</span><span class="p">,</span> <span class="n">dv</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">du</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">dv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">du</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">dv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="n">K</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">iasm</span><span class="p">(</span><span class="n">bilinear_form</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="module-skfem.element">
+<span id="element-module"></span><h2>Element module<a class="headerlink" href="#module-skfem.element" title="Permalink to this headline">¶</a></h2>
+<p>Element classes define the finite element basis functions or DOF functionals.</p>
+<dl class="docutils">
+<dt>The two major types of elements are subclasses of</dt>
+<dd><ul class="first last simple">
+<li><code class="xref py py-class docutils literal"><span class="pre">skfem.element.ElementLocal</span></code></li>
+<li><code class="xref py py-class docutils literal"><span class="pre">skfem.element.ElementGlobal</span></code></li>
+</ul>
+</dd>
+</dl>
+<p>The former are used together with <code class="xref py py-class docutils literal"><span class="pre">skfem.assembly.AssemblerLocal</span></code>
+and the latter with <code class="xref py py-class docutils literal"><span class="pre">skfem.assembly.AssemblerGlobal</span></code>.</p>
+<p>Moreover, the name of the element class reveals which types of
+meshes it is designed for.</p>
+<p>What follows is a list of currently supported elements. Note that new elements
+are fairly easy to add yourself.</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">ElementGlobalTriDG</span></code>(elem)</td>
+<td>Transform all dofs into interior dofs.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">ElementGlobalTriP0</span></code>()</td>
+<td>Piecewise constant triangles.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">ElementGlobalLineP1</span></code>()</td>
+<td>Piecewise linear element in 1D.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">ElementGlobalLineHermite</span></code>()</td>
+<td>C^1 continuous Hermite element for Euler-Bernoulli beam.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">ElementGlobalTriPp</span></code>([p])</td>
+<td>Triangular Pp element, Lagrange DOFs.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">ElementGlobalMorley</span></code></td>
+<td>Morley element for fourth-order problems.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">ElementGlobalArgyris</span></code></td>
+<td>Argyris element for fourth-order problems.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">ElementTetRT0</span></code></td>
+<td>Lowest order Raviart-Thomas element for tetrahedron.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">ElementTriRT0</span></code></td>
+<td>Lowest order Raviart-Thomas element for triangle.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">ElementLocalH1Vec</span></code>(elem)</td>
+<td>Convert <span class="math">\(H^1\)</span> element to vectorial <span class="math">\(H^1\)</span> element.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">ElementLocalQ1</span></code></td>
+<td>Simplest quadrilateral element.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">ElementLocalQ2</span></code></td>
+<td>Second order quadrilateral element.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">ElementLocalTriDG</span></code>(elem)</td>
+<td>Transform a H1 conforming triangular element into a discontinuous one by turning all DOFs into interior DOFs.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">ElementLocalTetDG</span></code>(elem)</td>
+<td>Convert a H1 tetrahedral element into a DG element.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">ElementLocalTetP0</span></code></td>
+<td>Piecewise constant element for tetrahedral mesh.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">ElementLocalTriP0</span></code></td>
+<td>Piecewise constant element for triangular mesh.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">ElementLocalTriMini</span></code></td>
+<td>The MINI-element for triangular mesh.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">ElementLocalTetP2</span></code></td>
+<td>The quadratic tetrahedral element.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">ElementLocalLineP2</span></code></td>
+<td>Quadratic element for one dimension.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">ElementLocalLineP1</span></code></td>
+<td>Linear element for one dimension.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">ElementLocalTriP1</span></code></td>
+<td>The simplest triangular element.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">ElementLocalTriP2</span></code></td>
+<td>The quadratic triangular element.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">ElementLocalTetP1</span></code></td>
+<td>The simplest tetrahedral element.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Tom Gustafsson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

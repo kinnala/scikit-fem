@@ -1,6 +1,16 @@
 # -*- coding: utf-8 -*-
 """
-Assembly of matrices related to linear and bilinear forms.
+Assemblers transform bilinear forms into sparse matrices
+and linear forms into vectors. Moreover, they are used
+for computing local functionals over elements and for
+assigning DOF's to different topological entities of
+the mesh.
+
+There are currently two major assembler types.
+:class:`skfem.assembly.AssemblerLocal` uses finite elements
+defined through reference element. :class:`skfem.assembly.AssemblerGlobal`
+uses finite elements defined through DOF functionals. The latter
+are more general but slower.
 
 Examples
 --------
@@ -14,7 +24,8 @@ the Poisson problem using the piecewise linear elements.
     from skfem.element import ElementLocalTriP1
 
     m = MeshTri()
-    m.refine(3)
+    for itr in range(3):
+        m.refine()
     e = ElementLocalTriP1()
     a = AssemblerLocal(m, e)
 
