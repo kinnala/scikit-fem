@@ -984,26 +984,27 @@ class MeshTri(Mesh):
         """Highlight some nodes."""
         plt.plot(self.p[0, nodes], self.p[1, nodes], mark)
 
-    def plot(self, z, smooth=False, nofig=False, zlim=None):
+    def plot(self, z, smooth=False, ax=None, zlim=None, edgecolors=None):
         """Visualize nodal or elemental function (2d)."""
-        if nofig:
-            fig = 0
-        else:
+        if ax is None:
             fig = plt.figure()
+            ax = fig.add_subplot(111)
+        if edgecolors is None:
+            edgecolors = 'k'
         if zlim == None:
             if smooth:
-                plt.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z,
-                              shading='gouraud')
+                ax.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z,
+                              shading='gouraud', edgecolors=edgecolors)
             else:
-                plt.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z)
+                ax.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z, edgecolors=edgecolos)
         else:
             if smooth:
-                plt.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z,
-                              shading='gouraud', vmin=zlim[0], vmax=zlim[1])
+                ax.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z,
+                              shading='gouraud', vmin=zlim[0], vmax=zlim[1], edgecolors=edgecolors)
             else:
-                plt.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z,
-                              vmin=zlim[0], vmax=zlim[1])
-        return fig
+                ax.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z,
+                              vmin=zlim[0], vmax=zlim[1], edgecolors=edgecolors)
+        return ax
 
     def plot3(self, z, smooth=False, ax=None):
         """Visualize nodal function (3d i.e. three axes)."""
