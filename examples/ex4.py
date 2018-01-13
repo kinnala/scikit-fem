@@ -16,9 +16,12 @@ M = read_comsol("examples/square_largetris.mphtxt")
 M.translate((1.0, 0.0))
 
 def rule(x, y):
-    return (x==1.0)*(y+1.0)
+    return (x==1.0)
 
-mortar = MeshLineMortar(m, M, rule)
+def param(x, y):
+    return y
+
+mortar = MeshLineMortar(m, M, rule, param)
 
 e1 = ElementLocalTriP1()
 e = ElementLocalH1Vec(e1)

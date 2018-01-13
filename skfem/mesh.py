@@ -161,63 +161,71 @@ class MeshLineMortar(Mesh):
     refdom = "line"
     brefdom = "point"
 
-    def __init__(self, mesh1, mesh2, rule):
+    def __init__(self, mesh1, mesh2, rule, param, debug_plot=False):
         """
         Rule should be so that its positive only if
         point belongs to the subset and increases
         so that different points can be distinquished.
         """
-        # TODO works currently only if the ending points have nodes also
-        find1 = mesh1.facets_satisfying(rule)
-        find2 = mesh2.facets_satisfying(rule)
-
-        p1_ix = mesh1.facets[:, find1].flatten()
-        p2_ix = mesh2.facets[:, find2].flatten()
+        p1_ix = mesh1.nodes_satisfying(rule)
+        p2_ix = mesh2.nodes_satisfying(rule)
 
         p1 = mesh1.p[:, p1_ix]
         p2 = mesh2.p[:, p2_ix]
-        _, ix = np.unique(np.concatenate((rule(p1[0, :], p1[1, :]), rule(p2[0, :], p2[1, :]))), return_index=True)
+        _, ix = np.unique(np.concatenate((param(p1[0, :], p1[1, :]), param(p2[0, :], p2[1, :]))), return_index=True)
 
         self.p = np.hstack((p1, p2))[:, ix]
         self.facets = np.array([np.arange(np.max(self.p.shape)-1), np.arange(np.max(self.p.shape)-1)+1])
 
+        if debug_plot:
+            ax = mesh1.draw()
+            mesh2.draw(ax=ax)
+            mesh2.draw_nodes(p2_ix, 'rs')
+            mesh1.draw_nodes(p1_ix, 'bx')
+
         # mappings from facets to the original triangles
         # TODO vectorize
-        self.f2t = self.facets*0
+        self.f2t = self.facets*0-1
         for itr in range(self.facets.shape[1]):
             mx = .5*(self.p[0, self.facets[0, itr]] + self.p[0, self.facets[1, itr]])
             my = .5*(self.p[1, self.facets[0, itr]] + self.p[1, self.facets[1, itr]])
-            val = rule(mx, my)
-            for jtr in find1:  
+            val = param(mx, my)
+            for jtr in mesh1.boundary_facets():  
                 fix1 = mesh1.facets[0, jtr]
                 x1 = mesh1.p[0, fix1]
                 y1 = mesh1.p[1, fix1]
                 fix2 = mesh1.facets[1, jtr]
                 x2 = mesh1.p[0, fix2]
                 y2 = mesh1.p[1, fix2]
-                if val > rule(x1, y1) and val < rule(x2, y2):
-                    # OK
-                    self.f2t[0, itr] = jtr
-                    break
-                elif val < rule(x1, y1) and val > rule(x2, y2):
-                    # OK
-                    self.f2t[0, itr] = jtr
-                    break
-            for jtr in find2:  
+                if rule(x1, y1) > 0 or rule(x2, y2) > 0:
+                    if val > param(x1, y1) and val < param(x2, y2):
+                        # OK
+                        self.f2t[0, itr] = jtr
+                        break
+                    elif val < param(x1, y1) and val > param(x2, y2):
+                        # OK
+                        self.f2t[0, itr] = jtr
+                        break
+            for jtr in mesh2.boundary_facets():  
                 fix1 = mesh2.facets[0, jtr]
                 x1 = mesh2.p[0, fix1]
                 y1 = mesh2.p[1, fix1]
                 fix2 = mesh2.facets[1, jtr]
                 x2 = mesh2.p[0, fix2]
                 y2 = mesh2.p[1, fix2]
-                if val > rule(x1, y1) and val < rule(x2, y2):
-                    # OK
-                    self.f2t[1, itr] = jtr
-                    break
-                elif val < rule(x1, y1) and val > rule(x2, y2):
-                    # OK
-                    self.f2t[1, itr] = jtr
-                    break
+                if rule(x1, y1) > 0 or rule(x2, y2) > 0:
+                    if val > param(x1, y1) and val < param(x2, y2):
+                        # OK
+                        self.f2t[1, itr] = jtr
+                        break
+                    elif val < param(x1, y1) and val > param(x2, y2):
+                        # OK
+                        self.f2t[1, itr] = jtr
+                        break
+        if (self.f2t>-1).all():
+            return
+        else:
+            raise Exception("All mesh facets corresponding to mortar facets not found!")
 
     def draw(self, color='ro-'):
         """Draw the mesh"""

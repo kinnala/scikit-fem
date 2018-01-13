@@ -147,3 +147,7 @@ def cg(A, b, tol, maxiter, x0=None, D=None, I=None, pc=None, verbose=True, viewi
         U = np.zeros(A.shape[0])
         U[I] = u[0]
         return U
+
+def adaptive_theta(est, theta=0.5):
+    return np.nonzero(theta*np.max(est) < est)[0]
+
