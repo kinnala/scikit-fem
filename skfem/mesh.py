@@ -41,8 +41,14 @@ class Mesh(object):
     p = np.array([])  #: The vertices of the mesh, size: dim x Npoints
     t = np.array([])  #: The element connectivity, size: verts/elem x Nelems
 
-    def __init__(self):
-        pass
+    def __init__(self, p, t):
+        if p is not None:
+            if p.flags['F_CONTIGUOUS']:
+                p = np.ascontiguousarray(p)
+        if t is not None:
+            if t.flags['F_CONTIGUOUS']:
+                t = np.ascontiguousarray(t)
+        return p, t
 
     def show(self):
         """Call the correct pyplot show commands after plotting."""
@@ -253,7 +259,6 @@ class MeshLine(Mesh):
     brefdom = "point"
 
     def __init__(self, p=None, t=None, validate=True):
-        super(MeshLine, self).__init__()
         if p is None and t is None:
             p = np.array([[0, 1]])
             t = np.array([[0], [1]])
@@ -261,6 +266,7 @@ class MeshLine(Mesh):
             t = np.array([np.arange(np.max(p.shape)-1), np.arange(np.max(p.shape)-1)+1])
         if len(p.shape)==1:
             p = np.array([p]) 
+        p, t = super(MeshLine, self).__init__(p, t)
         self.p = p
         self.t = t
         if validate:
@@ -336,12 +342,12 @@ class MeshQuad(Mesh):
     brefdom = "line"
 
     def __init__(self, p=None, t=None, validate=True):
-        super(MeshQuad, self).__init__()
         if p is None and t is None:
             p = np.array([[0, 0], [1, 0], [1, 1], [0, 1]]).T
             t = np.array([[0, 1, 2, 3]]).T
         elif p is None or t is None:
             raise Exception("Must provide p AND t or neither")
+        p, t = super(MeshQuad, self).__init__(p, t)
         self.p = p
         self.t = t
         if validate:
@@ -540,7 +546,6 @@ class MeshTet(Mesh):
     brefdom = "tri"
 
     def __init__(self, p=None, t=None, validate=True):
-        super(MeshTet, self).__init__()
         if p is None and t is None:
             p = np.array([[0, 0, 0], [0, 0, 1], [0, 1, 0], [1, 0, 0],
                           [0, 1, 1], [1, 0, 1], [1, 1, 0], [1, 1, 1]]).T
@@ -548,6 +553,7 @@ class MeshTet(Mesh):
                           [2, 3, 1, 7], [1, 2, 4, 7]]).T
         elif p is None or t is None:
             raise Exception("Must provide p AND t or neither")
+        p, t = super(MeshTet, self).__init__(p, t)
         self.p = p
         self.t = t
         if validate:
@@ -800,7 +806,6 @@ class MeshTri(Mesh):
     brefdom = "line"
 
     def __init__(self, p=None, t=None, validate=True, initmesh=None, sort_t=True):
-        super(MeshTri, self).__init__()
         if p is None and t is None:
             if initmesh is 'symmetric':
                 p = np.array([[0, 1, 1, 0, 0.5],
@@ -829,6 +834,7 @@ class MeshTri(Mesh):
                 t = np.array([[0, 1, 2], [1, 3, 2]], dtype=np.intp).T
         elif p is None or t is None:
             raise Exception("Must provide p AND t or neither")
+        p, t = super(MeshTri, self).__init__(p, t)
         self.p = p
         self.t = t
         if validate:
