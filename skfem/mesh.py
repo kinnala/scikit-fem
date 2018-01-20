@@ -66,17 +66,13 @@ class Mesh(object):
         """Perform a single uniform mesh refinement."""
         raise NotImplementedError("Single refine not implemented for this mesh type!")
 
-    def _adaptive_refine(self, marked):
-        """Perform a single adaptive mesh refinement."""
-        raise NotImplementedError("Adaptive refine not implemented for this mesh type!")
-
-    def refine(self, marked=None):
+    def refine(self, N=None):
         """Refine the mesh."""
-        if marked is not None:
-            return self._adaptive_refine(marked)
-        else:
-            # uniform refinement
+        if N is None:
             return self._uniform_refine()
+        else:
+            for itr in range(N):
+                self._uniform_refine()
 
     def remove_elements(self, element_indices):
         """Construct new mesh with elements removed
@@ -569,6 +565,7 @@ class MeshTet(Mesh):
         self.t = t
         if validate:
             self._validate()
+        self.ENABLE_FACETS = True
         self._build_mappings()
 
     def _build_mappings(self):
@@ -588,48 +585,62 @@ class MeshTet(Mesh):
 
         # unique edges
         tmp = np.ascontiguousarray(self.edges.T)
-        tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]),
+        _, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]),
                                   return_index=True, return_inverse=True)
         self.edges = self.edges[:, ixa]
+        self.edges = np.ascontiguousarray(self.edges)
         self.t2e = ixb.reshape((6, self.t.shape[1]))
 
         # define facets
-        self.facets = np.sort(np.vstack((self.t[0, :],
-                                         self.t[1, :],
-                                         self.t[2, :])), axis=0)
-        f = np.array([0, 1, 3,
-                      0, 2, 3,
-                      1, 2, 3])
-        for i in range(3):
-            self.facets = np.hstack((self.facets,
-                                     np.sort(np.vstack((self.t[f[2*i], :],
-                                                        self.t[f[2*i+1], :],
-                                                        self.t[f[2*i+2]])),
-                                             axis=0)))
+        if self.ENABLE_FACETS:
+            self.facets = np.sort(np.vstack((self.t[0, :],
+                                             self.t[1, :],
+                                             self.t[2, :])), axis=0)
+            f = np.array([0, 1, 3,
+                          0, 2, 3,
+                          1, 2, 3])
+            for i in range(3):
+                self.facets = np.hstack((self.facets,
+                                         np.sort(np.vstack((self.t[f[2*i], :],
+                                                            self.t[f[2*i+1], :],
+                                                            self.t[f[2*i+2]])),
+                                                 axis=0)))
 
-        # unique facets
-        tmp = np.ascontiguousarray(self.facets.T)
-        tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]),
-                                  return_index=True, return_inverse=True)
-        self.facets = self.facets[:, ixa]
-        self.t2f = ixb.reshape((4, self.t.shape[1]))
+            # unique facets
+            tmp = np.ascontiguousarray(self.facets.T)
+            tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]),
+                                      return_index=True, return_inverse=True)
+            self.facets = self.facets[:, ixa]
+            self.facets = np.ascontiguousarray(self.facets)
+            self.t2f = ixb.reshape((4, self.t.shape[1]))
 
-        # build facet-to-tetra mapping: 2 (tets) x Nfacets
-        e_tmp = np.hstack((self.t2f[0, :], self.t2f[1, :],
-                           self.t2f[2, :], self.t2f[3, :]))
-        t_tmp = np.tile(np.arange(self.t.shape[1]), (1, 4))[0]
+            # build facet-to-tetra mapping: 2 (tets) x Nfacets
+            e_tmp = np.hstack((self.t2f[0, :], self.t2f[1, :],
+                               self.t2f[2, :], self.t2f[3, :]))
+            t_tmp = np.tile(np.arange(self.t.shape[1]), (1, 4))[0]
 
-        e_first, ix_first = np.unique(e_tmp, return_index=True)
-        # this emulates matlab unique(e_tmp,'last')
-        e_last, ix_last = np.unique(e_tmp[::-1], return_index=True)
-        ix_last = e_tmp.shape[0] - ix_last-1
+            e_first, ix_first = np.unique(e_tmp, return_index=True)
+            # this emulates matlab unique(e_tmp,'last')
+            e_last, ix_last = np.unique(e_tmp[::-1], return_index=True)
+            ix_last = e_tmp.shape[0] - ix_last-1
 
-        self.f2t = np.zeros((2, self.facets.shape[1]), dtype=np.int64)
-        self.f2t[0, e_first] = t_tmp[ix_first]
-        self.f2t[1, e_last] = t_tmp[ix_last]
+            self.f2t = np.zeros((2, self.facets.shape[1]), dtype=np.int64)
+            self.f2t[0, e_first] = t_tmp[ix_first]
+            self.f2t[1, e_last] = t_tmp[ix_last]
 
-        # second row to zero if repeated (i.e., on boundary)
-        self.f2t[1, np.nonzero(self.f2t[0, :] == self.f2t[1, :])[0]] = -1
+            # second row to zero if repeated (i.e., on boundary)
+            self.f2t[1, np.nonzero(self.f2t[0, :] == self.f2t[1, :])[0]] = -1
+
+    def refine(self, N=None):
+        """Refine the mesh, tetrahedral optimization."""
+        if N is None:
+            return self._uniform_refine()
+        else:
+            self.ENABLE_FACETS = False
+            for itr in range(N-1):
+                self._uniform_refine()
+            self.ENABLE_FACETS = True
+            self._uniform_refine()
 
     def nodes_satisfying(self, test):
         """Return nodes that satisfy some condition."""
