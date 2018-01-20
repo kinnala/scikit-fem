@@ -169,6 +169,37 @@ class MappingQ1(Mapping):
         invJ[1][1]=self.J[0][0](x,y,tind)/detDF
         
         return invJ
+
+    def normals(self,X,tind,find,t2f):
+        N={}
+
+        nref=np.array([[0.0,-1.0],[1.0,0.0],[0.0,1.0],[-1.0,0.0]])
+
+        invDF=self.invDF(X,tind)
+
+        # initialize n to zero
+        n={}
+        n[0]=np.zeros(find.shape[0]) # of size Nfacets x Nqp
+        n[1]=np.zeros(find.shape[0])
+
+        # compute all local normals
+        for itr in range(nref.shape[0]):
+            inds=np.nonzero(t2f[itr,tind]==find)[0]
+            for jtr in range(nref.shape[1]):
+               n[jtr][inds]=nref[itr,jtr]
+
+        # map to global normals
+        N[0]=invDF[0][0]*n[0][:,None]+invDF[1][0]*n[1][:,None]
+        N[1]=invDF[0][1]*n[0][:,None]+invDF[1][1]*n[1][:,None]
+
+        # normalize
+        nlen=np.sqrt(N[0]**2+N[1]**2)
+
+        # shrink to required facets and tile
+        N[0]=N[0]/nlen
+        N[1]=N[1]/nlen
+
+        return N # n[0] etc. are of size Nfacets x Nqp
         
     def G(self,X,find=None):
         """Boundary mapping :math:`G(X)=BX+c`."""

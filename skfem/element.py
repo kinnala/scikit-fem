@@ -32,6 +32,7 @@ are fairly easy to add yourself.
     ElementLocalTetDG
     ElementLocalTetP0
     ElementLocalTriP0
+    ElementLocalP0
     ElementLocalTriMini
     ElementLocalTetP2
     ElementLocalLineP2
@@ -715,6 +716,9 @@ class ElementLocalTriP0(ElementLocalH1):
                 0:lambda x,y: 0*x
                 }[i](X[0],X[1])
         return phi,dphi
+
+class ElementLocalP0(ElementLocalTriP0):
+    pass
 
 class ElementLocalTriMini(ElementLocalH1):
     """The MINI-element for triangular mesh."""

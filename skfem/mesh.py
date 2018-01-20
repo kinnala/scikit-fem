@@ -396,6 +396,10 @@ class MeshQuad(Mesh):
         # second row to -1 if repeated (i.e., on boundary)
         self.f2t[1, np.nonzero(self.f2t[0, :] == self.f2t[1, :])[0]] = -1
 
+    def interior_facets(self):
+        """Return an array of interior facet indices."""
+        return np.nonzero(self.f2t[1, :] >= 0)[0]
+
     def boundary_nodes(self):
         """Return an array of boundary node indices."""
         return np.unique(self.facets[:, self.boundary_facets()])
@@ -418,6 +422,10 @@ class MeshQuad(Mesh):
         mx = 0.5*(self.p[0, self.facets[0, :]] + self.p[0, self.facets[1, :]])
         my = 0.5*(self.p[1, self.facets[0, :]] + self.p[1, self.facets[1, :]])
         return np.nonzero(test(mx, my))[0]
+
+    def draw_nodes(self, nodes, mark='bo'):
+        """Highlight some nodes."""
+        plt.plot(self.p[0, nodes], self.p[1, nodes], mark)
 
     def _uniform_refine(self):
         """Perform a single mesh refine that halves 'h'.
@@ -476,23 +484,23 @@ class MeshQuad(Mesh):
         t = np.hstack((t, self.t[[1, 2, 3]]))
         return MeshTri(self.p, t), X
 
-    def plot(self, z, smooth=False):
+    def plot(self, z, smooth=False, ax=None, zlim=None):
         """Visualize nodal or elemental function (2d).
 
         The quadrilateral mesh is split into triangular mesh (MeshTri) and
         the respective plotting function for the triangular mesh is used.
         """
         m, z = self._splitquads(z)
-        return m.plot(z, smooth)
+        return m.plot(z, smooth, ax=ax, zlim=zlim)
 
-    def plot3(self, z, smooth=False):
+    def plot3(self, z, smooth=False, ax=None):
         """Visualize nodal function (3d i.e. three axes).
 
         The quadrilateral mesh is split into triangular mesh (MeshTri) and
         the respective plotting function for the triangular mesh is used.
         """
         m, z = self._splitquads(z)
-        return m.plot3(z, smooth)
+        return m.plot3(z, smooth, ax=ax)
 
     def jiggle(self, z=0.2):
         """Jiggle the interior nodes of the mesh.
@@ -514,9 +522,12 @@ class MeshQuad(Mesh):
                                       self.p[:, self.facets[1, :]])**2,
                                      axis=0)))
 
-    def draw(self):
+    def draw(self, ax=None):
         """Draw the mesh."""
-        fig = plt.figure()
+        if ax is None:
+            # create new figure
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
         # visualize the mesh
         # faster plotting is achieved through
         # None insertion trick.
@@ -533,7 +544,7 @@ class MeshQuad(Mesh):
             ys.append(v)
             ys.append(None)
         plt.plot(xs, ys, 'k')
-        return fig
+        return ax
 
     def mapping(self):
         return skfem.mapping.MappingQ1(self)
