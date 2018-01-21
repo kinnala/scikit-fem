@@ -29,6 +29,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.tri as mtri
 import skfem.mapping
+import warnings
 from scipy.sparse import coo_matrix
 
 
@@ -41,14 +42,19 @@ class Mesh(object):
     p = np.array([])  #: The vertices of the mesh, size: dim x Npoints
     t = np.array([])  #: The element connectivity, size: verts/elem x Nelems
 
-    def __init__(self, p, t):
-        if p is not None:
-            if p.flags['F_CONTIGUOUS']:
-                p = np.ascontiguousarray(p)
-        if t is not None:
-            if t.flags['F_CONTIGUOUS']:
-                t = np.ascontiguousarray(t)
-        return p, t
+    def __init__(self):
+        if self.p is not None:
+            if self.p.flags['F_CONTIGUOUS']:
+                if self.p.shape[1]>1000:
+                    warnings.warn("Mesh.__init__(): Transforming " +
+                            "over 100 vertices to C_CONTIGUOUS.")
+                self.p = np.ascontiguousarray(self.p)
+        if self.t is not None:
+            if self.t.flags['F_CONTIGUOUS']:
+                if self.t.shape[1]>1000:
+                    warnings.warn("Mesh.__init__(): Transforming " +
+                            "over 100 elements to C_CONTIGUOUS.")
+                self.t = np.ascontiguousarray(self.t)
 
     def show(self):
         """Call the correct pyplot show commands after plotting."""
@@ -150,7 +156,7 @@ class Mesh(object):
         if self.p.shape[1] != np.unique(tmp.view([('', tmp.dtype)]
                                                  * tmp.shape[1])).shape[0]:
             msg = "Mesh._validate(): Mesh contains duplicate vertices."
-            raise Exception(msg)
+            warnings.warn(msg)
         # check that all points are at least in some element
         if len(np.setdiff1d(np.arange(self.p.shape[1]), np.unique(self.t))):
             msg = ("Mesh._validate(): Mesh contains a vertex "
@@ -262,11 +268,11 @@ class MeshLine(Mesh):
             t = np.array([np.arange(np.max(p.shape)-1), np.arange(np.max(p.shape)-1)+1])
         if len(p.shape)==1:
             p = np.array([p]) 
-        p, t = super(MeshLine, self).__init__(p, t)
         self.p = p
         self.t = t
         if validate:
             self._validate()
+        super(MeshLine, self).__init__()
 
     def _uniform_refine(self):
         """Perform a single mesh refine that halves 'h'."""
@@ -337,18 +343,24 @@ class MeshQuad(Mesh):
     refdom = "quad"
     brefdom = "line"
 
-    def __init__(self, p=None, t=None, validate=True):
+    def __init__(self, p=None, t=None, initmesh=None, validate=True):
         if p is None and t is None:
-            p = np.array([[0, 0], [1, 0], [1, 1], [0, 1]]).T
-            t = np.array([[0, 1, 2, 3]]).T
+            if initmesh is None:
+                p = np.array([[0, 0], [1, 0], [1, 1], [0, 1]]).T
+                t = np.array([[0, 1, 2, 3]]).T
+            elif initmesh is 'refdom':
+                p = np.array([[-1, -1], [1, -1], [1, 1], [-1, 1]]).T
+                t = np.array([[0, 1, 2, 3]]).T
+            else:
+                raise Exception("invalid initmesh keyword.")
         elif p is None or t is None:
             raise Exception("Must provide p AND t or neither")
-        p, t = super(MeshQuad, self).__init__(p, t)
         self.p = p
         self.t = t
         if validate:
             self._validate()
         self._build_mappings()
+        super(MeshQuad, self).__init__()
 
     def _build_mappings(self):
         # do not sort since order defines counterclockwise order
@@ -478,16 +490,16 @@ class MeshQuad(Mesh):
             X = x
         t = self.t[[0, 1, 3], :]
         t = np.hstack((t, self.t[[1, 2, 3]]))
-        return MeshTri(self.p, t), X
+        return MeshTri(self.p, t, validate=False), X
 
-    def plot(self, z, smooth=False, ax=None, zlim=None):
+    def plot(self, z, smooth=False, edgecolors=None, ax=None, zlim=None):
         """Visualize nodal or elemental function (2d).
 
         The quadrilateral mesh is split into triangular mesh (MeshTri) and
         the respective plotting function for the triangular mesh is used.
         """
         m, z = self._splitquads(z)
-        return m.plot(z, smooth, ax=ax, zlim=zlim)
+        return m.plot(z, smooth, ax=ax, zlim=zlim, edgecolors=edgecolors)
 
     def plot3(self, z, smooth=False, ax=None):
         """Visualize nodal function (3d i.e. three axes).
@@ -560,13 +572,13 @@ class MeshTet(Mesh):
                           [2, 3, 1, 7], [1, 2, 4, 7]]).T
         elif p is None or t is None:
             raise Exception("Must provide p AND t or neither")
-        p, t = super(MeshTet, self).__init__(p, t)
         self.p = p
         self.t = t
         if validate:
             self._validate()
         self.ENABLE_FACETS = True
         self._build_mappings()
+        super(MeshTet, self).__init__()
 
     def _build_mappings(self):
         """Build element-to-facet, element-to-edges, etc. mappings."""
@@ -856,12 +868,12 @@ class MeshTri(Mesh):
                 t = np.array([[0, 1, 2], [1, 3, 2]], dtype=np.intp).T
         elif p is None or t is None:
             raise Exception("Must provide p AND t or neither")
-        p, t = super(MeshTri, self).__init__(p, t)
         self.p = p
         self.t = t
         if validate:
             self._validate()
         self._build_mappings(sort_t=sort_t)
+        super(MeshTri, self).__init__()
 
     def _build_mappings(self, sort_t=True):
         # sort to preserve orientations etc.

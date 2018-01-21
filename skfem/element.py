@@ -573,6 +573,27 @@ class ElementLocalH1Vec(ElementLocalH1):
                     du[itr][jtr]=0*phi
             
         return u,du
+
+class ElementLocalQ1(ElementLocalH1):
+    """The derivative of Q1 element."""
+    maxdeg = 1
+    i_dofs = 2
+    dim = 2
+    def lbasis(self, X, i):
+        phi = {
+            0:lambda x, y: x,
+            1:lambda x, y: y,
+            }[i](X[0], X[1])
+        dphi = {}
+        dphi[0] = {
+            0:lambda x, y: 1.0+0*x,
+            1:lambda x, y: 0*x,
+            }[i](X[0], X[1])
+        dphi[1] = {
+            0:lambda x, y: 0*x,
+            1:lambda x, y: 1.0+0*x,
+            }[i](X[0], X[1])
+        return phi, dphi
         
 class ElementLocalQ1(ElementLocalH1):
     """Simplest quadrilateral element."""
@@ -658,6 +679,19 @@ class ElementLocalTriDG(ElementLocalH1):
         self.elem=elem
         self.maxdeg=elem.maxdeg
         self.i_dofs=3*elem.n_dofs+3*elem.f_dofs+elem.i_dofs
+        self.dim=2
+    def lbasis(self,X,i):
+        return self.elem.lbasis(X,i)
+
+class ElementLocalQuadDG(ElementLocalH1):
+    """Transform a H1 conforming quadrilateral element
+    into a discontinuous one by turning all DOFs into
+    interior DOFs."""
+    def __init__(self,elem):
+        # change all dofs to interior dofs
+        self.elem=elem
+        self.maxdeg=elem.maxdeg
+        self.i_dofs=4*elem.n_dofs+4*elem.f_dofs+elem.i_dofs
         self.dim=2
     def lbasis(self,X,i):
         return self.elem.lbasis(X,i)

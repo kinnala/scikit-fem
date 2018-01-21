@@ -5,10 +5,10 @@ from skfem.weakforms import laplace
 High-order plotting test.
 """
 
-m = MeshTri()
-m.refine(2)
+m = MeshQuad()
+m.refine(1)
 
-e = ElementLocalTriP2()
+e = ElementLocalQ2()
 a = AssemblerLocal(m, e)
 
 K = a.iasm(laplace)
@@ -20,5 +20,6 @@ x = direct(K, f, D=D)
 
 M, X = a.refinterp(x, 3)
 
-M.plot(X, smooth=True, edgecolors='')
+ax = m.draw()
+M.plot(X, smooth=True, edgecolors='', ax=ax)
 M.show()

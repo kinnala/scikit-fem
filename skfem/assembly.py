@@ -199,38 +199,36 @@ class Assembler(object):
 
     def refinterp(self, interp, Nrefs=1):
         """Refine and interpolate (for plotting)."""
-        if isinstance(self.mesh, skfem.mesh.MeshTri):
-            # mesh reference domain, refine and take the vertices
-            m = skfem.mesh.MeshTri(initmesh='refdom')
-            m.refine(Nrefs)
-            X = m.p
+        # mesh reference domain, refine and take the vertices
+        meshclass = type(self.mesh)
+        m = meshclass(initmesh='refdom')
+        m.refine(Nrefs)
+        X = m.p
 
-            # map vertices to global elements
-            x = self.mapping.F(X)
+        # map vertices to global elements
+        x = self.mapping.F(X)
 
-            Nbfun_u = self.dofnum_u.t_dof.shape[0]
+        Nbfun_u = self.dofnum_u.t_dof.shape[0]
 
-            # interpolate some previous discrete function at the vertices
-            # of the refined mesh
-            w = 0.0*x[0]
-            for j in range(Nbfun_u):
-                phi, _ = self.elem_u.lbasis(X, j)
-                w += np.outer(interp[self.dofnum_u.t_dof[j, :]], phi)
+        # interpolate some previous discrete function at the vertices
+        # of the refined mesh
+        w = 0.0*x[0]
+        for j in range(Nbfun_u):
+            phi, _ = self.elem_u.lbasis(X, j)
+            w += np.outer(interp[self.dofnum_u.t_dof[j, :]], phi)
 
-            nt = self.mesh.t.shape[1]
-            t = np.tile(m.t, (1, nt))
-            dt = np.max(t)
-            t += (dt+1)*np.tile(np.arange(nt), (3*m.t.shape[1], 1)).flatten('F').reshape((-1, 3)).T
+        nt = self.mesh.t.shape[1]
+        t = np.tile(m.t, (1, nt))
+        dt = np.max(t)
+        t += (dt+1)*np.tile(np.arange(nt), (m.t.shape[0]*m.t.shape[1], 1)).flatten('F').reshape((-1, m.t.shape[0])).T
 
-            p = x[0].flatten()
-            for itr in range(len(x)-1):
-                p = np.vstack((p, x[itr+1].flatten()))
+        p = x[0].flatten()
+        for itr in range(len(x)-1):
+            p = np.vstack((p, x[itr+1].flatten()))
 
-            M = skfem.mesh.MeshTri(p, t, validate=False)
+        M = meshclass(p, t, validate=False)
 
-            return M, w.flatten()
-        else:
-            raise NotImplementedError("Not yet implemented")
+        return M, w.flatten()
 
 
     def fillargs(self, oldform, newargs):
