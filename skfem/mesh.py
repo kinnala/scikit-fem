@@ -847,7 +847,7 @@ class MeshTri(Mesh):
                               [4, 6, 7],
                               [4, 7, 8],
                               [4, 5, 8]], dtype=np.intp).T
-            elif initmesh is 'reftri':
+            elif initmesh is 'refdom':
                 p = np.array([[0, 1, 0],
                               [0, 0, 1]], dtype=np.float_)
                 t = np.array([[0, 1, 2]], dtype=np.intp).T
@@ -1032,7 +1032,7 @@ class MeshTri(Mesh):
                 ax.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z,
                               shading='gouraud', edgecolors=edgecolors)
             else:
-                ax.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z, edgecolors=edgecolos)
+                ax.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z, edgecolors=edgecolors)
         else:
             if smooth:
                 ax.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z,

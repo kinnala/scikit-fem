@@ -49,7 +49,7 @@ class Assembler(object):
     def __init__(self):
         raise NotImplementedError("Assembler metaclass cannot be initialized.")
 
-    def essential_bc(self, test, bc=None, boundary=True, dofrows=None, check_vertices=True,
+    def essential_bc(self, test=None, bc=None, boundary=True, dofrows=None, check_vertices=True,
                   check_facets=True, check_edges=True):
         """Helper function for setting essential boundary conditions.
 
@@ -60,7 +60,7 @@ class Assembler(object):
         
         Parameters
         ----------
-        test : lambda
+        test : (OPTIONAL, default=function returning True) lambda
             An anonymous function with Ndim arguments. If returns other than 0
             when evaluated at the DOF location, the respective DOF is included
             in the return set.
@@ -89,6 +89,12 @@ class Assembler(object):
         """
         if self.mesh.dim() == 1:
             raise Exception("Assembler.find_dofs not implemented for 1D mesh.")
+
+        if test is None:
+            if self.mesh.dim() == 2:
+                test = lambda x, y: 0*x + True
+            elif self.mesh.dim() == 3:
+                test = lambda x, y, z: 0*x + True
 
         if bc is None:
             if self.mesh.dim() == 2:
@@ -190,6 +196,42 @@ class Assembler(object):
             raise NotImplementedError("Method essential_bc's not implemented for the given dimension.")
 
         return x, dofs
+
+    def refinterp(self, interp, Nrefs=1):
+        """Refine and interpolate (for plotting)."""
+        if isinstance(self.mesh, skfem.mesh.MeshTri):
+            # mesh reference domain, refine and take the vertices
+            m = skfem.mesh.MeshTri(initmesh='refdom')
+            m.refine(Nrefs)
+            X = m.p
+
+            # map vertices to global elements
+            x = self.mapping.F(X)
+
+            Nbfun_u = self.dofnum_u.t_dof.shape[0]
+
+            # interpolate some previous discrete function at the vertices
+            # of the refined mesh
+            w = 0.0*x[0]
+            for j in range(Nbfun_u):
+                phi, _ = self.elem_u.lbasis(X, j)
+                w += np.outer(interp[self.dofnum_u.t_dof[j, :]], phi)
+
+            nt = self.mesh.t.shape[1]
+            t = np.tile(m.t, (1, nt))
+            dt = np.max(t)
+            t += (dt+1)*np.tile(np.arange(nt), (3*m.t.shape[1], 1)).flatten('F').reshape((-1, 3)).T
+
+            p = x[0].flatten()
+            for itr in range(len(x)-1):
+                p = np.vstack((p, x[itr+1].flatten()))
+
+            M = skfem.mesh.MeshTri(p, t, validate=False)
+
+            return M, w.flatten()
+        else:
+            raise NotImplementedError("Not yet implemented")
+
 
     def fillargs(self, oldform, newargs):
         """Used for filling functions with required set of arguments."""
