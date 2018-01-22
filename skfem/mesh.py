@@ -436,6 +436,23 @@ class MeshLine(Mesh):
             self._validate()
         super(MeshLine, self).__init__()
 
+    def adaptive_refine(self, marked):
+        """Perform an adaptive refine which splits each marked element into two."""
+        t = self.t
+        p = self.p
+
+        mid = range(len(marked)) + np.max(t) + 1
+
+        nonmarked = np.setdiff1d(np.arange(t.shape[1]), marked)
+
+        newp = np.hstack((p, 0.5*(p[:, self.t[0, marked]] + p[:, self.t[1, marked]])))
+        newt = np.vstack((t[0, marked], mid))
+        newt = np.hstack((t[:, nonmarked], newt, np.vstack((mid, t[1, marked]))))
+        # update fields
+        self.p = newp
+        self.t = newt
+
+
     def _uniform_refine(self):
         """Perform a single mesh refine that halves 'h'."""
         # rename variables
@@ -628,6 +645,17 @@ class MeshQuad(Mesh2D):
         t = self.t[[0, 1, 3], :]
         t = np.hstack((t, self.t[[1, 2, 3]]))
         return MeshTri(self.p, t, validate=False), X
+
+    def _splitquads_symmetric(self):
+        """Split quads into four triangles."""
+        t = np.vstack((self.t, np.arange(self.t.shape[1]) + self.p.shape[1]))
+        newt = t[[0, 1, 4], :]
+        newt = np.hstack((newt, t[[1, 2, 4], :]))
+        newt = np.hstack((newt, t[[2, 3, 4], :]))
+        newt = np.hstack((newt, t[[3, 0, 4], :]))
+        mx = np.sum(self.p[0, self.t], axis=0)/self.t.shape[0]
+        my = np.sum(self.p[1, self.t], axis=0)/self.t.shape[0]
+        return MeshTri(np.hstack((self.p, np.vstack((mx, my)))), newt, validate=False)
 
     def plot(self, z, smooth=False, edgecolors=None, ax=None, zlim=None):
         """Visualize nodal or elemental function (2d).
