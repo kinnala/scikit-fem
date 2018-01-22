@@ -101,7 +101,8 @@ class Mesh(object):
         reverse[ptix] = np.arange(len(ptix))
         newt = reverse[newt]
         newp = self.p[:, ptix]
-        return newp, newt.astype(np.intp)
+        meshclass = type(self)
+        return meshclass(newp, newt.astype(np.intp))
 
     def scale(self, scale):
         """Scale the mesh.
@@ -163,6 +164,10 @@ class Mesh(object):
                    "not belonging to any element.")
             raise Exception(msg)
 
+
+class Mesh2D(Mesh):
+    """Two dimensional meshes, common methods."""
+
     def jiggle(self, z=0.2):
         """Jiggle the interior nodes of the mesh.
 
@@ -177,20 +182,31 @@ class Mesh(object):
         self.p[0, I] = self.p[0, I] + y*np.random.rand(len(I))
         self.p[1, I] = self.p[1, I] + y*np.random.rand(len(I))
 
-
-class Mesh2D(Mesh):
-    """Two dimensional meshes, common methods."""
-
     def boundary_nodes(self):
         """Return an array of boundary node indices."""
         return np.unique(self.facets[:, self.boundary_facets()])
 
     def nodes_satisfying(self, test):
-        """Return nodes that satisfy some condition."""
+        """Return nodes that satisfy some condition.
+
+        Parameters
+        ----------
+        test : lambda
+            An anonymous function with two parameters (x and y) and which returns True for the set of nodes
+            that are to be included in the return set.
+        """
         return np.nonzero(test(self.p[0, :], self.p[1, :]))[0]
 
     def draw_nodes(self, nodes, mark='bo'):
-        """Highlight some nodes."""
+        """Highlight some nodes.
+
+        Parameters
+        ----------
+        nodes : numpy array
+            The indices of the nodes to highlight.
+        mark : (OPTIONAL, default='bo') string
+            A standard matplotlib string to define the highlight style.
+        """
         plt.plot(self.p[0, nodes], self.p[1, nodes], mark)
 
     def param(self):
@@ -203,13 +219,27 @@ class Mesh2D(Mesh):
         return np.setdiff1d(np.arange(0, self.p.shape[1]), self.boundary_nodes())
 
     def facets_satisfying(self, test):
-        """Return facets whose midpoints satisfy some condition."""
+        """Return facets whose midpoints satisfy some condition.
+
+        Parameters
+        ----------
+        test : lambda
+            An anonymous function with two parameters (x and y) and which returns True for the midpoints
+            of the set of facets that are to be included in the return set.
+        """
         mx = 0.5*(self.p[0, self.facets[0, :]] + self.p[0, self.facets[1, :]])
         my = 0.5*(self.p[1, self.facets[0, :]] + self.p[1, self.facets[1, :]])
         return np.nonzero(test(mx, my))[0]
 
     def elements_satisfying(self, test):
-        """Return elements whose midpoints satisfy some condition."""
+        """Return elements whose midpoints satisfy some condition.
+
+        Parameters
+        ----------
+        test : lambda
+            An anonymous function with two parameters (x and y) and which returns True for the midpoints
+            of the set of elements that are to be included in the return set.
+        """
         mx = np.sum(self.p[0, self.t], axis=0)/self.t.shape[0]
         my = np.sum(self.p[1, self.t], axis=0)/self.t.shape[0]
         return np.nonzero(test(mx, my))[0]
@@ -222,8 +252,20 @@ class Mesh2D(Mesh):
         """Return an array of boundary facet indices."""
         return np.nonzero(self.f2t[1, :] == -1)[0]
 
-    def draw(self, ax=None, numbering=False):
-        """Draw the mesh."""
+    def draw(self, ax=None, node_numbering=False, facet_numbering=False, element_numbering=False):
+        """Draw the mesh.
+
+        Parameters
+        ----------
+        ax : (OPTIONAL, default=None) matplotlib axis
+            Use a predefined axis for plotting.
+        node_numbering : (OPTIONAL, default=False)
+            Draw node numbering.
+        facet_numbering: (OPTIONAL, default=False)
+            Draw facet numbering.
+        element_numbering : (OPTIONAL, default=False)
+            Draw element numbering.
+        """
         if ax is None:
             # create new figure
             fig = plt.figure()
@@ -243,15 +285,27 @@ class Mesh2D(Mesh):
             ys.append(v)
             ys.append(None)
         ax.plot(xs, ys, 'k')
-        if numbering:
+
+        if node_numbering:
+            for itr in range(self.p.shape[1]):
+                ax.text(self.p[0, itr], self.p[1, itr], str(itr))
+
+        if facet_numbering:
+            mx = .5*(self.p[0, self.facets[0, :]] + self.p[0, self.facets[1, :]])
+            my = .5*(self.p[1, self.facets[0, :]] + self.p[1, self.facets[1, :]])
+            for itr in range(self.facets.shape[1]):
+                ax.text(mx[itr], my[itr], str(itr))
+
+        if element_numbering:
             mx = np.sum(self.p[0, self.t], axis=0)/self.t.shape[0]
             my = np.sum(self.p[1, self.t], axis=0)/self.t.shape[0]
             for itr in range(self.t.shape[1]):
                 ax.text(mx[itr], my[itr], str(itr))
+
         return ax
 
     def mirror_mesh(self, a, b, c):
-        """Mirror a mesh by a line."""
+        """Mirror a mesh by the line ax + by + c = 0."""
         tmp = -2.0*(a*self.p[0, :] + b*self.p[1, :] + c)/(a**2 + b**2)
         newx = a*tmp + self.p[0, :]
         newy = b*tmp + self.p[1, :]
@@ -343,7 +397,7 @@ class MeshLineMortar(Mesh):
             raise Exception("All mesh facets corresponding to mortar facets not found!")
 
     def draw(self, color='ro-'):
-        """Draw the mesh"""
+        """Draw the interface mesh"""
         xs = []
         ys = []
         for y1, y2, s, t in zip(self.p[1, self.facets[0, :]],
