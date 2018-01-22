@@ -19,18 +19,18 @@ Obtain a three times refined mesh of the unit square and draw it.
 
     from skfem.mesh import MeshTri
     m = MeshTri()
-    for itr in range(3):
-        m.refine()
+    m.refine(3)
     m.draw()
     m.show()
 
 """
-import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.tri as mtri
-import skfem.mapping
+import numpy as np
 import warnings
 from scipy.sparse import coo_matrix
+
+import skfem.mapping
 
 
 class Mesh(object):
@@ -162,6 +162,113 @@ class Mesh(object):
             msg = ("Mesh._validate(): Mesh contains a vertex "
                    "not belonging to any element.")
             raise Exception(msg)
+
+    def jiggle(self, z=0.2):
+        """Jiggle the interior nodes of the mesh.
+
+        Parameters
+        ----------
+        z : (OPTIONAL, default=0.2) float
+            Mesh parameter is multiplied by this number. The resulting number
+            corresponds to the standard deviation of the jiggle.
+        """
+        y = z*self.param()
+        I = self.interior_nodes()
+        self.p[0, I] = self.p[0, I] + y*np.random.rand(len(I))
+        self.p[1, I] = self.p[1, I] + y*np.random.rand(len(I))
+
+
+class Mesh2D(Mesh):
+    """Two dimensional meshes, common methods."""
+
+    def boundary_nodes(self):
+        """Return an array of boundary node indices."""
+        return np.unique(self.facets[:, self.boundary_facets()])
+
+    def nodes_satisfying(self, test):
+        """Return nodes that satisfy some condition."""
+        return np.nonzero(test(self.p[0, :], self.p[1, :]))[0]
+
+    def draw_nodes(self, nodes, mark='bo'):
+        """Highlight some nodes."""
+        plt.plot(self.p[0, nodes], self.p[1, nodes], mark)
+
+    def param(self):
+        """Return mesh parameter."""
+        return np.max(np.sqrt(np.sum((self.p[:, self.facets[0, :]] -
+                                      self.p[:, self.facets[1, :]])**2, axis=0)))
+
+    def interior_nodes(self):
+        """Return an array of interior node indices."""
+        return np.setdiff1d(np.arange(0, self.p.shape[1]), self.boundary_nodes())
+
+    def facets_satisfying(self, test):
+        """Return facets whose midpoints satisfy some condition."""
+        mx = 0.5*(self.p[0, self.facets[0, :]] + self.p[0, self.facets[1, :]])
+        my = 0.5*(self.p[1, self.facets[0, :]] + self.p[1, self.facets[1, :]])
+        return np.nonzero(test(mx, my))[0]
+
+    def elements_satisfying(self, test):
+        """Return elements whose midpoints satisfy some condition."""
+        mx = np.sum(self.p[0, self.t], axis=0)/self.t.shape[0]
+        my = np.sum(self.p[1, self.t], axis=0)/self.t.shape[0]
+        return np.nonzero(test(mx, my))[0]
+
+    def interior_facets(self):
+        """Return an array of interior facet indices."""
+        return np.nonzero(self.f2t[1, :] >= 0)[0]
+
+    def boundary_facets(self):
+        """Return an array of boundary facet indices."""
+        return np.nonzero(self.f2t[1, :] == -1)[0]
+
+    def draw(self, ax=None, numbering=False):
+        """Draw the mesh."""
+        if ax is None:
+            # create new figure
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+        # visualize the mesh faster plotting is achieved through
+        # None insertion trick.
+        xs = []
+        ys = []
+        for s, t, u, v in zip(self.p[0, self.facets[0, :]],
+                              self.p[1, self.facets[0, :]],
+                              self.p[0, self.facets[1, :]],
+                              self.p[1, self.facets[1, :]]):
+            xs.append(s)
+            xs.append(u)
+            xs.append(None)
+            ys.append(t)
+            ys.append(v)
+            ys.append(None)
+        ax.plot(xs, ys, 'k')
+        if numbering:
+            mx = np.sum(self.p[0, self.t], axis=0)/self.t.shape[0]
+            my = np.sum(self.p[1, self.t], axis=0)/self.t.shape[0]
+            for itr in range(self.t.shape[1]):
+                ax.text(mx[itr], my[itr], str(itr))
+        return ax
+
+    def mirror_mesh(self, a, b, c):
+        """Mirror a mesh by a line."""
+        tmp = -2.0*(a*self.p[0, :] + b*self.p[1, :] + c)/(a**2 + b**2)
+        newx = a*tmp + self.p[0, :]
+        newy = b*tmp + self.p[1, :]
+        newpoints = np.vstack((newx, newy))
+        points = np.hstack((self.p, newpoints))
+        tris = np.hstack((self.t, self.t + self.p.shape[1]))
+
+        # remove duplicates
+        tmp = np.ascontiguousarray(points.T)
+        tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)]*tmp.shape[1]), return_index=True, return_inverse=True)
+        points = points[:, ixa]
+        tris = ixb[tris]
+
+        meshclass = type(self)
+
+        return meshclass(points, tris)
+
 
 class MeshLineMortar(Mesh):
     """One-dimensional mortar mesh at the interface of two 2D meshes."""
@@ -337,7 +444,7 @@ class MeshLine(Mesh):
         return skfem.mapping.MappingAffine(self)
 
 
-class MeshQuad(Mesh):
+class MeshQuad(Mesh2D):
     """A mesh consisting of quadrilateral elements."""
 
     refdom = "quad"
@@ -403,37 +510,6 @@ class MeshQuad(Mesh):
 
         # second row to -1 if repeated (i.e., on boundary)
         self.f2t[1, np.nonzero(self.f2t[0, :] == self.f2t[1, :])[0]] = -1
-
-    def interior_facets(self):
-        """Return an array of interior facet indices."""
-        return np.nonzero(self.f2t[1, :] >= 0)[0]
-
-    def boundary_nodes(self):
-        """Return an array of boundary node indices."""
-        return np.unique(self.facets[:, self.boundary_facets()])
-
-    def boundary_facets(self):
-        """Return an array of boundary facet indices."""
-        return np.nonzero(self.f2t[1, :] == -1)[0]
-
-    def interior_nodes(self):
-        """Return an array of interior node indices."""
-        return np.setdiff1d(np.arange(0, self.p.shape[1]),
-                            self.boundary_nodes())
-
-    def nodes_satisfying(self, test):
-        """Return nodes that satisfy some condition."""
-        return np.nonzero(test(self.p[0, :], self.p[1, :]))[0]
-
-    def facets_satisfying(self, test):
-        """Return facets whose midpoints satisfy some condition."""
-        mx = 0.5*(self.p[0, self.facets[0, :]] + self.p[0, self.facets[1, :]])
-        my = 0.5*(self.p[1, self.facets[0, :]] + self.p[1, self.facets[1, :]])
-        return np.nonzero(test(mx, my))[0]
-
-    def draw_nodes(self, nodes, mark='bo'):
-        """Highlight some nodes."""
-        plt.plot(self.p[0, nodes], self.p[1, nodes], mark)
 
     def _uniform_refine(self):
         """Perform a single mesh refine that halves 'h'.
@@ -509,50 +585,6 @@ class MeshQuad(Mesh):
         """
         m, z = self._splitquads(z)
         return m.plot3(z, smooth, ax=ax)
-
-    def jiggle(self, z=0.2):
-        """Jiggle the interior nodes of the mesh.
-
-        Parameters
-        ----------
-        z : (OPTIONAL, default=0.2) float
-            Mesh parameter is multiplied by this number. The resulting number
-            corresponds to the standard deviation of the jiggle.
-        """
-        y = z*self.param()
-        I = self.interior_nodes()
-        self.p[0, I] = self.p[0, I] + y*np.random.rand(len(I))
-        self.p[1, I] = self.p[1, I] + y*np.random.rand(len(I))
-
-    def param(self):
-        """Return mesh parameter."""
-        return np.max(np.sqrt(np.sum((self.p[:, self.facets[0, :]] -
-                                      self.p[:, self.facets[1, :]])**2,
-                                     axis=0)))
-
-    def draw(self, ax=None):
-        """Draw the mesh."""
-        if ax is None:
-            # create new figure
-            fig = plt.figure()
-            ax = fig.add_subplot(111)
-        # visualize the mesh
-        # faster plotting is achieved through
-        # None insertion trick.
-        xs = []
-        ys = []
-        for s, t, u, v in zip(self.p[0, self.facets[0, :]],
-                              self.p[1, self.facets[0, :]],
-                              self.p[0, self.facets[1, :]],
-                              self.p[1, self.facets[1, :]]):
-            xs.append(s)
-            xs.append(u)
-            xs.append(None)
-            ys.append(t)
-            ys.append(v)
-            ys.append(None)
-        plt.plot(xs, ys, 'k')
-        return ax
 
     def mapping(self):
         return skfem.mapping.MappingQ1(self)
@@ -833,7 +865,7 @@ class MeshTet(Mesh):
         return skfem.mapping.MappingAffine(self)
 
 
-class MeshTri(Mesh):
+class MeshTri(Mesh2D):
     """Triangular mesh."""
 
     refdom = "tri"
@@ -913,38 +945,6 @@ class MeshTri(Mesh):
         # second row to zero if repeated (i.e., on boundary)
         self.f2t[1, np.nonzero(self.f2t[0, :] == self.f2t[1, :])[0]] = -1
 
-    def boundary_nodes(self):
-        """Return an array of boundary node indices."""
-        return np.unique(self.facets[:, self.boundary_facets()])
-
-    def boundary_facets(self):
-        """Return an array of boundary facet indices."""
-        return np.nonzero(self.f2t[1, :] == -1)[0]
-
-    def interior_facets(self):
-        """Return an array of interior facet indices."""
-        return np.nonzero(self.f2t[1, :] >= 0)[0]
-
-    def nodes_satisfying(self, test):
-        """Return nodes that satisfy some condition."""
-        return np.nonzero(test(self.p[0, :], self.p[1, :]))[0]
-
-    def elements_satisfying(self, test):
-        """Return elements whose midpoints satisfy some condition."""
-        mx = .33333*np.sum(self.p[0, self.t], axis=0)
-        my = .33333*np.sum(self.p[1, self.t], axis=0)
-        return np.nonzero(test(mx, my))[0]
-
-    def facets_satisfying(self, test):
-        """Return facets whose midpoints satisfy some condition."""
-        mx = 0.5*(self.p[0, self.facets[0, :]] + self.p[0, self.facets[1, :]])
-        my = 0.5*(self.p[1, self.facets[0, :]] + self.p[1, self.facets[1, :]])
-        return np.nonzero(test(mx, my))[0]
-
-    def interior_nodes(self):
-        """Return an array of interior node indices."""
-        return np.setdiff1d(np.arange(0, self.p.shape[1]), self.boundary_nodes())
-
     def interpolator(self, x):
         """Return a function which interpolates values with P1 basis."""
         triang = mtri.Triangulation(self.p[0, :], self.p[1, :], self.t.T)
@@ -962,11 +962,6 @@ class MeshTri(Mesh):
         def handle(X, Y):
             return x[finder(X, Y)]
         return handle
-
-    def param(self):
-        """Return mesh parameter."""
-        return np.max(np.sqrt(np.sum((self.p[:, self.facets[0, :]] -
-                                      self.p[:, self.facets[1, :]])**2, axis=0)))
 
     def smooth(self, c=1.0):
         """Apply smoothing to interior nodes."""
@@ -996,41 +991,6 @@ class MeshTri(Mesh):
             plt.plot(self.p[0,self.t[[1,2],itr]], self.p[1,self.t[[1,2],itr]], 'k-')
             plt.plot(self.p[0,self.t[[0,2],itr]], self.p[1,self.t[[0,2],itr]], 'k-')
         return fig
-
-
-    def draw(self, ax=None, trinum=False):
-        """Draw the mesh."""
-        if ax is None:
-            # create new figure
-            fig = plt.figure()
-            ax = fig.add_subplot(111)
-        # visualize the mesh faster plotting is achieved through
-        # None insertion trick.
-        xs = []
-        ys = []
-        for s, t, u, v in zip(self.p[0, self.facets[0, :]],
-                              self.p[1, self.facets[0, :]],
-                              self.p[0, self.facets[1, :]],
-                              self.p[1, self.facets[1, :]]):
-            xs.append(s)
-            xs.append(u)
-            xs.append(None)
-            ys.append(t)
-            ys.append(v)
-            ys.append(None)
-        ax.plot(xs, ys, 'k')
-        if trinum:
-            if fig==0:
-                raise Exception("Must create figure to plot elem numbers")
-            for itr in range(self.t.shape[1]):
-                mx = .3333*(self.p[0, self.t[0, itr]] + self.p[0, self.t[1, itr]] + self.p[0, self.t[2, itr]])
-                my = .3333*(self.p[1, self.t[0, itr]] + self.p[1, self.t[1, itr]] + self.p[1, self.t[2, itr]])
-                ax.text(mx, my, str(itr))
-        return ax
-
-    def draw_nodes(self, nodes, mark='bo'):
-        """Highlight some nodes."""
-        plt.plot(self.p[0, nodes], self.p[1, nodes], mark)
 
     def plot(self, z, smooth=False, ax=None, zlim=None, edgecolors=None):
         """Visualize nodal or elemental function (2d)."""
@@ -1122,22 +1082,6 @@ class MeshTri(Mesh):
              (np.hstack((np.arange(sz), np.arange(nsz - sz) + sz, np.arange(nsz - sz) + sz)),
               np.hstack((np.arange(sz), e[0, :], e[1, :])))),
             shape=(nsz, sz)).tocsr()
-
-    def mirror_mesh(self, a, b, c):
-        tmp = -2.0*(a*self.p[0, :] + b*self.p[1, :] + c)/(a**2 + b**2)
-        newx = a*tmp + self.p[0, :]
-        newy = b*tmp + self.p[1, :]
-        newpoints = np.vstack((newx, newy))
-        points = np.hstack((self.p, newpoints))
-        tris = np.hstack((self.t, self.t + self.p.shape[1]))
-
-        # remove duplicates
-        tmp = np.ascontiguousarray(points.T)
-        tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)]*tmp.shape[1]), return_index=True, return_inverse=True)
-        points = points[:, ixa]
-        tris = ixb[tris]
-
-        return MeshTri(points, tris)
 
     def mapping(self):
         return skfem.mapping.MappingAffine(self)
