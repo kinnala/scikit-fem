@@ -421,10 +421,11 @@ class MeshLine(Mesh):
     refdom = "line"
     brefdom = "point"
 
-    def __init__(self, p=None, t=None, validate=True):
+    def __init__(self, p=None, t=None, validate=True, initmesh=None):
         if p is None and t is None:
-            p = np.array([[0, 1]])
-            t = np.array([[0], [1]])
+            if initmesh is None or initmesh is 'refdom':
+                p = np.array([[0, 1]])
+                t = np.array([[0], [1]])
         elif p is not None and t is None:
             t = np.array([np.arange(np.max(p.shape)-1), np.arange(np.max(p.shape)-1)+1])
         if len(p.shape)==1:
@@ -462,8 +463,12 @@ class MeshLine(Mesh):
         _, counts = np.unique(self.t.flatten(), return_counts=True)
         return np.nonzero(counts == 2)[0]
 
-    def plot(self, u, color='ko-'):
+    def plot(self, u, ax=None, color='ko-'):
         """Plot a function defined on the nodes of the mesh."""
+        if ax is None:
+            # create new figure
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
         xs = []
         ys = []
         for y1, y2, s, t in zip(u[self.t[0, :]],
@@ -476,7 +481,9 @@ class MeshLine(Mesh):
             ys.append(y1)
             ys.append(y2)
             ys.append(None)
-        plt.plot(xs, ys, color)
+        ax.plot(xs, ys, color)
+
+        return ax
 
     def __mul__(self, other):
         """Tensor product mesh."""

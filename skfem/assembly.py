@@ -24,8 +24,7 @@ the Poisson problem using the piecewise linear elements.
     from skfem.element import ElementLocalTriP1
 
     m = MeshTri()
-    for itr in range(3):
-        m.refine()
+    m.refine(3)
     e = ElementLocalTriP1()
     a = AssemblerLocal(m, e)
 
@@ -213,18 +212,30 @@ class Assembler(object):
         # interpolate some previous discrete function at the vertices
         # of the refined mesh
         w = 0.0*x[0]
-        for j in range(Nbfun_u):
-            phi, _ = self.elem_u.lbasis(X, j)
-            w += np.outer(interp[self.dofnum_u.t_dof[j, :]], phi)
+        if X.shape[0]==1:
+            w = 0.0*x
+        if isinstance(self, AssemblerLocal):
+            for j in range(Nbfun_u):
+                phi, _ = self.elem_u.lbasis(X, j)
+                w += np.outer(interp[self.dofnum_u.t_dof[j, :]], phi)
+        elif isinstance(self, AssemblerGlobal):
+            phi, _, _, _ = self.elem_u.evalbasis(self.mesh, x)
+            for j in range(Nbfun_u):
+                w += interp[self.dofnum_u.t_dof[j, :]][:, None]*phi[j]
+        else:
+            raise NotImplementedError("refinterp not implemented for this Assembler type.")
 
         nt = self.mesh.t.shape[1]
         t = np.tile(m.t, (1, nt))
         dt = np.max(t)
         t += (dt+1)*np.tile(np.arange(nt), (m.t.shape[0]*m.t.shape[1], 1)).flatten('F').reshape((-1, m.t.shape[0])).T
 
-        p = x[0].flatten()
-        for itr in range(len(x)-1):
-            p = np.vstack((p, x[itr+1].flatten()))
+        if X.shape[0]==1:
+            p = np.array([x.flatten()])
+        else:
+            p = x[0].flatten()
+            for itr in range(len(x)-1):
+                p = np.vstack((p, x[itr+1].flatten()))
 
         M = meshclass(p, t, validate=False)
 

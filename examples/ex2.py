@@ -11,8 +11,7 @@ using cubic Hermite elements.
 """
 
 m = MeshLine()
-for itr in range(3):
-    m.refine()
+m.refine(3)
 
 e = ElementGlobalLineHermite()
 a = AssemblerGlobal(m, e)
@@ -29,5 +28,8 @@ D = np.array([0, 1, 2, 3])
 
 x = direct(K, f, D=D, solve=solve_cholmod)
 
-m.plot(x[a.dofnum_u.n_dof[0, :]])
-m.show()
+M, X = a.refinterp(x, 3)
+
+ax = m.plot(x[a.dofnum_u.n_dof[0, :]], color='ko')
+M.plot(X, color='k-', ax=ax)
+M.show()
