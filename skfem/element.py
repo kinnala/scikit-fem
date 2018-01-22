@@ -752,6 +752,7 @@ class ElementLocalTriP0(ElementLocalH1):
         return phi,dphi
 
 class ElementLocalP0(ElementLocalTriP0):
+    """Constant element for quadrilateral mesh."""
     pass
 
 class ElementLocalTriMini(ElementLocalH1):
