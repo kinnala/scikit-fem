@@ -338,8 +338,7 @@ class AssemblerGlobal(Assembler):
     These elements are defined through global degrees of freedom but
     are not limited to H^1-conforming elements. As a result,
     this assembler is more computationally intensive than
-    :class:`skfem.assembly.AssemblerLocal` so use it instead
-    if possible.
+    :class:`skfem.assembly.AssemblerLocal`.
 
     Parameters
     ----------
@@ -1206,8 +1205,6 @@ class AssemblerLocal(Assembler):
         if intorder is None:
             intorder = self.elem_u.maxdeg + self.elem_v.maxdeg
 
-        nv = self.mesh.p.shape[1]
-        nt = self.mesh.t.shape[1]
         ne = find.shape[0]
 
         # check and fix parameters of form
@@ -1372,6 +1369,64 @@ class AssemblerLocal(Assembler):
                               shape=(self.dofnum_v.N, 1)).toarray().T[0]
 
     def fnorm(self, form, interp, intorder=None, interior=False, normals=True):
+        """Evaluate L2-norms of solution vectors on element boundaries. Useful for
+        e.g. evaluating a posteriori estimators.
+
+        Parameters
+        ----------
+        form : function handle
+            The function for which the L2 norm is evaluated.
+
+            If interior=False, can consist of the following arguments
+
+            +-----------+----------------------+
+            | Parameter | Explanation          |
+            +-----------+----------------------+
+            | u         | solution             |
+            +-----------+----------------------+
+            | du        | solution derivatives |
+            +-----------+----------------------+
+            | x         | spatial location     |
+            +-----------+----------------------+
+            | n         | normal vector        |
+            +-----------+----------------------+
+            | t         | tangent vector       |
+            +-----------+----------------------+
+            | h         | the mesh parameter   |
+            +-----------+----------------------+
+
+            If interior=True, the solution and solution derivatives are replaced by
+
+            +-----------+-------------------------+
+            | Parameter | Explanation             |
+            +-----------+-------------------------+
+            | u1        | solution on 1st elem    |
+            +-----------+-------------------------+
+            | du1       | derivatives on 1st elem |
+            +-----------+-------------------------+
+            | u2        | solution on 2nd elem    |
+            +-----------+-------------------------+
+            | du2       | derivatives on 2nd elem |
+            +-----------+-------------------------+
+
+            The function handle must use these exact names for
+            the variables. Unused variable names can be omitted.
+
+        interp : dict of numpy arrays
+            The solutions that are interpolated.
+
+        intorder : (OPTIONAL) int
+            The order of polynomials for which the applied
+            quadrature rule is exact. By default,
+            2*Element.maxdeg is used.
+
+        interior : (OPTIONAL, default=False) bool
+            Whether to consider interior edges.
+
+        normals : (OPTIONAL, default=True) bool
+            You can disable normal/tangent precomputation. Possibly useful for
+            mappings that do not support normals.
+        """
         if interior:
             # evaluate norm on all interior facets
             find = self.mesh.interior_facets()
@@ -1498,7 +1553,6 @@ class AssemblerLocal(Assembler):
             intorder = 2*self.elem_u.maxdeg
 
         # check and fix parameters of form
-        oldparams = inspect.getargspec(form).args
         paramlist = ['u', 'du', 'x', 'h']
         fform = self.fillargs(form, paramlist)
 
@@ -1520,13 +1574,9 @@ class AssemblerLocal(Assembler):
             w[k] = zero
             dw[k] = const_cell(zero, dim)
             for j in range(Nbfun_u):
-                jdofs = self.dofnum_u.t_dof[j, :]
-                #phi, dphi = self.elem_u.lbasis(X, j)
                 phi, dphi = self.elem_u.gbasis(self.mapping, X, j, tind)
-                #w[k] += np.outer(interp[k][jdofs], phi)
                 w[k] += interp[k][self.dofnum_u.t_dof[j, tind], None]*phi
                 for a in range(dim):
-                    #dw[k][a] += np.outer(interp[k][jdofs], dphi[a])
                     dw[k][a] += interp[k][self.dofnum_u.t_dof[j, tind], None]*dphi[a]
 
         # compute the mesh parameter from jacobian determinant

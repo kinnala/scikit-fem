@@ -23,8 +23,7 @@ are fairly easy to add yourself.
     ElementGlobalTriPp
     ElementGlobalMorley
     ElementGlobalArgyris
-    ElementTetRT0
-    ElementTriRT0
+    ElementLocalTriRT0
     ElementLocalH1Vec
     ElementLocalQ1
     ElementLocalQ2
@@ -61,7 +60,7 @@ class ElementLocal(object):
         """Returns local basis functions evaluated at some local points."""
         raise NotImplementedError("Local basis (lbasis) not implemented!")
 
-    def gbasis(self, X, i, tind):
+    def gbasis(self, mapping, X, i, tind):
         """Returns global basis functions evaluated at some local points."""
         raise NotImplementedError("Global basis (gbasis) not implemented!")
 
@@ -449,11 +448,7 @@ class ElementLocalHdiv(ElementLocal):
 
         return u, du
 
-class ElementTetRT0(ElementLocalHdiv):
-    """Lowest order Raviart-Thomas element for tetrahedron."""
-    pass #TODO
-
-class ElementTriRT0(ElementLocalHdiv):
+class ElementLocalTriRT0(ElementLocalHdiv):
     """Lowest order Raviart-Thomas element for triangle."""
 
     maxdeg=1
