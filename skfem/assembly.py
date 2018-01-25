@@ -1214,10 +1214,7 @@ class AssemblerLocal(Assembler):
             cols = np.zeros(Nbfun_v*nt)
 
             for i in range(Nbfun_v):
-                if precompute_basis:
-                    v, dv = U[i], dU[i]
-                else:
-                    v, dv = self.elem_v.gbasis(self.mapping, X, i, tind)
+                v, dv = self.elem_v.gbasis(self.mapping, X, i, tind)
 
                 # find correct location in data,rows,cols
                 ixs = slice(nt*i, nt*(i+1))

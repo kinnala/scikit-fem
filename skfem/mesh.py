@@ -717,11 +717,9 @@ class MeshTet(Mesh):
                                             axis=0)))
 
         # unique edges
-        tmp = np.ascontiguousarray(self.edges.T)
-        _, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]),
-                                  return_index=True, return_inverse=True)
-        self.edges = self.edges[:, ixa]
+        self.edges, ixa, ixb = np.unique(self.edges, axis=1, return_index=True, return_inverse=True)
         self.edges = np.ascontiguousarray(self.edges)
+
         self.t2e = ixb.reshape((6, self.t.shape[1]))
 
         # define facets
@@ -740,11 +738,9 @@ class MeshTet(Mesh):
                                                  axis=0)))
 
             # unique facets
-            tmp = np.ascontiguousarray(self.facets.T)
-            tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]),
-                                      return_index=True, return_inverse=True)
-            self.facets = self.facets[:, ixa]
+            self.facets, ixa, ixb = np.unique(self.facets, axis=1, return_index=True, return_inverse=True)
             self.facets = np.ascontiguousarray(self.facets)
+
             self.t2f = ixb.reshape((4, self.t.shape[1]))
 
             # build facet-to-tetra mapping: 2 (tets) x Nfacets
