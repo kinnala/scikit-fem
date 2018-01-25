@@ -945,6 +945,14 @@ class MeshTet(Mesh):
         from pyevtk.hl import unstructuredGridToVTK
         from pyevtk.vtk import VtkTetra
 
+        if pointData is not None:
+            if type(pointData) != dict:
+                pointData = {'0':pointData}
+
+        if cellData is not None:
+            if type(cellData) != dict:
+                cellData = {'0':cellData}
+
         offset = (np.arange(self.t.shape[1])+1)*4
         ctypes = np.zeros(self.t.shape[1]) + VtkTetra.tid
         unstructuredGridToVTK(filename, self.p[0, :], self.p[1, :], self.p[2, :], connectivity=self.t.flatten('F'),

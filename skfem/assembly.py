@@ -893,7 +893,9 @@ class AssemblerLocalMortar(Assembler):
         n = self.mapping1.normals(Y1, tind1, find1, self.mesh1.t2f)
 
         # compute the mesh parameter from jacobian determinant
-        h = np.abs(detDG)**(1.0/(self.mesh1.dim() - 1.0))
+        h = {}
+        h[0] = np.abs(self.mapping1.detDF(X, tind=tind1))**(1.0/self.mesh1.dim())
+        h[1] = np.abs(self.mapping2.detDF(X, tind=tind2))**(1.0/self.mesh2.dim())
 
         # initialize sparse matrix structures
         ndata = Nbfun1*Nbfun2*ne
@@ -1004,13 +1006,13 @@ class AssemblerLocal(Assembler):
             self.elem_v = elem_v
             self.dofnum_v = Dofnum(mesh, elem_v)
 
-    def iasm(self, form, intorder=None, tind=None, interp=None, precompute_basis=False):
+    def iasm(self, form, intorder=None, tind=None, interp=None):
         """Return a matrix related to a bilinear or linear form
         where the integral is over the interior of the domain.
 
         Parameters
         ----------
-        form : function handle
+        form : function handle OR string
             The bilinear or linear form function handle.
             The supported parameters can be found in the
             following table.
@@ -1066,6 +1068,12 @@ class AssemblerLocal(Assembler):
             The linear forms are automatically detected to be
             non-bilinear through the omission of u or du.
 
+            If bilinear form is string, then uses Numexpr to
+            compile the expression. Examples of valid strings:
+            ::
+
+                'sum((ux*vx + uy*vx + uz*vz)*dx, axis=1)'
+
         intorder : (OPTIONAL) int
             The order of polynomials for which the applied
             quadrature rule is exact. By default,
@@ -1083,11 +1091,6 @@ class AssemblerLocal(Assembler):
         tind : (OPTIONAL) numpy array
             The indices of elements that are integrated over.
             By default, all elements of the mesh are included.
-
-        precompute_basis : (OPTIONAL, default: False) boolean
-            This will usually make assembly faster but requires
-            more memory (approximately no-basis-functions/2
-            times more memory).
         """
         if tind is None:
             # assemble on all elements by default
@@ -1098,14 +1101,18 @@ class AssemblerLocal(Assembler):
             intorder = self.elem_u.maxdeg + self.elem_v.maxdeg
 
         # check and fix parameters of form
-        oldparams = inspect.getargspec(form).args
-        if 'u' in oldparams or 'du' in oldparams:
-            paramlist = ['u', 'v', 'du', 'dv', 'x', 'w', 'h']
+        if isinstance(form, str):
+            fform = 'sum((' + form + ')*dx, axis=1)'
             bilinear = True
         else:
-            paramlist = ['v', 'dv', 'x', 'w', 'h']
-            bilinear = False
-        fform = self.fillargs(form, paramlist)
+            oldparams = inspect.getargspec(form).args
+            if 'u' in oldparams or 'du' in oldparams:
+                paramlist = ['u', 'v', 'du', 'dv', 'x', 'w', 'h']
+                bilinear = True
+            else:
+                paramlist = ['v', 'dv', 'x', 'w', 'h']
+                bilinear = False
+            fform = self.fillargs(form, paramlist)
 
         # quadrature points and weights
         X, W = get_quadrature(self.mesh.refdom, intorder)
@@ -1135,11 +1142,6 @@ class AssemblerLocal(Assembler):
         h = np.abs(detDF)**(1.0/self.mesh.dim())
         absdetDF = np.abs(detDF)
 
-        if precompute_basis:
-            U, dU = {}, {}
-            for j in range(Nbfun_u):
-                U[j], dU[j] = self.elem_u.gbasis(self.mapping, X, j, tind)
-
         # bilinear form
         if bilinear:
             # initialize sparse matrix structures
@@ -1147,25 +1149,60 @@ class AssemblerLocal(Assembler):
             rows = np.zeros(Nbfun_u*Nbfun_v*nt)
             cols = np.zeros(Nbfun_u*Nbfun_v*nt)
 
-            for j in range(Nbfun_u):
-                if precompute_basis:
-                    u, du = U[j], dU[j]
-                else:
+            if not isinstance(form, str):
+                for j in range(Nbfun_u):
                     u, du = self.elem_u.gbasis(self.mapping, X, j, tind)
-                for i in range(Nbfun_v):
-                    if precompute_basis:
-                        v, dv = U[i], dU[i]
-                    else:
+                    for i in range(Nbfun_v):
                         v, dv = self.elem_v.gbasis(self.mapping, X, i, tind)
 
-                    # find correct location in data,rows,cols
-                    ixs = slice(nt*(Nbfun_v*j+i), nt*(Nbfun_v*j+i+1))
+                        # find correct location in data,rows,cols
+                        ixs = slice(nt*(Nbfun_v*j+i), nt*(Nbfun_v*j+i+1))
 
-                    # compute entries of local stiffness matrices
-                    data[ixs] = np.dot(fform(u, v, du, dv, x, w, h)
-                                       * absdetDF, W)
-                    rows[ixs] = self.dofnum_v.t_dof[i, tind]
-                    cols[ixs] = self.dofnum_u.t_dof[j, tind]
+                        # compute entries of local stiffness matrices
+                        data[ixs] = np.dot(fform(u, v, du, dv, x, w, h)
+                                           * absdetDF, W)
+                        rows[ixs] = self.dofnum_v.t_dof[i, tind]
+                        cols[ixs] = self.dofnum_u.t_dof[j, tind]
+            else:
+                import numexpr as ne
+
+                U, dU = {}, {}
+                for j in range(Nbfun_u):
+                    U[j], dU[j] = self.elem_u.gbasis(self.mapping, X, j, tind)
+
+                dx = absdetDF * np.tile(W, (len(tind), 1))
+
+                for j in range(Nbfun_u):
+                    for i in range(Nbfun_v):
+                        # find correct location in data,rows,cols
+                        ixs = slice(nt * (Nbfun_v * j + i), nt * (Nbfun_v * j + i + 1))
+
+                        inputs = {
+                            'u': U[j],
+                            'v': U[i],
+                            'ux': dU[j][0],
+                            'vx': dU[i][0],
+                            'uy': dU[j][1],
+                            'vy': dU[i][1],
+                            'x': x[0],
+                            'y': x[1],
+                            'h': h,
+                            'dx': dx,
+                        }
+                        if self.elem_u.dim == 3:
+                            inputs['uz'] = dU[j][2]
+                            inputs['vz'] = dU[i][2]
+                            inputs['z'] = x[2]
+                        if interp is not None:
+                            for k in interp:
+                                inputs['w'+str(k)] = w[k]
+
+                        if j==0 and i==0:
+                            data[ixs] = ne.evaluate(fform, inputs)
+                        else:
+                            data[ixs] = ne.re_evaluate(inputs)
+                        rows[ixs] = self.dofnum_v.t_dof[i, tind]
+                        cols[ixs] = self.dofnum_u.t_dof[j, tind]
 
             return coo_matrix((data, (rows, cols)),
                               shape=(self.dofnum_v.N, self.dofnum_u.N)).tocsr()
