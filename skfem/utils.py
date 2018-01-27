@@ -135,9 +135,7 @@ def cg(A, b, tol, maxiter, x0=None, D=None, I=None, pc=None, verbose=True, viewi
                        tol=tol, callback=callback)
 
     if verbose:
-        if u[1] == 0:
-            print("* Achieved tolerance " + str(tol) + ".")
-        elif u[1] > 0:
+        if u[1] > 0:
             print("* WARNING! Maximum number of iterations "\
                   + str(maxiter) + " reached.")
 
@@ -148,6 +146,9 @@ def cg(A, b, tol, maxiter, x0=None, D=None, I=None, pc=None, verbose=True, viewi
         U[I] = u[0]
         return U
 
-def adaptive_theta(est, theta=0.5):
-    return np.nonzero(theta*np.max(est) < est)[0]
+def adaptive_theta(est, theta=0.5, max=None):
+    if max is None:
+        return np.nonzero(theta*np.max(est) < est)[0]
+    else:
+        return np.nonzero(theta*max < est)[0]
 
