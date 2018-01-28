@@ -1063,7 +1063,7 @@ class AssemblerExpr(Assembler):
         self.u = np.empty((self.Nbfun_u, nt, len(W)))
         self.du = np.empty((self.Nbfun_u, dim, nt, len(W)))
         for j in range(self.Nbfun_u):
-            self.u[j, :, :], du = self.elem_u.gbasis(self.mapping, X, j, tind)
+            self.u[j, :, :], du = self.elem_u.gbasis(self.mapping, X, j)
             for i in range(dim):
                 self.du[j, i, :, :] = du[i]
 
@@ -1071,16 +1071,16 @@ class AssemblerExpr(Assembler):
             self.v = np.empty((self.Nbfun_v, nt, len(W)))
             self.dv = np.empty((self.Nbfun_v, dim, nt, len(W)))
             for j in range(self.Nbfun_v):
-                self.v[j, :, :], dv = self.elem_v.gbasis(self.mapping, X, j, tind)
+                self.v[j, :, :], dv = self.elem_v.gbasis(self.mapping, X, j)
                 for i in range(dim):
                     self.dv[j, i, :, :] = dv[i]
 
-        x = self.mapping.F(X, tind)
+        x = self.mapping.F(X)
         self.x = np.empty((dim, nt, len(W)))
         for i in range(dim):
             self.x[i] = x[i]
 
-        self.detDF = self.mapping.detDF(X, tind)
+        self.detDF = self.mapping.detDF(X)
         self.h = np.abs(self.detDF) ** (1.0 / self.mesh.dim())
 
         self.W = W
@@ -1088,6 +1088,7 @@ class AssemblerExpr(Assembler):
         self.tind = tind
 
     def interpolate(self, w, derivative=False):
+        """"""
         wex = np.zeros((nt, len(W)))
         if derivative:
             dwex = np.zeros((dim, nt, len(W)))
@@ -1108,14 +1109,29 @@ class AssemblerExpr(Assembler):
         """
         Interior assembly using kernel function.
 
-        Example:
+        Parameters
+        ----------
+        kernel : function handle
+            See Examples.
+        w : ndarray
+            An array of ndarrays of size Nelems x Nqp.
+        nthreads : (OPTIONAL, default=1) int
+            Number of threads to use in assembly. This is only
+            useful if kernel is numba function compiled with
+            nogil = True.
 
-        def assemble(A, u, du, v, dv, w, dx):
-            for j in range(u.shape[0]):
-              for i in range(v.shape[0]):
-                 A[i, j, :] = np.sum((du[j][0] * dv[i][0] +\
-                                      du[j][1] * dv[i][1] +\
-                                      du[j][2] * dv[i][2]) * dx, axis=1)
+        Examples
+        --------
+
+        from numba import njit
+
+        @njit(nogil=True)
+        def assemble(A, ix, u, du, v, dv, w, dx):
+            for k in range(ix.shape[0]):
+                i, j = ix[k]
+                A[i, j] = np.sum((du[j][0] * dv[i][0] +\
+                                  du[j][1] * dv[i][1] +\
+                                  du[j][2] * dv[i][2]) * dx, axis=1)
         """
         import threading
         from itertools import product

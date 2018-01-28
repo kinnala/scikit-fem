@@ -478,39 +478,41 @@ class ElementLocalTriRT0(ElementLocalHdiv):
 class ElementLocalH1(ElementLocal):
     """Abstract :math:`H^1` conforming finite element."""
 
-    def gbasis(self,mapping,X,i,tind):
-        if isinstance(X,dict):
-            [phi,dphi]=self.lbasis(X,i)
-            u=phi
-            du={}
+    def gbasis(self, mapping, X, i, tind=None):
+        if isinstance(X, dict):
+            [phi, dphi] = self.lbasis(X, i)
+            u = phi
+            du = {}
         else:
-            x={}
-            x[0]=X[0,:]
-            if mapping.dim>=2:
-                x[1]=X[1,:]
-            if mapping.dim>=3:
-                x[2]=X[2,:]
-            [phi,dphi]=self.lbasis(x,i)
-            u=np.tile(phi,(len(tind),1))
-            du={}
-            
-        invDF=mapping.invDF(X,tind) # investigate if 'x' should used after else
+            x = {}
+            x[0] = X[0, :]
+            if mapping.dim >= 2:
+                x[1] = X[1, :]
+            if mapping.dim >= 3:
+                x[2] = X[2, :]
+            [phi, dphi] = self.lbasis(x, i)
+            du = {}
 
-        self.dim=mapping.dim
+        invDF = mapping.invDF(X, tind)  # investigate if 'x' should used after else
 
-        if mapping.dim==1:
-            du=np.outer(invDF,dphi)
-        elif mapping.dim==2:
-            du[0]=invDF[0][0]*dphi[0]+invDF[1][0]*dphi[1]
-            du[1]=invDF[0][1]*dphi[0]+invDF[1][1]*dphi[1]
-        elif mapping.dim==3:
-            du[0]=invDF[0][0]*dphi[0]+invDF[1][0]*dphi[1]+invDF[2][0]*dphi[2]
-            du[1]=invDF[0][1]*dphi[0]+invDF[1][1]*dphi[1]+invDF[2][1]*dphi[2]
-            du[2]=invDF[0][2]*dphi[0]+invDF[1][2]*dphi[1]+invDF[2][2]*dphi[2]
+        self.dim = mapping.dim
+
+        if mapping.dim == 1:
+            u = np.tile(phi, (len(invDF), 1))
+            du = np.outer(invDF, dphi)
+        elif mapping.dim == 2:
+            u = np.tile(phi, (len(invDF[0][0]), 1))
+            du[0] = invDF[0][0] * dphi[0] + invDF[1][0] * dphi[1]
+            du[1] = invDF[0][1] * dphi[0] + invDF[1][1] * dphi[1]
+        elif mapping.dim == 3:
+            u = np.tile(phi, (len(invDF[0][0]), 1))
+            du[0] = invDF[0][0] * dphi[0] + invDF[1][0] * dphi[1] + invDF[2][0] * dphi[2]
+            du[1] = invDF[0][1] * dphi[0] + invDF[1][1] * dphi[1] + invDF[2][1] * dphi[2]
+            du[2] = invDF[0][2] * dphi[0] + invDF[1][2] * dphi[1] + invDF[2][2] * dphi[2]
         else:
             raise NotImplementedError("ElementH1.gbasis: not implemented for the given dim.")
 
-        return u,du
+        return u, du
 
 class ElementLocalH1Vec(ElementLocalH1):
     """Convert :math:`H^1` element to vectorial :math:`H^1` element."""
