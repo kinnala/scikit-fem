@@ -840,7 +840,7 @@ class AssemblerLocalMortar(Assembler):
             self.elem2 = elem2
             self.dofnum2 = Dofnum(mesh2, elem2)
 
-    def fnorm(self, form, interp, intorder=None):
+    def fnorm(self, form, interp1, interp2, intorder=None):
         """Interface norm evaluator. For a posteriori etc."""
 
         find1 = self.mortar.f2t[0, :]
@@ -851,7 +851,7 @@ class AssemblerLocalMortar(Assembler):
 
         # fix parameters of form
         paramlist = ['u1', 'u2', 'du1', 'du2',
-                     'x', 'h', 'n']
+                     'x', 'n', 'h']
         fform = self.fillargs(form, paramlist)
 
         X, W = get_quadrature(self.mesh1.brefdom, intorder)
@@ -883,27 +883,34 @@ class AssemblerLocalMortar(Assembler):
         w1, w2 = {}, {}
         dw1, dw2 = {}, {}
 
-        if not isinstance(interp, dict):
+        dim = self.mesh1.dim()
+
+        if not isinstance(interp1, dict):
             raise Exception("The input solution vector(s) must be in a "
                             "dictionary! Pass e.g. {0:u} instead of u.")
-        for k in interp:
+        if not isinstance(interp2, dict):
+            raise Exception("The input solution vector(s) must be in a "
+                            "dictionary! Pass e.g. {0:u} instead of u.")
+        for k in interp1:
             w1[k] = 0.0 * x[0]
             dw1[k] = const_cell(0.0 * x[0], dim)
+            for j in range(Nbfun1):
+                phi1, dphi1 = self.elem1.gbasis(self.mapping1, Y1, j, tind1)
+                w1[k] += interp1[k][self.dofnum1.t_dof[j, tind1], None] * phi1
+                for a in range(dim):
+                    dw1[k][a] += interp1[k][self.dofnum1.t_dof[j, tind1], None] * dphi1[a]
+
+        for k in interp2:
             w2[k] = 0.0 * x[0]
             dw2[k] = const_cell(0.0 * x[0], dim)
-            for j in range(Nbfun_u):
-                phi1, dphi1 = self.elem_u.gbasis(self.mapping, Y1, j, tind1)
-                phi2, dphi2 = self.elem_u.gbasis(self.mapping, Y2, j, tind2)
-                w1[k] += interp[k][self.dofnum_u.t_dof[j, tind1], None] * phi1
-                w2[k] += interp[k][self.dofnum_u.t_dof[j, tind2], None] * phi2
+            for j in range(Nbfun2):
+                phi2, dphi2 = self.elem2.gbasis(self.mapping2, Y2, j, tind2)
+                w2[k] += interp2[k][self.dofnum2.t_dof[j, tind2], None] * phi2
                 for a in range(dim):
-                    dw1[k][a] += interp[k][self.dofnum_u.t_dof[j, tind1], None] * dphi1[a]
-                    dw2[k][a] += interp[k][self.dofnum_u.t_dof[j, tind2], None] * dphi2[a]
-
-        h = np.abs(detDG) ** (1.0 / (self.mesh.dim() - 1.0))
+                    dw2[k][a] += interp2[k][self.dofnum2.t_dof[j, tind2], None] * dphi2[a]
 
         return np.dot(fform(w1, w2, dw1, dw2,
-                            x, n, t, h) ** 2 * np.abs(detDG), W), find1, find2
+                            x, n, h) ** 2 * np.abs(detDG), W), find1, find2
 
     def fasm(self, form, find=None, intorder=None):
         """Facet assembly."""

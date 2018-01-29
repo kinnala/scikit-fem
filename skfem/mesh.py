@@ -8,7 +8,7 @@ Currently implemented mesh types are
     * :class:`skfem.mesh.MeshTet`, a tetrahedral mesh
     * :class:`skfem.mesh.MeshQuad`, a mesh consisting of quadrilaterals
     * :class:`skfem.mesh.MeshLine`, one-dimensional mesh
-    * :class:`skfem.mesh.MeshLineMortar`, interface mesh between two 2D meshes
+    * (experimental) :class:`skfem.mesh.MeshLineMortar`, interface mesh between two 2D meshes
 
 Examples
 --------
@@ -22,6 +22,13 @@ Obtain a three times refined mesh of the unit square and draw it.
     m.refine(3)
     m.draw()
     m.show()
+
+Read a mesh generated using Gmsh.
+
+.. code-block:: python
+
+    from skfem.extern_sfepy import read_gmsh
+    m = read_gmsh('cylinder.msh')
 
 """
 import matplotlib.pyplot as plt

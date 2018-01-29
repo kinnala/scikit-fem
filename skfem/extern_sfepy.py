@@ -224,9 +224,6 @@ def read_gmsh(filename):
         p = coors[:, 1:].T
         t = conns0[0].T
 
-        if nm.sum(p[2, :]) < 1e-10:
-            p = p[0:2, :]
-
         tmp = nm.ascontiguousarray(p.T)
         tmp, ixa, ixb = nm.unique(tmp.view([('', tmp.dtype)]*tmp.shape[1]), return_index=True, return_inverse=True)
         p = p[:, ixa]
@@ -235,12 +232,10 @@ def read_gmsh(filename):
         p = nm.ascontiguousarray(p)
         t = nm.ascontiguousarray(t)
 
-        if t.shape[0] == 3 and p.shape[0] == 2:
-            return MeshTri(p, t)
-        elif t.shape[0] == 4 and p.shape[0] == 3:
+        if t.shape[0] == 3:
+            return MeshTri(p[0:2, :], t)
+        elif t.shape[0] == 4:
             return MeshTet(p, t)
-        elif t.shape[0] == 4 and p.shape[0] == 2:
-            return MeshQuad(p, t)
         else:
             raise Exception("mesh type not supported")
 
