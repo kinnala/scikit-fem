@@ -291,7 +291,7 @@ class Mesh2D(Mesh):
             ys.append(t)
             ys.append(v)
             ys.append(None)
-        ax.plot(xs, ys, 'k')
+        ax.plot(xs, ys, 'k', linewidth='0.5')
 
         if node_numbering:
             for itr in range(self.p.shape[1]):
@@ -361,7 +361,7 @@ class MeshLineMortar(Mesh):
 
         # mappings from facets to the original triangles
         # TODO vectorize
-        self.f2t = self.facets*0-1
+        self.f2f = self.facets*0-1
         for itr in range(self.facets.shape[1]):
             mx = .5*(self.p[0, self.facets[0, itr]] + self.p[0, self.facets[1, itr]])
             my = .5*(self.p[1, self.facets[0, itr]] + self.p[1, self.facets[1, itr]])
@@ -376,13 +376,29 @@ class MeshLineMortar(Mesh):
                 if rule(x1, y1) > 0 or rule(x2, y2) > 0:
                     if val > param(x1, y1) and val < param(x2, y2):
                         # OK
-                        self.f2t[0, itr] = jtr
+                        self.f2f[0, itr] = jtr
                         break
-                    elif val < param(x1, y1) and val > param(x2, y2):
+                    elif val < param(x1, y1) and val > param(x2, y2): # ye olde
                         # OK
-                        self.f2t[0, itr] = jtr
+                        self.f2f[0, itr] = jtr
                         break
-            for jtr in mesh2.boundary_facets():  
+                    elif val >= param(x1, y1) and val < param(x2, y2):
+                        # OK
+                        self.f2f[0, itr] = jtr
+                        break
+                    elif val > param(x1, y1) and val <= param(x2, y2):
+                        # OK
+                        self.f2f[0, itr] = jtr
+                        break
+                    elif val <= param(x1, y1) and val > param(x2, y2):
+                        # OK
+                        self.f2f[0, itr] = jtr
+                        break
+                    elif val < param(x1, y1) and val >= param(x2, y2):
+                        # OK
+                        self.f2f[0, itr] = jtr
+                        break
+            for jtr in mesh2.boundary_facets():
                 fix1 = mesh2.facets[0, jtr]
                 x1 = mesh2.p[0, fix1]
                 y1 = mesh2.p[1, fix1]
@@ -392,15 +408,32 @@ class MeshLineMortar(Mesh):
                 if rule(x1, y1) > 0 or rule(x2, y2) > 0:
                     if val > param(x1, y1) and val < param(x2, y2):
                         # OK
-                        self.f2t[1, itr] = jtr
+                        self.f2f[1, itr] = jtr
                         break
                     elif val < param(x1, y1) and val > param(x2, y2):
                         # OK
-                        self.f2t[1, itr] = jtr
+                        self.f2f[1, itr] = jtr
                         break
-        if (self.f2t>-1).all():
+                    elif val >= param(x1, y1) and val < param(x2, y2):
+                        # OK
+                        self.f2f[1, itr] = jtr
+                        break
+                    elif val > param(x1, y1) and val <= param(x2, y2):
+                        # OK
+                        self.f2f[1, itr] = jtr
+                        break
+                    elif val <= param(x1, y1) and val > param(x2, y2):
+                        # OK
+                        self.f2f[1, itr] = jtr
+                        break
+                    elif val < param(x1, y1) and val >= param(x2, y2):
+                        # OK
+                        self.f2f[1, itr] = jtr
+                        break
+        if (self.f2f>-1).all():
             return
         else:
+            print(self.f2f)
             raise Exception("All mesh facets corresponding to mortar facets not found!")
 
     def draw(self, color='ro-'):

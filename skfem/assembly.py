@@ -30,6 +30,20 @@ the Poisson problem using the piecewise linear elements.
         return du[0]*dv[0] + du[1]*dv[1]
 
     K = a.iasm(bilinear_form)
+
+Assemble a predefined bilinear form.
+
+.. code-block:: python
+
+    from skfem import *
+    from skfem.weakforms import *
+        
+    m = MeshQuad()
+    m.refine(3)
+    e = ElementLocalH1Vec(ElementLocalQ1())
+    a = AssemblerLocal(m, e)
+
+    K = a.iasm(elasticity_plane_strain(100, 50))
 """
 import numpy as np
 import inspect
@@ -840,11 +854,11 @@ class AssemblerLocalMortar(Assembler):
             self.elem2 = elem2
             self.dofnum2 = Dofnum(mesh2, elem2)
 
-    def fnorm(self, form, interp1, interp2, intorder=None):
+    def fnorm(self, form, interp1, interp2, intorder=None, return_tinds=False):
         """Interface norm evaluator. For a posteriori etc."""
 
-        find1 = self.mortar.f2t[0, :]
-        find2 = self.mortar.f2t[1, :]
+        find1 = self.mortar.f2f[0, :]
+        find2 = self.mortar.f2f[1, :]
 
         if intorder is None:
             intorder = self.elem1.maxdeg + self.elem2.maxdeg
@@ -909,14 +923,18 @@ class AssemblerLocalMortar(Assembler):
                 for a in range(dim):
                     dw2[k][a] += interp2[k][self.dofnum2.t_dof[j, tind2], None] * dphi2[a]
 
-        return np.dot(fform(w1, w2, dw1, dw2,
-                            x, n, h) ** 2 * np.abs(detDG), W), find1, find2
+        if return_tinds:
+            return np.dot(fform(w1, w2, dw1, dw2,
+                                x, n, h) ** 2 * np.abs(detDG), W), tind1, tind2
+        else:
+            return np.dot(fform(w1, w2, dw1, dw2,
+                                x, n, h) ** 2 * np.abs(detDG), W), find1, find2
 
     def fasm(self, form, find=None, intorder=None):
         """Facet assembly."""
 
-        find1 = self.mortar.f2t[0, :]
-        find2 = self.mortar.f2t[1, :]
+        find1 = self.mortar.f2f[0, :]
+        find2 = self.mortar.f2f[1, :]
 
         if intorder is None:
             intorder = self.elem1.maxdeg + self.elem2.maxdeg
