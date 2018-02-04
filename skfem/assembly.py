@@ -1037,19 +1037,39 @@ class AssemblerLocalMortar(Assembler):
         return coo_matrix((data, (rows, cols)),
                           shape=(self.dofnum1.N + self.dofnum2.N, self.dofnum1.N + self.dofnum2.N)).tocsr()
 
-class AssemblerExpr(Assembler):
+def set_bilinear(form):
+    form.bilinear = True
+    return form
+
+def set_linear(form):
+    form.bilinear = False
+    return form
+
+def bilinear_form(form):
+    """Bilinear form decorator"""
+    @set_bilinear
+    def kernel(A, ix, u, du, v, dv, w, dx):
+        for k in range(ix.shape[0]):
+            i, j = ix[k]
+            A[i, j] = np.sum(form(u[j], du[j], v[i], dv[i], w) * dx, axis=1)
+    return kernel
+
+def linear_form(form):
+    """Linear form decorator"""
+    @set_linear
+    def kernel(b, ix, v, dv, w, dx):
+        for i in ix:
+            b[i] = np.sum(form(v[i], dv[i], w) * dx, axis=1)
+    kernel.bilinear = False
+    return kernel
+
+class AssemblerGeneric(Assembler):
     """Experimental local assembler with some optimizations."""
     def __init__(self, mesh, elem_u, elem_v=None, mapping=None, intorder=None):
-        if not isinstance(mesh, skfem.mesh.Mesh):
-            raise Exception("First parameter must be an instance of "
-                            "skfem.mesh.Mesh!")
-        if not isinstance(elem_u, skfem.element.ElementLocal):
-            raise Exception("Second parameter must be an instance of "
-                            "skfem.element.ElementLocal!")
-
         # get default mapping from the mesh
         if mapping is None:
-            self.mapping = mesh.mapping()
+            from skfem.mapping import MappingAffineGeneric
+            self.mapping = MappingAffineGeneric(mesh)
         else:
             self.mapping = mapping  # assumes an already initialized mapping
 
@@ -1059,6 +1079,8 @@ class AssemblerExpr(Assembler):
 
         # duplicate test function element type if None is given
         if elem_v is None:
+            self.elem_v = elem_u
+            self.dofnum_v = self.dofnum_u
             self.SYMMETRIC_ELEMS = True
         else:
             self.elem_v = elem_v
@@ -1073,17 +1095,13 @@ class AssemblerExpr(Assembler):
 
         if intorder is None:
             # compute the maximum polynomial degree from elements
-            if not self.SYMMETRIC_ELEMS:
-                intorder = self.elem_u.maxdeg + self.elem_v.maxdeg
-            else:
-                intorder = 2*self.elem_u.maxdeg
+            intorder = self.elem_u.maxdeg + self.elem_v.maxdeg
 
         # quadrature points and weights
         X, W = get_quadrature(self.mesh.refdom, intorder)
 
         dim = self.mesh.p.shape[0]
         nt = self.mesh.t.shape[1]
-        tind = range(nt)
 
         self.u = np.empty((self.Nbfun_u, nt, len(W)))
         self.du = np.empty((self.Nbfun_u, dim, nt, len(W)))
@@ -1092,7 +1110,10 @@ class AssemblerExpr(Assembler):
             for i in range(dim):
                 self.du[j, i, :, :] = du[i]
 
-        if not self.SYMMETRIC_ELEMS:
+        if self.SYMMETRIC_ELEMS:
+            self.v = self.u
+            self.dv = self.du
+        else:
             self.v = np.empty((self.Nbfun_v, nt, len(W)))
             self.dv = np.empty((self.Nbfun_v, dim, nt, len(W)))
             for j in range(self.Nbfun_v):
@@ -1100,35 +1121,49 @@ class AssemblerExpr(Assembler):
                 for i in range(dim):
                     self.dv[j, i, :, :] = dv[i]
 
-        x = self.mapping.F(X)
-        self.x = np.empty((dim, nt, len(W)))
-        for i in range(dim):
-            self.x[i] = x[i]
-
         self.detDF = self.mapping.detDF(X)
-        self.h = np.abs(self.detDF) ** (1.0 / self.mesh.dim())
+        self.dx = np.abs(self.detDF) * np.tile(W, (nt, 1))
 
-        self.W = W
+    def global_coordinates(self):
+        return self.mapping.F(X)
 
-        self.tind = tind
+    def mesh_parameters(self):
+        return np.abs(self.detDF) ** (1.0 / self.mesh.dim())
 
     def interpolate(self, w, derivative=False):
-        """"""
-        wex = np.zeros((nt, len(W)))
-        if derivative:
-            dwex = np.zeros((dim, nt, len(W)))
+        """
+        Interpolate a solution vector to quadrature points.
+
+        Parameters
+        ----------
+        w : ndarray of size Ndofs
+            A solution vector
+        derivative : (OPTIONAL, default=False) bool
+            Return also the derivative
+
+        Returns
+        -------
+        ndarray of size Nelems x Nqp
+            Interpolated solution vector
+        """
+        dim = self.mesh.p.shape[0]
+        nt = self.mesh.t.shape[1]
+        nqp = self.dx.shape[1]
+
+        W = np.zeros((nt, nqp))
         for j in range(self.Nbfun_u):
             jdofs = self.dofnum_u.t_dof[j, :]
-            wex += w[k][jdofs][:, None] \
-                            * self.u[j]
-            if derivative:
-                for a in range(dim):
-                    dwex[a, :, :] += w[k][jdofs][:, None] \
-                                     * self.du[j][a]
+            W += w[k][jdofs][:, None] \
+                 * self.u[j]
         if derivative:
-            return wex, dwex
-        else:
-            return wex
+            dW = np.zeros((dim, nt, nqp))
+            for j in range(self.Nbfun_u):
+                jdofs = self.dofnum_u.t_dof[j, :]
+                for a in range(dim):
+                    dW[a, :, :] += w[k][jdofs][:, None] \
+                                     * self.du[j][a]
+            return W, dW
+        return W
 
     def iasm(self, kernel, w=np.array([]), nthreads=1):
         """
@@ -1148,8 +1183,11 @@ class AssemblerExpr(Assembler):
         Examples
         --------
 
+        Creating multithreadable kernel function.
+
         from numba import njit
 
+        @set_bilinear
         @njit(nogil=True)
         def assemble(A, ix, u, du, v, dv, w, dx):
             for k in range(ix.shape[0]):
@@ -1161,52 +1199,55 @@ class AssemblerExpr(Assembler):
         import threading
         from itertools import product
 
-        W = self.W
-        nt = len(self.tind)
-        tind = self.tind
+        nt = self.mesh.t.shape[1]
 
-        # compute the mesh parameter from jacobian determinant
-        absdetDF = np.abs(self.detDF)
-        dx = absdetDF * np.tile(W, (len(tind), 1))
+        if kernel.bilinear:
+            # initialize COO data structures
+            data = np.zeros((self.Nbfun_u, self.Nbfun_v, nt))
+            rows = np.zeros(self.Nbfun_u * self.Nbfun_v * nt)
+            cols = np.zeros(self.Nbfun_u * self.Nbfun_v * nt)
 
-        data = np.zeros((self.Nbfun_u, self.Nbfun_v, nt))
-        rows = np.zeros(self.Nbfun_u * self.Nbfun_v * nt)
-        cols = np.zeros(self.Nbfun_u * self.Nbfun_v * nt)
-
-        if self.SYMMETRIC_ELEMS:
+            # create sparse matrix indexing
             for j in range(self.u.shape[0]):
-                for i in range(self.u.shape[0]):
+                for i in range(self.v.shape[0]):
                     # find correct location in data,rows,cols
                     ixs = slice(nt * (self.Nbfun_v * j + i), nt * (self.Nbfun_v * j + i + 1))
-                    rows[ixs] = self.dofnum_u.t_dof[i, :]
+                    rows[ixs] = self.dofnum_v.t_dof[i, :]
                     cols[ixs] = self.dofnum_u.t_dof[j, :]
 
-            ixs = [i for i, j in product(range(self.u.shape[0]), range(self.u.shape[0]))]
+            # create indices for linear loop over local stiffness matrix
+            ixs = [i for i, j in product(range(self.v.shape[0]), range(self.v.shape[0]))]
             jxs = [j for i, j in product(range(self.u.shape[0]), range(self.u.shape[0]))]
             indices = np.array([ixs, jxs]).T
 
-            threads = [threading.Thread(target=kernel, args=(data, ij, self.u, self.du, self.u, self.du, w, dx)) for ij in np.array_split(indices, nthreads, axis=0)]
+            # split local stiffness matrix elements to threads
+            threads = [threading.Thread(target=kernel, args=(data, ij, self.u, self.du, self.v, self.dv, w, self.dx)) for ij
+                       in np.array_split(indices, nthreads, axis=0)]
 
+            # start threads and wait for finishing
             for t in threads:
                 t.start()
             for t in threads:
                 t.join()
 
-            return coo_matrix((data.flatten('C'), (rows, cols)),
-                              shape=(self.dofnum_u.N, self.dofnum_u.N)).tocsr()
+            K = coo_matrix((data.flatten('C'), (rows, cols)),
+                              shape=(self.dofnum_v.N, self.dofnum_u.N))
+            K.eliminate_zeros()
+            return K.tocsr()
         else:
-            for j in range(self.u.shape[0]):
-                for i in range(self.v.shape[0]):
-                    # find correct location in data,rows,cols
-                    ixs = slice(nt * (self.Nbfun_v * j + i), nt * (self.Nbfun_v * j + i + 1))
-                    rows[ixs] = self.dofnum_v.t_dof[i, tind]
-                    cols[ixs] = self.dofnum_u.t_dof[j, tind]
+            data = np.zeros((self.Nbfun_v, nt))
+            rows = np.zeros(self.Nbfun_v * nt)
+            cols = np.zeros(self.Nbfun_v * nt)
 
-            ixs = [i for i, j in product(range(self.v.shape[0]), range(self.v.shape[0]))]
-            jxs = [j for i, j in product(range(self.u.shape[0]), range(self.u.shape[0]))]
-            indices = np.array([ixs, jxs]).T
+            for i in range(self.Nbfun_v):
+                # find correct location in data,rows,cols
+                ixs = slice(nt * i, nt * (i + 1))
+                rows[ixs] = self.dofnum_v.t_dof[i, :]
+                cols[ixs] = np.zeros(nt)
 
-            threads = [threading.Thread(target=kernel, args=(data, ij, self.u, self.du, self.v, self.dv, w, dx)) for ij
+            indices = range(self.v.shape[0])
+
+            threads = [threading.Thread(target=kernel, args=(data, ix, self.v, self.dv, w, self.dx)) for ix
                        in np.array_split(indices, nthreads, axis=0)]
 
             for t in threads:
@@ -1215,7 +1256,8 @@ class AssemblerExpr(Assembler):
                 t.join()
 
             return coo_matrix((data.flatten('C'), (rows, cols)),
-                              shape=(self.dofnum_v.N, self.dofnum_u.N)).tocsr()
+                              shape=(self.dofnum_v.N, 1)).toarray().T[0]
+
 
 class AssemblerLocal(Assembler):
     """An assembler for Element classes.

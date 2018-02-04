@@ -11,37 +11,38 @@ untested code. The following mappings are implemented to some extent:
 import numpy as np
 import copy
 
+
 class Mapping:
     """Abstract class for mappings."""
-    dim=0
+    dim = 0
 
-    def __init__(self,mesh):
+    def __init__(self, mesh):
         raise NotImplementedError("Constructor not implemented!")
 
-    def F(self,X,tind):
+    def F(self, X, tind):
         """Element local to global."""
         raise NotImplementedError("F() not implemented!")
 
-    def invF(self,x,tind):
+    def invF(self, x, tind):
         raise NotImplementedError("invF() not implemented!")
 
-    def DF(self,X,tind):
+    def DF(self, X, tind):
         raise NotImplementedError("DF() not implemented!")
 
-    def invDF(self,X,tind):
+    def invDF(self, X, tind):
         raise NotImplementedError("invDF() not implemented!")
 
-    def detDF(self,X,tind):
+    def detDF(self, X, tind):
         raise NotImplementedError("detDF() not implemented!")
 
-    def G(self,X,find):
+    def G(self, X, find):
         """Boundary local to global."""
         raise NotImplementedError("G() not implemented!")
-        
-    def detDG(self,X,find):
+
+    def detDG(self, X, find):
         raise NotImplementedError("detDG() not implemented!")
 
-    def normals(self,X,find):
+    def normals(self, X, find):
         raise NotImplementedError("normals() not implemented!")
 
 class MappingQ1(Mapping):
@@ -257,6 +258,122 @@ class MappingAffineMortar(Mapping):
         else:
             detDG=self.detB[find]
         return np.tile(detDG,(X.shape[1],1)).T
+
+class MappingAffineGeneric(Mapping):
+    """A more generic version of MappingAffine without dicts."""
+    def __init__(self, mesh):
+        dim = mesh.p.shape[0]
+        nt = mesh.t.shape[1]
+
+        # initialize the affine mapping
+        self.A = np.empty((dim, dim, nt))
+        self.b = np.empty((dim, nt))
+
+        for i in range(dim):
+            self.b[i] = mesh.p[i, mesh.t[0, :]]
+            for j in range(dim):
+                self.A[i, j] = mesh.p[i, mesh.t[j+1, :]] - mesh.p[i, mesh.t[0, :]]
+
+        # determinants
+        if dim == 2:
+            self.detA = self.A[0, 0] * self.A[1, 1] - self.A[0, 1] * self.A[1, 0]
+        elif dim == 3:
+            self.detA = self.A[0, 0] * (self.A[1, 1] * self.A[2, 2] - self.A[1, 2] * self.A[2, 1]) \
+                      - self.A[0, 1] * (self.A[1, 0] * self.A[2, 2] - self.A[1, 2] * self.A[2, 0]) \
+                      + self.A[0, 2] * (self.A[1, 0] * self.A[2, 1] - self.A[1, 1] * self.A[2, 0])
+        else:
+            raise Exception("Not implemented for the given dimension.")
+
+        # affine mapping inverses
+        self.invA = np.empty((dim, dim, nt))
+        if dim == 2:
+            self.invA[0, 0] =  self.A[1, 1] / self.detA
+            self.invA[0, 1] = -self.A[0, 1] / self.detA
+            self.invA[1, 0] = -self.A[1, 0] / self.detA
+            self.invA[1, 1] =  self.A[0, 0] / self.detA
+        elif dim == 3:
+            self.invA[0, 0] = (-self.A[1, 2] * self.A[2, 1] + self.A[1, 1] * self.A[2, 2]) / self.detA
+            self.invA[1, 0] = ( self.A[1, 2] * self.A[2, 0] - self.A[1, 0] * self.A[2, 2]) / self.detA
+            self.invA[2, 0] = (-self.A[1, 1] * self.A[2, 0] + self.A[1, 0] * self.A[2, 1]) / self.detA
+            self.invA[0, 1] = ( self.A[0, 2] * self.A[2, 1] - self.A[0, 1] * self.A[2, 2]) / self.detA
+            self.invA[1, 1] = (-self.A[0, 2] * self.A[2, 0] + self.A[0, 0] * self.A[2, 2]) / self.detA
+            self.invA[2, 1] = ( self.A[0, 1] * self.A[2, 0] - self.A[0, 0] * self.A[2, 1]) / self.detA
+            self.invA[0, 2] = (-self.A[0, 2] * self.A[1, 1] + self.A[0, 1] * self.A[1, 2]) / self.detA
+            self.invA[1, 2] = ( self.A[0, 2] * self.A[1, 0] - self.A[0, 0] * self.A[1, 2]) / self.detA
+            self.invA[2, 2] = (-self.A[0, 1] * self.A[1, 0] + self.A[0, 0] * self.A[1, 1]) / self.detA
+        else:
+            raise Exception("Not implemented for the given dimension.")
+
+        self.dim = dim
+
+
+
+    def F(self, X, tind=None):
+        """
+        Perform an affine mapping from the reference element
+        to global elements.
+
+        Parameters
+        ----------
+        X : ndarray of size Ndim x Nqp
+            Local points on the reference element
+
+        tind : (OPTIONAL) ndarray
+            A set of element indices to map to
+
+        Returns
+        -------
+        ndarray of size Ndim x Nelems x Nqp
+            Global points
+        """
+        if tind is None:
+            A, b = self.A, self.b
+        else:
+            A, b = self.A[:, :, tind], self.b[:, tind]
+
+        return (np.einsum('ijk,jl', A, X).T + b.T).T
+
+    def invF(self, x, tind=None):
+        """
+        Perform an inverse affine mapping.
+
+        Parameters
+        ----------
+        x : ndarray of size Ndim x Nelems x Nqp
+            The global points
+        tind
+            A set of element indices to map from
+
+        Returns
+        -------
+        ndarray of size Ndim x Nelems x Nqp
+            The corresponding local points
+
+        """
+        if tind is None:
+            invA, b = self.invA, self.b
+        else:
+            invA, b = self.invA[:, :, tind], self.b[:, tind]
+
+        y = (x.T - b.T).T
+
+        return np.einsum('ijk,jkl->ikl', invA, y)
+
+    def detDF(self, X, tind=None):
+        if tind is None:
+            detDF = self.detA
+        else:
+            detDF = self.detA[tind]
+
+        return np.tile(detDF, (X.shape[1], 1)).T
+
+    def invDF(self, X, tind=None):
+        if tind is None:
+            invDF = self.invA
+        else:
+            invDF = self.invA[:, :, tind]
+
+        return np.einsum('ijk,l->ijkl', invDF, 1 + 0*X[0, :])
 
 class MappingAffine(Mapping):
     """Affine mappings for simplex (=line,tri,tet) mesh."""
