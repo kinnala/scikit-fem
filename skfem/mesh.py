@@ -63,6 +63,12 @@ class Mesh(object):
                             "over 100 elements to C_CONTIGUOUS.")
                 self.t = np.ascontiguousarray(self.t)
 
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        return str(type(self)) + "\np: " + str(self.p.shape) + "\nt: " + str(self.t.shape)
+
     def show(self):
         """Call the correct pyplot show commands after plotting."""
         plt.show()
