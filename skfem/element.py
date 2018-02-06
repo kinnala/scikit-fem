@@ -480,16 +480,99 @@ class Element():
     f_dofs = 0
     i_dofs = 0
     e_dofs = 0
+    dim = -1
+    maxdeg = -1
+    order = (-1, -1)  # 0 - scalar, 1 - vector, 2 - tensor, etc
+
+    def orient(self, mapping, i, tind=None):
+        """Orient basis functions. By default all = 1."""
+        if tind is None:
+            return 1 + 0*mapping.mesh.t[0, :]
+        else:
+            return 1 + 0*tind
 
     def lbasis(self, X, i):
         raise Exception("Element class should have a lbasis method -- not found.")
 
 class ElementH1(Element):
+    order = (0, 1)
+
     def gbasis(self, mapping, X, i, tind=None):
         [phi, dphi] = self.lbasis(X, i)
         invDF = mapping.invDF(X, tind)
         return np.broadcast_to(phi, (invDF.shape[2], invDF.shape[3])),\
                np.einsum('ijkl,il->jkl', invDF, dphi)
+
+
+class ElementHdiv(Element):
+    order = (1, 0)
+
+    def orient(self, mapping, i, tind=None):
+        # TODO fix tind
+        return -1 + 2*(mapping.mesh.f2t[0, mapping.mesh.t2f[i, :]] \
+                       == np.arange(mapping.mesh.t.shape[1]))
+
+    def gbasis(self, mapping, X, i, tind=None):
+        [phi, dphi] = self.lbasis(X, i)
+        DF = mapping.DF(X, tind)
+        detDF = mapping.detDF(X, tind)
+        orient = self.orient(mapping, i, tind)
+        return np.einsum('ijkl,jl,kl->ikl', DF, phi, 1/np.abs(detDF)*orient[:, None]),\
+               dphi/(np.abs(detDF)*orient[:, None])
+
+
+class ElementHcurl(Element):
+    """Note: only 3D support. Piola transformation
+    is different in 2D."""
+    order = (1, 1)
+
+    def orient(self, mapping, i, tind=None):
+        # TODO fix tind
+        t1 = [0, 1, 0, 0, 1, 2][i]
+        t2 = [1, 2, 2, 3, 3, 3][i]
+        return 1 - 2*(mapping.mesh.t[t1, :] > mapping.mesh.t[t2, :])
+
+    def gbasis(self, mapping, X, i, tind=None):
+        [phi, dphi] = self.lbasis(X, i)
+        DF = mapping.DF(X, tind)
+        invDF = mapping.invDF(X, tind)
+        detDF = mapping.detDF(X, tind)
+        orient = self.orient(mapping, i, tind)
+        return np.einsum('ijkl,il,k->jkl', invDF, phi, orient), \
+               np.einsum('ijkl,jl,kl->ikl', DF, dphi, 1/detDF*orient[:, None])
+
+
+class ElementTetN0(ElementHcurl):
+    e_dofs = 1
+    dim = 3
+    maxdeg = 1
+
+    def lbasis(self, X, i):
+        x, y, z = X[0, :], X[1, :], X[2, :]
+
+        if i == 0:
+            phi = np.array([1-z-y, x, x])
+            dphi = np.array([0*x, -2 + 0*x, 2 + 0*x])
+        elif i == 1:
+            phi = np.array([-y, x, 0*z])
+            dphi = np.array([0*x, 0*x, 2 + 0*x])
+        elif i == 2:
+            phi = np.array([y, 1-z-x, y])
+            dphi = np.array([2 + 0*x, 0*x, -2 + 0*x])
+        elif i == 3:
+            phi = np.array([z, z, 1-x-y])
+            dphi = np.array([-2 + 0*x, 2 + 0*x, 0*x])
+        elif i == 4:
+            phi = np.array([-z, 0*y, x])
+            dphi = np.array([0*x, -2 + 0*x, 0*x])
+        elif i == 5:
+            phi = np.array([0*x, -z, y])
+            dphi = np.array([2 + 0*x, 0*x, 0*x])
+        else:
+            raise Exception("!")
+
+        return phi, dphi
+
 
 class ElementTriP1(ElementH1):
     n_dofs = 1
@@ -512,6 +595,74 @@ class ElementTriP1(ElementH1):
             raise Exception("!")
 
         return phi, dphi
+
+
+class ElementTriP0(ElementH1):
+    i_dofs = 1
+    dim = 2
+    maxdeg = 0
+
+    def lbasis(self, X, i):
+        return 1 + 0*X[0, :], 0*X
+
+
+class ElementTriRT0(ElementHdiv):
+    f_dofs = 1
+    dim = 2
+    maxdeg = 1
+
+    def lbasis(self, X, i):
+        x, y = X[0, :], X[1, :]
+
+        if i == 0:
+            phi = np.array([x, y-1])
+            dphi = 2 + 0*x
+        elif i == 1:
+            phi = np.array([x, y])
+            dphi = 2 + 0*x
+        elif i == 2:
+            phi = np.array([x-1, y])
+            dphi = 2 + 0*x
+        else:
+            raise Exception("!")
+
+        return phi, dphi
+
+
+class ElementTetP0(ElementH1):
+    i_dofs = 1
+    dim = 3
+    maxdeg = 0
+
+    def lbasis(self, X, i):
+        return 1 + 0*X[0, :], 0*X
+
+
+class ElementTetRT0(ElementHdiv):
+    f_dofs = 1
+    dim = 3
+    maxdeg = 1
+
+    def lbasis(self, X, i):
+        x, y, z = X[0, :], X[1, :], X[2, :]
+
+        if i == 0:
+            phi = np.array([x, y, z-1])
+            dphi = 3 + 0*x
+        elif i == 1:
+            phi = np.array([x, y-1, z])
+            dphi = 3 + 0*x
+        elif i == 2:
+            phi = np.array([x-1, y, z])
+            dphi = 3 + 0*x
+        elif i == 3:
+            phi = np.array([x, y, z])
+            dphi = 3 + 0*x
+        else:
+            raise Exception("!")
+
+        return phi, dphi
+
 
 class ElementLocalH1(ElementLocal):
     """Abstract :math:`H^1` conforming finite element."""

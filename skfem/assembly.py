@@ -1073,7 +1073,6 @@ class AssemblerGeneric(Assembler):
         else:
             self.mapping = mapping  # assumes an already initialized mapping
 
-        self.mesh = mesh
         self.elem_u = elem_u
         self.dofnum_u = Dofnum(mesh, elem_u)
 
@@ -1098,17 +1097,27 @@ class AssemblerGeneric(Assembler):
             intorder = self.elem_u.maxdeg + self.elem_v.maxdeg
 
         # quadrature points and weights
-        X, W = get_quadrature(self.mesh.refdom, intorder)
+        X, W = get_quadrature(mesh.refdom, intorder)
 
-        dim = self.mesh.p.shape[0]
-        nt = self.mesh.t.shape[1]
+        dim = mesh.p.shape[0]
+        nt = mesh.t.shape[1]
 
-        self.u = np.empty((self.Nbfun_u, nt, len(W)))
-        self.du = np.empty((self.Nbfun_u, dim, nt, len(W)))
+        if elem_u.order[0] == 0:
+            self.u = np.empty((self.Nbfun_u, nt, len(W)))
+        elif elem_u.order[0] == 1:
+            self.u = np.empty((self.Nbfun_u, dim, nt, len(W)))
+        else:
+            raise NotImplementedError("!")
+
+        if elem_u.order[1] == 0:
+            self.du = np.empty((self.Nbfun_u, nt, len(W)))
+        elif elem_u.order[1] == 1:
+            self.du = np.empty((self.Nbfun_u, dim, nt, len(W)))
+        else:
+            raise NotImplementedError("!")
+
         for j in range(self.Nbfun_u):
-            self.u[j, :, :], du = self.elem_u.gbasis(self.mapping, X, j)
-            for i in range(dim):
-                self.du[j, i, :, :] = du[i]
+            self.u[j], self.du[j] = self.elem_u.gbasis(self.mapping, X, j)
 
         if self.SYMMETRIC_ELEMS:
             self.v = self.u
@@ -1128,7 +1137,7 @@ class AssemblerGeneric(Assembler):
         return self.mapping.F(X)
 
     def mesh_parameters(self):
-        return np.abs(self.detDF) ** (1.0 / self.mesh.dim())
+        return np.abs(self.detDF) ** (1.0 / self.mapping.mesh.dim())
 
     def interpolate(self, w, derivative=False):
         """
@@ -1146,8 +1155,8 @@ class AssemblerGeneric(Assembler):
         ndarray of size Nelems x Nqp
             Interpolated solution vector
         """
-        dim = self.mesh.p.shape[0]
-        nt = self.mesh.t.shape[1]
+        dim = self.mapping.mesh.p.shape[0]
+        nt = self.mapping.mesh.t.shape[1]
         nqp = self.dx.shape[1]
 
         W = np.zeros((nt, nqp))
@@ -1199,11 +1208,11 @@ class AssemblerGeneric(Assembler):
         import threading
         from itertools import product
 
-        nt = self.mesh.t.shape[1]
+        nt = self.mapping.mesh.t.shape[1]
 
         if kernel.bilinear:
             # initialize COO data structures
-            data = np.zeros((self.Nbfun_u, self.Nbfun_v, nt))
+            data = np.zeros((self.Nbfun_v, self.Nbfun_u, nt))
             rows = np.zeros(self.Nbfun_u * self.Nbfun_v * nt)
             cols = np.zeros(self.Nbfun_u * self.Nbfun_v * nt)
 
@@ -1216,8 +1225,8 @@ class AssemblerGeneric(Assembler):
                     cols[ixs] = self.dofnum_u.t_dof[j, :]
 
             # create indices for linear loop over local stiffness matrix
-            ixs = [i for i, j in product(range(self.v.shape[0]), range(self.v.shape[0]))]
-            jxs = [j for i, j in product(range(self.u.shape[0]), range(self.u.shape[0]))]
+            ixs = [i for i, j in product(range(self.v.shape[0]), range(self.u.shape[0]))]
+            jxs = [j for i, j in product(range(self.v.shape[0]), range(self.u.shape[0]))]
             indices = np.array([ixs, jxs]).T
 
             # split local stiffness matrix elements to threads

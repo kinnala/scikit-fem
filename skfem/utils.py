@@ -5,6 +5,7 @@ Utility functions.
 import numpy as np
 import scipy.sparse as sp
 import scipy.sparse.linalg as spl
+import scipy.sparse.csgraph as spg
 from copy import deepcopy
 
 def cell_shape(x, *rest):
@@ -36,6 +37,7 @@ def const_cell(nparr, *arg):
     else:
         u = {i: const_cell(nparr, *arg[1:]) for (i, _) in enumerate(range(arg[0]))}
     return u
+
 
 def direct(A, b, x=None, I=None, D=None, solve=None):
     """Solve system Ax=b with essential boundary conditions.
@@ -95,6 +97,49 @@ def direct(A, b, x=None, I=None, D=None, solve=None):
     else:
         D = np.setdiff1d(np.arange(A.shape[0]), I)
         x[I] = solve(A[I].T[I].T, b[I] - A[I].T[D].T.dot(x[D]))
+
+    return x
+
+
+def rcm_reordering(A, symmetric=False):
+    """Compute reverse Cuthill-McKee reordering using SciPy."""
+    return spg.reverse_cuthill_mckee(A, symmetric_mode=symmetric)
+
+
+def set_constraint(A, b, x, I=None, D=None):
+    if I is None and D is None:
+        raise Exception("Either I or D must be given!")
+    elif I is None:
+        D = np.setdiff1d(np.arange(A.shape[0]), I)
+    elif D is None:
+        I = np.setdiff1d(np.arange(A.shape[0]), D)
+    else:
+        raise Exception("Give only I or only D!")
+    return A[I].T[I].T, b[I] - A[I].T[D].T.dot(x[D]), I
+
+
+def solver_direct_scipy(rcm=False):
+    if rcm:
+        def solver_rcm(A, b):
+            p = rcm_reordering(A)
+            x = np.zeros(A.shape[0])
+            x[p] = spl.spsolve(A[p].T[p].T, b[p])
+            return x
+        return solver_rcm
+    else:
+        def solver(A, b):
+            return spl.spsolve(A, b)
+        return solver
+
+
+def solve(A, b, I=None, solver=None):
+    if solver is None:
+        solver = solver_direct_scipy()
+
+    if I is None:
+        x = solver(A, b)
+    else:
+        x[I] = solver(A, b)
 
     return x
 

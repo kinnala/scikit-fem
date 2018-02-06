@@ -305,7 +305,7 @@ class MappingAffineGeneric(Mapping):
             raise Exception("Not implemented for the given dimension.")
 
         self.dim = dim
-
+        self.mesh = mesh
 
 
     def F(self, X, tind=None):
@@ -366,6 +366,14 @@ class MappingAffineGeneric(Mapping):
             detDF = self.detA[tind]
 
         return np.tile(detDF, (X.shape[1], 1)).T
+
+    def DF(self, X, tind=None):
+        if tind is None:
+            DF = self.A
+        else:
+            DF = self.A[:, :, tind]
+
+        return np.einsum('ijk,l->ijkl', DF, 1 + 0*X[0, :])
 
     def invDF(self, X, tind=None):
         if tind is None:
