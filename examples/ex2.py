@@ -1,35 +1,54 @@
-from skfem import *
+from skfem.mesh import *
+from skfem.assembly import *
+from skfem.mapping import *
+from skfem.utils import *
+from skfem.element import *
+from skfem.models import *
 import numpy as np
 
-"""
-Solve
-
-  u'''' = 1
-  u(0)=u'(0)=u(1)=u'(1)=0
-  
-using cubic Hermite elements.
-"""
-
-m = MeshLine()
+m = MeshTri()
 m.refine(3)
 
-e = ElementGlobalLineHermite()
-a = AssemblerGlobal(m, e)
+e = ElementMorley()
+map = MappingAffine(m)
+ib = InteriorBasis(m, e, map, 4)
 
-K = a.iasm(lambda ddu,ddv: ddu*ddv)
-f = a.iasm(lambda v: 1*v)
+@bilinear_form
+def bilinf(u, du, v, dv, w):
+    # plate thickness
+    d = 1.0
+    E = 1.0
+    nu = 0.3
 
-def solve_cholmod(A, b):
-    from sksparse.cholmod import cholesky
-    factor = cholesky(A)
-    return factor(b)
+    def C(T):
+        trT=T[0,0]+T[1,1]
+        return np.array([[E/(1.0+nu)*(T[0, 0]+nu/(1.0-nu)*trT), E/(1.0+nu)*T[0, 1]],
+                         [E/(1.0+nu)*T[1, 0], E/(1.0+nu)*(T[1, 1]+nu/(1.0-nu)*trT)]])
 
-D = np.array([0, 1, 2, 3])
+    def Eps(ddU):
+        return np.array([[ddU[0][0], ddU[0][1]],
+                         [ddU[1][0], ddU[1][1]]])
 
-x = direct(K, f, D=D, solve=solve_cholmod)
+    def ddot(T1,T2):
+        return T1[0, 0]*T2[0, 0]+\
+               T1[0, 1]*T2[0, 1]+\
+               T1[1, 0]*T2[1, 0]+\
+               T1[1, 1]*T2[1, 1]
 
-M, X = a.refinterp(x, 3)
+    ddu = du[1]
+    ddv = dv[1]
 
-ax = m.plot(x[a.dofnum_u.n_dof[0, :]], color='ko')
-M.plot(X, color='k-', ax=ax)
+    return d**3/12.0*ddot(C(Eps(ddu)), Eps(ddv))
+
+K = asm(bilinf, ib)
+f = asm(unit_load, ib)
+
+x, D = ib.essential_bc()
+I = ib.dofnum.complement_dofs(D)
+
+x[I] = solve(*condense(K, f, I=I), solver=solver_direct_cholmod())
+
+M, X = ib.refinterp(x, 3)
+ax = m.draw()
+M.plot(X, smooth=True, edgecolors='', ax=ax)
 M.show()

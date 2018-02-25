@@ -1,19 +1,31 @@
-from skfem import *
-from skfem.weakforms import laplace
+from skfem.mesh import *
+from skfem.assembly import *
+from skfem.mapping import *
+from skfem.utils import *
+from skfem.element import *
 
 m = MeshTri()
-for itr in range(4):
-    m.refine()
+m.refine(4)
 
-e = ElementLocalTriP1()
-a = AssemblerLocal(m, e)
+e = ElementTriP1()
+map = MappingAffine(m)
+basis = InteriorBasis(m, e, map, 2)
 
-K = a.iasm(laplace)
-f = a.iasm(lambda v: 1*v)
+@bilinear_form
+def laplace(u, du, v, dv, w):
+    return du[0]*dv[0] + du[1]*dv[1]
 
-D = m.boundary_nodes()
+@linear_form
+def load(v, dv, w):
+    return 1.0*v
 
-x = direct(K, f, D=D)
+A = asm(laplace, basis)
+b = asm(load, basis)
+
+I = m.interior_nodes()
+
+x = 0*b
+x[I] = solve(*condense(A, b, I=I))
 
 m.plot3(x)
 m.show()

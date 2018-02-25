@@ -8,97 +8,80 @@ import scipy.sparse.linalg as spl
 import scipy.sparse.csgraph as spg
 from copy import deepcopy
 
-def cell_shape(x, *rest):
-    """Find out the shape of a cell array."""
-    if isinstance(x, dict):
-        s = len(x)
-        return cell_shape(x[0], s, *rest)
-    else:
-        return rest[::-1]
+def bilinear_form(form):
+    """Bilinear form decorator"""
+    def kernel(A, ix, u, du, v, dv, w, dx):
+        for k in range(ix.shape[0]):
+            i, j = ix[k]
+            A[i, j] = np.sum(form(u[j], du[j], v[i], dv[i], w) * dx, axis=1)
+    kernel.bilinear = True
+    return kernel
 
-def const_cell(nparr, *arg):
+
+def linear_form(form):
+    """Linear form decorator"""
+    def kernel(b, ix, v, dv, w, dx):
+        for i in ix:
+            b[i] = np.sum(form(v[i], dv[i], w) * dx, axis=1)
+    kernel.bilinear = False
+    return kernel
+
+
+def nonlinear_form(nonlin):
     """
-    Initialize a cell array (i.e. python dictionary)
-    with the given parameter array/float by performing
-    a deep copy.
+    Create tangent system using automatic differentiation.
 
-    *Example*. Initializing a cell array with zeroes.
+    The new form is bilinear and has the parameters (u, du, v, dv, w).
 
-    .. code-block:: python
+    It is expected that w[0] contains u_0, w[1] contains du_0/dx, etc.
 
-        >>> from fem.utils import const_cell
-        >>> const_cell(0.0, 3, 2)
-        {0: {0: 0.0, 1: 0.0}, 1: {0: 0.0, 1: 0.0}, 2: {0: 0.0, 1: 0.0}}
+    Note: Requires autograd. Use autograd.numpy instead of numpy for any special operations.
     """
-    if len(arg) == 1:
-        u = {i: deepcopy(nparr) for (i, _) in enumerate(range(arg[0]))}
-    elif len(arg) == 0:
-        return nparr
-    else:
-        u = {i: const_cell(nparr, *arg[1:]) for (i, _) in enumerate(range(arg[0]))}
-    return u
+    from autograd import elementwise_grad as egrad
 
-
-def direct(A, b, x=None, I=None, D=None, solve=None):
-    """Solve system Ax=b with essential boundary conditions.
-    
-    Parameters
-    ----------
-    A : scipy sparse matrix
-        The system matrix.
-    b : numpy array
-        The right hand side.
-    x : (OPTIONAL) numpy array
-        For implementing inhomogeneous essential conditions. Must be of size
-        b.shape[0].
-    D : (OPTIONAL) numpy array
-        The boundary nodes.
-    I : (OPTIONAL) numpy array
-        The interior nodes. A list of integers to x corresponding to interior
-        nodes.
-    solve : (OPTIONAL) lambda
-        Function taking two parameters (A,b) and solving Ax = b.
-        Default functionality uses SciPy direct solver.
-
-    Examples
-    --------
-    Default 'solve' uses SuperLU from SciPy. You
-    can supply another solver using 'solve'-parameter.
-
-    Example for using Umfpack:
-
-    .. code-block:: python
-        def solve_umfpack(A, b):
-            return spl.spsolve(A, b, use_umfpack=True)
-
-    Example for using CHOLMOD through scikit-sparse:
-
-    .. code-block:: python
-        def solve_cholmod(A, b):
-            from sksparse.cholmod import cholesky
-            factor = cholesky(A)
-            return factor(b)
-    """
-    def default_solve(A, b):
-        return spl.spsolve(A, b)
-
-    if solve is None:
-        solve = default_solve
-
-    if x is None:
-        x = np.zeros(A.shape[0])
-
-    if I is None:
-        if D is None:
-            x = solve(A, b)
+    @bilinear_form
+    def bilin(u, du, v, dv, w):
+        order = (len(u.shape)-2, len(du.shape)-2)
+        if order[0] > 0:
+            dim = u.shape[0]
+        elif order[1] > 0:
+            dim = du.shape[0]
         else:
-            I = np.setdiff1d(np.arange(A.shape[0]), D)
-            x[I] = solve(A[I].T[I].T, b[I] - A[I].T[D].T.dot(x[D]))
-    else:
-        D = np.setdiff1d(np.arange(A.shape[0]), I)
-        x[I] = solve(A[I].T[I].T, b[I] - A[I].T[D].T.dot(x[D]))
+            raise Exception("Could not deduce the dimension!")
+        if order[0] == 0 and order[1] == 1:
+            # scalar H1
+            first_arg = egrad(nonlin, argnum=0)(w[0], w[1:(dim+1)], v, dv, w[(dim+1):])*u
+            second_arg = np.sum(egrad(nonlin, argnum=1)(w[0], w[1:(dim+1)], v, dv, w[(dim+1):])*du, axis=0)
+        elif order[0] == 1 and order[1] == 0:
+            # Hdiv / Hcurl
+            first_arg = np.sum(egrad(nonlin, argnum=0)(w[0:dim], w[dim], v, dv, w[(dim+1):])*u, axis=0)
+            second_arg = egrad(nonlin, argnum=1)(w[0:dim], w[dim], v, dv, w[(dim+1):])*du
+        else:
+            raise Exception("The linearization of the given order not supported.")
+        # derivative chain rule
+        return first_arg + second_arg
 
-    return x
+    @linear_form
+    def lin(v, dv, w):
+        order = (len(v.shape)-2, len(dv.shape)-2)
+        if order[0] > 0:
+            dim = v.shape[0]
+        elif order[1] > 0:
+            dim = dv.shape[0]
+        else:
+            raise Exception("Could not deduce the dimension!")
+        if order[0] == 0 and order[1] == 1:
+            # scalar H1
+            return nonlin(w[0], w[1:(dim+1)], v, dv, w[(dim+1):])
+        elif order[0] == 1 and order[1] == 0:
+            # Hdiv / Hcurl
+            return nonlin(w[0:dim], w[dim], v, dv, w[(dim+1):])
+        else:
+            raise Exception("The linearization of the given order not supported.")
+
+    bilin.rhs = lin
+
+    return bilin
 
 
 def rcm_reordering(A, symmetric=False):
@@ -106,42 +89,63 @@ def rcm_reordering(A, symmetric=False):
     return spg.reverse_cuthill_mckee(A, symmetric_mode=symmetric)
 
 
-def set_constraint(A, b, x, I=None, D=None):
+def condense(A, b=None, x=None, I=None, D=None):
+    if x is None:
+        x = np.zeros(A.shape[0])
     if I is None and D is None:
         raise Exception("Either I or D must be given!")
-    elif I is None:
-        D = np.setdiff1d(np.arange(A.shape[0]), I)
-    elif D is None:
+    elif I is None and D is not None:
         I = np.setdiff1d(np.arange(A.shape[0]), D)
+    elif D is None and I is not None:
+        D = np.setdiff1d(np.arange(A.shape[0]), I)
     else:
         raise Exception("Give only I or only D!")
-    return A[I].T[I].T, b[I] - A[I].T[D].T.dot(x[D]), I
-
-
-def solver_direct_scipy(rcm=False):
-    if rcm:
-        def solver_rcm(A, b):
-            p = rcm_reordering(A)
-            x = np.zeros(A.shape[0])
-            x[p] = spl.spsolve(A[p].T[p].T, b[p])
-            return x
-        return solver_rcm
+    if b is None:
+        return A[I].T[I].T
     else:
-        def solver(A, b):
-            return spl.spsolve(A, b)
-        return solver
+        return A[I].T[I].T, b[I] - A[I].T[D].T.dot(x[D])
 
 
-def solve(A, b, I=None, solver=None):
+def rcm(A, b):
+    p = rcm_reordering(A)
+    return A[p].T[p].T, b[p], p
+
+
+def solver_direct_scipy():
+    def solver(A, b):
+        return spl.spsolve(A, b)
+    return solver
+
+
+def solver_direct_cholmod():
+    def solver(A, b):
+        from sksparse.cholmod import cholesky
+        factor = cholesky(A)
+        return factor(b)
+    return solver
+
+
+def solve(A, b, solver=None):
+    """
+    Example for using Umfpack:
+
+    .. code-block:: python
+    def solver_umfpack(A, b):
+        return spl.spsolve(A, b, use_umfpack=True)
+
+    Example for using CHOLMOD through scikit-sparse:
+
+    .. code-block:: python
+    def solver_cholmod(A, b):
+        from sksparse.cholmod import cholesky
+        factor = cholesky(A)
+        return factor(b)
+
+    """
     if solver is None:
         solver = solver_direct_scipy()
 
-    if I is None:
-        x = solver(A, b)
-    else:
-        x[I] = solver(A, b)
-
-    return x
+    return solver(A, b)
 
 def build_ilu_pc(A):
     """Build a preconditioner for the matrix using incomplete LU decomposition.

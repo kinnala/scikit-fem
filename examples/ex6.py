@@ -1,24 +1,36 @@
-from skfem import *
-from skfem.weakforms import laplace
+from skfem.mesh import *
+from skfem.assembly import *
+from skfem.mapping import *
+from skfem.utils import *
+from skfem.element import *
+from skfem.models import *
 
 """
 High-order plotting test.
 """
 
 m = MeshQuad()
-m.refine(1)
+m.refine(2)
 
-e = ElementLocalQ2()
-a = AssemblerLocal(m, e)
+e1 = ElementQ1()
+e = ElementQ2()
+map = MappingIsoparametric(m, e1)
+ib = InteriorBasis(m, e, map, 4)
 
-K = a.iasm(laplace)
-f = a.iasm(lambda v: 1*v)
+K = asm(laplace, ib)
 
-_, D = a.essential_bc()
+@linear_form
+def linf(v, dv, w):
+    return v
 
-x = direct(K, f, D=D)
+f = asm(linf, ib)
 
-M, X = a.refinterp(x, 3)
+x, D = ib.essential_bc()
+I = ib.dofnum.complement_dofs(D)
+
+x[I] = solve(*condense(K, f, D=D))
+
+M, X = ib.refinterp(x, 3)
 
 ax = m.draw()
 M.plot(X, smooth=True, edgecolors='', ax=ax)

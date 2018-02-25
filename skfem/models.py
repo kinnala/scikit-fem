@@ -3,19 +3,24 @@
 Weak forms for various PDE's
 """
 import numpy as np
+from skfem.utils import bilinear_form, linear_form
 
-def laplace(du, dv):
-    if len(du)==1:
-        return du*dv
-    elif len(du)==2:
+@bilinear_form
+def laplace(u, du, v, dv, w):
+    if du.shape[0] == 2:
         return du[0]*dv[0] + du[1]*dv[1]
-    elif len(du)==3:
+    elif du.shape[0] == 3:
         return du[0]*dv[0] + du[1]*dv[1] + du[2]*dv[2]
     else:
         raise NotImplementedError("Laplace weakform not implemented for the used dimension.")
 
-def elasticity_plane_strain(Lambda=1.0, Mu=1.0, component=None):
-    def weakform(du, dv, v):
+@linear_form
+def unit_load(v, dv, w):
+    return v
+
+def plane_strain(Lambda=1.0, Mu=1.0, component=None):
+    @bilinear_form
+    def weakform(u, du, v, dv, w):
         def ddot(A, B):
             return A[0, 0] * B[0, 0] + \
                    A[0, 1] * B[0, 1] + \
