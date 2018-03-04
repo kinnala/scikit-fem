@@ -1,19 +1,22 @@
-from skfem import *
-from skfem.weakforms import elasticity_plane_strain
 from skfem.mesh import *
 from skfem.assembly import *
+from skfem.mapping import *
+from skfem.element import *
 from scipy.sparse.linalg import eigsh
 from skfem.extern_sfepy import *
 import numpy as np
 import matplotlib.pyplot as plt
 
-"""
-Solve linear elastic contact problem using penalty method
-"""
-
 m = read_comsol("examples/square_smalltris.mphtxt")
-M = read_comsol("examples/square_largetris.mphtxt")
-M.translate((1.0, 0.0))
+#M = read_comsol("examples/square_largetris.mphtxt")
+#M.translate((1.0, 0.0))
+
+map = MappingAffine(m)
+e = ElementTriP1()
+
+ib = InteriorBasis(m, e, map, 2)
+fb0 = FacetBasis(m, e, map, 2, side=0)
+fb1 = FacetBasis(m, e, map, 2, side=1)
 
 def rule(x, y):
     return (x==1.0)

@@ -455,7 +455,7 @@ def asm(kernel, ubasis, vbasis=None, w=None, nthreads=1):
         K = coo_matrix((data.flatten('C'), (rows, cols)),
                           shape=(vbasis.dofnum.N, ubasis.dofnum.N))
         K.eliminate_zeros()
-        return K.tocsr().T # TODO investigate why transpose is required
+        return K.tocsr()
     else:
         data = np.zeros((vbasis.Nbfun, nt))
         rows = np.zeros(vbasis.Nbfun * nt)

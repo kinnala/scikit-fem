@@ -6,7 +6,7 @@ import numpy as np
 import scipy.sparse as sp
 import scipy.sparse.linalg as spl
 import scipy.sparse.csgraph as spg
-from copy import deepcopy
+
 
 def bilinear_form(form):
     """Bilinear form decorator"""
