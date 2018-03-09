@@ -281,8 +281,9 @@ class FacetBasis(GlobalBasis):
         # global facet to refdom facet
         Y = self.mapping.invF(x, tind=self.tind)
 
-        # construct normal vectors here because Y is needed
-        self.normals = self.mapping.normals(Y, self.tind, self.find, self.mesh.t2f)
+        # construct normal vectors from side=0 always
+        Y0 = self.mapping.invF(x, tind=self.mesh.f2t[0, self.find]) # TODO check why without this works also (Y0 = Y)
+        self.normals = self.mapping.normals(Y0, self.mesh.f2t[0, self.find], self.find, self.mesh.t2f)
 
         self.nf = len(self.find)
 
@@ -434,8 +435,8 @@ def asm(kernel, ubasis, vbasis=None, w=None, nthreads=1):
                 cols[ixs] = ubasis.dofnum.t_dof[j, :]
 
         # create indices for linear loop over local stiffness matrix
-        ixs = [i for i, j in product(range(vbasis.phi.shape[0]), range(ubasis.phi.shape[0]))]
-        jxs = [j for i, j in product(range(vbasis.phi.shape[0]), range(ubasis.phi.shape[0]))]
+        ixs = [i for j, i in product(range(vbasis.phi.shape[0]), range(ubasis.phi.shape[0]))]
+        jxs = [j for j, i in product(range(vbasis.phi.shape[0]), range(ubasis.phi.shape[0]))]
         indices = np.array([ixs, jxs]).T
 
         # split local stiffness matrix elements to threads
@@ -452,7 +453,7 @@ def asm(kernel, ubasis, vbasis=None, w=None, nthreads=1):
         for t in threads:
             t.join()
 
-        K = coo_matrix((data.flatten('C'), (rows, cols)),
+        K = coo_matrix((np.transpose(data, (1, 0, 2)).flatten('C'), (rows, cols)),
                           shape=(vbasis.dofnum.N, ubasis.dofnum.N))
         K.eliminate_zeros()
         return K.tocsr()

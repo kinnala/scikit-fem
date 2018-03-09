@@ -26,7 +26,7 @@ def bilinf(u, du, v, dv, w):
 def facetbilinf(u, du, v, dv, w):
     n = w[2]
     x = w[0]
-    return -(dv[0]*n[0] + dv[1]*n[1])*u*(x[0] == 1.0)
+    return -(du[0]*n[0] + du[1]*n[1])*v*(x[0] == 1.0)
 
 @linear_form
 def facetlinf(v, dv, w):

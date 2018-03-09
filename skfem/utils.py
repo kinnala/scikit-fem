@@ -84,6 +84,15 @@ def nonlinear_form(nonlin):
     return bilin
 
 
+def smoothplot(x, basis, nref=3, m=None):
+    M, X = basis.refinterp(x, 3)
+    if m is not None:
+        ax = m.draw()
+        M.plot(X, smooth=True, edgecolors='', ax=ax)
+    else:
+        M.plot(X, smooth=True, edgecolors='')
+
+
 def rcm_reordering(A, symmetric=False):
     """Compute reverse Cuthill-McKee reordering using SciPy."""
     return spg.reverse_cuthill_mckee(A, symmetric_mode=symmetric)
