@@ -1,8 +1,4 @@
-from skfem.mesh import *
-from skfem.assembly import *
-from skfem.mapping import *
-from skfem.utils import *
-from skfem.element import *
+from skfem import *
 
 m = MeshTri()
 m.refine(4)

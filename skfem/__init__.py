@@ -1,41 +1,35 @@
-from skfem.mesh import *
-from skfem.assembly import *
-from skfem.element import *
-from skfem.utils import *
+# partly from https://stackoverflow.com/questions/14426574/how-to-import-members-of-modules-within-a-package/14428820#14428820
 
+def _import_all_modules():
+    """dynamically imports all modules in the package"""
+    import traceback
+    import os
+    global __all__
+    __all__ = []
+    globals_, locals_ = globals(), locals()
 
-__all__ = ['MeshTri',
-           'MeshTet',
-           'MeshQuad',
-           'MeshLine',
-           'MeshLineMortar',
-           'AssemblerLocalMortar',
-           'AssemblerLocal',
-           'AssemblerGlobal',
-           'ElementGlobalTriDG',
-           'ElementGlobalTriP0',
-           'ElementGlobalLineP1',
-           'ElementGlobalLineHermite',
-           'ElementGlobalTriPp',
-           'ElementGlobalMorley',
-           'ElementGlobalArgyris',
-           'ElementLocalTriRT0',
-           'ElementLocalH1Vec',
-           'ElementLocalQ1',
-           'ElementLocalQ2',
-           'ElementLocalTriDG',
-           'ElementLocalTetDG',
-           'ElementLocalTetP0',
-           'ElementLocalTriP0',
-           'ElementLocalQuadDG',
-           'ElementLocalP0',
-           'ElementLocalTriMini',
-           'ElementLocalTetP2',
-           'ElementLocalLineP2',
-           'ElementLocalLineP1',
-           'ElementLocalTriP1',
-           'ElementLocalTriP2',
-           'ElementLocalTetP1',
-           'direct',
-           'cg',
-           'build_ilu_pc']
+    # dynamically import all the package modules
+    for filename in os.listdir(__name__):
+        # process all python files in directory that don't start with underscore
+        # (which also keeps this module from importing itself)
+        if filename == 'assembly.py' \
+                or filename == 'mesh.py' \
+                or filename == 'utils.py' \
+                or filename == 'element.py' \
+                or filename == 'mapping.py' \
+                or filename == 'extern_sfepy.py' \
+                or filename == 'models.py':
+            modulename = filename.split('.')[0]  # filename without extension
+            package_module = '.'.join([__name__, modulename])
+            try:
+                module = __import__(package_module, globals_, locals_, [modulename])
+            except:
+                traceback.print_exc()
+                raise
+            for name in module.__dict__:
+                if not name.startswith('_'):
+                    globals_[name] = module.__dict__[name]
+                    __all__.append(name)
+
+_import_all_modules()
+

@@ -1,9 +1,4 @@
-from skfem.mesh import *
-from skfem.assembly import *
-from skfem.mapping import *
-from skfem.utils import *
-from skfem.element import *
-from skfem.models import *
+from skfem import *
 from scipy.sparse.linalg import eigsh
 import numpy as np
 
