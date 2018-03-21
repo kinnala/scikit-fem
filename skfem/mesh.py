@@ -364,8 +364,11 @@ class InterfaceMesh1D(Mesh):
         self.t2f = -1 + 0*np.hstack((mesh1.t2f, mesh2.t2f))
 
         # construct normals
-        facet_lengths = np.sqrt(self.p[0, :]**2 +
-        self.normals = np.array([-self.p[0, :]
+        tangent_x = self.p[0, self.facets[0, :]] - self.p[0, self.facets[1, :]]
+        tangent_y = self.p[1, self.facets[0, :]] - self.p[1, self.facets[1, :]]
+        tangent_lengths = np.sqrt(tangent_x**2 + tangent_y**2)
+
+        self.normals = np.array([-tangent_y/tangent_lengths, tangent_x/tangent_lengths])
 
         if debug_plot:
             ax = mesh1.draw()
@@ -455,24 +458,6 @@ class InterfaceMesh1D(Mesh):
         else:
             print(self.f2t)
             raise Exception("All mesh facets corresponding to mortar facets not found!")
-
-
-
-    def draw(self, color='ro-'):
-        """Draw the interface mesh"""
-        xs = []
-        ys = []
-        for y1, y2, s, t in zip(self.p[1, self.t[0, :]],
-                                self.p[1, self.t[1, :]],
-                                self.p[0, self.t[0, :]],
-                                self.p[0, self.t[1, :]]):
-            xs.append(s)
-            xs.append(t)
-            xs.append(None)
-            ys.append(y1)
-            ys.append(y2)
-            ys.append(None)
-        plt.plot(xs, ys, color)
 
 
 class MeshLine(Mesh):

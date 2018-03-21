@@ -248,9 +248,12 @@ class FacetBasis(GlobalBasis):
         # global facet to refdom facet
         Y = self.mapping.invF(x, tind=self.tind)
 
-        # construct normal vectors from side=0 always
-        Y0 = self.mapping.invF(x, tind=self.mesh.f2t[0, self.find]) # TODO check why without this works also (Y0 = Y)
-        self.normals = self.mapping.normals(Y0, self.mesh.f2t[0, self.find], self.find, self.mesh.t2f)
+        if hasattr(mesh, 'normals'):
+            self.normals = np.repeat(mesh.normals[:, :, None], len(self.W), axis=2)
+        else:
+            # construct normal vectors from side=0 always
+            Y0 = self.mapping.invF(x, tind=self.mesh.f2t[0, self.find]) # TODO check why without this works also (Y0 = Y)
+            self.normals = self.mapping.normals(Y0, self.mesh.f2t[0, self.find], self.find, self.mesh.t2f)
 
         self.nf = len(self.find)
 
