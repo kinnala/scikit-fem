@@ -1,49 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-Assemblers transform bilinear forms into sparse matrices
-and linear forms into vectors. Moreover, they are used
-for computing local functionals over elements.
+This file contains objects and functions related to the finite element assembly.
 
-There are currently two assembler types.
-:class:`skfem.assembly.AssemblerLocal` uses finite elements
-defined through reference element. :class:`skfem.assembly.AssemblerGlobal`
-uses finite elements defined through DOF functionals. The latter
-are more general but slower.
-
-Examples
+Workflow
 --------
-Assemble the stiffness matrix related to
-the Poisson problem using the piecewise linear elements.
+The user should perform the following steps:
 
-.. code-block:: python
-
-    from skfem.mesh import MeshTri
-    from skfem.assembly import AssemblerLocal
-    from skfem.element import ElementLocalTriP1
-
-    m = MeshTri()
-    m.refine(3)
-    e = ElementLocalTriP1()
-    a = AssemblerLocal(m, e)
-
-    def bilinear_form(du, dv):
-        return du[0]*dv[0] + du[1]*dv[1]
-
-    K = a.iasm(bilinear_form)
-
-Assemble a predefined bilinear form.
-
-.. code-block:: python
-
-    from skfem import *
-    from skfem.weakforms import *
-        
-    m = MeshQuad()
-    m.refine(3)
-    e = ElementLocalH1Vec(ElementLocalQ1())
-    a = AssemblerLocal(m, e)
-
-    K = a.iasm(elasticity_plane_strain(100, 50))
+    1. Mesh + Element + Mapping ----> GlobalBasis object
+    2. GlobalBasis object is fed to function asm which returns a sparse matrix
 """
 import numpy as np
 from scipy.sparse import coo_matrix
@@ -261,8 +225,11 @@ class GlobalBasis():
 
 
 class FacetBasis(GlobalBasis):
-    def __init__(self, mesh, elem, mapping, intorder, side=None):
+    def __init__(self, mesh, elem, mapping, intorder, side=None, dofnum=None):
         super(FacetBasis, self).__init__(mesh, elem, mapping, intorder)
+        if dofnum is not None:
+            self.dofnum = dofnum
+            self.Nbfun = self.dofnum.t_dof.shape[0]
 
         self.X, self.W = get_quadrature(self.brefdom, self.intorder)
 
