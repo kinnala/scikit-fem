@@ -30,6 +30,10 @@ Read a mesh generated using Gmsh.
     from skfem.extern_sfepy import read_gmsh
     m = read_gmsh('cylinder.msh')
 
+>>> m = MeshTri()
+>>> m.p.shape[0]
+1
+
 """
 import matplotlib.pyplot as plt
 import matplotlib.tri as mtri
@@ -40,7 +44,7 @@ from scipy.sparse import coo_matrix
 import skfem.mapping
 
 
-class Mesh(object):
+class Mesh():
     """Finite element mesh."""
 
     refdom = "none"  #: A string defining type of the mesh
@@ -1489,3 +1493,7 @@ class MeshTri(Mesh2D):
 
     def mapping(self):
         return skfem.mapping.MappingAffine(self)
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
