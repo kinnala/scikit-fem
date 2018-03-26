@@ -4,35 +4,32 @@ Mesh module contains different types of finite element meshes.
 
 Currently implemented mesh types are
 
-    * :class:`skfem.mesh.MeshTri`, a triangular mesh
-    * :class:`skfem.mesh.MeshTet`, a tetrahedral mesh
-    * :class:`skfem.mesh.MeshQuad`, a mesh consisting of quadrilaterals
-    * :class:`skfem.mesh.MeshLine`, one-dimensional mesh
-    * :class:`skfem.mesh.InterfaceMesh1D`, 1D interface mesh between two 2D meshes
+    * MeshLine, one-dimensional mesh
+    * MeshTri, triangular mesh
+    * MeshTet, tetrahedral mesh
+    * MeshQuad, quadrilateral mesh
+    * MeshHex, hexahedral mesh
+    * InterfaceMesh1D, an interface mesh between two 2D meshes
 
 Examples
 --------
 
-Obtain a three times refined mesh of the unit square and draw it.
+Obtain a three times refined mesh of the unit square.
 
-.. code-block:: python
-
-    from skfem.mesh import MeshTri
-    m = MeshTri()
-    m.refine(3)
-    m.draw()
-    m.show()
+>>> from skfem.mesh import MeshTri
+>>> m = MeshTri()
+>>> m.refine(3)
+>>> m.p.shape
+(2, 81)
 
 Read a mesh generated using Gmsh.
 
-.. code-block:: python
-
-    from skfem.extern_sfepy import read_gmsh
-    m = read_gmsh('cylinder.msh')
-
->>> m = MeshTri()
->>> m.p.shape[0]
-1
+>>> from skfem.extern_sfepy import read_gmsh
+>>> m = read_gmsh('examples/box.msh')
+>>> type(m)
+<class 'skfem.mesh.MeshTet'>
+>>> m.p.shape
+(3, 358)
 
 """
 import matplotlib.pyplot as plt
@@ -45,13 +42,23 @@ import skfem.mapping
 
 
 class Mesh():
-    """Finite element mesh."""
+    """A finite element mesh.
+    
+    This is an abstract superclass. Check the following implementations
 
-    refdom = "none"  #: A string defining type of the mesh
-    brefdom = "none"  #: A string defining type of the boundary mesh
+        * MeshLine, one-dimensional mesh
+        * MeshTri, triangular mesh
+        * MeshTet, tetrahedral mesh
+        * MeshQuad, quadrilateral mesh
+        * MeshHex, hexahedral mesh
+        * InterfaceMesh1D, an interface mesh between two 2D meshes
+    """
 
-    p = np.array([])  #: The vertices of the mesh, size: dim x Npoints
-    t = np.array([])  #: The element connectivity, size: verts/elem x Nelems
+    refdom = "none"  
+    brefdom = "none" 
+
+    p = np.array([]) 
+    t = np.array([]) 
 
     def __init__(self):
         """Check that p and t are C_CONTIGUOUS as this leads
@@ -481,6 +488,9 @@ class MeshLine(Mesh):
     refdom = "line"
     brefdom = "point"
 
+    p = np.array([])
+    t = np.array([])
+
     def __init__(self, p=None, t=None, validate=True, initmesh=None):
         if p is None and t is None:
             if initmesh is None or initmesh is 'refdom':
@@ -583,12 +593,44 @@ class MeshLine(Mesh):
 
 
 class MeshQuad(Mesh2D):
-    """A mesh consisting of quadrilateral elements."""
+    """A mesh consisting of quadrilateral elements.
+    
+    Attributes
+    ----------
+    p : numpy array of size 2 x Nvertices
+        The vertices of the mesh
+    t : numpy array of size 4 x Nelements
+        The element connectivity
+    facets : numpy array of size 2 x Nfacets
+        Each column contains a pair of indices to p.
+    f2t : numpy array of size 2 x Nfacets
+        Each column contains a pair of indices to t
+        or -1 on the second row if the facet is on
+        the boundary.
+    t2f : numpy array of size 4 x Nelements
+        Each column contains four indices to facets.
+    """
 
     refdom = "quad"
     brefdom = "line"
 
+    p = np.array([])
+    t = np.array([])
+    facets = np.array([])
+    f2t = np.array([])
+    t2f = np.array([])
+
     def __init__(self, p=None, t=None, initmesh=None, validate=True):
+        """Initialize a quadrilateral mesh.
+
+        Parameters
+        ----------
+        p : (optional) numpy array of size 2 x Nvertices
+            The points of the mesh.
+        t : (optional) numpy array of size 4 x Nelements
+            The element connectivity, i.e. indices to p.
+            These should be in counter-clockwise order.
+        """
         if p is None and t is None:
             if initmesh is None:
                 p = np.array([[0., 0.], [1., 0.], [1., 1.], [0., 1.]]).T
@@ -1274,12 +1316,77 @@ class MeshTet(Mesh):
 
 
 class MeshTri(Mesh2D):
-    """Triangular mesh."""
+    """A mesh consisting of triangular elements.
+    
+    Attributes
+    ----------
+    p : numpy array of size 2 x Nvertices
+        The vertices of the mesh
+    t : numpy array of size 3 x Nelements
+        The element connectivity
+    facets : numpy array of size 2 x Nfacets
+        Each column contains a pair of indices to p.
+    f2t : numpy array of size 2 x Nfacets
+        Each column contains a pair of indices to t
+        or -1 on the second row if the facet is on
+        the boundary.
+    t2f : numpy array of size 3 x Nelements
+        Each column contains three indices to facets.
+    """
 
     refdom = "tri"
     brefdom = "line"
 
+    p = np.array([])
+    t = np.array([])
+    facets = np.array([])
+    f2t = np.array([])
+    t2f = np.array([])
+
     def __init__(self, p=None, t=None, validate=True, initmesh=None, sort_t=True):
+        """Initialize a triangular mesh.
+
+        Parameters
+        ----------
+        p : (optional) numpy array of size 2 x Nvertices
+            The points of the mesh.
+        t : (optional) numpy array of size 3 x Nelements
+            The element connectivity, i.e. indices to p.
+        validate : (optional) bool
+            Whether to run mesh validity checks or not.
+        initmesh : (optional) string
+            This has an effect only if p and t are not given.
+            Can be one of the following values: 'symmetric',
+            'sqsymmetric', 'refdom'. Gives diffeent initial
+            meshes.
+
+        Examples
+        --------
+
+        Initialize a symmetric mesh of the unit square.
+
+        >>> m = MeshTri(initmesh='sqsymmetric')
+        >>> m.t.shape
+        (3, 8)
+
+        Facets (edges) and mappings from triangles to facets and vice versa are
+        automatically constructed. In the following example we have 5 facets
+        (edges).
+
+        >>> m = MeshTri()
+        >>> m.facets
+        array([[0, 0, 1, 1, 2],
+               [1, 2, 2, 3, 3]])
+        >>> m.t2f
+        array([[0, 2],
+               [2, 4],
+               [1, 3]])
+        >>> m.f2t
+        array([[ 0,  0,  1,  1,  1],
+               [-1, -1,  0, -1, -1]])
+
+        The value -1 implies that the facet (the edges) is on the boundary.
+        """
         if p is None and t is None:
             if initmesh is 'symmetric':
                 p = np.array([[0, 1, 1, 0, 0.5],
