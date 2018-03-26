@@ -50,6 +50,8 @@ class Mesh(object):
     t = np.array([])  #: The element connectivity, size: verts/elem x Nelems
 
     def __init__(self):
+        """Check that p and t are C_CONTIGUOUS as this leads
+        to better performance."""
         if self.p is not None:
             if self.p.flags['F_CONTIGUOUS']:
                 if self.p.shape[1]>1000:
@@ -67,10 +69,12 @@ class Mesh(object):
         return self.__repr__()
 
     def __repr__(self):
-        return str(type(self)) + "\np: " + str(self.p.shape) + "\nt: " + str(self.t.shape)
+        return str(type(self)) + \
+               "\np: " + str(self.p.shape) + \
+               "\nt: " + str(self.t.shape)
 
     def show(self):
-        """Call the correct pyplot show commands after plotting."""
+        """A wrapper for matplotlib.pyplot.show()."""
         plt.show()
 
     def dim(self):
@@ -83,10 +87,17 @@ class Mesh(object):
 
     def _uniform_refine(self):
         """Perform a single uniform mesh refinement."""
-        raise NotImplementedError("Single refine not implemented for this mesh type!")
+        raise NotImplementedError("Single refine not implemented " +
+                                  "for this mesh type!")
 
     def refine(self, N=None):
-        """Refine the mesh."""
+        """Refine the mesh.
+        
+        Parameters
+        ----------
+        N : int (optional)
+            Perform N refinements.
+        """
         if N is None:
             return self._uniform_refine()
         else:
@@ -343,7 +354,7 @@ class Mesh2D(Mesh):
 
 
 class InterfaceMesh1D(Mesh):
-
+    """An interface mesh for mortar methods."""
     def __init__(self, mesh1, mesh2, rule, param, debug_plot=False):
         self.brefdom = mesh1.brefdom
 
@@ -734,7 +745,6 @@ class MeshHex(Mesh):
         if p is None and t is None:
             p = np.array([[0., 0., 0.], [0., 0., 1.], [0., 1., 0.], [1., 0., 0.],
                           [0., 1., 1.], [1., 0., 1.], [1., 1., 0.], [1., 1., 1.]]).T
-            #t = np.array([[0, 3, 6, 2, 1, 5, 7, 4]]).T
             t = np.array([[0, 1, 2, 3, 4, 5, 6, 7]]).T
         elif p is None or t is None:
             raise Exception("Must provide p AND t or neither")
@@ -748,7 +758,7 @@ class MeshHex(Mesh):
         # |   |/
         # 1---5
         #
-        # The missing node is 0.
+        # The hidden node is 0.
         #
         self.p = p
         self.t = t
@@ -939,13 +949,20 @@ class MeshHex(Mesh):
         # TODO implement prolongation
 
     def export_vtk(self, filename, pointData=None, cellData=None):
-        """
-        Export the mesh and fields to VTK.
+        """Export the mesh and fields to VTK.
+
+        Parameters
+        ----------
+        filename : string
+            The filename for vtu-file. E.g. "mesh" is saved
+            to the file "mesh.vtu".
+        pointData : (optional) numpy array or dict
+        cellData : (optional) numpy array or dict 
         """
         from pyevtk.hl import unstructuredGridToVTK
         from pyevtk.vtk import VtkHexahedron
 
-        # vtk wants its own ordering
+        # vtk requires a different ordering
         t = self.t[[0, 3, 6, 2, 1, 5, 7, 4], :]
 
         if pointData is not None:
@@ -1043,7 +1060,12 @@ class MeshTet(Mesh):
             self.f2t[1, np.nonzero(self.f2t[0, :] == self.f2t[1, :])[0]] = -1
 
     def refine(self, N=None):
-        """Refine the mesh, tetrahedral optimization."""
+        """Refine the mesh, tetrahedral optimization.
+        
+        Parameters
+        ----------
+        N : (optional) int
+            Perform N refinements."""
         if N is None:
             return self._uniform_refine()
         else:
@@ -1054,7 +1076,14 @@ class MeshTet(Mesh):
             self._uniform_refine()
 
     def nodes_satisfying(self, test):
-        """Return nodes that satisfy some condition."""
+        """Return nodes that satisfy some condition.
+        
+        Parameters
+        ----------
+        test : lambda function (3 params)
+            Should return 1 or True for nodes belonging
+            to the set.
+        """
         return np.nonzero(test(self.p[0, :], self.p[1, :], self.p[2, :]))[0]
 
     def facets_satisfying(self, test):
