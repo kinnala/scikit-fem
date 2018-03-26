@@ -23,23 +23,10 @@ def param(x, y):
 mortar = InterfaceMesh1D(m, M, rule, param, debug_plot=True)
 m.show()
 
-#mortar_map = MappingAffine(mortar)
-
-#mb = {}
-#mb[0] = MortarBasis(mortar, e, (map, mortar_map), 2, side=0)
-#mb[1] = MortarBasis(mortar, e, (Map, mortar_map), 2, side=1)
 mb = {}
-#joined_mesh = MeshTri(mortar.p, mortar.t)
 mortar_map = MappingAffine(mortar)
-#mb[0] = FacetBasis(mortar, e, mortar_map, 2, side=0, dofnum=Dofnum(joined_mesh, e))
-#mb[1] = FacetBasis(mortar, e, mortar_map, 2, side=1, dofnum=Dofnum(joined_mesh, e))
 mb[0] = FacetBasis(mortar, e, mortar_map, 2, side=0)
 mb[1] = FacetBasis(mortar, e, mortar_map, 2, side=1)
-
-#mb[0].normals[0] = 1.0
-#mb[0].normals[1] = 0.0
-#mb[1].normals[0] = 1.0
-#mb[1].normals[1] = 0.0
 
 E1 = 1000.0
 E2 = 1000.0
@@ -53,9 +40,13 @@ Mu2 = E2/(2.0*(1.0 + nu2))
 Lambda1 = E1*nu1/((1.0 + nu1)*(1.0 - 2.0*nu1))
 Lambda2 = E2*nu2/((1.0 + nu2)*(1.0 - 2.0*nu2))
 
+Mu = Mu1
+Lambda = Lambda1
+
 weakform1 = plane_strain(Lambda=Lambda1, Mu=Mu1)
 weakform2 = plane_strain(Lambda=Lambda2, Mu=Mu2)
 
+alpha = 1
 K1 = asm(weakform1, ib)
 K2 = asm(weakform2, Ib)
 L = 0
@@ -66,10 +57,21 @@ for i in range(2):
             n = w[2]
             ju = (-1.0)**i*(u[0]*n[0] + u[1]*n[1])
             jv = (-1.0)**j*(v[0]*n[0] + v[1]*n[1])
-            #mu = 0.5*(n*[0]*du[0, 0]*n[0] + n[0]*du[0, 1]*n[1])
-            #mv = 0.5*(dv[0]*n[0] + dv[1]*n[1])
+
+            def tr(T):
+                return T[0, 0] + T[1, 1]
+
+            def C(T):
+                return np.array([[2*Mu*T[0, 0] + Lambda*tr(T), 2*Mu*T[0, 1]],
+                                 [2*Mu*T[1, 0], 2*Mu*T[1, 1] + Lambda*tr(T)]])
+
+            def Eps(dw):
+                return np.array([[dw[0][0], 0.5*(dw[0][1] + dw[1][0])],
+                                 [0.5*(dw[1][0] + dw[0][1]), dw[1][1]]])
+            mu = 0.5*(n[0]*C(Eps(du))[0, 0]*n[0] + n[0]*C(Eps(du))[0, 1]*n[1] + n[1]*C(Eps(du))[1, 0]*n[0] + n[1]*C(Eps(du))[1, 1]*n[1])
+            mv = 0.5*(n[0]*C(Eps(dv))[0, 0]*n[0] + n[0]*C(Eps(dv))[0, 1]*n[1] + n[1]*C(Eps(dv))[1, 0]*n[0] + n[1]*C(Eps(dv))[1, 1]*n[1])
             h = w[1]
-            return 1.0/h*ju*jv# - mu*jv - mv*ju
+            return 1.0/(alpha*h)*ju*jv - mu*jv - mv*ju
 
         L = asm(bilin_penalty, mb[i], mb[j]) + L
 
@@ -81,7 +83,7 @@ f1 = asm(load, ib)
 f2 = np.zeros(K2.shape[0])
 
 import scipy.sparse
-K = (scipy.sparse.bmat([[K1, None],[None, K2]]) + 1e4*L).tocsr()
+K = (scipy.sparse.bmat([[K1, None],[None, K2]]) + L).tocsr()
 
 i1 = np.arange(K1.shape[0])
 i2 = np.arange(K2.shape[0]) + K1.shape[0]

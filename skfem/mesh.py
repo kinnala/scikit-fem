@@ -8,7 +8,7 @@ Currently implemented mesh types are
     * :class:`skfem.mesh.MeshTet`, a tetrahedral mesh
     * :class:`skfem.mesh.MeshQuad`, a mesh consisting of quadrilaterals
     * :class:`skfem.mesh.MeshLine`, one-dimensional mesh
-    * (experimental) :class:`skfem.mesh.MeshLineMortar`, interface mesh between two 2D meshes
+    * :class:`skfem.mesh.InterfaceMesh1D`, 1D interface mesh between two 2D meshes
 
 Examples
 --------
@@ -160,7 +160,7 @@ class Mesh(object):
                    "the given vertex matrix is of size Ndim x Nvertices.")
             raise Exception(msg)
         # check that element connectivity matrix has correct size
-        nvertices = {'line': 2, 'tri': 3, 'quad': 4, 'tet': 4}
+        nvertices = {'line': 2, 'tri': 3, 'quad': 4, 'tet': 4, 'hex': 8}
         if self.t.shape[0] != nvertices[self.refdom]:
             msg = ("Mesh._validate(): The given connectivity "
                    "matrix has wrong shape!")
@@ -576,10 +576,10 @@ class MeshQuad(Mesh2D):
     def __init__(self, p=None, t=None, initmesh=None, validate=True):
         if p is None and t is None:
             if initmesh is None:
-                p = np.array([[0, 0], [1, 0], [1, 1], [0, 1]]).T
+                p = np.array([[0., 0.], [1., 0.], [1., 1.], [0., 1.]]).T
                 t = np.array([[0, 1, 2, 3]]).T
             elif initmesh is 'refdom':
-                p = np.array([[-1, -1], [1, -1], [1, 1], [-1, 1]]).T
+                p = np.array([[-1., -1.], [1., -1.], [1., 1.], [-1., 1.]]).T
                 t = np.array([[0, 1, 2, 3]]).T
             else:
                 raise Exception("invalid initmesh keyword.")
@@ -724,6 +724,243 @@ class MeshQuad(Mesh2D):
         return skfem.mapping.MappingQ1(self)
 
 
+class MeshHex(Mesh):
+    """Hexahedral mesh."""
+
+    refdom = "hex"
+    brefdom = "quad"
+
+    def __init__(self, p=None, t=None, validate=True):
+        if p is None and t is None:
+            p = np.array([[0., 0., 0.], [0., 0., 1.], [0., 1., 0.], [1., 0., 0.],
+                          [0., 1., 1.], [1., 0., 1.], [1., 1., 0.], [1., 1., 1.]]).T
+            #t = np.array([[0, 3, 6, 2, 1, 5, 7, 4]]).T
+            t = np.array([[0, 1, 2, 3, 4, 5, 6, 7]]).T
+        elif p is None or t is None:
+            raise Exception("Must provide p AND t or neither")
+        #
+        # TODO fix orientation if p and t is provided. refer to
+        # the default mesh for correct orientation
+        #
+        #   2---6
+        #  /   /|
+        # 4---7 3
+        # |   |/
+        # 1---5
+        #
+        # The missing node is 0.
+        #
+        self.p = p
+        self.t = t
+        if validate:
+            self._validate()
+        self._build_mappings()
+        super(MeshHex, self).__init__()
+
+    def _build_mappings(self):
+        """Build element-to-facet, element-to-edges, etc. mappings."""
+        self.edges = np.sort(np.vstack((self.t[0, :], self.t[1, :])), axis=0)
+        e = np.array([0, 2,
+                      0, 3,
+                      1, 4,
+                      1, 5,
+                      2, 4,
+                      2, 6,
+                      3, 5,
+                      3, 6,
+                      4, 7,
+                      5, 7,
+                      6, 7]) # see the picture in init
+        for i in range(11):
+            self.edges = np.hstack((self.edges,
+                                    np.sort(np.vstack((self.t[e[2*i], :],
+                                                       self.t[e[2*i+1], :])),
+                                            axis=0)))
+
+        # unique edges
+        self.edges, ixa, ixb = np.unique(self.edges, axis=1, return_index=True, return_inverse=True)
+        self.edges = np.ascontiguousarray(self.edges)
+
+        self.t2e = ixb.reshape((12, self.t.shape[1]))
+
+        # define facets
+        self.facets = np.sort(np.vstack((self.t[0, :], self.t[1, :], self.t[4, :], self.t[2, :])), axis=0)
+        f = np.array([0, 3, 6, 2,
+                      0, 1, 5, 3,
+                      2, 6, 7, 4,
+                      1, 5, 7, 4,
+                      3, 5, 7, 6])
+        for i in range(5):
+            self.facets = np.hstack((self.facets, np.sort(np.vstack((self.t[f[4*i], :],
+                                                                     self.t[f[4*i+1], :],
+                                                                     self.t[f[4*i+2], :],
+                                                                     self.t[f[4*i+3], :])), axis=0)))
+
+
+        # unique facets
+        self.facets, ixa, ixb = np.unique(self.facets, axis=1, return_index=True, return_inverse=True)
+        self.facets = np.ascontiguousarray(self.facets)
+
+        self.t2f = ixb.reshape((6, self.t.shape[1]))
+
+        # build facet-to-tetra mapping: 2 (tets) x Nfacets
+        #e_tmp = np.hstack((self.t2f[0, :], self.t2f[1, :],
+        #                   self.t2f[2, :], self.t2f[3, :]))
+        #t_tmp = np.tile(np.arange(self.t.shape[1]), (1, 4))[0]
+
+        #e_first, ix_first = np.unique(e_tmp, return_index=True)
+        ## this emulates matlab unique(e_tmp,'last')
+        #e_last, ix_last = np.unique(e_tmp[::-1], return_index=True)
+        #ix_last = e_tmp.shape[0] - ix_last-1
+
+        #self.f2t = np.zeros((2, self.facets.shape[1]), dtype=np.int64)
+        #self.f2t[0, e_first] = t_tmp[ix_first]
+        #self.f2t[1, e_last] = t_tmp[ix_last]
+
+        ## second row to zero if repeated (i.e., on boundary)
+        #self.f2t[1, np.nonzero(self.f2t[0, :] == self.f2t[1, :])[0]] = -1
+
+    def _uniform_refine(self):
+        """Perform a single mesh refine that halves 'h'.
+
+        Each hex is split into 8."""
+        # rename variables
+        t = self.t
+        p = self.p
+        e = self.edges
+        f = self.facets
+        sz = p.shape[1]
+        t2e = self.t2e + sz
+        t2f = self.t2f + np.max(t2e) + 1
+        # hex middle point
+        mid = range(self.t.shape[1]) + np.max(t2f) + 1
+        # new vertices are the midpoints of edges ...
+        newp1 = 0.5*np.vstack((p[0, e[0, :]] + p[0, e[1, :]],
+                               p[1, e[0, :]] + p[1, e[1, :]],
+                               p[2, e[0, :]] + p[2, e[1, :]]))
+        # ... midpoints of facets ...
+        newp2 = 0.25*np.vstack((p[0, f[0, :]] + p[0, f[1, :]] +
+                                p[0, f[2, :]] + p[0, f[3, :]],
+                                p[1, f[0, :]] + p[1, f[1, :]] +
+                                p[1, f[2, :]] + p[1, f[3, :]],
+                                p[2, f[0, :]] + p[2, f[1, :]] +
+                                p[2, f[2, :]] + p[2, f[3, :]]))
+        # ... and element middle points
+        newp3 = 0.125*np.vstack((p[0, t[0, :]] + p[0, t[1, :]] +
+                                 p[0, t[2, :]] + p[0, t[3, :]] +
+                                 p[0, t[4, :]] + p[0, t[5, :]] +
+                                 p[0, t[6, :]] + p[0, t[7, :]],
+                                 p[1, t[0, :]] + p[1, t[1, :]] +
+                                 p[1, t[2, :]] + p[1, t[3, :]] +
+                                 p[1, t[4, :]] + p[1, t[5, :]] +
+                                 p[1, t[6, :]] + p[1, t[7, :]],
+                                 p[2, t[0, :]] + p[2, t[1, :]] +
+                                 p[2, t[2, :]] + p[2, t[3, :]] +
+                                 p[2, t[4, :]] + p[2, t[5, :]] +
+                                 p[2, t[6, :]] + p[2, t[7, :]]))
+        newp = np.hstack((p, newp1, newp2, newp3))
+        # build new hex indexing (this requires some serious meditation)
+        newt = np.vstack((t[0, :],
+                          t2e[0, :],
+                          t2e[1, :],
+                          t2e[2, :],
+                          t2f[0, :],
+                          t2f[2, :],
+                          t2f[1, :],
+                          mid))
+        newt = np.hstack((newt, np.vstack((t2e[0, :],
+                                           t[1, :],
+                                           t2f[0, :],
+                                           t2f[2, :],
+                                           t2e[3, :],
+                                           t2e[4, :],
+                                           mid,
+                                           t2f[4, :]))))
+        newt = np.hstack((newt, np.vstack((t2e[1, :],
+                                           t2f[0, :],
+                                           t[2, :],
+                                           t2f[1, :],
+                                           t2e[5, :],
+                                           mid,
+                                           t2e[6, :],
+                                           t2f[3, :]
+                                           ))))
+        newt = np.hstack((newt, np.vstack((t2e[2, :],
+                                           t2f[2, :],
+                                           t2f[1, :],
+                                           t[3, :],
+                                           mid,
+                                           t2e[7, :],
+                                           t2e[8, :],
+                                           t2f[5, :]
+                                           ))))
+        newt = np.hstack((newt, np.vstack((t2f[0, :],
+                                           t2e[3, :],
+                                           t2e[5, :],
+                                           mid,
+                                           t[4, :],
+                                           t2f[4, :],
+                                           t2f[3, :],
+                                           t2e[9, :]
+                                           ))))
+        newt = np.hstack((newt, np.vstack((t2f[2, :],
+                                           t2e[4, :],
+                                           mid,
+                                           t2e[7, :],
+                                           t2f[4, :],
+                                           t[5, :],
+                                           t2f[5, :],
+                                           t2e[10, :],
+                                           ))))
+        newt = np.hstack((newt, np.vstack((t2f[1, :],
+                                           mid,
+                                           t2e[6, :],
+                                           t2e[8, :],
+                                           t2f[3, :],
+                                           t2f[5, :],
+                                           t[6, :],
+                                           t2e[11, :]
+                                           ))))
+        newt = np.hstack((newt, np.vstack((mid,
+                                           t2f[4, :],
+                                           t2f[3, :],
+                                           t2f[5, :],
+                                           t2e[9, :],
+                                           t2e[10, :],
+                                           t2e[11, :],
+                                           t[7, :]
+                                           ))))
+        # update fields
+        self.p = newp
+        self.t = newt
+
+        self._build_mappings()
+
+        # TODO implement prolongation
+
+    def export_vtk(self, filename, pointData=None, cellData=None):
+        """
+        Export the mesh and fields to VTK.
+        """
+        from pyevtk.hl import unstructuredGridToVTK
+        from pyevtk.vtk import VtkHexahedron
+
+        # vtk wants its own ordering
+        t = self.t[[0, 3, 6, 2, 1, 5, 7, 4], :]
+
+        if pointData is not None:
+            if type(pointData) != dict:
+                pointData = {'0':pointData}
+
+        if cellData is not None:
+            if type(cellData) != dict:
+                cellData = {'0':cellData}
+
+        offset = (np.arange(t.shape[1])+1)*8
+        ctypes = np.zeros(t.shape[1]) + VtkHexahedron.tid
+        unstructuredGridToVTK(filename, self.p[0, :], self.p[1, :], self.p[2, :], connectivity=t.flatten('F'),
+                              offsets=offset, cell_types=ctypes, cellData=cellData, pointData=pointData)
+
 class MeshTet(Mesh):
     """Tetrahedral mesh."""
 
@@ -732,8 +969,8 @@ class MeshTet(Mesh):
 
     def __init__(self, p=None, t=None, validate=True):
         if p is None and t is None:
-            p = np.array([[0, 0, 0], [0, 0, 1], [0, 1, 0], [1, 0, 0],
-                          [0, 1, 1], [1, 0, 1], [1, 1, 0], [1, 1, 1]]).T
+            p = np.array([[0., 0., 0.], [0., 0., 1.], [0., 1., 0.], [1., 0., 0.],
+                          [0., 1., 1.], [1., 0., 1.], [1., 1., 0.], [1., 1., 1.]]).T
             t = np.array([[0, 1, 2, 3], [3, 5, 1, 7], [2, 3, 6, 7],
                           [2, 3, 1, 7], [1, 2, 4, 7]]).T
         elif p is None or t is None:
@@ -1030,11 +1267,11 @@ class MeshTri(Mesh2D):
                               [4, 7, 8],
                               [4, 5, 8]], dtype=np.intp).T
             elif initmesh is 'refdom':
-                p = np.array([[0, 1, 0],
-                              [0, 0, 1]], dtype=np.float_)
+                p = np.array([[0., 1., 0.],
+                              [0., 0., 1.]], dtype=np.float_)
                 t = np.array([[0, 1, 2]], dtype=np.intp).T
             else:
-                p = np.array([[0, 1, 0, 1], [0, 0, 1, 1]], dtype=np.float_)
+                p = np.array([[0., 1., 0., 1.], [0., 0., 1., 1.]], dtype=np.float_)
                 t = np.array([[0, 1, 2], [1, 3, 2]], dtype=np.intp).T
         elif p is None or t is None:
             raise Exception("Must provide p AND t or neither")
