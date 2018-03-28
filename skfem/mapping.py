@@ -78,7 +78,16 @@ class MappingIsoparametric():
             invDF[1, 0] = -self.J(1, 0, X)/detDF
             invDF[1, 1] =  self.J(0, 0, X)/detDF
         elif dim == 3:
-            raise NotImplementedError("!")
+            invDF = np.empty((3, 3) + self.J(0, 0, X).shape)
+            invDF[0, 0] = (-self.J(1, 2, X) * self.J(2, 1, X) + self.J(1, 1, X) * self.J(2, 2, X)) / detDF
+            invDF[1, 0] = ( self.J(1, 2, X) * self.J(2, 0, X) - self.J(1, 0, X) * self.J(2, 2, X)) / detDF
+            invDF[2, 0] = (-self.J(1, 1, X) * self.J(2, 0, X) + self.J(1, 0, X) * self.J(2, 1, X)) / detDF
+            invDF[0, 1] = ( self.J(0, 2, X) * self.J(2, 1, X) - self.J(0, 1, X) * self.J(2, 2, X)) / detDF
+            invDF[1, 1] = (-self.J(0, 2, X) * self.J(2, 0, X) + self.J(0, 0, X) * self.J(2, 2, X)) / detDF
+            invDF[2, 1] = ( self.J(0, 1, X) * self.J(2, 0, X) - self.J(0, 0, X) * self.J(2, 1, X)) / detDF
+            invDF[0, 2] = (-self.J(0, 2, X) * self.J(1, 1, X) + self.J(0, 1, X) * self.J(1, 2, X)) / detDF
+            invDF[1, 2] = ( self.J(0, 2, X) * self.J(1, 0, X) - self.J(0, 0, X) * self.J(1, 2, X)) / detDF
+            invDF[2, 2] = (-self.J(0, 1, X) * self.J(1, 0, X) + self.J(0, 0, X) * self.J(1, 1, X)) / detDF
         else:
             raise Exception("Not implemented for the given dimension.")
 

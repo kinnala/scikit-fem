@@ -2,15 +2,6 @@
 """
 Mesh module contains different types of finite element meshes.
 
-Currently implemented mesh types are
-
-    * MeshLine, one-dimensional mesh
-    * MeshTri, triangular mesh
-    * MeshTet, tetrahedral mesh
-    * MeshQuad, quadrilateral mesh
-    * MeshHex, hexahedral mesh
-    * InterfaceMesh1D, an interface mesh between two 2D meshes
-
 Examples
 --------
 
@@ -198,6 +189,69 @@ class Mesh():
             msg = ("Mesh._validate(): Mesh contains a vertex "
                    "not belonging to any element.")
             raise Exception(msg)
+
+
+class Mesh3D(Mesh):
+    """Three dimensional meshes, common methods."""
+
+    def nodes_satisfying(self, test):
+        """Return nodes that satisfy some condition.
+
+        Parameters
+        ----------
+        test : lambda function (3 params)
+            Should return 1 or True for nodes belonging
+            to the set.
+        """
+        return np.nonzero(test(self.p[0, :], self.p[1, :], self.p[2, :]))[0]
+
+    def facets_satisfying(self, test):
+        """Return facets whose midpoints satisfy some condition."""
+        mx = np.sum(self.p[0, self.facets], axis=0)/self.facets.shape[0]
+        my = np.sum(self.p[1, self.facets], axis=0)/self.facets.shape[0]
+        mz = np.sum(self.p[2, self.facets], axis=0)/self.facets.shape[0]
+        return np.nonzero(test(mx, my, mz))[0]
+
+    def edges_satisfying(self, test):
+        """Return edges whose midpoints satisfy some condition."""
+        mx = 0.5*(self.p[0, self.edges[0, :]] + self.p[0, self.edges[1, :]])
+        my = 0.5*(self.p[1, self.edges[0, :]] + self.p[1, self.edges[1, :]])
+        mz = 0.5*(self.p[2, self.edges[0, :]] + self.p[2, self.edges[1, :]])
+        return np.nonzero(test(mx, my, mz))[0]
+
+    def boundary_nodes(self):
+        """Return an array of boundary node indices."""
+        return np.unique(self.facets[:, self.boundary_facets()])
+
+    def boundary_facets(self):
+        """Return an array of boundary facet indices."""
+        return np.nonzero(self.f2t[1, :] == -1)[0]
+
+    def interior_facets(self):
+        """Return an array of interior facet indices."""
+        return np.nonzero(self.f2t[1, :] >= 0)[0]
+
+    def boundary_edges(self):
+        """Return an array of boundary edge indices."""
+        bnodes = self.boundary_nodes()[:, None]
+        return np.nonzero(np.sum(self.edges[0, :] == bnodes, axis=0) *
+                          np.sum(self.edges[1, :] == bnodes, axis=0))[0]
+
+    def interior_nodes(self):
+        """Return an array of interior node indices."""
+        return np.setdiff1d(np.arange(0, self.p.shape[1]), self.boundary_nodes())
+
+    def draw_vertices(self):
+        """Draw all vertices using mplot3d."""
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        ax.scatter(self.p[0, :], self.p[1, :], self.p[2, :])
+        return fig
+
+    def param(self):
+        """Return (maximum) mesh parameter."""
+        return np.max(np.sqrt(np.sum((self.p[:, self.edges[0, :]] -
+                                      self.p[:, self.edges[1, :]])**2, axis=0)))
 
 
 class Mesh2D(Mesh):
@@ -781,7 +835,7 @@ class MeshQuad(Mesh2D):
         return skfem.mapping.MappingQ1(self)
 
 
-class MeshHex(Mesh):
+class MeshHex(Mesh3D):
     """Hexahedral mesh."""
 
     refdom = "hex"
@@ -859,22 +913,22 @@ class MeshHex(Mesh):
 
         self.t2f = ixb.reshape((6, self.t.shape[1]))
 
-        # build facet-to-tetra mapping: 2 (tets) x Nfacets
-        #e_tmp = np.hstack((self.t2f[0, :], self.t2f[1, :],
-        #                   self.t2f[2, :], self.t2f[3, :]))
-        #t_tmp = np.tile(np.arange(self.t.shape[1]), (1, 4))[0]
+        # build facet-to-hexa mapping: 2 (hexes) x Nfacets
+        e_tmp = np.hstack((self.t2f[0, :], self.t2f[1, :],
+                           self.t2f[2, :], self.t2f[3, :],
+                           self.t2f[4, :], self.t2f[5, :]))
+        t_tmp = np.tile(np.arange(self.t.shape[1]), (1, 6))[0]
 
-        #e_first, ix_first = np.unique(e_tmp, return_index=True)
-        ## this emulates matlab unique(e_tmp,'last')
-        #e_last, ix_last = np.unique(e_tmp[::-1], return_index=True)
-        #ix_last = e_tmp.shape[0] - ix_last-1
+        e_first, ix_first = np.unique(e_tmp, return_index=True)
+        e_last, ix_last = np.unique(e_tmp[::-1], return_index=True)
+        ix_last = e_tmp.shape[0] - ix_last - 1
 
-        #self.f2t = np.zeros((2, self.facets.shape[1]), dtype=np.int64)
-        #self.f2t[0, e_first] = t_tmp[ix_first]
-        #self.f2t[1, e_last] = t_tmp[ix_last]
+        self.f2t = np.zeros((2, self.facets.shape[1]), dtype=np.int64)
+        self.f2t[0, e_first] = t_tmp[ix_first]
+        self.f2t[1, e_last] = t_tmp[ix_last]
 
         ## second row to zero if repeated (i.e., on boundary)
-        #self.f2t[1, np.nonzero(self.f2t[0, :] == self.f2t[1, :])[0]] = -1
+        self.f2t[1, np.nonzero(self.f2t[0, :] == self.f2t[1, :])[0]] = -1
 
     def _uniform_refine(self):
         """Perform a single mesh refine that halves 'h'.
@@ -1024,7 +1078,7 @@ class MeshHex(Mesh):
         unstructuredGridToVTK(filename, self.p[0, :], self.p[1, :], self.p[2, :], connectivity=t.flatten('F'),
                               offsets=offset, cell_types=ctypes, cellData=cellData, pointData=pointData)
 
-class MeshTet(Mesh):
+class MeshTet(Mesh3D):
     """Tetrahedral mesh."""
 
     refdom = "tet"
@@ -1121,37 +1175,6 @@ class MeshTet(Mesh):
             self.ENABLE_FACETS = True
             self._uniform_refine()
 
-    def nodes_satisfying(self, test):
-        """Return nodes that satisfy some condition.
-        
-        Parameters
-        ----------
-        test : lambda function (3 params)
-            Should return 1 or True for nodes belonging
-            to the set.
-        """
-        return np.nonzero(test(self.p[0, :], self.p[1, :], self.p[2, :]))[0]
-
-    def facets_satisfying(self, test):
-        """Return facets whose midpoints satisfy some condition."""
-        mx = 0.3333333*(self.p[0, self.facets[0, :]] +
-                        self.p[0, self.facets[1, :]] +
-                        self.p[0, self.facets[2, :]])
-        my = 0.3333333*(self.p[1, self.facets[0, :]] +
-                        self.p[1, self.facets[1, :]] +
-                        self.p[1, self.facets[2, :]])
-        mz = 0.3333333*(self.p[2, self.facets[0, :]] +
-                        self.p[2, self.facets[1, :]] +
-                        self.p[2, self.facets[2, :]])
-        return np.nonzero(test(mx, my, mz))[0]
-
-    def edges_satisfying(self, test):
-        """Return edges whose midpoints satisfy some condition."""
-        mx = 0.5*(self.p[0, self.edges[0, :]] + self.p[0, self.edges[1, :]])
-        my = 0.5*(self.p[1, self.edges[0, :]] + self.p[1, self.edges[1, :]])
-        mz = 0.5*(self.p[2, self.edges[0, :]] + self.p[2, self.edges[1, :]])
-        return np.nonzero(test(mx, my, mz))[0]
-
     def _uniform_refine(self):
         """Perform a single mesh refine.
 
@@ -1247,40 +1270,6 @@ class MeshTet(Mesh):
         self._build_mappings()
 
         # TODO implement prolongation matrix
-
-    def draw_vertices(self):
-        """Draw all vertices using mplot3d."""
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        ax.scatter(self.p[0, :], self.p[1, :], self.p[2, :])
-        return fig
-
-    def boundary_nodes(self):
-        """Return an array of boundary node indices."""
-        return np.unique(self.facets[:, self.boundary_facets()])
-
-    def boundary_facets(self):
-        """Return an array of boundary facet indices."""
-        return np.nonzero(self.f2t[1, :] == -1)[0]
-
-    def interior_facets(self):
-        """Return an array of interior facet indices."""
-        return np.nonzero(self.f2t[1, :] >= 0)[0]
-
-    def boundary_edges(self):
-        """Return an array of boundary edge indices."""
-        bnodes = self.boundary_nodes()[:, None]
-        return np.nonzero(np.sum(self.edges[0, :] == bnodes, axis=0) *
-                          np.sum(self.edges[1, :] == bnodes, axis=0))[0]
-
-    def interior_nodes(self):
-        """Return an array of interior node indices."""
-        return np.setdiff1d(np.arange(0, self.p.shape[1]), self.boundary_nodes())
-
-    def param(self):
-        """Return (maximum) mesh parameter."""
-        return np.max(np.sqrt(np.sum((self.p[:, self.edges[0, :]] -
-                                      self.p[:, self.edges[1, :]])**2, axis=0)))
 
     def shapereg(self):
         """Return the largest shape-regularity constant."""

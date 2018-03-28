@@ -28,6 +28,9 @@ def get_quadrature(refdom, norder):
         | quad  | (-1,-1) (1,-1)  | infty          |
         |       | (1,1) (-1,1)    |                |
         +-------+-----------------+----------------+
+        | hex   | (-1,-1,-1),     | infty          |
+        |       | (1,1,1), etc.   |                |
+        +-------+-----------------+----------------+
 
     norder : int
         The polynomial order upto which the requested quadrature rule is
@@ -56,6 +59,16 @@ def get_quadrature(refdom, norder):
         # transform weights
         A, B = np.meshgrid(2*W, 2*W)
         Z = A*B
+        W = Z.flatten(order='F')
+        return Y, W
+    elif refdom is "hex": # (-1,-1,-1), (1,1,1), etc.
+        X, W = get_quadrature_line(norder)
+        # generate tensor product rule from 1D rule
+        A, B, C = np.meshgrid(X, X, X)
+        Y = 2.0*np.vstack((A.flatten(order='F'), B.flatten(order='F'), C.flatten(order='F'))) - 1.0
+        # transform weights
+        A, B, C = np.meshgrid(2*W, 2*W, 2*W)
+        Z = A*B*C
         W = Z.flatten(order='F')
         return Y, W
     else:

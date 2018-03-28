@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-This file contains objects and functions related to the finite element assembly.
+Assembly module contains classes and functions related to the finite element assembly.
 
 Workflow
 --------
-The user should perform the following steps:
+In order to assemble finite element matrices, the user should perform the following steps:
 
-    1. Mesh + Element + Mapping ----> GlobalBasis object
-    2. GlobalBasis object is fed to function asm which returns a sparse matrix
+    1. Mesh + Element + Mapping --> GlobalBasis object.
+    2. GlobalBasis object is fed to function 'asm' which returns a sparse matrix.
 """
 import numpy as np
 from scipy.sparse import coo_matrix
