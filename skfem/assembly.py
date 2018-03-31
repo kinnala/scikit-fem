@@ -8,6 +8,22 @@ In order to assemble finite element matrices, the user should perform the follow
 
     1. Mesh + Element + Mapping --> GlobalBasis object.
     2. GlobalBasis object is fed to function 'asm' which returns a sparse matrix.
+
+Examples
+--------
+
+Assemble a stiffness matrix K for the Dirichlet problem in a unit cube.
+
+>>> from skfem import *
+>>> from skfem.models import *
+>>> m = MeshHex()
+>>> m.refine(2)
+>>> e = ElementHex1()
+>>> map = MappingIsoparametric(m, e)
+>>> basis = InteriorBasis(m, e, map, 3) # 3 is the order of integration
+>>> K = asm(laplace, basis)
+>>> K.shape
+(125, 125)
 """
 import numpy as np
 from scipy.sparse import coo_matrix
@@ -15,6 +31,15 @@ from skfem.quadrature import get_quadrature
 
 
 class GlobalBasis():
+    """GlobalBasis (abstract) is a combination of Mesh, Element and Mapping (and quadrature points).
+
+    The finite element basis is evaluated at global quadrature points and cached inside the object.
+
+    Please see the following implementations:
+
+        * InteriorBasis
+        * FacetBasis
+    """
     def __init__(self, mesh, elem, mapping, intorder):
         self.mapping = mapping
 
@@ -345,7 +370,7 @@ class InteriorBasis(GlobalBasis):
         return M, w.flatten()
 
 
-def asm(kernel, ubasis, vbasis=None, w=None, nthreads=1):
+def asm(kernel, ubasis, vbasis=None, w=None, nthreads=1, assemble=True):
     """
     Assembly using kernel function.
 
@@ -423,10 +448,13 @@ def asm(kernel, ubasis, vbasis=None, w=None, nthreads=1):
         for t in threads:
             t.join()
 
-        K = coo_matrix((np.transpose(data, (1, 0, 2)).flatten('C'), (rows, cols)),
-                          shape=(vbasis.dofnum.N, ubasis.dofnum.N))
-        K.eliminate_zeros()
-        return K.tocsr()
+        if assemble:
+            K = coo_matrix((np.transpose(data, (1, 0, 2)).flatten('C'), (rows, cols)),
+                              shape=(vbasis.dofnum.N, ubasis.dofnum.N))
+            K.eliminate_zeros()
+            return K.tocsr()
+        else:
+            return (np.transpose(data, (1, 0, 2)).flatten('C'), (rows, cols))
     else:
         data = np.zeros((vbasis.Nbfun, nt))
         rows = np.zeros(vbasis.Nbfun * nt)
@@ -535,3 +563,8 @@ class Dofnum(object):
         if T is not None:
             dofs = np.hstack((dofs, self.i_dof[:, T].flatten()))
         return dofs.flatten()
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()

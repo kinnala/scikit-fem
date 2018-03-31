@@ -415,6 +415,77 @@ class ElementTetP0(ElementH1):
         return 1 + 0*X[0, :], 0*X
 
 
+class ElementTetP1(ElementH1):
+    n_dofs = 1
+    dim = 3
+    maxdeg = 1
+
+    def lbasis(self, X, i):
+        x, y, z = X[0, :], X[1, :], X[2, :]
+
+        if i == 0:
+            phi = 1 - x - y - z
+            dphi = np.array([-1 + 0*x, -1 + 0*x, -1 + 0*x])
+        elif i == 1:
+            phi = x
+            dphi = np.array([1 + 0*x, 0*x, 0*x])
+        elif i == 2:
+            phi = y
+            dphi = np.array([0*x, 1 + 0*x, 0*x])
+        elif i == 3:
+            phi = z 
+            dphi = np.array([0*x, 0*x, 1 + 0*x])
+        else:
+            raise Exception("!")
+
+        return phi, dphi
+
+
+class ElementTetP2(ElementH1):
+    n_dofs = 1
+    e_dofs = 1
+    dim = 3
+    maxdeg = 2
+
+    def lbasis(self, X, i):
+        x, y, z = X[0, :], X[1, :], X[2, :]
+
+        if i == 0:
+            phi = 1 - x - y - z
+            dphi = np.array([-1 + 0*x, -1 + 0*x, -1 + 0*x])
+        elif i == 1:
+            phi = x
+            dphi = np.array([1 + 0*x, 0*x, 0*x])
+        elif i == 2:
+            phi = y
+            dphi = np.array([0*x, 1 + 0*x, 0*x])
+        elif i == 3:
+            phi = z 
+            dphi = np.array([0*x, 0*x, 1 + 0*x])
+        elif i == 4: # (0, 1)
+            phi = (1 - x - y - z)*x
+            dphi = np.array([1 - 2*x - y - z, -x, -x])
+        elif i == 5: # (1, 2)
+            phi = x*y
+            dphi = np.array([y, x, 0*x])
+        elif i == 6: # (0, 2)
+            phi = (1 - x - y - z)*y
+            dphi = np.array([-y, 1 - x - 2*y - z, -y])
+        elif i == 7: # (0, 3)
+            phi = (1 - x - y - z)*z
+            dphi = np.array([-z, -z, 1 - x - y - 2*z])
+        elif i == 8: # (1, 3)
+            phi = x*z
+            dphi = np.array([z, 0*x, x])
+        elif i == 9: # (2, 3)
+            phi = y*z
+            dphi = np.array([0*x, z, y])
+        else:
+            raise Exception("!")
+
+        return phi, dphi
+
+
 class ElementTetRT0(ElementHdiv):
     f_dofs = 1
     dim = 3

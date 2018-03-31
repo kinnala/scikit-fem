@@ -35,7 +35,7 @@ import skfem.mapping
 class Mesh():
     """A finite element mesh.
     
-    This is an abstract superclass. Check the following implementations
+    This is an abstract superclass. Check the following implementations:
 
         * MeshLine, one-dimensional mesh
         * MeshTri, triangular mesh
@@ -1079,7 +1079,38 @@ class MeshHex(Mesh3D):
                               offsets=offset, cell_types=ctypes, cellData=cellData, pointData=pointData)
 
 class MeshTet(Mesh3D):
-    """Tetrahedral mesh."""
+    """Tetrahedral mesh.
+
+    Attributes
+    ----------
+    p : numpy array of size 3 x Nvertices
+        The vertices of the mesh. Each column corresponds to a point.
+
+    t : numpy array of size 4 x Nelements
+        The element connectivity. Each column corresponds to a element
+        and contains four column indices to MeshTet.p.
+
+    facets : numpy array of size 3 x Nfacets
+        Each column contains a triplet of column indices to MeshTet.p.
+
+        Order: (0, 1, 2) (0, 1, 3) (0, 2, 3) (1, 2, 3)
+
+    f2t : numpy array of size 2 x Nfacets
+        Each column contains a pair of column indices to MeshTet.t
+        or -1 on the second row if the facet is located on the boundary.
+
+    t2f : numpy array of size 4 x Nelements
+        Each column contains four indices to MeshTet.facets.
+
+    edges : numpy array of size 2 x Nedges
+        Each column corresponds to an edge and contains two indices to
+        MeshTet.p.
+
+        Order: (0, 1) (1, 2) (0, 2) (0, 3) (1, 3) (2, 3)
+
+    t2e : numpy array of size 6 x Nelements
+        Each column contains six indices to MeshTet.edges.
+    """
 
     refdom = "tet"
     brefdom = "tri"

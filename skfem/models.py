@@ -14,6 +14,10 @@ def laplace(u, du, v, dv, w):
     else:
         raise NotImplementedError("Laplace weakform not implemented for the used dimension.")
 
+@bilinear_form
+def mass(u, du, v, dv, w):
+    return u*v
+
 @linear_form
 def unit_load(v, dv, w):
     return v
