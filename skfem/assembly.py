@@ -1,13 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Assembly module contains classes and functions related to the finite element assembly.
-
-Workflow
---------
-In order to assemble finite element matrices, the user should perform the following steps:
-
-    1. Mesh + Element + Mapping --> GlobalBasis object.
-    2. GlobalBasis object is fed to function 'asm' which returns a sparse matrix.
+Assembly module contains classes and functions related to the construction
+of finite element matrices.
 
 Examples
 --------
@@ -25,15 +19,18 @@ Assemble a stiffness matrix K for the Dirichlet problem in a unit cube.
 >>> K.shape
 (125, 125)
 """
+
 import numpy as np
 from scipy.sparse import coo_matrix
 from skfem.quadrature import get_quadrature
 
 
 class GlobalBasis():
-    """GlobalBasis (abstract) is a combination of Mesh, Element and Mapping (and quadrature points).
+    """GlobalBasis (abstract) is a combination of Mesh, Element and Mapping
+    (and quadrature points).
 
-    The finite element basis is evaluated at global quadrature points and cached inside the object.
+    The finite element basis is evaluated at global quadrature points and
+    cached inside the object.
 
     Please see the following implementations:
 
@@ -372,7 +369,7 @@ class InteriorBasis(GlobalBasis):
 
 def asm(kernel, ubasis, vbasis=None, w=None, nthreads=1, assemble=True):
     """
-    Assembly using kernel function.
+    Assembly using a kernel function.
 
     Parameters
     ----------
