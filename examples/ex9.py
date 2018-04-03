@@ -1,5 +1,5 @@
 from skfem import *
-from skfem.models import *
+from skfem.models.poisson import *
 
 """
 Solve Laplace equation with zero Dirichlet BC

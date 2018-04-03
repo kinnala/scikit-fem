@@ -16,9 +16,7 @@ def _import_all_modules():
                 or filename == 'mesh.py' \
                 or filename == 'utils.py' \
                 or filename == 'element.py' \
-                or filename == 'mapping.py' \
-                or filename == 'extern_sfepy.py' \
-                or filename == 'models.py':
+                or filename == 'mapping.py':
             modulename = filename.split('.')[0]  # filename without extension
             package_module = '.'.join([__name__, modulename])
             try:

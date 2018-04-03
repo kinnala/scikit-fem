@@ -1,4 +1,5 @@
 from skfem import *
+from skfem.models.poisson import laplace
 
 """
 High-order plotting test.

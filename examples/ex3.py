@@ -1,4 +1,5 @@
 from skfem import *
+from skfem.models.elasticity import *
 from scipy.sparse.linalg import eigsh
 import numpy as np
 

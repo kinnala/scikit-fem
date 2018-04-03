@@ -1,5 +1,6 @@
 from skfem import *
-from skfem.models import *
+from skfem.mesh_importers import *
+from skfem.models.elasticity import *
 import numpy as np
 
 m = read_comsol("examples/square_smalltris.mphtxt")

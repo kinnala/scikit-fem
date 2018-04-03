@@ -1,4 +1,5 @@
 from skfem import *
+from skfem.models.poisson import unit_load
 import numpy as np
 
 m = MeshTri()
