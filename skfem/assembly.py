@@ -97,14 +97,12 @@ class GlobalBasis():
             return W, dW
         return W
 
-    def essential_bc(self, test=None, bc=None, boundary=True, dofrows=None, check_vertices=True,
-                     check_facets=True, check_edges=True):
-        """Helper function for setting essential boundary conditions.
+    def find_dofs(self, test=None, bc=None, boundary=True, dofrows=None,
+                  check_vertices=True, check_facets=True, check_edges=True):
+        """Helper function for finding DOF indices for BC's.
 
-        Does not test for element interior DOFs since they are not typically included in
-        boundary conditions! Uses dofnum of 'u' variable.
-
-        Remark: More convenient replacement for Assembler.dofnum_u.getdofs().
+        Does not test for element interior DOFs since they are not typically
+        included in boundary conditions! Uses dofnum of 'u' variable.
 
         Parameters
         ----------
@@ -135,9 +133,6 @@ class GlobalBasis():
         I : np.array
             Set of DOF numbers set by the function
         """
-        if self.mesh.dim() == 1:
-            raise Exception("Assembler.find_dofs not implemented for 1D mesh.")
-
         if test is None:
             if self.mesh.dim() == 2:
                 test = lambda x, y: 0*x + True
@@ -194,15 +189,9 @@ class GlobalBasis():
                 Fdofy = np.tile(my, (Fdofs.shape[0], 1)).flatten()
                 locs = np.hstack((locs, np.vstack((Fdofx, Fdofy))))
             else:
-                mx = 0.3333333*(self.mesh.p[0, self.mesh.facets[0, F]] +
-                                self.mesh.p[0, self.mesh.facets[1, F]] +
-                                self.mesh.p[0, self.mesh.facets[2, F]])
-                my = 0.3333333*(self.mesh.p[1, self.mesh.facets[0, F]] +
-                                self.mesh.p[1, self.mesh.facets[1, F]] +
-                                self.mesh.p[1, self.mesh.facets[2, F]])
-                mz = 0.3333333*(self.mesh.p[2, self.mesh.facets[0, F]] +
-                                self.mesh.p[2, self.mesh.facets[1, F]] +
-                                self.mesh.p[2, self.mesh.facets[2, F]])
+                mx = np.sum(self.mesh.p[0, self.mesh.facets[:, F]], axis=0)/self.mesh.facets.shape[0]
+                my = np.sum(self.mesh.p[1, self.mesh.facets[:, F]], axis=0)/self.mesh.facets.shape[0]
+                mz = np.sum(self.mesh.p[2, self.mesh.facets[:, F]], axis=0)/self.mesh.facets.shape[0]
                 Fdofx = np.tile(mx, (Fdofs.shape[0], 1)).flatten()
                 Fdofy = np.tile(my, (Fdofs.shape[0], 1)).flatten()
                 Fdofz = np.tile(mz, (Fdofs.shape[0], 1)).flatten()
@@ -241,7 +230,8 @@ class GlobalBasis():
         elif self.mesh.dim() == 3:
             x[dofs] = bc(locs[0, :], locs[1, :], locs[2, :])
         else:
-            raise NotImplementedError("Method essential_bc's not implemented for the given dimension.")
+            raise NotImplementedError("Method find_dofs not implemented " +
+                                      "for the given dimension.")
 
         return x, dofs
 

@@ -39,7 +39,7 @@ def bilinf(u, du, v, dv, w):
 K = asm(bilinf, ib)
 f = asm(unit_load, ib)
 
-x, D = ib.essential_bc()
+x, D = ib.find_dofs()
 I = ib.dofnum.complement_dofs(D)
 
 x[I] = solve(*condense(K, f, I=I), solver=solver_direct_cholmod())

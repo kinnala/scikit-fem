@@ -27,7 +27,7 @@ def mass(u, du, v, dv, w):
 
 M = asm(mass, gb)
 
-y, D = gb.essential_bc(lambda x, y: x==0.0)
+y, D = gb.find_dofs(lambda x, y: x==0.0)
 
 I = gb.dofnum.complement_dofs(D)
 

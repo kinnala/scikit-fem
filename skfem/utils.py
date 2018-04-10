@@ -85,7 +85,7 @@ def nonlinear_form(nonlin):
 
 
 def smoothplot(x, basis, nref=3, m=None):
-    M, X = basis.refinterp(x, 3)
+    M, X = basis.refinterp(x, nref)
     if m is not None:
         ax = m.draw()
         M.plot(X, smooth=True, edgecolors='', ax=ax)
@@ -210,3 +210,14 @@ def adaptive_theta(est, theta=0.5, max=None):
     else:
         return np.nonzero(theta*max < est)[0]
 
+def initialize(basis, *bcs):
+    """Initialize a solution vector with boundary conditions in place."""
+    y = np.zeros(basis.dofnum.N)
+    boundary_ix = np.array([])
+
+    for bc in bcs:
+        x, D = bc(basis)
+        y += x
+        boundary_ix = np.concatenate((boundary_ix, D))
+
+    return y, basis.dofnum.complement_dofs(boundary_ix)

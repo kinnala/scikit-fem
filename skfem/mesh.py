@@ -13,9 +13,9 @@ Obtain a three times refined mesh of the unit square.
 >>> m.p.shape
 (2, 81)
 
-Read a mesh generated using Gmsh.
+Read a tetrahedral mesh generated using Gmsh.
 
->>> from skfem.extern_sfepy import read_gmsh
+>>> from skfem.mesh_importers import read_gmsh
 >>> m = read_gmsh('examples/box.msh')
 >>> type(m)
 <class 'skfem.mesh.MeshTet'>
