@@ -161,7 +161,7 @@ class Mesh():
         """Perform mesh validity checks."""
         # check that element connectivity contains integers
         # NOTE: this is neccessary for some plotting functionality
-        if not np.issubdtype(self.t[0, 0], int):
+        if not np.issubdtype(self.t[0, 0], np.signedinteger):
             msg = ("Mesh._validate(): Element connectivity "
                    "must consist of integers.")
             raise Exception(msg)
