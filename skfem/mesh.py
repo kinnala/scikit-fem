@@ -2,26 +2,12 @@
 """
 Mesh module contains different types of finite element meshes.
 
-Examples
---------
+Check the following implementations:
 
-Obtain a three times refined mesh of the unit square.
-
->>> from skfem.mesh import MeshTri
->>> m = MeshTri()
->>> m.refine(3)
->>> m.p.shape
-(2, 81)
-
-Read a tetrahedral mesh generated using Gmsh.
-
->>> from skfem.mesh_importers import read_gmsh
->>> m = read_gmsh('examples/box.msh')
->>> type(m)
-<class 'skfem.mesh.MeshTet'>
->>> m.p.shape
-(3, 358)
-
+        * MeshTri, triangular mesh
+        * MeshTet, tetrahedral mesh
+        * MeshQuad, quadrilateral mesh
+        * MeshHex, hexahedral mesh
 """
 import matplotlib.pyplot as plt
 import matplotlib.tri as mtri
@@ -37,12 +23,10 @@ class Mesh():
     
     This is an abstract superclass. Check the following implementations:
 
-        * MeshLine, one-dimensional mesh
         * MeshTri, triangular mesh
         * MeshTet, tetrahedral mesh
         * MeshQuad, quadrilateral mesh
         * MeshHex, hexahedral mesh
-        * InterfaceMesh1D, an interface mesh between two 2D meshes
     """
 
     refdom = "none"  
@@ -836,7 +820,29 @@ class MeshQuad(Mesh2D):
 
 
 class MeshHex(Mesh3D):
-    """Hexahedral mesh."""
+    """A mesh consisting of hexahedral elements.
+
+    Attributes
+    ----------
+    p : numpy array of size 3 x Nvertices
+        The vertices of the mesh. Each column corresponds to a point.
+    t : numpy array of size 8 x Nelements
+        The element connectivity. Each column corresponds to a element
+        and contains eight column indices to MeshHex.p.
+    facets : numpy array of size 4 x Nfacets
+        Each column contains four column indices to MeshHex.p.
+    f2t : numpy array of size 2 x Nfacets
+        Each column contains a pair of column indices to MeshHex.t
+        or -1 on the second row if the corresponding
+        facet is located on the boundary.
+    t2f : numpy array of size 6 x Nelements
+        Each column contains four indices to MeshHex.facets.
+    edges : numpy array of size 2 x Nedges
+        Each column corresponds to an edge and contains two indices to
+        MeshHex.p.
+    t2e : numpy array of size 12 x Nelements
+        Each column contains twelve column indices of MeshHex.edges.
+    """
 
     refdom = "hex"
     brefdom = "quad"
@@ -1079,37 +1085,41 @@ class MeshHex(Mesh3D):
                               offsets=offset, cell_types=ctypes, cellData=cellData, pointData=pointData)
 
 class MeshTet(Mesh3D):
-    """Tetrahedral mesh.
+    """A mesh consisting of tetrahedral elements.
 
     Attributes
     ----------
     p : numpy array of size 3 x Nvertices
         The vertices of the mesh. Each column corresponds to a point.
-
     t : numpy array of size 4 x Nelements
         The element connectivity. Each column corresponds to a element
         and contains four column indices to MeshTet.p.
-
     facets : numpy array of size 3 x Nfacets
         Each column contains a triplet of column indices to MeshTet.p.
-
         Order: (0, 1, 2) (0, 1, 3) (0, 2, 3) (1, 2, 3)
-
     f2t : numpy array of size 2 x Nfacets
         Each column contains a pair of column indices to MeshTet.t
         or -1 on the second row if the facet is located on the boundary.
-
     t2f : numpy array of size 4 x Nelements
         Each column contains four indices to MeshTet.facets.
-
     edges : numpy array of size 2 x Nedges
         Each column corresponds to an edge and contains two indices to
         MeshTet.p.
-
         Order: (0, 1) (1, 2) (0, 2) (0, 3) (1, 3) (2, 3)
-
     t2e : numpy array of size 6 x Nelements
         Each column contains six indices to MeshTet.edges.
+
+    Examples
+    --------
+
+    Read a tetrahedral mesh generated using Gmsh.
+
+    >>> from skfem.mesh_importers import read_gmsh
+    >>> m = read_gmsh('examples/box.msh')
+    >>> type(m)
+    <class 'skfem.mesh.MeshTet'>
+    >>> m.p.shape
+    (3, 358)
     """
 
     refdom = "tet"
@@ -1352,6 +1362,40 @@ class MeshTri(Mesh2D):
         the boundary.
     t2f : numpy array of size 3 x Nelements
         Each column contains three indices to facets.
+
+    Examples
+    --------
+
+    Initialize a symmetric mesh of the unit square.
+
+    >>> m = MeshTri(initmesh='sqsymmetric')
+    >>> m.t.shape
+    (3, 8)
+
+    Facets (edges) and mappings from triangles to facets and vice versa are
+    automatically constructed. In the following example we have 5 facets
+    (edges).
+
+    >>> m = MeshTri()
+    >>> m.facets
+    array([[0, 0, 1, 1, 2],
+           [1, 2, 2, 3, 3]])
+    >>> m.t2f
+    array([[0, 2],
+           [2, 4],
+           [1, 3]])
+    >>> m.f2t
+    array([[ 0,  0,  1,  1,  1],
+           [-1, -1,  0, -1, -1]])
+
+    The value -1 implies that the facet (the edge) is on the boundary.
+
+    Refine the triangular mesh of the unit square three times.
+
+    >>> m = MeshTri()
+    >>> m.refine(3)
+    >>> m.p.shape
+    (2, 81)
     """
 
     refdom = "tri"
@@ -1377,35 +1421,8 @@ class MeshTri(Mesh2D):
         initmesh : (optional) string
             This has an effect only if p and t are not given.
             Can be one of the following values: 'symmetric',
-            'sqsymmetric', 'refdom'. Gives diffeent initial
+            'sqsymmetric', 'refdom'. Gives different initial
             meshes.
-
-        Examples
-        --------
-
-        Initialize a symmetric mesh of the unit square.
-
-        >>> m = MeshTri(initmesh='sqsymmetric')
-        >>> m.t.shape
-        (3, 8)
-
-        Facets (edges) and mappings from triangles to facets and vice versa are
-        automatically constructed. In the following example we have 5 facets
-        (edges).
-
-        >>> m = MeshTri()
-        >>> m.facets
-        array([[0, 0, 1, 1, 2],
-               [1, 2, 2, 3, 3]])
-        >>> m.t2f
-        array([[0, 2],
-               [2, 4],
-               [1, 3]])
-        >>> m.f2t
-        array([[ 0,  0,  1,  1,  1],
-               [-1, -1,  0, -1, -1]])
-
-        The value -1 implies that the facet (the edges) is on the boundary.
         """
         if p is None and t is None:
             if initmesh is 'symmetric':

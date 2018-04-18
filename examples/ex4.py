@@ -89,8 +89,8 @@ K = (scipy.sparse.bmat([[K1, None],[None, K2]]) + L).tocsr()
 i1 = np.arange(K1.shape[0])
 i2 = np.arange(K2.shape[0]) + K1.shape[0]
 
-_, D1 = ib.essential_bc(lambda x, y: x==0.0)
-_, D2 = Ib.essential_bc(lambda x, y: x==2.0)
+_, D1 = ib.find_dofs(lambda x, y: x==0.0)
+_, D2 = Ib.find_dofs(lambda x, y: x==2.0)
 
 x = np.zeros(K.shape[0])
 

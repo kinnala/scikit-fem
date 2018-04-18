@@ -1,5 +1,6 @@
 from skfem import *
 import matplotlib.pyplot as plt
+import numpy as np
 
 """
 Plot Argyris basis functions
