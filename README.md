@@ -17,4 +17,4 @@ Otherwise you can just clone this repository.
 ## Contributors
 
 - Tom Gustafsson (Maintainer)
-- (Geordie McBain)[https://github.com/gdmcbain] (Bug reports, examples)
+- [Geordie McBain](https://github.com/gdmcbain) (Bug reports, examples)
