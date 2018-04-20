@@ -5,7 +5,6 @@ import numpy as np
 from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
 
-m = MeshTri()
 geom = Geometry()
 geom.add_circle([0.] * 3, 1., .5**3)
 points, cells = generate_mesh(geom)[:2]
