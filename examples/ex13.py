@@ -1,3 +1,5 @@
+# contributed by gdmcbain
+
 from skfem import *
 
 import numpy as np

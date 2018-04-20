@@ -13,3 +13,8 @@ Otherwise you can just clone this repository.
 - Transforms bilinear forms into sparse matrices
 - Supports triangular, quadrilateral, tetrahedral and hexahedral meshes
 - Supports a nice subset of different finite elements (including some H1-, H2-, L2-, H(div)-, and H(curl)-conforming elements)
+
+## Contributors
+
+- Tom Gustafsson (Maintainer)
+- (Geordie McBain)[https://github.com/gdmcbain] (Bug reports, examples)
