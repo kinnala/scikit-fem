@@ -3,7 +3,6 @@ from skfem.assembly import *
 from skfem.mapping import *
 from skfem.element import *
 from skfem.utils import *
-from skfem.mesh_importers import *
 
 __all__ = ['InterfaceMesh1D',
            'Mesh',
@@ -60,10 +59,4 @@ __all__ = ['InterfaceMesh1D',
            'ElementVectorH1',
            'MeshQuad',
            'MeshTet',
-           'MeshTri',
-           'read_array',
-           'assert_',
-           'read_comsol',
-           'read_gmsh',
-           'read_token',
-           'skip_read_line']
+           'MeshTri',]

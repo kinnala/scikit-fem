@@ -21,4 +21,4 @@ I = m.interior_nodes()
 x = 0*b
 x[I] = solve(*condense(A, b, I=I))
 
-m.export_vtk('hexatest', x)
+m.save('hexatest.vtk', x)
