@@ -1,5 +1,5 @@
 from skfem import *
-from skfem.mesh_importers import *
+from skfem.extern import *
 from skfem.models.elasticity import *
 import numpy as np
 
