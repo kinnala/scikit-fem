@@ -22,4 +22,4 @@ u[I] = solve(*condense(K, 0*u, I=I, x=u))
 sf = 1.0
 for itr in range(3):
     m.p[itr, :] += sf*u[ib.dofnum.n_dof[itr, :]]
-m.export_vtk('elasticity')
+m.save('elasticity.vtk')

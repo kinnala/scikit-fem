@@ -7,8 +7,7 @@ for fname in ['mesh',
               'assembly',
               'mapping',
               'utils',
-              'element',
-              'mesh_importers']:
+              'element',]:
     mod = importlib.import_module(fname, 'skfem')
     for x in dir(mod):
         if isinstance(getattr(mod, x), types.FunctionType):

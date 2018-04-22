@@ -31,6 +31,7 @@ class Mesh():
 
     refdom = "none"  
     brefdom = "none" 
+    meshio_type = "none"
 
     p = np.array([]) 
     t = np.array([]) 
@@ -55,9 +56,9 @@ class Mesh():
         return self.__repr__()
 
     def __repr__(self):
-        return str(type(self)) + \
-               "\np: " + str(self.p.shape) + \
-               "\nt: " + str(self.t.shape)
+        return "Mesh of type '" + str(type(self)) + "' "\
+               "with " + str(self.p.shape) + " vertices " \
+               "and " + str(self.t.shape) + " elements."
 
     def show(self):
         """A wrapper for matplotlib.pyplot.show()."""
@@ -173,6 +174,39 @@ class Mesh():
             msg = ("Mesh._validate(): Mesh contains a vertex "
                    "not belonging to any element.")
             raise Exception(msg)
+
+    def save(self, filename, pointData=None, cellData=None):
+        """Export the mesh and fields using meshio.
+
+        Parameters
+        ----------
+        filename : string
+            The filename for vtk-file.
+        pointData : (optional) numpy array for one output or dict for multiple
+        cellData : (optional) numpy array for one output or dict for multiple
+        """
+        import meshio
+
+        if pointData is not None:
+            if type(pointData) != dict:
+                pointData = {'0':pointData}
+
+        if cellData is not None:
+            if type(cellData) != dict:
+                cellData = {'0':cellData}
+
+        cells = { self.meshio_type : self.t.T }
+        meshio.write(filename, self.p.T, cells, point_data=pointData, cell_data=cellData)
+
+    @classmethod
+    def load(cls, filename):
+        """Load a mesh from file using meshio."""
+        import meshio
+        points, cells, _, _, _ = meshio.read(filename)
+        if issubclass(cls, Mesh2D):
+            return cls(points[:, :2].T, cells[cls.meshio_type].T)
+        else:
+            return cls(points.T, cells[cls.meshio_type].T)
 
 
 class Mesh3D(Mesh):
@@ -400,6 +434,32 @@ class Mesh2D(Mesh):
         meshclass = type(self)
 
         return meshclass(points, tris)
+
+    def save(self, filename, pointData=None, cellData=None):
+        """Export the mesh and fields using meshio. (2D version.)
+
+        Parameters
+        ----------
+        filename : string
+            The filename for vtk-file.
+        pointData : (optional) numpy array for one output or dict for multiple
+        cellData : (optional) numpy array for one output or dict for multiple
+        """
+        import meshio
+
+        # a row of zeros required in 2D
+        p = np.vstack((np.zeros(self.p.shape[1]), self.p))
+
+        if pointData is not None:
+            if type(pointData) != dict:
+                pointData = {'0':pointData}
+
+        if cellData is not None:
+            if type(cellData) != dict:
+                cellData = {'0':cellData}
+
+        cells = { self.meshio_type : self.t.T }
+        meshio.write(filename, p.T, cells, point_data=pointData, cell_data=cellData)
 
 
 class InterfaceMesh1D(Mesh):
@@ -651,6 +711,7 @@ class MeshQuad(Mesh2D):
 
     refdom = "quad"
     brefdom = "line"
+    meshio_type = "quad"
 
     p = np.array([])
     t = np.array([])
@@ -846,6 +907,7 @@ class MeshHex(Mesh3D):
 
     refdom = "hex"
     brefdom = "quad"
+    meshio_type = "hexahedron"
 
     def __init__(self, p=None, t=None, validate=True):
         if p is None and t is None:
@@ -1054,19 +1116,17 @@ class MeshHex(Mesh3D):
 
         # TODO implement prolongation
 
-    def export_vtk(self, filename, pointData=None, cellData=None):
-        """Export the mesh and fields to VTK.
+    def save(self, filename, pointData=None, cellData=None):
+        """Export the mesh and fields using meshio. (Hexahedron version.)
 
         Parameters
         ----------
         filename : string
-            The filename for vtu-file. E.g. "mesh" is saved
-            to the file "mesh.vtu".
-        pointData : (optional) numpy array or dict
-        cellData : (optional) numpy array or dict 
+            The filename for vtk-file.
+        pointData : (optional) numpy array for one output or dict for multiple
+        cellData : (optional) numpy array for one output or dict for multiple
         """
-        from pyevtk.hl import unstructuredGridToVTK
-        from pyevtk.vtk import VtkHexahedron
+        import meshio
 
         # vtk requires a different ordering
         t = self.t[[0, 3, 6, 2, 1, 5, 7, 4], :]
@@ -1079,10 +1139,8 @@ class MeshHex(Mesh3D):
             if type(cellData) != dict:
                 cellData = {'0':cellData}
 
-        offset = (np.arange(t.shape[1])+1)*8
-        ctypes = np.zeros(t.shape[1]) + VtkHexahedron.tid
-        unstructuredGridToVTK(filename, self.p[0, :], self.p[1, :], self.p[2, :], connectivity=t.flatten('F'),
-                              offsets=offset, cell_types=ctypes, cellData=cellData, pointData=pointData)
+        cells = { 'hexahedron' : t.T }
+        meshio.write(filename, self.p.T, cells, point_data=pointData, cell_data=cellData)
 
 class MeshTet(Mesh3D):
     """A mesh consisting of tetrahedral elements.
@@ -1112,18 +1170,16 @@ class MeshTet(Mesh3D):
     Examples
     --------
 
-    Read a tetrahedral mesh generated using Gmsh.
+    Read a tetrahedral mesh from gmsh-format using meshio.
 
-    >>> from skfem.mesh_importers import read_gmsh
-    >>> m = read_gmsh('examples/box.msh')
-    >>> type(m)
-    <class 'skfem.mesh.MeshTet'>
+    >>> m = MeshTet.load('examples/box.msh')
     >>> m.p.shape
     (3, 358)
     """
 
     refdom = "tet"
     brefdom = "tri"
+    meshio_type = "tetra"
 
     def __init__(self, p=None, t=None, validate=True):
         if p is None and t is None:
@@ -1321,26 +1377,6 @@ class MeshTet(Mesh3D):
         edgelenmat = np.vstack(tuple(edgelen(i) for i in range(6)))
         return np.max(np.max(edgelenmat, axis=0)/np.min(edgelenmat, axis=0))
 
-    def export_vtk(self, filename, pointData=None, cellData=None):
-        """
-        Export the mesh and fields to VTK.
-        """
-        from pyevtk.hl import unstructuredGridToVTK
-        from pyevtk.vtk import VtkTetra
-
-        if pointData is not None:
-            if type(pointData) != dict:
-                pointData = {'0':pointData}
-
-        if cellData is not None:
-            if type(cellData) != dict:
-                cellData = {'0':cellData}
-
-        offset = (np.arange(self.t.shape[1])+1)*4
-        ctypes = np.zeros(self.t.shape[1]) + VtkTetra.tid
-        unstructuredGridToVTK(filename, self.p[0, :], self.p[1, :], self.p[2, :], connectivity=self.t.flatten('F'),
-                              offsets=offset, cell_types=ctypes, cellData=cellData, pointData=pointData)
-
     def mapping(self):
         return skfem.mapping.MappingAffine(self)
 
@@ -1400,6 +1436,7 @@ class MeshTri(Mesh2D):
 
     refdom = "tri"
     brefdom = "line"
+    meshio_type = "triangle"
 
     p = np.array([])
     t = np.array([])

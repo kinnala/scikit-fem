@@ -9,7 +9,7 @@ Examples
 Assemble a stiffness matrix K for the Dirichlet problem in a unit cube.
 
 >>> from skfem import *
->>> from skfem.models import *
+>>> from skfem.models.poisson import *
 >>> m = MeshHex()
 >>> m.refine(2)
 >>> e = ElementHex1()
