@@ -1,3 +1,8 @@
+"""
+Solve the problem -∇²u = 1 with zero boundary conditions
+on a unit square.
+"""
+
 from skfem import *
 
 m = MeshTri()

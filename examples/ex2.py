@@ -1,3 +1,10 @@
+"""
+Solve the Kirchhoff plate bending problem in a unit square
+with clamped boundary conditions using the nonconforming
+Morley element. Demonstrates also the visualization of
+higher order solutions using 'GlobalBasis.refinterp'.
+"""
+
 from skfem import *
 from skfem.models.poisson import unit_load
 import numpy as np

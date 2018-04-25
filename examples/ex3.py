@@ -1,11 +1,11 @@
+"""
+Solve the linear elastic eigenvalue problem.
+"""
+
 from skfem import *
 from skfem.models.elasticity import *
 from scipy.sparse.linalg import eigsh
 import numpy as np
-
-"""
-Solve linear elastic eigenvalue problem.
-"""
 
 m1 = MeshLine(np.linspace(0,5,50))
 m2 = MeshLine(np.linspace(0,1,10))

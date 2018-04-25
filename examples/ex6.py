@@ -1,9 +1,8 @@
-from skfem import *
-from skfem.models.poisson import laplace
-
 """
 High-order plotting test.
 """
+from skfem import *
+from skfem.models.poisson import laplace
 
 m = MeshQuad()
 m.refine(2)

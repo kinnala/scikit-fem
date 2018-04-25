@@ -1,4 +1,18 @@
-# contributed by gdmcbain
+"""
+Author: gdmcbain
+
+In this example 'pygmsh' is used to generate a disk, replacing the default
+square of MeshTri() in ex1.py.
+
+A basic postprocessing step in finite element analysis is evaluating linear
+forms over the solution. For the boundary value problem of ex1.py, the integral
+of the solution (normalized by the area) is the 'Boussinesq k-factor' [1]; for
+the square it's roughly 0.03514, for the circle 1/π/8 ≐ 0.03979. Linear forms
+are easily evaluated in skfem using the 1-D arrays assembled using the
+@linear_form decorator. In ex1.py, the linear form required for simple
+integration happens to be the same one used on the right-hand side of the
+differential equation, so it's already to hand.
+"""
 
 from skfem import *
 
