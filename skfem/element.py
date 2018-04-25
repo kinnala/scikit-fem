@@ -5,10 +5,10 @@ Element classes define the finite element basis functions or DOF functionals.
 import numpy as np
 
 class Element():
-    n_dofs = 0
-    f_dofs = 0
-    i_dofs = 0
-    e_dofs = 0
+    nodal_dofs = 0 # DOFs at the vertices of the element
+    facet_dofs = 0 # DOFs at the facets of the element
+    interior_dofs = 0 # DOFs at element interior
+    edge_dofs = 0 # DOFs at the edges of the element
     dim = -1
     maxdeg = -1
     order = (-1, -1)  # 0 - scalar, 1 - vector, 2 - tensor, etc
@@ -45,10 +45,10 @@ class ElementVectorH1(Element):
         self.dim = elem.dim
         self.elem = elem
 
-        self.n_dofs = self.elem.n_dofs * self.dim
-        self.f_dofs = self.elem.f_dofs * self.dim
-        self.i_dofs = self.elem.i_dofs * self.dim
-        self.e_dofs = self.elem.e_dofs * self.dim
+        self.nodal_dofs = self.elem.nodal_dofs * self.dim
+        self.facet_dofs = self.elem.facet_dofs * self.dim
+        self.interior_dofs = self.elem.interior_dofs * self.dim
+        self.edge_dofs = self.elem.edge_dofs * self.dim
 
         self.maxdeg = elem.maxdeg
 
@@ -218,7 +218,7 @@ class ElementH2(Element):
 # Triangular
 
 class ElementTriP1(ElementH1):
-    n_dofs = 1
+    nodal_dofs = 1
     dim = 2
     maxdeg = 1
 
@@ -247,13 +247,13 @@ class ElementTriDG(ElementH1):
         # change all dofs to interior dofs
         self.elem = elem
         self.maxdeg = elem.maxdeg
-        self.i_dofs = 3*elem.n_dofs + 3*elem.f_dofs + elem.i_dofs
+        self.interior_dofs = 3*elem.nodal_dofs + 3*elem.facet_dofs + elem.interior_dofs
 
     def lbasis(self, X, i):
         return self.elem.lbasis(X, i)
 
 class ElementTriP0(ElementH1):
-    i_dofs = 1
+    interior_dofs = 1
     dim = 2
     maxdeg = 0
 
@@ -262,7 +262,7 @@ class ElementTriP0(ElementH1):
 
 
 class ElementTriRT0(ElementHdiv):
-    f_dofs = 1
+    facet_dofs = 1
     dim = 2
     maxdeg = 1
 
@@ -285,8 +285,8 @@ class ElementTriRT0(ElementHdiv):
 
 
 class ElementMorley(ElementH2):
-    n_dofs = 1
-    f_dofs = 1
+    nodal_dofs = 1
+    facet_dofs = 1
     dim = 2
     maxdeg = 2
 
@@ -307,8 +307,8 @@ class ElementMorley(ElementH2):
             raise Exception("!")
 
 class ElementArgyris(ElementH2):
-    n_dofs = 6
-    f_dofs = 1
+    nodal_dofs = 6
+    facet_dofs = 1
     dim = 2
     maxdeg = 5
 
@@ -338,7 +338,7 @@ class ElementArgyris(ElementH2):
 # Quadilateral
 
 class ElementQ1(ElementH1):
-    n_dofs = 1
+    nodal_dofs = 1
     dim = 2
     maxdeg = 2
 
@@ -363,9 +363,9 @@ class ElementQ1(ElementH1):
         return phi, dphi
 
 class ElementQ2(ElementH1):
-    n_dofs = 1
-    f_dofs = 1
-    i_dofs = 1
+    nodal_dofs = 1
+    facet_dofs = 1
+    interior_dofs = 1
     dim = 2
     maxdeg = 3
 
@@ -407,7 +407,7 @@ class ElementQ2(ElementH1):
 # Tetrahedral
 
 class ElementTetP0(ElementH1):
-    i_dofs = 1
+    interior_dofs = 1
     dim = 3
     maxdeg = 0
 
@@ -416,7 +416,7 @@ class ElementTetP0(ElementH1):
 
 
 class ElementTetP1(ElementH1):
-    n_dofs = 1
+    nodal_dofs = 1
     dim = 3
     maxdeg = 1
 
@@ -442,8 +442,8 @@ class ElementTetP1(ElementH1):
 
 
 class ElementTetP2(ElementH1):
-    n_dofs = 1
-    e_dofs = 1
+    nodal_dofs = 1
+    edge_dofs = 1
     dim = 3
     maxdeg = 2
 
@@ -487,7 +487,7 @@ class ElementTetP2(ElementH1):
 
 
 class ElementTetRT0(ElementHdiv):
-    f_dofs = 1
+    facet_dofs = 1
     dim = 3
     maxdeg = 1
 
@@ -513,7 +513,7 @@ class ElementTetRT0(ElementHdiv):
 
 
 class ElementTetN0(ElementHcurl):
-    e_dofs = 1
+    edge_dofs = 1
     dim = 3
     maxdeg = 1
 
@@ -546,7 +546,7 @@ class ElementTetN0(ElementHcurl):
 # Hexahedral
 
 class ElementHex1(ElementH1):
-    n_dofs = 1
+    nodal_dofs = 1
     dim = 3
     maxdeg = 3
 

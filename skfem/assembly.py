@@ -479,35 +479,35 @@ class Dofnum(object):
 
     def __init__(self, mesh, element):
         # vertex dofs
-        self.n_dof = np.reshape(np.arange(element.n_dofs
+        self.n_dof = np.reshape(np.arange(element.nodal_dofs
                                           * mesh.p.shape[1],
                                           dtype=np.int64),
-                                (element.n_dofs, mesh.p.shape[1]), order='F')
-        offset = element.n_dofs*mesh.p.shape[1]
+                                (element.nodal_dofs, mesh.p.shape[1]), order='F')
+        offset = element.nodal_dofs*mesh.p.shape[1]
 
         # edge dofs
         if hasattr(mesh, 'edges'): # 3D mesh
-            self.e_dof = np.reshape(np.arange(element.e_dofs
+            self.e_dof = np.reshape(np.arange(element.edge_dofs
                                               * mesh.edges.shape[1],
                                               dtype=np.int64),
-                                    (element.e_dofs, mesh.edges.shape[1]),
+                                    (element.edge_dofs, mesh.edges.shape[1]),
                                     order='F') + offset
-            offset = offset + element.e_dofs*mesh.edges.shape[1]
+            offset = offset + element.edge_dofs*mesh.edges.shape[1]
 
         # facet dofs
         if hasattr(mesh, 'facets'): # 2D or 3D mesh
-            self.f_dof = np.reshape(np.arange(element.f_dofs
+            self.f_dof = np.reshape(np.arange(element.facet_dofs
                                               * mesh.facets.shape[1],
                                               dtype=np.int64),
-                                    (element.f_dofs, mesh.facets.shape[1]),
+                                    (element.facet_dofs, mesh.facets.shape[1]),
                                     order='F') + offset
-            offset = offset + element.f_dofs*mesh.facets.shape[1]
+            offset = offset + element.facet_dofs*mesh.facets.shape[1]
 
         # interior dofs
-        self.i_dof = np.reshape(np.arange(element.i_dofs
+        self.i_dof = np.reshape(np.arange(element.interior_dofs
                                           * mesh.t.shape[1],
                                           dtype=np.int64),
-                                (element.i_dofs, mesh.t.shape[1]),
+                                (element.interior_dofs, mesh.t.shape[1]),
                                 order='F') + offset
 
         # global numbering
