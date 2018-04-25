@@ -1,3 +1,23 @@
+"""
+Author: gdmcbain.
+
+Here's another extension of examples/ex1.py, still solving the Laplace
+equation but now with mixed boundary conditions, two parts isopotential
+(charged and earthed) and the rest insulated. The isopotential parts are
+tagged during the construction of the geometry in pygmsh, as introduced in
+ex13.py.
+
+The example is ∇²u = 0 in Ω = {(x, y) : 1 < x² + y² < 4, 0 < θ < π/2},
+where tan θ = y/x, with u = 0 on y = 0 and u = 1 on x = 0. Although these
+boundaries would be simple enough to identify using the coordinates and
+skfem.assembly.find_dofs as in ex3.py, the present technique generalizes to
+more complicated shapes.
+
+The exact solution is u = 2 θ / π. The field strength is |∇ u|² = 4/π² (x² + y²)
+so the conductance (for unit potential difference and conductivity) is
+‖∇ u‖² = 2 ln 2 / π.
+"""
+
 from skfem import *
 from skfem.models.poisson import laplace, mass, unit_load
 
