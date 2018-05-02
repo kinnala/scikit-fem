@@ -417,8 +417,8 @@ def asm(kernel, ubasis, vbasis=None, w=None, nthreads=1, assemble=True):
                 cols[ixs] = ubasis.dofnum.t_dof[j, :]
 
         # create indices for linear loop over local stiffness matrix
-        ixs = [i for j, i in product(range(vbasis.phi.shape[0]), range(ubasis.phi.shape[0]))]
-        jxs = [j for j, i in product(range(vbasis.phi.shape[0]), range(ubasis.phi.shape[0]))]
+        ixs = [i for j, i in product(range(ubasis.phi.shape[0]), range(vbasis.phi.shape[0]))]
+        jxs = [j for j, i in product(range(ubasis.phi.shape[0]), range(vbasis.phi.shape[0]))]
         indices = np.array([ixs, jxs]).T
 
         # split local stiffness matrix elements to threads

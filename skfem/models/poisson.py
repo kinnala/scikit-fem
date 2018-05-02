@@ -21,3 +21,8 @@ def mass(u, du, v, dv, w):
 @linear_form
 def unit_load(v, dv, w):
     return v
+
+def boundary_zero(ind):
+    def bc(basis):
+        return basis.find_dofs(ind)
+    return bc

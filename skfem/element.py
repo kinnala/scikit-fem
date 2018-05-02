@@ -240,6 +240,39 @@ class ElementTriP1(ElementH1):
         return phi, dphi
 
 
+class ElementTriP2(ElementH1):
+    nodal_dofs = 1
+    facet_dofs = 1
+    dim = 2
+    maxdeg = 2
+
+    def lbasis(self, X, i):
+        x, y = X[0, :], X[1, :]
+
+        if i == 0:
+            phi = 1. - x - y
+            dphi = np.array([-1. + 0*x, -1. + 0*x])
+        elif i == 1:
+            phi = x
+            dphi = np.array([1. + 0*x, 0*x])
+        elif i == 2:
+            phi = y
+            dphi = np.array([0*x, 1. + 0*x])
+        elif i == 3: # 0->1
+            phi = (1 - x - y)*x
+            dphi = np.array([1. - 2.*x - y, -x])
+        elif i == 4: # 1->2
+            phi = x*y
+            dphi = np.array([y, x])
+        elif i == 5: # 0->2
+            phi = (1 - x - y)*y
+            dphi = np.array([-y, 1. - x - 2.*y])
+        else:
+            raise Exception("!")
+
+        return phi, dphi
+
+
 class ElementTriDG(ElementH1):
     dim = 2
 
