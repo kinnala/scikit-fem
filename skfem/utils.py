@@ -221,3 +221,22 @@ def initialize(basis, *bcs):
         boundary_ix = np.concatenate((boundary_ix, D))
 
     return y, basis.dofnum.complement_dofs(boundary_ix)
+
+
+def derivative(x, basis1, basis0, i=0):
+    """Calculate the i'th partial derivative by projecting from basis1 to basis0."""
+    from skfem.assembly import asm
+
+    @bilinear_form
+    def deriv(u, du, v, dv, w):
+        return du[i]*v
+
+    @bilinear_form
+    def mass(u, du, v, dv, w):
+        return u*v
+
+    A = asm(deriv, basis1, basis0)
+    M = asm(mass, basis0)
+
+    return solve(M, A @ x)
+     
