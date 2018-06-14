@@ -591,11 +591,10 @@ class MeshLine(Mesh):
     p = np.array([])
     t = np.array([])
 
-    def __init__(self, p=None, t=None, validate=True, initmesh=None):
+    def __init__(self, p=None, t=None, validate=True):
         if p is None and t is None:
-            if initmesh is None or initmesh is 'refdom':
-                p = np.array([[0, 1]])
-                t = np.array([[0], [1]])
+            p = np.array([[0, 1]])
+            t = np.array([[0], [1]])
         elif p is not None and t is None:
             t = np.array([np.arange(np.max(p.shape)-1), np.arange(np.max(p.shape)-1)+1])
         if len(p.shape)==1:
@@ -605,6 +604,11 @@ class MeshLine(Mesh):
         if validate:
             self._validate()
         super(MeshLine, self).__init__()
+
+    @classmethod
+    def init_refdom(cls):
+        """Initialize a mesh constisting of the reference interval [0,1]."""
+        return cls()
 
     def adaptive_refine(self, marked):
         """Perform an adaptive refine which splits each marked element into two."""
@@ -721,7 +725,7 @@ class MeshQuad(Mesh2D):
     f2t = np.array([])
     t2f = np.array([])
 
-    def __init__(self, p=None, t=None, initmesh=None, validate=True):
+    def __init__(self, p=None, t=None, validate=True):
         """Initialize a quadrilateral mesh.
 
         Parameters
@@ -733,14 +737,8 @@ class MeshQuad(Mesh2D):
             These should be in counter-clockwise order.
         """
         if p is None and t is None:
-            if initmesh is None:
-                p = np.array([[0., 0.], [1., 0.], [1., 1.], [0., 1.]]).T
-                t = np.array([[0, 1, 2, 3]]).T
-            elif initmesh is 'refdom':
-                p = np.array([[-1., -1.], [1., -1.], [1., 1.], [-1., 1.]]).T
-                t = np.array([[0, 1, 2, 3]]).T
-            else:
-                raise Exception("invalid initmesh keyword.")
+            p = np.array([[0., 0.], [1., 0.], [1., 1.], [0., 1.]]).T
+            t = np.array([[0, 1, 2, 3]]).T
         elif p is None or t is None:
             raise Exception("Must provide p AND t or neither")
         self.p = p
@@ -749,6 +747,25 @@ class MeshQuad(Mesh2D):
             self._validate()
         self._build_mappings()
         super(MeshQuad, self).__init__()
+
+    @classmethod
+    def init_refdom(cls):
+        """Initialize a mesh that includes only the reference quad.
+        
+        The mesh topology is as follows:
+         (-1,1) *-------------* (1,1)
+                |             |
+                |             |
+                |             |
+                |             | 
+                |             | 
+                |             |
+                |             |  
+        (-1,-1) *-------------* (1,-1)
+        """
+        p = np.array([[-1., -1.], [1., -1.], [1., 1.], [-1., 1.]]).T
+        t = np.array([[0, 1, 2, 3]]).T
+        return cls(p, t)
 
     def _build_mappings(self):
         # do not sort since order defines counterclockwise order
@@ -1407,7 +1424,7 @@ class MeshTri(Mesh2D):
 
     Initialize a symmetric mesh of the unit square.
 
-    >>> m = MeshTri(initmesh='sqsymmetric')
+    >>> m = MeshTri.init_sqsymmetric()
     >>> m.t.shape
     (3, 8)
 
@@ -1447,7 +1464,7 @@ class MeshTri(Mesh2D):
     f2t = np.array([])
     t2f = np.array([])
 
-    def __init__(self, p=None, t=None, validate=True, initmesh=None, sort_t=True):
+    def __init__(self, p=None, t=None, validate=True, sort_t=True):
         """Initialize a triangular mesh.
 
         Parameters
@@ -1456,33 +1473,14 @@ class MeshTri(Mesh2D):
             The points of the mesh.
         t : (optional) numpy array of size 3 x Nelements
             The element connectivity, i.e. indices to p.
-        validate : (optional) bool
+        validate : (optional, default=True) bool
             Whether to run mesh validity checks or not.
-        initmesh : (optional) string
-            This has an effect only if p and t are not given.
-            Can be one of the following values:
-            'sqsymmetric', 'refdom'. Gives different initial
-            meshes.
+        sort_t : (optional, default=True) bool
+            Sort the element connectivity matrix before building mappings.
         """
         if p is None and t is None:
-            if initmesh is 'sqsymmetric':
-                p = np.array([[0, 0.5, 1,   0, 0.5,   1, 0, 0.5, 1],
-                              [0, 0,   0, 0.5, 0.5, 0.5, 1,   1, 1]], dtype=np.float_)
-                t = np.array([[0, 1, 4],
-                              [1, 2, 4],
-                              [2, 4, 5],
-                              [0, 3, 4],
-                              [3, 4, 6],
-                              [4, 6, 7],
-                              [4, 7, 8],
-                              [4, 5, 8]], dtype=np.intp).T
-            elif initmesh is 'refdom':
-                p = np.array([[0., 1., 0.],
-                              [0., 0., 1.]], dtype=np.float_)
-                t = np.array([[0, 1, 2]], dtype=np.intp).T
-            else:
-                p = np.array([[0., 1., 0., 1.], [0., 0., 1., 1.]], dtype=np.float_)
-                t = np.array([[0, 1, 2], [1, 3, 2]], dtype=np.intp).T
+            p = np.array([[0., 1., 0., 1.], [0., 0., 1., 1.]], dtype=np.float_)
+            t = np.array([[0, 1, 2], [1, 3, 2]], dtype=np.intp).T
         elif p is None or t is None:
             raise Exception("Must provide p AND t or neither")
         self.p = p
@@ -1494,7 +1492,7 @@ class MeshTri(Mesh2D):
 
     @classmethod
     def init_symmetric(cls):
-        """Initialize a symmetric mesh on the unit square.
+        """Initialize a symmetric mesh of the unit square.
         
         The mesh topology is as follows:
         *------------*
@@ -1513,6 +1511,53 @@ class MeshTri(Mesh2D):
                       [1, 2, 4],
                       [2, 3, 4],
                       [0, 3, 4]], dtype=np.intp).T
+        return cls(p, t)
+
+    @classmethod
+    def init_sqsymmetric(cls):
+        """Initialize a symmetric mesh of the unit square.
+        
+        The mesh topology is as follows:
+        *------------*
+        |\    |     /|
+        |  \  |   /  |
+        |    \| /    |
+        |-----*------|
+        |    /| \    |
+        |  /  |   \  |
+        |/    |     \|
+        *------------*
+        """
+        p = np.array([[0, 0.5, 1,   0, 0.5,   1, 0, 0.5, 1],
+                      [0, 0,   0, 0.5, 0.5, 0.5, 1,   1, 1]], dtype=np.float_)
+        t = np.array([[0, 1, 4],
+                      [1, 2, 4],
+                      [2, 4, 5],
+                      [0, 3, 4],
+                      [3, 4, 6],
+                      [4, 6, 7],
+                      [4, 7, 8],
+                      [4, 5, 8]], dtype=np.intp).T
+        return cls(p, t)
+
+    @classmethod
+    def init_refdom(cls):
+        """Initialize a mesh that includes only the reference triangle.
+        
+        The mesh topology is as follows:
+        *
+        |\           
+        |  \         
+        |    \       
+        |      \      
+        |        \    
+        |          \  
+        |            \ 
+        *-------------*
+        """
+        p = np.array([[0., 1., 0.],
+                      [0., 0., 1.]], dtype=np.float_)
+        t = np.array([[0, 1, 2]], dtype=np.intp).T
         return cls(p, t)
 
     def _build_mappings(self, sort_t=True):

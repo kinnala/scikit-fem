@@ -325,7 +325,7 @@ class InteriorBasis(GlobalBasis):
         """Refine and interpolate (for plotting)."""
         # mesh reference domain, refine and take the vertices
         meshclass = type(self.mesh)
-        m = meshclass(initmesh='refdom')
+        m = meshclass.init_refdom()
         m.refine(Nrefs)
         X = m.p
 
