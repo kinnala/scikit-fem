@@ -1460,19 +1460,12 @@ class MeshTri(Mesh2D):
             Whether to run mesh validity checks or not.
         initmesh : (optional) string
             This has an effect only if p and t are not given.
-            Can be one of the following values: 'symmetric',
+            Can be one of the following values:
             'sqsymmetric', 'refdom'. Gives different initial
             meshes.
         """
         if p is None and t is None:
-            if initmesh is 'symmetric':
-                p = np.array([[0, 1, 1, 0, 0.5],
-                              [0, 0, 1, 1, 0.5]], dtype=np.float_)
-                t = np.array([[0, 1, 4],
-                              [1, 2, 4],
-                              [2, 3, 4],
-                              [0, 3, 4]], dtype=np.intp).T
-            elif initmesh is 'sqsymmetric':
+            if initmesh is 'sqsymmetric':
                 p = np.array([[0, 0.5, 1,   0, 0.5,   1, 0, 0.5, 1],
                               [0, 0,   0, 0.5, 0.5, 0.5, 1,   1, 1]], dtype=np.float_)
                 t = np.array([[0, 1, 4],
@@ -1498,6 +1491,29 @@ class MeshTri(Mesh2D):
             self._validate()
         self._build_mappings(sort_t=sort_t)
         super(MeshTri, self).__init__()
+
+    @classmethod
+    def init_symmetric(cls):
+        """Initialize a symmetric mesh on the unit square.
+        
+        The mesh topology is as follows:
+        *------------*
+        |\          /|
+        |  \      /  |
+        |    \  /    |
+        |     *      |
+        |    /  \    |
+        |  /      \  |
+        |/          \|
+        *------------*
+        """
+        p = np.array([[0, 1, 1, 0, 0.5],
+                      [0, 0, 1, 1, 0.5]], dtype=np.float_)
+        t = np.array([[0, 1, 4],
+                      [1, 2, 4],
+                      [2, 3, 4],
+                      [0, 3, 4]], dtype=np.intp).T
+        return cls(p, t)
 
     def _build_mappings(self, sort_t=True):
         # sort to preserve orientations etc.
