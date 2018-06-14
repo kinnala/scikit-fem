@@ -196,17 +196,18 @@ class Mesh():
                 cellData = {'0':cellData}
 
         cells = { self.meshio_type : self.t.T }
-        meshio.write(filename, self.p.T, cells, point_data=pointData, cell_data=cellData)
+        mesh = meshio.Mesh(self.p.T, cells, pointData, cellData)
+        meshio.write(filename, mesh)
 
     @classmethod
     def load(cls, filename):
         """Load a mesh from file using meshio."""
         import meshio
-        points, cells, _, _, _ = meshio.read(filename)
+        mesh = meshio.read(filename)
         if issubclass(cls, Mesh2D):
-            return cls(points[:, :2].T, cells[cls.meshio_type].T)
+            return cls(mesh.points[:, :2].T, mesh.cells[cls.meshio_type].T)
         else:
-            return cls(points.T, cells[cls.meshio_type].T)
+            return cls(mesh.points.T, mesh.cells[cls.meshio_type].T)
 
 
 class Mesh3D(Mesh):
@@ -459,7 +460,8 @@ class Mesh2D(Mesh):
                 cellData = {'0':cellData}
 
         cells = { self.meshio_type : self.t.T }
-        meshio.write(filename, p.T, cells, point_data=pointData, cell_data=cellData)
+        mesh = meshio.Mesh(p.T, cells, pointData, cellData)
+        meshio.write(filename, mesh)
 
 
 class InterfaceMesh1D(Mesh):
@@ -1140,7 +1142,8 @@ class MeshHex(Mesh3D):
                 cellData = {'0':cellData}
 
         cells = { 'hexahedron' : t.T }
-        meshio.write(filename, self.p.T, cells, point_data=pointData, cell_data=cellData)
+        mesh = meshio.Mesh(self.p.T, cells, pointData, cellData)
+        meshio.write(filename, mesh)
 
 class MeshTet(Mesh3D):
     """A mesh consisting of tetrahedral elements.
