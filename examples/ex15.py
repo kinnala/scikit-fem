@@ -2,8 +2,8 @@
 Author: gdmcbain
 
 Another simple modification of examples/ex1.py, this time showing how to pass
-the x keyword-argument to condense to impose inhomogeneous Dirichlet
-conditions. The forcing term is suppressed for simplicity. The boundary values
+impose inhomogeneous Dirichlet conditions to condense. 
+The forcing term is suppressed for simplicity. The boundary values
 are set as the real part x**2 - y**2 of an analytic complex function z**2 which
 is harmonic and so that is the exact solution through the domain.
 
