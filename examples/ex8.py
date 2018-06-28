@@ -6,7 +6,7 @@ import numpy as np
 Plot Argyris basis functions
 """
 
-m = MeshTri(initmesh='sqsymmetric')
+m = MeshTri.init_sqsymmetric()
 map = MappingAffine(m)
 e = ElementArgyris()
 

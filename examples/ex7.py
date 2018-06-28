@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 # Interior penalty
 
-m = MeshTri(initmesh='sqsymmetric')
+m = MeshTri.init_sqsymmetric()
 m.refine(2)
 map = MappingAffine(m)
 e = ElementTriDG(ElementTriP1())
