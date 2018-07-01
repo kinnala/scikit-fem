@@ -2,12 +2,12 @@
 """
 Mesh module contains different types of finite element meshes.
 
-Check the following implementations:
+See the following implementations:
 
-        * MeshTri, triangular mesh
-        * MeshTet, tetrahedral mesh
-        * MeshQuad, quadrilateral mesh
-        * MeshHex, hexahedral mesh
+    * MeshTri, triangular mesh
+    * MeshTet, tetrahedral mesh
+    * MeshQuad, quadrilateral mesh
+    * MeshHex, hexahedral mesh
 """
 import matplotlib.pyplot as plt
 import matplotlib.tri as mtri
@@ -21,7 +21,7 @@ import skfem.mapping
 class Mesh():
     """A finite element mesh.
     
-    This is an abstract superclass. Check the following implementations:
+    This is an abstract superclass. See the following implementations:
 
         * MeshTri, triangular mesh
         * MeshTet, tetrahedral mesh
@@ -211,7 +211,13 @@ class Mesh():
 
 
 class Mesh3D(Mesh):
-    """Three dimensional meshes, common methods."""
+    """Three dimensional meshes, common methods.
+
+    See the following implementations:
+
+        * MeshTet, tetrahedral mesh
+        * MeshHex, hexahedral mesh
+    """
 
     def nodes_satisfying(self, test):
         """Return nodes that satisfy some condition.
@@ -274,7 +280,13 @@ class Mesh3D(Mesh):
 
 
 class Mesh2D(Mesh):
-    """Two dimensional meshes, common methods."""
+    """Two dimensional meshes, common methods.
+    
+    See the following implementations:
+
+        * MeshTri, triangular mesh
+        * MeshQuad, quadrilateral mesh
+    """
 
     def jiggle(self, z=0.2):
         """Jiggle the interior nodes of the mesh.

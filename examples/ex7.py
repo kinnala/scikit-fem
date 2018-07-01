@@ -50,5 +50,6 @@ for i in range(2):
 
 x = solve(A+B+C, b)
 
-smoothplot(x, ib)
-m.show()
+M, X = ib.refinterp(x, 3)
+M.plot(X, smooth=True, edgecolors='')
+M.show()

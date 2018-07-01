@@ -8,96 +8,6 @@ import scipy.sparse.linalg as spl
 import scipy.sparse.csgraph as spg
 
 
-def bilinear_form(form):
-    """Bilinear form decorator"""
-    def kernel(A, ix, u, du, v, dv, w, dx):
-        for k in range(ix.shape[0]):
-            i, j = ix[k]
-            A[i, j] = np.sum(form(u[j], du[j], v[i], dv[i], w) * dx, axis=1)
-    kernel.bilinear = True
-    return kernel
-
-
-def linear_form(form):
-    """Linear form decorator"""
-    def kernel(b, ix, v, dv, w, dx):
-        for i in ix:
-            b[i] = np.sum(form(v[i], dv[i], w) * dx, axis=1)
-    kernel.bilinear = False
-    return kernel
-
-
-def nonlinear_form(nonlin):
-    """
-    Create tangent system using automatic differentiation.
-
-    The new form is bilinear and has the parameters (u, du, v, dv, w).
-
-    It is expected that w[0] contains u_0, w[1] contains du_0/dx, etc.
-
-    Note: Requires autograd. Use autograd.numpy instead of numpy for any special operations.
-    """
-    from autograd import elementwise_grad as egrad
-
-    @bilinear_form
-    def bilin(u, du, v, dv, w):
-        order = (len(u.shape)-2, len(du.shape)-2)
-        if order[0] > 0:
-            dim = u.shape[0]
-        elif order[1] > 0:
-            dim = du.shape[0]
-        else:
-            raise Exception("Could not deduce the dimension!")
-        if order[0] == 0 and order[1] == 1:
-            # scalar H1
-            first_arg = egrad(nonlin, argnum=0)(w[0], w[1:(dim+1)], v, dv, w[(dim+1):])*u
-            second_arg = np.sum(egrad(nonlin, argnum=1)(w[0], w[1:(dim+1)], v, dv, w[(dim+1):])*du, axis=0)
-        elif order[0] == 1 and order[1] == 0:
-            # Hdiv / Hcurl
-            first_arg = np.sum(egrad(nonlin, argnum=0)(w[0:dim], w[dim], v, dv, w[(dim+1):])*u, axis=0)
-            second_arg = egrad(nonlin, argnum=1)(w[0:dim], w[dim], v, dv, w[(dim+1):])*du
-        else:
-            raise Exception("The linearization of the given order not supported.")
-        # derivative chain rule
-        return first_arg + second_arg
-
-    @linear_form
-    def lin(v, dv, w):
-        order = (len(v.shape)-2, len(dv.shape)-2)
-        if order[0] > 0:
-            dim = v.shape[0]
-        elif order[1] > 0:
-            dim = dv.shape[0]
-        else:
-            raise Exception("Could not deduce the dimension!")
-        if order[0] == 0 and order[1] == 1:
-            # scalar H1
-            return nonlin(w[0], w[1:(dim+1)], v, dv, w[(dim+1):])
-        elif order[0] == 1 and order[1] == 0:
-            # Hdiv / Hcurl
-            return nonlin(w[0:dim], w[dim], v, dv, w[(dim+1):])
-        else:
-            raise Exception("The linearization of the given order not supported.")
-
-    bilin.rhs = lin
-
-    return bilin
-
-
-def smoothplot(x, basis, nref=3, m=None):
-    M, X = basis.refinterp(x, nref)
-    if m is not None:
-        ax = m.draw()
-        M.plot(X, smooth=True, edgecolors='', ax=ax)
-    else:
-        M.plot(X, smooth=True, edgecolors='')
-
-
-def rcm_reordering(A, symmetric=False):
-    """Compute reverse Cuthill-McKee reordering using SciPy."""
-    return spg.reverse_cuthill_mckee(A, symmetric_mode=symmetric)
-
-
 def condense(A, b=None, x=None, I=None, D=None):
     if x is None:
         x = np.zeros(A.shape[0])
@@ -116,13 +26,19 @@ def condense(A, b=None, x=None, I=None, D=None):
 
 
 def rcm(A, b):
-    p = rcm_reordering(A)
+    p = spg.reverse_cuthill_mckee(A, symmetric_mode=False)
     return A[p].T[p].T, b[p], p
 
 
 def solver_direct_scipy():
     def solver(A, b):
         return spl.spsolve(A, b)
+    return solver
+
+
+def solver_direct_umfpack():
+    def solver(A, b):
+        return spl.spsolve(A, b, use_umfpack=True)
     return solver
 
 
@@ -135,26 +51,11 @@ def solver_direct_cholmod():
 
 
 def solve(A, b, solver=None):
-    """
-    Example for using Umfpack:
-
-    .. code-block:: python
-    def solver_umfpack(A, b):
-        return spl.spsolve(A, b, use_umfpack=True)
-
-    Example for using CHOLMOD through scikit-sparse:
-
-    .. code-block:: python
-    def solver_cholmod(A, b):
-        from sksparse.cholmod import cholesky
-        factor = cholesky(A)
-        return factor(b)
-
-    """
     if solver is None:
         solver = solver_direct_scipy()
 
     return solver(A, b)
+
 
 def build_ilu_pc(A):
     """Build a preconditioner for the matrix using incomplete LU decomposition.
@@ -163,6 +64,7 @@ def build_ilu_pc(A):
     P_x = lambda x: P.solve(x)
     M = spl.LinearOperator((A.shape[0], A.shape[0]), matvec=P_x)
     return M
+
 
 def cg(A, b, tol, maxiter, x0=None, D=None, I=None, pc=None, verbose=True, viewiters=False):
     """Conjugate gradient solver wrapped for FEM purposes."""
@@ -204,11 +106,13 @@ def cg(A, b, tol, maxiter, x0=None, D=None, I=None, pc=None, verbose=True, viewi
         U[I] = u[0]
         return U
 
+
 def adaptive_theta(est, theta=0.5, max=None):
     if max is None:
         return np.nonzero(theta*np.max(est) < est)[0]
     else:
         return np.nonzero(theta*max < est)[0]
+
 
 def initialize(basis, *bcs):
     """Initialize a solution vector with boundary conditions in place."""

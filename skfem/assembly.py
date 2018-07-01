@@ -551,6 +551,80 @@ class Dofnum(object):
             dofs = np.hstack((dofs, self.i_dof[:, T].flatten()))
         return dofs.flatten()
 
+def bilinear_form(form):
+    """Bilinear form decorator"""
+    def kernel(A, ix, u, du, v, dv, w, dx):
+        for k in range(ix.shape[0]):
+            i, j = ix[k]
+            A[i, j] = np.sum(form(u[j], du[j], v[i], dv[i], w) * dx, axis=1)
+    kernel.bilinear = True
+    return kernel
+
+
+def linear_form(form):
+    """Linear form decorator"""
+    def kernel(b, ix, v, dv, w, dx):
+        for i in ix:
+            b[i] = np.sum(form(v[i], dv[i], w) * dx, axis=1)
+    kernel.bilinear = False
+    return kernel
+
+
+def nonlinear_form(nonlin):
+    """
+    Create tangent system using automatic differentiation.
+
+    The new form is bilinear and has the parameters (u, du, v, dv, w).
+
+    It is expected that w[0] contains u_0, w[1] contains du_0/dx, etc.
+
+    Note: Requires autograd. Use autograd.numpy instead of numpy for any special operations.
+    """
+    from autograd import elementwise_grad as egrad
+
+    @bilinear_form
+    def bilin(u, du, v, dv, w):
+        order = (len(u.shape)-2, len(du.shape)-2)
+        if order[0] > 0:
+            dim = u.shape[0]
+        elif order[1] > 0:
+            dim = du.shape[0]
+        else:
+            raise Exception("Could not deduce the dimension!")
+        if order[0] == 0 and order[1] == 1:
+            # scalar H1
+            first_arg = egrad(nonlin, argnum=0)(w[0], w[1:(dim+1)], v, dv, w[(dim+1):])*u
+            second_arg = np.sum(egrad(nonlin, argnum=1)(w[0], w[1:(dim+1)], v, dv, w[(dim+1):])*du, axis=0)
+        elif order[0] == 1 and order[1] == 0:
+            # Hdiv / Hcurl
+            first_arg = np.sum(egrad(nonlin, argnum=0)(w[0:dim], w[dim], v, dv, w[(dim+1):])*u, axis=0)
+            second_arg = egrad(nonlin, argnum=1)(w[0:dim], w[dim], v, dv, w[(dim+1):])*du
+        else:
+            raise Exception("The linearization of the given order not supported.")
+        # derivative chain rule
+        return first_arg + second_arg
+
+    @linear_form
+    def lin(v, dv, w):
+        order = (len(v.shape)-2, len(dv.shape)-2)
+        if order[0] > 0:
+            dim = v.shape[0]
+        elif order[1] > 0:
+            dim = dv.shape[0]
+        else:
+            raise Exception("Could not deduce the dimension!")
+        if order[0] == 0 and order[1] == 1:
+            # scalar H1
+            return nonlin(w[0], w[1:(dim+1)], v, dv, w[(dim+1):])
+        elif order[0] == 1 and order[1] == 0:
+            # Hdiv / Hcurl
+            return nonlin(w[0:dim], w[dim], v, dv, w[(dim+1):])
+        else:
+            raise Exception("The linearization of the given order not supported.")
+
+    bilin.rhs = lin
+
+    return bilin
 
 if __name__ == "__main__":
     import doctest

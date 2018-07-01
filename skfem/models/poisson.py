@@ -3,7 +3,7 @@
 Poisson equation
 """
 import numpy as np
-from skfem.utils import bilinear_form, linear_form
+from skfem.assembly import bilinear_form, linear_form
 
 @bilinear_form
 def laplace(u, du, v, dv, w):

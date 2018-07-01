@@ -3,7 +3,7 @@
 Linear elasticity
 """
 import numpy as np
-from skfem.utils import bilinear_form, linear_form
+from skfem.assembly import bilinear_form, linear_form
 
 def basis_elasticity(m):
     import skfem.mesh

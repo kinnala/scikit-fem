@@ -28,5 +28,6 @@ I = m.interior_nodes()
 x = 0*b
 x[I] = solve(*condense(A, b, I=I))
 
-m.plot3(x)
-m.show()
+if __name__ == "__main__":
+    m.plot3(x)
+    m.show()
