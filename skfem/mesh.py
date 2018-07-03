@@ -331,7 +331,7 @@ class Mesh2D(Mesh):
 
         Returns
         -------
-        ndarray
+        numpy array
             An array of node indices.
         """
         return np.nonzero(test(self.p[0, :], self.p[1, :]))[0]
@@ -992,6 +992,39 @@ class MeshHex(Mesh3D):
             self._validate()
         self._build_mappings()
         super(MeshHex, self).__init__()
+
+    @classmethod
+    def init_tensor(cls, x, y, z):
+        """Initialize a tensor product mesh.
+
+        Parameters
+        ----------
+        x : numpy array (1d)
+            The nodal coordinates in dimension x
+        y : numpy array (1d)
+            The nodal coordinates in dimension y
+        z : numpy array (1d)
+            The nodal coordinates in dimension z
+        """
+        npx = len(x)
+        npy = len(y)
+        npz = len(z)
+        X, Y, Z = np.meshgrid(np.sort(x), np.sort(y), np.sort(z))   
+        p = np.vstack((X.flatten('F'), Y.flatten('F'), Z.flatten('F')))
+        ix = np.arange(npx*npy*npz)
+        ne = (npx-1)*(npy-1)*(npz-1)
+        t = np.zeros((8, ne))
+        ix = ix.reshape(npy, npx, npz, order='F').copy()
+        t[0, :] = ix[0:(npz-1), 0:(npy-1), 0:(npx-1)].reshape(ne, 1, order='F').copy().flatten()
+        t[1, :] = ix[1:npz, 0:(npy-1), 0:(npx-1)].reshape(ne, 1, order='F').copy().flatten()
+        t[2, :] = ix[0:(npz-1), 1:npy, 0:(npx-1)].reshape(ne, 1, order='F').copy().flatten()
+        t[3, :] = ix[0:(npz-1), 0:(npy-1), 1:npx].reshape(ne, 1, order='F').copy().flatten()
+        t[4, :] = ix[1:npz, 1:npy, 0:(npx-1)].reshape(ne, 1, order='F').copy().flatten()
+        t[5, :] = ix[1:npz, 0:(npy-1), 1:npx].reshape(ne, 1, order='F').copy().flatten()
+        t[6, :] = ix[0:(npz-1), 1:npy, 1:npx].reshape(ne, 1, order='F').copy().flatten()
+        t[7, :] = ix[1:npz, 1:npy, 1:npx].reshape(ne, 1, order='F').copy().flatten()
+        return cls(p, t.astype(np.int64))
+
 
     def _build_mappings(self):
         """Build element-to-facet, element-to-edges, etc. mappings."""
