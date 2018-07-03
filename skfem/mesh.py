@@ -225,20 +225,34 @@ class Mesh3D(Mesh):
         Parameters
         ----------
         test : lambda function (3 params)
-            Should return 1 or True for nodes belonging
-            to the set.
+            Evaluates to 1 or True for nodes belonging
+            to the output set.
         """
         return np.nonzero(test(self.p[0, :], self.p[1, :], self.p[2, :]))[0]
 
     def facets_satisfying(self, test):
-        """Return facets whose midpoints satisfy some condition."""
+        """Return facets whose midpoints satisfy some condition.
+        
+        Parameters
+        ----------
+        test : lambda functions (3 params)
+            Evaluates to 1 or True for facet midpoints
+            of the facets belonging to the output set.
+        """
         mx = np.sum(self.p[0, self.facets], axis=0)/self.facets.shape[0]
         my = np.sum(self.p[1, self.facets], axis=0)/self.facets.shape[0]
         mz = np.sum(self.p[2, self.facets], axis=0)/self.facets.shape[0]
         return np.nonzero(test(mx, my, mz))[0]
 
     def edges_satisfying(self, test):
-        """Return edges whose midpoints satisfy some condition."""
+        """Return edges whose midpoints satisfy some condition.
+
+        Parameters
+        ----------
+        test : lambda functions (3 params)
+            Evaluates to 1 or True for edge midpoints
+            of the edges belonging to the output set.
+        """
         mx = 0.5*(self.p[0, self.edges[0, :]] + self.p[0, self.edges[1, :]])
         my = 0.5*(self.p[1, self.edges[0, :]] + self.p[1, self.edges[1, :]])
         mz = 0.5*(self.p[2, self.edges[0, :]] + self.p[2, self.edges[1, :]])
@@ -348,9 +362,10 @@ class Mesh2D(Mesh):
 
         Parameters
         ----------
-        test : lambda
-            An anonymous function with two parameters (x and y) and which returns True for the midpoints
-            of the set of facets that are to be included in the return set.
+        test : lambda function (2 params)
+            An anonymous function with two parameters (x and y) and which
+            returns True for the midpoints of the set of facets that are
+            to be included in the return set.
         """
         mx = 0.5*(self.p[0, self.facets[0, :]] + self.p[0, self.facets[1, :]])
         my = 0.5*(self.p[1, self.facets[0, :]] + self.p[1, self.facets[1, :]])
@@ -361,9 +376,10 @@ class Mesh2D(Mesh):
 
         Parameters
         ----------
-        test : lambda
-            An anonymous function with two parameters (x and y) and which returns True for the midpoints
-            of the set of elements that are to be included in the return set.
+        test : lambda function (2 params)
+            An anonymous function with two parameters (x and y) and which
+            returns True for the midpoints of the set of elements that
+            are to be included in the return set.
         """
         mx = np.sum(self.p[0, self.t], axis=0)/self.t.shape[0]
         my = np.sum(self.p[1, self.t], axis=0)/self.t.shape[0]
@@ -430,7 +446,14 @@ class Mesh2D(Mesh):
         return ax
 
     def mirror_mesh(self, a, b, c):
-        """Mirror a mesh by the line ax + by + c = 0."""
+        """Mirror a mesh by the line ax + by + c = 0.
+        
+        Parameters
+        ----------
+        a : float
+        b : float
+        c : float
+        """
         tmp = -2.0*(a*self.p[0, :] + b*self.p[1, :] + c)/(a**2 + b**2)
         newx = a*tmp + self.p[0, :]
         newy = b*tmp + self.p[1, :]
@@ -595,7 +618,11 @@ class InterfaceMesh1D(Mesh):
 
 
 class MeshLine(Mesh):
-    """One-dimensional mesh."""
+    """One-dimensional mesh.
+    
+    This cannot currently be used for finite element computations
+    due to inadequate support in skfem.assembly and skfem.mapping.
+    """
 
     refdom = "line"
     brefdom = "point"
@@ -868,7 +895,7 @@ class MeshQuad(Mesh2D):
         # TODO implement prolongation
 
     def _splitquads(self, x):
-        """Split each quad into a triangle and return MeshTri."""
+        """Split each quad into two triangles and return MeshTri."""
         if len(x) == self.t.shape[1]:
             # preserve elemental constant functions
             X = np.concatenate((x, x))
