@@ -51,5 +51,7 @@ for i in range(2):
 x = solve(A+B+C, b)
 
 M, X = ib.refinterp(x, 3)
-M.plot(X, smooth=True, edgecolors='')
-M.show()
+
+if __name__ == "__main__":
+    M.plot(X, smooth=True, edgecolors='')
+    M.show()

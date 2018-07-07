@@ -27,6 +27,7 @@ x[I] = solve(*condense(K, f, D=D))
 
 M, X = ib.refinterp(x, 3)
 
-ax = m.draw()
-M.plot(X, smooth=True, edgecolors='', ax=ax)
-M.show()
+if __name__ == "__main__":
+    ax = m.draw()
+    M.plot(X, smooth=True, edgecolors='', ax=ax)
+    M.show()

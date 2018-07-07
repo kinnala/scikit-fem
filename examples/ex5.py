@@ -50,5 +50,6 @@ I = np.append(I, K.shape[0]-1)
 
 x[I] = solve(*condense(K, f, I=I))
 
-m.plot3(x[:-1])
-m.show()
+if __name__ == "__main__":
+    m.plot3(x[:-1])
+    m.show()

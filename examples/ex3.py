@@ -35,5 +35,6 @@ L, x = eigsh(K[I].T[I].T, k=6, M=M[I].T[I].T, which='SM')
 
 y[I] = x[:, 4]
 
-MeshQuad(np.array([m.p[0, :]+y[gb.dofnum.n_dof[0, :]], m.p[1, :]+y[gb.dofnum.n_dof[1, :]]]), m.t).draw()
-m.show()
+if __name__ == "__main__":
+    MeshQuad(np.array([m.p[0, :]+y[gb.dofnum.n_dof[0, :]], m.p[1, :]+y[gb.dofnum.n_dof[1, :]]]), m.t).draw()
+    m.show()
