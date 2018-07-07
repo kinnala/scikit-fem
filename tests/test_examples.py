@@ -35,9 +35,3 @@ class TestEx7(unittest.TestCase):
     def runTest(self):
         import examples.ex7
         self.assertAlmostEqual(np.max(examples.ex7.x), 0.077891428529719878)
-
-class TestEx10(unittest.TestCase):
-    """Run examples/ex10.py"""
-    def runTest(self):
-        import examples.ex10
-        self.assertAlmostEqual(np.mean(examples.ex10.x), 0.2779315217317)

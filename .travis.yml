@@ -11,7 +11,7 @@ install:
   - conda update -q conda
   - conda info -a
   - conda create -q -n scikit-fem python=$TRAVIS_PYTHON_VERSION nomkl numpy scipy matplotlib sympy ipython 
-  - pip install autograd
   - source activate scikit-fem
 script:
-  - make
+  - ipython -m unittest discover -- -v
+
