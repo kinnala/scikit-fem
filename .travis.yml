@@ -1,0 +1,17 @@
+language: python
+python:
+  - "3.6"
+install:
+  - sudo apt-get update
+  - wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a
+  - conda create -q -n scikit-fem python=$TRAVIS_PYTHON_VERSION nomkl numpy scipy matplotlib sympy ipython 
+  - pip install autograd
+  - source activate scikit-fem
+script:
+  - make
