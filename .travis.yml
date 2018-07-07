@@ -13,5 +13,4 @@ install:
   - conda create -q -n scikit-fem python=$TRAVIS_PYTHON_VERSION nomkl numpy scipy matplotlib sympy ipython 
   - source activate scikit-fem
 script:
-  - ipython -m unittest discover -- -v
-
+  - python -m unittest discover 
