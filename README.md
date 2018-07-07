@@ -1,5 +1,8 @@
 # scikit-fem
 
+[![PyPI version](https://badge.fury.io/py/scikit-fem.svg)](https://badge.fury.io/py/scikit-fem)
+[![Build Status](https://travis-ci.com/kinnala/scikit-fem.svg?branch=master)](https://travis-ci.com/kinnala/scikit-fem)
+
 Easy to use finite element assemblers and the related tools.
 
 ## Installation
