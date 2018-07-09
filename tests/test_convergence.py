@@ -9,6 +9,7 @@ Check the convergence rates of the elements.
 class ConvergenceQ1(unittest.TestCase):
     rateL2 = 2.0
     rateH1 = 1.0
+    eps = 0.1
     def runTest(self):
         @bilinear_form
         def laplace(u, du, v, dv, w):
@@ -54,9 +55,8 @@ class ConvergenceQ1(unittest.TestCase):
         rateL2 = np.polyfit(np.log(hs), np.log(L2s), 1)[0]
         rateH1 = np.polyfit(np.log(hs), np.log(H1s), 1)[0]
 
-        eps = 0.1
-        self.assertLess(np.abs(rateL2-self.rateL2), eps)
-        self.assertLess(np.abs(rateH1-self.rateH1), eps)
+        self.assertLess(np.abs(rateL2-self.rateL2), self.eps)
+        self.assertLess(np.abs(rateH1-self.rateH1), self.eps)
 
     def compute_error(self, m, basis, U):
         uh, duh = basis.interpolate(U, derivative=True)
@@ -148,3 +148,39 @@ class ConvergenceTriP2(ConvergenceTriP1):
         e = ElementTriP2()
         map = MappingAffine(m)
         return InteriorBasis(m, e, map, 2)
+
+class ConvergenceHex1(ConvergenceQ1):
+    rateL2 = 2.0
+    rateH1 = 1.0
+    eps = 0.11
+    def create_basis(self, m):
+        e = ElementHex1()
+        map = MappingIsoparametric(m, e)
+        return InteriorBasis(m, e, map, 3)
+    def setUp(self):
+        self.mesh = MeshHex()
+        self.mesh.refine(2)
+
+class ConvergenceTetP1(ConvergenceQ1):
+    rateL2 = 2.0
+    rateH1 = 1.0
+    eps = 0.13
+    def create_basis(self, m):
+        e = ElementTetP1()
+        map = MappingAffine(m)
+        return InteriorBasis(m, e, map, 2)
+    def setUp(self):
+        self.mesh = MeshTet()
+        self.mesh.refine(2)
+
+class ConvergenceTetP2(ConvergenceTetP1):
+    rateL2 = 3.0
+    rateH1 = 2.0
+    eps = 0.132
+    def create_basis(self, m):
+        e = ElementTetP2()
+        map = MappingAffine(m)
+        return InteriorBasis(m, e, map, 3)
+    def setUp(self):
+        self.mesh = MeshTet()
+        self.mesh.refine(1)
