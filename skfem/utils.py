@@ -6,6 +6,7 @@ import numpy as np
 import scipy.sparse as sp
 import scipy.sparse.linalg as spl
 import scipy.sparse.csgraph as spg
+import warnings
 
 
 def condense(A, b=None, x=None, I=None, D=None):
@@ -43,10 +44,61 @@ def solver_direct_umfpack():
 
 
 def solver_direct_cholmod():
+    """Cholmod-based direct solver for symmetric systems."""
     def solver(A, b):
         from sksparse.cholmod import cholesky
         factor = cholesky(A)
         return factor(b)
+    return solver
+
+
+def build_ilu_pc(A):
+    """Incomplete LU preconditioner."""
+    P = spl.spilu(A.tocsc(), drop_tol=1e-4, fill_factor=20)
+    P_x = lambda x: P.solve(x)
+    M = spl.LinearOperator((A.shape[0], A.shape[0]), matvec=P_x)
+    return M
+
+
+def build_diag_pc(A):
+    """Diagonal preconditioner."""
+    return sp.spdiags(1.0/A.diagonal(), 0, A.shape[0], A.shape[0])
+
+
+def solver_iter_pcg(pc=None, guess=None, maxiter=100, tol=1e-8, verbose=False):
+    """Conjugate gradient solver.
+    
+    Parameters
+    ----------
+    pc : (optional) sparse matrix, LinearOperator
+        A preconditioner for the conjugate gradient algorithm.
+        By default, a diagonal preconditioner is built using
+        skfem.utils.build_diag_pc. User can supply a fixed
+        preconditioner using this parameter.
+    guess : (optional) numpy array
+        An initial guess. By default, zero is used as an initial
+        guess.
+    maxiter : (optional, default=100) int
+    tol : (optional, default=1e-8) float
+    verbose : (optional, default=False) bool
+    """
+    def callback(x):
+        if verbose:
+            print(np.linalg.norm(x))
+
+    if pc is None:
+        def solver(A, b):
+            sol, info = spl.cg(A, b, x0=guess, maxiter=maxiter, M=build_diag_pc(A), tol=tol, callback=callback)
+            if info > 0:
+                warnings.warn("Convergence not achieved (TOL=" + str(tol) + ", MAXITER=" + str(maxiter) + ")")
+            return sol
+    else:
+        def solver(A, b):
+            sol, info = spl.cg(A, b, x0=guess, maxiter=maxiter, M=pc, tol=tol, callback=callback)
+            if info > 0:
+                warnings.warn("Convergence not achieved (TOL=" + str(tol) + ", MAXITER=" + str(maxiter) + ")")
+            return sol
+
     return solver
 
 
@@ -55,56 +107,6 @@ def solve(A, b, solver=None):
         solver = solver_direct_scipy()
 
     return solver(A, b)
-
-
-def build_ilu_pc(A):
-    """Build a preconditioner for the matrix using incomplete LU decomposition.
-    The output can be fed directly to e.g. skfem.utils.cg."""
-    P = spl.spilu(A.tocsc(), drop_tol=1e-4, fill_factor=20)
-    P_x = lambda x: P.solve(x)
-    M = spl.LinearOperator((A.shape[0], A.shape[0]), matvec=P_x)
-    return M
-
-
-def cg(A, b, tol, maxiter, x0=None, D=None, I=None, pc=None, verbose=True, viewiters=False):
-    """Conjugate gradient solver wrapped for FEM purposes."""
-    def callback(x):
-        if viewiters:
-            print("- Vector-2 norm: " + str(np.linalg.norm(x)))
-
-    if D is not None:
-        I = np.setdiff1d(np.arange(A.shape[0]), D)
-    else:
-        if I is None:
-            I = np.arange(A.shape[0])
-
-    if pc is None:
-        # diagonal preconditioner
-        M = sp.spdiags(1/(A[I].T[I].diagonal()), 0, I.shape[0], I.shape[0])
-    else:
-        M = pc
-
-    if I is None:
-        u = spl.cg(A, b, x0=x0, maxiter=maxiter, M=M, tol=tol, callback=callback)
-    else:
-        if x0 is None:
-            u = spl.cg(A[I].T[I].T, b[I], maxiter=maxiter, M=M, tol=tol,
-                       callback=callback)
-        else:
-            u = spl.cg(A[I].T[I].T, b[I], x0=x0[I], maxiter=maxiter, M=M,
-                       tol=tol, callback=callback)
-
-    if verbose:
-        if u[1] > 0:
-            print("* WARNING! Maximum number of iterations "\
-                  + str(maxiter) + " reached.")
-
-    if I is None: 
-        return u[0]
-    else:
-        U = np.zeros(A.shape[0])
-        U[I] = u[0]
-        return U
 
 
 def adaptive_theta(est, theta=0.5, max=None):
