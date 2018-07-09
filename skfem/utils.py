@@ -52,15 +52,15 @@ def solver_direct_cholmod():
     return solver
 
 
-def build_ilu_pc(A):
+def build_pc_ilu(A, drop_tol=1e-4, fill_factor=20):
     """Incomplete LU preconditioner."""
-    P = spl.spilu(A.tocsc(), drop_tol=1e-4, fill_factor=20)
+    P = spl.spilu(A.tocsc(), drop_tol=drop_tol, fill_factor=fill_factor)
     P_x = lambda x: P.solve(x)
     M = spl.LinearOperator((A.shape[0], A.shape[0]), matvec=P_x)
     return M
 
 
-def build_diag_pc(A):
+def build_pc_diag(A):
     """Diagonal preconditioner."""
     return sp.spdiags(1.0/A.diagonal(), 0, A.shape[0], A.shape[0])
 
@@ -73,7 +73,7 @@ def solver_iter_pcg(pc=None, guess=None, maxiter=100, tol=1e-8, verbose=False):
     pc : (optional) sparse matrix, LinearOperator
         A preconditioner for the conjugate gradient algorithm.
         By default, a diagonal preconditioner is built using
-        skfem.utils.build_diag_pc. User can supply a fixed
+        skfem.utils.build_pc_diag. User can supply a fixed
         preconditioner using this parameter.
     guess : (optional) numpy array
         An initial guess. By default, zero is used as an initial
@@ -87,16 +87,24 @@ def solver_iter_pcg(pc=None, guess=None, maxiter=100, tol=1e-8, verbose=False):
             print(np.linalg.norm(x))
 
     if pc is None:
+        if verbose:
+            print("Starting conjugate gradient with TOL=" + str(tol) + ", MAXITER=" + str(maxiter) + " and diagonal preconditioner ...")
         def solver(A, b):
-            sol, info = spl.cg(A, b, x0=guess, maxiter=maxiter, M=build_diag_pc(A), tol=tol, callback=callback)
+            sol, info = spl.cg(A, b, x0=guess, maxiter=maxiter, M=build_pc_diag(A), atol=tol, callback=callback)
             if info > 0:
-                warnings.warn("Convergence not achieved (TOL=" + str(tol) + ", MAXITER=" + str(maxiter) + ")")
+                warnings.warn("Convergence not achieved!")
+            elif info == 0 and verbose:
+                print("Conjugate gradient converged to TOL=" + str(tol))
             return sol
     else:
+        if verbose:
+            print("Starting conjugate gradient with TOL=" + str(tol) + ", MAXITER=" + str(maxiter) + " and user-given preconditioner ...")
         def solver(A, b):
-            sol, info = spl.cg(A, b, x0=guess, maxiter=maxiter, M=pc, tol=tol, callback=callback)
+            sol, info = spl.cg(A, b, x0=guess, maxiter=maxiter, M=pc, atol=tol, callback=callback)
             if info > 0:
-                warnings.warn("Convergence not achieved (TOL=" + str(tol) + ", MAXITER=" + str(maxiter) + ")")
+                warnings.warn("Convergence not achieved!")
+            elif info == 0 and verbose:
+                print("Conjugate gradient converged to TOL=" + str(tol))
             return sol
 
     return solver
