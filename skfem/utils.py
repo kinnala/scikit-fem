@@ -10,6 +10,7 @@ import warnings
 
 
 def condense(A, b=None, x=None, I=None, D=None):
+    """Eliminate DOFs from a linear system."""
     if x is None:
         x = np.zeros(A.shape[0])
     if I is None and D is None:
@@ -111,6 +112,19 @@ def solver_iter_pcg(pc=None, guess=None, maxiter=100, tol=1e-8, verbose=False):
 
 
 def solve(A, b, solver=None):
+    """Solve a linear system.
+
+    Parameters
+    ----------
+    A : sparse matrix
+    b : numpy array
+    solver : (optional) function
+        Choose one of the following solvers:
+        * skfem.utils.solver_direct_scipy (default)
+        * skfem.utils.solver_direct_umfpack
+        * skfem.utils.solver_direct_cholmod
+        * skfem.utils.solver_iter_pcg
+    """
     if solver is None:
         solver = solver_direct_scipy()
 
@@ -122,19 +136,6 @@ def adaptive_theta(est, theta=0.5, max=None):
         return np.nonzero(theta*np.max(est) < est)[0]
     else:
         return np.nonzero(theta*max < est)[0]
-
-
-def initialize(basis, *bcs):
-    """Initialize a solution vector with boundary conditions in place."""
-    y = np.zeros(basis.dofnum.N)
-    boundary_ix = np.array([])
-
-    for bc in bcs:
-        x, D = bc(basis)
-        y += x
-        boundary_ix = np.concatenate((boundary_ix, D))
-
-    return y, basis.dofnum.complement_dofs(boundary_ix)
 
 
 def derivative(x, basis1, basis0, i=0):

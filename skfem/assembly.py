@@ -170,7 +170,7 @@ class GlobalBasis():
 
             dofs = np.hstack((dofs, Ndofs.flatten()))
 
-        if check_facets:
+        if check_facets and self.dofnum.f_dof.shape[0]>0:
             # handle facets
             F = self.mesh.facets_satisfying(test)
             if boundary:
@@ -199,7 +199,7 @@ class GlobalBasis():
 
             dofs = np.hstack((dofs, Fdofs.flatten()))
 
-        if check_edges:
+        if check_edges and self.dofnum.e_dof.shape[0]>0:
             # handle edges
             if self.mesh.dim() == 3:
                 E = self.mesh.edges_satisfying(test)
