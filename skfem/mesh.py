@@ -894,16 +894,20 @@ class MeshQuad(Mesh2D):
 
         # TODO implement prolongation
 
-    def _splitquads(self, x):
+    def _splitquads(self, x=None):
         """Split each quad into two triangles and return MeshTri."""
-        if len(x) == self.t.shape[1]:
-            # preserve elemental constant functions
-            X = np.concatenate((x, x))
-        else:
-            X = x
         t = self.t[[0, 1, 3], :]
         t = np.hstack((t, self.t[[1, 2, 3]]))
-        return MeshTri(self.p, t, validate=False), X
+
+        if x is not None:
+            if len(x) == self.t.shape[1]:
+                # preserve elemental constant functions
+                X = np.concatenate((x, x))
+            else:
+                raise Exception("The parameter x must have one value per element.")
+            return MeshTri(self.p, t, validate=False), X
+        else:
+            return MeshTri(self.p, t, validate=False)
 
     def _splitquads_symmetric(self):
         """Split quads into four triangles."""

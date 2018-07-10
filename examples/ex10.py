@@ -1,10 +1,11 @@
+"""
+Author: kinnala
+
+Solve the nonlinear minimal surface problem using automatic differentiation.
+"""
 from skfem import *
 import numpy as np
 import matplotlib.pyplot as plt
-
-"""
-Solve the nonlinear minimal surface problem using automatic differentiation.
-"""
 
 m = MeshTri()
 m.refine(5)

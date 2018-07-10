@@ -1,3 +1,8 @@
+"""
+Author: kinnala
+
+Solve the linear elasticity problem in 3D.
+"""
 import numpy as np
 from skfem import *
 from skfem.models.elasticity import linear_elasticity, \

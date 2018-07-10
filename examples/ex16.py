@@ -1,9 +1,10 @@
-from skfem import *
-from skfem.models.poisson import *
-
 """
+Author: kinnala
+
 Solving example 9 with iterative methods.
 """
+from skfem import *
+from skfem.models.poisson import *
 
 m = MeshHex()
 m.refine(4)

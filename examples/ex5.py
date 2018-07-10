@@ -1,8 +1,9 @@
-from skfem import *
+"""
+Author: kinnala
 
+Impose integral condition using a Lagrange multiplier.
 """
-Impose integral condition using a Lagrange multiplier
-"""
+from skfem import *
 
 m = MeshTri()
 m.refine(5)

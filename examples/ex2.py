@@ -1,4 +1,6 @@
 """
+Author: kinnala
+
 Solve the Kirchhoff plate bending problem in a unit square
 with clamped boundary conditions using the nonconforming
 Morley element. Demonstrates also the visualization of

@@ -1,15 +1,19 @@
 """
+Author: kinnala
+
 Solve a linearized contact problem between two linear elastic
 bodies using the penalty method.
 """
 
 from skfem import *
-from skfem.extern import *
-from skfem.models.elasticity import *
+from skfem.models.elasticity import plane_strain
 import numpy as np
 
-m = read_comsol("examples/square_smalltris.mphtxt")
-M = read_comsol("examples/square_largetris.mphtxt")
+m = MeshTri()
+m.refine(3)
+M = MeshLine(np.linspace(0, 1, 6))
+M = M*M
+M = M._splitquads()
 M.translate((1.0, 0.0))
 
 map = MappingAffine(m)

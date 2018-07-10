@@ -1,10 +1,11 @@
-from skfem import *
-from skfem.models.poisson import *
-
 """
+Author: kinnala
+
 Solve Laplace equation with zero Dirichlet BC
 using trilinear hexahedral elements.
 """
+from skfem import *
+from skfem.models.poisson import *
 
 m = MeshHex()
 m.refine(4)

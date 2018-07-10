@@ -1,10 +1,10 @@
+"""
+Author: kinnala
+
+Visualise the Argyris basis functions.
+"""
 from skfem import *
 import matplotlib.pyplot as plt
-import numpy as np
-
-"""
-Plot Argyris basis functions
-"""
 
 m = MeshTri.init_sqsymmetric()
 map = MappingAffine(m)

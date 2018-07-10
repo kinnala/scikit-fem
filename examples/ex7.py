@@ -1,7 +1,12 @@
+"""
+Author: kinnala
+
+Solve the Poisson problem using an interior
+penalty method.
+"""
+
 from skfem import *
 import matplotlib.pyplot as plt
-
-# Interior penalty
 
 m = MeshTri.init_sqsymmetric()
 m.refine(2)

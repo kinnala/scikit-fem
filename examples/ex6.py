@@ -1,5 +1,8 @@
 """
-High-order plotting test.
+Author: kinnala
+
+Visualising high-order solutions by refining the mesh and
+interpolating the solution.
 """
 from skfem import *
 from skfem.models.poisson import laplace
