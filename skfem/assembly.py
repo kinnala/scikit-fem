@@ -228,6 +228,58 @@ class GlobalBasis():
 
 
 class FacetBasis(GlobalBasis):
+    """Global basis functions evaluated at integration points on the element
+    boundaries.
+
+    Attributes
+    ----------
+    phi : numpy array
+        Global basis functions at global quadrature points.
+    dphi : numpy array
+        Global basis function derivatives at global quadrature points.
+    X : numpy array of size Ndim x Nqp
+        Local quadrature points.
+    W : numpy array of size Nqp
+        Local quadrature weights.
+    nf : int
+    dx : numpy array of size Nelems x Nqp
+        Can be used in computing global integrals elementwise.
+        For example, np.sum(u**2*dx, axis=1) where u is also
+        a numpy array of size Nelems x Nqp.
+    find
+    tind
+    normals
+    mapping
+    elem
+    dofnum
+    Nbfun
+    intorder
+    dim
+    nt
+    mesh
+    refdom
+    brefdom
+
+    Examples
+    --------
+
+    FacetBasis object is a combination of Mesh, Element,
+    and Mapping:
+
+    >>> from skfem import *
+    >>> from skfem.models.poisson import mass
+    >>> m = MeshTri.init_symmetric()
+    >>> e = ElementTriP1()
+    >>> fb = FacetBasis(m, e, MappingAffine(m))
+
+    The object is used in the assembly of bilinear and
+    linear forms where the integral is over the boundary
+    of the domain (or elements).
+
+    >>> B = asm(mass, fb)
+    >>> B.shape
+    (5, 5)
+    """
     def __init__(self, mesh, elem, mapping, intorder=None, side=None, dofnum=None):
         super(FacetBasis, self).__init__(mesh, elem, mapping, intorder)
         if dofnum is not None:
@@ -286,6 +338,53 @@ class FacetBasis(GlobalBasis):
 
 
 class InteriorBasis(GlobalBasis):
+    """Global basis functions evaluated at integration points inside the
+    elements.
+
+    Attributes
+    ----------
+    phi : numpy array
+        Global basis functions at global quadrature points.
+    dphi : numpy array
+        Global basis function derivatives at global quadrature points.
+    X : numpy array of size Ndim x Nqp
+        Local quadrature points.
+    W : numpy array of size Nqp
+        Local quadrature weights.
+    nelems : int
+    dx : numpy array of size Nelems x Nqp
+        Can be used in computing global integrals elementwise.
+        For example, np.sum(u**2*dx, axis=1) where u is also
+        a numpy array of size Nelems x Nqp.
+    mapping
+    elem
+    dofnum
+    Nbfun
+    intorder
+    dim
+    nt
+    mesh
+    refdom
+    brefdom
+
+    Examples
+    --------
+
+    InteriorBasis object is a combination of Mesh, Element,
+    and Mapping:
+
+    >>> from skfem import *
+    >>> from skfem.models.poisson import laplace
+    >>> m = MeshTri.init_symmetric()
+    >>> e = ElementTriP1()
+    >>> ib = InteriorBasis(m, e, MappingAffine(m))
+
+    The resulting objects are used in the assembly.
+
+    >>> K = asm(laplace, ib)
+    >>> K.shape
+    (5, 5)
+    """
     def __init__(self, mesh, elem, mapping, intorder=None):
         super(InteriorBasis, self).__init__(mesh, elem, mapping, intorder)
 

@@ -1504,6 +1504,12 @@ class MeshTri(Mesh2D):
     >>> m.t.shape
     (3, 8)
 
+    The different constructors are:
+        * load (requires meshio)
+        * init_symmetric
+        * init_sqsymmetric
+        * init_refdom
+
     Facets (edges) and mappings from triangles to facets and vice versa are
     automatically constructed. In the following example we have 5 facets
     (edges).
