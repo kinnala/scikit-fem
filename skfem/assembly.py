@@ -3,39 +3,27 @@
 Assembly module contains classes and functions related to the construction
 of finite element matrices.
 
-Examples
---------
+A library user is mainly interested in the following:
 
-Assemble a stiffness matrix K for the Dirichlet problem in a unit cube.
-
->>> from skfem import *
->>> from skfem.models.poisson import *
->>> m = MeshHex()
->>> m.refine(2)
->>> e = ElementHex1()
->>> map = MappingIsoparametric(m, e)
->>> basis = InteriorBasis(m, e, map, 3) # 3 is the order of integration
->>> K = asm(laplace, basis)
->>> K.shape
-(125, 125)
+    * InteriorBasis (class)
+    * FacetBasis (class)
+    * asm (function)
+    * bilinear_form (decorator)
+    * linear_form (decorator)
 """
 
 import numpy as np
 from scipy.sparse import coo_matrix
 from skfem.quadrature import get_quadrature
 
-
 class GlobalBasis():
-    """GlobalBasis (abstract) is a combination of Mesh, Element and Mapping
-    (and quadrature points).
-
-    The finite element basis is evaluated at global quadrature points and
-    cached inside the object.
+    """The finite element basis is evaluated at global quadrature points and
+    cached inside this object.
 
     Please see the following implementations:
 
-        * InteriorBasis
-        * FacetBasis
+        * InteriorBasis, for basis functions inside elements
+        * FacetBasis, for basis functions on element boundaries
     """
     def __init__(self, mesh, elem, mapping, intorder):
         self.mapping = mapping
@@ -44,7 +32,10 @@ class GlobalBasis():
         self.dofnum = Dofnum(mesh, elem)
         self.Nbfun = self.dofnum.t_dof.shape[0]
 
-        self.intorder = intorder
+        if intorder is None:
+            self.intorder = 2*self.elem.maxdeg
+        else:
+            self.intorder = intorder
 
         self.dim = mesh.p.shape[0]
         self.nt = mesh.t.shape[1]
@@ -237,7 +228,7 @@ class GlobalBasis():
 
 
 class FacetBasis(GlobalBasis):
-    def __init__(self, mesh, elem, mapping, intorder, side=None, dofnum=None):
+    def __init__(self, mesh, elem, mapping, intorder=None, side=None, dofnum=None):
         super(FacetBasis, self).__init__(mesh, elem, mapping, intorder)
         if dofnum is not None:
             self.dofnum = dofnum
@@ -295,7 +286,7 @@ class FacetBasis(GlobalBasis):
 
 
 class InteriorBasis(GlobalBasis):
-    def __init__(self, mesh, elem, mapping, intorder):
+    def __init__(self, mesh, elem, mapping, intorder=None):
         super(InteriorBasis, self).__init__(mesh, elem, mapping, intorder)
 
         self.X, self.W = get_quadrature(self.refdom, self.intorder)
