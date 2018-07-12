@@ -26,7 +26,10 @@ class GlobalBasis():
         * FacetBasis, for basis functions on element boundaries
     """
     def __init__(self, mesh, elem, mapping, intorder):
-        self.mapping = mapping
+        if mapping is None:
+            self.mapping = mesh.mapping()
+        else:
+            self.mapping = mapping
 
         self.elem = elem
         self.dofnum = Dofnum(mesh, elem)
@@ -280,7 +283,7 @@ class FacetBasis(GlobalBasis):
     >>> B.shape
     (5, 5)
     """
-    def __init__(self, mesh, elem, mapping, intorder=None, side=None, dofnum=None):
+    def __init__(self, mesh, elem, mapping=None, intorder=None, side=None, dofnum=None):
         super(FacetBasis, self).__init__(mesh, elem, mapping, intorder)
         if dofnum is not None:
             self.dofnum = dofnum
@@ -385,7 +388,7 @@ class InteriorBasis(GlobalBasis):
     >>> K.shape
     (5, 5)
     """
-    def __init__(self, mesh, elem, mapping, intorder=None):
+    def __init__(self, mesh, elem, mapping=None, intorder=None):
         super(InteriorBasis, self).__init__(mesh, elem, mapping, intorder)
 
         self.X, self.W = get_quadrature(self.refdom, self.intorder)

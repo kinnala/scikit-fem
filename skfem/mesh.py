@@ -16,6 +16,7 @@ import warnings
 from scipy.sparse import coo_matrix
 
 import skfem.mapping
+import skfem.element
 
 
 class Mesh():
@@ -201,7 +202,13 @@ class Mesh():
 
     @classmethod
     def load(cls, filename):
-        """Load a mesh from file using meshio."""
+        """Load a mesh from file using meshio.
+        
+        Parameters
+        ----------
+        filename : string
+            The filename for the mesh.
+        """
         import meshio
         mesh = meshio.read(filename)
         if issubclass(cls, Mesh2D):
@@ -307,7 +314,7 @@ class Mesh2D(Mesh):
 
         Parameters
         ----------
-        z : (OPTIONAL, default=0.2) float
+        z : (optional, default=0.2) float
             Mesh parameter is multiplied by this number. The resulting number
             corresponds to the standard deviation of the jiggle.
         """
@@ -343,7 +350,7 @@ class Mesh2D(Mesh):
         ----------
         nodes : numpy array
             The indices of the nodes to highlight.
-        mark : (OPTIONAL, default='bo') string
+        mark : (optional, default='bo') string
             A standard matplotlib string to define the highlight style.
         """
         plt.plot(self.p[0, nodes], self.p[1, nodes], mark)
@@ -398,13 +405,13 @@ class Mesh2D(Mesh):
 
         Parameters
         ----------
-        ax : (OPTIONAL, default=None) matplotlib axis
+        ax : (optional, default=None) matplotlib axis
             Use a predefined axis for plotting.
-        node_numbering : (OPTIONAL, default=False)
+        node_numbering : (optional, default=False)
             Draw node numbering.
-        facet_numbering: (OPTIONAL, default=False)
+        facet_numbering: (optional, default=False)
             Draw facet numbering.
-        element_numbering : (OPTIONAL, default=False)
+        element_numbering : (optional, default=False)
             Draw element numbering.
         """
         if ax is None:
@@ -694,7 +701,7 @@ class MeshLine(Mesh):
         return np.nonzero(counts == 2)[0]
 
     def plot(self, u, ax=None, color='ko-'):
-        """Plot a function defined on the nodes of the mesh."""
+        """Plot a function defined at the nodes of the mesh."""
         if ax is None:
             # create new figure
             fig = plt.figure()
@@ -851,7 +858,8 @@ class MeshQuad(Mesh2D):
     def _uniform_refine(self):
         """Perform a single mesh refine that halves 'h'.
 
-        Each quadrilateral is split into four subquads."""
+        Each quadrilateral is split into four.
+        """
         # rename variables
         t = self.t
         p = self.p
@@ -939,7 +947,7 @@ class MeshQuad(Mesh2D):
         return m.plot3(z, smooth, ax=ax)
 
     def mapping(self):
-        return skfem.mapping.MappingQ1(self)
+        return skfem.mapping.MappingIsoparametric(self, skfem.element.ElementQ1())
 
 
 class MeshHex(Mesh3D):
@@ -1029,7 +1037,6 @@ class MeshHex(Mesh3D):
         t[7, :] = ix[1:npz, 1:npy, 1:npx].reshape(ne, 1, order='F').copy().flatten()
         return cls(p, t.astype(np.int64))
 
-
     def _build_mappings(self):
         """Build element-to-facet, element-to-edges, etc. mappings."""
         self.edges = np.sort(np.vstack((self.t[0, :], self.t[1, :])), axis=0)
@@ -1045,10 +1052,8 @@ class MeshHex(Mesh3D):
                       5, 7,
                       6, 7]) # see the picture in init
         for i in range(11):
-            self.edges = np.hstack((self.edges,
-                                    np.sort(np.vstack((self.t[e[2*i], :],
-                                                       self.t[e[2*i+1], :])),
-                                            axis=0)))
+            self.edges = np.hstack((self.edges, np.sort(np.vstack((self.t[e[2*i], :],
+                                                                   self.t[e[2*i+1], :])), axis=0)))
 
         # unique edges
         self.edges, ixa, ixb = np.unique(self.edges, axis=1, return_index=True, return_inverse=True)
@@ -1057,7 +1062,10 @@ class MeshHex(Mesh3D):
         self.t2e = ixb.reshape((12, self.t.shape[1]))
 
         # define facets
-        self.facets = np.sort(np.vstack((self.t[0, :], self.t[1, :], self.t[4, :], self.t[2, :])), axis=0)
+        self.facets = np.sort(np.vstack((self.t[0, :],
+                                         self.t[1, :],
+                                         self.t[4, :],
+                                         self.t[2, :])), axis=0)
         f = np.array([0, 3, 6, 2,
                       0, 1, 5, 3,
                       2, 6, 7, 4,
@@ -1238,6 +1246,10 @@ class MeshHex(Mesh3D):
         mesh = meshio.Mesh(self.p.T, cells, pointData, cellData)
         meshio.write(filename, mesh)
 
+    def mapping(self):
+        return skfem.mapping.MappingIsoparametric(self, skfem.mapping.ElementHex1())
+
+
 class MeshTet(Mesh3D):
     """A mesh consisting of tetrahedral elements.
 
@@ -1289,7 +1301,7 @@ class MeshTet(Mesh3D):
         self.t = t
         if validate:
             self._validate()
-        self.ENABLE_FACETS = True
+        self.enable_facets = True
         self._build_mappings()
         super(MeshTet, self).__init__()
 
@@ -1315,7 +1327,7 @@ class MeshTet(Mesh3D):
         self.t2e = ixb.reshape((6, self.t.shape[1]))
 
         # define facets
-        if self.ENABLE_FACETS:
+        if self.enable_facets:
             self.facets = np.sort(np.vstack((self.t[0, :],
                                              self.t[1, :],
                                              self.t[2, :])), axis=0)
@@ -1358,14 +1370,15 @@ class MeshTet(Mesh3D):
         Parameters
         ----------
         N : (optional) int
-            Perform N refinements."""
+            Perform N refinements.
+        """
         if N is None:
             return self._uniform_refine()
         else:
-            self.ENABLE_FACETS = False
+            self.enable_facets = False
             for itr in range(N-1):
                 self._uniform_refine()
-            self.ENABLE_FACETS = True
+            self.enable_facets = True
             self._uniform_refine()
 
     def _uniform_refine(self):

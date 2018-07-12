@@ -14,7 +14,7 @@ Otherwise you can just clone this repository.
 
 - Transforms bilinear forms into sparse matrices and linear forms into vectors
 - Supports triangular, quadrilateral, tetrahedral and hexahedral meshes
-- Supports a nice set of finite elements including H1-, H2-, L2-, H(div)-, and
+- Supports various different finite element families including H1-, H2-, L2-, H(div)-, and
   H(curl)-conforming elements
 - No complex dependencies: Most of the functionality require only SciPy and
   NumPy
@@ -30,8 +30,7 @@ m = MeshTri()
 m.refine(4)
 
 e = ElementTriP1()
-map = MappingAffine(m)
-basis = InteriorBasis(m, e, map, 2)
+basis = InteriorBasis(m, e)
 
 @bilinear_form
 def laplace(u, du, v, dv, w):
