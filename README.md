@@ -8,7 +8,7 @@ Easy to use finite element assemblers and the related tools.
 ## Installation
 
 The most recent release can be installed using `pip install scikit-fem`.
-Otherwise you can just clone this repository.
+For more recent developments, you can just clone this repository.
 
 ## Feature highlights
 
@@ -18,7 +18,6 @@ Otherwise you can just clone this repository.
   H(curl)-conforming elements
 - No complex dependencies: Most of the functionality require only SciPy and
   NumPy
-- Native Python: No need to compile anything 
 
 ## Usage
 
@@ -56,4 +55,4 @@ Please see the directory *examples* for more instructions.
 ## Contributors
 
 - Tom Gustafsson (Maintainer)
-- [Geordie McBain](https://github.com/gdmcbain) (Bug reports, examples)
+- [Geordie McBain](https://github.com/gdmcbain)

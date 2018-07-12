@@ -1,20 +1,25 @@
 """
-Author: gdmcbain
+Author: gdmcbain.
 
-In this example 'pygmsh' is used to generate a disk, replacing the default
-square of MeshTri() in ex1.py.
+Here's another extension of examples/ex1.py, still solving the Laplace
+equation but now with mixed boundary conditions, two parts isopotential
+(charged and earthed) and the rest insulated. The isopotential parts are
+tagged during the construction of the geometry in pygmsh, as introduced in
+ex13.py.
 
-A basic postprocessing step in finite element analysis is evaluating linear
-forms over the solution. For the boundary value problem of ex1.py, the integral
-of the solution (normalized by the area) is the 'Boussinesq k-factor' [1]; for
-the square it's roughly 0.03514, for the circle 1/π/8 ≐ 0.03979. Linear forms
-are easily evaluated in skfem using the 1-D arrays assembled using the
-@linear_form decorator. In ex1.py, the linear form required for simple
-integration happens to be the same one used on the right-hand side of the
-differential equation, so it's already to hand.
+The example is ∇²u = 0 in Ω = {(x, y) : 1 < x² + y² < 4, 0 < θ < π/2},
+where tan θ = y/x, with u = 0 on y = 0 and u = 1 on x = 0. Although these
+boundaries would be simple enough to identify using the coordinates and
+skfem.assembly.find_dofs as in ex3.py, the present technique generalizes to
+more complicated shapes.
+
+The exact solution is u = 2 θ / π. The field strength is |∇ u|² = 4/π² (x² + y²)
+so the conductance (for unit potential difference and conductivity) is
+‖∇ u‖² = 2 ln 2 / π.
 """
 
 from skfem import *
+from skfem.models.poisson import laplace, mass, unit_load
 
 import numpy as np
 
@@ -22,35 +27,51 @@ from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
 
 geom = Geometry()
-geom.add_physical_surface(geom.add_circle([0.] * 3, 1., .5**3).plane_surface,
-                          'disk')
-points, cells = generate_mesh(geom)[:2]
-m = MeshTri(points[:, :2].T, cells['triangle'].T)
+points = []
+lines = []
+radii = [1., 2.]
+lcar = .1
+points.append(geom.add_point([0.] * 3, lcar))  # centre
+for x in radii:
+    points.append(geom.add_point([x, 0., 0.], lcar))
+for y in reversed(radii):
+    points.append(geom.add_point([0., y, 0.], lcar))
+lines.append(geom.add_line(*points[1:3]))
+geom.add_physical_line(lines[-1], 'ground')
+lines.append(geom.add_circle_arc(points[2], points[0], points[3]))
+lines.append(geom.add_line(points[3], points[4]))
+geom.add_physical_line(lines[-1], 'positive')
+lines.append(geom.add_circle_arc(points[4], points[0], points[1]))
+geom.add_physical_surface(
+    geom.add_plane_surface(geom.add_line_loop(lines)), 'domain')
 
-e = ElementTriP1()
-map = MappingAffine(m)
-basis = InteriorBasis(m, e, map, 2)
+pts, cells, _, cell_data, field_data = generate_mesh(
+    geom, prune_vertices=False)
 
-@bilinear_form
-def laplace(u, du, v, dv, w):
-    return du[0]*dv[0] + du[1]*dv[1]
+mesh = MeshTri(pts[:, :2].T, cells['triangle'].T)
+boundaries = {bc:
+              np.unique(cells['line'][cell_data['line']['gmsh:physical'] ==
+                                      field_data[bc][0]])
+              for bc in field_data if field_data[bc][1] == 1}
 
-@linear_form
-def load(v, dv, w):
-    return 1.0*v
-
+elements = ElementTriP1()
+basis = InteriorBasis(mesh, elements, MappingAffine(mesh), 2)
 A = asm(laplace, basis)
-b = asm(load, basis)
+b = asm(unit_load, basis)
 
-I = m.interior_nodes()
+dofs = np.setdiff1d(np.arange(0, mesh.p.shape[1]),
+                    np.union1d(boundaries['positive'],
+                               boundaries['ground']))
 
-x = 0*b
-x[I] = solve(*condense(A, b, I=I))
+u = 0.*b
+u[boundaries['positive']] = 1.
+u[dofs] = solve(*condense(A, 0.*b, u, dofs))
 
-area = b @ np.ones_like(x)
-k = b @ x / area**2
-print('area = {:.4f} (exact = {:.4f})'.format(area, np.pi))
-print('k = {:.5f} (exact = 1/8/pi = {:.5f})'.format(k, 1/np.pi/8))
+u_exact = 2 * np.arctan2(mesh.p[1, :], mesh.p[0, :]) / np.pi
+u_error = u - u_exact
+print('L2 error =', np.sqrt(u_error @ asm(mass, basis) @ u_error))
+print('conductance = {:.4f} (exact = 2 ln 2 / pi = {:.4f})'.format(
+    u @ A @ u, 2 * np.log(2) / np.pi))
 
-m.plot3(x)
-m.show()
+mesh.plot3(u)
+mesh.show()

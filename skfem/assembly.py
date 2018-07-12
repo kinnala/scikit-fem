@@ -452,12 +452,12 @@ class InteriorBasis(GlobalBasis):
 
 def asm(kernel, ubasis, vbasis=None, w=None, nthreads=1, assemble=True):
     """
-    Assembly using a kernel function.
+    Assembly finite element matrices.
 
     Parameters
     ----------
     kernel : function handle
-        See Examples.
+        See InteriorBasis or FacetBasis.
     ubasis : InteriorBasis
     vbasis : (OPTIONAL) InteriorBasis
     w : (OPTIONAL) ndarray
