@@ -4,7 +4,79 @@ The mappings defining relationships between reference and global elements.
 """
 import numpy as np
 
-class MappingIsoparametric():
+class Mapping():
+    def F(self, X, tind=None):
+        """Perform an isoparametric mapping from the reference element
+        to global elements.
+
+        Parameters
+        ----------
+        X : ndarray of size Ndim x Nqp
+            Local points on the reference element
+        tind : (optional) ndarray
+            A set of element indices to map to
+
+        Returns
+        -------
+        ndarray of size Ndim x Nelems x Nqp
+            Global points
+        """
+        raise NotImplementedError("!")
+
+    def invF(self, x, tind=None):
+        """Perform an inverse mapping from global elements to reference
+        element.
+
+        Parameters
+        ----------
+        x : ndarray of size Ndim x Nelems x Nqp
+            The global points
+        tind : (optional) ndarray
+            A set of element indices to map from
+
+        Returns
+        -------
+        ndarray of size Ndim x Nelems x Nqp
+            The corresponding local points
+        """
+        raise NotImplementedError("!")
+
+    def G(self, X, find=None):
+        """Perform a mapping from the reference facet to global facet.
+
+        Parameters
+        ----------
+        X : ndarray of size Ndim x Nqp
+            Local points on the reference element
+        find : (optional) ndarray
+            A set of facet indices to map to
+
+        Returns
+        -------
+        ndarray of size Ndim x Nelems x Nqp
+            Global points
+        """
+        raise NotImplementedError("!")
+
+    def detDG(self, X, find=None):
+        raise NotImplementedError("!")
+    
+    def normals(self, X, tind, find, t2f):
+        raise NotImplementedError("!")
+
+    def detDF(self, X, tind=None):
+        raise NotImplementedError("!")
+
+    def DF(self, X, tind=None):
+        raise NotImplementedError("!")
+
+    def invDF(self, X, tind=None):
+        raise NotImplementedError("!")
+
+
+class MappingIsoparametric(Mapping):
+    """An isoparametric mapping, e.g., for quadrilateral and hexahedral
+    elements."""
     def __init__(self, mesh, elem):
         p = mesh.p
         t = mesh.t
@@ -29,26 +101,7 @@ class MappingIsoparametric():
         self.mesh = mesh
 
     def F(self, X, tind=None):
-        """
-        Perform an isoparametric mapping from the reference element
-        to global elements.
-
-        Parameters
-        ----------
-        X : ndarray of size Ndim x Nqp
-            Local points on the reference element
-
-        tind : (OPTIONAL) ndarray
-            A set of element indices to map to
-
-        Returns
-        -------
-        ndarray of size Ndim x Nelems x Nqp
-            Global points
-        """
-
         # TODO fix tind
-
         return np.array([self.map(i, X) for i in range(X.shape[0])])
 
     def detDF(self, X, tind=None):
@@ -67,7 +120,6 @@ class MappingIsoparametric():
         return detDF
 
     def invDF(self, X, tind=None):
-
         dim = X.shape[0]
         detDF = self.detDF(X, tind)
 
@@ -93,7 +145,9 @@ class MappingIsoparametric():
 
         return invDF
 
-class MappingAffine():
+
+class MappingAffine(Mapping):
+    """An affine mapping for simplical elements."""
     def __init__(self, mesh):
         dim = mesh.p.shape[0]
 
@@ -114,9 +168,9 @@ class MappingAffine():
             elif dim == 2:
                 self.detA = self.A[0, 0] * self.A[1, 1] - self.A[0, 1] * self.A[1, 0]
             elif dim == 3:
-                self.detA = self.A[0, 0] * (self.A[1, 1] * self.A[2, 2] - self.A[1, 2] * self.A[2, 1]) \
-                          - self.A[0, 1] * (self.A[1, 0] * self.A[2, 2] - self.A[1, 2] * self.A[2, 0]) \
-                          + self.A[0, 2] * (self.A[1, 0] * self.A[2, 1] - self.A[1, 1] * self.A[2, 0])
+                self.detA = self.A[0, 0] * (self.A[1, 1] * self.A[2, 2] - self.A[1, 2] * self.A[2, 1]) -\
+                            self.A[0, 1] * (self.A[1, 0] * self.A[2, 2] - self.A[1, 2] * self.A[2, 0]) +\
+                            self.A[0, 2] * (self.A[1, 0] * self.A[2, 1] - self.A[1, 1] * self.A[2, 0])
             else:
                 raise Exception("Not implemented for the given dimension.")
 
@@ -168,23 +222,6 @@ class MappingAffine():
 
 
     def F(self, X, tind=None):
-        """
-        Perform an affine mapping from the reference element
-        to global elements.
-
-        Parameters
-        ----------
-        X : ndarray of size Ndim x Nqp
-            Local points on the reference element
-
-        tind : (OPTIONAL) ndarray
-            A set of element indices to map to
-
-        Returns
-        -------
-        ndarray of size Ndim x Nelems x Nqp
-            Global points
-        """
         if tind is None:
             A, b = self.A, self.b
         else:
@@ -193,22 +230,6 @@ class MappingAffine():
         return (np.einsum('ijk,jl', A, X).T + b.T).T
 
     def invF(self, x, tind=None):
-        """
-        Perform an inverse affine mapping.
-
-        Parameters
-        ----------
-        x : ndarray of size Ndim x Nelems x Nqp
-            The global points
-        tind
-            A set of element indices to map from
-
-        Returns
-        -------
-        ndarray of size Ndim x Nelems x Nqp
-            The corresponding local points
-
-        """
         if tind is None:
             invA, b = self.invA, self.b
         else:
@@ -244,23 +265,6 @@ class MappingAffine():
         return np.einsum('ijk,l->ijkl', invDF, ones)
 
     def G(self, X, find=None):
-        """
-        Perform a mapping from the reference facet
-        to global facet.
-
-        Parameters
-        ----------
-        X : ndarray of size Ndim x Nqp
-            Local points on the reference element
-
-        find : (OPTIONAL) ndarray
-            A set of facet indices to map to
-
-        Returns
-        -------
-        ndarray of size Ndim x Nelems x Nqp
-            Global points
-        """
         if find is None:
             B, c = self.B, self.c
         else:
