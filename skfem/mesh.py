@@ -1710,21 +1710,22 @@ class MeshTri(Mesh2D):
             return x[finder(X, Y)]
         return handle
 
-    def smooth(self, c=1.0):
+    def smooth(self, k=1.0):
         """Apply smoothing to interior nodes."""
-        from skfem.assembly import AssemblerLocal
-        from skfem.element import ElementLocalTriP1
-        from skfem.utils import direct
+        from skfem.assembly import InteriorBasis, asm
+        from skfem.element import ElementTriP1
+        from skfem.utils import solve
+        from skfem.models.poisson import laplace, mass
 
-        e = ElementLocalTriP1()
-        a = AssemblerLocal(self, e)
+        e = ElementTriP1()
+        ib = InteriorBasis(self, e)
 
-        K = a.iasm(lambda du,dv: du[0]*dv[0] + du[1]*dv[1])
-        M = a.iasm(lambda u,v: u*v)
+        K = asm(laplace, ib)
+        M = asm(mass, ib)
 
         I = self.interior_nodes()
-        dx = - k*direct(M, K.dot(self.p[0, :]))
-        dy = - k*direct(M, K.dot(self.p[1, :]))
+        dx = - k*solve(M, K.dot(self.p[0, :]))
+        dy = - k*solve(M, K.dot(self.p[1, :]))
 
         self.p[0, I] += dx[I]
         self.p[1, I] += dy[I]

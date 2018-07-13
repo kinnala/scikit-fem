@@ -24,6 +24,12 @@ class TestEx3(unittest.TestCase):
         import examples.ex03
         self.assertAlmostEqual(examples.ex03.L[0], 0.00418289)
 
+class TestEx4(unittest.TestCase):
+    """Run examples/ex04.py"""
+    def runTest(self):
+        import examples.ex04
+        self.assertAlmostEqual(np.max(examples.ex04.x), 0.0294118495011)
+
 class TestEx5(unittest.TestCase):
     """Run examples/ex05.py"""
     def runTest(self):

@@ -30,8 +30,7 @@ def rule(x, y):
 def param(x, y):
     return y
 
-mortar = InterfaceMesh1D(m, M, rule, param, debug_plot=True)
-m.show()
+mortar = InterfaceMesh1D(m, M, rule, param)
 
 mb = {}
 mortar_map = MappingAffine(mortar)
@@ -119,8 +118,7 @@ m.p[1, :] = m.p[1, :] + sf*x[i1][ib.dofnum.n_dof[1, :]]
 M.p[0, :] = M.p[0, :] + sf*x[i2][Ib.dofnum.n_dof[0, :]]
 M.p[1, :] = M.p[1, :] + sf*x[i2][Ib.dofnum.n_dof[1, :]]
 
-ax = m.draw()
-M.draw(ax=ax)
-m.show()
-
-print(np.max(x))
+if __name__ == "__main__":
+    ax = m.draw()
+    M.draw(ax=ax)
+    m.show()
