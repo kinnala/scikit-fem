@@ -13,7 +13,9 @@ class ConvergenceQ1(unittest.TestCase):
     def runTest(self):
         @bilinear_form
         def laplace(u, du, v, dv, w):
-            if du.shape[0] == 2:
+            if du.shape[0] == 1:
+                return du[0]*dv[0]
+            elif du.shape[0] == 2:
                 return du[0]*dv[0] + du[1]*dv[1]
             elif du.shape[0] == 3:
                 return du[0]*dv[0] + du[1]*dv[1] + du[2]*dv[2]
@@ -22,7 +24,9 @@ class ConvergenceQ1(unittest.TestCase):
         @linear_form
         def load(v, dv, w):
             x = w[0]
-            if x.shape[0] == 2:
+            if x.shape[0] == 1:
+                return np.sin(np.pi*x[0])*(np.pi**2)*v
+            elif x.shape[0] == 2:
                 return np.sin(np.pi*x[0])*np.sin(np.pi*x[1])*(2.0*np.pi**2)*v
             elif x.shape[0] == 3:
                 return np.sin(np.pi*x[0])*np.sin(np.pi*x[1])*np.sin(np.pi*x[2])*(3.0*np.pi**2)*v
@@ -41,7 +45,11 @@ class ConvergenceQ1(unittest.TestCase):
             A = asm(laplace, ib)
             b = asm(load, ib)
 
-            x, D = ib.find_dofs()
+            if m.dim() == 1: # TODO works only for elements with one DOF/node
+                D = [0, 1]
+                x = np.zeros(ib.dofnum.N)
+            else:
+                x, D = ib.find_dofs()
             I = ib.dofnum.complement_dofs(D)
 
             x[I] = solve(*condense(A, b, I=I))
@@ -64,7 +72,9 @@ class ConvergenceQ1(unittest.TestCase):
         x = basis.global_coordinates()
 
         def u(y):
-            if y.shape[0] == 2:
+            if y.shape[0] == 1:
+                return np.sin(np.pi*y[0])
+            elif y.shape[0] == 2:
                 return np.sin(np.pi*y[0])*np.sin(np.pi*y[1])
             elif y.shape[0] == 3:
                 return np.sin(np.pi*y[0])*np.sin(np.pi*y[1])*np.sin(np.pi*y[2])
@@ -74,31 +84,38 @@ class ConvergenceQ1(unittest.TestCase):
         L2 = np.sqrt(np.sum(np.sum((uh - u(x))**2*dx, axis=1)))
 
         def ux(y):
-            if y.shape[0] == 2:
+            if y.shape[0] == 1:
+                return np.pi*np.cos(np.pi*y[0])
+            elif y.shape[0] == 2:
                 return np.pi*np.cos(np.pi*y[0])*np.sin(np.pi*y[1])
             elif y.shape[0] == 3:
                 return np.pi*np.cos(np.pi*y[0])*np.sin(np.pi*y[1])*np.sin(np.pi*y[2])
             else:
                 raise Exception("The dimension not supported")
 
-        def uy(y):
-            if y.shape[0] == 2:
-                return np.pi*np.sin(np.pi*y[0])*np.cos(np.pi*y[1])
-            elif y.shape[0] == 3:
-                return np.pi*np.sin(np.pi*y[0])*np.cos(np.pi*y[1])*np.sin(np.pi*y[2])
-            else:
-                raise Exception("The dimension not supported")
+        if x.shape[0] >= 2:
+            def uy(y):
+                if y.shape[0] == 2:
+                    return np.pi*np.sin(np.pi*y[0])*np.cos(np.pi*y[1])
+                elif y.shape[0] == 3:
+                    return np.pi*np.sin(np.pi*y[0])*np.cos(np.pi*y[1])*np.sin(np.pi*y[2])
+                else:
+                    raise Exception("The dimension not supported")
 
         if x.shape[0] == 3:
             def uz(y):
                 return np.pi*np.sin(np.pi*y[0])*np.sin(np.pi*y[1])*np.cos(np.pi*y[2])
 
+
+        if x.shape[0] == 3:
             H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x))**2 +\
                                         (duh[1] - uy(x))**2 +\
                                         (duh[2] - uz(x))**2)*dx, axis=1)))
-        else:
+        elif x.shape[0] == 2:
             H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x))**2 +\
                                         (duh[1] - uy(x))**2)*dx, axis=1)))
+        else:
+            H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x))**2)*dx, axis=1)))
 
         return L2, H1
 
@@ -184,3 +201,11 @@ class ConvergenceTetP2(ConvergenceTetP1):
     def setUp(self):
         self.mesh = MeshTet()
         self.mesh.refine(1)
+
+class ConvergenceLineP1(ConvergenceQ1):
+    def create_basis(self, m):
+        e = ElementLineP1()
+        return InteriorBasis(m, e)
+    def setUp(self):
+        self.mesh = MeshLine()
+        self.mesh.refine(3)

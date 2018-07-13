@@ -625,11 +625,7 @@ class InterfaceMesh1D(Mesh):
 
 
 class MeshLine(Mesh):
-    """One-dimensional mesh.
-    
-    This cannot currently be used for finite element computations
-    due to inadequate support in skfem.assembly and skfem.mapping.
-    """
+    """One-dimensional mesh."""
 
     refdom = "line"
     brefdom = "point"
@@ -737,6 +733,9 @@ class MeshLine(Mesh):
         t[2, :] = ix[1:npy, 1:npx].reshape(ne, 1, order='F').copy().flatten()
         t[3, :] = ix[0:(npy-1), 1:npx].reshape(ne, 1, order='F').copy().flatten()
         return MeshQuad(p, t.astype(np.int64))
+
+    def param(self):
+        return np.max(np.abs(self.p[0, self.t[1, :]] - self.p[0, self.t[0, :]]))
 
     def mapping(self):
         return skfem.mapping.MappingAffine(self)

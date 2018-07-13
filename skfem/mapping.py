@@ -96,7 +96,6 @@ class MappingIsoparametric():
 class MappingAffine():
     def __init__(self, mesh):
         dim = mesh.p.shape[0]
-        nf = mesh.facets.shape[1]
 
         if mesh.t.shape[0] > 0:
             nt = mesh.t.shape[1]
@@ -110,7 +109,9 @@ class MappingAffine():
                     self.A[i, j] = mesh.p[i, mesh.t[j+1, :]] - mesh.p[i, mesh.t[0, :]]
 
             # determinants
-            if dim == 2:
+            if dim == 1:
+                self.detA = self.A[0, 0]
+            elif dim == 2:
                 self.detA = self.A[0, 0] * self.A[1, 1] - self.A[0, 1] * self.A[1, 0]
             elif dim == 3:
                 self.detA = self.A[0, 0] * (self.A[1, 1] * self.A[2, 2] - self.A[1, 2] * self.A[2, 1]) \
@@ -121,7 +122,9 @@ class MappingAffine():
 
             # affine mapping inverses
             self.invA = np.empty((dim, dim, nt))
-            if dim == 2:
+            if dim == 1:
+                self.invA[0, 0] = 1.0 / self.A[0, 0]
+            elif dim == 2:
                 self.invA[0, 0] =  self.A[1, 1] / self.detA
                 self.invA[0, 1] = -self.A[0, 1] / self.detA
                 self.invA[1, 0] = -self.A[1, 0] / self.detA
@@ -140,6 +143,7 @@ class MappingAffine():
                 raise Exception("Not implemented for the given dimension.")
 
         if hasattr(mesh, 'facets'):
+            nf = mesh.facets.shape[1]
             # initialize the boundary mapping
             self.B = np.empty((dim, dim-1, nf))
             self.c = np.empty((dim, nf))
