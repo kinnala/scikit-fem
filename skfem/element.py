@@ -285,6 +285,7 @@ class ElementTriDG(ElementH1):
     def lbasis(self, X, i):
         return self.elem.lbasis(X, i)
 
+
 class ElementTriP0(ElementH1):
     interior_dofs = 1
     dim = 2
@@ -317,7 +318,7 @@ class ElementTriRT0(ElementHdiv):
         return phi, dphi
 
 
-class ElementMorley(ElementH2):
+class ElementTriMorley(ElementH2):
     nodal_dofs = 1
     facet_dofs = 1
     dim = 2
@@ -339,7 +340,8 @@ class ElementMorley(ElementH2):
         else:
             raise Exception("!")
 
-class ElementArgyris(ElementH2):
+
+class ElementTriArgyris(ElementH2):
     nodal_dofs = 6
     facet_dofs = 1
     dim = 2
@@ -370,7 +372,7 @@ class ElementArgyris(ElementH2):
 
 # Quadilateral
 
-class ElementQ1(ElementH1):
+class ElementQuad1(ElementH1):
     nodal_dofs = 1
     dim = 2
     maxdeg = 2
@@ -395,7 +397,7 @@ class ElementQ1(ElementH1):
 
         return phi, dphi
 
-class ElementQ2(ElementH1):
+class ElementQuad2(ElementH1):
     nodal_dofs = 1
     facet_dofs = 1
     interior_dofs = 1

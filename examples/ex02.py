@@ -14,7 +14,7 @@ import numpy as np
 m = MeshTri()
 m.refine(3)
 
-e = ElementMorley()
+e = ElementTriMorley()
 map = MappingAffine(m)
 ib = InteriorBasis(m, e, map, 4)
 
@@ -51,9 +51,10 @@ f = asm(unit_load, ib)
 x, D = ib.find_dofs()
 I = ib.dofnum.complement_dofs(D)
 
-x[I] = solve(*condense(K, f, I=I), solver=solver_direct_cholmod())
+x[I] = solve(*condense(K, f, I=I))
 
-M, X = ib.refinterp(x, 3)
-ax = m.draw()
-M.plot(X, smooth=True, edgecolors='', ax=ax)
-M.show()
+if __name__ == "__main__":
+    M, X = ib.refinterp(x, 3)
+    ax = m.draw()
+    M.plot(X, smooth=True, edgecolors='', ax=ax)
+    M.show()

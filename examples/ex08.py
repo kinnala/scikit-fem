@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 m = MeshTri.init_sqsymmetric()
 map = MappingAffine(m)
-e = ElementArgyris()
+e = ElementTriArgyris()
 
 ib = InteriorBasis(m, e, map, 5)
 

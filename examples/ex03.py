@@ -13,7 +13,7 @@ m1 = MeshLine(np.linspace(0,5,50))
 m2 = MeshLine(np.linspace(0,1,10))
 m = m1*m2
 
-e1 = ElementQ1()
+e1 = ElementQuad1()
 
 map = MappingIsoparametric(m, e1)
 

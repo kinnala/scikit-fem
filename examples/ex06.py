@@ -10,8 +10,8 @@ from skfem.models.poisson import laplace
 m = MeshQuad()
 m.refine(2)
 
-e1 = ElementQ1()
-e = ElementQ2()
+e1 = ElementQuad1()
+e = ElementQuad2()
 map = MappingIsoparametric(m, e1)
 ib = InteriorBasis(m, e, map, 4)
 

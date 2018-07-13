@@ -121,7 +121,7 @@ class ConvergenceQ1(unittest.TestCase):
 
 
     def create_basis(self, m):
-        e = ElementQ1()
+        e = ElementQuad1()
         map = MappingIsoparametric(m, e)
         return InteriorBasis(m, e, map, 2)
 
@@ -140,8 +140,8 @@ class ConvergenceQ2(ConvergenceQ1):
     rateL2 = 3.0
     rateH1 = 3.0
     def create_basis(self, m):
-        e = ElementQ2()
-        emap = ElementQ1()
+        e = ElementQuad2()
+        emap = ElementQuad1()
         map = MappingIsoparametric(m, emap)
         return InteriorBasis(m, e, map, 3)
     def setUp(self):
