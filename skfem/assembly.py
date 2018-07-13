@@ -59,14 +59,13 @@ class GlobalBasis():
         raise NotImplementedError("Default parameters not implemented")
 
     def interpolate(self, w, derivative=False):
-        """
-        Interpolate a solution vector to quadrature points.
+        """Interpolate a solution vector to quadrature points.
 
         Parameters
         ----------
         w : ndarray of size Ndofs
             A solution vector
-        derivative : (OPTIONAL, default=False) bool
+        derivative : (optional, default=False) bool
             Return also the derivative
 
         Returns
@@ -100,24 +99,24 @@ class GlobalBasis():
 
         Parameters
         ----------
-        test : (OPTIONAL, default=function returning True) lambda
+        test : (optional, default=function returning True) lambda
             An anonymous function with Ndim arguments. If returns other than 0
             when evaluated at the DOF location, the respective DOF is included
             in the return set.
-        bc : (OPTIONAL, default=zero function) lambda
+        bc : (optional, default=zero function) lambda
             The boundary condition value.
-        boundary : (OPTIONAL, default=True) bool
+        boundary : (optional, default=True) bool
             Check only boundary DOFs.
-        dofrows : (OPTIONAL, default=None) np.array
+        dofrows : (optional, default=None) np.array
             List of rows that are extracted from the DOF structures.
             For example, if each node/facet/edge contains 3 DOFs (say, in three
             dimensional problems x, y and z displacements) you can give [0, 1]
             to consider only two first DOFs.
-        check_vertices : (OPTIONAL, default=True) bool
+        check_vertices : (optional, default=True) bool
             Include vertex dofs
-        check_facets: (OPTIONAL, default=True) bool
+        check_facets: (optional, default=True) bool
             Include facet dofs
-        check_edges: (OPTIONAL, default=True) bool
+        check_edges: (optional, default=True) bool
             Include edge dofs (3D only)
 
         Returns
@@ -451,18 +450,17 @@ class InteriorBasis(GlobalBasis):
 
 
 def asm(kernel, ubasis, vbasis=None, w=None, nthreads=1, assemble=True):
-    """
-    Assembly finite element matrices.
+    """Assemble finite element matrices.
 
     Parameters
     ----------
     kernel : function handle
         See InteriorBasis or FacetBasis.
-    ubasis : InteriorBasis
-    vbasis : (OPTIONAL) InteriorBasis
-    w : (OPTIONAL) ndarray
+    ubasis : GlobalBasis
+    vbasis : (optional) GlobalBasis
+    w : (optional) ndarray
         An array of ndarrays of size Nelems x Nqp.
-    nthreads : (OPTIONAL, default=1) int
+    nthreads : (optional, default=1) int
         Number of threads to use in assembly. This is only
         useful if kernel is numba function compiled with
         nogil = True.
@@ -664,8 +662,7 @@ def linear_form(form):
 
 
 def nonlinear_form(nonlin):
-    """
-    Create tangent system using automatic differentiation.
+    """Create tangent system using automatic differentiation.
 
     The new form is bilinear and has the parameters (u, du, v, dv, w).
 

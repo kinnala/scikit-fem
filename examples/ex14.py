@@ -1,7 +1,7 @@
 """
 Author: gdmcbain
 
-Another simple modification of examples/ex1.py, this time showing how to pass
+Another simple modification of examples/ex01.py, this time showing how to
 impose inhomogeneous Dirichlet conditions with condense. 
 The forcing term is suppressed for simplicity. The boundary values
 are set as the real part x**2 - y**2 of an analytic complex function z**2 which

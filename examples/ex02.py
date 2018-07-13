@@ -26,7 +26,7 @@ def bilinf(u, du, v, dv, w):
     nu = 0.3
 
     def C(T):
-        trT=T[0,0]+T[1,1]
+        trT = T[0,0] + T[1,1]
         return np.array([[E/(1.0+nu)*(T[0, 0]+nu/(1.0-nu)*trT), E/(1.0+nu)*T[0, 1]],
                          [E/(1.0+nu)*T[1, 0], E/(1.0+nu)*(T[1, 1]+nu/(1.0-nu)*trT)]])
 
@@ -34,10 +34,10 @@ def bilinf(u, du, v, dv, w):
         return np.array([[ddU[0][0], ddU[0][1]],
                          [ddU[1][0], ddU[1][1]]])
 
-    def ddot(T1,T2):
-        return T1[0, 0]*T2[0, 0]+\
-               T1[0, 1]*T2[0, 1]+\
-               T1[1, 0]*T2[1, 0]+\
+    def ddot(T1, T2):
+        return T1[0, 0]*T2[0, 0] +\
+               T1[0, 1]*T2[0, 1] +\
+               T1[1, 0]*T2[1, 0] +\
                T1[1, 1]*T2[1, 1]
 
     ddu = du[1]
