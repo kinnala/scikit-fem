@@ -248,19 +248,23 @@ class FacetBasis(GlobalBasis):
         Can be used in computing global integrals elementwise.
         For example, np.sum(u**2*dx, axis=1) where u is also
         a numpy array of size Nelems x Nqp.
-    find
-    tind
+    find : numpy array
+        A list of facet indices.
+    tind : numpy array
+        A list of triangle indices.
     normals
-    mapping
-    elem
-    dofnum
-    Nbfun
-    intorder
-    dim
-    nt
-    mesh
-    refdom
-    brefdom
+    mapping : an object of type skfem.mapping.Mapping
+    elem : an object of type skfem.element.Element
+    dofnum : an object of type skfem.assembly.Dofnum
+    Nbfun : int
+        The number of basis functions.
+    intorder : int
+        The integration order
+    dim : int
+    nt : int
+    mesh : an object of type skfem.mesh.Mesh
+    refdom : string
+    brefdom : string
 
     Examples
     --------
@@ -358,16 +362,16 @@ class InteriorBasis(GlobalBasis):
         Can be used in computing global integrals elementwise.
         For example, np.sum(u**2*dx, axis=1) where u is also
         a numpy array of size Nelems x Nqp.
-    mapping
-    elem
-    dofnum
-    Nbfun
-    intorder
-    dim
-    nt
-    mesh
-    refdom
-    brefdom
+    mapping : an object of the type skfem.mapping.Mapping
+    elem : an object of the type skfem.element.Element
+    dofnum : an object of the type skfem.assembly.Dofnum
+    Nbfun : int
+    intorder : int
+    dim : int
+    nt : int
+    mesh : an object of the type skfem.mesh.Mesh
+    refdom : string
+    brefdom : string
 
     Examples
     --------
@@ -642,6 +646,7 @@ class Dofnum(object):
             dofs = np.hstack((dofs, self.i_dof[:, T].flatten()))
         return dofs.flatten()
 
+
 def bilinear_form(form):
     """Bilinear form decorator"""
     def kernel(A, ix, u, du, v, dv, w, dx):
@@ -665,10 +670,10 @@ def nonlinear_form(nonlin):
     """Create tangent system using automatic differentiation.
 
     The new form is bilinear and has the parameters (u, du, v, dv, w).
-
     It is expected that w[0] contains u_0, w[1] contains du_0/dx, etc.
 
-    Note: Requires autograd. Use autograd.numpy instead of numpy for any special operations.
+    Note: Requires autograd. Use autograd.numpy instead of numpy for any
+    special operations.
     """
     from autograd import elementwise_grad as egrad
 
@@ -715,6 +720,7 @@ def nonlinear_form(nonlin):
     bilin.rhs = lin
 
     return bilin
+
 
 if __name__ == "__main__":
     import doctest
