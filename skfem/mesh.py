@@ -1026,14 +1026,14 @@ class MeshHex(Mesh3D):
         ne = (npx-1)*(npy-1)*(npz-1)
         t = np.zeros((8, ne))
         ix = ix.reshape(npy, npx, npz, order='F').copy()
-        t[0, :] = ix[0:(npz-1), 0:(npy-1), 0:(npx-1)].reshape(ne, 1, order='F').copy().flatten()
-        t[1, :] = ix[1:npz, 0:(npy-1), 0:(npx-1)].reshape(ne, 1, order='F').copy().flatten()
-        t[2, :] = ix[0:(npz-1), 1:npy, 0:(npx-1)].reshape(ne, 1, order='F').copy().flatten()
-        t[3, :] = ix[0:(npz-1), 0:(npy-1), 1:npx].reshape(ne, 1, order='F').copy().flatten()
-        t[4, :] = ix[1:npz, 1:npy, 0:(npx-1)].reshape(ne, 1, order='F').copy().flatten()
-        t[5, :] = ix[1:npz, 0:(npy-1), 1:npx].reshape(ne, 1, order='F').copy().flatten()
-        t[6, :] = ix[0:(npz-1), 1:npy, 1:npx].reshape(ne, 1, order='F').copy().flatten()
-        t[7, :] = ix[1:npz, 1:npy, 1:npx].reshape(ne, 1, order='F').copy().flatten()
+        t[0, :] = ix[0:(npy-1), 0:(npx-1), 0:(npz-1)].reshape(ne, 1, order='F').copy().flatten()
+        t[1, :] = ix[1:npy, 0:(npx-1), 0:(npz-1)].reshape(ne, 1, order='F').copy().flatten()
+        t[2, :] = ix[0:(npy-1), 1:npx, 0:(npz-1)].reshape(ne, 1, order='F').copy().flatten()
+        t[3, :] = ix[0:(npy-1), 0:(npx-1), 1:npz].reshape(ne, 1, order='F').copy().flatten()
+        t[4, :] = ix[1:npy, 1:npx, 0:(npz-1)].reshape(ne, 1, order='F').copy().flatten()
+        t[5, :] = ix[1:npy, 0:(npx-1), 1:npz].reshape(ne, 1, order='F').copy().flatten()
+        t[6, :] = ix[0:(npy-1), 1:npx, 1:npz].reshape(ne, 1, order='F').copy().flatten()
+        t[7, :] = ix[1:npy, 1:npx, 1:npz].reshape(ne, 1, order='F').copy().flatten()
         return cls(p, t.astype(np.int64))
 
     def _build_mappings(self):
@@ -1246,7 +1246,7 @@ class MeshHex(Mesh3D):
         meshio.write(filename, mesh)
 
     def mapping(self):
-        return skfem.mapping.MappingIsoparametric(self, skfem.mapping.ElementHex1())
+        return skfem.mapping.MappingIsoparametric(self, skfem.element.ElementHex1())
 
 
 class MeshTet(Mesh3D):
