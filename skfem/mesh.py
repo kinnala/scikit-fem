@@ -720,19 +720,7 @@ class MeshLine(Mesh):
 
     def __mul__(self, other):
         """Tensor product mesh."""
-        npx = self.p.shape[1]
-        npy = other.p.shape[1]
-        X, Y = np.meshgrid(np.sort(self.p[0, :]), np.sort(other.p[0, :]))   
-        p = np.vstack((X.flatten('F'), Y.flatten('F')))
-        ix = np.arange(npx*npy)
-        ne = (npx-1)*(npy-1)
-        t = np.zeros((4, ne))
-        ix = ix.reshape(npy, npx, order='F').copy()
-        t[0, :] = ix[0:(npy-1), 0:(npx-1)].reshape(ne, 1, order='F').copy().flatten()
-        t[1, :] = ix[1:npy, 0:(npx-1)].reshape(ne, 1, order='F').copy().flatten()
-        t[2, :] = ix[1:npy, 1:npx].reshape(ne, 1, order='F').copy().flatten()
-        t[3, :] = ix[0:(npy-1), 1:npx].reshape(ne, 1, order='F').copy().flatten()
-        return MeshQuad(p, t.astype(np.int64))
+        return MeshQuad.init_tensor(self.p[0, :], other.p[0, :])
 
     def param(self):
         return np.max(np.abs(self.p[0, self.t[1, :]] - self.p[0, self.t[0, :]]))
@@ -792,6 +780,31 @@ class MeshQuad(Mesh2D):
             self._validate()
         self._build_mappings()
         super(MeshQuad, self).__init__()
+
+    @classmethod
+    def init_tensor(cls, x, y):
+        """Initialize a tensor product mesh.
+
+        Parameters
+        ----------
+        x : numpy array (1d)
+            The nodal coordinates in dimension x
+        y : numpy array (1d)
+            The nodal coordinates in dimension y
+        """
+        npx = len(x)
+        npy = len(y)
+        X, Y = np.meshgrid(np.sort(x), np.sort(y))   
+        p = np.vstack((X.flatten('F'), Y.flatten('F')))
+        ix = np.arange(npx*npy)
+        ne = (npx-1)*(npy-1)
+        t = np.zeros((4, ne))
+        ix = ix.reshape(npy, npx, order='F').copy()
+        t[0, :] = ix[0:(npy-1), 0:(npx-1)].reshape(ne, 1, order='F').copy().flatten()
+        t[1, :] = ix[1:npy, 0:(npx-1)].reshape(ne, 1, order='F').copy().flatten()
+        t[2, :] = ix[1:npy, 1:npx].reshape(ne, 1, order='F').copy().flatten()
+        t[3, :] = ix[0:(npy-1), 1:npx].reshape(ne, 1, order='F').copy().flatten()
+        return cls(p, t.astype(np.int64))
 
     @classmethod
     def init_refdom(cls):
@@ -1583,6 +1596,19 @@ class MeshTri(Mesh2D):
             self._validate()
         self._build_mappings(sort_t=sort_t)
         super(MeshTri, self).__init__()
+
+    @classmethod
+    def init_tensor(cls, x, y):
+        """Initialize a tensor product mesh.
+
+        Parameters
+        ----------
+        x : numpy array (1d)
+            The nodal coordinates in dimension x
+        y : numpy array (1d)
+            The nodal coordinates in dimension y
+        """
+        return MeshQuad.init_tensor(x, y)._splitquads()
 
     @classmethod
     def init_symmetric(cls):
