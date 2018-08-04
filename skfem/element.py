@@ -108,7 +108,7 @@ class ElementHcurl(Element):
 
 
 class ElementH2(Element):
-    order = (0, 3)
+    order = (0, 1, 2)
     V = None  # For caching inverse Vandermonde matrix
 
     def gbasis(self, mapping, X, i, tind=None):
@@ -122,31 +122,28 @@ class ElementH2(Element):
 
         x = mapping.F(X, tind=tind)
         u = np.zeros(x[0].shape)
-        du = np.zeros((2, 2, 2) + x[0].shape)
+        du = np.zeros((2,) + x[0].shape)
+        ddu = np.zeros((2, 2) + x[0].shape)
 
         # loop over new basis
         for itr in range(N):
             u += self.V[:, itr, i][:, None]\
                  * self._pbasis[itr](x[0], x[1])
-            du[0, 0, 0] += self.V[:, itr, i][:, None]\
-                           * self._pbasisdx[itr](x[0], x[1])
-            du[0, 0, 1] += self.V[:, itr, i][:,None]\
-                           * self._pbasisdy[itr](x[0], x[1])
-            du[1, 0, 0] += self.V[:, itr, i][:, None]\
-                           * self._pbasisdxx[itr](x[0], x[1])
-            du[1, 0, 1] += self.V[:, itr, i][:, None]\
-                           * self._pbasisdxy[itr](x[0], x[1])
-            du[1, 1, 1] += self.V[:, itr, i][:, None]\
-                           * self._pbasisdyy[itr](x[0], x[1])
+            du[0] += self.V[:, itr, i][:, None]\
+                     * self._pbasisdx[itr](x[0], x[1])
+            du[1] += self.V[:, itr, i][:,None]\
+                     * self._pbasisdy[itr](x[0], x[1])
+            ddu[0, 0] += self.V[:, itr, i][:, None]\
+                         * self._pbasisdxx[itr](x[0], x[1])
+            ddu[0, 1] += self.V[:, itr, i][:, None]\
+                         * self._pbasisdxy[itr](x[0], x[1])
+            ddu[1, 1] += self.V[:, itr, i][:, None]\
+                         * self._pbasisdyy[itr](x[0], x[1])
 
         # dxy = dyx
-        du[1, 1, 0] = du[1, 0, 1]
+        ddu[1, 0] = ddu[0, 1]
 
-        # Empty
-        du[0, 1, 0] = u + np.nan
-        du[0, 1, 1] = u + np.nan
-
-        return u, du
+        return u, du, ddu
 
     def _pbasis_init(self, N):
         """Define power bases (for 2D)."""

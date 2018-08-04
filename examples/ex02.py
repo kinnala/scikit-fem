@@ -8,7 +8,6 @@ higher order solutions using 'GlobalBasis.refinterp'.
 """
 
 from skfem import *
-from skfem.models.poisson import unit_load
 import numpy as np
 
 m = MeshTri()
@@ -19,7 +18,7 @@ map = MappingAffine(m)
 ib = InteriorBasis(m, e, map, 4)
 
 @bilinear_form
-def bilinf(u, du, v, dv, w):
+def bilinf(u, du, ddu, v, dv, ddv, w):
     # plate thickness
     d = 1.0
     E = 1.0
@@ -40,13 +39,14 @@ def bilinf(u, du, v, dv, w):
                T1[1, 0]*T2[1, 0] +\
                T1[1, 1]*T2[1, 1]
 
-    ddu = du[1]
-    ddv = dv[1]
-
     return d**3/12.0*ddot(C(Eps(ddu)), Eps(ddv))
 
+@linear_form
+def linf(v, dv, ddv, w):
+    return 1.0*v
+
 K = asm(bilinf, ib)
-f = asm(unit_load, ib)
+f = asm(linf, ib)
 
 x, D = ib.find_dofs()
 I = ib.dofnum.complement_dofs(D)

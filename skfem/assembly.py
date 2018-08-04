@@ -15,6 +15,7 @@ A library user is mainly interested in the following:
 import numpy as np
 from scipy.sparse import coo_matrix
 from skfem.quadrature import get_quadrature
+from inspect import signature
 
 class GlobalBasis():
     """The finite element basis is evaluated at global quadrature points and
@@ -79,14 +80,14 @@ class GlobalBasis():
         for j in range(self.Nbfun):
             jdofs = self.dofnum.t_dof[j, :]
             W += w[jdofs][:, None] \
-                 * self.phi[j]
+                 * self.basis[0][j]
         if derivative:
             dW = np.zeros((self.dim, self.nelems, nqp))
             for j in range(self.Nbfun):
                 jdofs = self.dofnum.t_dof[j, :]
                 for a in range(self.dim):
                     dW[a, :, :] += w[jdofs][:, None] \
-                                   * self.dphi[j][a]
+                                   * self.basis[1][j][a]
             return W, dW
         return W
 
@@ -318,11 +319,7 @@ class FacetBasis(GlobalBasis):
 
         self.nf = len(self.find)
 
-        self.phi = self.init_gbasis(self.nf, len(self.W), self.elem.order[0])
-        self.dphi = self.init_gbasis(self.nf, len(self.W), self.elem.order[1])
-
-        for j in range(self.Nbfun):
-            self.phi[j], self.dphi[j] = self.elem.gbasis(self.mapping, Y, j, self.tind)
+        self.basis = list(zip(*[self.elem.gbasis(self.mapping, Y, j, self.tind) for j in range(self.Nbfun)]))
 
         self.nelems = self.nf
         self.dx = np.abs(self.mapping.detDG(self.X, find=self.find)) * np.tile(self.W, (self.nelems, 1))
@@ -396,11 +393,7 @@ class InteriorBasis(GlobalBasis):
 
         self.X, self.W = get_quadrature(self.refdom, self.intorder)
 
-        self.phi = self.init_gbasis(self.nt, len(self.W), self.elem.order[0])
-        self.dphi = self.init_gbasis(self.nt, len(self.W), self.elem.order[1])
-
-        for j in range(self.Nbfun):
-            self.phi[j], self.dphi[j] = self.elem.gbasis(self.mapping, self.X, j)
+        self.basis = list(zip(*[self.elem.gbasis(self.mapping, self.X, j) for j in range(self.Nbfun)]))
 
         self.nelems = self.nt
         self.dx = np.abs(self.mapping.detDF(self.X)) * np.tile(self.W, (self.nelems, 1))
@@ -504,24 +497,23 @@ def asm(kernel, ubasis, vbasis=None, w=None, nthreads=1, assemble=True):
         cols = np.zeros(ubasis.Nbfun * vbasis.Nbfun * nt)
 
         # create sparse matrix indexing
-        for j in range(ubasis.phi.shape[0]):
-            for i in range(vbasis.phi.shape[0]):
+        for j in range(ubasis.Nbfun):
+            for i in range(vbasis.Nbfun):
                 # find correct location in data,rows,cols
                 ixs = slice(nt * (vbasis.Nbfun * j + i), nt * (vbasis.Nbfun * j + i + 1))
                 rows[ixs] = vbasis.dofnum.t_dof[i, :]
                 cols[ixs] = ubasis.dofnum.t_dof[j, :]
 
         # create indices for linear loop over local stiffness matrix
-        ixs = [i for j, i in product(range(ubasis.phi.shape[0]), range(vbasis.phi.shape[0]))]
-        jxs = [j for j, i in product(range(ubasis.phi.shape[0]), range(vbasis.phi.shape[0]))]
+        ixs = [i for j, i in product(range(ubasis.Nbfun), range(vbasis.Nbfun))]
+        jxs = [j for j, i in product(range(ubasis.Nbfun), range(vbasis.Nbfun))]
         indices = np.array([ixs, jxs]).T
 
         # split local stiffness matrix elements to threads
         threads = [threading.Thread(target=kernel, args=(data, ij,
-                                                         ubasis.phi,
-                                                         ubasis.dphi,
-                                                         vbasis.phi,
-                                                         vbasis.dphi, w, dx)) for ij
+                                                         *ubasis.basis,
+                                                         *vbasis.basis,
+                                                         w, dx)) for ij
                    in np.array_split(indices, nthreads, axis=0)]
 
         # start threads and wait for finishing
@@ -548,9 +540,9 @@ def asm(kernel, ubasis, vbasis=None, w=None, nthreads=1, assemble=True):
             rows[ixs] = vbasis.dofnum.t_dof[i, :]
             cols[ixs] = np.zeros(nt)
 
-        indices = range(vbasis.phi.shape[0])
+        indices = range(vbasis.Nbfun)
 
-        threads = [threading.Thread(target=kernel, args=(data, ix, vbasis.phi, vbasis.dphi, w, dx)) for ix
+        threads = [threading.Thread(target=kernel, args=(data, ix, *vbasis.basis, w, dx)) for ix
                    in np.array_split(indices, nthreads, axis=0)]
 
         for t in threads:
@@ -649,19 +641,36 @@ class Dofnum(object):
 
 def bilinear_form(form):
     """Bilinear form decorator"""
-    def kernel(A, ix, u, du, v, dv, w, dx):
-        for k in range(ix.shape[0]):
-            i, j = ix[k]
-            A[i, j] = np.sum(form(u[j], du[j], v[i], dv[i], w) * dx, axis=1)
+    nargs = len(signature(form).parameters)
+    if nargs == 5:
+        def kernel(A, ix, u, du, v, dv, w, dx):
+            for k in range(ix.shape[0]):
+                i, j = ix[k]
+                A[i, j] = np.sum(form(u[j], du[j], v[i], dv[i], w) * dx, axis=1)
+    elif nargs == 7:
+        def kernel(A, ix, u, du, ddu, v, dv, ddv, w, dx):
+            for k in range(ix.shape[0]):
+                i, j = ix[k]
+                A[i, j] = np.sum(form(u[j], du[j], ddu[j], v[i], dv[i], ddv[i], w) * dx, axis=1)
+    else:
+        raise NotImplementedError("Given number of form arguments not supported.")
     kernel.bilinear = True
     return kernel
 
 
 def linear_form(form):
     """Linear form decorator"""
-    def kernel(b, ix, v, dv, w, dx):
-        for i in ix:
-            b[i] = np.sum(form(v[i], dv[i], w) * dx, axis=1)
+    nargs = len(signature(form).parameters)
+    if nargs == 3:
+        def kernel(b, ix, v, dv, w, dx):
+            for i in ix:
+                b[i] = np.sum(form(v[i], dv[i], w) * dx, axis=1)
+    elif nargs == 4:
+        def kernel(b, ix, v, dv, ddv, w, dx):
+            for i in ix:
+                b[i] = np.sum(form(v[i], dv[i], ddv[i], w) * dx, axis=1)
+    else:
+        raise NotImplementedError("Given number of form arguments not supported.")
     kernel.bilinear = False
     return kernel
 
