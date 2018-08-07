@@ -39,7 +39,7 @@ def stiffness(u, du, v, dv, w):
 L = asm(stiffness, basis)
 M = asm(mass, basis)
 
-k, u = eigsh(L, k=6, M=M, which='SM')
+k, u = eigsh(L, M=M, which='SM')
 u = u * np.sqrt([2 / (2 * n + 1) for n in range(len(k))]) * np.sign(u[-1, :])
 
 fig, ax = subplots()
