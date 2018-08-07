@@ -7,6 +7,7 @@ iterative methods.
 """
 from skfem import *
 from skfem.models.poisson import *
+import numpy as np
 
 p = np.linspace(0, 1, 16)
 m = MeshHex.init_tensor(p, p, p)
