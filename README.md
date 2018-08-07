@@ -56,3 +56,5 @@ Please see the directory *examples* for more instructions.
 
 - Tom Gustafsson (Maintainer)
 - [Geordie McBain](https://github.com/gdmcbain)
+
+*By contributing code to scikit-fem, you are agreeing to release it under BSD-3-Clause, see LICENSE.*
