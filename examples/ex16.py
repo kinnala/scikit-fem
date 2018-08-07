@@ -40,11 +40,12 @@ M = asm(mass, basis)
 ks, u = eigsh(L, M=M, sigma=0.)
 u = u * np.sqrt([2 / (2 * n + 1) for n in range(len(ks))]) * np.sign(u[-1, :])
 
-fig, ax = subplots()
-for n, (k, u) in enumerate(zip(ks, u.T)):
-    dots, = ax.plot(x, u, label=n, marker='o', linestyle='None')
-    ax.plot(x, legendre(n)(x), color=dots.get_color())
-
 if __name__ == "__main__":
+    fig, ax = subplots()
+    for n, (k, u) in enumerate(zip(ks, u.T)):
+        dots, = ax.plot(x, u, label=n, marker='o', linestyle='None')
+        ax.plot(x, legendre(n)(x), color=dots.get_color())
+        print('{:2d}  {:5.2f}'.format(n * (n + 1), k))
+
     ax.legend()
     show()
