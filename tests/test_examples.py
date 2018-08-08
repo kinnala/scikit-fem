@@ -52,7 +52,7 @@ class TestEx09(unittest.TestCase):
     """Run examples/ex09.py"""
     def runTest(self):
         import examples.ex09
-        self.assertAlmostEqual(np.max(examples.ex09.x), 0.054313059564406921)
+        self.assertAlmostEqual(np.max(examples.ex09.x), 0.055596791644282988)
 
 class TestEx16(unittest.TestCase):
     """Run examples/ex16.py"""

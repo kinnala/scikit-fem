@@ -1,19 +1,19 @@
 """
 Author: kinnala
 
-Solve Laplace equation with zero Dirichlet BC
-using trilinear hexahedral elements and
-iterative methods.
+Solve Laplace equation with zero Dirichlet BC using linear tetrahedral elements
+and preconditioned conjugate gradient method.
+
 """
 from skfem import *
 from skfem.models.poisson import *
 import numpy as np
 
 p = np.linspace(0, 1, 16)
-m = MeshHex.init_tensor(p, p, p)
+m = MeshTet.init_tensor(p, p, p)
 
-e = ElementHex1()
-map = MappingIsoparametric(m, e)
+e = ElementTetP1()
+map = MappingAffine(m)
 basis = InteriorBasis(m, e, map)
 
 A = asm(laplace, basis)
@@ -35,4 +35,4 @@ Aint, bint = condense(A, b, I=I)
 x[I] = solve(Aint, bint, solver=solver_iter_pcg(pc=build_pc_ilu(Aint), verbose=verbose))
 
 if verbose:
-    m.save("ex9.vtk", x)
+    m.save("ex09.vtk", x)
