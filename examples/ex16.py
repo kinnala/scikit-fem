@@ -8,9 +8,7 @@ Legendre's equation in self-adjoint Sturm–Liouville form is
   {(1 - x**2) u'}' + k u = 0      (-1 < x < 1)
 
 The eigenvalues are k = n * (n + 1) for n = 0, 1, 2, ...  The
-conventional normalization is u(1) = 1 and
-
-   <u, u> = 2 / (2 * n + 1).
+conventional normalization is u(1) = 1.
 
 The x-coordinate for the spatially varying coefficient (1 - x**2) is
 accessed inside the bilinear_form as w[0][0].
@@ -38,7 +36,7 @@ L = asm(stiffness, basis)
 M = asm(mass, basis)
 
 ks, u = eigsh(L, M=M, sigma=0.)
-u = u * np.sqrt([2 / (2 * n + 1) for n in range(len(ks))]) * np.sign(u[-1, :])
+u /= u[-1, :]
 
 if __name__ == "__main__":
     fig, ax = subplots()
