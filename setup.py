@@ -23,6 +23,6 @@ setup(
     packages=find_packages(exclude=['examples']),  # Required
     install_requires=['numpy', 'scipy', 'sympy', 'matplotlib'],  # Optional
     extras_require={
-        'all' : ['meshio', 'autograd'],
+        'all' : ['meshio'],
         },
 )
