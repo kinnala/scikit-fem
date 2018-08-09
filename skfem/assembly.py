@@ -76,13 +76,25 @@ class GlobalBasis():
         """
         nqp = len(self.W)
 
-        W = np.zeros((self.nelems, nqp))
+        if self.elem.order[0] == 0:
+            W = np.zeros((self.nelems, nqp))
+        elif self.elem.order[0] == 1:
+            W = np.zeros((self.dim, self.nelems, nqp))
+        else:
+            raise Exception("Interpolation of this element order is not implemented.")
+
         for j in range(self.Nbfun):
             jdofs = self.dofnum.t_dof[j, :]
             W += w[jdofs][:, None] \
                  * self.basis[0][j]
+
         if derivative:
-            dW = np.zeros((self.dim, self.nelems, nqp))
+            if self.elem.order[1] == 1:
+                dW = np.zeros((self.dim, self.nelems, nqp))
+            elif self.elem.order[1] == 2:
+                dW = np.zeros((self.dim, self.dim, self.nelems, nqp))
+            else:
+                raise Exception("Interpolation of this element order is not implemented.")
             for j in range(self.Nbfun):
                 jdofs = self.dofnum.t_dof[j, :]
                 for a in range(self.dim):
@@ -673,62 +685,6 @@ def linear_form(form):
         raise NotImplementedError("Given number of form arguments not supported.")
     kernel.bilinear = False
     return kernel
-
-
-def nonlinear_form(nonlin):
-    """Create tangent system using automatic differentiation.
-
-    The new form is bilinear and has the parameters (u, du, v, dv, w).
-    It is expected that w[0] contains u_0, w[1] contains du_0/dx, etc.
-
-    Note: Requires autograd. Use autograd.numpy instead of numpy for any
-    special operations.
-    """
-    from autograd import elementwise_grad as egrad
-
-    @bilinear_form
-    def bilin(u, du, v, dv, w):
-        order = (len(u.shape)-2, len(du.shape)-2)
-        if order[0] > 0:
-            dim = u.shape[0]
-        elif order[1] > 0:
-            dim = du.shape[0]
-        else:
-            raise Exception("Could not deduce the dimension!")
-        if order[0] == 0 and order[1] == 1:
-            # scalar H1
-            first_arg = egrad(nonlin, argnum=0)(w[0], w[1:(dim+1)], v, dv, w[(dim+1):])*u
-            second_arg = np.sum(egrad(nonlin, argnum=1)(w[0], w[1:(dim+1)], v, dv, w[(dim+1):])*du, axis=0)
-        elif order[0] == 1 and order[1] == 0:
-            # Hdiv / Hcurl
-            first_arg = np.sum(egrad(nonlin, argnum=0)(w[0:dim], w[dim], v, dv, w[(dim+1):])*u, axis=0)
-            second_arg = egrad(nonlin, argnum=1)(w[0:dim], w[dim], v, dv, w[(dim+1):])*du
-        else:
-            raise Exception("The linearization of the given order not supported.")
-        # derivative chain rule
-        return first_arg + second_arg
-
-    @linear_form
-    def lin(v, dv, w):
-        order = (len(v.shape)-2, len(dv.shape)-2)
-        if order[0] > 0:
-            dim = v.shape[0]
-        elif order[1] > 0:
-            dim = dv.shape[0]
-        else:
-            raise Exception("Could not deduce the dimension!")
-        if order[0] == 0 and order[1] == 1:
-            # scalar H1
-            return nonlin(w[0], w[1:(dim+1)], v, dv, w[(dim+1):])
-        elif order[0] == 1 and order[1] == 0:
-            # Hdiv / Hcurl
-            return nonlin(w[0:dim], w[dim], v, dv, w[(dim+1):])
-        else:
-            raise Exception("The linearization of the given order not supported.")
-
-    bilin.rhs = lin
-
-    return bilin
 
 
 if __name__ == "__main__":

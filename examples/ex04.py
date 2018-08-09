@@ -6,7 +6,7 @@ bodies using the penalty method.
 """
 
 from skfem import *
-from skfem.models.elasticity import plane_strain
+from skfem.models.elasticity import linear_elasticity
 import numpy as np
 
 m = MeshTri()
@@ -52,8 +52,8 @@ Lambda2 = E2*nu2/((1.0 + nu2)*(1.0 - 2.0*nu2))
 Mu = Mu1
 Lambda = Lambda1
 
-weakform1 = plane_strain(Lambda=Lambda1, Mu=Mu1)
-weakform2 = plane_strain(Lambda=Lambda2, Mu=Mu2)
+weakform1 = linear_elasticity(Lambda=Lambda1, Mu=Mu1)
+weakform2 = linear_elasticity(Lambda=Lambda2, Mu=Mu2)
 
 alpha = 1
 K1 = asm(weakform1, ib)

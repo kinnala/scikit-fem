@@ -5,7 +5,7 @@ Solve the linear elastic eigenvalue problem.
 """
 
 from skfem import *
-from skfem.models.elasticity import plane_strain
+from skfem.models.elasticity import linear_elasticity
 from scipy.sparse.linalg import eigsh
 import numpy as np
 
@@ -21,7 +21,7 @@ e = ElementVectorH1(e1)
 
 gb = InteriorBasis(m, e, map, 2)
 
-K = asm(plane_strain(1.0, 1.0), gb)
+K = asm(linear_elasticity(1.0, 1.0), gb)
 
 @bilinear_form
 def mass(u, du, v, dv, w):
