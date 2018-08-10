@@ -12,10 +12,19 @@ A library user is mainly interested in the following:
     * linear_form (decorator)
 """
 
+from typing import NamedTuple, Optional
+
 import numpy as np
 from scipy.sparse import coo_matrix
 from skfem.quadrature import get_quadrature
 from inspect import signature
+
+
+class Weights(NamedTuple):  # sorry, I wasn't sure what w stood for
+    x: np.ndarray
+    h: np.ndarray
+    n: Optional[np.ndarray]=None
+    
 
 class GlobalBasis():
     """The finite element basis is evaluated at global quadrature points and
@@ -339,11 +348,9 @@ class FacetBasis(GlobalBasis):
         self.dofnum.t_dof = self.dofnum.t_dof[:, self.tind] # TODO this is required for asm(). Check for other options.
 
     def default_parameters(self):
-        return np.array([
-            self.global_coordinates(),
-            self.mesh_parameters(),
-            self.normals,
-        ])
+        return Weights(self.global_coordinates(),
+                       self.mesh_parameters(),
+                       self.normals)
 
     def global_coordinates(self):
         return self.mapping.G(self.X, find=self.find)
@@ -411,10 +418,8 @@ class InteriorBasis(GlobalBasis):
         self.dx = np.abs(self.mapping.detDF(self.X)) * np.tile(self.W, (self.nelems, 1))
 
     def default_parameters(self):
-        return np.array([
-            self.global_coordinates(),
-            self.mesh_parameters(),
-        ])
+        return Weights(self.global_coordinates(),
+                       self.mesh_parameters())
 
     def global_coordinates(self):
         return self.mapping.F(self.X)
