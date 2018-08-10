@@ -63,7 +63,7 @@ for i in range(2):
     for j in range(2):
         @bilinear_form
         def bilin_penalty(u, du, v, dv, w):
-            n = w[2]
+            n = w.n
             ju = (-1.0)**i*(u[0]*n[0] + u[1]*n[1])
             jv = (-1.0)**j*(v[0]*n[0] + v[1]*n[1])
 
@@ -79,7 +79,7 @@ for i in range(2):
                                  [0.5*(dw[1][0] + dw[0][1]), dw[1][1]]])
             mu = 0.5*(n[0]*C(Eps(du))[0, 0]*n[0] + n[0]*C(Eps(du))[0, 1]*n[1] + n[1]*C(Eps(du))[1, 0]*n[0] + n[1]*C(Eps(du))[1, 1]*n[1])
             mv = 0.5*(n[0]*C(Eps(dv))[0, 0]*n[0] + n[0]*C(Eps(dv))[0, 1]*n[1] + n[1]*C(Eps(dv))[1, 0]*n[0] + n[1]*C(Eps(dv))[1, 1]*n[1])
-            h = w[1]
+            h = w.h
             return 1.0/(alpha*h)*ju*jv - mu*jv - mv*ju
 
         L = asm(bilin_penalty, mb[i], mb[j]) + L

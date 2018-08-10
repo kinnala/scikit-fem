@@ -25,7 +25,7 @@ def bilin(u, du, v, dv, w):
 
 @bilinear_form
 def bilin_bnd(u, du, v, dv, w):
-    h = w[1]
+    h = w.h
     return 1.0/h*u*v
 
 @linear_form
@@ -45,10 +45,10 @@ for i in range(2):
         def bilin_penalty(u, du, v, dv, w):
             ju = (-1.0)**i*u
             jv = (-1.0)**j*v
-            n = w[2]
+            n = w.n
             mu = 0.5*(du[0]*n[0] + du[1]*n[1])
             mv = 0.5*(dv[0]*n[0] + dv[1]*n[1])
-            h = w[1]
+            h = w.h
             return ieps/h*ju*jv - mu*jv - mv*ju
 
         B = asm(bilin_penalty, fb[i], fb[j]) + B
