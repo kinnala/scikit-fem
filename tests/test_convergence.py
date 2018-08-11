@@ -23,7 +23,7 @@ class ConvergenceQ1(unittest.TestCase):
                 raise Exception("The dimension not supported")
         @linear_form
         def load(v, dv, w):
-            x = w[0]
+            x = w.x
             if x.shape[0] == 1:
                 return np.sin(np.pi*x[0])*(np.pi**2)*v
             elif x.shape[0] == 2:

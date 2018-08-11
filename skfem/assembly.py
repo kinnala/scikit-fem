@@ -20,12 +20,6 @@ from skfem.quadrature import get_quadrature
 from inspect import signature
 
 
-class Weights(NamedTuple):  # sorry, I wasn't sure what w stood for
-    x: np.ndarray
-    h: np.ndarray
-    n: Optional[np.ndarray]=None
-    
-
 class GlobalBasis():
     """The finite element basis is evaluated at global quadrature points and
     cached inside this object.
@@ -348,9 +342,9 @@ class FacetBasis(GlobalBasis):
         self.dofnum.t_dof = self.dofnum.t_dof[:, self.tind] # TODO this is required for asm(). Check for other options.
 
     def default_parameters(self):
-        return Weights(self.global_coordinates(),
-                       self.mesh_parameters(),
-                       self.normals)
+        return {'x':self.global_coordinates(),
+                'h':self.mesh_parameters(),
+                'n':self.normals}
 
     def global_coordinates(self):
         return self.mapping.G(self.X, find=self.find)
@@ -418,8 +412,8 @@ class InteriorBasis(GlobalBasis):
         self.dx = np.abs(self.mapping.detDF(self.X)) * np.tile(self.W, (self.nelems, 1))
 
     def default_parameters(self):
-        return Weights(self.global_coordinates(),
-                       self.mesh_parameters())
+        return {'x':self.global_coordinates(),
+                'h':self.mesh_parameters()}
 
     def global_coordinates(self):
         return self.mapping.F(self.X)
@@ -463,7 +457,7 @@ class InteriorBasis(GlobalBasis):
         return M, w.flatten()
 
 
-def asm(kernel, ubasis, vbasis=None, w=None, nthreads=1, assemble=True):
+def asm(kernel, ubasis, vbasis=None, w=None, dw=None, ddw=None, nthreads=1, assemble=True):
     """Assemble finite element matrices.
 
     Parameters
@@ -473,11 +467,15 @@ def asm(kernel, ubasis, vbasis=None, w=None, nthreads=1, assemble=True):
     ubasis : GlobalBasis
     vbasis : (optional) GlobalBasis
     w : (optional) ndarray
-        An array of ndarrays of size Nelems x Nqp.
+        Accessible in form definition as w.w.
+    dw : (optional) ndarray
+        Accessible in form definition as w.dw.
+    ddw : (optional) ndarray
+        Accessible in form definition as w.ddw.
     nthreads : (optional, default=1) int
         Number of threads to use in assembly. This is only
         useful if kernel is numba function compiled with
-        nogil = True.
+        nogil = True, see Examples.
 
     Examples
     --------
@@ -504,8 +502,15 @@ def asm(kernel, ubasis, vbasis=None, w=None, nthreads=1, assemble=True):
     nt = ubasis.nelems
     dx = ubasis.dx
 
-    if w is None:
-        w = ubasis.default_parameters()
+    class FormParameters(NamedTuple):
+        x: np.ndarray
+        h: np.ndarray
+        n: Optional[np.ndarray] = None
+        w: Optional[np.ndarray] = None
+        dw: Optional[np.ndarray] = None
+        ddw: Optional[np.ndarray] = None
+
+    w = FormParameters(w=w, dw=dw, ddw=ddw, **ubasis.default_parameters())
 
     if kernel.bilinear:
         # initialize COO data structures
