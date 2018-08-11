@@ -20,14 +20,14 @@ def bilinf(u, du, v, dv, w):
 
 @bilinear_form
 def facetbilinf(u, du, v, dv, w):
-    n = w[2]
-    x = w[0]
+    n = w.n
+    x = w.x
     return -(du[0]*n[0] + du[1]*n[1])*v*(x[0] == 1.0)
 
 @linear_form
 def facetlinf(v, dv, w):
-    n = w[2]
-    x = w[0]
+    n = w.n
+    x = w.x
     return -(dv[0]*n[0] + dv[1]*n[1])*(x[0] == 1.0)
 
 A = asm(bilinf, ib)

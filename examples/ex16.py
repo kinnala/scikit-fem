@@ -11,7 +11,7 @@ The eigenvalues are k = n * (n + 1) for n = 0, 1, 2, ...  The
 conventional normalization is u(1) = 1.
 
 The x-coordinate for the spatially varying coefficient (1 - x**2) is
-accessed inside the bilinear_form as w[0][0].
+accessed inside the bilinear_form as w.x[0].
 
 """
 
@@ -30,7 +30,7 @@ basis = InteriorBasis(m, e)
 
 @bilinear_form
 def stiffness(u, du, v, dv, w):
-    return (1 - w[0][0]**2) * du[0] * dv[0]
+    return (1 - w.x[0]**2) * du[0] * dv[0]
 
 L = asm(stiffness, basis)
 M = asm(mass, basis)
