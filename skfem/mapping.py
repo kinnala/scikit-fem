@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-"""
-The mappings defining relationships between reference and global elements.
-"""
+"""The mappings define relationships between reference and global elements."""
 import numpy as np
+
 
 class Mapping():
     def F(self, X, tind=None):
@@ -20,6 +19,7 @@ class Mapping():
         -------
         ndarray of size Ndim x Nelems x Nqp
             Global points
+
         """
         raise NotImplementedError("!")
 
@@ -38,6 +38,7 @@ class Mapping():
         -------
         ndarray of size Ndim x Nelems x Nqp
             The corresponding local points
+
         """
         raise NotImplementedError("!")
 
@@ -55,6 +56,7 @@ class Mapping():
         -------
         ndarray of size Ndim x Nelems x Nqp
             Global points
+
         """
         raise NotImplementedError("!")
 

@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-"""
-Element classes define the finite element basis functions or DOF functionals.
-"""
+"""Element classes define and evaluate the finite element basis functions."""
 import numpy as np
+
 
 class Element():
     nodal_dofs = 0 # DOFs at the vertices of the element

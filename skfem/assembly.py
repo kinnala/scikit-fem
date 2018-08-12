@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-"""
-Assembly module contains classes and functions related to the construction
-of finite element matrices.
+"""Assembly module contains classes and functions related to the
+construction of finite element matrices.
 
 A library user is mainly interested in the following:
 
@@ -10,6 +9,7 @@ A library user is mainly interested in the following:
     * asm (function)
     * bilinear_form (decorator)
     * linear_form (decorator)
+
 """
 
 from typing import NamedTuple, Optional
@@ -21,13 +21,14 @@ from inspect import signature
 
 
 class GlobalBasis():
-    """The finite element basis is evaluated at global quadrature points and
-    cached inside this object.
+    """The finite element basis is evaluated at global quadrature points
+    and cached inside this object.
 
     Please see the following implementations:
 
         * InteriorBasis, for basis functions inside elements
         * FacetBasis, for basis functions on element boundaries
+
     """
     def __init__(self, mesh, elem, mapping, intorder):
         if mapping is None:
@@ -76,6 +77,7 @@ class GlobalBasis():
         -------
         ndarray of size Nelems x Nqp
             Interpolated solution vector
+
         """
         nqp = len(self.W)
 
@@ -141,6 +143,7 @@ class GlobalBasis():
             Solution vector with the BC's
         I : np.array
             Set of DOF numbers set by the function
+
         """
         if test is None:
             if self.mesh.dim() == 2:
@@ -301,6 +304,7 @@ class FacetBasis(GlobalBasis):
     >>> B = asm(mass, fb)
     >>> B.shape
     (5, 5)
+
     """
     def __init__(self, mesh, elem, mapping=None, intorder=None, side=None, dofnum=None):
         super(FacetBasis, self).__init__(mesh, elem, mapping, intorder)
@@ -400,6 +404,7 @@ class InteriorBasis(GlobalBasis):
     >>> K = asm(laplace, ib)
     >>> K.shape
     (5, 5)
+
     """
     def __init__(self, mesh, elem, mapping=None, intorder=None):
         super(InteriorBasis, self).__init__(mesh, elem, mapping, intorder)
@@ -492,6 +497,7 @@ def asm(kernel, ubasis, vbasis=None, w=None, dw=None, ddw=None, nthreads=1, asse
                               du[j][1] * dv[i][1] +\
                               du[j][2] * dv[i][2]) * dx, axis=1)
     assemble.bilinear = True
+
     """
     import threading
     from itertools import product
@@ -577,7 +583,7 @@ def asm(kernel, ubasis, vbasis=None, w=None, dw=None, ddw=None, nthreads=1, asse
 
 
 class Dofnum(object):
-    """Generate a global degree-of-freedom numbering for arbitrary mesh."""
+    """Generate a global degree-of-freedom numbering for any mesh."""
 
     n_dof = np.array([]) #: Nodal DOFs
     e_dof = np.array([]) #: Edge DOFs (3D only)

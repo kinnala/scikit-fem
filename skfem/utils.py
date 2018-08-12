@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Utility functions.
-"""
+"""Utility functions."""
 import numpy as np
 import scipy.sparse as sp
 import scipy.sparse.linalg as spl
@@ -124,6 +122,7 @@ def solve(A, b, solver=None):
         * skfem.utils.solver_direct_umfpack
         * skfem.utils.solver_direct_cholmod
         * skfem.utils.solver_iter_pcg
+
     """
     if solver is None:
         solver = solver_direct_scipy()

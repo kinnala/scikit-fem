@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-"""
-Tabulated and generated quadrature points for various reference domains.
-"""
+"""Tabulated and generated quadrature points for various reference domains."""
 import numpy as np
+
 
 def get_quadrature(refdom, norder):
     """Return a nth order accurate quadrature rule for
@@ -44,6 +43,7 @@ def get_quadrature(refdom, norder):
 
     np.array
         A one-dimensional array of quadrature weights.
+
     """
     if refdom is "tri":
         return get_quadrature_tri(norder)

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Mesh module contains different types of finite element meshes.
+"""Mesh module contains different types of finite element meshes.
 
 See the following implementations:
 
@@ -8,6 +7,7 @@ See the following implementations:
     * MeshTet, tetrahedral mesh
     * MeshQuad, quadrilateral mesh
     * MeshHex, hexahedral mesh
+
 """
 import matplotlib.pyplot as plt
 import matplotlib.tri as mtri
@@ -28,6 +28,7 @@ class Mesh():
         * MeshTet, tetrahedral mesh
         * MeshQuad, quadrilateral mesh
         * MeshHex, hexahedral mesh
+
     """
 
     refdom = "none"  
@@ -85,6 +86,7 @@ class Mesh():
         ----------
         N : int (optional)
             Perform N refinements.
+
         """
         if N is None:
             return self._uniform_refine()
@@ -105,6 +107,7 @@ class Mesh():
         -------
         skfem.Mesh
             A new mesh object with elements removed as per requested.
+
         """
         keep = np.setdiff1d(np.arange(self.t.shape[1]), element_indices)
         newt = self.t[:, keep]
@@ -125,6 +128,7 @@ class Mesh():
             Scale each dimension by a factor. If a floating
             point number is provided, same scale is used
             for each dimension.
+
         """
         for itr in range(int(self.dim())):
             if isinstance(scale, tuple):
@@ -139,6 +143,7 @@ class Mesh():
         ----------
         vec : tuple of size dim
             Translate the mesh by a vector.
+
         """
         for itr in range(int(self.dim())):
             self.p[itr, :] += vec[itr]
@@ -185,6 +190,7 @@ class Mesh():
             The filename for vtk-file.
         pointData : (optional) numpy array for one output or dict for multiple
         cellData : (optional) numpy array for one output or dict for multiple
+
         """
         import meshio
 
@@ -224,6 +230,7 @@ class Mesh3D(Mesh):
 
         * MeshTet, tetrahedral mesh
         * MeshHex, hexahedral mesh
+
     """
 
     def nodes_satisfying(self, test):
@@ -234,6 +241,7 @@ class Mesh3D(Mesh):
         test : lambda function (3 params)
             Evaluates to 1 or True for nodes belonging
             to the output set.
+
         """
         return np.nonzero(test(self.p[0, :], self.p[1, :], self.p[2, :]))[0]
 
@@ -245,6 +253,7 @@ class Mesh3D(Mesh):
         test : lambda functions (3 params)
             Evaluates to 1 or True for facet midpoints
             of the facets belonging to the output set.
+
         """
         mx = np.sum(self.p[0, self.facets], axis=0)/self.facets.shape[0]
         my = np.sum(self.p[1, self.facets], axis=0)/self.facets.shape[0]
@@ -259,6 +268,7 @@ class Mesh3D(Mesh):
         test : lambda functions (3 params)
             Evaluates to 1 or True for edge midpoints
             of the edges belonging to the output set.
+
         """
         mx = 0.5*(self.p[0, self.edges[0, :]] + self.p[0, self.edges[1, :]])
         my = 0.5*(self.p[1, self.edges[0, :]] + self.p[1, self.edges[1, :]])
@@ -307,6 +317,7 @@ class Mesh2D(Mesh):
 
         * MeshTri, triangular mesh
         * MeshQuad, quadrilateral mesh
+
     """
 
     def jiggle(self, z=0.2):
@@ -317,6 +328,7 @@ class Mesh2D(Mesh):
         z : (optional, default=0.2) float
             Mesh parameter is multiplied by this number. The resulting number
             corresponds to the standard deviation of the jiggle.
+
         """
         y = z*self.param()
         I = self.interior_nodes()
@@ -352,6 +364,7 @@ class Mesh2D(Mesh):
             The indices of the nodes to highlight.
         mark : (optional, default='bo') string
             A standard matplotlib string to define the highlight style.
+
         """
         plt.plot(self.p[0, nodes], self.p[1, nodes], mark)
 
@@ -373,6 +386,7 @@ class Mesh2D(Mesh):
             An anonymous function with two parameters (x and y) and which
             returns True for the midpoints of the set of facets that are
             to be included in the return set.
+
         """
         mx = 0.5*(self.p[0, self.facets[0, :]] + self.p[0, self.facets[1, :]])
         my = 0.5*(self.p[1, self.facets[0, :]] + self.p[1, self.facets[1, :]])
@@ -387,6 +401,7 @@ class Mesh2D(Mesh):
             An anonymous function with two parameters (x and y) and which
             returns True for the midpoints of the set of elements that
             are to be included in the return set.
+
         """
         mx = np.sum(self.p[0, self.t], axis=0)/self.t.shape[0]
         my = np.sum(self.p[1, self.t], axis=0)/self.t.shape[0]
@@ -413,6 +428,7 @@ class Mesh2D(Mesh):
             Draw facet numbering.
         element_numbering : (optional, default=False)
             Draw element numbering.
+
         """
         if ax is None:
             # create new figure
@@ -460,6 +476,7 @@ class Mesh2D(Mesh):
         a : float
         b : float
         c : float
+
         """
         tmp = -2.0*(a*self.p[0, :] + b*self.p[1, :] + c)/(a**2 + b**2)
         newx = a*tmp + self.p[0, :]
@@ -487,6 +504,7 @@ class Mesh2D(Mesh):
             The filename for vtk-file.
         pointData : (optional) numpy array for one output or dict for multiple
         cellData : (optional) numpy array for one output or dict for multiple
+
         """
         import meshio
 
@@ -746,6 +764,7 @@ class MeshQuad(Mesh2D):
         the boundary.
     t2f : numpy array of size 4 x Nelements
         Each column contains four indices to facets.
+
     """
 
     refdom = "quad"
@@ -768,6 +787,7 @@ class MeshQuad(Mesh2D):
         t : (optional) numpy array of size 4 x Nelements
             The element connectivity, i.e. indices to p.
             These should be in counter-clockwise order.
+
         """
         if p is None and t is None:
             p = np.array([[0., 0.], [1., 0.], [1., 1.], [0., 1.]]).T
@@ -791,6 +811,7 @@ class MeshQuad(Mesh2D):
             The nodal coordinates in dimension x
         y : numpy array (1d)
             The nodal coordinates in dimension y
+
         """
         npx = len(x)
         npy = len(y)
@@ -820,6 +841,7 @@ class MeshQuad(Mesh2D):
                 |             |
                 |             |  
         (-1,-1) *-------------* (1,-1)
+
         """
         p = np.array([[-1., -1.], [1., -1.], [1., 1.], [-1., 1.]]).T
         t = np.array([[0, 1, 2, 3]]).T
@@ -868,10 +890,8 @@ class MeshQuad(Mesh2D):
         self.f2t[1, np.nonzero(self.f2t[0, :] == self.f2t[1, :])[0]] = -1
 
     def _uniform_refine(self):
-        """Perform a single mesh refine that halves 'h'.
-
-        Each quadrilateral is split into four.
-        """
+        """Perform a single mesh refine that halves 'h'. Each
+        quadrilateral is split into four."""
         # rename variables
         t = self.t
         p = self.p
@@ -943,8 +963,10 @@ class MeshQuad(Mesh2D):
     def plot(self, z, smooth=False, edgecolors=None, ax=None, zlim=None):
         """Visualize nodal or elemental function (2d).
 
-        The quadrilateral mesh is split into triangular mesh (MeshTri) and
-        the respective plotting function for the triangular mesh is used.
+        The quadrilateral mesh is split into triangular mesh (MeshTri)
+        and the respective plotting function for the triangular mesh is
+        used.
+
         """
         m, z = self._splitquads(z)
         return m.plot(z, smooth, ax=ax, zlim=zlim, edgecolors=edgecolors)
@@ -952,8 +974,10 @@ class MeshQuad(Mesh2D):
     def plot3(self, z, smooth=False, ax=None):
         """Visualize nodal function (3d i.e. three axes).
 
-        The quadrilateral mesh is split into triangular mesh (MeshTri) and
-        the respective plotting function for the triangular mesh is used.
+        The quadrilateral mesh is split into triangular mesh (MeshTri)
+        and the respective plotting function for the triangular mesh is
+        used.
+
         """
         m, z = self._splitquads(z)
         return m.plot3(z, smooth, ax=ax)
@@ -985,6 +1009,7 @@ class MeshHex(Mesh3D):
         MeshHex.p.
     t2e : numpy array of size 12 x Nelements
         Each column contains twelve column indices of MeshHex.edges.
+
     """
 
     refdom = "hex"
@@ -1029,6 +1054,7 @@ class MeshHex(Mesh3D):
             The nodal coordinates in dimension y
         z : numpy array (1d)
             The nodal coordinates in dimension z
+
         """
         npx = len(x)
         npy = len(y)
@@ -1114,9 +1140,8 @@ class MeshHex(Mesh3D):
         self.f2t[1, np.nonzero(self.f2t[0, :] == self.f2t[1, :])[0]] = -1
 
     def _uniform_refine(self):
-        """Perform a single mesh refine that halves 'h'.
-
-        Each hex is split into 8."""
+        """Perform a single mesh refine that halves 'h'. Each hex is
+        split into 8."""
         # rename variables
         t = self.t
         p = self.p
@@ -1240,6 +1265,7 @@ class MeshHex(Mesh3D):
             The filename for vtk-file.
         pointData : (optional) numpy array for one output or dict for multiple
         cellData : (optional) numpy array for one output or dict for multiple
+
         """
         import meshio
 
@@ -1286,6 +1312,7 @@ class MeshTet(Mesh3D):
         Order: (0, 1) (1, 2) (0, 2) (0, 3) (1, 3) (2, 3)
     t2e : numpy array of size 6 x Nelements
         Each column contains six indices to MeshTet.edges.
+
     """
 
     refdom = "tet"
@@ -1345,6 +1372,7 @@ class MeshTet(Mesh3D):
         LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
         OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         SOFTWARE.
+
         """
         # Create the vertices.
         nx, ny, nz = len(x), len(y), len(z)
@@ -1557,6 +1585,7 @@ class MeshTet(Mesh3D):
         ----------
         N : (optional) int
             Perform N refinements.
+
         """
         if N is None:
             return self._uniform_refine()
@@ -1596,6 +1625,7 @@ class MeshTet(Mesh3D):
         in such a way that the connection between the opposite edges
         is shortest. This minimizes the shape-regularity constant of
         the resulting mesh family.
+
         """
         # rename variables
         t = self.t
@@ -1733,6 +1763,7 @@ class MeshTri(Mesh2D):
     >>> m.refine(3)
     >>> m.p.shape
     (2, 81)
+
     """
 
     refdom = "tri"
@@ -1758,6 +1789,7 @@ class MeshTri(Mesh2D):
             Whether to run mesh validity checks or not.
         sort_t : (optional, default=True) bool
             Sort the element connectivity matrix before building mappings.
+
         """
         if p is None and t is None:
             p = np.array([[0., 1., 0., 1.], [0., 0., 1., 1.]], dtype=np.float_)
@@ -1781,6 +1813,7 @@ class MeshTri(Mesh2D):
             The nodal coordinates in dimension x
         y : numpy array (1d)
             The nodal coordinates in dimension y
+
         """
         return MeshQuad.init_tensor(x, y)._splitquads()
 
@@ -1798,6 +1831,7 @@ class MeshTri(Mesh2D):
         |  /      \  |
         |/          \|
         *------------*
+
         """
         p = np.array([[0, 1, 1, 0, 0.5],
                       [0, 0, 1, 1, 0.5]], dtype=np.float_)
@@ -1821,6 +1855,7 @@ class MeshTri(Mesh2D):
         |  /  |   \  |
         |/    |     \|
         *------------*
+
         """
         p = np.array([[0, 0.5, 1,   0, 0.5,   1, 0, 0.5, 1],
                       [0, 0,   0, 0.5, 0.5, 0.5, 1,   1, 1]], dtype=np.float_)
@@ -1848,6 +1883,7 @@ class MeshTri(Mesh2D):
         |          \  
         |            \ 
         *-------------*
+
         """
         p = np.array([[0., 1., 0.],
                       [0., 0., 1.]], dtype=np.float_)
