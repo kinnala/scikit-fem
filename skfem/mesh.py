@@ -983,7 +983,7 @@ class MeshQuad(Mesh2D):
         return m.plot3(z, smooth, ax=ax)
 
     def mapping(self):
-        return skfem.mapping.MappingIsoparametric(self, skfem.element.ElementQ1())
+        return skfem.mapping.MappingIsoparametric(self, skfem.element.ElementQuad1(), skfem.element.ElementLineP1())
 
 
 class MeshHex(Mesh3D):
@@ -1100,25 +1100,41 @@ class MeshHex(Mesh3D):
         self.t2e = ixb.reshape((12, self.t.shape[1]))
 
         # define facets
-        self.facets = np.sort(np.vstack((self.t[0, :],
-                                         self.t[1, :],
-                                         self.t[4, :],
-                                         self.t[2, :])), axis=0)
-        f = np.array([0, 3, 6, 2,
-                      0, 1, 5, 3,
-                      2, 6, 7, 4,
+#        self.facets = np.sort(np.vstack((self.t[0, :],
+#                                         self.t[1, :],
+#                                         self.t[4, :],
+#                                         self.t[2, :])), axis=0)
+#        f = np.array([0, 3, 6, 2,
+#                      0, 1, 5, 3,
+#                      2, 6, 7, 4,
+#                      1, 5, 7, 4,
+#                      3, 5, 7, 6])
+#        for i in range(5):
+#            self.facets = np.hstack((self.facets, np.sort(np.vstack((self.t[f[4*i], :],
+#                                                                     self.t[f[4*i+1], :],
+#                                                                     self.t[f[4*i+2], :],
+#                                                                     self.t[f[4*i+3], :])), axis=0)))
+#
+        self.facets = np.vstack((self.t[0, :],
+                                 self.t[1, :],
+                                 self.t[4, :],
+                                 self.t[2, :]))
+        f = np.array([0, 2, 6, 3,
+                      0, 3, 5, 1,
+                      2, 4, 7, 6,
                       1, 5, 7, 4,
-                      3, 5, 7, 6])
+                      3, 6, 7, 5])
         for i in range(5):
-            self.facets = np.hstack((self.facets, np.sort(np.vstack((self.t[f[4*i], :],
-                                                                     self.t[f[4*i+1], :],
-                                                                     self.t[f[4*i+2], :],
-                                                                     self.t[f[4*i+3], :])), axis=0)))
+            self.facets = np.hstack((self.facets, np.vstack((self.t[f[4*i], :],
+                                                             self.t[f[4*i+1], :],
+                                                             self.t[f[4*i+2], :],
+                                                             self.t[f[4*i+3], :]))))
 
+        sorted_facets = np.sort(self.facets, axis=0)
 
         # unique facets
-        self.facets, ixa, ixb = np.unique(self.facets, axis=1, return_index=True, return_inverse=True)
-        self.facets = np.ascontiguousarray(self.facets)
+        sorted_facets, ixa, ixb = np.unique(sorted_facets, axis=1, return_index=True, return_inverse=True)
+        self.facets = np.ascontiguousarray(self.facets[:, ixa])
 
         self.t2f = ixb.reshape((6, self.t.shape[1]))
 
@@ -1285,7 +1301,7 @@ class MeshHex(Mesh3D):
         meshio.write(filename, mesh)
 
     def mapping(self):
-        return skfem.mapping.MappingIsoparametric(self, skfem.element.ElementHex1())
+        return skfem.mapping.MappingIsoparametric(self, skfem.element.ElementHex1(), skfem.element.ElementQuad1())
 
 
 class MeshTet(Mesh3D):

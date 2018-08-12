@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-"""The mappings define relationships between reference and global elements."""
+"""The mappings define relationships between reference and global
+elements."""
+
 import numpy as np
 
 
@@ -79,43 +81,111 @@ class Mapping():
 class MappingIsoparametric(Mapping):
     """An isoparametric mapping, e.g., for quadrilateral and hexahedral
     elements."""
-    def __init__(self, mesh, elem):
+    def __init__(self, mesh, elem, bndelem=None):
         p = mesh.p
         t = mesh.t
+        facets = mesh.facets
 
-        def map(i, X):
-            out = np.zeros((t.shape[1], X.shape[1]))
-            for itr in range(t.shape[0]):
-                phi, _ = elem.lbasis(X, itr)
-                out += p[i, t[itr, :]][:, None]*phi
-            return out
+        def map(i, X, tind=None):
+            if tind is None:
+                out = np.zeros((t.shape[1], X.shape[1]))
+                for itr in range(t.shape[0]):
+                    phi, _ = elem.lbasis(X, itr)
+                    out += p[i, t[itr, :]][:, None]*phi
+                return out
+            else:
+                out = np.zeros((len(tind), X.shape[2]))
+                for itr in range(t.shape[0]):
+                    phi, _ = elem.lbasis(X, itr)
+                    out += p[i, t[itr, tind]][:, None]*phi
+                return out
 
-        def J(i, j, X):
-            out = np.zeros((t.shape[1], X.shape[1]))
-            for itr in range(t.shape[0]):
-                _, dphi = elem.lbasis(X, itr)
-                out += p[i, t[itr, :]][:, None]*dphi[j]
-            return out
+        def J(i, j, X, tind=None):
+            if tind is None:
+                out = np.zeros((t.shape[1], X.shape[1]))
+                for itr in range(t.shape[0]):
+                    _, dphi = elem.lbasis(X, itr)
+                    out += p[i, t[itr, :]][:, None]*dphi[j]
+                return out
+            else:
+                out = np.zeros((len(tind), X.shape[2]))
+                for itr in range(t.shape[0]):
+                    _, dphi = elem.lbasis(X, itr)
+                    out += p[i, t[itr, tind]][:, None]*dphi[j]
+                return out
+
+        def bndmap(i, X, find=None):
+            if find is None:
+                out = np.zeros((facets.shape[1], X.shape[1]))
+                for itr in range(facets.shape[0]):
+                    phi, _ = bndelem.lbasis(X, itr)
+                    out += p[i, facets[itr, :]][:, None]*phi
+                return out
+            else:
+                out = np.zeros((len(find), X.shape[1]))
+                for itr in range(facets.shape[0]):
+                    phi, _ = bndelem.lbasis(X, itr)
+                    out += p[i, facets[itr, find]][:, None]*phi
+                return out
+
+        def bndJ(i, j, X, find=None):
+            if find is None:
+                out = np.zeros((facets.shape[1], X.shape[1]))
+                for itr in range(facets.shape[0]):
+                    _, dphi = bndelem.lbasis(X, itr)
+                    out += p[i, facets[itr, :]][:, None]*dphi[j]
+                return out
+            else:
+                out = np.zeros((len(find), X.shape[1]))
+                for itr in range(facets.shape[0]):
+                    _, dphi = bndelem.lbasis(X, itr)
+                    out += p[i, facets[itr, find]][:, None]*dphi[j]
+                return out
 
         self.map = map
+        self.bndmap = bndmap
         self.J = J
+        self.bndJ = bndJ
         self.elem = elem
         self.mesh = mesh
 
+    def G(self, X, find=None):
+        return np.array([self.bndmap(i, X, find=find) for i in range(self.mesh.dim())])
+
+    def detDG(self, X, find=None):
+        dim = self.mesh.p.shape[0]
+
+        if dim == 2:
+            return np.sqrt(self.bndJ(0, 0, X, find)**2 + self.bndJ(1, 0, X, find)**2)
+        elif dim == 3:
+            return np.sqrt(( self.bndJ(1, 0, X, find)*self.bndJ(2, 1, X, find) - self.bndJ(2, 0, X, find)*self.bndJ(1, 1, X, find))**2 +
+                           (-self.bndJ(0, 0, X, find)*self.bndJ(2, 1, X, find) + self.bndJ(2, 0, X, find)*self.bndJ(0, 1, X, find))**2 +
+                           ( self.bndJ(0, 0, X, find)*self.bndJ(1, 1, X, find) - self.bndJ(1, 0, X, find)*self.bndJ(0, 1, X, find))**2)
+        else:
+            raise NotImplementedError("!")
+
+    def invF(self, x, tind=None):
+        X = np.zeros(x.shape)
+        for itr in range(1): # TODO check for more than one iteration
+            F = self.F(X, tind)
+            invDF = self.invDF(X, tind)
+            X = X + np.einsum('ijkl,jkl->ikl', invDF, x - F)
+        return X
+
     def F(self, X, tind=None):
         # TODO fix tind
-        return np.array([self.map(i, X) for i in range(X.shape[0])])
+        return np.array([self.map(i, X, tind) for i in range(X.shape[0])])
 
     def detDF(self, X, tind=None):
         # TODO fix tind
         dim = X.shape[0]
 
         if dim == 2:
-            detDF = self.J(0, 0, X) * self.J(1, 1, X) - self.J(0, 1, X) * self.J(1, 0, X)
+            detDF = self.J(0, 0, X, tind=tind) * self.J(1, 1, X, tind=tind) - self.J(0, 1, X, tind=tind) * self.J(1, 0, X, tind=tind)
         elif dim == 3:
-            detDF = self.J(0, 0, X) * (self.J(1, 1, X) * self.J(2, 2, X) - self.J(1, 2, X) * self.J(2, 1, X)) \
-                  - self.J(0, 1, X) * (self.J(1, 0, X) * self.J(2, 2, X) - self.J(1, 2, X) * self.J(2, 0, X)) \
-                  + self.J(0, 2, X) * (self.J(1, 0, X) * self.J(2, 1, X) - self.J(1, 1, X) * self.J(2, 0, X))
+            detDF = self.J(0, 0, X, tind=tind) * (self.J(1, 1, X, tind=tind) * self.J(2, 2, X, tind=tind) - self.J(1, 2, X, tind=tind) * self.J(2, 1, X, tind=tind)) \
+                  - self.J(0, 1, X, tind=tind) * (self.J(1, 0, X, tind=tind) * self.J(2, 2, X, tind=tind) - self.J(1, 2, X, tind=tind) * self.J(2, 0, X, tind=tind)) \
+                  + self.J(0, 2, X, tind=tind) * (self.J(1, 0, X, tind=tind) * self.J(2, 1, X, tind=tind) - self.J(1, 1, X, tind=tind) * self.J(2, 0, X, tind=tind))
         else:
             raise Exception("Not implemented for the given dimension.")
 
@@ -126,26 +196,30 @@ class MappingIsoparametric(Mapping):
         detDF = self.detDF(X, tind)
 
         if dim == 2:
-            invDF = np.empty((2, 2) + self.J(0, 0, X).shape)
-            invDF[0, 0] =  self.J(1, 1, X)/detDF
-            invDF[0, 1] = -self.J(0, 1, X)/detDF
-            invDF[1, 0] = -self.J(1, 0, X)/detDF
-            invDF[1, 1] =  self.J(0, 0, X)/detDF
+            invDF = np.empty((2, 2) + self.J(0, 0, X, tind=tind).shape)
+            invDF[0, 0] =  self.J(1, 1, X, tind=tind)/detDF
+            invDF[0, 1] = -self.J(0, 1, X, tind=tind)/detDF
+            invDF[1, 0] = -self.J(1, 0, X, tind=tind)/detDF
+            invDF[1, 1] =  self.J(0, 0, X, tind=tind)/detDF
         elif dim == 3:
-            invDF = np.empty((3, 3) + self.J(0, 0, X).shape)
-            invDF[0, 0] = (-self.J(1, 2, X) * self.J(2, 1, X) + self.J(1, 1, X) * self.J(2, 2, X)) / detDF
-            invDF[1, 0] = ( self.J(1, 2, X) * self.J(2, 0, X) - self.J(1, 0, X) * self.J(2, 2, X)) / detDF
-            invDF[2, 0] = (-self.J(1, 1, X) * self.J(2, 0, X) + self.J(1, 0, X) * self.J(2, 1, X)) / detDF
-            invDF[0, 1] = ( self.J(0, 2, X) * self.J(2, 1, X) - self.J(0, 1, X) * self.J(2, 2, X)) / detDF
-            invDF[1, 1] = (-self.J(0, 2, X) * self.J(2, 0, X) + self.J(0, 0, X) * self.J(2, 2, X)) / detDF
-            invDF[2, 1] = ( self.J(0, 1, X) * self.J(2, 0, X) - self.J(0, 0, X) * self.J(2, 1, X)) / detDF
-            invDF[0, 2] = (-self.J(0, 2, X) * self.J(1, 1, X) + self.J(0, 1, X) * self.J(1, 2, X)) / detDF
-            invDF[1, 2] = ( self.J(0, 2, X) * self.J(1, 0, X) - self.J(0, 0, X) * self.J(1, 2, X)) / detDF
-            invDF[2, 2] = (-self.J(0, 1, X) * self.J(1, 0, X) + self.J(0, 0, X) * self.J(1, 1, X)) / detDF
+            invDF = np.empty((3, 3) + self.J(0, 0, X, tind=tind).shape)
+            invDF[0, 0] = (-self.J(1, 2, X, tind=tind) * self.J(2, 1, X, tind=tind) + self.J(1, 1, X, tind=tind) * self.J(2, 2, X, tind=tind)) / detDF
+            invDF[1, 0] = ( self.J(1, 2, X, tind=tind) * self.J(2, 0, X, tind=tind) - self.J(1, 0, X, tind=tind) * self.J(2, 2, X, tind=tind)) / detDF
+            invDF[2, 0] = (-self.J(1, 1, X, tind=tind) * self.J(2, 0, X, tind=tind) + self.J(1, 0, X, tind=tind) * self.J(2, 1, X, tind=tind)) / detDF
+            invDF[0, 1] = ( self.J(0, 2, X, tind=tind) * self.J(2, 1, X, tind=tind) - self.J(0, 1, X, tind=tind) * self.J(2, 2, X, tind=tind)) / detDF
+            invDF[1, 1] = (-self.J(0, 2, X, tind=tind) * self.J(2, 0, X, tind=tind) + self.J(0, 0, X, tind=tind) * self.J(2, 2, X, tind=tind)) / detDF
+            invDF[2, 1] = ( self.J(0, 1, X, tind=tind) * self.J(2, 0, X, tind=tind) - self.J(0, 0, X, tind=tind) * self.J(2, 1, X, tind=tind)) / detDF
+            invDF[0, 2] = (-self.J(0, 2, X, tind=tind) * self.J(1, 1, X, tind=tind) + self.J(0, 1, X, tind=tind) * self.J(1, 2, X, tind=tind)) / detDF
+            invDF[1, 2] = ( self.J(0, 2, X, tind=tind) * self.J(1, 0, X, tind=tind) - self.J(0, 0, X, tind=tind) * self.J(1, 2, X, tind=tind)) / detDF
+            invDF[2, 2] = (-self.J(0, 1, X, tind=tind) * self.J(1, 0, X, tind=tind) + self.J(0, 0, X, tind=tind) * self.J(1, 1, X, tind=tind)) / detDF
         else:
             raise Exception("Not implemented for the given dimension.")
 
         return invDF
+    
+    def normals(self, X, tind, find, t2f):
+        # TODO implement this
+        return 0
 
 
 class MappingAffine(Mapping):

@@ -1,10 +1,10 @@
+# -*- coding: utf-8 -*- 
+"""Check the convergence rates of the elements."""
+
 import unittest
 import numpy as np
 from skfem import *
 
-"""
-Check the convergence rates of the elements.
-"""
 
 class ConvergenceQ1(unittest.TestCase):
     rateL2 = 2.0
