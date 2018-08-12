@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
-"""The mappings define relationships between reference and global
-elements."""
+"""Mappings define relationships between reference and global elements."""
 
 import numpy as np
 
 
 class Mapping():
     def F(self, X, tind=None):
-        """Perform an isoparametric mapping from the reference element
+        """Perform mapping from the reference element
         to global elements.
 
         Parameters
