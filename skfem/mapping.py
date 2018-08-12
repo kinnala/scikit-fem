@@ -164,19 +164,17 @@ class MappingIsoparametric(Mapping):
             raise NotImplementedError("!")
 
     def invF(self, x, tind=None):
-        X = np.zeros(x.shape)
-        for itr in range(1): # TODO check for more than one iteration
+        X = np.zeros(x.shape) + 0.1
+        for itr in range(2):
             F = self.F(X, tind)
             invDF = self.invDF(X, tind)
             X = X + np.einsum('ijkl,jkl->ikl', invDF, x - F)
         return X
 
     def F(self, X, tind=None):
-        # TODO fix tind
         return np.array([self.map(i, X, tind) for i in range(X.shape[0])])
 
     def detDF(self, X, tind=None):
-        # TODO fix tind
         dim = X.shape[0]
 
         if dim == 2:
@@ -187,6 +185,9 @@ class MappingIsoparametric(Mapping):
                   + self.J(0, 2, X, tind=tind) * (self.J(1, 0, X, tind=tind) * self.J(2, 1, X, tind=tind) - self.J(1, 1, X, tind=tind) * self.J(2, 0, X, tind=tind))
         else:
             raise Exception("Not implemented for the given dimension.")
+
+        if np.sum(detDF==0)>0:
+            raise Exception("Zero Jacobian determinant")
 
         return detDF
 
