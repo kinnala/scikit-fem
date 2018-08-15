@@ -38,12 +38,8 @@ For more recent features, you can clone the project's Github repository:
 Examples
 ========
 
-.. include:: ../examples/ex01.py
-    :start-after: """
-    :end-before: """
-
+.. include:: ../examples/ex01.rst
 .. literalinclude:: ../examples/ex01.py
-    :end-before: """
 
 
 
