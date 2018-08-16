@@ -1,8 +1,10 @@
 Poisson equation
 ----------------
 
-The canonical model problem for second-order partial
-differential equations reads: find :math:`u : \Omega \rightarrow \mathbb{R}`
+In this example, we demonstrate the basic concepts
+and workflow of scikit-fem. This is done by solving
+the canonical model problem for second-order partial
+differential equations: find :math:`u : \Omega \rightarrow \mathbb{R}`
 that satisfies
 
 .. math::
@@ -16,10 +18,15 @@ problem and its variants have applications, e.g., in `electrostatics
 <https://en.wikipedia.org/wiki/Laplace%27s_equation#Electrostatics_2>`_,
 `acoustics <https://en.wikipedia.org/wiki/Helmholtz_equation>`_ and `fluid flow
 <https://en.wikipedia.org/wiki/Potential_flow#Analysis_for_two-dimensional_flow>`_.
+Finite element method can be used for solving the problem's weak formulation:
+find :math:`u \in H^1_0(\Omega)` that satisfies
 
-In this example, we solve the problem using piecewise-linear triangular finite
-elements. A square domain can be meshed using the default constructor of
-:class:`MeshTri`. In the following, the default mesh is further refined four
+.. math::
+    (\nabla u, \nabla v) = (f, v), \quad \forall v \in H^1_0(\Omega).
+
+We discretise this problem using piecewise-linear triangular finite elements.  A
+mesh for the unit square can be obtained using the default constructor of
+:class:`MeshTri`.  In the following, we further refine the default mesh four
 times:
 
 .. literalinclude:: ../examples/ex01.py
@@ -27,30 +34,44 @@ times:
 
 .. figure:: ../examples/ex01_mesh.png
 
-    The generated mesh of the unit square.
+    The resulting mesh of the unit square. Triangular meshes can be
+    visualised using :meth:`MeshTri.draw`.
 
-Next, we pre-evaluate the finite element basis at the global quadrature
-points. This is done by creating an object of the type :class:`InteriorBasis`
-whose constructor requires the mesh and an :class:`Element` object:
+After creating the mesh, we evaluate the finite element basis at the global
+quadrature points. This is done within an object of the type
+:class:`InteriorBasis` whose constructor requires the mesh and an
+:class:`Element` object:
 
 .. literalinclude:: ../examples/ex01.py
     :lines: 6-7
 
-The weak formulation corresponding to our problem reads:
-find :math:`u \in H^1_0(\Omega)` that satisfies
+The class :class:`ElementTriP1` is a child of :class:`Element` and it defines
+the local basis functions and transformation rules.
 
-.. math::
-    (\nabla u, \nabla v) = (f, v), \quad \forall v \in H^1_0(\Omega).
-
-The respective bilinear and linear forms can be defined with the help of the
-decorators called `@bilinear_form` and `@linear_form`. It is important to have
-the order of the form arguments correct.
+The bilinear and linear forms can be defined using the decorators
+:func:`bilinear_form` and :func:`linear_form`. It is important to have the order of the
+form arguments correct.
 
 .. literalinclude:: ../examples/ex01.py
     :lines: 9-15
 
-All assembly operations are performed by the function :meth:`asm`. It needs the
-form function handle and a pre-evaluated basis as its arguments.
+All assembly operations can now be performed with the function :func:`asm`
+which returns either SciPy sparse matrices or NumPy vectors depending on the
+input.
 
 .. literalinclude:: ../examples/ex01.py
     :lines: 17-18
+
+We are left with solving assembler linear system.  Due to the zero boundary
+condition, we do this only in the interior nodes of the mesh.
+
+.. literalinclude:: ../examples/ex01.py
+    :lines: 20-23
+
+The solution can now be visualised using :meth:`MeshTri.plot3`. 
+
+.. figure:: ../examples/ex01_solution.png
+
+    The visualised solution of example 1.
+
+The complete example reads as follows:

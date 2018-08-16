@@ -654,13 +654,11 @@ class MeshLine(Mesh):
     def __init__(self, p=None, t=None, validate=True):
         if p is None and t is None:
             p = np.array([[0, 1]])
-            t = np.array([[0], [1]])
-        elif p is not None and t is None:
-            t = np.array([np.arange(np.max(p.shape)-1), np.arange(np.max(p.shape)-1)+1])
         if len(p.shape)==1:
             p = np.array([p]) 
         self.p = p
-        self.t = t
+        self._build_mappings()
+
         if validate:
             self._validate()
         super(MeshLine, self).__init__()
@@ -669,6 +667,28 @@ class MeshLine(Mesh):
     def init_refdom(cls):
         """Initialize a mesh constisting of the reference interval [0,1]."""
         return cls()
+
+    def _build_mappings(self):
+        """Build t2f and f2t. Also sorts p and builds t."""
+        self.p = np.sort(self.p)
+        self.t = np.array([np.arange(np.max(self.p.shape)-1), np.arange(np.max(self.p.shape)-1)+1])
+
+        self.facets = np.array([np.arange(self.p.shape[1])])
+        self.t2f = self.t
+        # build f2t
+        e_tmp = np.hstack((self.t2f[0, :], self.t2f[1, :]))
+        t_tmp = np.tile(np.arange(self.t.shape[1]), (1, 2))[0]
+
+        e_first, ix_first = np.unique(e_tmp, return_index=True)
+        e_last, ix_last = np.unique(e_tmp[::-1], return_index=True)
+        ix_last = e_tmp.shape[0] - ix_last - 1
+
+        self.f2t = np.zeros((2, self.facets.shape[1]), dtype=np.int64)
+        self.f2t[0, e_first] = t_tmp[ix_first]
+        self.f2t[1, e_last] = t_tmp[ix_last]
+
+        # second row to zero if repeated (i.e., on boundary)
+        self.f2t[1, np.nonzero(self.f2t[0, :] == self.f2t[1, :])[0]] = -1
 
     def adaptive_refine(self, marked):
         """Perform an adaptive refine which splits each marked element into two."""
@@ -686,21 +706,29 @@ class MeshLine(Mesh):
         self.p = newp
         self.t = newt
 
+    def nodes_satisfying(self, test):
+        """Return nodes that satisfy some condition.
+
+        Parameters
+        ----------
+        test : lambda function (1 param)
+            Evaluates to 1 or True for nodes belonging
+            to the output set.
+
+        """
+        return np.nonzero(test(self.p[0, :]))[0]
 
     def _uniform_refine(self):
         """Perform a single mesh refine that halves 'h'."""
         # rename variables
-        t = self.t
         p = self.p
 
-        mid = range(self.t.shape[1]) + np.max(t) + 1
+        mid = range(self.t.shape[1]) + np.max(self.t) + 1
         # new vertices and elements
         newp = np.hstack((p, 0.5*(p[:, self.t[0, :]] + p[:, self.t[1, :]])))
-        newt = np.vstack((t[0, :], mid))
-        newt = np.hstack((newt, np.vstack((mid, t[1, :]))))
         # update fields
         self.p = newp
-        self.t = newt
+        self._build_mappings()
 
         # TODO implement prolongation
 
@@ -968,7 +996,10 @@ class MeshQuad(Mesh2D):
         used.
 
         """
-        m, z = self._splitquads(z)
+        if len(z) == self.t.shape[-1]:
+            m, z = self._splitquads(z)
+        else:
+            m = self._splitquads()
         return m.plot(z, smooth, ax=ax, zlim=zlim, edgecolors=edgecolors)
 
     def plot3(self, z, smooth=False, ax=None):
@@ -1100,21 +1131,6 @@ class MeshHex(Mesh3D):
         self.t2e = ixb.reshape((12, self.t.shape[1]))
 
         # define facets
-#        self.facets = np.sort(np.vstack((self.t[0, :],
-#                                         self.t[1, :],
-#                                         self.t[4, :],
-#                                         self.t[2, :])), axis=0)
-#        f = np.array([0, 3, 6, 2,
-#                      0, 1, 5, 3,
-#                      2, 6, 7, 4,
-#                      1, 5, 7, 4,
-#                      3, 5, 7, 6])
-#        for i in range(5):
-#            self.facets = np.hstack((self.facets, np.sort(np.vstack((self.t[f[4*i], :],
-#                                                                     self.t[f[4*i+1], :],
-#                                                                     self.t[f[4*i+2], :],
-#                                                                     self.t[f[4*i+3], :])), axis=0)))
-#
         self.facets = np.vstack((self.t[0, :],
                                  self.t[1, :],
                                  self.t[4, :],

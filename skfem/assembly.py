@@ -146,13 +146,17 @@ class GlobalBasis():
 
         """
         if test is None:
-            if self.mesh.dim() == 2:
+            if self.mesh.dim() == 1:
+                test = lambda x: 0*x + True
+            elif self.mesh.dim() == 2:
                 test = lambda x, y: 0*x + True
             elif self.mesh.dim() == 3:
                 test = lambda x, y, z: 0*x + True
 
         if bc is None:
-            if self.mesh.dim() == 2:
+            if self.mesh.dim() == 1:
+                bc = lambda x: 0*x
+            elif self.mesh.dim() == 2:
                 bc = lambda x, y: 0*x
             elif self.mesh.dim() == 3:
                 bc = lambda x, y, z: 0*x
@@ -354,7 +358,10 @@ class FacetBasis(GlobalBasis):
         return self.mapping.G(self.X, find=self.find)
 
     def mesh_parameters(self):
-        return np.abs(self.mapping.detDG(self.X, self.find)) ** (1.0 / (self.mesh.dim() - 1))
+        if self.mesh.dim() == 1:
+            return 0.0
+        else:
+            return np.abs(self.mapping.detDG(self.X, self.find)) ** (1.0 / (self.mesh.dim() - 1))
 
 
 class InteriorBasis(GlobalBasis):
@@ -594,14 +601,12 @@ class Dofnum(object):
 
     def __init__(self, mesh, element):
         # vertex dofs
-        self.n_dof = np.reshape(np.arange(element.nodal_dofs
-                                          * mesh.p.shape[1],
-                                          dtype=np.int64),
+        self.n_dof = np.reshape(np.arange(element.nodal_dofs * mesh.p.shape[1], dtype=np.int64),
                                 (element.nodal_dofs, mesh.p.shape[1]), order='F')
         offset = element.nodal_dofs*mesh.p.shape[1]
 
         # edge dofs
-        if hasattr(mesh, 'edges'): # 3D mesh
+        if mesh.dim() == 3: 
             self.e_dof = np.reshape(np.arange(element.edge_dofs
                                               * mesh.edges.shape[1],
                                               dtype=np.int64),
@@ -610,7 +615,7 @@ class Dofnum(object):
             offset = offset + element.edge_dofs*mesh.edges.shape[1]
 
         # facet dofs
-        if hasattr(mesh, 'facets'): # 2D or 3D mesh
+        if mesh.dim() >= 2: # 2D or 3D mesh
             self.f_dof = np.reshape(np.arange(element.facet_dofs
                                               * mesh.facets.shape[1],
                                               dtype=np.int64),
@@ -633,14 +638,14 @@ class Dofnum(object):
             self.t_dof = np.vstack((self.t_dof,
                                     self.n_dof[:, mesh.t[itr, :]]))
 
-        # edge dofs (if 3D)
-        if hasattr(mesh, 'edges'):
+        # edge dofs
+        if mesh.dim() == 3:
             for itr in range(mesh.t2e.shape[0]):
                 self.t_dof = np.vstack((self.t_dof,
                                         self.e_dof[:, mesh.t2e[itr, :]]))
 
-        # facet dofs (if 2D or 3D)
-        if hasattr(mesh, 'facets'):
+        # facet dofs
+        if mesh.dim() >= 2:
             for itr in range(mesh.t2f.shape[0]):
                 self.t_dof = np.vstack((self.t_dof,
                                         self.f_dof[:, mesh.t2f[itr, :]]))

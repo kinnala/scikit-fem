@@ -46,11 +46,11 @@ class ConvergenceQ1(unittest.TestCase):
             b = asm(load, ib)
 
             if m.dim() == 1: # TODO works only for elements with one DOF/node
-                D = [0, 1]
+                I = m.interior_nodes()
                 x = np.zeros(ib.dofnum.N)
             else:
                 x, D = ib.find_dofs()
-            I = ib.dofnum.complement_dofs(D)
+                I = ib.dofnum.complement_dofs(D)
 
             x[I] = solve(*condense(A, b, I=I))
 

@@ -284,7 +284,9 @@ class MappingAffine(Mapping):
                     self.B[i, j] = mesh.p[i, mesh.facets[j+1, :]] - mesh.p[i, mesh.facets[0, :]]
 
             # area scaling
-            if dim == 2:
+            if dim == 1:
+                self.detB = np.ones(nf)
+            elif dim == 2:
                 self.detB = np.sqrt(self.B[0, 0]**2 + self.B[1, 0]**2)
             elif dim == 3:
                 self.detB = np.sqrt((self.B[1, 0]*self.B[2, 1] - self.B[2, 0]*self.B[1, 1])**2 +
@@ -357,7 +359,10 @@ class MappingAffine(Mapping):
         return np.tile(detDG, (X.shape[1], 1)).T
 
     def normals(self, X, tind, find, t2f):
-        if self.dim == 2:
+        if self.dim == 1:
+            Nref = np.array([[-1.0],
+                             [ 1.0]])
+        elif self.dim == 2:
             Nref = np.array([[0.0, -1.0],
                              [1.0, 1.0],
                              [-1.0, 0.0]])

@@ -30,6 +30,8 @@ def get_quadrature(refdom, norder):
         | hex   | (-1,-1,-1),     | infty          |
         |       | (1,1,1), etc.   |                |
         +-------+-----------------+----------------+
+        | point | N.A.            | infty          |
+        +-------+-----------------+----------------+
 
     norder : int
         The polynomial order upto which the requested quadrature rule is
@@ -37,11 +39,10 @@ def get_quadrature(refdom, norder):
 
     Returns
     -------
-    np.array
+    ndarray
         A two-dimensional array of quadrature points. The size of the array
         is number-of-dimensions x number-of-quadrature points.
-
-    np.array
+    ndarray
         A one-dimensional array of quadrature weights.
 
     """
