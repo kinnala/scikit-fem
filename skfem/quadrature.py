@@ -30,6 +30,8 @@ def get_quadrature(refdom, norder):
         | hex   | (-1,-1,-1),     | infty          |
         |       | (1,1,1), etc.   |                |
         +-------+-----------------+----------------+
+        | point | N.A.            | infty          |
+        +-------+-----------------+----------------+
 
     norder : int
         The polynomial order upto which the requested quadrature rule is
@@ -37,11 +39,10 @@ def get_quadrature(refdom, norder):
 
     Returns
     -------
-    np.array
+    ndarray
         A two-dimensional array of quadrature points. The size of the array
         is number-of-dimensions x number-of-quadrature points.
-
-    np.array
+    ndarray
         A one-dimensional array of quadrature weights.
 
     """
@@ -51,6 +52,8 @@ def get_quadrature(refdom, norder):
         return get_quadrature_tet(norder)
     elif refdom is "line": # [0,1]
         return get_quadrature_line(norder)
+    elif refdom is "point": # 0
+        return np.zeros((1, 1)), np.ones(1)
     elif refdom is "quad": # (-1,-1) (1,-1) (1,1) (-1,1)
         X, W = get_quadrature_line(norder)
         # generate tensor product rule from 1D rule
