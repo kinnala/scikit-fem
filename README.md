@@ -2,6 +2,7 @@
 
 [![PyPI version](https://badge.fury.io/py/scikit-fem.svg)](https://badge.fury.io/py/scikit-fem)
 [![Build Status](https://travis-ci.com/kinnala/scikit-fem.svg?branch=master)](https://travis-ci.com/kinnala/scikit-fem)
+[![Documentation Status](https://readthedocs.org/projects/scikit-fem/badge/?version=latest)](https://scikit-fem.readthedocs.io/en/latest/?badge=latest)
 
 Easy to use finite element assemblers and the related tools.
 
