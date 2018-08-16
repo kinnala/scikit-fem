@@ -968,7 +968,10 @@ class MeshQuad(Mesh2D):
         used.
 
         """
-        m, z = self._splitquads(z)
+        if len(z) == self.t.shape[-1]:
+            m, z = self._splitquads(z)
+        else:
+            m = self._splitquads()
         return m.plot(z, smooth, ax=ax, zlim=zlim, edgecolors=edgecolors)
 
     def plot3(self, z, smooth=False, ax=None):
