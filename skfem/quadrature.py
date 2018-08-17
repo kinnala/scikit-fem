@@ -52,8 +52,8 @@ def get_quadrature(refdom, norder):
         return get_quadrature_tet(norder)
     elif refdom is "line": # [0,1]
         return get_quadrature_line(norder)
-    elif refdom is "point": # 0
-        return np.zeros((1, 1)), np.ones(1)
+    elif refdom is "point":
+        return get_quadrature_point(norder)
     elif refdom is "quad": # (-1,-1) (1,-1) (1,1) (-1,1)
         X, W = get_quadrature_line(norder)
         # generate tensor product rule from 1D rule
@@ -542,3 +542,8 @@ def get_quadrature_line(norder):
         norder = 2
     X, W = np.polynomial.legendre.leggauss(int(np.ceil((norder + 1.0)/2.0)))
     return np.array([0.5*X + 0.5]), W/2.0
+
+
+def get_quadrature_point(norder=0):
+    """Return the quadrature rule for the point []."""
+    return np.zeros((0, 1)), np.ones(1)
