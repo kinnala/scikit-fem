@@ -16,10 +16,10 @@ setup(
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Mathematics',
     ],
-    keywords='sample setuptools development',  # Optional
     packages=find_packages(exclude=['examples']),  # Required
     install_requires=['numpy', 'scipy', 'sympy', 'matplotlib'],  # Optional
     extras_require={
