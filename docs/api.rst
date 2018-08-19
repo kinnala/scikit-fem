@@ -16,8 +16,8 @@ MeshTri
 
 .. autoclass:: skfem.mesh.MeshTri
 
-Constructors
-^^^^^^^^^^^^
+Different constructors
+^^^^^^^^^^^^^^^^^^^^^^
 
 .. automethod:: skfem.mesh.MeshTri.__init__
 
@@ -31,8 +31,8 @@ Constructors
 
 .. automethod:: skfem.mesh.MeshTri.init_tensor
 
-Visualisation
-^^^^^^^^^^^^^
+Methods for visualisation
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automethod:: skfem.mesh.MeshTri.draw
 

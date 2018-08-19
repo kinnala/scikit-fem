@@ -3,11 +3,11 @@
 
 See the following implementations:
 
-    - :class:`~skfem.mesh.MeshTri`, triangular mesh
-    - :class:`~skfem.mesh.MeshTet`, tetrahedral mesh
-    - :class:`~skfem.mesh.MeshQuad`, quadrilateral mesh
-    - :class:`~skfem.mesh.MeshHex`, hexahedral mesh
-    - :class:`~skfem.mesh.MeshLine`, one-dimensional mesh
+- :class:`~skfem.mesh.MeshTri`, triangular mesh
+- :class:`~skfem.mesh.MeshTet`, tetrahedral mesh
+- :class:`~skfem.mesh.MeshQuad`, quadrilateral mesh
+- :class:`~skfem.mesh.MeshHex`, hexahedral mesh
+- :class:`~skfem.mesh.MeshLine`, one-dimensional mesh
 
 """
 
@@ -20,8 +20,9 @@ from scipy.sparse import coo_matrix
 import skfem.mapping
 import skfem.element
 
-from typing import Optional, Union, Tuple
+from typing import Optional, Union, Tuple, Any
 from numpy import ndarray
+from matplotlib.axes import Axes
 
 
 class Mesh():
@@ -29,10 +30,11 @@ class Mesh():
     
     This is an abstract superclass. See the following implementations:
 
-        * MeshTri, triangular mesh
-        * MeshTet, tetrahedral mesh
-        * MeshQuad, quadrilateral mesh
-        * MeshHex, hexahedral mesh
+    - :class:`~skfem.mesh.MeshTri`, triangular mesh
+    - :class:`~skfem.mesh.MeshTet`, tetrahedral mesh
+    - :class:`~skfem.mesh.MeshQuad`, quadrilateral mesh
+    - :class:`~skfem.mesh.MeshHex`, hexahedral mesh
+    - :class:`~skfem.mesh.MeshLine`, one-dimensional mesh
 
     """
 
@@ -422,19 +424,28 @@ class Mesh2D(Mesh):
         """Return an array of boundary facet indices."""
         return np.nonzero(self.f2t[1, :] == -1)[0]
 
-    def draw(self, ax=None, node_numbering=False, facet_numbering=False, element_numbering=False):
-        """Draw the mesh.
+    def draw(self,
+             ax: Optional[Axes] = None,
+             node_numbering: Optional[bool] = False,
+             facet_numbering: Optional[bool] = False,
+             element_numbering: Optional[bool] = False) -> Axes:
+        """Visualise a mesh by drawing the edges.
 
         Parameters
         ----------
-        ax : (optional, default=None) matplotlib axis
-            Use a predefined axis for plotting.
-        node_numbering : (optional, default=False)
-            Draw node numbering.
-        facet_numbering: (optional, default=False)
-            Draw facet numbering.
-        element_numbering : (optional, default=False)
-            Draw element numbering.
+        ax
+            A preinitialised Matplotlib axes for plotting.
+        node_numbering
+            If true, draw node numbering.
+        facet_numbering
+            If true, draw facet numbering.
+        element_numbering
+            If true, draw element numbering.
+
+        Returns
+        -------
+        Axes
+            The Matplotlib axes onto which the mesh was plotted.
 
         """
         if ax is None:
@@ -672,7 +683,7 @@ class MeshLine(Mesh):
 
     @classmethod
     def init_refdom(cls):
-        """Initialize a mesh constisting of the reference interval [0,1]."""
+        """Initialise a mesh constisting of the reference interval [0,1]."""
         return cls()
 
     def _build_mappings(self):
@@ -813,7 +824,7 @@ class MeshQuad(Mesh2D):
     t2f = np.array([])
 
     def __init__(self, p=None, t=None, validate=True):
-        """Initialize a quadrilateral mesh.
+        """Initialise a quadrilateral mesh.
 
         Parameters
         ----------
@@ -838,7 +849,7 @@ class MeshQuad(Mesh2D):
 
     @classmethod
     def init_tensor(cls, x, y):
-        """Initialize a tensor product mesh.
+        """Initialise a tensor product mesh.
 
         Parameters
         ----------
@@ -864,7 +875,7 @@ class MeshQuad(Mesh2D):
 
     @classmethod
     def init_refdom(cls):
-        """Initialize a mesh that includes only the reference quad.
+        """Initialise a mesh that includes only the reference quad.
         
         The mesh topology is as follows:
          (-1,1) *-------------* (1,1)
@@ -996,11 +1007,11 @@ class MeshQuad(Mesh2D):
         return MeshTri(np.hstack((self.p, np.vstack((mx, my)))), newt, validate=False)
 
     def plot(self, z, smooth=False, edgecolors=None, ax=None, zlim=None):
-        """Visualize nodal or elemental function (2d).
+        """Visualise piecewise-linear or piecewise-constant function.
 
-        The quadrilateral mesh is split into triangular mesh (MeshTri)
-        and the respective plotting function for the triangular mesh is
-        used.
+        The quadrilaterals are split into two triangles
+        (:class:`skfem.mesh.MeshTri`) and the respective plotting function for
+        the triangular mesh is used.
 
         """
         if len(z) == self.t.shape[-1]:
@@ -1010,7 +1021,7 @@ class MeshQuad(Mesh2D):
         return m.plot(z, smooth, ax=ax, zlim=zlim, edgecolors=edgecolors)
 
     def plot3(self, z, smooth=False, ax=None):
-        """Visualize nodal function (3d i.e. three axes).
+        """Visualise nodal function (3d i.e. three axes).
 
         The quadrilateral mesh is split into triangular mesh (MeshTri)
         and the respective plotting function for the triangular mesh is
@@ -1082,7 +1093,7 @@ class MeshHex(Mesh3D):
 
     @classmethod
     def init_tensor(cls, x, y, z):
-        """Initialize a tensor product mesh.
+        """Initialise a tensor product mesh.
 
         Parameters
         ----------
@@ -1376,7 +1387,7 @@ class MeshTet(Mesh3D):
 
     @classmethod
     def init_tensor(cls, x, y, z):
-        """Initialize a tensor product mesh.
+        """Initialise a tensor product mesh.
 
         Parameters
         ----------
@@ -1747,6 +1758,15 @@ class MeshTet(Mesh3D):
 
 class MeshTri(Mesh2D):
     """A mesh consisting of triangular elements.
+
+    The different constructors are:
+
+        - :meth:`~skfem.mesh.MeshTri.__init__`
+        - :meth:`~skfem.mesh.MeshTri.load` (requires meshio)
+        - :meth:`~skfem.mesh.MeshTri.init_symmetric`
+        - :meth:`~skfem.mesh.MeshTri.init_sqsymmetric`
+        - :meth:`~skfem.mesh.MeshTri.init_refdom`
+        - :meth:`~skfem.mesh.MeshTri.init_tensor`
     
     Attributes
     ----------
@@ -1766,20 +1786,11 @@ class MeshTri(Mesh2D):
 
     Examples
     --------
-    Initialize a symmetric mesh of the unit square.
+    Initialise a symmetric mesh of the unit square.
 
     >>> m = MeshTri.init_sqsymmetric()
     >>> m.t.shape
     (3, 8)
-
-    The different constructors are:
-
-        - :meth:`skfem.mesh.MeshTri.__init__`
-        - :meth:`skfem.mesh.MeshTri.load` (requires meshio)
-        - :meth:`skfem.mesh.MeshTri.init_symmetric`
-        - :meth:`skfem.mesh.MeshTri.init_sqsymmetric`
-        - :meth:`skfem.mesh.MeshTri.init_refdom`
-        - :meth:`skfem.mesh.MeshTri.init_tensor`
 
     Facets (edges) and mappings from triangles to facets and vice versa are
     automatically constructed. In the following example we have 5 facets
@@ -1823,7 +1834,7 @@ class MeshTri(Mesh2D):
                  t: Optional[ndarray] = None,
                  validate: Optional[bool] = True,
                  sort_t: Optional[bool] = True):
-        """Initialize a triangular mesh.
+        """Initialise a triangular mesh.
 
         If no arguments are given, initialises a mesh with the following
         topology::
@@ -1841,10 +1852,10 @@ class MeshTri(Mesh2D):
         Parameters
         ----------
         p
-            An array of size 2 x Nvertices containing the points of the mesh.
+            An array containing the points of the mesh (2 x Nvertices).
         t
-            An array of size 3 x Nelements containing the element connectivity,
-            i.e. indices to p.
+            An array containing the element connectivity (3 x Nelems), i.e.
+            indices to p.
         validate
             If true, run mesh validity checks.
         sort_t
@@ -2040,8 +2051,13 @@ class MeshTri(Mesh2D):
             plt.plot(self.p[0,self.t[[0,2],itr]], self.p[1,self.t[[0,2],itr]], 'k-')
         return fig
 
-    def plot(self, z, smooth=False, ax=None, zlim=None, edgecolors=None):
-        """Visualize nodal or elemental function (2d)."""
+    def plot(self,
+             z: ndarray,
+             smooth: Optional[bool] = False,
+             ax: Optional[Axes] = None,
+             zlim: Optional[Tuple[float, float]] = None,
+             edgecolors: Optional[str] = None) -> Axes:
+        """Visualise piecewise-linear or piecewise-constant function."""
         if ax is None:
             fig = plt.figure()
             ax = fig.add_subplot(111)
