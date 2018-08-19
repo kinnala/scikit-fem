@@ -12,12 +12,12 @@ A library user is mainly interested in the following:
 
 """
 
-from typing import NamedTuple, Optional
-
 import numpy as np
 from scipy.sparse import coo_matrix
 from skfem.quadrature import get_quadrature
 from inspect import signature
+
+from typing import NamedTuple, Optional
 
 
 class GlobalBasis():

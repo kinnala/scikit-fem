@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
-"""Mesh module contains different types of finite element meshes.
+"""This module contains different types of finite element meshes.
 
 See the following implementations:
 
-    * MeshTri, triangular mesh
-    * MeshTet, tetrahedral mesh
-    * MeshQuad, quadrilateral mesh
-    * MeshHex, hexahedral mesh
+    - :class:`skfem.mesh.MeshTri`, triangular mesh
+    - :class:`skfem.mesh.MeshTet`, tetrahedral mesh
+    - :class:`skfem.mesh.MeshQuad`, quadrilateral mesh
+    - :class:`skfem.mesh.MeshHex`, hexahedral mesh
+    - :class:`skfem.mesh.MeshLine`, one-dimensional mesh
 
 """
+
 import matplotlib.pyplot as plt
 import matplotlib.tri as mtri
 import numpy as np
@@ -17,6 +19,9 @@ from scipy.sparse import coo_matrix
 
 import skfem.mapping
 import skfem.element
+
+from typing import Optional, Union, Tuple
+from numpy import ndarray
 
 
 class Mesh():
@@ -207,13 +212,15 @@ class Mesh():
         meshio.write(filename, mesh)
 
     @classmethod
-    def load(cls, filename):
-        """Load a mesh from file using meshio.
+    def load(cls, filename: str):
+        """Load an external mesh from file using `meshio
+        <https://github.com/nschloe/meshio>`_.
         
         Parameters
         ----------
-        filename : string
-            The filename for the mesh.
+        filename
+            The filename of the mesh.
+
         """
         import meshio
         mesh = meshio.read(filename)
@@ -1743,22 +1750,22 @@ class MeshTri(Mesh2D):
     
     Attributes
     ----------
-    p : numpy array of size 2 x Nvertices
-        The vertices of the mesh
-    t : numpy array of size 3 x Nelements
-        The element connectivity
-    facets : numpy array of size 2 x Nfacets
-        Each column contains a pair of indices to p.
-    f2t : numpy array of size 2 x Nfacets
-        Each column contains a pair of indices to t
-        or -1 on the second row if the facet is on
-        the boundary.
-    t2f : numpy array of size 3 x Nelements
+    p
+        An array containing the vertices of the mesh (2 x Nvertices).
+    t
+        An array containing the element connectivity (3 x Nelems).
+    facets
+        An array containing the facet vertices (2 x Nfacets).
+    f2t
+        An array containing the triangles next to each facet (2 x Nfacets).
+        Each column contains two indices to t.  If the second row is zero then
+        the facet is on the boundary.
+    t2f
+        An array containing the facets belonging to each triangle (3 x Nelems).
         Each column contains three indices to facets.
 
     Examples
     --------
-
     Initialize a symmetric mesh of the unit square.
 
     >>> m = MeshTri.init_sqsymmetric()
@@ -1766,10 +1773,13 @@ class MeshTri(Mesh2D):
     (3, 8)
 
     The different constructors are:
-        * load (requires meshio)
-        * init_symmetric
-        * init_sqsymmetric
-        * init_refdom
+
+        - :meth:`skfem.mesh.MeshTri.__init__`
+        - :meth:`skfem.mesh.MeshTri.load` (requires meshio)
+        - :meth:`skfem.mesh.MeshTri.init_symmetric`
+        - :meth:`skfem.mesh.MeshTri.init_sqsymmetric`
+        - :meth:`skfem.mesh.MeshTri.init_refdom`
+        - :meth:`skfem.mesh.MeshTri.init_tensor`
 
     Facets (edges) and mappings from triangles to facets and vice versa are
     automatically constructed. In the following example we have 5 facets
@@ -1808,19 +1818,38 @@ class MeshTri(Mesh2D):
     f2t = np.array([])
     t2f = np.array([])
 
-    def __init__(self, p=None, t=None, validate=True, sort_t=True):
+    def __init__(self,
+                 p: Optional[ndarray] = None,
+                 t: Optional[ndarray] = None,
+                 validate: Optional[bool] = True,
+                 sort_t: Optional[bool] = True):
         """Initialize a triangular mesh.
+
+        If no arguments are given, initialises a mesh with the following
+        topology::
+
+            *-------------*
+            |\            |
+            |  \          |
+            |    \        |
+            |      \      |
+            |        \    |
+            |          \  |
+            |            \|
+            *-------------*
 
         Parameters
         ----------
-        p : (optional) numpy array of size 2 x Nvertices
-            The points of the mesh.
-        t : (optional) numpy array of size 3 x Nelements
-            The element connectivity, i.e. indices to p.
-        validate : (optional, default=True) bool
-            Whether to run mesh validity checks or not.
-        sort_t : (optional, default=True) bool
-            Sort the element connectivity matrix before building mappings.
+        p
+            An array of size 2 x Nvertices containing the points of the mesh.
+        t
+            An array of size 3 x Nelements containing the element connectivity,
+            i.e. indices to p.
+        validate
+            If true, run mesh validity checks.
+        sort_t
+            If true, sort the element connectivity matrix before building
+            mappings.
 
         """
         if p is None and t is None:
@@ -1836,33 +1865,34 @@ class MeshTri(Mesh2D):
         super(MeshTri, self).__init__()
 
     @classmethod
-    def init_tensor(cls, x, y):
-        """Initialize a tensor product mesh.
+    def init_tensor(cls, x: ndarray, y: ndarray):
+        """Initialise a tensor product mesh.
 
         Parameters
         ----------
-        x : numpy array (1d)
-            The nodal coordinates in dimension x
-        y : numpy array (1d)
-            The nodal coordinates in dimension y
+        x
+            The nodal coordinates in dimension x.
+        y
+            The nodal coordinates in dimension y.
 
         """
         return MeshQuad.init_tensor(x, y)._splitquads()
 
     @classmethod
     def init_symmetric(cls):
-        """Initialize a symmetric mesh of the unit square.
+        """Initialise a symmetric mesh of the unit square.
         
-        The mesh topology is as follows:
-        *------------*
-        |\          /|
-        |  \      /  |
-        |    \  /    |
-        |     *      |
-        |    /  \    |
-        |  /      \  |
-        |/          \|
-        *------------*
+        The mesh topology is as follows::
+
+            *------------*
+            |\          /|
+            |  \      /  |
+            |    \  /    |
+            |     *      |
+            |    /  \    |
+            |  /      \  |
+            |/          \|
+            *------------*
 
         """
         p = np.array([[0, 1, 1, 0, 0.5],
@@ -1875,18 +1905,19 @@ class MeshTri(Mesh2D):
 
     @classmethod
     def init_sqsymmetric(cls):
-        """Initialize a symmetric mesh of the unit square.
+        """Initialise a symmetric mesh of the unit square.
         
-        The mesh topology is as follows:
-        *------------*
-        |\    |     /|
-        |  \  |   /  |
-        |    \| /    |
-        |-----*------|
-        |    /| \    |
-        |  /  |   \  |
-        |/    |     \|
-        *------------*
+        The mesh topology is as follows::
+
+            *------------*
+            |\    |     /|
+            |  \  |   /  |
+            |    \| /    |
+            |-----*------|
+            |    /| \    |
+            |  /  |   \  |
+            |/    |     \|
+            *------------*
 
         """
         p = np.array([[0, 0.5, 1,   0, 0.5,   1, 0, 0.5, 1],
@@ -1903,18 +1934,19 @@ class MeshTri(Mesh2D):
 
     @classmethod
     def init_refdom(cls):
-        """Initialize a mesh that includes only the reference triangle.
+        """Initialise a mesh that includes only the reference triangle.
         
-        The mesh topology is as follows:
-        *
-        |\           
-        |  \         
-        |    \       
-        |      \      
-        |        \    
-        |          \  
-        |            \ 
-        *-------------*
+        The mesh topology is as follows::
+
+            *
+            |\           
+            |  \         
+            |    \       
+            |      \      
+            |        \    
+            |          \  
+            |            \ 
+            *-------------*
 
         """
         p = np.array([[0., 1., 0.],

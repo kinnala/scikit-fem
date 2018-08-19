@@ -1,14 +1,42 @@
 # -*- coding: utf-8 -*-
-"""Utility functions."""
+"""This module contains utility functions such as convenient access to SciPy
+linear solvers."""
+
 import numpy as np
 import scipy.sparse as sp
 import scipy.sparse.linalg as spl
 import scipy.sparse.csgraph as spg
 import warnings
 
+from typing import Optional, Union, Tuple, Callable
+from numpy import ndarray
+from scipy.sparse import spmatrix
+LinearSolver = Callable[[spmatrix, ndarray], ndarray]
 
-def condense(A, b=None, x=None, I=None, D=None):
-    """Eliminate DOFs from a linear system."""
+def condense(A: spmatrix,
+             b: Optional[ndarray] = None,
+             x: Optional[ndarray] = None,
+             I: Optional[ndarray] = None,
+             D: Optional[ndarray] = None) -> Union[spmatrix, Tuple[spmatrix, ndarray]]:
+    """Eliminate DOF's from a linear system.
+    
+    Parameters
+    ----------
+    A
+        The system matrix
+    b
+        The right hand side vector
+    I
+        The set of DOF numbers to keep
+    D
+        The set of DOF numbers to dismiss
+        
+    Returns
+    -------
+    ndarray
+        The condensed linear system.
+        
+    """
     if x is None:
         x = np.zeros(A.shape[0])
     if I is None and D is None:
@@ -25,24 +53,25 @@ def condense(A, b=None, x=None, I=None, D=None):
         return A[I].T[I].T, b[I] - A[I].T[D].T.dot(x[D])
 
 
-def rcm(A, b):
+def rcm(A: spmatrix,
+        b: ndarray) -> Tuple[spmatrix, ndarray, ndarray]:
     p = spg.reverse_cuthill_mckee(A, symmetric_mode=False)
     return A[p].T[p].T, b[p], p
 
 
-def solver_direct_scipy():
+def solver_direct_scipy() -> LinearSolver:
     def solver(A, b):
         return spl.spsolve(A, b)
     return solver
 
 
-def solver_direct_umfpack():
+def solver_direct_umfpack() -> LinearSolver:
     def solver(A, b):
         return spl.spsolve(A, b, use_umfpack=True)
     return solver
 
 
-def solver_direct_cholmod():
+def solver_direct_cholmod() -> LinearSolver:
     """Cholmod-based direct solver for symmetric systems."""
     def solver(A, b):
         from sksparse.cholmod import cholesky
@@ -51,7 +80,9 @@ def solver_direct_cholmod():
     return solver
 
 
-def build_pc_ilu(A, drop_tol=1e-4, fill_factor=20):
+def build_pc_ilu(A: spmatrix,
+                 drop_tol: Optional[float] = 1e-4,
+                 fill_factor: Optional[float] = 20) -> spl.LinearOperator:
     """Incomplete LU preconditioner."""
     P = spl.spilu(A.tocsc(), drop_tol=drop_tol, fill_factor=fill_factor)
     P_x = lambda x: P.solve(x)
@@ -59,27 +90,37 @@ def build_pc_ilu(A, drop_tol=1e-4, fill_factor=20):
     return M
 
 
-def build_pc_diag(A):
+def build_pc_diag(A: spmatrix) -> spmatrix:
     """Diagonal preconditioner."""
     return sp.spdiags(1.0/A.diagonal(), 0, A.shape[0], A.shape[0])
 
 
-def solver_iter_pcg(pc=None, guess=None, maxiter=100, tol=1e-8, verbose=False):
+def solver_iter_pcg(pc: Optional[spmatrix] = None,
+                    guess: Optional[ndarray] = None,
+                    maxiter: Optional[int] = 100,
+                    tol: Optional[float] = 1e-8,
+                    verbose: Optional[bool] = False) -> LinearSolver:
     """Conjugate gradient solver.
     
     Parameters
     ----------
-    pc : (optional) sparse matrix, LinearOperator
-        A preconditioner for the conjugate gradient algorithm.
-        By default, a diagonal preconditioner is built using
-        skfem.utils.build_pc_diag. User can supply a fixed
-        preconditioner using this parameter.
-    guess : (optional) numpy array
-        An initial guess. By default, zero is used as an initial
-        guess.
-    maxiter : (optional, default=100) int
-    tol : (optional, default=1e-8) float
-    verbose : (optional, default=False) bool
+    pc
+        A preconditioner for the conjugate gradient algorithm.  By default, a
+        diagonal preconditioner is built using :func:`skfem.utils.build_pc_diag`.
+    guess
+        An initial guess. By default, a zero vector is used.
+    maxiter
+        Maximum number of iterations.
+    tol
+        Tolerance for convergence.
+    verbose
+        If True, print the norm of the iterate.
+
+    Returns
+    -------
+    lambda
+        A solver function that can be passed to :func:`solve`.
+
     """
     def callback(x):
         if verbose:
@@ -109,19 +150,29 @@ def solver_iter_pcg(pc=None, guess=None, maxiter=100, tol=1e-8, verbose=False):
     return solver
 
 
-def solve(A, b, solver=None):
+def solve(A: spmatrix,
+          b: ndarray,
+          solver: Optional[LinearSolver] = None) -> ndarray:
     """Solve a linear system.
 
     Parameters
     ----------
-    A : sparse matrix
-    b : numpy array
-    solver : (optional) function
+    A
+        The system matrix
+    b
+        The right hand side vector
+    solver
         Choose one of the following solvers:
-        * skfem.utils.solver_direct_scipy (default)
-        * skfem.utils.solver_direct_umfpack
-        * skfem.utils.solver_direct_cholmod
-        * skfem.utils.solver_iter_pcg
+
+            - :func:`skfem.utils.solver_direct_scipy` (default)
+            - :func:`skfem.utils.solver_direct_umfpack`
+            - :func:`skfem.utils.solver_direct_cholmod`
+            - :func:`skfem.utils.solver_iter_pcg`
+
+    Returns
+    -------
+    ndarray
+        Solution vector to the linear system Ax = b.
 
     """
     if solver is None:
@@ -138,8 +189,8 @@ def adaptive_theta(est, theta=0.5, max=None):
 
 
 def derivative(x, basis1, basis0, i=0):
-    """Calculate the i'th partial derivative by projecting from basis1 to basis0."""
-    from skfem.assembly import asm
+    """Calculate the i'th partial derivative through projection."""
+    from skfem.assembly import asm, bilinear_form
 
     @bilinear_form
     def deriv(u, du, v, dv, w):

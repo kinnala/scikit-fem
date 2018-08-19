@@ -1,17 +1,14 @@
-Introduction
-============
+The documentation of scikit-fem
+===============================
 
-`scikit-fem <https://github.com/kinnala/scikit-fem>`_ is a lightweight Python
+`scikit-fem <https://github.com/kinnala/scikit-fem>`_ is a lightweight Python 3.6
 library for performing `finite element assembly
 <https://en.wikipedia.org/wiki/Finite_element_method>`_. Its main purpose is
 the transformation of bilinear forms into sparse matrices and linear forms into
-vectors.
+vectors.  The library supports triangular, quadrilateral, tetrahedral and
+hexahedral meshes as well as one-dimensional problems.
 
-Features
-========
-
-The library supports triangular, quadrilateral, tetrahedral and
-hexahedral meshes as well as one-dimensional problems. Moreover, it supports
+Moreover, the library supports
 the implementation of various different :math:`h`-type finite element methods,
 and has built-in elements for the usual :math:`H^1`-, :math:`H^2`-,
 :math:`H(\text{div})`- and :math:`H(\text{curl})`-conforming problems. A major
@@ -19,36 +16,15 @@ portion of the features are available for users that have only SciPy (and its
 dependencies) installed. The library contains no compiled code and is licensed
 with the permissive 3-clause BSD license.
 
+This document contains the efforts to improve the user documentation of the
+project. Currently, the main learning resource consists of the extended
+examples that are continuously improved. In case you have any further
+questions, do not hesitate to drop in and say hello at our `Gitter chat
+<https://gitter.im/scikit-fem>`_.
 
-Installation
-============
+.. toctree::
+    :maxdepth: 2
 
-The latest release can be installed from PyPI:
-
-.. code-block:: bash
-
-    pip install scikit-fem
-
-For more recent features, you can clone the project's Github repository:
-
-.. code-block:: bash
-
-    git clone https://github.com/kinnala/scikit-fem
-
-Examples
-========
-
-This section contains documented examples. More examples can be found within
-the `source code distribution
-<https://github.com/kinnala/scikit-fem/tree/master/examples>`_.
-
-.. include:: ../examples/ex01.rst
-.. literalinclude:: ../examples/ex01.py
-    :linenos:
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+    gettingstarted
+    examples
+    api

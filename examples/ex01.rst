@@ -26,7 +26,7 @@ find :math:`u \in H^1_0(\Omega)` that satisfies
 
 We discretise this problem using piecewise-linear triangular finite elements.  A
 mesh for the unit square can be obtained using the default constructor of
-:class:`MeshTri`.  In the following, we further refine the default mesh four
+:class:`skfem.mesh.MeshTri`.  In the following, we further refine the default mesh four
 times:
 
 .. literalinclude:: ../examples/ex01.py
@@ -39,23 +39,23 @@ times:
 
 After creating the mesh, we evaluate the finite element basis at the global
 quadrature points. This is done within an object of the type
-:class:`InteriorBasis` whose constructor requires the mesh and an
-:class:`Element` object:
+:class:`skfem.assembly.InteriorBasis` whose constructor requires the mesh and an
+:class:`skfem.element.Element` object:
 
 .. literalinclude:: ../examples/ex01.py
     :lines: 6-7
 
-The class :class:`ElementTriP1` is a child of :class:`Element` and it defines
+The class :class:`skfem.element.ElementTriP1` is a child of :class:`skfem.element.Element` and it defines
 the local basis functions and transformation rules.
 
 The bilinear and linear forms can be defined using the decorators
-:func:`bilinear_form` and :func:`linear_form`. It is important to have the order of the
+:func:`skfem.assembly.bilinear_form` and :func:`skfem.assembly.linear_form`. It is important to have the order of the
 form arguments correct.
 
 .. literalinclude:: ../examples/ex01.py
     :lines: 9-15
 
-All assembly operations can now be performed with the function :func:`asm`
+All assembly operations can now be performed with the function :func:`skfem.assembly.asm`
 which returns either SciPy sparse matrices or NumPy vectors depending on the
 input.
 
@@ -68,7 +68,7 @@ condition, we do this only in the interior nodes of the mesh.
 .. literalinclude:: ../examples/ex01.py
     :lines: 20-23
 
-The solution can now be visualised using :meth:`MeshTri.plot3`. 
+The solution can now be visualised using :meth:`skfem.mesh.MeshTri.plot3`. 
 
 .. figure:: ../examples/ex01_solution.png
 

@@ -1,49 +1,49 @@
 # -*- coding: utf-8 -*-
 """Tabulated and generated quadrature points for various reference domains."""
+
 import numpy as np
 
+from typing import Tuple
 
-def get_quadrature(refdom, norder):
-    """Return a nth order accurate quadrature rule for
-    different reference domains.
+
+def get_quadrature(refdom: str, norder: int) -> Tuple[np.ndarray, np.ndarray]:
+    """Return a nth order accurate quadrature rule for different reference
+    domains.
     
     Parameters
     ----------
-    refdom : string
-        The name of the reference domain. Valid reference domains
-        can be found in the following table.
-        
+    refdom
+        The name of the reference domain. Valid reference domains can be found
+        in the following table.
+    
         +-------+-----------------+----------------+
         | Name  | Corner points   | Maximum order  |
+        +-------+-----------------+----------------+
+        | point | N.A.            | infty          |
+        +-------+-----------------+----------------+
+        | line  | 0, 1            | infty          |
         +-------+-----------------+----------------+
         | tri   | (0,0) (0,1)     | 19             |
         |       | (1,0)           |                |
         +-------+-----------------+----------------+
-        | tet   | (0,0,0) (0,0,1) | 4              |
-        |       | (0,1,0) (1,0,0) |                |
-        +-------+-----------------+----------------+
-        | line  | 0, 1            | infty          |
-        +-------+-----------------+----------------+
         | quad  | (-1,-1) (1,-1)  | infty          |
         |       | (1,1) (-1,1)    |                |
+        +-------+-----------------+----------------+
+        | tet   | (0,0,0) (0,0,1) | 4              |
+        |       | (0,1,0) (1,0,0) |                |
         +-------+-----------------+----------------+
         | hex   | (-1,-1,-1),     | infty          |
         |       | (1,1,1), etc.   |                |
         +-------+-----------------+----------------+
-        | point | N.A.            | infty          |
-        +-------+-----------------+----------------+
 
-    norder : int
-        The polynomial order upto which the requested quadrature rule is
-        accurate.
+        norder
+            The polynomial order upto which the requested quadrature rule is
+            accurate.
 
     Returns
     -------
-    ndarray
-        A two-dimensional array of quadrature points. The size of the array
-        is number-of-dimensions x number-of-quadrature points.
-    ndarray
-        A one-dimensional array of quadrature weights.
+        An array of quadrature points (Ndim x Nqp) and an array of quadrature
+        weights (Nqp).
 
     """
     if refdom is "tri":
@@ -58,17 +58,20 @@ def get_quadrature(refdom, norder):
         X, W = get_quadrature_line(norder)
         # generate tensor product rule from 1D rule
         A, B = np.meshgrid(X, X)
-        Y = 2.0*np.vstack((A.flatten(order='F'), B.flatten(order='F'))) - 1.0
+        Y = 2.0*np.vstack((A.flatten(order='F'),
+                           B.flatten(order='F'))) - 1.0
         # transform weights
         A, B = np.meshgrid(2*W, 2*W)
-        Z = A*B
+        Z = A*B 
         W = Z.flatten(order='F')
         return Y, W
     elif refdom is "hex": # (-1,-1,-1), (1,1,1), etc.
         X, W = get_quadrature_line(norder)
         # generate tensor product rule from 1D rule
         A, B, C = np.meshgrid(X, X, X)
-        Y = 2.0*np.vstack((A.flatten(order='F'), B.flatten(order='F'), C.flatten(order='F'))) - 1.0
+        Y = 2.0*np.vstack((A.flatten(order='F'),
+                           B.flatten(order='F'),
+                           C.flatten(order='F'))) - 1.0
         # transform weights
         A, B, C = np.meshgrid(2*W, 2*W, 2*W)
         Z = A*B*C
@@ -77,7 +80,8 @@ def get_quadrature(refdom, norder):
     else:
         raise NotImplementedError("The given mesh type is not supported!")
 
-def get_quadrature_tet(norder):
+
+def get_quadrature_tet(norder: int) -> Tuple[np.ndarray, np.ndarray]:
     """Return a nth order accurate quadrature rule for the reference
     tetrahedron (0,0,0) (0,0,1) (0,1,0) (1,0,0)."""
     if norder <= 1:
@@ -88,10 +92,9 @@ def get_quadrature_tet(norder):
                           [0.1381966011250105, 0.1381966011250105, 0.1381966011250105, 0.5854101966249685], \
                           [0.1381966011250105, 0.1381966011250105, 0.5854101966249685, 0.1381966011250105]]), \
                 np.array([0.2500000000000000, 0.2500000000000000, 0.2500000000000000, 0.2500000000000000]) / 6.),
-            3: (np.array(
-                [[0.2500000000000000, 0.5000000000000000, 0.1666666666666667, 0.1666666666666667, 0.1666666666666667], \
-                 [0.2500000000000000, 0.1666666666666667, 0.1666666666666667, 0.1666666666666667, 0.5000000000000000], \
-                 [0.2500000000000000, 0.1666666666666667, 0.1666666666666667, 0.5000000000000000, 0.1666666666666667]]), \
+            3: (np.array([[0.2500000000000000, 0.5000000000000000, 0.1666666666666667, 0.1666666666666667, 0.1666666666666667], \
+                          [0.2500000000000000, 0.1666666666666667, 0.1666666666666667, 0.1666666666666667, 0.5000000000000000], \
+                          [0.2500000000000000, 0.1666666666666667, 0.1666666666666667, 0.5000000000000000, 0.1666666666666667]]), \
                 np.array([-0.8000000000000000, 0.4500000000000000, 0.4500000000000000, 0.4500000000000000,
                           0.4500000000000000]) / 6.),
             4: (np.array([[0.2500000000000000, 0.7857142857142857, 0.0714285714285714, 0.0714285714285714,
@@ -108,13 +111,15 @@ def get_quadrature_tet(norder):
                           0.1493333333333333, 0.1493333333333333, 0.1493333333333333]) / 6.)
         }[norder]  # last one available from http://www.cfd-online.com/Wiki/Code:_Quadrature_on_Tetrahedra
     except:
-        raise NotImplementedError("The requested order of quadrature "
+        raise NotImplementedError("The requested order of quadrature " +
                                   "is not tabulated.")
-def get_quadrature_tri(norder):
-    """Return a nth order accurate quadrature rule for
-    the reference triangle (0,0) (0,1) (1,0)."""
-    if norder<=1:
-        norder=2
+
+
+def get_quadrature_tri(norder: int) -> Tuple[np.ndarray, np.ndarray]:
+    """Return a nth order accurate quadrature rule for the reference triangle
+    (0,0) (0,1) (1,0)."""
+    if norder <= 1:
+        norder = 2
     try:
         return {
             2: (np.array([[1.666666666666666666666e-01, 6.666666666666666666666e-01, 1.666666666666666666666e-01],
@@ -536,7 +541,8 @@ def get_quadrature_tri(norder):
     except:
         raise NotImplementedError("get_quadrature_tri: The requested order of quadrature is not implemented!")
 
-def get_quadrature_line(norder):
+
+def get_quadrature_line(norder: int) -> Tuple[np.ndarray, np.ndarray]:
     """Return a nth order accurate quadrature rule for line [0,1]."""
     if norder <= 1:
         norder = 2
@@ -544,6 +550,6 @@ def get_quadrature_line(norder):
     return np.array([0.5*X + 0.5]), W/2.0
 
 
-def get_quadrature_point(norder=0):
+def get_quadrature_point(norder: int = 0) -> Tuple[np.ndarray, np.ndarray]:
     """Return the quadrature rule for the point []."""
     return np.zeros((0, 1)), np.ones(1)
