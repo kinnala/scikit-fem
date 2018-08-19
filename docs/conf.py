@@ -158,3 +158,6 @@ texinfo_documents = [
 
 
 # -- Extension configuration -------------------------------------------------
+
+import matplotlib
+matplotlib.use('agg')
