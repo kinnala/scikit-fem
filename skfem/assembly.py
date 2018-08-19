@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-"""Assembly module contains classes and functions related to the
+"""This module contains classes and functions related to the
 construction of finite element matrices.
 
 A library user is mainly interested in the following:
 
-    * InteriorBasis (class)
-    * FacetBasis (class)
-    * asm (function)
-    * bilinear_form (decorator)
-    * linear_form (decorator)
+    - :class:`~skfem.assembly.InteriorBasis`
+    - :class:`~skfem.assembly.FacetBasis`
+    - :func:`~skfem.assembly.asm`
+    - :func:`~skfem.assembly.bilinear_form`
+    - :func:`~skfem.assembly.linear_form`
 
 """
 
@@ -26,8 +26,8 @@ class GlobalBasis():
 
     Please see the following implementations:
 
-        * InteriorBasis, for basis functions inside elements
-        * FacetBasis, for basis functions on element boundaries
+        - :class:`~skfem.assembly.InteriorBasis`, for basis functions inside elements
+        - :class:`~skfem.assembly.FacetBasis`, for basis functions on element boundaries
 
     """
     def __init__(self, mesh, elem, mapping, intorder):
@@ -673,7 +673,12 @@ class Dofnum(object):
 
 
 def bilinear_form(form):
-    """Bilinear form decorator"""
+    """Bilinear form decorator.
+    
+    This decorator is used for defining bilinear forms that can be assembled
+    using :func:`~skfem.assembly.asm`.
+
+    """
     nargs = len(signature(form).parameters)
     if nargs == 5:
         def kernel(A, ix, u, du, v, dv, w, dx):
@@ -692,7 +697,12 @@ def bilinear_form(form):
 
 
 def linear_form(form):
-    """Linear form decorator"""
+    """Linear form decorator.
+    
+    This decorator is used for defining linear forms that can be assembled
+    using :func:`~skfem.assembly.asm`.
+
+    """
     nargs = len(signature(form).parameters)
     if nargs == 3:
         def kernel(b, ix, v, dv, w, dx):

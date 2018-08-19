@@ -60,6 +60,29 @@ MeshLine
 
 .. autoclass:: skfem.mesh.MeshLine
 
+skfem.assembly
+--------------
+
+.. automodule:: skfem.assembly
+
+Defining a global basis
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: skfem.assembly.GlobalBasis
+
+.. autoclass:: skfem.assembly.InteriorBasis
+
+.. autoclass:: skfem.assembly.FacetBasis
+
+Assembling matrices
+~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: skfem.assembly.bilinear_form
+
+.. autofunction:: skfem.assembly.linear_form
+
+.. autofunction:: skfem.assembly.asm
+
 skfem.utils
 -----------
 

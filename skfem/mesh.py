@@ -3,11 +3,11 @@
 
 See the following implementations:
 
-    - :class:`skfem.mesh.MeshTri`, triangular mesh
-    - :class:`skfem.mesh.MeshTet`, tetrahedral mesh
-    - :class:`skfem.mesh.MeshQuad`, quadrilateral mesh
-    - :class:`skfem.mesh.MeshHex`, hexahedral mesh
-    - :class:`skfem.mesh.MeshLine`, one-dimensional mesh
+    - :class:`~skfem.mesh.MeshTri`, triangular mesh
+    - :class:`~skfem.mesh.MeshTet`, tetrahedral mesh
+    - :class:`~skfem.mesh.MeshQuad`, quadrilateral mesh
+    - :class:`~skfem.mesh.MeshHex`, hexahedral mesh
+    - :class:`~skfem.mesh.MeshLine`, one-dimensional mesh
 
 """
 
