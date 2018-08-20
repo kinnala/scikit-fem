@@ -2057,7 +2057,27 @@ class MeshTri(Mesh2D):
              ax: Optional[Axes] = None,
              zlim: Optional[Tuple[float, float]] = None,
              edgecolors: Optional[str] = None) -> Axes:
-        """Visualise piecewise-linear or piecewise-constant function."""
+        """Visualise piecewise-linear or piecewise-constant function, 2D plot.
+        
+        Parameters
+        ----------
+        z
+            An array of nodal values (Nvertices) or elemental values (Nelems).
+        smooth
+            If true, use gouraud shading.
+        ax
+            Plot onto the given preinitialised Matplotlib axes.
+        zlim
+            Use the given minimum and maximum values for coloring.
+        edgecolors
+            A string describing the edge coloring, e.g. 'k' for black.
+
+        Returns
+        -------
+        Axes
+            The Matplotlib axes onto which the mesh was plotted.
+            
+        """
         if ax is None:
             fig = plt.figure()
             ax = fig.add_subplot(111)
@@ -2079,7 +2099,23 @@ class MeshTri(Mesh2D):
         return ax
 
     def plot3(self, z, smooth=False, ax=None):
-        """Visualize nodal function (3d i.e. three axes)."""
+        """Visualise piecewise-linear or piecewise-constant function, 3D plot.
+        
+        Parameters
+        ----------
+        z
+            An array of nodal values (Nvertices) or elemental values (Nelems).
+        smooth
+            If true, use gouraud shading.
+        ax
+            Plot onto the given preinitialised Matplotlib axes.
+
+        Returns
+        -------
+        Axes
+            The Matplotlib axes onto which the mesh was plotted.
+            
+        """
         from mpl_toolkits.mplot3d import Axes3D
         if ax is None:
             fig = plt.figure()

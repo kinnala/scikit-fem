@@ -16,8 +16,8 @@ MeshTri
 
 .. autoclass:: skfem.mesh.MeshTri
 
-Different constructors
-^^^^^^^^^^^^^^^^^^^^^^
+Constructors
+^^^^^^^^^^^^
 
 .. automethod:: skfem.mesh.MeshTri.__init__
 
@@ -31,8 +31,8 @@ Different constructors
 
 .. automethod:: skfem.mesh.MeshTri.init_tensor
 
-Methods for visualisation
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Visualisation
+^^^^^^^^^^^^^
 
 .. automethod:: skfem.mesh.MeshTri.draw
 
@@ -45,20 +45,58 @@ MeshQuad
 
 .. autoclass:: skfem.mesh.MeshQuad
 
+Constructors
+^^^^^^^^^^^^
+
+.. automethod:: skfem.mesh.MeshQuad.__init__
+
+.. automethod:: skfem.mesh.MeshQuad.load
+
+.. automethod:: skfem.mesh.MeshQuad.init_refdom
+
+.. automethod:: skfem.mesh.MeshQuad.init_tensor
+
+Visualisation
+^^^^^^^^^^^^^
+
+.. automethod:: skfem.mesh.MeshQuad.draw
+
+.. automethod:: skfem.mesh.MeshQuad.plot
+
+.. automethod:: skfem.mesh.MeshQuad.plot3
+
 MeshTet
 ~~~~~~~
 
 .. autoclass:: skfem.mesh.MeshTet
+
+Constructors
+^^^^^^^^^^^^
+
+Visualisation
+^^^^^^^^^^^^^
 
 MeshHex
 ~~~~~~~
 
 .. autoclass:: skfem.mesh.MeshHex
 
+Constructors
+^^^^^^^^^^^^
+
+Visualisation
+^^^^^^^^^^^^^
+
 MeshLine
 ~~~~~~~~
 
 .. autoclass:: skfem.mesh.MeshLine
+
+Constructors
+^^^^^^^^^^^^
+
+Visualisation
+^^^^^^^^^^^^^
 
 skfem.assembly
 --------------
