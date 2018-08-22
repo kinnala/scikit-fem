@@ -144,29 +144,26 @@ class ElementH2(Element):
 
         return u, du, ddu
 
+    def _pbasis_create_xy(self, i, j, dx=0, dy=0):
+        cx = 1
+        cy = 1
+        if dx > 0:
+            for k in np.arange(dx, 0, -1):
+                cx *= i - dx + k
+        if dy > 0:
+            for k in np.arange(dy, 0, -1):
+                cy *= j - dy + k
+        return eval("lambda x, y: {}*x**{}*y**{}".format(cx*cy, np.max([i-dx, 0]), np.max([j-dy, 0])))
+
     def _pbasis_init(self, N):
         """Define power bases (for 2D)."""
-        if not hasattr(self, '_pbasis' + str(N)):
-            import sympy as sp
-            from sympy.abc import x, y
-            R = list(range(N+1))
-            ops = {
-                '': lambda a: a,
-                'dx': lambda a: sp.diff(a, x),
-                'dy': lambda a: sp.diff(a, y),
-                'dxx': lambda a: sp.diff(a, x, 2),
-                'dyy': lambda a: sp.diff(a, y, 2),
-                'dxy': lambda a: sp.diff(sp.diff(a, x), y),
-            }
-            for name, op in ops.items():
-                pbasis = [sp.lambdify((x,y), op(x**i*y**j), "numpy")
-                          for i in R for j in R if i+j<=N]
-                # workaround for constant shape bug in SymPy
-                for itr in range(len(pbasis)):
-                    const = pbasis[itr](np.zeros(2), np.zeros(2))
-                    if type(const) is int:
-                        pbasis[itr] = lambda X, Y, const=const: const*np.ones(X.shape)
-                setattr(self, '_pbasis'+name, pbasis)
+        if not hasattr(self, '_pbasis'):
+            setattr(self, '_pbasis', [self._pbasis_create_xy(i, j) for i in range(N+1) for j in range(N+1) if i + j <= N])
+            setattr(self, '_pbasisdx', [self._pbasis_create_xy(i, j, dx=1) for i in range(N+1) for j in range(N+1) if i + j <= N])
+            setattr(self, '_pbasisdy', [self._pbasis_create_xy(i, j, dy=1) for i in range(N+1) for j in range(N+1) if i + j <= N])
+            setattr(self, '_pbasisdxx', [self._pbasis_create_xy(i, j, dx=2) for i in range(N+1) for j in range(N+1) if i + j <= N])
+            setattr(self, '_pbasisdxy', [self._pbasis_create_xy(i, j, dx=1, dy=1) for i in range(N+1) for j in range(N+1) if i + j <= N])
+            setattr(self, '_pbasisdyy', [self._pbasis_create_xy(i, j, dy=2) for i in range(N+1) for j in range(N+1) if i + j <= N])
 
     def _eval_dofs(self, mesh, tind=None):
         if tind is None:

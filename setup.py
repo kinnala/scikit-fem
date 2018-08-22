@@ -21,7 +21,7 @@ setup(
         'Topic :: Scientific/Engineering :: Mathematics',
     ],
     packages=find_packages(exclude=['examples']),  # Required
-    install_requires=['numpy', 'scipy', 'sympy', 'matplotlib'],  # Optional
+    install_requires=['numpy', 'scipy', 'matplotlib'],  # Optional
     extras_require={
         'all' : ['meshio'],
         },
