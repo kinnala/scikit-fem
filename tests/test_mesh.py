@@ -20,12 +20,6 @@ class MeshTests(unittest.TestCase):
         # Mesh3D.facets_satisfying
         self.assertEqual(len(m.facets_satisfying(lambda x,y,z: x==0.5)), 1)
 
-        # jiggle
-        m = MeshTri()
-        m.refine(3)
-        m.jiggle()
-        m.smooth()
-
 class FaultyInputs(unittest.TestCase):
     """Check that faulty meshes are detected by the constructors."""
     def runTest(self):

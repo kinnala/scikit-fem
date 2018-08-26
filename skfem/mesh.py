@@ -370,21 +370,6 @@ class Mesh2D(Mesh):
 
     """
 
-    def jiggle(self, z=0.2):
-        """Jiggle the interior nodes of the mesh.
-
-        Parameters
-        ----------
-        z : (optional, default=0.2) float
-            Mesh parameter is multiplied by this number. The resulting number
-            corresponds to the standard deviation of the jiggle.
-
-        """
-        y = z*self.param()
-        I = self.interior_nodes()
-        self.p[0, I] = self.p[0, I] + y*np.random.rand(len(I))
-        self.p[1, I] = self.p[1, I] + y*np.random.rand(len(I))
-
     def boundary_nodes(self):
         """Return an array of boundary node indices."""
         return np.unique(self.facets[:, self.boundary_facets()])
@@ -404,19 +389,6 @@ class Mesh2D(Mesh):
             An array of node indices.
         """
         return np.nonzero(test(self.p[0, :], self.p[1, :]))[0]
-
-    def draw_nodes(self, nodes, mark='bo'):
-        """Highlight some nodes.
-
-        Parameters
-        ----------
-        nodes : numpy array
-            The indices of the nodes to highlight.
-        mark : (optional, default='bo') string
-            A standard matplotlib string to define the highlight style.
-
-        """
-        plt.plot(self.p[0, nodes], self.p[1, nodes], mark)
 
     def param(self):
         """Return mesh parameter."""
@@ -1122,6 +1094,7 @@ class MeshHex(Mesh3D):
     meshio_type = "hexahedron"
 
     def __init__(self, p=None, t=None, validate=True):
+        """Initialise a hexahedral mesh."""
         if p is None and t is None:
             p = np.array([[0., 0., 0.], [0., 0., 1.], [0., 1., 0.], [1., 0., 0.],
                           [0., 1., 1.], [1., 0., 1.], [1., 1., 0.], [1., 1., 1.]]).T
@@ -2076,26 +2049,6 @@ class MeshTri(Mesh2D):
         def handle(X, Y):
             return x[finder(X, Y)]
         return handle
-
-    def smooth(self, k=1.0):
-        """Apply smoothing to interior nodes."""
-        from skfem.assembly import InteriorBasis, asm
-        from skfem.element import ElementTriP1
-        from skfem.utils import solve
-        from skfem.models.poisson import laplace, mass
-
-        e = ElementTriP1()
-        ib = InteriorBasis(self, e)
-
-        K = asm(laplace, ib)
-        M = asm(mass, ib)
-
-        I = self.interior_nodes()
-        dx = - k*solve(M, K.dot(self.p[0, :]))
-        dy = - k*solve(M, K.dot(self.p[1, :]))
-
-        self.p[0, I] += dx[I]
-        self.p[1, I] += dy[I]
 
     def draw_debug(self):
         """Draw without mesh.facets. For debugging self.draw()."""

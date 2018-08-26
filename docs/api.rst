@@ -31,14 +31,55 @@ Constructors
 
 .. automethod:: skfem.mesh.MeshTri.init_tensor
 
-Visualisation
-^^^^^^^^^^^^^
+Modify
+^^^^^^
+
+.. automethod:: skfem.mesh.MeshTri.refine
+
+.. automethod:: skfem.mesh.MeshTri.remove_elements
+
+.. automethod:: skfem.mesh.MeshTri.scale
+
+.. automethod:: skfem.mesh.MeshTri.translate
+
+.. automethod:: skfem.mesh.MeshTri.mirror_mesh
+
+Explore
+^^^^^^^
+
+.. automethod:: skfem.mesh.MeshTri.nodes_satisfying
+
+.. automethod:: skfem.mesh.MeshTri.facets_satisfying
+
+.. automethod:: skfem.mesh.MeshTri.elements_satisfying
+
+.. automethod:: skfem.mesh.MeshTri.interior_nodes
+
+.. automethod:: skfem.mesh.MeshTri.boundary_nodes
+
+.. automethod:: skfem.mesh.MeshTri.interior_facets
+
+.. automethod:: skfem.mesh.MeshTri.boundary_facets
+
+Visualise
+^^^^^^^^^
+
+.. automethod:: skfem.mesh.MeshTri.save
 
 .. automethod:: skfem.mesh.MeshTri.draw
 
 .. automethod:: skfem.mesh.MeshTri.plot
 
 .. automethod:: skfem.mesh.MeshTri.plot3
+
+Other methods
+^^^^^^^^^^^^^
+
+.. automethod:: skfem.mesh.MeshTri.submesh
+
+.. automethod:: skfem.mesh.MeshTri.interpolator
+
+.. automethod:: skfem.mesh.MeshTri.const_interpolator
 
 MeshQuad
 ~~~~~~~~
@@ -56,8 +97,38 @@ Constructors
 
 .. automethod:: skfem.mesh.MeshQuad.init_tensor
 
-Visualisation
-^^^^^^^^^^^^^
+Modify
+^^^^^^
+
+.. automethod:: skfem.mesh.MeshQuad.refine
+
+.. automethod:: skfem.mesh.MeshQuad.remove_elements
+
+.. automethod:: skfem.mesh.MeshQuad.scale
+
+.. automethod:: skfem.mesh.MeshQuad.translate
+
+.. automethod:: skfem.mesh.MeshQuad.mirror_mesh
+
+Explore
+^^^^^^^
+
+.. automethod:: skfem.mesh.MeshQuad.nodes_satisfying
+
+.. automethod:: skfem.mesh.MeshQuad.facets_satisfying
+
+.. automethod:: skfem.mesh.MeshQuad.elements_satisfying
+
+.. automethod:: skfem.mesh.MeshQuad.interior_nodes
+
+.. automethod:: skfem.mesh.MeshQuad.boundary_nodes
+
+.. automethod:: skfem.mesh.MeshQuad.interior_facets
+
+.. automethod:: skfem.mesh.MeshQuad.boundary_facets
+
+Visualise
+^^^^^^^^^
 
 .. automethod:: skfem.mesh.MeshQuad.draw
 
@@ -83,6 +154,21 @@ MeshHex
 
 Constructors
 ^^^^^^^^^^^^
+
+.. automethod:: skfem.mesh.MeshHex.__init__
+
+.. automethod:: skfem.mesh.MeshHex.init_tensor
+
+Modify
+^^^^^^
+
+.. automethod:: skfem.mesh.MeshHex.refine
+
+.. automethod:: skfem.mesh.MeshHex.remove_elements
+
+.. automethod:: skfem.mesh.MeshHex.scale
+
+.. automethod:: skfem.mesh.MeshHex.translate
 
 Visualisation
 ^^^^^^^^^^^^^
