@@ -20,9 +20,17 @@ from scipy.sparse import coo_matrix
 import skfem.mapping
 import skfem.element
 
-from typing import Optional, Union, Tuple, Any
+from typing import Optional, Union, Tuple, Any, NamedTuple
 from numpy import ndarray
 from matplotlib.axes import Axes
+
+
+class Submesh(NamedTuple):
+    """Index arrays that define subsets of mesh topological entities."""
+    p: Optional[ndarray] = None
+    t: Optional[ndarray] = None
+    facets: Optional[ndarray] = None
+    edges: Optional[ndarray] = None
 
 
 class Mesh():
@@ -284,6 +292,39 @@ class Mesh3D(Mesh):
         mz = 0.5*(self.p[2, self.edges[0, :]] + self.p[2, self.edges[1, :]])
         return np.nonzero(test(mx, my, mz))[0]
 
+    def elements_satisfying(self, test):
+        """Return elements whose midpoints satisfy some condition.
+
+        Parameters
+        ----------
+        test : function
+            An anonymous function with three parameters (x, y, z) and which
+            returns True for the midpoints of the set of elements that
+            are to be included in the return set.
+
+        """
+        mx = np.sum(self.p[0, self.t], axis=0)/self.t.shape[0]
+        my = np.sum(self.p[1, self.t], axis=0)/self.t.shape[0]
+        mz = np.sum(self.p[2, self.t], axis=0)/self.t.shape[0]
+        return np.nonzero(test(mx, my, mz))[0]
+
+    def submesh(self, test):
+        """Return Submesh object where all topological entities satisfy some
+        condition."""
+        p = self.nodes_satisfying(test)
+        if len(p) == 0:
+            p = None
+        facets = self.facets_satisfying(test)
+        if len(facets) == 0:
+            facets = None
+        edges = self.edges_satisfying(test)
+        if len(edges) == 0:
+            edges = None
+        t = self.elements_satisfying(test)
+        if len(t) == 0:
+            t = None
+        return Submesh(p=p, facets=facets, edges=edges, t=t)
+
     def boundary_nodes(self):
         """Return an array of boundary node indices."""
         return np.unique(self.facets[:, self.boundary_facets()])
@@ -415,6 +456,20 @@ class Mesh2D(Mesh):
         mx = np.sum(self.p[0, self.t], axis=0)/self.t.shape[0]
         my = np.sum(self.p[1, self.t], axis=0)/self.t.shape[0]
         return np.nonzero(test(mx, my))[0]
+    
+    def submesh(self, test):
+        """Return Submesh object where all topological entities satisfy some
+        condition."""
+        p = self.nodes_satisfying(test)
+        if len(p) == 0:
+            p = None
+        facets = self.facets_satisfying(test)
+        if len(facets) == 0:
+            facets = None
+        t = self.elements_satisfying(test)
+        if len(t) == 0:
+            t = None
+        return Submesh(p=p, facets=facets, edges=None, t=t)
 
     def interior_facets(self):
         """Return an array of interior facet indices."""
@@ -877,16 +932,17 @@ class MeshQuad(Mesh2D):
     def init_refdom(cls):
         """Initialise a mesh that includes only the reference quad.
         
-        The mesh topology is as follows:
-         (-1,1) *-------------* (1,1)
-                |             |
-                |             |
-                |             |
-                |             | 
-                |             | 
-                |             |
-                |             |  
-        (-1,-1) *-------------* (1,-1)
+        The mesh topology is as follows::
+
+             (-1,1) *-------------* (1,1)
+                    |             |
+                    |             |
+                    |             |
+                    |             | 
+                    |             | 
+                    |             |
+                    |             |  
+            (-1,-1) *-------------* (1,-1)
 
         """
         p = np.array([[-1., -1.], [1., -1.], [1., 1.], [-1., 1.]]).T
@@ -2076,6 +2132,17 @@ class MeshTri(Mesh2D):
         -------
         Axes
             The Matplotlib axes onto which the mesh was plotted.
+
+        Examples
+        --------
+        Mesh the unit square :math:`(0,1)^2` and visualise the function
+        :math:`f(x)=x^2`.
+
+        >>> from skfem.mesh import MeshTri
+        >>> m = MeshTri()
+        >>> m.refine(3)
+        >>> m.plot(m.p[0, :]**2)
+        >>> m.show()
             
         """
         if ax is None:

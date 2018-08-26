@@ -24,11 +24,11 @@ _, Drightyz = ib.find_dofs(lambda x,y,z: x==1.0, dofrows=[1,2])
 
 u[Drightx] = 0.3
 
-I = ib.dofnum.complement_dofs(np.concatenate((Dleft, Drightx, Drightyz)))
+I = ib.complement_dofs(np.concatenate((Dleft, Drightx, Drightyz)))
 
 u[I] = solve(*condense(K, 0*u, I=I, x=u))
 
 sf = 1.0
 for itr in range(3):
-    m.p[itr, :] += sf*u[ib.dofnum.n_dof[itr, :]]
+    m.p[itr, :] += sf*u[ib.n_dof[itr, :]]
 m.save('elasticity.vtk')

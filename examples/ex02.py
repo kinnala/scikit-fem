@@ -49,7 +49,7 @@ K = asm(bilinf, ib)
 f = asm(linf, ib)
 
 x, D = ib.find_dofs()
-I = ib.dofnum.complement_dofs(D)
+I = ib.complement_dofs(D)
 
 x[I] = solve(*condense(K, f, I=I))
 

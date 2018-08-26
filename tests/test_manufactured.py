@@ -33,7 +33,7 @@ class Line1D(unittest.TestCase):
         L = asm(laplace, ib)
         b = asm(boundary_flux, fb)
         D = m.nodes_satisfying(lambda x: x==0.0) 
-        I = ib.dofnum.complement_dofs(D)  # noqa E741
+        I = ib.complement_dofs(D)  # noqa E741
         u = np.zeros_like(b)
         u[I] = solve(*condense(L, b, I=I)) # noqa E741
 
@@ -66,7 +66,7 @@ class LineNegative1D(unittest.TestCase):
         L = asm(laplace, ib)
         b = asm(boundary_flux, fb)
         D = m.nodes_satisfying(lambda x: x==0.0) 
-        I = ib.dofnum.complement_dofs(D)  # noqa E741
+        I = ib.complement_dofs(D)  # noqa E741
         u = np.zeros_like(b)
         u[I] = solve(*condense(L, b, I=I)) # noqa E741
 

@@ -105,18 +105,18 @@ x = np.zeros(K.shape[0])
 f = np.hstack((f1, f2))
 
 x = np.zeros(K.shape[0])
-D = np.concatenate((D1, D2 + ib.dofnum.N))
+D = np.concatenate((D1, D2 + ib.N))
 I = np.setdiff1d(np.arange(K.shape[0]), D)
 
 x[I] = solve(*condense(K, f, I=I))
 
 sf = 1
 
-m.p[0, :] = m.p[0, :] + sf*x[i1][ib.dofnum.n_dof[0, :]]
-m.p[1, :] = m.p[1, :] + sf*x[i1][ib.dofnum.n_dof[1, :]]
+m.p[0, :] = m.p[0, :] + sf*x[i1][ib.n_dof[0, :]]
+m.p[1, :] = m.p[1, :] + sf*x[i1][ib.n_dof[1, :]]
 
-M.p[0, :] = M.p[0, :] + sf*x[i2][Ib.dofnum.n_dof[0, :]]
-M.p[1, :] = M.p[1, :] + sf*x[i2][Ib.dofnum.n_dof[1, :]]
+M.p[0, :] = M.p[0, :] + sf*x[i2][Ib.n_dof[0, :]]
+M.p[1, :] = M.p[1, :] + sf*x[i2][Ib.n_dof[1, :]]
 
 if __name__ == "__main__":
     ax = m.draw()

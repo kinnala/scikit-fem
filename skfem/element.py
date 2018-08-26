@@ -11,6 +11,7 @@ class Element():
     dim = -1
     maxdeg = -1
     order = (-1, -1)  # 0 - scalar, 1 - vector, 2 - tensor, etc
+    dofnames = []
 
     def orient(self, mapping, i, tind=None):
         """Orient basis functions. By default all = 1."""
@@ -214,6 +215,7 @@ class ElementTriP1(ElementH1):
     nodal_dofs = 1
     dim = 2
     maxdeg = 1
+    dofnames = ['u']
 
     def lbasis(self, X, i):
         x, y = X[0, :], X[1, :]
@@ -238,6 +240,7 @@ class ElementTriP2(ElementH1):
     facet_dofs = 1
     dim = 2
     maxdeg = 2
+    dofnames = ['u', 'u']
 
     def lbasis(self, X, i):
         x, y = X[0, :], X[1, :]
@@ -283,6 +286,7 @@ class ElementTriP0(ElementH1):
     interior_dofs = 1
     dim = 2
     maxdeg = 0
+    dofnames = ['u']
 
     def lbasis(self, X, i):
         return 1 + 0*X[0, :], 0*X
@@ -292,6 +296,7 @@ class ElementTriRT0(ElementHdiv):
     facet_dofs = 1
     dim = 2
     maxdeg = 1
+    dofnames = ['u_n']
 
     def lbasis(self, X, i):
         x, y = X[0, :], X[1, :]
@@ -316,6 +321,7 @@ class ElementTriMorley(ElementH2):
     facet_dofs = 1
     dim = 2
     maxdeg = 2
+    dofnames = ['u', 'u_n']
 
     def gdof(self, u, du, ddu, v, e, n, i):
         if i == 0:
@@ -339,6 +345,7 @@ class ElementTriArgyris(ElementH2):
     facet_dofs = 1
     dim = 2
     maxdeg = 5
+    dofnames = ['u', 'u_x', 'u_n']
 
     def gdof(self, u, du, ddu, v, e, n, i):
         if i < 18:
