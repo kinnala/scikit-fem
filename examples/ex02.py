@@ -1,27 +1,17 @@
-"""
-Author: kinnala
-
-Solve the Kirchhoff plate bending problem in a unit square
-with clamped boundary conditions using the nonconforming
-Morley element. Demonstrates also the visualization of
-higher order solutions using 'GlobalBasis.refinterp'.
-"""
-
 from skfem import *
 import numpy as np
 
-m = MeshTri()
+m = MeshTri.init_symmetric()
 m.refine(3)
 
 e = ElementTriMorley()
-map = MappingAffine(m)
-ib = InteriorBasis(m, e, map, 4)
+mapp = MappingAffine(m)
+ib = InteriorBasis(m, e, mapp, 4)
 
 @bilinear_form
 def bilinf(u, du, ddu, v, dv, ddv, w):
-    # plate thickness
-    d = 1.0
-    E = 1.0
+    d = 0.1
+    E = 200e9
     nu = 0.3
 
     def C(T):
@@ -29,9 +19,9 @@ def bilinf(u, du, ddu, v, dv, ddv, w):
         return np.array([[E/(1.0+nu)*(T[0, 0]+nu/(1.0-nu)*trT), E/(1.0+nu)*T[0, 1]],
                          [E/(1.0+nu)*T[1, 0], E/(1.0+nu)*(T[1, 1]+nu/(1.0-nu)*trT)]])
 
-    def Eps(ddU):
-        return np.array([[ddU[0][0], ddU[0][1]],
-                         [ddU[1][0], ddU[1][1]]])
+    def Eps(ddw):
+        return np.array([[ddw[0][0], ddw[0][1]],
+                         [ddw[1][0], ddw[1][1]]])
 
     def ddot(T1, T2):
         return T1[0, 0]*T2[0, 0] +\
@@ -43,12 +33,28 @@ def bilinf(u, du, ddu, v, dv, ddv, w):
 
 @linear_form
 def linf(v, dv, ddv, w):
-    return 1.0*v
+    return 1e6*v
 
 K = asm(bilinf, ib)
 f = asm(linf, ib)
 
-x, D = ib.find_dofs()
+boundary = {
+        'left':  m.submesh(lambda x, y: x==0),
+        'right': m.submesh(lambda x, y: x==1),
+        'top':   m.submesh(lambda x, y: y==1),
+        }
+
+dofs = ib.get_dofs(boundary)
+
+x = np.zeros_like(f)
+
+D = np.concatenate((
+        dofs['left'].nodal['u'],
+        dofs['left'].facet['u_n'],
+        dofs['right'].nodal['u'],
+        dofs['top'].nodal['u'],
+        ))
+
 I = ib.complement_dofs(D)
 
 x[I] = solve(*condense(K, f, I=I))
@@ -56,5 +62,5 @@ x[I] = solve(*condense(K, f, I=I))
 if __name__ == "__main__":
     M, X = ib.refinterp(x, 3)
     ax = m.draw()
-    M.plot(X, smooth=True, edgecolors='', ax=ax)
+    M.plot(X, smooth=True, ax=ax)
     M.show()

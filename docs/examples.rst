@@ -9,5 +9,4 @@ the `source code distribution
 
 .. include:: ../examples/ex01.rst
 
-.. literalinclude:: ../examples/ex01.py
-    :linenos:
+.. include:: ../examples/ex02.rst
