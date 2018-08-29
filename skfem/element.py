@@ -347,7 +347,7 @@ class ElementTriArgyris(ElementH2):
     facet_dofs = 1
     dim = 2
     maxdeg = 5
-    dofnames = ['u', 'u_x', 'u_n']
+    dofnames = ['u', 'u_x', 'u_y', 'u_xx', 'u_xy', 'u_yy', 'u_n']
 
     def gdof(self, u, du, ddu, v, e, n, i):
         if i < 18:
