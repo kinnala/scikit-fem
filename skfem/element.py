@@ -2,16 +2,18 @@
 """Element classes define and evaluate the finite element basis functions."""
 import numpy as np
 
+from typing import Tuple, Union, List
 
 class Element():
-    nodal_dofs = 0 # DOFs at the vertices of the element
-    facet_dofs = 0 # DOFs at the facets of the element
-    interior_dofs = 0 # DOFs at element interior
-    edge_dofs = 0 # DOFs at the edges of the element
-    dim = -1
-    maxdeg = -1
-    order = (-1, -1)  # 0 - scalar, 1 - vector, 2 - tensor, etc
-    dofnames = []
+    nodal_dofs: int = 0 
+    facet_dofs: int = 0
+    interior_dofs: int = 0
+    edge_dofs: int = 0
+    dim: int = -1
+    maxdeg: int = -1
+    # 0 - scalar, 1 - vector, 2 - tensor, etc
+    order: Union[Tuple[int, int], Tuple[int, int, int]] = (-1, -1)
+    dofnames: List[str] = []
 
     def orient(self, mapping, i, tind=None):
         """Orient basis functions. By default all = 1."""
@@ -376,6 +378,7 @@ class ElementQuad1(ElementH1):
     nodal_dofs = 1
     dim = 2
     maxdeg = 2
+    dofnames = ['u']
 
     def lbasis(self, X, i):
         x, y = X[0, :], X[1, :]
@@ -403,6 +406,7 @@ class ElementQuad2(ElementH1):
     interior_dofs = 1
     dim = 2
     maxdeg = 3
+    dofnames = ['u', 'u', 'u']
 
     def lbasis(self, X, i):
         x, y = X[0, :], X[1, :]
@@ -445,6 +449,7 @@ class ElementTetP0(ElementH1):
     interior_dofs = 1
     dim = 3
     maxdeg = 0
+    dofnames = ['u']
 
     def lbasis(self, X, i):
         return 1 + 0*X[0, :], 0*X
@@ -454,6 +459,7 @@ class ElementTetP1(ElementH1):
     nodal_dofs = 1
     dim = 3
     maxdeg = 1
+    dofnames = ['u']
 
     def lbasis(self, X, i):
         x, y, z = X[0, :], X[1, :], X[2, :]
@@ -481,6 +487,7 @@ class ElementTetP2(ElementH1):
     edge_dofs = 1
     dim = 3
     maxdeg = 2
+    dofnames = ['u', 'u']
 
     def lbasis(self, X, i):
         x, y, z = X[0, :], X[1, :], X[2, :]
@@ -525,6 +532,7 @@ class ElementTetRT0(ElementHdiv):
     facet_dofs = 1
     dim = 3
     maxdeg = 1
+    dofnames = ['u_n']
 
     def lbasis(self, X, i):
         x, y, z = X[0, :], X[1, :], X[2, :]
@@ -551,6 +559,7 @@ class ElementTetN0(ElementHcurl):
     edge_dofs = 1
     dim = 3
     maxdeg = 1
+    dofnames = ['u_t']
 
     def lbasis(self, X, i):
         x, y, z = X[0, :], X[1, :], X[2, :]
@@ -584,6 +593,7 @@ class ElementHex1(ElementH1):
     nodal_dofs = 1
     dim = 3
     maxdeg = 3
+    dofnames = ['u']
 
     def lbasis(self, X, i):
         x, y, z = X[0, :], X[1, :], X[2, :]
@@ -639,6 +649,7 @@ class ElementLineP1(ElementH1):
     nodal_dofs = 1
     dim = 1
     maxdeg = 1
+    dofnames = ['u']
 
     def lbasis(self, X, i):
         x = X[0, :]
@@ -653,3 +664,4 @@ class ElementLineP1(ElementH1):
             raise Exception("!")
 
         return phi, dphi
+
