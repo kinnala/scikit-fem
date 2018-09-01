@@ -14,7 +14,7 @@ For more recent features, you can just clone this repository.
 
 ## Getting started
 
-Please see the directory *examples*.
+Please see the [user documentation](https://scikit-fem.readthedocs.io).
 
 ## Contributors
 

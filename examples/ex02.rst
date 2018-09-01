@@ -73,7 +73,7 @@ creating a simple symmetric mesh for the unit square.
     :lines: 1-5
 
 After creating the mesh, we evaluate the finite element basis at the global
-quadrature points. This could be done as before but instead we demonstrate
+quadrature points. This could be done as before but we demonstrate instead
 the extended syntax of :class:`~skfem.assembly.InteriorBasis`
 constructor which allows the user to input an object of type
 :class:`~skfem.mapping.Mapping` and the integration order as
@@ -117,13 +117,26 @@ facets, etc.) of the submesh. In the following, we continue by
 constructing an array of boundary degree-of-freedom numbers:
 
 .. literalinclude:: ../examples/ex02.py
-    :lines: 47-56
+    :lines: 47-54
 
 The solution of the linear system is now done similarly as in the
 Poisson example.
 
 .. literalinclude:: ../examples/ex02.py
-    :lines: 58-60
+    :lines: 56-58
+
+As the Morley element is based on piecewise quadratic basis
+functions, we cannot appreciate the discrete solution
+unless we further refine the mesh for visualisation
+purposes. The refine and interpolation is done using
+:meth:`~skfem.assembly.InteriorBasis.refinterp` as follows:
+
+.. literalinclude:: ../examples/ex02.py
+    :lines: 60-64
+
+.. figure:: ../examples/ex02_solution.png
+
+    The visualised solution of example 2.
 
 The complete source code reads as follows:
 

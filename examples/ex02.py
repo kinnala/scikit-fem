@@ -46,8 +46,6 @@ boundary = {
 
 dofs = ib.get_dofs(boundary)
 
-x = np.zeros_like(f)
-
 D = np.concatenate((
         dofs['left'].nodal['u'],
         dofs['left'].facet['u_n'],
@@ -56,7 +54,7 @@ D = np.concatenate((
         ))
 
 I = ib.complement_dofs(D)
-
+x = np.zeros_like(f)
 x[I] = solve(*condense(K, f, I=I))
 
 if __name__ == "__main__":

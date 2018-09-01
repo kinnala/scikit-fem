@@ -17,8 +17,8 @@ dependencies) installed. The library contains no compiled code and is licensed
 with the permissive 3-clause BSD license.
 
 This document contains the efforts to improve the user documentation of the
-project. Currently, the main learning resource consists of the extended
-examples that are continuously improved. In case you have any further
+project. Currently, the main learning resource consists of the
+:ref:`extended examples <Examples>` that are continuously improved. In case you have any further
 questions, do not hesitate to drop in and say hello at our `Gitter chat
 <https://gitter.im/scikit-fem>`_.
 

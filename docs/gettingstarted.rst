@@ -20,7 +20,7 @@ Learning
 --------
 
 Currently, the most efficient approach for learning the library
-is to read :ref:`examples`.
+is to read :ref:`examples <Examples>`.
 
 Contributing
 ------------

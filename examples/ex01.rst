@@ -62,13 +62,16 @@ input.
 .. literalinclude:: ../examples/ex01.py
     :lines: 17-18
 
-We are left with solving assembler linear system.  Due to the zero boundary
+We are left with solving the assembled linear system.  Due to the zero boundary
 condition, we do this only in the interior nodes of the mesh.
 
 .. literalinclude:: ../examples/ex01.py
     :lines: 20-23
 
 The solution can now be visualised using :meth:`~skfem.mesh.MeshTri.plot3`. 
+
+.. literalinclude:: ../examples/ex01.py
+    :lines: 25-27
 
 .. figure:: ../examples/ex01_solution.png
 
