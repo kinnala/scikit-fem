@@ -39,3 +39,25 @@ class FaultyInputs(unittest.TestCase):
             # floats in element connectivity
             m = MeshTri(np.array([[0,0],[0,1],[1,0],[1,1]]).T,
                         np.array([[0.0,1.0,2.0],[1.0,2.0,3.0]]).T)
+
+class Loading(unittest.TestCase):
+    """Check that Mesh.load works properly."""
+    def runTest(self):
+        # submeshes
+        m = MeshTet.load('examples/box.msh')
+        self.assertTrue((m.boundaries['front'].p == m.submesh(lambda x,y,z: z==1).p).all())
+        self.assertTrue((m.boundaries['back'].p == m.submesh(lambda x,y,z: z==0).p).all())
+        self.assertTrue((m.boundaries['top'].p == m.submesh(lambda x,y,z: y==1).p).all())
+        self.assertTrue((m.boundaries['top'].facets == m.submesh(lambda x,y,z: y==1).facets).all())
+        self.assertTrue((m.boundaries['back'].facets == m.submesh(lambda x,y,z: z==0).facets).all())
+        self.assertTrue((m.boundaries['front'].facets == m.submesh(lambda x,y,z: z==1).facets).all())
+        #self.assertTrue((m.boundaries['top'].edges == m.submesh(lambda x,y,z: y==1).edges).all())
+        #self.assertTrue((m.boundaries['back'].edges == m.submesh(lambda x,y,z: z==0).edges).all())
+        #self.assertTrue((m.boundaries['front'].edges == m.submesh(lambda x,y,z: z==1).edges).all())
+        m = MeshTri.load('examples/square.msh')
+        self.assertTrue((m.boundaries['left'].p == m.submesh(lambda x,y: x==0).p).all())
+        self.assertTrue((m.boundaries['right'].p == m.submesh(lambda x,y: x==1).p).all())
+        self.assertTrue((m.boundaries['top'].p == m.submesh(lambda x,y: y==1).p).all())
+        self.assertTrue((m.boundaries['top'].facets == m.submesh(lambda x,y: y==1).facets).all())
+        self.assertTrue((m.boundaries['left'].facets == m.submesh(lambda x,y: x==0).facets).all())
+        self.assertTrue((m.boundaries['right'].facets == m.submesh(lambda x,y: x==1).facets).all())

@@ -20,9 +20,13 @@ from scipy.sparse import coo_matrix
 import skfem.mapping
 import skfem.element
 
-from typing import Optional, Union, Tuple, Any, NamedTuple
+from typing import Optional, Union, Tuple,\
+                   Any, NamedTuple, Type,\
+                   TypeVar, Dict
 from numpy import ndarray
 from matplotlib.axes import Axes
+
+MeshType = TypeVar('MeshType', bound='Mesh')
 
 
 class Submesh(NamedTuple):
@@ -46,12 +50,12 @@ class Mesh():
 
     """
 
-    refdom = "none"  
-    brefdom = "none" 
-    meshio_type = "none"
+    refdom: str = "none"  
+    brefdom: str = "none" 
+    meshio_type: str = "none"
 
-    p = np.array([]) 
-    t = np.array([]) 
+    p: ndarray = np.array([]) 
+    t: ndarray = np.array([]) 
 
     def __init__(self):
         """Check that p and t are C_CONTIGUOUS as this leads
@@ -94,33 +98,34 @@ class Mesh():
         raise NotImplementedError("Single refine not implemented " +
                                   "for this mesh type!")
 
-    def refine(self, N=None):
+    def refine(self,
+               no_refs: Optional[int] = None):
         """Refine the mesh.
         
         Parameters
         ----------
-        N : int (optional)
-            Perform N refinements.
+        no_refs
+            Perform multiple refinements.
 
         """
-        if N is None:
+        if no_refs is None:
             return self._uniform_refine()
         else:
-            for itr in range(N):
+            for itr in range(no_refs):
                 self._uniform_refine()
 
-    def remove_elements(self, element_indices):
+    def remove_elements(self, element_indices: ndarray) -> MeshType:
         """Construct new mesh with elements removed
         based on their indices.
 
         Parameters
         ----------
-        element_indices : numpy array
+        element_indices
             List of element indices to remove.
 
         Returns
         -------
-        skfem.Mesh
+        Mesh
             A new mesh object with elements removed as per requested.
 
         """
@@ -222,7 +227,7 @@ class Mesh():
         meshio.write(filename, mesh)
 
     @classmethod
-    def load(cls, filename: str):
+    def load(cls: Type[MeshType], filename: str) -> MeshType:
         """Load an external mesh from file using `meshio
         <https://github.com/nschloe/meshio>`_.
         
@@ -233,11 +238,57 @@ class Mesh():
 
         """
         import meshio
-        mesh = meshio.read(filename)
-        if issubclass(cls, Mesh2D):
-            return cls(mesh.points[:, :2].T, mesh.cells[cls.meshio_type].T)
+        meshdata = meshio.read(filename)
+        if cls.meshio_type in meshdata.cells:
+            if issubclass(cls, Mesh2D):
+                p = meshdata.points[:, :2].T
+            else:
+                p = meshdata.points.T
+            t = meshdata.cells[cls.meshio_type].T
+            mesh = cls(p, t)
+            # load submeshes, currently gmsh only
+            try:
+                bnd_type = {
+                        'triangle':'line',
+                        'quad':'line',
+                        'tetra':'triangle',
+                        'hexahedron':'quad',
+                        }[cls.meshio_type]
+                if bnd_type in meshdata.cells:
+                    facets = meshdata.cells[bnd_type]
+                    facets_tag = meshdata.cell_data[bnd_type]['gmsh:physical']
+                    bndfacets = mesh.boundary_facets()
+                    # put Mesh.facets to dict
+                    dic = {tuple(np.sort(facets[i])): facets_tag[i] for i in range(facets.shape[0])}
+                    # get index of corresponding Mesh.facets for each meshio
+                    # facet is found in the dict
+                    ix = np.array([[dic[tuple(np.sort(mesh.facets[:, i]))], i]
+                                     for i in bndfacets
+                                     if tuple(np.sort(mesh.facets[:, i])) in dic])
+                    # read meshio tag numbers and names
+                    tags = ix[:, 0]
+                    facet_ix = {}
+                    def find_tagname(t):
+                        for key in meshdata.field_data:
+                            if meshdata.field_data[key][0] == t:
+                                return key
+                    for tag in np.unique(tags):
+                        tagix = np.nonzero(tags == tag)[0]
+                        facet_ix[find_tagname(tag)] = ix[tagix, 1]
+                    nodes_ix = {key: np.unique(mesh.facets[:, facet_ix[key]].flatten())
+                                     for key in facet_ix}
+                    # save submesh info to mesh.boundaries
+                    mesh.boundaries = {key: Submesh(p = nodes_ix[key], facets = facet_ix[key])
+                                      for key in facet_ix}
+                    # TODO edges
+            except Exception:
+                # all mesh formats are not supported; raise warning for
+                # unsupported types
+                warnings.warn("Could not load submeshes.")
+            return mesh
         else:
-            return cls(mesh.points.T, mesh.cells[cls.meshio_type].T)
+            raise Exception("The mesh contains no elements of type "
+                            + cls.meshio_type)
 
 
 class Mesh3D(Mesh):
@@ -709,7 +760,7 @@ class MeshLine(Mesh):
         super(MeshLine, self).__init__()
 
     @classmethod
-    def init_refdom(cls):
+    def init_refdom(cls: Type[MeshType]) -> MeshType:
         """Initialise a mesh constisting of the reference interval [0,1]."""
         return cls()
 
@@ -875,7 +926,9 @@ class MeshQuad(Mesh2D):
         super(MeshQuad, self).__init__()
 
     @classmethod
-    def init_tensor(cls, x, y):
+    def init_tensor(cls: Type[MeshType],
+                    x: ndarray,
+                    y: ndarray) -> MeshType:
         """Initialise a tensor product mesh.
 
         Parameters
@@ -901,7 +954,7 @@ class MeshQuad(Mesh2D):
         return cls(p, t.astype(np.int64))
 
     @classmethod
-    def init_refdom(cls):
+    def init_refdom(cls: Type[MeshType]) -> MeshType:
         """Initialise a mesh that includes only the reference quad.
         
         The mesh topology is as follows::
@@ -1121,7 +1174,10 @@ class MeshHex(Mesh3D):
         super(MeshHex, self).__init__()
 
     @classmethod
-    def init_tensor(cls, x, y, z):
+    def init_tensor(cls: Type[MeshType],
+                    x: ndarray,
+                    y: ndarray,
+                    z: ndarray) -> MeshType:
         """Initialise a tensor product mesh.
 
         Parameters
@@ -1335,15 +1391,20 @@ class MeshHex(Mesh3D):
 
         # TODO implement prolongation
 
-    def save(self, filename, pointData=None, cellData=None):
+    def save(self,
+            filename: str,
+            pointData: Optional[Union[ndarray, Dict[str, ndarray]]] = None,
+            cellData: Optional[Union[ndarray, Dict[str, ndarray]]] = None):
         """Export the mesh and fields using meshio. (Hexahedron version.)
 
         Parameters
         ----------
-        filename : string
+        filename
             The filename for vtk-file.
-        pointData : (optional) numpy array for one output or dict for multiple
-        cellData : (optional) numpy array for one output or dict for multiple
+        pointData
+            ndarray for one output or dict for multiple
+        cellData
+            ndarray for one output or dict for multiple
 
         """
         import meshio
@@ -1415,16 +1476,19 @@ class MeshTet(Mesh3D):
         super(MeshTet, self).__init__()
 
     @classmethod
-    def init_tensor(cls, x, y, z):
+    def init_tensor(cls: Type[MeshType],
+                    x: ndarray,
+                    y: ndarray,
+                    z: ndarray) -> MeshType:
         """Initialise a tensor product mesh.
 
         Parameters
         ----------
-        x : numpy array (1d)
+        x
             The nodal coordinates in dimension x
-        y : numpy array (1d)
+        y
             The nodal coordinates in dimension y
-        z : numpy array (1d)
+        z
             The nodal coordinates in dimension z
 
         License
@@ -1905,7 +1969,9 @@ class MeshTri(Mesh2D):
         super(MeshTri, self).__init__()
 
     @classmethod
-    def init_tensor(cls, x: ndarray, y: ndarray):
+    def init_tensor(cls: Type[MeshType],
+                    x: ndarray,
+                    y: ndarray) -> MeshType:
         """Initialise a tensor product mesh.
 
         Parameters
@@ -1944,7 +2010,7 @@ class MeshTri(Mesh2D):
         return cls(p, t)
 
     @classmethod
-    def init_sqsymmetric(cls):
+    def init_sqsymmetric(cls: Type[MeshType]) -> MeshType:
         """Initialise a symmetric mesh of the unit square.
         
         The mesh topology is as follows::
@@ -1973,7 +2039,7 @@ class MeshTri(Mesh2D):
         return cls(p, t)
 
     @classmethod
-    def init_refdom(cls):
+    def init_refdom(cls: Type[MeshType]) -> MeshType:
         """Initialise a mesh that includes only the reference triangle.
         
         The mesh topology is as follows::
