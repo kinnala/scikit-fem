@@ -52,6 +52,7 @@ class ElementVectorH1(Element):
         self.interior_dofs = self.elem.interior_dofs * self.dim
         self.edge_dofs = self.elem.edge_dofs * self.dim
 
+        self.dofnames = [i + "^" + str(j+1) for i in elem.dofnames for j in range(self.dim)]
         self.maxdeg = elem.maxdeg
 
     def gbasis(self, mapping, X, i, tind=None):

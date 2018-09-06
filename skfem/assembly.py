@@ -142,15 +142,15 @@ class GlobalBasis():
                 n_dof[self.dofnames[i]] = self.n_dof[i, submesh.p]
                 offset += 1
         if submesh.facets is not None:
-            for i in range(self.n_dof.shape[0]):
+            for i in range(self.f_dof.shape[0]):
                 f_dof[self.dofnames[i + offset]] = self.f_dof[i, submesh.facets]
                 offset += 1
         if submesh.edges is not None:
-            for i in range(self.n_dof.shape[0]):
+            for i in range(self.e_dof.shape[0]):
                 e_dof[self.dofnames[i + offset]] = self.e_dof[i, submesh.edges]
                 offset += 1
         if submesh.t is not None:
-            for i in range(self.n_dof.shape[0]):
+            for i in range(self.i_dof.shape[0]):
                 i_dof[self.dofnames[i + offset]] = self.i_dof[i, submesh.t]
 
         return Dofs(n_dof, f_dof, e_dof, i_dof)
