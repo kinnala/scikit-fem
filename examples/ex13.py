@@ -46,7 +46,7 @@ geom.add_physical_surface(
     geom.add_plane_surface(geom.add_line_loop(lines)), 'domain')
 
 pts, cells, _, cell_data, field_data = generate_mesh(
-    geom, prune_vertices=False)
+    geom, prune_vertices=False, extra_gmsh_arguments=['-format', 'msh2'])
 
 mesh = MeshTri(pts[:, :2].T, cells['triangle'].T)
 boundaries = {bc:
