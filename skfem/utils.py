@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-"""This module contains utility functions such as convenient access to SciPy
-linear solvers."""
+"""This module contains utility functions such as convenient access to
+SciPy linear solvers."""
 
 import numpy as np
 import scipy.sparse as sp
@@ -11,21 +11,26 @@ import warnings
 from typing import Optional, Union, Tuple, Callable
 from numpy import ndarray
 from scipy.sparse import spmatrix
+
 LinearSolver = Callable[[spmatrix, ndarray], ndarray]
+EigenSolver = Callable[[spmatrix, spmatrix], Tuple[ndarray, ndarray]]
 
 def condense(A: spmatrix,
-             b: Optional[ndarray] = None,
+             b: Optional[Union[ndarray, spmatrix]] = None,
              x: Optional[ndarray] = None,
              I: Optional[ndarray] = None,
-             D: Optional[ndarray] = None) -> Union[spmatrix, Tuple[spmatrix, ndarray]]:
+             D: Optional[ndarray] = None) -> Union[spmatrix, Tuple[spmatrix, ndarray], Tuple[spmatrix, spmatrix]]:
     """Eliminate DOF's from a linear system.
+
+    Supports also generalized eigenvalue problems.
     
     Parameters
     ----------
     A
         The system matrix
     b
-        The right hand side vector
+        The right hand side vector or the mass matrix
+        for generalized eigenvalue problems.
     I
         The set of DOF numbers to keep
     D
@@ -33,8 +38,8 @@ def condense(A: spmatrix,
         
     Returns
     -------
-    ndarray
-        The condensed linear system.
+    spmatrix or (spmatrix, ndarray) or (spmatrix, spmatrix)
+        The condensed system.
         
     """
     if x is None:
@@ -50,13 +55,44 @@ def condense(A: spmatrix,
     if b is None:
         return A[I].T[I].T
     else:
-        return A[I].T[I].T, b[I] - A[I].T[D].T.dot(x[D])
+        if isinstance(b, spmatrix):
+            # generalized eigenvalue problem: don't modify rhs
+            return A[I].T[I].T, b[I].T[I].T 
+        elif isinstance(b, ndarray):
+            return A[I].T[I].T, b[I] - A[I].T[D].T @ x[D]
+        else:
+            raise Exception("The second arg type not supported.")
 
 
 def rcm(A: spmatrix,
         b: ndarray) -> Tuple[spmatrix, ndarray, ndarray]:
     p = spg.reverse_cuthill_mckee(A, symmetric_mode=False)
     return A[p].T[p].T, b[p], p
+
+
+def solver_eigen_scipy(sigma: float,
+                       n: Optional[int] = 3,
+                       mode: Optional[str] = 'normal') -> EigenSolver:
+    """Solve generalized eigenproblem using SciPy (ARPACK).
+    
+    Parameters
+    ----------
+    sigma
+        The parameter for spectral shift, choose a value near the
+        expected eigenvalues.
+    n
+        The number of eigenpairs to solve.
+
+    Returns
+    -------
+    EigenSolver
+        A solver function that can be passed to :func:`solve`.
+    
+    """
+    def solver(K, M):
+        from scipy.sparse.linalg import eigsh
+        return eigsh(K, k=n, M=M, sigma=sigma, mode=mode)
+    return solver
 
 
 def solver_direct_scipy() -> LinearSolver:
@@ -66,6 +102,7 @@ def solver_direct_scipy() -> LinearSolver:
 
 
 def solver_direct_umfpack() -> LinearSolver:
+    """SciPy interface to umfpack."""
     def solver(A, b):
         return spl.spsolve(A, b, use_umfpack=True)
     return solver
@@ -118,7 +155,7 @@ def solver_iter_pcg(pc: Optional[spmatrix] = None,
 
     Returns
     -------
-    lambda
+    LinearSolver
         A solver function that can be passed to :func:`solve`.
 
     """
@@ -151,32 +188,32 @@ def solver_iter_pcg(pc: Optional[spmatrix] = None,
 
 
 def solve(A: spmatrix,
-          b: ndarray,
-          solver: Optional[LinearSolver] = None) -> ndarray:
-    """Solve a linear system.
+          b: Union[ndarray, spmatrix],
+          solver: Optional[Union[LinearSolver, EigenSolver]] = None) -> ndarray:
+    """Solve a linear system or a generalized eigenvalue problem.
 
     Parameters
     ----------
     A
         The system matrix
     b
-        The right hand side vector
+        The right hand side vector or the mass matrix of a generalized
+        eigenvalue problem.
     solver
         Choose one of the following solvers:
 
             - :func:`skfem.utils.solver_direct_scipy` (default)
+            - :func:`skfem.utils.solver_eigen_scipy` (default)
             - :func:`skfem.utils.solver_direct_umfpack`
             - :func:`skfem.utils.solver_direct_cholmod`
             - :func:`skfem.utils.solver_iter_pcg`
 
-    Returns
-    -------
-    ndarray
-        Solution vector to the linear system Ax = b.
-
     """
     if solver is None:
-        solver = solver_direct_scipy()
+        if isinstance(b, spmatrix):
+            solver = solver_eigen_scipy(10.0)
+        elif isinstance(b, ndarray):
+            solver = solver_direct_scipy()
 
     return solver(A, b)
 
