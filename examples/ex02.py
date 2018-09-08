@@ -6,7 +6,7 @@ m.refine(3)
 
 e = ElementTriMorley()
 mapp = MappingAffine(m)
-ib = InteriorBasis(m, e, mapp, 4)
+ib = InteriorBasis(m, e, mapp, 2)
 
 @bilinear_form
 def bilinf(u, du, ddu, v, dv, ddv, w):

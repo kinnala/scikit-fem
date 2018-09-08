@@ -3,9 +3,11 @@ Kirchhoff plate
 
 This example demonstrates the solution of a slightly more complicated problem
 with multiple boundary conditions and a fourth-order differential operator. We
-consider the Kirchhoff plate bending problem which finds its applications in
-solid mechanics. For a stationary plate of constant thickness
-:math:`d`, the governing equation reads: find the deflection :math:`u : \Omega \rightarrow \mathbb{R}` that satisfies
+consider the `Kirchhoff plate bending problem
+<https://en.wikipedia.org/wiki/Kirchhoff%E2%80%93Love_plate_theory>`_ which
+finds its applications in solid mechanics. For a stationary plate of constant
+thickness :math:`d`, the governing equation reads: find the deflection :math:`u
+: \Omega \rightarrow \mathbb{R}` that satisfies
 
 .. math::
     \frac{Ed^3}{12(1-\nu^2)} \Delta^2 u = f, \quad \text{in $\Omega$},
@@ -73,7 +75,7 @@ creating a simple symmetric mesh for the unit square.
     :lines: 1-5
 
 After creating the mesh, we evaluate the finite element basis at the global
-quadrature points. This could be done as before but we demonstrate instead
+quadrature points. We demonstrate
 the extended syntax of :class:`~skfem.assembly.InteriorBasis`
 constructor which allows the user to input an object of type
 :class:`~skfem.mapping.Mapping` and the integration order as
@@ -82,8 +84,12 @@ optional parameters:
 .. literalinclude:: ../examples/ex02.py
     :lines: 8-9
 
-The rather complicated bilinear form can be written in several
-parts:
+The integration order refers to the highest order of exactly integrated
+polynomials. In this example, quadratic polynomials can be integrated exactly,
+which is required in the right hand side linear form.
+
+The rather complicated bilinear form :math:`(\boldsymbol{M}(u),
+\boldsymbol{K}(v))` can be written in several parts:
 
 .. literalinclude:: ../examples/ex02.py
     :lines: 11-32
@@ -100,21 +106,16 @@ is now two calls to :func:`~skfem.assembly.asm`:
 .. literalinclude:: ../examples/ex02.py
     :lines: 38-39
 
-Next we demonstrate a convenient way of setting essential
-boundary conditions on different parts of the boundary. We begin
-by defining :class:`skfem.mesh.Submesh` objects that contain
-the nodes and the facets belonging to the respective boundaries:
+Next we demonstrate setting different boundary conditions on different parts of
+the boundary.  An easy way is to create :class:`~skfem.mesh.Submesh` objects
+for each boundary:
 
 .. literalinclude:: ../examples/ex02.py
     :lines: 41-45
 
 The corresponding degree-of-freedom numbers (i.e. rows and columns
 of the stiffness matrix) can be found using
-:meth:`~skfem.assembly.GlobalBasis.get_dofs` which returns a
-dictionary of tuples. These tuples contain the degree-of-freedom
-numbers corresponding to different topological entities (nodes,
-facets, etc.) of the submesh. In the following, we continue by
-constructing an array of boundary degree-of-freedom numbers:
+:meth:`~skfem.assembly.GlobalBasis.get_dofs`.
 
 .. literalinclude:: ../examples/ex02.py
     :lines: 47-54
@@ -125,10 +126,9 @@ Poisson example.
 .. literalinclude:: ../examples/ex02.py
     :lines: 56-58
 
-As the Morley element is based on piecewise quadratic basis
-functions, we cannot appreciate the discrete solution
-unless we further refine the mesh for visualisation
-purposes. The refine and interpolation is done using
+Morley element uses quadratic basis
+functions, and we cannot fully appreciate the discrete solution
+unless we refine the mesh for visualisation. This is done using
 :meth:`~skfem.assembly.InteriorBasis.refinterp` as follows:
 
 .. literalinclude:: ../examples/ex02.py
