@@ -7,10 +7,36 @@
 
 Easy to use finite element assemblers and the related tools.
 
+## Yet another finite element library?
+
+This library fills an important gap in the spectrum of finite element codes.
+The library is **lightweight** meaning that it has **minimal dependencies**.
+It contains **no compiled code**, which means that it's **easy to install** and
+use on all platforms that support NumPy.  Despite being fully interpreted, the
+code has a reasonably **good performance**.
+
+In the following snippet, we create a tetrahedral mesh with over 1 million
+elements and assemble a discrete Laplace operator. On Thinkpad X201, 2010
+model, the last line finishes in under 5 seconds.
+
+```
+from skfem import *
+import numpy as np
+
+mesh = MeshTet.init_tensor(*((np.linspace(0, 1, 60),)*3))
+basis = InteriorBasis(mesh, ElementTetP1())
+
+@bilinear_form
+def laplace(u, du, v, dv, w):
+    return sum(du*dv)
+
+A = asm(laplace, basis)
+```
+
 ## Installation
 
-The most recent release can be installed using `pip install scikit-fem`.
-For more recent features, you can just clone this repository.
+The most recent release can be installed simply by `pip install scikit-fem`.
+For more recent features, you can clone this repository.
 
 ## Getting started
 

@@ -2,13 +2,13 @@
 """This module contains classes and functions related to the
 construction of finite element matrices.
 
-A library user is mainly interested in the following:
+The basic workflow is the following:
 
-    - :class:`~skfem.assembly.InteriorBasis`
-    - :class:`~skfem.assembly.FacetBasis`
-    - :func:`~skfem.assembly.asm`
-    - :func:`~skfem.assembly.bilinear_form`
-    - :func:`~skfem.assembly.linear_form`
+1. Create :class:`~skfem.assembly.InteriorBasis` and/or :class:`~skfem.assembly.FacetBasis`
+   objects.
+2. Define the bilinear and linear forms using the decorators :func:`~skfem.assembly.bilinear_form`
+   and :func:`~skfem.assembly.linear_form`.
+3. Assemble finite element matrices using :func:`~skfem.assembly.asm`.
 
 """
 
@@ -28,8 +28,8 @@ class GlobalBasis():
 
     Please see the following implementations:
 
-        - :class:`~skfem.assembly.InteriorBasis`, for basis functions inside elements
-        - :class:`~skfem.assembly.FacetBasis`, for basis functions on element boundaries
+    - :class:`~skfem.assembly.InteriorBasis`, for basis functions inside elements
+    - :class:`~skfem.assembly.FacetBasis`, for basis functions on element boundaries
 
     """
 
@@ -604,16 +604,13 @@ def asm(kernel, ubasis, vbasis=None, w=None, dw=None, ddw=None, nthreads=1, asse
 
     Creating multithreadable kernel function.
 
-    from numba import njit
-
-    @njit(nogil=True)
-    def assemble(A, ix, u, du, v, dv, w, dx):
-        for k in range(ix.shape[0]):
-            i, j = ix[k]
-            A[i, j] = np.sum((du[j][0] * dv[i][0] +\
-                              du[j][1] * dv[i][1] +\
-                              du[j][2] * dv[i][2]) * dx, axis=1)
-    assemble.bilinear = True
+    >>> from numba import njit
+    >>> @njit(nogil=True)
+        def assemble(A, ix, u, du, v, dv, w, dx):
+            for k in range(ix.shape[0]):
+                i, j = ix[k]
+                A[i, j] = np.sum((du[j][0]*dv[i][0] + du[j][1]*dv[i][1] + du[j][2]*dv[i][2]) * dx, axis=1)
+    >>> assemble.bilinear = True
 
     """
     import threading

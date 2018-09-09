@@ -165,7 +165,7 @@ class Mesh():
         ----------
         vec
             Translate the mesh by a vector. Must have same size as the mesh
-            dimansion.
+            dimension.
 
         """
         for itr in range(int(self.dim())):
@@ -206,8 +206,8 @@ class Mesh():
 
     def save(self,
              filename: str,
-             pointData: Union[ndarray, Dict[str, ndarray]] = None,
-             cellData: Union[ndarray, Dict[str, ndarray]] = None) -> None:
+             pointData: Optional[Union[ndarray, Dict[str, ndarray]]] = None,
+             cellData: Optional[Union[ndarray, Dict[str, ndarray]]] = None) -> None:
         """Export the mesh and fields using meshio.
 
         Parameters
@@ -306,8 +306,8 @@ class Mesh3D(Mesh):
 
     See the following implementations:
 
-        * MeshTet, tetrahedral mesh
-        * MeshHex, hexahedral mesh
+    - :class:`~skfem.mesh.MeshTet`, tetrahedral mesh
+    - :class:`~skfem.mesh.MeshHex`, hexahedral mesh
 
     """
 
@@ -337,14 +337,14 @@ class Mesh3D(Mesh):
         mz = np.sum(self.p[2, self.facets], axis=0)/self.facets.shape[0]
         return np.nonzero(test(mx, my, mz))[0]
 
-    def edges_satisfying(self, test):
+    def edges_satisfying(self, test: Callable[[float, float, float], bool]) -> ndarray:
         """Return edges whose midpoints satisfy some condition.
 
         Parameters
         ----------
-        test : lambda functions (3 params)
-            Evaluates to 1 or True for edge midpoints
-            of the edges belonging to the output set.
+        test
+            Evaluates to 1 or True for edge midpoints of the edges belonging to
+            the output set.
 
         """
         mx = 0.5*(self.p[0, self.edges[0, :]] + self.p[0, self.edges[1, :]])
@@ -352,15 +352,14 @@ class Mesh3D(Mesh):
         mz = 0.5*(self.p[2, self.edges[0, :]] + self.p[2, self.edges[1, :]])
         return np.nonzero(test(mx, my, mz))[0]
 
-    def elements_satisfying(self, test):
+    def elements_satisfying(self, test: Callable[[float, float, float], bool]) -> ndarray:
         """Return elements whose midpoints satisfy some condition.
 
         Parameters
         ----------
-        test : function
-            An anonymous function with three parameters (x, y, z) and which
-            returns True for the midpoints of the set of elements that
-            are to be included in the return set.
+        test
+            Evaluates to 1 or True for element midpoints of the elements
+            belonging to the output set.
 
         """
         mx = np.sum(self.p[0, self.t], axis=0)/self.t.shape[0]
@@ -368,9 +367,17 @@ class Mesh3D(Mesh):
         mz = np.sum(self.p[2, self.t], axis=0)/self.t.shape[0]
         return np.nonzero(test(mx, my, mz))[0]
 
-    def submesh(self, test):
+    def submesh(self, test: Callable[[float, float, float], bool]) -> Submesh:
         """Return Submesh object where all topological entities satisfy some
-        condition."""
+        condition.
+        
+        Parameters
+        ----------
+        test
+            Evaluates to 1 or True for the midpoints of the topological
+            entities belonging to the output Submesh.
+
+        """
         p = self.nodes_satisfying(test)
         if len(p) == 0:
             p = None
@@ -385,36 +392,29 @@ class Mesh3D(Mesh):
             t = None
         return Submesh(p=p, facets=facets, edges=edges, t=t)
 
-    def boundary_nodes(self):
+    def boundary_nodes(self) -> ndarray:
         """Return an array of boundary node indices."""
         return np.unique(self.facets[:, self.boundary_facets()])
 
-    def boundary_facets(self):
+    def boundary_facets(self) -> ndarray:
         """Return an array of boundary facet indices."""
         return np.nonzero(self.f2t[1, :] == -1)[0]
 
-    def interior_facets(self):
+    def interior_facets(self) -> ndarray:
         """Return an array of interior facet indices."""
         return np.nonzero(self.f2t[1, :] >= 0)[0]
 
-    def boundary_edges(self):
+    def boundary_edges(self) -> ndarray:
         """Return an array of boundary edge indices."""
         bnodes = self.boundary_nodes()[:, None]
         return np.nonzero(np.sum(self.edges[0, :] == bnodes, axis=0) *
                           np.sum(self.edges[1, :] == bnodes, axis=0))[0]
 
-    def interior_nodes(self):
+    def interior_nodes(self) -> ndarray:
         """Return an array of interior node indices."""
         return np.setdiff1d(np.arange(0, self.p.shape[1]), self.boundary_nodes())
 
-    def draw_vertices(self):
-        """Draw all vertices using mplot3d."""
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        ax.scatter(self.p[0, :], self.p[1, :], self.p[2, :])
-        return fig
-
-    def param(self):
+    def param(self) -> float:
         """Return (maximum) mesh parameter."""
         return np.max(np.sqrt(np.sum((self.p[:, self.edges[0, :]] -
                                       self.p[:, self.edges[1, :]])**2, axis=0)))
@@ -425,73 +425,70 @@ class Mesh2D(Mesh):
     
     See the following implementations:
 
-        * MeshTri, triangular mesh
-        * MeshQuad, quadrilateral mesh
+    - :class:`~skfem.mesh.MeshTri`, triangular mesh
+    - :class:`~skfem.mesh.MeshQuad`, quadrilateral mesh
 
     """
 
-    def boundary_nodes(self):
+    def boundary_nodes(self) -> ndarray:
         """Return an array of boundary node indices."""
         return np.unique(self.facets[:, self.boundary_facets()])
 
-    def nodes_satisfying(self, test):
+    def interior_nodes(self) -> ndarray:
+        """Return an array of interior node indices."""
+        return np.setdiff1d(np.arange(0, self.p.shape[1]), self.boundary_nodes())
+
+    def nodes_satisfying(self, test: Callable[[float, float], bool]) -> ndarray:
         """Return nodes that satisfy some condition.
 
         Parameters
         ----------
-        test : lambda
-            An anonymous function with two parameters (x and y) and which returns True for the set of nodes
-            that are to be included in the return set.
+        test
+            A function which returns True for the set of nodes that are to be
+            included in the return set.
 
-        Returns
-        -------
-        numpy array
-            An array of node indices.
         """
         return np.nonzero(test(self.p[0, :], self.p[1, :]))[0]
 
-    def param(self):
-        """Return mesh parameter."""
-        return np.max(np.sqrt(np.sum((self.p[:, self.facets[0, :]] -
-                                      self.p[:, self.facets[1, :]])**2, axis=0)))
-
-    def interior_nodes(self):
-        """Return an array of interior node indices."""
-        return np.setdiff1d(np.arange(0, self.p.shape[1]), self.boundary_nodes())
-
-    def facets_satisfying(self, test):
+    def facets_satisfying(self, test: Callable[[float, float], bool]) -> ndarray:
         """Return facets whose midpoints satisfy some condition.
 
         Parameters
         ----------
-        test : lambda function (2 params)
-            An anonymous function with two parameters (x and y) and which
-            returns True for the midpoints of the set of facets that are
-            to be included in the return set.
+        test
+            A function which returns True for the facet midpoints that are to
+            be included in the return set.
 
         """
         mx = 0.5*(self.p[0, self.facets[0, :]] + self.p[0, self.facets[1, :]])
         my = 0.5*(self.p[1, self.facets[0, :]] + self.p[1, self.facets[1, :]])
         return np.nonzero(test(mx, my))[0]
 
-    def elements_satisfying(self, test):
+    def elements_satisfying(self, test: Callable[[float, float], bool]) -> ndarray:
         """Return elements whose midpoints satisfy some condition.
 
         Parameters
         ----------
-        test : lambda function (2 params)
-            An anonymous function with two parameters (x and y) and which
-            returns True for the midpoints of the set of elements that
-            are to be included in the return set.
+        test
+            A function which returns True for the element midpoints that are to
+            be included in the return set.
 
         """
         mx = np.sum(self.p[0, self.t], axis=0)/self.t.shape[0]
         my = np.sum(self.p[1, self.t], axis=0)/self.t.shape[0]
         return np.nonzero(test(mx, my))[0]
     
-    def submesh(self, test):
+    def submesh(self, test: Callable[[float, float], bool]) -> Submesh:
         """Return Submesh object where all topological entities satisfy some
-        condition."""
+        condition.
+        
+        Parameters
+        ----------
+        test
+            Evaluates to 1 or True for the midpoints of the topological
+            entities belonging to the output Submesh.
+
+        """
         p = self.nodes_satisfying(test)
         if len(p) == 0:
             p = None
@@ -503,11 +500,11 @@ class Mesh2D(Mesh):
             t = None
         return Submesh(p=p, facets=facets, edges=None, t=t)
 
-    def interior_facets(self):
+    def interior_facets(self) -> ndarray:
         """Return an array of interior facet indices."""
         return np.nonzero(self.f2t[1, :] >= 0)[0]
 
-    def boundary_facets(self):
+    def boundary_facets(self) -> ndarray:
         """Return an array of boundary facet indices."""
         return np.nonzero(self.f2t[1, :] == -1)[0]
 
@@ -573,16 +570,8 @@ class Mesh2D(Mesh):
 
         return ax
 
-    def mirror_mesh(self, a, b, c):
-        """Mirror a mesh by the line ax + by + c = 0.
-        
-        Parameters
-        ----------
-        a : float
-        b : float
-        c : float
-
-        """
+    def mirror_mesh(self, a: float, b: float, c: float) -> MeshType:
+        """Mirror a mesh by the line :math:`ax + by + c = 0`."""
         tmp = -2.0*(a*self.p[0, :] + b*self.p[1, :] + c)/(a**2 + b**2)
         newx = a*tmp + self.p[0, :]
         newy = b*tmp + self.p[1, :]
@@ -600,15 +589,22 @@ class Mesh2D(Mesh):
 
         return meshclass(points, tris)
 
-    def save(self, filename, pointData=None, cellData=None):
+    def save(self,
+            filename: str,
+            pointData: Optional[Union[ndarray, Dict[str, ndarray]]] = None,
+            cellData: Optional[Union[ndarray, Dict[str, ndarray]]] = None) -> None:
         """Export the mesh and fields using meshio. (2D version.)
 
         Parameters
         ----------
-        filename : string
+        filename
             The filename for vtk-file.
-        pointData : (optional) numpy array for one output or dict for multiple
-        cellData : (optional) numpy array for one output or dict for multiple
+        pointData
+            Data related to the vertices of the mesh. Numpy array for one
+            output or dict for multiple.
+        cellData
+            Data related to the elements of the mesh. Numpy array for one
+            output or dict for multiple
 
         """
         import meshio
@@ -627,6 +623,11 @@ class Mesh2D(Mesh):
         cells = { self.meshio_type : self.t.T }
         mesh = meshio.Mesh(p.T, cells, pointData, cellData)
         meshio.write(filename, mesh)
+
+    def param(self) -> float:
+        """Return mesh parameter."""
+        return np.max(np.sqrt(np.sum((self.p[:, self.facets[0, :]] -
+                                      self.p[:, self.facets[1, :]])**2, axis=0)))
 
 
 class InterfaceMesh1D(Mesh):
