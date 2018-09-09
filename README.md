@@ -19,7 +19,7 @@ In the following snippet, we create a tetrahedral mesh with over 1 million
 elements and assemble a discrete Laplace operator. On Thinkpad X201, 2010
 model, the last line finishes in under 5 seconds.
 
-```
+```python
 from skfem import *
 import numpy as np
 
