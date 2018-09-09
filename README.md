@@ -7,7 +7,7 @@
 
 Easy to use finite element assemblers and the related tools.
 
-## Yet another finite element library?
+## Features
 
 This library fills an important gap in the spectrum of finite element codes.
 The library is **lightweight** meaning that it has **minimal dependencies**.
