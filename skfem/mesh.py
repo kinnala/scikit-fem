@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """This module contains different types of finite element meshes.
 
-See the following implementations:
+Meshes are created using various built-in constructors or loaded from external
+formats using `meshio <https://github.com/nschloe/meshio>`_. See the following
+implementations:
 
 - :class:`~skfem.mesh.MeshTri`, triangular mesh
 - :class:`~skfem.mesh.MeshTet`, tetrahedral mesh
@@ -22,11 +24,12 @@ import skfem.element
 
 from typing import Optional, Union, Tuple,\
                    Any, NamedTuple, Type,\
-                   TypeVar, Dict
+                   TypeVar, Dict, Callable
 from numpy import ndarray
 from matplotlib.axes import Axes
 
 MeshType = TypeVar('MeshType', bound='Mesh')
+DimTuple = Union[Tuple[float], Tuple[float, float], Tuple[float, float, float]]
 
 
 class Submesh(NamedTuple):
@@ -98,8 +101,7 @@ class Mesh():
         raise NotImplementedError("Single refine not implemented " +
                                   "for this mesh type!")
 
-    def refine(self,
-               no_refs: Optional[int] = None):
+    def refine(self, no_refs: Optional[int] = None):
         """Refine the mesh.
         
         Parameters
@@ -126,7 +128,7 @@ class Mesh():
         Returns
         -------
         Mesh
-            A new mesh object with elements removed as per requested.
+            A new mesh object with the requested elements removed.
 
         """
         keep = np.setdiff1d(np.arange(self.t.shape[1]), element_indices)
@@ -139,15 +141,15 @@ class Mesh():
         meshclass = type(self)
         return meshclass(newp, newt.astype(np.intp))
 
-    def scale(self, scale):
+    def scale(self, scale: Union[float, DimTuple]) -> None:
         """Scale the mesh.
 
         Parameters
         ----------
-        scale : float OR tuple of size dim
-            Scale each dimension by a factor. If a floating
-            point number is provided, same scale is used
-            for each dimension.
+        scale
+            Scale each dimension by this factor. If a single float is provided,
+            same scaling is used for all dimensions. Otherwise, provide a
+            tuple which has same size as the mesh dimension.
 
         """
         for itr in range(int(self.dim())):
@@ -156,13 +158,14 @@ class Mesh():
             else:
                 self.p[itr, :] *= scale
 
-    def translate(self, vec):
+    def translate(self, vec: DimTuple) -> None:
         """Translate the mesh.
 
         Parameters
         ----------
-        vec : tuple of size dim
-            Translate the mesh by a vector.
+        vec
+            Translate the mesh by a vector. Must have same size as the mesh
+            dimansion.
 
         """
         for itr in range(int(self.dim())):
@@ -201,15 +204,22 @@ class Mesh():
                    "not belonging to any element.")
             raise Exception(msg)
 
-    def save(self, filename, pointData=None, cellData=None):
+    def save(self,
+             filename: str,
+             pointData: Union[ndarray, Dict[str, ndarray]] = None,
+             cellData: Union[ndarray, Dict[str, ndarray]] = None) -> None:
         """Export the mesh and fields using meshio.
 
         Parameters
         ----------
-        filename : string
+        filename
             The filename for vtk-file.
-        pointData : (optional) numpy array for one output or dict for multiple
-        cellData : (optional) numpy array for one output or dict for multiple
+        pointData
+            Data related to the vertices of the mesh. Numpy array for one
+            output or dict for multiple.
+        cellData
+            Data related to the elements of the mesh. Numpy array for one
+            output or dict for multiple
 
         """
         import meshio
@@ -301,26 +311,25 @@ class Mesh3D(Mesh):
 
     """
 
-    def nodes_satisfying(self, test):
+    def nodes_satisfying(self, test: Callable[[float, float, float], bool]) -> ndarray:
         """Return nodes that satisfy some condition.
 
         Parameters
         ----------
-        test : lambda function (3 params)
-            Evaluates to 1 or True for nodes belonging
-            to the output set.
+        test
+            Evaluates to 1 or True for nodes belonging to the output set.
 
         """
         return np.nonzero(test(self.p[0, :], self.p[1, :], self.p[2, :]))[0]
 
-    def facets_satisfying(self, test):
+    def facets_satisfying(self, test: Callable[[float, float, float], bool]) -> ndarray:
         """Return facets whose midpoints satisfy some condition.
         
         Parameters
         ----------
-        test : lambda functions (3 params)
-            Evaluates to 1 or True for facet midpoints
-            of the facets belonging to the output set.
+        test
+            Evaluates to 1 or True for facet midpoints of the facets belonging
+            to the output set.
 
         """
         mx = np.sum(self.p[0, self.facets], axis=0)/self.facets.shape[0]
