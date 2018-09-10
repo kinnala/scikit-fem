@@ -17,7 +17,7 @@ from scipy.sparse import coo_matrix
 from skfem.quadrature import get_quadrature
 from inspect import signature
 
-from typing import NamedTuple, Optional, Dict, List
+from typing import NamedTuple, Optional, Dict, List, Tuple, Union
 
 from numpy import ndarray
 
@@ -79,12 +79,12 @@ class GlobalBasis():
         # facet dofs
         if mesh.dim() >= 2: # 2D or 3D mesh
             self.facet_dofs = np.reshape(np.arange(element.facet_dofs * mesh.facets.shape[1], dtype=np.int64),
-                                    (element.facet_dofs, mesh.facets.shape[1]), order='F') + offset
+                                         (element.facet_dofs, mesh.facets.shape[1]), order='F') + offset
             offset = offset + element.facet_dofs * mesh.facets.shape[1]
 
         # interior dofs
         self.interior_dofs = np.reshape(np.arange(element.interior_dofs * mesh.t.shape[1], dtype=np.int64),
-                                (element.interior_dofs, mesh.t.shape[1]), order='F') + offset
+                                        (element.interior_dofs, mesh.t.shape[1]), order='F') + offset
 
         # global numbering
         self.element_dofs = np.zeros((0, mesh.t.shape[1]), dtype=np.int64)
@@ -166,23 +166,26 @@ class GlobalBasis():
             return np.empty((self.Nbfun,) + order*(self.dim,) + (nvals, nqp))
 
     def default_parameters(self):
-        """This is used by assembler to get default parameters for 'w'"""
-        raise NotImplementedError("Default parameters not implemented")
+        """This is used by :func:`skfem.assembly.asm` to get the default
+        parameters for 'w'."""
+        raise NotImplementedError("Default parameters not implemented.")
 
-    def interpolate(self, w, derivative=False):
+    def interpolate(self,
+                    w: ndarray,
+                    derivative: Optional[bool] = False) -> Union[ndarray, Tuple[ndarray, ndarray]]:
         """Interpolate a solution vector to quadrature points.
 
         Parameters
         ----------
-        w : ndarray of size Ndofs
-            A solution vector
-        derivative : (optional, default=False) bool
-            Return also the derivative
+        w
+            A solution vector.
+        derivative
+            If true, return also the derivative.
 
         Returns
         -------
-        ndarray of size Nelems x Nqp
-            Interpolated solution vector
+        ndarray
+            Interpolated solution vector (Nelems x Nqp).
 
         """
         nqp = len(self.W)
@@ -192,7 +195,7 @@ class GlobalBasis():
         elif self.elem.order[0] == 1:
             W = np.zeros((self.dim, self.nelems, nqp))
         else:
-            raise Exception("Interpolation of this element order is not implemented.")
+            raise Exception("Interpolation not implemented for this Element.order.")
 
         for j in range(self.Nbfun):
             jdofs = self.element_dofs[j, :]
@@ -205,7 +208,7 @@ class GlobalBasis():
             elif self.elem.order[1] == 2:
                 dW = np.zeros((self.dim, self.dim, self.nelems, nqp))
             else:
-                raise Exception("Interpolation of this element order is not implemented.")
+                raise Exception("Interpolation not implemented for this Element.order.")
             for j in range(self.Nbfun):
                 jdofs = self.element_dofs[j, :]
                 for a in range(self.dim):
@@ -364,33 +367,36 @@ class FacetBasis(GlobalBasis):
 
     Attributes
     ----------
-    phi : numpy array
+    phi : ndarray
         Global basis functions at global quadrature points.
-    dphi : numpy array
+    dphi : ndarray
         Global basis function derivatives at global quadrature points.
-    X : numpy array of size Ndim x Nqp
-        Local quadrature points.
-    W : numpy array of size Nqp
-        Local quadrature weights.
+    X : ndarray
+        Local quadrature points (Ndim x Nqp).
+    W : ndarray
+        Local quadrature weights (Nqp).
     nf : int
-    dx : numpy array of size Nelems x Nqp
-        Can be used in computing global integrals elementwise.
+        Number of facets.
+    dx : ndarray
+        Used in computing global integrals elementwise (Nelems x Nqp).
         For example, np.sum(u**2*dx, axis=1) where u is also
         a numpy array of size Nelems x Nqp.
-    find : numpy array
+    find : ndarray
         A list of facet indices.
-    tind : numpy array
+    tind : ndarray
         A list of triangle indices.
-    normals
-    mapping : an object of type skfem.mapping.Mapping
-    elem : an object of type skfem.element.Element
+    normals : ndarray
+    mapping : skfem.mapping.Mapping
+    elem : skfem.element.Element
     Nbfun : int
         The number of basis functions.
     intorder : int
-        The integration order
+        The integration order.
     dim : int
+        The problem dimension.
     nt : int
-    mesh : an object of type skfem.mesh.Mesh
+        Number of triangles.
+    mesh : skfem.mesh.Mesh
     refdom : string
     brefdom : string
 
@@ -451,17 +457,17 @@ class FacetBasis(GlobalBasis):
 
         self.element_dofs = self.element_dofs[:, self.tind] # TODO this is required for asm(). Check for other options.
 
-    def default_parameters(self):
+    def default_parameters(self) -> Dict[str, ndarray]:
         return {'x':self.global_coordinates(),
                 'h':self.mesh_parameters(),
                 'n':self.normals}
 
-    def global_coordinates(self):
+    def global_coordinates(self) -> ndarray:
         return self.mapping.G(self.X, find=self.find)
 
-    def mesh_parameters(self):
+    def mesh_parameters(self) -> ndarray:
         if self.mesh.dim() == 1:
-            return 0.0
+            return np.array([0.0])
         else:
             return np.abs(self.mapping.detDG(self.X, self.find)) ** (1.0 / (self.mesh.dim() - 1))
 
@@ -528,13 +534,13 @@ class InteriorBasis(GlobalBasis):
         return {'x':self.global_coordinates(),
                 'h':self.mesh_parameters()}
 
-    def global_coordinates(self):
+    def global_coordinates(self) -> ndarray:
         return self.mapping.F(self.X)
 
-    def mesh_parameters(self):
+    def mesh_parameters(self) -> ndarray:
         return np.abs(self.mapping.detDF(self.X)) ** (1.0 / self.mesh.dim())
 
-    def refinterp(self, interp, Nrefs=1):
+    def refinterp(self, interp: ndarray, Nrefs: Optional[int] = 1):
         """Refine and interpolate (for plotting)."""
         # mesh reference domain, refine and take the vertices
         meshclass = type(self.mesh)
@@ -570,25 +576,34 @@ class InteriorBasis(GlobalBasis):
         return M, w.flatten()
 
 
-def asm(kernel, ubasis, vbasis=None, w=None, dw=None, ddw=None, nthreads=1, assemble=True):
+def asm(kernel,
+        ubasis: GlobalBasis,
+        vbasis: Optional[GlobalBasis] = None,
+        w: Optional[ndarray] = None,
+        dw: Optional[ndarray] = None,
+        ddw: Optional[ndarray] = None,
+        nthreads: Optional[int] = 1,
+        assemble: Optional[bool] = True):
     """Assemble finite element matrices.
 
     Parameters
     ----------
-    kernel : function handle
-        See InteriorBasis or FacetBasis.
-    ubasis : GlobalBasis
-    vbasis : (optional) GlobalBasis
-    w : (optional) ndarray
+    kernel
+        The bilinear/linear form.
+    ubasis
+        GlobalBasis object for 'u'.
+    vbasis
+        GlobalBasis object for 'v'.
+    w
         Accessible in form definition as w.w.
-    dw : (optional) ndarray
+    dw
         Accessible in form definition as w.dw.
-    ddw : (optional) ndarray
+    ddw
         Accessible in form definition as w.ddw.
-    nthreads : (optional, default=1) int
-        Number of threads to use in assembly. This is only
-        useful if kernel is numba function compiled with
-        nogil = True, see Examples.
+    nthreads
+        Number of threads to use in assembly. Due to Python global interpreter
+        lock (GIL), this is only useful if kernel is numba function compiled
+        with nogil = True, see Examples.
 
     Examples
     --------
