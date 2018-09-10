@@ -1,4 +1,4 @@
-![scikit-fem](skfemlogo.jpg?raw=true)
+![scikit-fem](https://github.com/kinnala/scikit-fem/blob/master/skfemlogo.png?raw=true)
 
 [![PyPI version](https://badge.fury.io/py/scikit-fem.svg)](https://badge.fury.io/py/scikit-fem)
 [![Build Status](https://travis-ci.com/kinnala/scikit-fem.svg?branch=master)](https://travis-ci.com/kinnala/scikit-fem)
