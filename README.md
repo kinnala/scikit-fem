@@ -16,8 +16,7 @@ use on all platforms that support NumPy.  Despite being fully interpreted, the
 code has a reasonably **good performance**.
 
 In the following snippet, we create a tetrahedral mesh with over 1 million
-elements and assemble a discrete Laplace operator. On Thinkpad X201, 2010
-model, the last line finishes in under 5 seconds.
+elements and assemble a discrete Laplace operator, all in just a few seconds.
 
 ```python
 from skfem import *
