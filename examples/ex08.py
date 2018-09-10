@@ -17,7 +17,7 @@ f, axes = plt.subplots(3,3)
 ixs = [(0,0),(0,1),(0,2),(1,0),(1,2),(2,0)]
 i=0
 
-for itr in ib.n_dof[:,4]:
+for itr in ib.nodal_dofs[:,4]:
     axi=axes[ixs[i]]
     axi.set_axis_off()
     X = np.zeros(ib.N)

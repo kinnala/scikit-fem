@@ -112,11 +112,11 @@ x[I] = solve(*condense(K, f, I=I))
 
 sf = 1
 
-m.p[0, :] = m.p[0, :] + sf*x[i1][ib.n_dof[0, :]]
-m.p[1, :] = m.p[1, :] + sf*x[i1][ib.n_dof[1, :]]
+m.p[0, :] = m.p[0, :] + sf*x[i1][ib.nodal_dofs[0, :]]
+m.p[1, :] = m.p[1, :] + sf*x[i1][ib.nodal_dofs[1, :]]
 
-M.p[0, :] = M.p[0, :] + sf*x[i2][Ib.n_dof[0, :]]
-M.p[1, :] = M.p[1, :] + sf*x[i2][Ib.n_dof[1, :]]
+M.p[0, :] = M.p[0, :] + sf*x[i2][Ib.nodal_dofs[0, :]]
+M.p[1, :] = M.p[1, :] + sf*x[i2][Ib.nodal_dofs[1, :]]
 
 if __name__ == "__main__":
     ax = m.draw()
