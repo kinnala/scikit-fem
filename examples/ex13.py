@@ -73,5 +73,5 @@ print('L2 error =', np.sqrt(u_error @ asm(mass, basis) @ u_error))
 print('conductance = {:.4f} (exact = 2 ln 2 / pi = {:.4f})'.format(
     u @ A @ u, 2 * np.log(2) / np.pi))
 
-mesh.plot3(u)
+mesh.plot(u)
 mesh.show()

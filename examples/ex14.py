@@ -38,5 +38,5 @@ u = (([1., 1.j] @ m.p) ** 2).real          # x**2 - y**2
 u[I] = solve(*condense(A, 0.*b, u, I))
 
 print('||grad u||**2 = {:.4f} (exact = 8/3 = {:.4f})'.format(u @ A @ u, 8/3))
-m.plot3(u)
+m.plot(u)
 m.show()

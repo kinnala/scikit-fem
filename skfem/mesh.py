@@ -512,7 +512,8 @@ class Mesh2D(Mesh):
              ax: Optional[Axes] = None,
              node_numbering: Optional[bool] = False,
              facet_numbering: Optional[bool] = False,
-             element_numbering: Optional[bool] = False) -> Axes:
+             element_numbering: Optional[bool] = False,
+             aspect: float = 1.) -> Axes:
         """Visualise a mesh by drawing the edges.
 
         Parameters
@@ -525,6 +526,9 @@ class Mesh2D(Mesh):
             If true, draw facet numbering.
         element_numbering
             If true, draw element numbering.
+        aspect
+            Ratio of vertical to horizontal length-scales; ignored if ax
+            specified
 
         Returns
         -------
@@ -536,6 +540,7 @@ class Mesh2D(Mesh):
             # create new figure
             fig = plt.figure()
             ax = fig.add_subplot(111)
+            ax.set_aspect(aspect)
         # visualize the mesh faster plotting is achieved through
         # None insertion trick.
         xs = []
@@ -2141,7 +2146,8 @@ class MeshTri(Mesh2D):
              smooth: Optional[bool] = False,
              ax: Optional[Axes] = None,
              zlim: Optional[Tuple[float, float]] = None,
-             edgecolors: Optional[str] = None) -> Axes:
+             edgecolors: Optional[str] = None,
+             aspect: float = 1.) -> Axes:
         """Visualise piecewise-linear or piecewise-constant function, 2D plot.
         
         Parameters
@@ -2156,6 +2162,9 @@ class MeshTri(Mesh2D):
             Use the given minimum and maximum values for coloring.
         edgecolors
             A string describing the edge coloring, e.g. 'k' for black.
+        float
+            The ratio of vertical to horizontal length-scales; ignored if ax
+            specified.
 
         Returns
         -------
@@ -2177,6 +2186,7 @@ class MeshTri(Mesh2D):
         if ax is None:
             fig = plt.figure()
             ax = fig.add_subplot(111)
+            ax.set_aspect(aspect)
         if edgecolors is None:
             edgecolors = 'k'
         if zlim == None:
