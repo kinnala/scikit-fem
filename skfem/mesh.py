@@ -891,18 +891,17 @@ class MeshQuad(Mesh2D):
     
     Attributes
     ----------
-    p : numpy array of size 2 x Nvertices
-        The vertices of the mesh
-    t : numpy array of size 4 x Nelements
-        The element connectivity
-    facets : numpy array of size 2 x Nfacets
-        Each column contains a pair of indices to p.
-    f2t : numpy array of size 2 x Nfacets
-        Each column contains a pair of indices to t
-        or -1 on the second row if the facet is on
-        the boundary.
-    t2f : numpy array of size 4 x Nelements
-        Each column contains four indices to facets.
+    p : ndarray
+        The vertices of the mesh (2 x Nvertices).
+    t : ndarray
+        The element connectivity (4 x Nelemens).
+    facets : ndarray
+        Each column contains a pair of indices to p (2 x Nfacets).
+    f2t : ndarray
+        Each column contains a pair of indices to t or -1 on the
+        second row if the facet is on the boundary (2 x Nfacets).
+    t2f : ndarray
+        Each column contains four indices to facets (4 x Nelements).
 
     """
 
@@ -1448,25 +1447,28 @@ class MeshTet(Mesh3D):
 
     Attributes
     ----------
-    p : numpy array of size 3 x Nvertices
-        The vertices of the mesh. Each column corresponds to a point.
-    t : numpy array of size 4 x Nelements
-        The element connectivity. Each column corresponds to a element
-        and contains four column indices to MeshTet.p.
-    facets : numpy array of size 3 x Nfacets
-        Each column contains a triplet of column indices to MeshTet.p.
-        Order: (0, 1, 2) (0, 1, 3) (0, 2, 3) (1, 2, 3)
-    f2t : numpy array of size 2 x Nfacets
-        Each column contains a pair of column indices to MeshTet.t
-        or -1 on the second row if the facet is located on the boundary.
-    t2f : numpy array of size 4 x Nelements
-        Each column contains four indices to MeshTet.facets.
-    edges : numpy array of size 2 x Nedges
-        Each column corresponds to an edge and contains two indices to
+    p : ndarray
+        The vertices of the mesh (3 x Nvertices). Each column
+        corresponds to a point.
+    t : ndarray
+        The element connectivity (4 x Nelements). Each column
+        corresponds to a element and contains four column indices to
         MeshTet.p.
+    facets : ndarray
+        Each column contains a triplet of column indices to MeshTet.p
+        (3 x Nfacets).  Order: (0, 1, 2) (0, 1, 3) (0, 2, 3) (1, 2, 3)
+    f2t : ndarray
+        Each column contains a pair of column indices to MeshTet.t or
+        -1 on the second row if the facet is located on the boundary
+        (2 x Nfacets).
+    t2f : ndarray
+        Each column contains four indices to MeshTet.facets (4 x Nelements).
+    edges : ndarray
+        Each column corresponds to an edge and contains two indices to
+        MeshTet.p (2 x Nedges).
         Order: (0, 1) (1, 2) (0, 2) (0, 3) (1, 3) (2, 3)
-    t2e : numpy array of size 6 x Nelements
-        Each column contains six indices to MeshTet.edges.
+    t2e : ndarray
+        Each column contains six indices to MeshTet.edges (6 x Nelements).
 
     """
 
