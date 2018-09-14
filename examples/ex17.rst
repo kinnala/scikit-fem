@@ -2,7 +2,7 @@ Structural vibration
 --------------------
 
 This example demonstrates the solution of a three-dimensional
-vector-valued problem. For this purpose, we consider the elastic
+vector-valued problem. For this purpose, we consider an elastic
 eigenvalue problem.
 
 .. figure:: ../examples/ex17_mesh.png
@@ -13,13 +13,33 @@ eigenvalue problem.
 	    are denoted by :math:`\Gamma_D`. The rest of the
 	    boundary is denoted by :math:`\Gamma_N`.
 
-The governing equation of an elastic structure reads: find
-:math:`\boldsymbol{u} : \Omega \rightarrow \mathbb{R}^3` satisfying
+The governing equation for the displacement of the elastic structure
+:math:`\Omega` reads: find :math:`\boldsymbol{u} : \Omega \rightarrow
+\mathbb{R}^3` satisfying
 
 .. math::
    \rho \ddot{\boldsymbol{u}} = \mathrm{div}\,\boldsymbol{\sigma}(\boldsymbol{u}) + \rho \boldsymbol{g},
 
-where :math:`\rho = 8050\,\frac{\mathrm{kg}}{\mathrm{m}^3}` is the density. We consider two kinds of boundary conditions. On a *fixed part* of the boundary, :math:`\Gamma_D \subset \partial \Omega`, the displacement field :math:`\boldsymbol{u}` satisfies
+where :math:`\rho = 8050\,\frac{\mathrm{kg}}{\mathrm{m}^3}` is the
+density, :math:`\boldsymbol{g}` is the gravitational acceleration and
+:math:`\boldsymbol{\sigma}` is the linear elastic stress tensor
+defined via
+
+.. math::
+   \begin{aligned}
+   \boldsymbol{\sigma}(\boldsymbol{w}) &= 2 \mu \boldsymbol{\epsilon}(\boldsymbol{w}) + \lambda \mathrm{tr}\,\boldsymbol{\epsilon}(\boldsymbol{w}) \boldsymbol{I}, \\
+   \boldsymbol{\epsilon}(\boldsymbol{w}) &= \frac12( \nabla \boldsymbol{w} + \nabla \boldsymbol{w}^T).
+   \end{aligned}
+
+Moreover, the Lamé parameters are given by
+
+.. math::
+   \lambda = \frac{E}{2(1 + \nu)}, \quad \mu = \frac{E \nu}{(1+ \nu)(1 - 2 \nu)},
+
+where the Young's modulus :math:`E=200\cdot 10^9\,\text{Pa}`
+and the Poisson ratio :math:`\nu = 0.3`.
+
+We consider two kinds of boundary conditions. On a *fixed part* of the boundary, :math:`\Gamma_D \subset \partial \Omega`, the displacement field :math:`\boldsymbol{u}` satisfies
 
 .. math::
    \boldsymbol{u}|_{\Gamma_D} = \boldsymbol{0}.
@@ -37,13 +57,56 @@ assuming a periodic solution of the form
 .. math::
    \boldsymbol{u}(\boldsymbol{x},t) = \boldsymbol{w}(\boldsymbol{x}) \sin \omega t,
 
-leads to the following eigenvalue problem with :math:`(\boldsymbol{w},\omega)` as an unknown:
+leads to the following eigenvalue problem with :math:`\boldsymbol{w}` and :math:`\omega` as unknowns:
 
 .. math::
    \mathrm{div}\,\boldsymbol{\sigma}(\boldsymbol{w}) = \rho \omega^2 \boldsymbol{w}.
 
 The weak formulation of the problem reads: find :math:`(\boldsymbol{w},\omega) \in V \times \mathbb{R}` satisfying
 
+.. math::
+   (\boldsymbol{\sigma}(\boldsymbol{w}), \boldsymbol{\epsilon}(\boldsymbol{v})) = \rho \omega^2 (\boldsymbol{w}, \boldsymbol{v}) \quad \forall \boldsymbol{v} \in V,
+
+where the variational space :math:`V` is defined as
 
 .. math::
-   (\boldsymbol{\sigma}(\boldsymbol{w}), \boldsymbol{\epsilon}(\boldsymbol{v})) = \rho \omega^2 (\boldsymbol{w}, \boldsymbol{v}), \quad \forall \boldsymbol{v} \in V,
+   V = \{ \boldsymbol{w} \in [H^1(\Omega)]^3 : \boldsymbol{w}|_{\Gamma_D} = \boldsymbol{0} \}.
+
+The bilinear form for the problem can be found from
+:func:`skfem.models.elasticity.linear_elasticity`.  Moreover, the mesh
+for the problem is loaded from an external file *beams.msh*, which is
+included in the source code distribution.
+
+.. literalinclude:: ../examples/ex17.py
+		    :lines: 1-6
+
+A vectorial :math:`H^1`-conforming element is defined by supplying another :class:`~skfem.element.Element` object to the constructor of :class:`~skfem.element.ElementVectorH1`.
+
+.. literalinclude:: ../examples/ex17.py
+		    :lines: 7-10
+
+The assembly is standard with the exception of vectorial
+solution and test functions.
+
+.. literalinclude:: ../examples/ex17.py
+		    :lines: 12-20
+
+The function :func:`~skfem.utils.solve` automatically detects
+eigenvalue problems if another sparse matrix is given as an argument instead of a load vector.
+
+.. literalinclude:: ../examples/ex17.py
+		    :lines: 22-32
+
+Finally, we displace the mesh before exporting to the VTK format.
+
+.. literalinclude:: ../examples/ex17.py
+		    :lines: 34-41
+
+.. figure:: ../examples/ex17_solution.png
+
+	    The first eigenvector.
+
+The complete source code reads as follows:
+
+.. literalinclude:: ../examples/ex17.py
+    :linenos:
