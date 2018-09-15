@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
-"""Mappings define relationships between reference and global elements."""
+"""Mappings define relationships between reference and global elements.
+
+:class:`~skfem.mesh.Mesh` provides default mappings for each mesh type,
+so normally the user is not required to access these classes.
+"""
 
 import numpy as np
 

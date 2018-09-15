@@ -1,5 +1,18 @@
 # -*- coding: utf-8 -*-
-"""Element classes define and evaluate the finite element basis functions."""
+"""Element classes define and evaluate the finite element basis
+functions.
+
+:class:`~skfem.element.Element` objects are supplemented to the
+constructors of :class:`~skfem.assembly.InteriorBasis` and
+:class:`~skfem.assembly.FacetBasis` by the user.
+
+>>> from skfem import *
+>>> m = MeshTri()
+>>> e = ElementTriP2()
+>>> basis = InteriorBasis(m, e)
+
+"""
+
 import numpy as np
 
 from typing import Tuple, Union, List

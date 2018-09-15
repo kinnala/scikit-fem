@@ -184,6 +184,72 @@ Constructors
 Visualisation
 ^^^^^^^^^^^^^
 
+skfem.mapping
+-------------
+
+.. automodule:: skfem.mapping
+
+.. autoclass:: skfem.mapping.MappingAffine
+
+.. autoclass:: skfem.mapping.MappingIsoparametric
+
+skfem.element
+-------------
+
+.. automodule:: skfem.element
+
+Triangular elements
+~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: skfem.element.ElementTriP1
+
+.. autoclass:: skfem.element.ElementTriP2
+
+.. autoclass:: skfem.element.ElementTriP0
+
+.. autoclass:: skfem.element.ElementTriArgyris
+
+.. autoclass:: skfem.element.ElementTriMorley
+
+.. autoclass:: skfem.element.ElementTriDG
+
+.. autoclass:: skfem.element.ElementTriRT0
+
+Quadrilateral elements
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: skfem.element.ElementQuad1
+
+.. autoclass:: skfem.element.ElementQuad2
+
+Tetrahedral elements
+~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: skfem.element.ElementTetP1
+
+.. autoclass:: skfem.element.ElementTetP2
+
+.. autoclass:: skfem.element.ElementTetP0
+
+.. autoclass:: skfem.element.ElementTetRT0
+
+.. autoclass:: skfem.element.ElementTetN0
+
+Hexahedral elements
+~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: skfem.element.ElementHex1
+
+1D elements
+~~~~~~~~~~~
+
+.. autoclass:: skfem.element.ElementLineP1
+
+Other
+~~~~~
+
+.. autoclass:: skfem.element.ElementVectorH1
+
 skfem.assembly
 --------------
 
