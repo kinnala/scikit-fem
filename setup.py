@@ -6,7 +6,7 @@ here = path.abspath(path.dirname(__file__))
 
 setup(
     name='scikit-fem',
-    version='0.1.9',
+    version='0.1.10',
     description='Simple finite element assemblers',
     long_description='Easy to use finite element assemblers and related tools. See Github page for more information and examples.',  # Optional
     url='https://github.com/kinnala/scikit-fem',
@@ -20,6 +20,6 @@ setup(
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Mathematics',
     ],
-    packages=find_packages(exclude=['examples']),  # Required
-    install_requires=['numpy', 'scipy', 'matplotlib', 'meshio'],  # Optional
+    packages=find_packages(exclude=['examples']),
+    install_requires=['numpy', 'scipy', 'matplotlib', 'meshio'],
 )
