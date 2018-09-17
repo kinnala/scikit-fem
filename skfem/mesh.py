@@ -6,8 +6,8 @@ formats using `meshio <https://github.com/nschloe/meshio>`_. See the following
 implementations:
 
 - :class:`~skfem.mesh.MeshTri`, triangular mesh
-- :class:`~skfem.mesh.MeshTet`, tetrahedral mesh
 - :class:`~skfem.mesh.MeshQuad`, quadrilateral mesh
+- :class:`~skfem.mesh.MeshTet`, tetrahedral mesh
 - :class:`~skfem.mesh.MeshHex`, hexahedral mesh
 - :class:`~skfem.mesh.MeshLine`, one-dimensional mesh
 
@@ -891,17 +891,27 @@ class MeshQuad(Mesh2D):
     
     Attributes
     ----------
-    p : ndarray
-        The vertices of the mesh (2 x Nvertices).
-    t : ndarray
-        The element connectivity (4 x Nelemens).
-    facets : ndarray
+    p
+        An array containing the vertices of the mesh (2 x Nvertices).
+    t
+        An array containing the element connectivity (4 x Nelemens).
+    facets
         Each column contains a pair of indices to p (2 x Nfacets).
-    f2t : ndarray
+    f2t
         Each column contains a pair of indices to t or -1 on the
         second row if the facet is on the boundary (2 x Nfacets).
-    t2f : ndarray
+    t2f
         Each column contains four indices to facets (4 x Nelements).
+    
+    Examples
+    --------
+    Initialise a tensor-product mesh.
+    
+    >>> from skfem.mesh import MeshQuad
+    >>> import numpy as np
+    >>> m = MeshQuad.init_tensor(np.linspace(0, 1, 10), np.linspace(0, 2, 5))
+    >>> m.p.shape
+    (2, 50)
 
     """
 
@@ -915,15 +925,18 @@ class MeshQuad(Mesh2D):
     f2t = np.array([])
     t2f = np.array([])
 
-    def __init__(self, p=None, t=None, validate=True):
+    def __init__(self,
+                 p: Optional[ndarray] = None,
+                 t: Optional[ndarray] = None,
+                 validate: Optional[bool] = True):
         """Initialise a quadrilateral mesh.
 
         Parameters
         ----------
-        p : (optional) numpy array of size 2 x Nvertices
-            The points of the mesh.
-        t : (optional) numpy array of size 4 x Nelements
-            The element connectivity, i.e. indices to p.
+        p
+            The points of the mesh (2 x Nvertices).
+        t
+            The element connectivity (4 x Nelems), i.e. indices to p.
             These should be in counter-clockwise order.
 
         """
@@ -2181,8 +2194,10 @@ class MeshTri(Mesh2D):
         >>> from skfem.mesh import MeshTri
         >>> m = MeshTri()
         >>> m.refine(3)
-        >>> m.plot(m.p[0, :]**2)
+        >>> ax = m.plot(m.p[0, :]**2, smooth=True)
         >>> m.show()
+        
+        .. figure:: pics/api_MeshTri_plot.png
             
         """
         if ax is None:
@@ -2206,7 +2221,10 @@ class MeshTri(Mesh2D):
                               vmin=zlim[0], vmax=zlim[1], edgecolors=edgecolors)
         return ax
 
-    def plot3(self, z, smooth=False, ax=None):
+    def plot3(self,
+              z: ndarray,
+              smooth: Optional[bool] = False,
+              ax: Optional[Axes] = None) -> Axes:
         """Visualise piecewise-linear or piecewise-constant function, 3D plot.
         
         Parameters
@@ -2222,6 +2240,19 @@ class MeshTri(Mesh2D):
         -------
         Axes
             The Matplotlib axes onto which the mesh was plotted.
+        
+        Examples
+        --------
+        Mesh the unit square :math:`(0,1)^2` and visualise the function
+        :math:`f(x)=x^2`.
+
+        >>> from skfem.mesh import MeshTri
+        >>> m = MeshTri()
+        >>> m.refine(3)
+        >>> ax = m.plot3(m.p[1, :]**2)
+        >>> m.show()
+        
+        .. figure:: pics/api_MeshTri_plot3.png
             
         """
         from mpl_toolkits.mplot3d import Axes3D
