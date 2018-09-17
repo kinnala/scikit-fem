@@ -3,64 +3,74 @@
 
 :class:`~skfem.mesh.Mesh` provides default mappings for each mesh type,
 so normally the user is not required to access these classes.
+
 """
 
 import numpy as np
 
+from typing import Optional
+
+from nympy import ndarray
 
 class Mapping():
-    def F(self, X, tind=None):
+    def F(self,
+          X: ndarray,
+          tind: Optional[ndarray] = None) -> ndarray:
         """Perform mapping from the reference element
         to global elements.
 
         Parameters
         ----------
-        X : ndarray of size Ndim x Nqp
-            Local points on the reference element
-        tind : (optional) ndarray
+        X
+            Local points on the reference element (Ndim x Nqp).
+        tind
             A set of element indices to map to
 
         Returns
         -------
-        ndarray of size Ndim x Nelems x Nqp
-            Global points
+        ndarray
+            Global points (Ndim x Nelems x Nqp)
 
         """
         raise NotImplementedError("!")
 
-    def invF(self, x, tind=None):
-        """Perform an inverse mapping from global elements to reference
-        element.
+    def invF(self,
+             x: ndarray,
+             tind: Optional[ndarray] = None) -> ndarray:
+        """Perform an inverse mapping from global elements to
+        reference element.
 
         Parameters
         ----------
-        x : ndarray of size Ndim x Nelems x Nqp
-            The global points
-        tind : (optional) ndarray
+        x
+            The global points (Ndim x Nelems x Nqp).
+        tind
             A set of element indices to map from
 
         Returns
         -------
-        ndarray of size Ndim x Nelems x Nqp
-            The corresponding local points
+        ndarray
+            The corresponding local points (Ndim x Nelems x Nqp).
 
         """
         raise NotImplementedError("!")
 
-    def G(self, X, find=None):
+    def G(self,
+          X: ndarray,
+          find: Optional[ndarray] = None):
         """Perform a mapping from the reference facet to global facet.
 
         Parameters
         ----------
-        X : ndarray of size Ndim x Nqp
-            Local points on the reference element
-        find : (optional) ndarray
+        X
+            Local points on the reference element (Ndim x Nqp).
+        find
             A set of facet indices to map to
 
         Returns
         -------
-        ndarray of size Ndim x Nelems x Nqp
-            Global points
+        ndarray
+            Global points (Ndim x Nelems x Nqp).
 
         """
         raise NotImplementedError("!")
@@ -82,8 +92,9 @@ class Mapping():
 
 
 class MappingIsoparametric(Mapping):
-    """An isoparametric mapping, e.g., for quadrilateral and hexahedral
-    elements."""
+    """An isoparametric mapping, e.g., for quadrilateral and
+    hexahedral elements."""
+
     def __init__(self, mesh, elem, bndelem=None):
         p = mesh.p
         t = mesh.t
@@ -161,9 +172,12 @@ class MappingIsoparametric(Mapping):
         if dim == 2:
             return np.sqrt(self.bndJ(0, 0, X, find)**2 + self.bndJ(1, 0, X, find)**2)
         elif dim == 3:
-            return np.sqrt(( self.bndJ(1, 0, X, find)*self.bndJ(2, 1, X, find) - self.bndJ(2, 0, X, find)*self.bndJ(1, 1, X, find))**2 +
-                           (-self.bndJ(0, 0, X, find)*self.bndJ(2, 1, X, find) + self.bndJ(2, 0, X, find)*self.bndJ(0, 1, X, find))**2 +
-                           ( self.bndJ(0, 0, X, find)*self.bndJ(1, 1, X, find) - self.bndJ(1, 0, X, find)*self.bndJ(0, 1, X, find))**2)
+            return np.sqrt(( self.bndJ(1, 0, X, find)*self.bndJ(2, 1, X, find) -\
+                             self.bndJ(2, 0, X, find)*self.bndJ(1, 1, X, find))**2 +
+                           (-self.bndJ(0, 0, X, find)*self.bndJ(2, 1, X, find) +\
+                             self.bndJ(2, 0, X, find)*self.bndJ(0, 1, X, find))**2 +
+                           ( self.bndJ(0, 0, X, find)*self.bndJ(1, 1, X, find) -\
+                             self.bndJ(1, 0, X, find)*self.bndJ(0, 1, X, find))**2)
         else:
             raise NotImplementedError("!")
 
@@ -182,11 +196,15 @@ class MappingIsoparametric(Mapping):
         dim = X.shape[0]
 
         if dim == 2:
-            detDF = self.J(0, 0, X, tind=tind) * self.J(1, 1, X, tind=tind) - self.J(0, 1, X, tind=tind) * self.J(1, 0, X, tind=tind)
+            detDF = self.J(0, 0, X, tind=tind) * self.J(1, 1, X, tind=tind) -\
+                    self.J(0, 1, X, tind=tind) * self.J(1, 0, X, tind=tind)
         elif dim == 3:
-            detDF = self.J(0, 0, X, tind=tind) * (self.J(1, 1, X, tind=tind) * self.J(2, 2, X, tind=tind) - self.J(1, 2, X, tind=tind) * self.J(2, 1, X, tind=tind)) \
-                  - self.J(0, 1, X, tind=tind) * (self.J(1, 0, X, tind=tind) * self.J(2, 2, X, tind=tind) - self.J(1, 2, X, tind=tind) * self.J(2, 0, X, tind=tind)) \
-                  + self.J(0, 2, X, tind=tind) * (self.J(1, 0, X, tind=tind) * self.J(2, 1, X, tind=tind) - self.J(1, 1, X, tind=tind) * self.J(2, 0, X, tind=tind))
+            detDF = self.J(0, 0, X, tind=tind) * (self.J(1, 1, X, tind=tind) * self.J(2, 2, X, tind=tind) -\
+                                                  self.J(1, 2, X, tind=tind) * self.J(2, 1, X, tind=tind)) \
+                  - self.J(0, 1, X, tind=tind) * (self.J(1, 0, X, tind=tind) * self.J(2, 2, X, tind=tind) -\
+                                                  self.J(1, 2, X, tind=tind) * self.J(2, 0, X, tind=tind)) \
+                  + self.J(0, 2, X, tind=tind) * (self.J(1, 0, X, tind=tind) * self.J(2, 1, X, tind=tind) -\
+                                                  self.J(1, 1, X, tind=tind) * self.J(2, 0, X, tind=tind))
         else:
             raise Exception("Not implemented for the given dimension.")
 
@@ -201,21 +219,30 @@ class MappingIsoparametric(Mapping):
 
         if dim == 2:
             invDF = np.empty((2, 2) + self.J(0, 0, X, tind=tind).shape)
-            invDF[0, 0] =  self.J(1, 1, X, tind=tind)/detDF
-            invDF[0, 1] = -self.J(0, 1, X, tind=tind)/detDF
-            invDF[1, 0] = -self.J(1, 0, X, tind=tind)/detDF
-            invDF[1, 1] =  self.J(0, 0, X, tind=tind)/detDF
+            invDF[0, 0] =  self.J(1, 1, X, tind=tind) / detDF
+            invDF[0, 1] = -self.J(0, 1, X, tind=tind) / detDF
+            invDF[1, 0] = -self.J(1, 0, X, tind=tind) / detDF
+            invDF[1, 1] =  self.J(0, 0, X, tind=tind) / detDF
         elif dim == 3:
             invDF = np.empty((3, 3) + self.J(0, 0, X, tind=tind).shape)
-            invDF[0, 0] = (-self.J(1, 2, X, tind=tind) * self.J(2, 1, X, tind=tind) + self.J(1, 1, X, tind=tind) * self.J(2, 2, X, tind=tind)) / detDF
-            invDF[1, 0] = ( self.J(1, 2, X, tind=tind) * self.J(2, 0, X, tind=tind) - self.J(1, 0, X, tind=tind) * self.J(2, 2, X, tind=tind)) / detDF
-            invDF[2, 0] = (-self.J(1, 1, X, tind=tind) * self.J(2, 0, X, tind=tind) + self.J(1, 0, X, tind=tind) * self.J(2, 1, X, tind=tind)) / detDF
-            invDF[0, 1] = ( self.J(0, 2, X, tind=tind) * self.J(2, 1, X, tind=tind) - self.J(0, 1, X, tind=tind) * self.J(2, 2, X, tind=tind)) / detDF
-            invDF[1, 1] = (-self.J(0, 2, X, tind=tind) * self.J(2, 0, X, tind=tind) + self.J(0, 0, X, tind=tind) * self.J(2, 2, X, tind=tind)) / detDF
-            invDF[2, 1] = ( self.J(0, 1, X, tind=tind) * self.J(2, 0, X, tind=tind) - self.J(0, 0, X, tind=tind) * self.J(2, 1, X, tind=tind)) / detDF
-            invDF[0, 2] = (-self.J(0, 2, X, tind=tind) * self.J(1, 1, X, tind=tind) + self.J(0, 1, X, tind=tind) * self.J(1, 2, X, tind=tind)) / detDF
-            invDF[1, 2] = ( self.J(0, 2, X, tind=tind) * self.J(1, 0, X, tind=tind) - self.J(0, 0, X, tind=tind) * self.J(1, 2, X, tind=tind)) / detDF
-            invDF[2, 2] = (-self.J(0, 1, X, tind=tind) * self.J(1, 0, X, tind=tind) + self.J(0, 0, X, tind=tind) * self.J(1, 1, X, tind=tind)) / detDF
+            invDF[0, 0] = (-self.J(1, 2, X, tind=tind) * self.J(2, 1, X, tind=tind) +\
+                            self.J(1, 1, X, tind=tind) * self.J(2, 2, X, tind=tind)) / detDF
+            invDF[1, 0] = ( self.J(1, 2, X, tind=tind) * self.J(2, 0, X, tind=tind) -\
+                            self.J(1, 0, X, tind=tind) * self.J(2, 2, X, tind=tind)) / detDF
+            invDF[2, 0] = (-self.J(1, 1, X, tind=tind) * self.J(2, 0, X, tind=tind) +\
+                            self.J(1, 0, X, tind=tind) * self.J(2, 1, X, tind=tind)) / detDF
+            invDF[0, 1] = ( self.J(0, 2, X, tind=tind) * self.J(2, 1, X, tind=tind) -\
+                            self.J(0, 1, X, tind=tind) * self.J(2, 2, X, tind=tind)) / detDF
+            invDF[1, 1] = (-self.J(0, 2, X, tind=tind) * self.J(2, 0, X, tind=tind) +\
+                            self.J(0, 0, X, tind=tind) * self.J(2, 2, X, tind=tind)) / detDF
+            invDF[2, 1] = ( self.J(0, 1, X, tind=tind) * self.J(2, 0, X, tind=tind) -\
+                            self.J(0, 0, X, tind=tind) * self.J(2, 1, X, tind=tind)) / detDF
+            invDF[0, 2] = (-self.J(0, 2, X, tind=tind) * self.J(1, 1, X, tind=tind) +\
+                            self.J(0, 1, X, tind=tind) * self.J(1, 2, X, tind=tind)) / detDF
+            invDF[1, 2] = ( self.J(0, 2, X, tind=tind) * self.J(1, 0, X, tind=tind) -\
+                            self.J(0, 0, X, tind=tind) * self.J(1, 2, X, tind=tind)) / detDF
+            invDF[2, 2] = (-self.J(0, 1, X, tind=tind) * self.J(1, 0, X, tind=tind) +\
+                            self.J(0, 0, X, tind=tind) * self.J(1, 1, X, tind=tind)) / detDF
         else:
             raise Exception("Not implemented for the given dimension.")
 
@@ -293,9 +320,9 @@ class MappingAffine(Mapping):
             elif dim == 2:
                 self.detB = np.sqrt(self.B[0, 0]**2 + self.B[1, 0]**2)
             elif dim == 3:
-                self.detB = np.sqrt((self.B[1, 0]*self.B[2, 1] - self.B[2, 0]*self.B[1, 1])**2 +
+                self.detB = np.sqrt(( self.B[1, 0]*self.B[2, 1] - self.B[2, 0]*self.B[1, 1])**2 +
                                     (-self.B[0, 0]*self.B[2, 1] + self.B[2, 0]*self.B[0, 1])**2 +
-                                    (self.B[0, 0]*self.B[1, 1] - self.B[1, 0]*self.B[0, 1])**2)
+                                    ( self.B[0, 0]*self.B[1, 1] - self.B[1, 0]*self.B[0, 1])**2)
             else:
                 raise Exception("Not implemented for the given dimension.")
 
