@@ -10,7 +10,7 @@ import numpy as np
 
 from typing import Optional
 
-from nympy import ndarray
+from numpy import ndarray
 
 class Mapping():
     def F(self,
