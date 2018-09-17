@@ -23,10 +23,12 @@ project = 'scikit-fem'
 copyright = '2018, Tom Gustafsson'
 author = 'Tom Gustafsson'
 
+
+import re
+# The full version, including alpha/beta/rc tags.
+release = re.sub('^v', '', os.popen('git describe --tags').read().strip())
 # The short X.Y version
-version = ''
-# The full version, including alpha/beta/rc tags
-release = '0.1.8'
+version = release
 
 
 # -- General configuration ---------------------------------------------------
