@@ -11,10 +11,10 @@ Easy to use finite element assemblers and the related tools.
 ## Features
 
 This library fills an important gap in the spectrum of finite element codes.
-The library is **lightweight** meaning that it has **minimal dependencies**.
-It contains **no compiled code**, which means that it's **easy to install** and
+The library is *lightweight* meaning that it has *minimal dependencies*.
+It contains *no compiled code* meaning that it's *easy to install* and
 use on all platforms that support NumPy.  Despite being fully interpreted, the
-code has a reasonably **good performance**.
+code has a reasonably *good performance*.
 
 In the following snippet, we create a tetrahedral mesh with over 1 million
 elements and assemble a discrete Laplace operator, all in just a few seconds.
