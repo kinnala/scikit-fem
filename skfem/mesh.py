@@ -297,8 +297,23 @@ class Mesh():
                 warnings.warn("Could not load submeshes.")
             return mesh
         else:
-            raise Exception("The mesh contains no elements of type "
-                            + cls.meshio_type)
+            raise Exception("The mesh contains no elements of type " + cls.meshio_type)
+
+    def boundary_nodes(self) -> ndarray:
+        """Return an array of boundary node indices."""
+        return np.unique(self.facets[:, self.boundary_facets()])
+
+    def interior_nodes(self) -> ndarray:
+        """Return an array of interior node indices."""
+        return np.setdiff1d(np.arange(0, self.p.shape[1]), self.boundary_nodes())
+
+    def boundary_facets(self) -> ndarray:
+        """Return an array of boundary facet indices."""
+        return np.nonzero(self.f2t[1, :] == -1)[0]
+
+    def interior_facets(self) -> ndarray:
+        """Return an array of interior facet indices."""
+        return np.nonzero(self.f2t[1, :] >= 0)[0]
 
 
 class Mesh3D(Mesh):
@@ -392,27 +407,11 @@ class Mesh3D(Mesh):
             t = None
         return Submesh(p=p, facets=facets, edges=edges, t=t)
 
-    def boundary_nodes(self) -> ndarray:
-        """Return an array of boundary node indices."""
-        return np.unique(self.facets[:, self.boundary_facets()])
-
-    def boundary_facets(self) -> ndarray:
-        """Return an array of boundary facet indices."""
-        return np.nonzero(self.f2t[1, :] == -1)[0]
-
-    def interior_facets(self) -> ndarray:
-        """Return an array of interior facet indices."""
-        return np.nonzero(self.f2t[1, :] >= 0)[0]
-
     def boundary_edges(self) -> ndarray:
         """Return an array of boundary edge indices."""
         bnodes = self.boundary_nodes()[:, None]
         return np.nonzero(np.sum(self.edges[0, :] == bnodes, axis=0) *
                           np.sum(self.edges[1, :] == bnodes, axis=0))[0]
-
-    def interior_nodes(self) -> ndarray:
-        """Return an array of interior node indices."""
-        return np.setdiff1d(np.arange(0, self.p.shape[1]), self.boundary_nodes())
 
     def param(self) -> float:
         """Return (maximum) mesh parameter."""
@@ -429,14 +428,6 @@ class Mesh2D(Mesh):
     - :class:`~skfem.mesh.MeshQuad`, quadrilateral mesh
 
     """
-
-    def boundary_nodes(self) -> ndarray:
-        """Return an array of boundary node indices."""
-        return np.unique(self.facets[:, self.boundary_facets()])
-
-    def interior_nodes(self) -> ndarray:
-        """Return an array of interior node indices."""
-        return np.setdiff1d(np.arange(0, self.p.shape[1]), self.boundary_nodes())
 
     def nodes_satisfying(self, test: Callable[[float, float], bool]) -> ndarray:
         """Return nodes that satisfy some condition.
@@ -499,14 +490,6 @@ class Mesh2D(Mesh):
         if len(t) == 0:
             t = None
         return Submesh(p=p, facets=facets, edges=None, t=t)
-
-    def interior_facets(self) -> ndarray:
-        """Return an array of interior facet indices."""
-        return np.nonzero(self.f2t[1, :] >= 0)[0]
-
-    def boundary_facets(self) -> ndarray:
-        """Return an array of boundary facet indices."""
-        return np.nonzero(self.f2t[1, :] == -1)[0]
 
     def draw(self,
              ax: Optional[Axes] = None,
