@@ -23,6 +23,7 @@ from skfem.models.poisson import laplace, mass, unit_load
 
 import numpy as np
 
+import meshio
 from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
 
@@ -45,26 +46,19 @@ lines.append(geom.add_circle_arc(points[4], points[0], points[1]))
 geom.add_physical_surface(
     geom.add_plane_surface(geom.add_line_loop(lines)), 'domain')
 
-pts, cells, _, cell_data, field_data = generate_mesh(
-    geom, prune_vertices=False)
-
-mesh = MeshTri(pts[:, :2].T, cells['triangle'].T)
-boundaries = {bc:
-              np.unique(cells['line'][cell_data['line']['gmsh:physical'] ==
-                                      field_data[bc][0]])
-              for bc in field_data if field_data[bc][1] == 1}
+mesh = MeshTri.from_meshio(meshio.Mesh(*generate_mesh(geom,
+                                                      prune_vertices=False)))
 
 elements = ElementTriP1()
 basis = InteriorBasis(mesh, elements, MappingAffine(mesh), 2)
 A = asm(laplace, basis)
 b = asm(unit_load, basis)
 
-dofs = np.setdiff1d(np.arange(0, mesh.p.shape[1]),
-                    np.union1d(boundaries['positive'],
-                               boundaries['ground']))
+dofs = basis.complement_dofs(mesh.boundaries['positive'].p,
+                             mesh.boundaries['ground'].p)
 
 u = 0.*b
-u[boundaries['positive']] = 1.
+u[mesh.boundaries['positive'].p] = 1.
 u[dofs] = solve(*condense(A, 0.*b, u, dofs))
 
 u_exact = 2 * np.arctan2(mesh.p[1, :], mesh.p[0, :]) / np.pi
