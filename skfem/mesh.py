@@ -237,18 +237,17 @@ class Mesh():
         meshio.write(filename, mesh)
 
     @classmethod
-    def load(cls: Type[MeshType], filename: str) -> MeshType:
-        """Load an external mesh from file using `meshio
+    def from_meshio(cls: Type[MeshType], meshdata) -> MeshType:
+        """Translate a mesh from `meshio
         <https://github.com/nschloe/meshio>`_.
         
         Parameters
         ----------
-        filename
-            The filename of the mesh.
+        meshdata
+            A meshio.Mesh.
 
         """
-        import meshio
-        meshdata = meshio.read(filename)
+
         if cls.meshio_type in meshdata.cells:
             if issubclass(cls, Mesh2D):
                 p = meshdata.points[:, :2].T
@@ -298,6 +297,20 @@ class Mesh():
             return mesh
         else:
             raise Exception("The mesh contains no elements of type " + cls.meshio_type)
+
+    @classmethod
+    def load(cls: Type[MeshType], filename: str) -> MeshType:
+        """Load an external mesh from file using `meshio
+        <https://github.com/nschloe/meshio>`_.
+        
+        Parameters
+        ----------
+        filename
+            The filename of the mesh.
+
+        """
+        import meshio
+        return cls.from_meshio(meshio.read(filename))
 
     def boundary_nodes(self) -> ndarray:
         """Return an array of boundary node indices."""
