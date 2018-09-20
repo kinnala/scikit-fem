@@ -421,20 +421,30 @@ class FacetBasis(GlobalBasis):
     (5, 5)
 
     """
-    def __init__(self, mesh, elem, mapping=None, intorder=None, side=None):
+    def __init__(self,
+                 mesh,
+                 elem,
+                 mapping=None,
+                 intorder: Optional[int] = None,
+                 side: Optional[int] = None,
+                 submesh = None):
         super(FacetBasis, self).__init__(mesh, elem, mapping, intorder)
 
         self.X, self.W = get_quadrature(self.brefdom, self.intorder)
 
         # triangles where the basis is evaluated
-        if side is None:
-            self.find = np.nonzero(self.mesh.f2t[1, :] == -1)[0]
-            self.tind = self.mesh.f2t[0, self.find]
-        elif side == 0 or side == 1:
-            self.find = np.nonzero(self.mesh.f2t[1, :] != -1)[0]
-            self.tind = self.mesh.f2t[side, self.find]
+        if submesh is None:
+            if side is None:
+                self.find = np.nonzero(self.mesh.f2t[1, :] == -1)[0]
+                self.tind = self.mesh.f2t[0, self.find]
+            elif side == 0 or side == 1:
+                self.find = np.nonzero(self.mesh.f2t[1, :] != -1)[0]
+                self.tind = self.mesh.f2t[side, self.find]
+            else:
+                raise Exception("Parameter side must be 0 or 1. Facet shares only two elements.")
         else:
-            raise Exception("Parameter side must be 0 or 1. Facet shares only two elements.")
+            self.find = submesh.facets
+            self.tind = self.mesh.f2t[0, self.find]
 
         # boundary refdom to global facet
         x = self.mapping.G(self.X, find=self.find)

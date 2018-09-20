@@ -61,3 +61,25 @@ class IntegrateFuncOverBoundary(unittest.TestCase):
 
             self.assertAlmostEqual(ones @ (B @ ones), 0.3333333333, places=5)
 
+class IntegrateFuncOverBoundaryPart(unittest.TestCase):
+    def runTest(self):
+        cases = [(MeshHex, ElementHex1),
+                 (MeshTet, ElementTetP1),
+                 (MeshTet, ElementTetP0)]
+
+        for (mtype, etype) in cases:
+            m = mtype()
+            m.refine(3)
+            sm = m.submesh(lambda x,y,z: x==1.0)
+            fb = FacetBasis(m, etype(), submesh=sm)
+
+            @bilinear_form
+            def uv(u, du, v, dv, w):
+                x, y, z = w.x
+                return x**2*y**2*z**2*u*v
+            B = asm(uv, fb)
+
+            ones = np.ones(B.shape[0])
+
+            self.assertAlmostEqual(ones @ (B @ ones), 0.11111111, places=5)
+
