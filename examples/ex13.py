@@ -69,3 +69,5 @@ print('conductance = {:.4f} (exact = 2 ln 2 / pi = {:.4f})'.format(
 
 mesh.plot(u)
 mesh.show()
+
+positive_basis = FacetBasis(mesh, elements, submesh=mesh.boundaries['positive'])
