@@ -42,7 +42,7 @@ Modify
 
 .. automethod:: skfem.mesh.MeshTri.translate
 
-.. automethod:: skfem.mesh.MeshTri.mirror_mesh
+.. automethod:: skfem.mesh.MeshTri.mirror
 
 Explore
 ^^^^^^^
@@ -108,7 +108,7 @@ Modify
 
 .. automethod:: skfem.mesh.MeshQuad.translate
 
-.. automethod:: skfem.mesh.MeshQuad.mirror_mesh
+.. automethod:: skfem.mesh.MeshQuad.mirror
 
 Explore
 ^^^^^^^
