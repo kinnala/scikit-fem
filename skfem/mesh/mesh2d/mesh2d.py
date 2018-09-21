@@ -147,8 +147,9 @@ class Mesh2D(Mesh):
 
         return ax
 
-    def mirror_mesh(self, a: float, b: float, c: float) -> MeshType:
-        """Mirror a mesh by the line :math:`ax + by + c = 0`."""
+    def mirror(self, a: float, b: float, c: float) -> MeshType:
+        """Mirror a mesh by the line :math:`ax + by + c = 0`.  Returns a new
+        :class:`~skfem.mesh.Mesh` object."""
         tmp = -2.0*(a*self.p[0, :] + b*self.p[1, :] + c)/(a**2 + b**2)
         newx = a*tmp + self.p[0, :]
         newy = b*tmp + self.p[1, :]
