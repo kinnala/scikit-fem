@@ -20,6 +20,6 @@ setup(
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Mathematics',
     ],
-    packages=find_packages(exclude=['examples']),
+    packages=find_packages(exclude=['tests']),
     install_requires=['numpy', 'scipy', 'matplotlib', 'meshio'],
 )
