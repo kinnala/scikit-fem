@@ -5,6 +5,9 @@ from numpy import ndarray
 
 from skfem.quadrature import get_quadrature
 
+from skfem.mesh import Mesh
+from skfem.element import Element
+from skfem.mapping import Mapping
 from .global_basis import GlobalBasis
 
 
@@ -14,34 +17,39 @@ class InteriorBasis(GlobalBasis):
 
     Attributes
     ----------
-    phi : numpy array
+    phi : ndarray
         Global basis functions at global quadrature points.
-    dphi : numpy array
+    dphi : ndarray
         Global basis function derivatives at global quadrature points.
-    X : numpy array of size Ndim x Nqp
-        Local quadrature points.
-    W : numpy array of size Nqp
-        Local quadrature weights.
+    X : ndarray
+        Local quadrature points (Ndim x Nqp).
+    W : ndarray
+        Local quadrature weights (Nqp).
     nelems : int
-    dx : numpy array of size Nelems x Nqp
-        Can be used in computing global integrals elementwise.
-        For example, np.sum(u**2*dx, axis=1) where u is also
+    dx : ndarray
+        Can be used in computing global integrals elementwise (Nelems
+        x Nqp).  For example, np.sum(u**2*dx, axis=1) where u is also
         a numpy array of size Nelems x Nqp.
-    mapping : an object of the type skfem.mapping.Mapping
-    elem : an object of the type skfem.element.Element
+    mapping : skfem.mapping.Mapping
+    elem : skfem.element.Element
     Nbfun : int
+        Number of basis functions.
     intorder : int
+        Integration order.
     dim : int
+        Dimension of the problem.
     nt : int
-    mesh : an object of the type skfem.mesh.Mesh
+        Number of triangles.
+    mesh : skfem.mesh.Mesh
     refdom : string
     brefdom : string
 
     Examples
     --------
 
-    InteriorBasis object is a combination of Mesh, Element,
-    and Mapping:
+    :class:`~skfem.assembly.InteriorBasis` object is a combination of
+    :class:`~skfem.mesh.Mesh`, :class:`~skfem.element.Element`, and
+    :class:`~skfem.mapping.Mapping`:
 
     >>> from skfem import *
     >>> from skfem.models.poisson import laplace
@@ -56,7 +64,11 @@ class InteriorBasis(GlobalBasis):
     (5, 5)
 
     """
-    def __init__(self, mesh, elem, mapping=None, intorder=None):
+    def __init__(self,
+                 mesh: Mesh,
+                 elem: Element,
+                 mapping: Optional[Mapping] = None,
+                 intorder: Optional[int] = None):
         super(InteriorBasis, self).__init__(mesh, elem, mapping, intorder)
 
         self.X, self.W = get_quadrature(self.refdom, self.intorder)

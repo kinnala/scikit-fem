@@ -6,6 +6,7 @@ from typing import NamedTuple, Optional, Dict, List, Tuple, Union
 
 from numpy import ndarray
 
+from scipy.sparse import csr_matrix
 from .global_basis import GlobalBasis
 
 def asm(kernel,
@@ -15,7 +16,7 @@ def asm(kernel,
         dw: Optional[ndarray] = None,
         ddw: Optional[ndarray] = None,
         nthreads: Optional[int] = 1,
-        assemble: Optional[bool] = True):
+        assemble: Optional[bool] = True) -> csr_matrix:
     """Assemble finite element matrices.
 
     Parameters
