@@ -1,5 +1,9 @@
 import unittest
+
+import numpy as np
+
 from skfem.mesh import *
+
 
 class MeshTests(unittest.TestCase):
     """Test some of the methods in mesh classes
