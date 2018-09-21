@@ -1,4 +1,5 @@
 import unittest
+import numpy as np
 from skfem.mesh import *
 
 class MeshTests(unittest.TestCase):
