@@ -1,15 +1,15 @@
-from typing import Optional, Tuple, Type
-
-from matplotlib.axes import Axes
 import numpy as np
-from numpy import ndarray
-
+import matplotlib.pyplot as plt
+import matplotlib.tri as mtri
 from scipy.sparse import coo_matrix
-
 from skfem.mapping import MappingAffine
 
 from .mesh2d import Mesh2D, MeshType
 
+from typing import Optional, Tuple, Type
+
+from matplotlib.axes import Axes
+from numpy import ndarray
 
 class MeshTri(Mesh2D):
     """A mesh consisting of triangular elements.

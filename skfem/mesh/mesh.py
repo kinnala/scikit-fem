@@ -1,10 +1,11 @@
-from typing import Dict, Optional, Tuple, Type, TypeVar, Union
+import numpy as np
+import matplotlib.pyplot as plt
 import warnings
 
-import numpy as np
-from numpy import ndarray
-
 from .submesh import Submesh
+
+from typing import Dict, Optional, Tuple, Type, TypeVar, Union
+from numpy import ndarray
 
 MeshType = TypeVar('MeshType', bound='Mesh')
 DimTuple = Union[Tuple[float], Tuple[float, float], Tuple[float, float, float]]

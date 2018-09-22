@@ -1,7 +1,5 @@
-from typing import Optional, Type
-
 import numpy as np
-from numpy import ndarray
+import matplotlib.pyplot as plt
 
 from skfem.element import ElementQuad1, ElementLineP1
 from skfem.mapping import MappingIsoparametric
@@ -9,6 +7,9 @@ from skfem.mapping import MappingIsoparametric
 from .mesh2d import Mesh2D, MeshType
 from .mesh_tri import MeshTri
 
+from typing import Optional, Type
+
+from numpy import ndarray
 
 class MeshQuad(Mesh2D):
     """A mesh consisting of quadrilateral elements.
