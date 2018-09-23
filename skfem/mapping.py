@@ -11,6 +11,8 @@ import numpy as np
 from typing import Optional
 
 from numpy import ndarray
+from skfem.mesh import Mesh
+from skfem.element import Element
 
 class Mapping():
     def F(self,
@@ -57,7 +59,7 @@ class Mapping():
 
     def G(self,
           X: ndarray,
-          find: Optional[ndarray] = None):
+          find: Optional[ndarray] = None) -> ndarray:
         """Perform a mapping from the reference facet to global facet.
 
         Parameters
@@ -75,7 +77,9 @@ class Mapping():
         """
         raise NotImplementedError("!")
 
-    def detDG(self, X, find=None):
+    def detDG(self,
+              X: ndarray,
+              find: Optional[ndarray] = None) -> ndarray:
         raise NotImplementedError("!")
     
     def normals(self, X, tind, find, t2f):
@@ -95,7 +99,35 @@ class MappingIsoparametric(Mapping):
     """An isoparametric mapping, e.g., for quadrilateral and
     hexahedral elements."""
 
-    def __init__(self, mesh, elem, bndelem=None):
+    def __init__(self,
+                 mesh: Mesh,
+                 elem: Element,
+                 bndelem: Optional[Element] = None):
+        """Initialize an isoparametric mapping between
+        the reference and the global element.
+
+        This means that the mapping is defined through
+
+        .. math::
+            x = F(\widehat{x}) = \sum_{i=1}^N x_i \phi_i(\widehat{x}),
+        
+        where :math:`N` is the number of basis functions in the provided
+        element and :math:`x_i` are the locations of the corresponding
+        global nodes.
+
+        Parameters
+        ----------
+        mesh
+            An object of type `~skfem.mesh.Mesh`.
+        elem
+            An object of type `~skfem.element.Element`.
+        bndelem
+            An object of type `~skfem.element.Element`.
+            Should be a boundary element type corresponding
+            to elem, i.e. for ElementHex1 the corresponding
+            bndelem is ElementQuad1.
+
+        """
         p = mesh.p
         t = mesh.t
         facets = mesh.facets
@@ -163,10 +195,10 @@ class MappingIsoparametric(Mapping):
         self.elem = elem
         self.mesh = mesh
 
-    def G(self, X, find=None):
+    def G(self, X: ndarray, find: Optional[ndarray] = None) -> ndarray:
         return np.array([self.bndmap(i, X, find=find) for i in range(self.mesh.dim())])
 
-    def detDG(self, X, find=None):
+    def detDG(self, X: ndarray, find: Optional[ndarray] = None):
         dim = self.mesh.p.shape[0]
 
         if dim == 2:

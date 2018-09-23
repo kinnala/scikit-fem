@@ -1,12 +1,13 @@
-from typing import Callable, Dict, Optional, Union
-
-from matplotlib.axes import Axes
 import numpy as np
-from numpy import ndarray
+import matplotlib.pyplot as plt
 
 from skfem.mesh import Mesh, MeshType
 from skfem.mesh.submesh import Submesh
 
+from typing import Callable, Dict, Optional, Union
+
+from numpy import ndarray
+from matplotlib.axes import Axes
 
 class Mesh2D(Mesh):
     """Two dimensional meshes, common methods.

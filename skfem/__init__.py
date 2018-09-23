@@ -52,6 +52,7 @@ __all__ = ['InterfaceMesh1D',
            'ElementTriP0',
            'ElementTriP1',
            'ElementTriP2',
+           'ElementTriL2',
            'ElementTriRT0',
            'ElementVectorH1',
            'ElementLineP1',]
