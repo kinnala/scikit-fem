@@ -330,6 +330,8 @@ class MeshTri(Mesh2D):
         >>> m.show()
         
         .. figure:: pics/api_MeshTri_plot.png
+        
+                    The function :math:`f(x)=x^2` plotted using :meth:`~skfem.mesh.MeshTri.plot`.
             
         """
         if ax is None:
@@ -385,7 +387,8 @@ class MeshTri(Mesh2D):
         >>> m.show()
         
         .. figure:: pics/api_MeshTri_plot3.png
-            
+
+                    The function :math:`f(x)=x^2` plotted using :meth:`~skfem.mesh.MeshTri.plot3`.
         """
         from mpl_toolkits.mplot3d import Axes3D
         if ax is None:
