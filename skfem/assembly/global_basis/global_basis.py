@@ -113,15 +113,15 @@ class GlobalBasis():
         if submesh.p is not None:
             for i in range(self.nodal_dofs.shape[0]):
                 nodal_dofs[self.dofnames[i]] = self.nodal_dofs[i, submesh.p]
-                offset += 1
+            offset += self.nodal_dofs.shape[0]
         if submesh.facets is not None:
             for i in range(self.facet_dofs.shape[0]):
                 facet_dofs[self.dofnames[i + offset]] = self.facet_dofs[i, submesh.facets]
-                offset += 1
+            offset += self.facet_dofs.shape[0]
         if submesh.edges is not None:
             for i in range(self.edge_dofs.shape[0]):
                 edge_dofs[self.dofnames[i + offset]] = self.edge_dofs[i, submesh.edges]
-                offset += 1
+            offset += self.edge_dofs.shape[0]
         if submesh.t is not None:
             for i in range(self.interior_dofs.shape[0]):
                 interior_dofs[self.dofnames[i + offset]] = self.interior_dofs[i, submesh.t]

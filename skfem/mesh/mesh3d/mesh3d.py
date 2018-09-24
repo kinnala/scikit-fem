@@ -1,11 +1,11 @@
-from typing import Callable
-
 import numpy as np
-from numpy import ndarray
 
 from ..submesh import Submesh
 from ..mesh import Mesh
 
+from typing import Callable, Optional
+
+from numpy import ndarray
 
 class Mesh3D(Mesh):
     """Three dimensional meshes, common methods.
@@ -73,7 +73,9 @@ class Mesh3D(Mesh):
         mz = np.sum(self.p[2, self.t], axis=0)/self.t.shape[0]
         return np.nonzero(test(mx, my, mz))[0]
 
-    def submesh(self, test: Callable[[float, float, float], bool]) -> Submesh:
+    def submesh(self,
+                test: Callable[[float, float, float], bool],
+                boundaries_only: Optional[bool] = True) -> Submesh:
         """Return Submesh object where all topological entities satisfy some
         condition.
         
@@ -93,9 +95,15 @@ class Mesh3D(Mesh):
         edges = self.edges_satisfying(test)
         if len(edges) == 0:
             edges = None
-        t = self.elements_satisfying(test)
-        if len(t) == 0:
-            t = None
+        t = None
+        if boundaries_only:
+            p = np.setdiff1d(p, self.interior_nodes())
+            facets = np.setdiff1d(facets, self.interior_facets())
+            edges = np.setdiff1d(edges, self.interior_edges())
+        else:
+            t = self.elements_satisfying(test)
+            if len(t) == 0:
+                t = None
         return Submesh(p=p, facets=facets, edges=edges, t=t)
 
     def boundary_edges(self) -> ndarray:
@@ -103,6 +111,10 @@ class Mesh3D(Mesh):
         bnodes = self.boundary_nodes()[:, None]
         return np.nonzero(np.sum(self.edges[0, :] == bnodes, axis=0) *
                           np.sum(self.edges[1, :] == bnodes, axis=0))[0]
+
+    def interior_edges(self) -> ndarray:
+        """Return an array of interior edge indices."""
+        return np.setdiff1d(np.arange(self.edges.shape[1], dtype=np.int), self.boundary_edges())
 
     def param(self) -> float:
         """Return (maximum) mesh parameter."""
