@@ -1,16 +1,23 @@
-"""The stream-function ψ for two-dimensional incompressible creeping flow 
+"""The stream-function :math:`\psi` for two-dimensional creeping flow 
 
-is governed by the biharmonic equation, ν Δ²ψ = rot f, where ν is the
-kinematic viscosity, f the volumetric body-force, and rot f = (∂f/∂y,
--∂f/∂x).  The boundary conditions at a wall are that ψ be constant
-(the wall is impermeable) and that the normal component of its
-gradient vanish (no slip).  Thus the boundary value problem is
-analogous to that of bending a plate, and may be treated with Morley
-elements as in ex10.
+is governed by the biharmonic equation
 
-Here consider a buoyancy force f = (0, x), which arises in the
+.. math::  
+    \nu \Delta^2\psi = \mathop{rot} f
+
+where :math:`\nu` is the kinematic viscosity (assumed constant),
+:math:`f` the volumetric body-force, and :math:`\mathop{rot} f =
+(\partial f/\partial y, -\partial f/\partial x)`.  The boundary
+conditions at a wall are that :math:`\psi` be constant (the wall is
+impermeable) and that the normal component of its gradient vanish (no
+slip).  Thus the boundary value problem is analogous to that of
+bending a clamped plate, and may be treated with Morley elements as in
+`ex10`.
+
+Here consider a buoyancy force :math:`f = x\jhat`, which arises in the
 Boussinesq approximation of natural convection with a horizontal
-temperature gradient.
+temperature gradient (`Batchelor 1954`
+<http://dx.doi.org/10.1090/qam/64563>`_).
 
 For a circular cavity, the problem admits a polynomial solution with
 circular stream-lines.
@@ -19,7 +26,6 @@ circular stream-lines.
 
 from skfem import *
 
-from matplotlib.tri import Triangulation
 import numpy as np
 
 import meshio
@@ -72,6 +78,8 @@ if __name__ == "__main__":
 
     from os.path import splitext
     from sys import argv
+
+    from matplotlib.tri import Triangulation
 
     M, Psi = ib.refinterp(psi, 3)
     ax = mesh.draw()
