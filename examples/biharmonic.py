@@ -19,8 +19,11 @@ Boussinesq approximation of natural convection with a horizontal
 temperature gradient (`Batchelor 1954`
 <http://dx.doi.org/10.1090/qam/64563>`_).
 
-For a circular cavity, the problem admits a polynomial solution with
-circular stream-lines.
+For a circular cavity of radius :math:`a`, the problem admits a
+polynomial solution with circular stream-lines:
+
+.. math::
+    \psi = \left\{1 - (x^2+y^2)/a^2\right\} / 64.
 
 """
 
