@@ -65,7 +65,7 @@ def unit_rotation(v, dv, ddv, w):
 
 
 stokes = asm(biharmonic, ib)
-rotf = -asm(unit_rotation, ib)
+rotf = asm(unit_rotation, ib)
 
 dofs = ib.get_dofs(mesh.boundaries['perimeter'])
 
@@ -80,8 +80,11 @@ if __name__ == "__main__":
     from sys import argv
 
     from matplotlib.tri import Triangulation
-
+    
     M, Psi = ib.refinterp(psi, 3)
+    Psi0 = max(Psi)
+    print('ψ0 = {} (cf. exact = 1/64 ≐ {})'.format(Psi0, 1/64))
+
     ax = mesh.draw()
     ax.tricontour(Triangulation(M.p[0, :], M.p[1, :], M.t.T), Psi)
     ax.axis('off')
