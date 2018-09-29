@@ -12,3 +12,5 @@ the `source code distribution
 .. include:: ../examples/ex02.rst
 
 .. include:: ../examples/ex17.rst
+
+.. include:: ../examples/ex18.rst

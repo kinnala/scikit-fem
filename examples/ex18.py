@@ -1,32 +1,3 @@
-"""The stream-function :math:`\psi` for two-dimensional creeping flow 
-
-is governed by the biharmonic equation
-
-.. math::  
-    \nu \Delta^2\psi = \mathop{rot} f
-
-where :math:`\nu` is the kinematic viscosity (assumed constant),
-:math:`f` the volumetric body-force, and :math:`\mathop{rot} f =
-(\partial f/\partial y, -\partial f/\partial x)`.  The boundary
-conditions at a wall are that :math:`\psi` be constant (the wall is
-impermeable) and that the normal component of its gradient vanish (no
-slip).  Thus the boundary value problem is analogous to that of
-bending a clamped plate, and may be treated with Morley elements as in
-`ex10`.
-
-Here consider a buoyancy force :math:`f = x\jhat`, which arises in the
-Boussinesq approximation of natural convection with a horizontal
-temperature gradient (`Batchelor 1954`
-<http://dx.doi.org/10.1090/qam/64563>`_).
-
-For a circular cavity of radius :math:`a`, the problem admits a
-polynomial solution with circular stream-lines:
-
-.. math::
-    \psi = \left\{1 - (x^2+y^2)/a^2\right\}^2 / 64.
-
-"""
-
 from skfem import *
 
 import numpy as np
