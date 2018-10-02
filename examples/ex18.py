@@ -60,7 +60,6 @@ if __name__ == "__main__":
     print('phi0 = {} (cf. exact = 1/64 = {})'.format(Psi0, 1/64))
 
     ax = mesh.draw()
-    ax.set_title('stream-lines')
     fig = ax.get_figure()
     ax.tricontour(Triangulation(M.p[0, :], M.p[1, :], M.t.T), Psi)
     ax.axis('off')
@@ -70,7 +69,6 @@ if __name__ == "__main__":
     velocity = np.vstack([derivative(Psi, refbasis, refbasis, 1),
                           -derivative(Psi, refbasis, refbasis, 0)])
     ax = mesh.draw()
-    ax.set_title('velocity vectors coloured by buoyancy')
     sparsity_factor = 2**3      # subsample the arrows
     vector_factor = 2**3        # lengthen the arrows
     x = M.p[:, ::sparsity_factor]

@@ -5,16 +5,16 @@ The stream-function :math:`\psi` for two-dimensional creeping flow is
 governed by the biharmonic equation
 
 .. math::  
-    \nu \Delta^2\psi = \mathop{rot} f
+    \nu \Delta^2\psi = \mathrm{rot}\,f
 
 where :math:`\nu` is the kinematic viscosity (assumed constant),
-:math:`f` the volumetric body-force, and :math:`\mathop{rot} f =
+:math:`f` the volumetric body-force, and :math:`\mathrm{rot}\,f =
 (\partial f/\partial y, -\partial f/\partial x)`.  The boundary
-conditions at a wall are that :math:`\psi` be constant (the wall is
-impermeable) and that the normal component of its gradient vanish (no
+conditions at a wall are that :math:`\psi` is constant (the wall is
+impermeable) and that the normal component of its gradient vanishes (no
 slip).  Thus, the boundary value problem is analogous to that of
 bending a clamped plate, and may be treated with Morley elements as in
-`ex10`.
+`Kirchhoff plate`_ example.
 
 Here we consider a buoyancy force :math:`f = x\hat{j}`, which arises in
 the Boussinesq approximation of natural convection with a horizontal
@@ -30,9 +30,13 @@ polynomial solution with circular stream-lines:
 The resulting stream-lines and velocity vectors are given
 in the following figures:
 
-.. figure:: ../examples/ex18-stream-lines.png
+.. figure:: ../examples/ex18_stream-lines.png
 
-.. figure:: ../examples/ex18-velocity-vectors.png
+	    The stream-lines.
+
+.. figure:: ../examples/ex18_velocity-vectors.png
+
+	    The velocity vectors colored by buoyancy.
 
 The complete source code reads as follows:
 
