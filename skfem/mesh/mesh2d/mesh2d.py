@@ -188,9 +188,6 @@ class Mesh2D(Mesh):
         """
         import meshio
 
-        # a row of zeros required in 2D
-        p = np.vstack((np.zeros(self.p.shape[1]), self.p))
-
         if pointData is not None:
             if type(pointData) != dict:
                 pointData = {'0':pointData}
@@ -200,7 +197,7 @@ class Mesh2D(Mesh):
                 cellData = {'0':cellData}
 
         cells = { self.meshio_type : self.t.T }
-        mesh = meshio.Mesh(p.T, cells, pointData, cellData)
+        mesh = meshio.Mesh(self.p.T, cells, pointData, cellData)
         meshio.write(filename, mesh)
 
     def param(self) -> float:
