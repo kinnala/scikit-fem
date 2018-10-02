@@ -57,14 +57,14 @@ if __name__ == "__main__":
     
     M, Psi = ib.refinterp(psi, 3)
     Psi0 = max(Psi)
-    print('ψ0 = {} (cf. exact = 1/64 ≐ {})'.format(Psi0, 1/64))
+    print('phi0 = {} (cf. exact = 1/64 = {})'.format(Psi0, 1/64))
 
     ax = mesh.draw()
     ax.set_title('stream-lines')
     fig = ax.get_figure()
     ax.tricontour(Triangulation(M.p[0, :], M.p[1, :], M.t.T), Psi)
     ax.axis('off')
-    ax.get_figure().savefig(splitext(argv[0])[0] + '-stream-lines.png')
+    ax.get_figure().savefig(splitext(argv[0])[0] + '_stream-lines.png')
 
     refbasis = InteriorBasis(M, ElementTriP1())
     velocity = np.vstack([derivative(Psi, refbasis, refbasis, 1),
@@ -77,4 +77,4 @@ if __name__ == "__main__":
     u = vector_factor * velocity[:, ::sparsity_factor]
     ax.quiver(x[0], x[1], u[0], u[1], x[0])
     ax.axis('off')
-    ax.get_figure().savefig(splitext(argv[0])[0] + '-velocity-vectors.png')
+    ax.get_figure().savefig(splitext(argv[0])[0] + '_velocity-vectors.png')
