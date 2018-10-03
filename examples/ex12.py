@@ -23,6 +23,7 @@ evaluated by interpolation.
 """
 
 from skfem import *
+from skfem.models.poisson import laplace, unit_load
 
 import numpy as np
 
@@ -39,16 +40,8 @@ e = ElementTriP1()
 map = MappingAffine(m)
 basis = InteriorBasis(m, e, map, 2)
 
-@bilinear_form
-def laplace(u, du, v, dv, w):
-    return du[0]*dv[0] + du[1]*dv[1]
-
-@linear_form
-def load(v, dv, w):
-    return 1.0*v
-
 A = asm(laplace, basis)
-b = asm(load, basis)
+b = asm(unit_load, basis)
 
 I = m.interior_nodes()
 
