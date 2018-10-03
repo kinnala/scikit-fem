@@ -12,6 +12,14 @@ are easily evaluated in skfem using the 1-D arrays assembled using the
 @linear_form decorator. In ex01.py, the linear form required for simple
 integration happens to be the same one used on the right-hand side of the
 differential equation, so it's already to hand.
+
+Another is interpolation; i.e. evaluation of the solution at a
+specified point which isn't necessarily a node of the mesh.  For this
+problem, the maximum of the solution (normalized by the area) is the
+'Boussinesq k'-factor'; by symmetry, this occurs for squares (k' ≐
+0.07363) and circles (k' = 1/π/4) at the centre and so can be
+evaluated by interpolation.
+
 """
 
 from skfem import *
@@ -49,8 +57,12 @@ x[I] = solve(*condense(A, b, I=I))
 
 area = b @ np.ones_like(x)
 k = b @ x / area**2
-print('area = {:.4f} (exact = {:.4f})'.format(area, np.pi))
-print('k = {:.5f} (exact = 1/8/pi = {:.5f})'.format(k, 1/np.pi/8))
+k1 = m.interpolator(x)(0., 0.) / area
 
-m.plot3(x)
-m.show()
+if __name__ == '__main__':
+    print('area = {:.4f} (exact = {:.4f})'.format(area, np.pi))
+    print('k = {:.5f} (exact = 1/8/pi = {:.5f})'.format(k, 1/np.pi/8))
+    print("k' = {:.5f} (exact = 1/4/pi = {:.5f})".format(k1, 1/np.pi/4))
+
+    m.plot3(x)
+    m.show()
