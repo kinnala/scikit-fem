@@ -54,10 +54,19 @@ if __name__ == "__main__":
     from sys import argv
 
     from matplotlib.tri import Triangulation
+
+    # Evaluate the stream-function at the origin.
+    point = np.array([[0.], [0.]])
+    triangulation = Triangulation(mesh.p[0, :], mesh.p[1, :], mesh.t.T)
+    triangle = triangulation.get_trifinder()(*point[:, 0])
+    local_point = mapping.invF(point.reshape(-1, 1, 1),
+                               np.array([triangle]))[:, :, 0]
+    psi0 = (np.hstack([element.gbasis(mapping, local_point, k)[0][triangle]
+                       for k in range(ib.Nbfun)])
+            @ psi[ib.element_dofs[:, triangle]])
+    print('psi0 = {} (cf. exact = 1/64 = {})'.format(psi0, 1/64))
     
     M, Psi = ib.refinterp(psi, 3)
-    Psi0 = max(Psi)
-    print('max psi = {} (cf. exact = 1/64 = {})'.format(Psi0, 1/64))
 
     ax = mesh.draw()
     fig = ax.get_figure()
