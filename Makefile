@@ -10,4 +10,4 @@ release:
 	@eval python setup.py sdist upload
 
 dox:
-	@eval sphinx-autobuild docs docs/_build/html
+	@eval sphinx-build -b html docs ../scikit-fem-docs
