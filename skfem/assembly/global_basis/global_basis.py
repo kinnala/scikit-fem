@@ -1,6 +1,8 @@
+import numpy as np
+from skfem.assembly.dofs import Dofs
+
 from typing import Dict, List, NamedTuple, Optional, Tuple, Union
 
-import numpy as np
 from numpy import ndarray
 
 
@@ -98,12 +100,6 @@ class GlobalBasis():
 
     def _get_dofs(self, submesh):
         """Return global DOF numbers corresponding to a Submesh."""
-        class Dofs(NamedTuple):
-            nodal: Dict[str, ndarray] = {}
-            facet: Dict[str, ndarray] = {}
-            edge: Dict[str, ndarray] = {}
-            interior: Dict[str, ndarray] = {}
-
         nodal_dofs = {}
         facet_dofs = {}
         edge_dofs = {}
@@ -128,14 +124,28 @@ class GlobalBasis():
 
         return Dofs(nodal_dofs, facet_dofs, edge_dofs, interior_dofs)
 
-    def get_dofs(self, submesh):
-        """Return global DOF numbers corresponding to one or multiple
-        Submeshes."""
-        class Dofs(NamedTuple):
-            nodal: Dict[str, ndarray] = {}
-            facet: Dict[str, ndarray] = {}
-            edge: Dict[str, ndarray] = {}
-            interior: Dict[str, ndarray] = {}
+    def get_dofs(self, arg = None):
+        """Return global DOF numbers.
+
+        Parameters
+        ----------
+        arg
+            The argument can have multiple meanings:
+            
+            - If an object of type :class:`~skfem.mesh.Submesh`, return corresponding Dofs object.
+            - If a dictionary consisting of :class:`~skfem.mesh.Submesh` objects, return a dictionary
+              of :class:`~skfem.mesh.Submesh` objects with same keys as the original dictionary.
+            - If callable, first creates :class:`~skfem.mesh.Submesh` object through self.mesh.submesh(arg).
+            - If None, first creates :class:`~skfem.mesh.Submesh` through self.mesh.submesh().
+
+        """
+        if arg is None:
+            submesh = self.mesh.submesh()
+        elif callable(arg):
+            submesh = self.mesh.submesh(arg)
+        else:
+            submesh = arg
+            
         if type(submesh) is dict:
             return {key: self._get_dofs(submesh[key]) for key in submesh}
         else:
@@ -198,146 +208,3 @@ class GlobalBasis():
                                    * self.basis[1][j][a]
             return W, dW
         return W
-
-    def find_dofs(self, test=None, bc=None, boundary=True, dofrows=None,
-                  check_vertices=True, check_facets=True, check_edges=True):
-        """Helper function for finding DOF indices for BC's.
-
-        Does not test for element interior DOFs since they are not typically
-        included in boundary conditions! Uses DOF numbering of 'u' variable.
-
-        Parameters
-        ----------
-        test : (optional, default=function returning True) lambda
-            An anonymous function with Ndim arguments. If returns other than 0
-            when evaluated at the DOF location, the respective DOF is included
-            in the return set.
-        bc : (optional, default=zero function) lambda
-            The boundary condition value.
-        boundary : (optional, default=True) bool
-            Check only boundary DOFs.
-        dofrows : (optional, default=None) np.array
-            List of rows that are extracted from the DOF structures.
-            For example, if each node/facet/edge contains 3 DOFs (say, in three
-            dimensional problems x, y and z displacements) you can give [0, 1]
-            to consider only two first DOFs.
-        check_vertices : (optional, default=True) bool
-            Include vertex dofs
-        check_facets: (optional, default=True) bool
-            Include facet dofs
-        check_edges: (optional, default=True) bool
-            Include edge dofs (3D only)
-
-        Returns
-        -------
-        x : np.array
-            Solution vector with the BC's
-        I : np.array
-            Set of DOF numbers set by the function
-
-        """
-        if test is None:
-            if self.mesh.dim() == 1:
-                test = lambda x: 0*x + True
-            elif self.mesh.dim() == 2:
-                test = lambda x, y: 0*x + True
-            elif self.mesh.dim() == 3:
-                test = lambda x, y, z: 0*x + True
-
-        if bc is None:
-            if self.mesh.dim() == 1:
-                bc = lambda x: 0*x
-            elif self.mesh.dim() == 2:
-                bc = lambda x, y: 0*x
-            elif self.mesh.dim() == 3:
-                bc = lambda x, y, z: 0*x
-
-        x = np.zeros(self.N)
-
-        dofs = np.zeros(0, dtype=np.int64)
-        locs = np.zeros((self.mesh.dim(), 0))
-
-        if check_vertices:
-            # handle nodes
-            N = self.mesh.nodes_satisfying(test)
-            if boundary:
-                N = np.intersect1d(N, self.mesh.boundary_nodes())
-            if dofrows is None:
-                Ndofs = self.nodal_dofs[:, N]
-            else:
-                Ndofs = self.nodal_dofs[dofrows][:, N]
-
-            Ndofx = np.tile(self.mesh.p[0, N], (Ndofs.shape[0], 1)).flatten()
-            Ndofy = np.tile(self.mesh.p[1, N], (Ndofs.shape[0], 1)).flatten()
-            if self.mesh.dim() == 3:
-                Ndofz = np.tile(self.mesh.p[2, N], (Ndofs.shape[0], 1)).flatten()
-                locs = np.hstack((locs, np.vstack((Ndofx, Ndofy, Ndofz))))
-            else:
-                locs = np.hstack((locs, np.vstack((Ndofx, Ndofy))))
-
-            dofs = np.hstack((dofs, Ndofs.flatten()))
-
-        if check_facets and self.facet_dofs.shape[0]>0:
-            # handle facets
-            F = self.mesh.facets_satisfying(test)
-            if boundary:
-                F = np.intersect1d(F, self.mesh.boundary_facets())
-            if dofrows is None:
-                Fdofs = self.facet_dofs[:, F]
-            else:
-                Fdofs = self.facet_dofs[dofrows][:, F]
-
-            if self.mesh.dim() == 2:
-                mx = 0.5*(self.mesh.p[0, self.mesh.facets[0, F]] +
-                          self.mesh.p[0, self.mesh.facets[1, F]])
-                my = 0.5*(self.mesh.p[1, self.mesh.facets[0, F]] +
-                          self.mesh.p[1, self.mesh.facets[1, F]])
-                Fdofx = np.tile(mx, (Fdofs.shape[0], 1)).flatten()
-                Fdofy = np.tile(my, (Fdofs.shape[0], 1)).flatten()
-                locs = np.hstack((locs, np.vstack((Fdofx, Fdofy))))
-            else:
-                mx = np.sum(self.mesh.p[0, self.mesh.facets[:, F]], axis=0)/self.mesh.facets.shape[0]
-                my = np.sum(self.mesh.p[1, self.mesh.facets[:, F]], axis=0)/self.mesh.facets.shape[0]
-                mz = np.sum(self.mesh.p[2, self.mesh.facets[:, F]], axis=0)/self.mesh.facets.shape[0]
-                Fdofx = np.tile(mx, (Fdofs.shape[0], 1)).flatten()
-                Fdofy = np.tile(my, (Fdofs.shape[0], 1)).flatten()
-                Fdofz = np.tile(mz, (Fdofs.shape[0], 1)).flatten()
-                locs = np.hstack((locs, np.vstack((Fdofx, Fdofy, Fdofz))))
-
-            dofs = np.hstack((dofs, Fdofs.flatten()))
-
-        if check_edges and self.edge_dofs.shape[0]>0:
-            # handle edges
-            if self.mesh.dim() == 3:
-                E = self.mesh.edges_satisfying(test)
-                if boundary:
-                    E = np.intersect1d(E, self.mesh.boundary_edges())
-                if dofrows is None:
-                    Edofs = self.edge_dofs[:, E]
-                else:
-                    Edofs = self.edge_dofs[dofrows][:, E]
-
-                mx = 0.5*(self.mesh.p[0, self.mesh.edges[0, E]] +
-                          self.mesh.p[0, self.mesh.edges[1, E]])
-                my = 0.5*(self.mesh.p[1, self.mesh.edges[0, E]] +
-                          self.mesh.p[1, self.mesh.edges[1, E]])
-                mz = 0.5*(self.mesh.p[2, self.mesh.edges[0, E]] +
-                          self.mesh.p[2, self.mesh.edges[1, E]])
-
-                Edofx = np.tile(mx, (Edofs.shape[0], 1)).flatten()
-                Edofy = np.tile(my, (Edofs.shape[0], 1)).flatten()
-                Edofz = np.tile(mz, (Edofs.shape[0], 1)).flatten()
-
-                locs = np.hstack((locs, np.vstack((Edofx, Edofy, Edofz))))
-
-                dofs = np.hstack((dofs, Edofs.flatten()))
-
-        if self.mesh.dim() == 2:
-            x[dofs] = bc(locs[0, :], locs[1, :])
-        elif self.mesh.dim() == 3:
-            x[dofs] = bc(locs[0, :], locs[1, :], locs[2, :])
-        else:
-            raise NotImplementedError("Method find_dofs not implemented " +
-                                      "for the given dimension.")
-
-        return x, dofs

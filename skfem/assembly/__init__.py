@@ -13,5 +13,5 @@ The basic workflow is the following:
 """
 
 from .global_basis import GlobalBasis, InteriorBasis, FacetBasis
-from .forms import asm, bilinear_form, linear_form
-
+from .asm import asm, bilinear_form, linear_form
+from .dofs import Dofs

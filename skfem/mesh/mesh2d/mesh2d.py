@@ -59,7 +59,9 @@ class Mesh2D(Mesh):
         my = np.sum(self.p[1, self.t], axis=0)/self.t.shape[0]
         return np.nonzero(test(mx, my))[0]
     
-    def submesh(self, test: Callable[[float, float], bool]) -> Submesh:
+    def submesh(self,
+                test: Optional[Callable[[float, float], bool]] = None,
+                boundaries_only: Optional[bool] = True) -> Submesh:
         """Return Submesh object where all topological entities satisfy some
         condition.
         
@@ -67,19 +69,30 @@ class Mesh2D(Mesh):
         ----------
         test
             Evaluates to 1 or True for the midpoints of the topological
-            entities belonging to the output Submesh.
+            entities belonging to the output Submesh. If None is given,
+            returns a Submesh consisting of all boundary entities.
 
         """
-        p = self.nodes_satisfying(test)
-        if len(p) == 0:
-            p = None
-        facets = self.facets_satisfying(test)
-        if len(facets) == 0:
-            facets = None
-        t = self.elements_satisfying(test)
-        if len(t) == 0:
+        if test is None:
+            p = self.boundary_nodes()
+            facets = self.boundary_facets()
+            return Submesh(p=p, facets=facets, edges=None, t=None)
+        else:
+            p = self.nodes_satisfying(test)
+            if len(p) == 0:
+                p = None
+            facets = self.facets_satisfying(test)
+            if len(facets) == 0:
+                facets = None
             t = None
-        return Submesh(p=p, facets=facets, edges=None, t=t)
+            if boundaries_only:
+                p = np.setdiff1d(p, self.interior_nodes())
+                facets = np.setdiff1d(facets, self.interior_facets())
+            else:
+                t = self.elements_satisfying(test)
+                if len(t) == 0:
+                    t = None
+            return Submesh(p=p, facets=facets, edges=None, t=t)
 
     def draw(self,
              ax: Optional[Axes] = None,

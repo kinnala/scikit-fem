@@ -35,7 +35,7 @@ B = asm(facetbilinf, fb)
 
 b = asm(facetlinf, fb)
 
-_, D = ib.find_dofs(lambda x, y: (y == 0.0))
+D = ib.get_dofs(lambda x, y: (y == 0.0)).all()
 I = ib.complement_dofs(D)
 
 import scipy.sparse
