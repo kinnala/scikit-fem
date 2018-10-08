@@ -1,6 +1,7 @@
-from typing import Optional
-
 import numpy as np
+
+from typing import Optional, Callable
+
 from numpy import ndarray
 
 from skfem.quadrature import get_quadrature
@@ -122,3 +123,20 @@ class InteriorBasis(GlobalBasis):
         M = meshclass(p, t, validate=False)
 
         return M, w.flatten()
+
+    def interpolator(self, y: ndarray) -> Callable[[ndarray], ndarray]:
+        """Return a function handle, which can be used for finding
+        pointwise values of the given solution vector."""
+
+        finder = self.mesh.element_finder()
+
+        def interpfun(x):
+            tris = finder(*x)
+            pts = self.mapping.invF(x[:, :, np.newaxis], tind=tris)
+            w = np.zeros(x.shape[1])
+            for k in range(self.Nbfun):
+                phi = self.elem.gbasis(self.mapping, pts, k, tind=tris)
+                w += y[self.element_dofs[k, tris]]*phi[0].flatten()
+            return w
+
+        return interpfun

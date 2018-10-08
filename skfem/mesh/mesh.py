@@ -4,7 +4,9 @@ import warnings
 
 from .submesh import Submesh
 
-from typing import Dict, Optional, Tuple, Type, TypeVar, Union
+from typing import Dict, Optional, Tuple,\
+                   Type, TypeVar, Union,\
+                   Callable
 from numpy import ndarray
 
 MeshType = TypeVar('MeshType', bound='Mesh')
@@ -295,3 +297,9 @@ class Mesh():
     def interior_facets(self) -> ndarray:
         """Return an array of interior facet indices."""
         return np.nonzero(self.f2t[1, :] >= 0)[0]
+
+    def element_finder(self) -> Callable[[ndarray], ndarray]:
+        """Return a function, which returns element
+        indices corresponding to the input points."""
+        raise NotImplementError("element_finder not implemented" +\
+                                "for the given Mesh type.")

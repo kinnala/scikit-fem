@@ -260,34 +260,6 @@ class MeshTri(Mesh2D):
         # second row to zero if repeated (i.e., on boundary)
         self.f2t[1, np.nonzero(self.f2t[0, :] == self.f2t[1, :])[0]] = -1
 
-    def interpolator(self, x):
-        """Return a function which interpolates values with P1 basis."""
-        triang = mtri.Triangulation(self.p[0, :], self.p[1, :], self.t.T)
-        interpf = mtri.LinearTriInterpolator(triang, x)
-        # contruct an interpolator handle
-        def handle(X, Y):
-            return interpf(X, Y).data
-        return handle
-
-    def const_interpolator(self, x):
-        """Return a function which interpolates values with P0 basis."""
-        triang = mtri.Triangulation(self.p[0, :], self.p[1, :], self.t.T)
-        finder = triang.get_trifinder()
-        # construct an interpolator handle
-        def handle(X, Y):
-            return x[finder(X, Y)]
-        return handle
-
-    def draw_debug(self):
-        """Draw without mesh.facets. For debugging self.draw()."""
-        fig = plt.figure()
-        plt.hold('on')
-        for itr in range(self.t.shape[1]):
-            plt.plot(self.p[0,self.t[[0,1],itr]], self.p[1,self.t[[0,1],itr]], 'k-')
-            plt.plot(self.p[0,self.t[[1,2],itr]], self.p[1,self.t[[1,2],itr]], 'k-')
-            plt.plot(self.p[0,self.t[[0,2],itr]], self.p[1,self.t[[0,2],itr]], 'k-')
-        return fig
-
     def plot(self,
              z: ndarray,
              smooth: Optional[bool] = False,
@@ -459,3 +431,10 @@ class MeshTri(Mesh2D):
 
     def mapping(self):
         return MappingAffine(self)
+
+    def element_finder(self):
+        from matplotlib.tri import Triangulation
+
+        return Triangulation(self.p[0, :],
+                             self.p[1, :],
+                             self.t.T).get_trifinder()
