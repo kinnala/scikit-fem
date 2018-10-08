@@ -6,6 +6,7 @@ interpolating the solution.
 """
 from skfem import *
 from skfem.models.poisson import laplace
+import numpy as np
 
 m = MeshQuad()
 m.refine(2)
@@ -23,7 +24,8 @@ def linf(v, dv, w):
 
 f = asm(linf, ib)
 
-x, D = ib.find_dofs()
+D = ib.get_dofs().all()
+x = np.zeros(ib.N)
 I = ib.complement_dofs(D)
 
 x[I] = solve(*condense(K, f, D=D))

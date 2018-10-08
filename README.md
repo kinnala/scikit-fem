@@ -2,7 +2,7 @@
 
 [![PyPI version](https://badge.fury.io/py/scikit-fem.svg)](https://badge.fury.io/py/scikit-fem)
 [![Build Status](https://travis-ci.com/kinnala/scikit-fem.svg?branch=master)](https://travis-ci.com/kinnala/scikit-fem)
-[![Documentation Status](https://readthedocs.org/projects/scikit-fem/badge/?version=latest)](https://scikit-fem.readthedocs.io/en/latest/?badge=latest)
+[![Documentation](https://img.shields.io/badge/docs-latest-lightgrey.svg)](https://kinnala.github.io/scikit-fem-docs)
 [![Join the chat at https://gitter.im/scikit-fem/Lobby](https://badges.gitter.im/scikit-fem/Lobby.svg)](https://gitter.im/scikit-fem/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![DOI](https://zenodo.org/badge/115345426.svg)](https://zenodo.org/badge/latestdoi/115345426)
 
@@ -36,15 +36,13 @@ A = asm(laplace, basis)
 ## Installation
 
 The most recent release can be installed simply by `pip install scikit-fem`.
-The examples corresponding to the latest release can be found from the
-[stable user documentation](https://scikit-fem.readthedocs.io/en/stable/examples.html).
 
 For more cutting edge features, you can clone this repository. More examples can be found
 from the [source code repository](https://github.com/kinnala/scikit-fem/tree/master/examples).
 
 ## Getting started
 
-Please see the [user documentation](https://scikit-fem.readthedocs.io).
+Please see the [user documentation](https://kinnala.github.io/scikit-fem-docs).
 
 ## Contributors
 

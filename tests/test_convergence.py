@@ -49,7 +49,8 @@ class ConvergenceQ1(unittest.TestCase):
                 I = m.interior_nodes()
                 x = np.zeros(ib.N)
             else:
-                x, D = ib.find_dofs()
+                D = ib.get_dofs().all()
+                x = np.zeros(ib.N)
                 I = ib.complement_dofs(D)
 
             x[I] = solve(*condense(A, b, I=I))
