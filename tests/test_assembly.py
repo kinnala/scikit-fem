@@ -89,3 +89,40 @@ class IntegrateFuncOverBoundaryPartTetP1(IntegrateFuncOverBoundaryPart):
 
 class IntegrateFuncOverBoundaryPartTetP0(IntegrateFuncOverBoundaryPart):
     case = (MeshTet, ElementTetP0)
+
+
+class BasisInterpolator(unittest.TestCase):
+    case = (MeshTri, ElementTriP1)
+
+    def initOnes(self, basis):
+        return np.ones(basis.N)
+
+    def runTest(self):
+        mtype, etype = self.case
+        m = mtype()
+        m.refine(3)
+        e = etype()
+        ib = InteriorBasis(m, e)
+
+        x = self.initOnes(ib)
+        f = ib.interpolator(x)
+
+        self.assertTrue(np.sum(f(np.array([np.sin(m.p[0, :]), np.sin(3.0*m.p[1, :])]))-1.0) < 1e-10)
+
+class BasisInterpolatorMorley(BasisInterpolator):
+    case = (MeshTri, ElementTriMorley)
+
+    def initOnes(self, basis):
+        @bilinear_form
+        def mass(u, du, ddu, v, dv, ddv, w):
+            return u*v
+
+        @linear_form
+        def ones(v, dv, ddv, w):
+            return 1.0*v
+
+        M = asm(mass, basis)
+        f = asm(ones, basis)
+
+        return solve(M, f)
+        

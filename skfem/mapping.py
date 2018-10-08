@@ -368,7 +368,12 @@ class MappingAffine(Mapping):
         else:
             A, b = self.A[:, :, tind], self.b[:, tind]
 
-        return (np.einsum('ijk,jl', A, X).T + b.T).T
+        if len(X.shape) == 2:
+            return (np.einsum('ijk,jl', A, X).T + b.T).T
+        elif len(X.shape) == 3:
+            return (np.einsum('ijk,jkl->ikl', A, X).T + b.T).T
+        else:
+            raise Exception("Wrong dimension of input.")
 
     def invF(self, x, tind=None):
         if tind is None:
