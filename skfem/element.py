@@ -15,7 +15,9 @@ constructors of :class:`~skfem.assembly.InteriorBasis` and
 
 import numpy as np
 
-from typing import Tuple, Union, List
+from typing import Optional, Tuple, Union, List
+
+from numpy import ndarray
 
 class Element():
     nodal_dofs: int = 0 
@@ -34,6 +36,39 @@ class Element():
             return 1 + 0*mapping.mesh.t[0, :]
         else:
             return 1 + 0*tind
+
+    def gbasis(self,
+               mapping,
+               X: ndarray,
+               i: int,
+               tind: Optional[ndarray] = None) -> Union[Tuple[ndarray, ndarray],
+                                                        Tuple[ndarray, ndarray, ndarray]]:
+        """Evaluate the global basis functions, given local points X.
+
+        The global points - at which the global basis is evaluated at -
+        are defined through x = F(X), where F corresponds to the given mapping.
+
+        Parameters
+        ----------
+        mapping
+            Local-to-global mapping, an object of type :class:`~skfem.mapping.Mapping`.
+        X
+            An array of local points. The following shapes are supported: (Ndim x Npoints)
+            and (Ndim x Nelems x Npoints), i.e. local points shared by all elements
+            or different local points in each element.
+        i
+            Only the i'th basis function is evaluated.
+        tind
+            Optionally, choose a subset of elements to evaluate the basis at.
+
+        Returns
+        -------
+        (u, du) or (u, du, ddu)
+            The number of return arguments depends on the length of self.order.
+            The shape of k'th return argument depends on the value of self.order[k].
+
+        """
+        raise NotImplementedError("Element must implement gbasis.")
 
 
 class ElementH1(Element):
@@ -83,7 +118,9 @@ class ElementHdiv(Element):
     order = (1, 0)
 
     def orient(self, mapping, i, tind=None):
-        # TODO fix tind
+        if tind is not None:
+            # TODO fix
+            raise NotImplementedError("TODO: fix tind support in ElementHdiv")
         return -1 + 2*(mapping.mesh.f2t[0, mapping.mesh.t2f[i, :]] \
                        == np.arange(mapping.mesh.t.shape[1]))
 
@@ -102,10 +139,13 @@ class ElementHdiv(Element):
 class ElementHcurl(Element):
     """Note: only 3D support. Piola transformation
     is different in 2D."""
+    
     order = (1, 1)
 
     def orient(self, mapping, i, tind=None):
-        # TODO fix tind
+        if tind is not None:
+            # TODO fix
+            raise NotImplementedError("TODO: fix tind support in ElementHcurl")
         t1 = [0, 1, 0, 0, 1, 2][i]
         t2 = [1, 2, 2, 3, 3, 3][i]
         return 1 - 2*(mapping.mesh.t[t1, :] > mapping.mesh.t[t2, :])
@@ -124,17 +164,23 @@ class ElementHcurl(Element):
 
 
 class ElementH2(Element):
+    """Elements defined implicitly through global degrees-of-freedom."""
+    
     order = (0, 1, 2)
     V = None  # For caching inverse Vandermonde matrix
 
     def gbasis(self, mapping, X, i, tind=None):
+        if tind is None:
+            tind = np.arange(mapping.mesh.t.shape[1])
         # initialize power basis
         self._pbasis_init(self.maxdeg)
         N = len(self._pbasis)
 
         if self.V is None:
             # construct Vandermonde matrix and invert it
-            self.V = np.linalg.inv(self._eval_dofs(mapping.mesh, tind=tind))
+            self.V = np.linalg.inv(self._eval_dofs(mapping.mesh))
+
+        V = self.V[tind]
 
         x = mapping.F(X, tind=tind)
         u = np.zeros(x[0].shape)
@@ -143,17 +189,17 @@ class ElementH2(Element):
 
         # loop over new basis
         for itr in range(N):
-            u += self.V[:, itr, i][:, None]\
+            u += V[:, itr, i][:, None]\
                  * self._pbasis[itr](x[0], x[1])
-            du[0] += self.V[:, itr, i][:, None]\
+            du[0] += V[:, itr, i][:, None]\
                      * self._pbasisdx[itr](x[0], x[1])
-            du[1] += self.V[:, itr, i][:,None]\
+            du[1] += V[:, itr, i][:,None]\
                      * self._pbasisdy[itr](x[0], x[1])
-            ddu[0, 0] += self.V[:, itr, i][:, None]\
+            ddu[0, 0] += V[:, itr, i][:, None]\
                          * self._pbasisdxx[itr](x[0], x[1])
-            ddu[0, 1] += self.V[:, itr, i][:, None]\
+            ddu[0, 1] += V[:, itr, i][:, None]\
                          * self._pbasisdxy[itr](x[0], x[1])
-            ddu[1, 1] += self.V[:, itr, i][:, None]\
+            ddu[1, 1] += V[:, itr, i][:, None]\
                          * self._pbasisdyy[itr](x[0], x[1])
 
         # dxy = dyx
