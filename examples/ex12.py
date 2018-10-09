@@ -50,7 +50,7 @@ x[I] = solve(*condense(A, b, I=I))
 
 area = b @ np.ones_like(x)
 k = b @ x / area**2
-k1 = m.interpolator(x)(0., 0.) / area
+k1, = basis.interpolator(x)(np.zeros((2, 1))) / area
 
 if __name__ == '__main__':
     print('area = {:.4f} (exact = {:.4f})'.format(area, np.pi))
