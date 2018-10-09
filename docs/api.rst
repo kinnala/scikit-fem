@@ -77,10 +77,6 @@ Other methods
 
 .. automethod:: skfem.mesh.MeshTri.submesh
 
-.. automethod:: skfem.mesh.MeshTri.interpolator
-
-.. automethod:: skfem.mesh.MeshTri.const_interpolator
-
 MeshQuad
 ~~~~~~~~
 
@@ -144,8 +140,24 @@ MeshTet
 Constructors
 ^^^^^^^^^^^^
 
+.. automethod:: skfem.mesh.MeshTet.__init__
+
+.. automethod:: skfem.mesh.MeshTet.load
+
+Modify
+^^^^^^
+.. automethod:: skfem.mesh.MeshTet.refine
+
+.. automethod:: skfem.mesh.MeshTet.remove_elements
+
+.. automethod:: skfem.mesh.MeshTet.scale
+
+.. automethod:: skfem.mesh.MeshTet.translate
+
 Visualisation
 ^^^^^^^^^^^^^
+
+.. automethod:: skfem.mesh.MeshTet.save
 
 MeshHex
 ~~~~~~~
@@ -173,16 +185,13 @@ Modify
 Visualisation
 ^^^^^^^^^^^^^
 
+.. automethod:: skfem.mesh.MeshHex.save
+
 MeshLine
 ~~~~~~~~
 
 .. autoclass:: skfem.mesh.MeshLine
 
-Constructors
-^^^^^^^^^^^^
-
-Visualisation
-^^^^^^^^^^^^^
 
 skfem.mapping
 -------------
