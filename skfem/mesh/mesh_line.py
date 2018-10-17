@@ -1,6 +1,7 @@
 from typing import Type
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 from skfem.mapping import MappingAffine
 
