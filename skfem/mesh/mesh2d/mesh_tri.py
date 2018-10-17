@@ -223,9 +223,9 @@ class MeshTri(Mesh2D):
         return cls(p, t)
 
     def _build_mappings(self, sort_t=True):
-        # sort to preserve orientations etc.
+        # "sort" (actually roll) to preserve orientations etc.
         if sort_t:
-            self.t = np.sort(self.t, axis=0)
+            self.t = np.roll(self.t, self.t.argmin(axis=0), 0)
 
         # define facets: in the order (0,1) (1,2) (0,2)
         self.facets = np.sort(np.vstack((self.t[0, :], self.t[1, :])), axis=0)
