@@ -48,6 +48,12 @@ class TestEx07(unittest.TestCase):
         import examples.ex07
         self.assertAlmostEqual(np.max(examples.ex07.x), 0.077891428529719878)
 
+class TestEx08(unittest.TestCase):
+    """Run examples/ex08.py"""
+    def runTest(self):
+        import examples.ex08
+        # only run the initialization, nothing to test
+
 class TestEx09(unittest.TestCase):
     """Run examples/ex09.py"""
     def runTest(self):
@@ -60,10 +66,33 @@ class TestEx10(unittest.TestCase):
         import examples.ex10
         self.assertAlmostEqual(np.mean(examples.ex10.x), 0.14566021189334058)
 
+class TestEx11(unittest.TestCase):
+    """Run examples/ex11.py"""
+    def runTest(self):
+        import examples.ex11
+        u = examples.ex11.u
+        ib = examples.ex11.ib
+        # since the mesh is symmetric, the mean values should equal to zero
+        self.assertAlmostEqual(np.mean(u[ib.nodal_dofs[2, :]]), 0.0)
+        self.assertAlmostEqual(np.mean(u[ib.nodal_dofs[1, :]]), 0.0)
+
+class TestEx14(unittest.TestCase):
+    """Run examples/ex14.py"""
+    def runTest(self):
+        import examples.ex14
+        u = examples.ex14.u
+        A = examples.ex14.A
+        self.assertTrue(((u @ A @ u) - 8/3) < 0.01)
+
+class TestEx15(unittest.TestCase):
+    """Run examples/ex15.py"""
+    def runTest(self):
+        import examples.ex15
+        self.assertTrue(np.max(examples.ex15.x) - 0.1234567 < 1e-5)
+
 class TestEx16(unittest.TestCase):
     """Run examples/ex16.py"""
     def runTest(self):
         import examples.ex16
         self.assertTrue(np.linalg.norm(np.array([0,2,6,12,20,30])-examples.ex16.ks) < 0.4)
         self.assertTrue(examples.ex16.ks[-1], 30.309720458315521)
-

@@ -37,6 +37,7 @@ I = m.interior_nodes()
 u = (([1., 1.j] @ m.p) ** 2).real          # x**2 - y**2
 u[I] = solve(*condense(A, 0.*b, u, I))
 
-print('||grad u||**2 = {:.4f} (exact = 8/3 = {:.4f})'.format(u @ A @ u, 8/3))
-m.plot(u)
-m.show()
+if __name__ == "__main__":
+    print('||grad u||**2 = {:.4f} (exact = 8/3 = {:.4f})'.format(u @ A @ u, 8/3))
+    m.plot(u)
+    m.show()

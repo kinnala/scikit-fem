@@ -18,17 +18,21 @@ ib = InteriorBasis(m, e, map, 3)
 
 K = asm(linear_elasticity(*lame_parameters(1e3, 0.3)), ib)
 
-_, Dleft = ib.find_dofs(lambda x,y,z: x==0.0)
-u, Drightx = ib.find_dofs(lambda x,y,z: x==1.0, dofrows=[0])
-_, Drightyz = ib.find_dofs(lambda x,y,z: x==1.0, dofrows=[1,2])
+dofs = {
+    'left' : ib.get_dofs(lambda x,y,z: x==0.0),
+    'right': ib.get_dofs(lambda x,y,z: x==1.0),
+    }
 
-u[Drightx] = 0.3
+u = np.zeros(K.shape[0])
+u[dofs['right'].nodal['u^1']] = 0.3
 
-I = ib.complement_dofs(np.concatenate((Dleft, Drightx, Drightyz)))
+I = ib.complement_dofs(dofs)
 
 u[I] = solve(*condense(K, 0*u, I=I, x=u))
 
 sf = 1.0
 for itr in range(3):
     m.p[itr, :] += sf*u[ib.nodal_dofs[itr, :]]
-m.save('elasticity.vtk')
+
+if __name__ == "__main__":
+    m.save('elasticity.vtk')

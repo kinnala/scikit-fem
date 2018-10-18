@@ -96,6 +96,9 @@ class GlobalBasis():
         self.dofnames = element.dofnames
 
     def complement_dofs(self, *D):
+        if type(D[0]) is dict:
+            # if a dict of Dofs objects are given, flatten all
+            D = tuple(D[0][key].all() for key in D[0])
         return np.setdiff1d(np.arange(self.N), np.concatenate(D))
 
     def _get_dofs(self, submesh):
