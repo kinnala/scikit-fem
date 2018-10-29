@@ -1,0 +1,12 @@
+name: scikit-fem-dev
+dependencies:
+  - python=3.7
+  - numpy
+  - scipy
+  - matplotlib
+  - ipython
+  - sphinx
+  - pip:
+    - meshio
+    - pygmsh
+    - sphinx_rtd_theme
