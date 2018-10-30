@@ -55,3 +55,11 @@ velocity, pressure = np.split(uvp, [A.shape[0]])
 ax = mesh.plot(pressure)
 ax.axis('off')
 ax.get_figure().savefig('taylor_hood_pressure.png')
+
+ax = mesh.draw()
+velocity1 = velocity[basis['u'].nodal_dofs]
+ax.quiver(mesh.p[0, :], mesh.p[1, :],
+          velocity1[0, :], velocity1[1, :],
+          mesh.p[0, :])         # colour by buoyancy
+ax.axis('off')
+ax.get_figure().savefig('taylor_hood_velocity.png')
