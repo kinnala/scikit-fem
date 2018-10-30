@@ -1,4 +1,5 @@
 from skfem import *
+from skfem.models.poisson import mass
 
 import numpy as np
 from scipy.sparse import bmat
@@ -29,11 +30,6 @@ def dilatation(u, du, q, dq, w):
     return (du[0][0] + du[1][1]) * q
 
 
-@bilinear_form
-def regularization(p, dp, q, dq, w):
-    return p * q
-
-
 @linear_form
 def body_force(v, dv, w):
     return w.x[0] * v[1]
@@ -41,7 +37,7 @@ def body_force(v, dv, w):
 
 A = asm(vector_laplacian, basis['u'])
 B = asm(dilatation, basis['u'], basis['p'])
-C = asm(dilatation, basis['p'])
+C = asm(mass, basis['p'])
 
 K = bmat([[A, B.T],
           [B, 1e-3 * C]]).tocsr()
