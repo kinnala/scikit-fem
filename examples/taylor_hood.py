@@ -24,9 +24,10 @@ This example also demonstrates the use of the external pure-Python
 
 
 from skfem import *
-from skfem.models.poisson import vector_laplace, mass
+from skfem.models.poisson import vector_laplace, mass, laplace
 from skfem.models.general import divergence
 
+from matplotlib.tri import Triangulation
 import numpy as np
 from scipy.sparse import bmat
 
@@ -56,7 +57,8 @@ K = bmat([[A, B.T],
 f = np.concatenate([asm(body_force, basis['u']),
                     np.zeros(B.shape[0])])
 
-dofs = basis['u'].get_dofs(mesh.submesh(boundaries_only=True))
+boundary = mesh.submesh(boundaries_only=True)
+dofs = basis['u'].get_dofs(boundary)
 D = np.concatenate((dofs.nodal['u^1'], dofs.nodal['u^2']))
 uvp = np.zeros(K.shape[0])
 uvp[np.setdiff1d(np.arange(K.shape[0]), D)] = solve(*condense(K, f, D=D))
@@ -74,3 +76,26 @@ ax.quiver(mesh.p[0, :], mesh.p[1, :],
           mesh.p[0, :])         # colour by buoyancy
 ax.axis('off')
 ax.get_figure().savefig('taylor_hood_velocity.png')
+
+
+@linear_form
+def rot(v, dv, w):
+    return dv[1] * w.w[0] - dv[0] * w.w[1]
+
+
+basis['psi'] = InteriorBasis(mesh, ElementTriP2())
+A = asm(laplace, basis['psi'])
+psi = np.zeros(A.shape[0])
+D = basis['psi'].get_dofs(boundary).nodal['u']
+interior = basis['psi'].complement_dofs(D)
+psi[D] = 0.
+vorticity = asm(rot, basis['psi'],
+                w=(basis['psi'].interpolate(velocity[::2]),
+                   basis['psi'].interpolate(velocity[1::2])))
+psi[interior] = solve(*condense(A, vorticity, I=interior))
+
+ax = mesh.draw()
+ax.tricontour(Triangulation(mesh.p[0, :], mesh.p[1, :], mesh.t.T),
+              psi[basis['psi'].nodal_dofs.flatten()])
+ax.axis('off')
+ax.get_figure().savefig('taylor_hood_stream-function.png')
