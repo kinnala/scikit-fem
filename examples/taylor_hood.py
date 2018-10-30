@@ -20,6 +20,26 @@ and `ElementTriP1()` for pressure.
 This example also demonstrates the use of the external pure-Python
 `dmsh` to generate a `MeshTri`.
 
+Once the velocity has been found, the stream-function :math:`\psi` can
+be calculated by solving the Poisson problem
+
+.. math::
+    -\Delta\psi = \mathbf k\cdot\nabla\times\mathbf u
+
+where :math:`\mathbf k` is the unit-vector out of the plane.  The
+boundary conditions are that the stream-function be constant around
+the impermeable perimeter; this constant can be taken as zero without
+loss of generality.  In the weak formulation
+
+.. math::
+    \left(\nabla\phi, \nabla\psi\right) = \left(\phi\mathbf k, \nabla\times\mathbf u\right)
+
+the right-hand side can be converted using Green's theorem and the
+no-slip condition to not involve the derivatives of the velocity:
+
+.. math::
+     \left(\phi\mathbf k, \nabla\times\mathbf u\right) = \left(\mathbf k\times\nabla\phi, \mathbf u\right).
+
 """
 
 
