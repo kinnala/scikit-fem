@@ -1,5 +1,6 @@
 from skfem import *
 from skfem.models.poisson import vector_laplace, mass
+from skfem.models.general import divergence
 
 import numpy as np
 from scipy.sparse import bmat
@@ -20,18 +21,13 @@ basis = {variable: InteriorBasis(mesh, e, intorder=3)
          for variable, e in element.items()}
 
 
-@bilinear_form
-def dilatation(u, du, q, dq, w):
-    return (du[0][0] + du[1][1]) * q
-
-
 @linear_form
 def body_force(v, dv, w):
     return w.x[0] * v[1]
 
 
 A = asm(vector_laplace, basis['u'])
-B = asm(dilatation, basis['u'], basis['p'])
+B = asm(divergence, basis['u'], basis['p'])
 C = asm(mass, basis['p'])
 
 K = bmat([[A, B.T],
