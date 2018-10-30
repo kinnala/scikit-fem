@@ -5,15 +5,10 @@ from skfem.models.general import divergence
 import numpy as np
 from scipy.sparse import bmat
 
-import meshio
-from pygmsh import generate_mesh
-from pygmsh.built_in import Geometry
+import dmsh
 
-geom = Geometry()
-circle = geom.add_circle([0.] * 3, 1., .5**3)
-geom.add_physical_line(circle.line_loop.lines, 'perimeter')
-geom.add_physical_surface(circle.plane_surface, 'disk')
-mesh = MeshTri.from_meshio(meshio.Mesh(*generate_mesh(geom)))
+mesh = MeshTri(*map(np.transpose,
+                    dmsh.generate(dmsh.Circle([0., 0.], 1.), .1)))
 
 element = {'u': ElementVectorH1(ElementTriP2()),
            'p': ElementTriP1()}
@@ -36,7 +31,7 @@ K = bmat([[A, B.T],
 f = np.concatenate([asm(body_force, basis['u']),
                     np.zeros(B.shape[0])])
 
-dofs = basis['u'].get_dofs(mesh.boundaries['perimeter'])
+dofs = basis['u'].get_dofs(mesh.submesh(boundaries_only=True))
 D = np.concatenate((dofs.nodal['u^1'], dofs.nodal['u^2']))
 uvp = np.zeros(K.shape[0])
 uvp[np.setdiff1d(np.arange(K.shape[0]), D)] = solve(*condense(K, f, D=D))
