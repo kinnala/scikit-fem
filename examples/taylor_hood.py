@@ -1,3 +1,28 @@
+"""This solves for the same creeping flow as ex18 in primitive variables,
+
+i.e. velocity and pressure instead of stream-function.  These are governed by
+the Stokes momentum
+
+.. math::
+    0 = -\rho^{-1}\nabla p + \mathbf f \nu\Delta\mathbf u
+
+and continuity equations
+
+.. math::
+    \nabla\mathbf u = 0.
+
+This is an example of a mixed problem because it contains two
+different kinds of unknowns; pairs of elements for them have to be
+chosen carefully.  One of the simplest workable choices is the
+Taylor--Hood element: `ElementVectorH1(ElementTriP2())` for velocity
+and `ElementTriP1()` for pressure.
+
+This example also demonstrates the use of the external pure-Python
+`dmsh` to generate a `MeshTri`.
+
+"""
+
+
 from skfem import *
 from skfem.models.poisson import vector_laplace, mass
 from skfem.models.general import divergence
