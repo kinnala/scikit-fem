@@ -62,7 +62,6 @@ if __name__ == "__main__":
     M, Psi = ib.refinterp(psi, 3)
 
     ax = mesh.draw()
-    fig = ax.get_figure()
     ax.tricontour(Triangulation(M.p[0, :], M.p[1, :], M.t.T), Psi)
     ax.axis('off')
     ax.get_figure().savefig(splitext(argv[0])[0] + '_stream-lines.png')
