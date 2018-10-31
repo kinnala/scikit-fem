@@ -4,12 +4,12 @@ i.e. velocity and pressure instead of stream-function.  These are governed by
 the Stokes momentum
 
 .. math::
-    0 = -\rho^{-1}\nabla p + \mathbf f + \nu\Delta\mathbf u
+    0 = -\rho^{-1}\nabla p + \boldsymbol{f} + \nu\Delta\boldsymbol{u}
 
 and continuity equations
 
 .. math::
-    \nabla\mathbf u = 0.
+    \nabla\cdot\boldsymbol{u} = 0.
 
 This is an example of a mixed problem because it contains two
 different kinds of unknowns; pairs of elements for them have to be
@@ -24,12 +24,11 @@ Once the velocity has been found, the stream-function :math:`\psi` can
 be calculated by solving the Poisson problem
 
 .. math::
-    -\Delta\psi = \mathbf k\cdot\nabla\times\mathbf u
+    -\Delta\psi = \mathrm{rot} \boldsymbol{u}. 
 
-where :math:`\mathbf k` is the unit-vector out of the plane.  The
-boundary conditions are that the stream-function be constant around
-the impermeable perimeter; this constant can be taken as zero without
-loss of generality.  In the weak formulation
+The boundary conditions are that the stream-function be constant
+around the impermeable perimeter; this constant can be taken as zero
+without loss of generality.  In the weak formulation
 
 .. math::
     \left(\nabla\phi, \nabla\psi\right) = \left(\phi\mathbf k, \nabla\times\mathbf u\right)
