@@ -5,20 +5,20 @@ The stream-function :math:`\psi` for two-dimensional creeping flow is
 governed by the biharmonic equation
 
 .. math::  
-    \nu \Delta^2\psi = \mathrm{rot}\,f
+    \nu \Delta^2\psi = \mathrm{rot}\,\boldsymbol{f}
 
 where :math:`\nu` is the kinematic viscosity (assumed constant),
-:math:`f` the volumetric body-force, and :math:`\mathrm{rot}\,f =
-(\partial f/\partial y, -\partial f/\partial x)`.  The boundary
+:math:`f` the volumetric body-force, and :math:`\mathrm{rot}\,\boldsymbol{f} \equiv
+\partial f_y/\partial x - \partial f_x/\partial y`.  The boundary
 conditions at a wall are that :math:`\psi` is constant (the wall is
 impermeable) and that the normal component of its gradient vanishes (no
 slip).  Thus, the boundary value problem is analogous to that of
 bending a clamped plate, and may be treated with Morley elements as in
 `Kirchhoff plate`_ example.
 
-Here we consider a buoyancy force :math:`f = x\hat{j}`, which arises in
-the Boussinesq approximation of natural convection with a horizontal
-temperature gradient (`Batchelor 1954
+Here we consider a buoyancy force :math:`\boldsymbol{f} = x\hat{j}`,
+which arises in the Boussinesq approximation of natural convection
+with a horizontal temperature gradient (`Batchelor 1954
 <http://dx.doi.org/10.1090/qam/64563>`_).
 
 For a circular cavity of radius :math:`a`, the problem admits a
