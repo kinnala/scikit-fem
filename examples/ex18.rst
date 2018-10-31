@@ -1,3 +1,5 @@
+.. _ex18:
+
 ex18: Creeping flow
 -------------------
 
@@ -14,7 +16,7 @@ conditions at a wall are that :math:`\psi` is constant (the wall is
 impermeable) and that the normal component of its gradient vanishes (no
 slip).  Thus, the boundary value problem is analogous to that of
 bending a clamped plate, and may be treated with Morley elements as in
-the Kirchhoff plate example (ex02).
+the :ref:`Kirchhoff plate example <ex02>`.
 
 Here we consider a buoyancy force :math:`\boldsymbol{f} = x\hat{j}`,
 which arises in the Boussinesq approximation of natural convection

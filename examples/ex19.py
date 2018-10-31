@@ -31,9 +31,7 @@ K = bmat([[A, -B.T],
 f = np.concatenate([asm(body_force, basis['u']),
                     np.zeros(B.shape[0])])
 
-boundary = mesh.submesh(boundaries_only=True)
-dofs = basis['u'].get_dofs(boundary)
-D = dofs.all()
+D = basis['u'].get_dofs().all()
 uvp = np.zeros(K.shape[0])
 uvp[np.setdiff1d(np.arange(K.shape[0]), D)] = solve(*condense(K, f, D=D))
 
@@ -47,7 +45,7 @@ def rot(v, dv, w):
 basis['psi'] = InteriorBasis(mesh, ElementTriP2())
 A = asm(laplace, basis['psi'])
 psi = np.zeros(A.shape[0])
-D = basis['psi'].get_dofs(boundary).all()
+D = basis['psi'].get_dofs().all()
 interior = basis['psi'].complement_dofs(D)
 psi[D] = 0.
 vorticity = asm(rot, basis['psi'],
