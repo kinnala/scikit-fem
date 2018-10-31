@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Mappings define relationships between reference and global elements.
 
 :class:`~skfem.mesh.Mesh` provides default mappings for each mesh type,

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Tabulated and generated quadrature points for various reference domains."""
 
 import numpy as np

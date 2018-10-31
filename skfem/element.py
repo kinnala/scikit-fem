@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Element classes define and evaluate the finite element basis
 functions.
 
