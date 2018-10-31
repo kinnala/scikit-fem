@@ -10,7 +10,7 @@ hexahedral meshes as well as one-dimensional problems.
 
 This document contains the efforts to improve the user documentation of the
 project. Currently, the main learning resource consists of the
-:ref:`extended examples <Examples>` that are continuously improved. In case you have any further
+examples that are continuously improved. In case you have any further
 questions, do not hesitate to drop in and say hello at our `Gitter chat
 <https://gitter.im/scikit-fem>`_.
 
