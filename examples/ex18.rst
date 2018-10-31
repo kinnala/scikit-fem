@@ -9,16 +9,16 @@ governed by the biharmonic equation
 
 where :math:`\nu` is the kinematic viscosity (assumed constant),
 :math:`f` the volumetric body-force, and :math:`\mathrm{rot}\,\boldsymbol{f} \equiv
-\hat{i}\partial f_/\partial y -\hat{j}\partial f/\partial x`.  The boundary
+\partial f_y/\partial x - \partial f_x/\partial y`.  The boundary
 conditions at a wall are that :math:`\psi` is constant (the wall is
 impermeable) and that the normal component of its gradient vanishes (no
 slip).  Thus, the boundary value problem is analogous to that of
 bending a clamped plate, and may be treated with Morley elements as in
 `Kirchhoff plate`_ example.
 
-Here we consider a buoyancy force :math:`\boldsymbol{f} = x\hat{j}`, which arises in
-the Boussinesq approximation of natural convection with a horizontal
-temperature gradient (`Batchelor 1954
+Here we consider a buoyancy force :math:`\boldsymbol{f} = x\hat{j}`,
+which arises in the Boussinesq approximation of natural convection
+with a horizontal temperature gradient (`Batchelor 1954
 <http://dx.doi.org/10.1090/qam/64563>`_).
 
 For a circular cavity of radius :math:`a`, the problem admits a
