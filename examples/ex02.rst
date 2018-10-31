@@ -1,5 +1,5 @@
-Kirchhoff plate
----------------
+ex02: Kirchhoff plate
+---------------------
 
 This example demonstrates the solution of a slightly more complicated problem
 with multiple boundary conditions and a fourth-order differential operator. We

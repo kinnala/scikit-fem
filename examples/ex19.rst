@@ -1,0 +1,52 @@
+ex19: Stokes equations
+----------------------
+
+This solves for the same creeping flow problem as in ex18 but in the primitive
+variables, i.e. velocity and pressure instead of the stream-function.  These are
+governed by the Stokes momentum
+
+.. math::
+    0 = -\rho^{-1}\nabla p + \boldsymbol{f} + \nu\Delta\boldsymbol{u}
+
+and continuity equations
+
+.. math::
+    \nabla\cdot\boldsymbol{u} = 0.
+
+This is an example of a mixed problem because it contains two
+different kinds of unknowns; pairs of elements for them have to be
+chosen carefully.  One of the simplest workable choices is the
+Taylor--Hood element: :code:`ElementVectorH1(ElementTriP2())` for velocity
+and :code:`ElementTriP1()` for pressure.
+
+This example also demonstrates the use of the external pure-Python
+`dmsh` to generate a :class:`skfem.mesh.MeshTri`.
+
+Once the velocity has been found, the stream-function :math:`\psi` can
+be calculated by solving the Poisson problem
+
+.. math::
+    -\Delta\psi = \mathrm{rot}\,\boldsymbol{u}.
+
+The boundary conditions are that the stream-function be constant
+around the impermeable perimeter; this constant can be taken as zero
+without loss of generality.  In the weak formulation
+
+.. math::
+    \left(\nabla\phi, \nabla\psi\right) = \left(\phi, \mathrm{rot}\,\boldsymbol{u}\right)
+
+the right-hand side can be converted using Green's theorem and the
+no-slip condition to not involve the derivatives of the velocity:
+
+.. math::
+     \left(\phi, \mathrm{rot}\,\boldsymbol{u}\right) = \left(\boldsymbol{rot}\,\phi, \boldsymbol{u}\right)
+
+where :math:`\boldsymbol{rot}` is the adjoint of :math:`\mathrm{rot}`:
+
+.. math::
+    \boldsymbol{rot}\,\phi \equiv \frac{\partial\phi}{\partial y}\hat{i} - \frac{\partial\phi}{\partial x}\hat{j}.
+
+The complete source code reads as follows:
+
+.. literalinclude:: ../examples/ex19.py
+    :linenos:

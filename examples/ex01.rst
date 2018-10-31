@@ -1,5 +1,5 @@
-Poisson equation
-----------------
+ex01: Poisson equation
+----------------------
 
 In this example, we demonstrate the basic concepts
 and workflow of scikit-fem. This is done by solving

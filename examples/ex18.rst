@@ -1,5 +1,5 @@
-Creeping flow
--------------
+ex18: Creeping flow
+-------------------
 
 The stream-function :math:`\psi` for two-dimensional creeping flow is
 governed by the biharmonic equation
@@ -8,13 +8,13 @@ governed by the biharmonic equation
     \nu \Delta^2\psi = \mathrm{rot}\,\boldsymbol{f}
 
 where :math:`\nu` is the kinematic viscosity (assumed constant),
-:math:`f` the volumetric body-force, and :math:`\mathrm{rot}\,\boldsymbol{f} \equiv
+:math:`\boldsymbol{f}` the volumetric body-force, and :math:`\mathrm{rot}\,\boldsymbol{f} \equiv
 \partial f_y/\partial x - \partial f_x/\partial y`.  The boundary
 conditions at a wall are that :math:`\psi` is constant (the wall is
 impermeable) and that the normal component of its gradient vanishes (no
 slip).  Thus, the boundary value problem is analogous to that of
 bending a clamped plate, and may be treated with Morley elements as in
-`Kirchhoff plate`_ example.
+the Kirchhoff plate example (ex02).
 
 Here we consider a buoyancy force :math:`\boldsymbol{f} = x\hat{j}`,
 which arises in the Boussinesq approximation of natural convection
@@ -25,7 +25,7 @@ For a circular cavity of radius :math:`a`, the problem admits a
 polynomial solution with circular stream-lines:
 
 .. math::
-    \psi = \left\{1 - (x^2+y^2)/a^2\right\}^2 / 64.
+    \psi = \left(1 - (x^2+y^2)/a^2\right)^2 / 64.
 
 The resulting stream-lines and velocity vectors are given
 in the following figures:
