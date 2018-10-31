@@ -4,7 +4,7 @@ i.e. velocity and pressure instead of stream-function.  These are governed by
 the Stokes momentum
 
 .. math::
-    0 = -\rho^{-1}\nabla p + \mathbf f \nu\Delta\mathbf u
+    0 = -\rho^{-1}\nabla p + \mathbf f + \nu\Delta\mathbf u
 
 and continuity equations
 
