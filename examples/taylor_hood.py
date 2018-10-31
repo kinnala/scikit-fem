@@ -82,7 +82,7 @@ f = np.concatenate([asm(body_force, basis['u']),
 
 boundary = mesh.submesh(boundaries_only=True)
 dofs = basis['u'].get_dofs(boundary)
-D = np.concatenate((dofs.nodal['u^1'], dofs.nodal['u^2']))
+D = dofs.all()
 uvp = np.zeros(K.shape[0])
 uvp[np.setdiff1d(np.arange(K.shape[0]), D)] = solve(*condense(K, f, D=D))
 
