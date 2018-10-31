@@ -58,7 +58,7 @@ from scipy.sparse import bmat
 import dmsh
 
 mesh = MeshTri(*map(np.transpose,
-                    dmsh.generate(dmsh.Circle([0., 0.], 1.), .1)))
+                    dmsh.generate(dmsh.Circle([0., 0.], 1.), .5**4)))
 
 element = {'u': ElementVectorH1(ElementTriP2()),
            'p': ElementTriP1()}
@@ -75,8 +75,8 @@ A = asm(vector_laplace, basis['u'])
 B = asm(divergence, basis['u'], basis['p'])
 C = asm(mass, basis['p'])
 
-K = bmat([[A, B.T],
-          [B, 1e-3 * C]]).tocsr()
+K = bmat([[A, -B.T],
+          [-B, 1e-6 * C]]).tocsr()
 
 f = np.concatenate([asm(body_force, basis['u']),
                     np.zeros(B.shape[0])])
@@ -88,6 +88,9 @@ uvp = np.zeros(K.shape[0])
 uvp[np.setdiff1d(np.arange(K.shape[0]), D)] = solve(*condense(K, f, D=D))
 
 velocity, pressure = np.split(uvp, [A.shape[0]])
+
+
+print(basis['p'].interpolator(pressure)(np.array([[-0.5, 0.5], [0.5, 0.5]])))
 
 ax = mesh.plot(pressure)
 ax.axis('off')
@@ -114,9 +117,10 @@ D = basis['psi'].get_dofs(boundary).nodal['u']
 interior = basis['psi'].complement_dofs(D)
 psi[D] = 0.
 vorticity = asm(rot, basis['psi'],
-                w=(basis['psi'].interpolate(velocity[::2]),
-                   basis['psi'].interpolate(velocity[1::2])))
+                w=[basis['psi'].interpolate(velocity[i::2])
+                   for i in range(2)])
 psi[interior] = solve(*condense(A, vorticity, I=interior))
+
 
 ax = mesh.draw()
 ax.tricontour(Triangulation(mesh.p[0, :], mesh.p[1, :], mesh.t.T),
