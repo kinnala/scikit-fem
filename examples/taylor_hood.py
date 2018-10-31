@@ -24,20 +24,25 @@ Once the velocity has been found, the stream-function :math:`\psi` can
 be calculated by solving the Poisson problem
 
 .. math::
-    -\Delta\psi = \mathrm{rot} \boldsymbol{u}. 
+    -\Delta\psi = \mathrm{rot} \boldsymbol{u}.
 
 The boundary conditions are that the stream-function be constant
 around the impermeable perimeter; this constant can be taken as zero
 without loss of generality.  In the weak formulation
 
 .. math::
-    \left(\nabla\phi, \nabla\psi\right) = \left(\phi\mathbf k, \nabla\times\mathbf u\right)
+    \left(\nabla\phi, \nabla\psi\right) = \left(\phi, \mathrm{rot}\boldsymbol{u}\right)
 
 the right-hand side can be converted using Green's theorem and the
 no-slip condition to not involve the derivatives of the velocity:
 
 .. math::
-     \left(\phi\mathbf k, \nabla\times\mathbf u\right) = \left(\mathbf k\times\nabla\phi, \mathbf u\right).
+     \left(\phi, \mathrm{rot}\boldsymbol{u}\right) = \left(\boldsymbol{rot}\phi, \boldsymbol{u}\right)
+
+where :math:`\boldmath{rot}` is the adjoint of :math:`\mathrm{rot}`:
+
+.. math::
+    \boldsymbol{rot}\phi \equiv \frac{\partial\phi}{\partial y}\hat{i} - \frac{\partial\phi}{\partial x}\hat{j}.
 
 """
 
