@@ -51,14 +51,13 @@ from skfem import *
 from skfem.models.poisson import vector_laplace, mass, laplace
 from skfem.models.general import divergence
 
-from matplotlib.tri import Triangulation
 import numpy as np
 from scipy.sparse import bmat
 
 import dmsh
 
 mesh = MeshTri(*map(np.transpose,
-                    dmsh.generate(dmsh.Circle([0., 0.], 1.), .5**4)))
+                    dmsh.generate(dmsh.Circle([0., 0.], 1.), .1)))
 
 element = {'u': ElementVectorH1(ElementTriP2()),
            'p': ElementTriP1()}
@@ -89,22 +88,6 @@ uvp[np.setdiff1d(np.arange(K.shape[0]), D)] = solve(*condense(K, f, D=D))
 
 velocity, pressure = np.split(uvp, [A.shape[0]])
 
-
-print(basis['p'].interpolator(pressure)(np.array([[-0.5, 0.5], [0.5, 0.5]])))
-
-ax = mesh.plot(pressure)
-ax.axis('off')
-ax.get_figure().savefig('taylor_hood_pressure.png')
-
-ax = mesh.draw()
-velocity1 = velocity[basis['u'].nodal_dofs]
-ax.quiver(mesh.p[0, :], mesh.p[1, :],
-          velocity1[0, :], velocity1[1, :],
-          mesh.p[0, :])         # colour by buoyancy
-ax.axis('off')
-ax.get_figure().savefig('taylor_hood_velocity.png')
-
-
 @linear_form
 def rot(v, dv, w):
     return dv[1] * w.w[0] - dv[0] * w.w[1]
@@ -122,8 +105,36 @@ vorticity = asm(rot, basis['psi'],
 psi[interior] = solve(*condense(A, vorticity, I=interior))
 
 
-ax = mesh.draw()
-ax.tricontour(Triangulation(mesh.p[0, :], mesh.p[1, :], mesh.t.T),
-              psi[basis['psi'].nodal_dofs.flatten()])
-ax.axis('off')
-ax.get_figure().savefig('taylor_hood_stream-function.png')
+if __name__ == '__main__':
+
+    from os.path import splitext
+    from sys import argv
+
+    from matplotlib.tri import Triangulation
+
+    name = splitext(argv[0])[0]
+    
+    print(basis['p'].interpolator(pressure)(np.array([[-0.5, 0.5],
+                                                      [0.5, 0.5]])),
+          '(cf. exact -/+ 1/8)')
+
+    ax = mesh.plot(pressure)
+    ax.axis('off')
+    ax.get_figure().savefig(f'{name}_pressure.png')
+
+    ax = mesh.draw()
+    velocity1 = velocity[basis['u'].nodal_dofs]
+    ax.quiver(mesh.p[0, :], mesh.p[1, :],
+              velocity1[0, :], velocity1[1, :],
+              mesh.p[0, :])         # colour by buoyancy
+    ax.axis('off')
+    ax.get_figure().savefig(f'{name}_velocity.png')
+
+
+
+
+    ax = mesh.draw()
+    ax.tricontour(Triangulation(mesh.p[0, :], mesh.p[1, :], mesh.t.T),
+                  psi[basis['psi'].nodal_dofs.flatten()])
+    ax.axis('off')
+    ax.get_figure().savefig(f'{name}_stream-function.png')
