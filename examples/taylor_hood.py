@@ -96,7 +96,7 @@ def rot(v, dv, w):
 basis['psi'] = InteriorBasis(mesh, ElementTriP2())
 A = asm(laplace, basis['psi'])
 psi = np.zeros(A.shape[0])
-D = basis['psi'].get_dofs(boundary).nodal['u']
+D = basis['psi'].get_dofs(boundary).all()
 interior = basis['psi'].complement_dofs(D)
 psi[D] = 0.
 vorticity = asm(rot, basis['psi'],
