@@ -107,15 +107,6 @@ def solver_direct_umfpack() -> LinearSolver:
     return solver
 
 
-def solver_direct_cholmod() -> LinearSolver:
-    """Cholmod-based direct solver for symmetric systems."""
-    def solver(A, b):
-        from sksparse.cholmod import cholesky
-        factor = cholesky(A)
-        return factor(b)
-    return solver
-
-
 def build_pc_ilu(A: spmatrix,
                  drop_tol: Optional[float] = 1e-4,
                  fill_factor: Optional[float] = 20) -> spl.LinearOperator:
