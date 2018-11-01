@@ -195,7 +195,6 @@ def solve(A: spmatrix,
             - :func:`skfem.utils.solver_direct_scipy` (default)
             - :func:`skfem.utils.solver_eigen_scipy` (default)
             - :func:`skfem.utils.solver_direct_umfpack`
-            - :func:`skfem.utils.solver_direct_cholmod`
             - :func:`skfem.utils.solver_iter_pcg`
 
     """
