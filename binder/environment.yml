@@ -4,3 +4,5 @@ dependencies:
   - numpy
   - scipy
   - matplotlib
+  - pip:
+    - scikit-fem
