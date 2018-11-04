@@ -1,7 +1,7 @@
 import numpy as np
 from skfem.assembly.dofs import Dofs
 
-from typing import Dict, List, NamedTuple, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 from numpy import ndarray
 
