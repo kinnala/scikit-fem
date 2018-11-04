@@ -37,12 +37,11 @@ A = asm(laplace, basis)
 
 The most recent release can be installed simply by `pip install scikit-fem`.
 
-For more cutting edge features, you can clone this repository. More examples can be found
-from the [source code repository](https://github.com/kinnala/scikit-fem/tree/master/examples).
+For more cutting edge features, you can clone this repository.
 
 ## Getting started
 
-Please see the [user documentation](https://kinnala.github.io/scikit-fem-docs).
+Please see the [user documentation](https://kinnala.github.io/scikit-fem-docs) for examples.
 
 ## Contributors
 
