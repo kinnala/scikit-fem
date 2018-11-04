@@ -1,5 +1,5 @@
-ex19: Stokes equations
-----------------------
+Example: Stokes equations
+-------------------------
 
 This solves for the same creeping flow problem as in :ref:`ex18` but in the primitive
 variables, i.e. velocity and pressure instead of the stream-function.  These are
@@ -48,5 +48,5 @@ where :math:`\boldsymbol{rot}` is the adjoint of :math:`\mathrm{rot}`:
 
 The complete source code reads as follows:
 
-.. literalinclude:: ../examples/ex19.py
+.. literalinclude:: taylorhood.py
     :linenos:

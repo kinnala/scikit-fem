@@ -1,7 +1,7 @@
 .. _ex18:
 
-ex18: Creeping flow
--------------------
+Example: Creeping flow
+----------------------
 
 The stream-function :math:`\psi` for two-dimensional creeping flow is
 governed by the biharmonic equation
@@ -16,7 +16,7 @@ conditions at a wall are that :math:`\psi` is constant (the wall is
 impermeable) and that the normal component of its gradient vanishes (no
 slip).  Thus, the boundary value problem is analogous to that of
 bending a clamped plate, and may be treated with Morley elements as in
-the :ref:`Kirchhoff plate example <ex02>`.
+the Kirchhoff plate tutorial.
 
 Here we consider a buoyancy force :math:`\boldsymbol{f} = x\hat{j}`,
 which arises in the Boussinesq approximation of natural convection
@@ -29,18 +29,7 @@ polynomial solution with circular stream-lines:
 .. math::
     \psi = \left(1 - (x^2+y^2)/a^2\right)^2 / 64.
 
-The resulting stream-lines and velocity vectors are given
-in the following figures:
-
-.. figure:: ../examples/ex18_stream-lines.png
-
-	    The stream-lines.
-
-.. figure:: ../examples/ex18_velocity-vectors.png
-
-	    The velocity vectors colored by buoyancy.
-
 The complete source code reads as follows:
 
-.. literalinclude:: ../examples/ex18.py
+.. literalinclude:: creeping.py
     :linenos:

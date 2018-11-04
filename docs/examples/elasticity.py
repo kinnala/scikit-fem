@@ -3,7 +3,7 @@ from skfem.models.elasticity import linear_elasticity,\
                                     lame_parameters
 import numpy as np
 
-m = MeshTet.load("beams.msh")
+m = MeshTet.load("../meshes/beams.msh")
 e1 = ElementTetP1()
 e = ElementVectorH1(e1)
 

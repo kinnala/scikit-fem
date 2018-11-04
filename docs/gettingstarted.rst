@@ -16,11 +16,7 @@ For more recent features, you can clone the project's Github repository:
 
     git clone https://github.com/kinnala/scikit-fem
 
-Learning
---------
-
-Currently, the most efficient approach for learning the library
-is to read :ref:`tutorials <tutorials>` and :ref:`examples <examples>`.
+See :ref:`learning` for usage instructions.
 
 Contributing
 ------------

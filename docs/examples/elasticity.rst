@@ -1,17 +1,9 @@
-ex17: Structural vibration
---------------------------
+Tutorial: Structural vibration
+------------------------------
 
-This example demonstrates the solution of a three-dimensional
+This tutorial demonstrates the solution of a three-dimensional
 vector-valued problem. For this purpose, we consider an elastic
 eigenvalue problem.
-
-.. figure:: ../examples/ex17_mesh.png
-
-	    The elastic structure
-	    denoted by :math:`\Omega`.
-	    The bottom boundaries, fixed to the ground,
-	    are denoted by :math:`\Gamma_D`. The rest of the
-	    boundary is denoted by :math:`\Gamma_N`.
 
 The governing equation for the displacement of the elastic structure
 :math:`\Omega` reads: find :math:`\boldsymbol{u} : \Omega \rightarrow
@@ -77,36 +69,32 @@ The bilinear form for the problem can be found from
 for the problem is loaded from an external file *beams.msh*, which is
 included in the source code distribution.
 
-.. literalinclude:: ../examples/ex17.py
+.. literalinclude:: elasticity.py
 		    :lines: 1-6
 
 A vectorial :math:`H^1`-conforming element is defined by supplying another :class:`~skfem.element.Element` object to the constructor of :class:`~skfem.element.ElementVectorH1`.
 
-.. literalinclude:: ../examples/ex17.py
+.. literalinclude:: elasticity.py
 		    :lines: 7-10
 
 The assembly is standard with the exception of vectorial
 solution and test functions.
 
-.. literalinclude:: ../examples/ex17.py
+.. literalinclude:: elasticity.py
 		    :lines: 12-20
 
 The function :func:`~skfem.utils.solve` automatically detects
 eigenvalue problems if another sparse matrix is given as an argument instead of a load vector.
 
-.. literalinclude:: ../examples/ex17.py
+.. literalinclude:: elasticity.py
 		    :lines: 22-32
 
 Finally, we displace the mesh before exporting to the VTK format.
 
-.. literalinclude:: ../examples/ex17.py
+.. literalinclude:: elasticity.py
 		    :lines: 34-41
-
-.. figure:: ../examples/ex17_solution.png
-
-	    The first eigenvector.
 
 The complete source code reads as follows:
 
-.. literalinclude:: ../examples/ex17.py
+.. literalinclude:: elasticity.py
     :linenos:

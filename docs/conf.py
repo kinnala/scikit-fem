@@ -16,6 +16,16 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
+# notebook header
+nbsphinx_prolog = r"""
+{% set docname = env.doc2path(env.docname, base="docs") %}
+
+.. note::
+   This page was generated from a Jupyter notebook. You can `try out the example
+   <https://mybinder.org/v2/gh/kinnala/scikit-fem/master?filepath={{ docname }}>`_
+   interactively in your browser.
+
+"""
 
 # -- Project information -----------------------------------------------------
 
@@ -44,6 +54,8 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
+    'nbsphinx',
+    'IPython.sphinxext.ipython_console_highlighting',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
