@@ -154,12 +154,6 @@ class GlobalBasis():
         else:
             return self._get_dofs(submesh)
 
-    def init_gbasis(self, nvals, nqp, order):
-        if order == 0:
-            return np.empty((self.Nbfun, nvals, nqp))
-        else:
-            return np.empty((self.Nbfun,) + order*(self.dim,) + (nvals, nqp))
-
     def default_parameters(self):
         """This is used by :func:`skfem.assembly.asm` to get the default
         parameters for 'w'."""
