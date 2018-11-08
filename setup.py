@@ -6,7 +6,7 @@ here = path.abspath(path.dirname(__file__))
 
 setup(
     name='scikit-fem',
-    version='0.1.11',
+    version='0.1.12',
     description='Simple finite element assemblers',
     long_description='Easy to use finite element assemblers and related tools. See Github page for more information and examples.',  # Optional
     url='https://github.com/kinnala/scikit-fem',
