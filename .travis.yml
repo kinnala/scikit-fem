@@ -10,8 +10,15 @@ install:
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
   - conda info -a
-  - conda create -q -n scikit-fem python=$TRAVIS_PYTHON_VERSION nomkl numpy scipy matplotlib sympy ipython pip
+  - conda create -q -n scikit-fem python=$TRAVIS_PYTHON_VERSION nomkl numpy scipy matplotlib ipython pip
   - source activate scikit-fem
   - pip install meshio
 script:
   - python -m unittest discover 
+deploy:
+  provider: pypi
+  user: "knl"
+  password:
+    secure: "VwUp61UeDs+K0L+0LgUJrQfjYMt8EINvD6LQ/F/+SkAGdc4R1USVhVUUnhlGFvfGRkyOqpq3oShWmuRNXtunWoyGGUoap0GgC9xVACG5tw3savf8kr/9JdiY3KG23ulp7uByf7Pi0pcErhW+F1nPeFDPNWiXq/cnUyRS1VlKDE2dJHQxrMUyNHCr74UWuU0XwZG2iDq+ws3BgDOabxPy7tkf2rxZAbwBCbhaLCtDyO6PHyiUGtGtMrSOalx53w1f+xn0TcwiCnrEqQzEU52d84Ig2F6LO5W0b9tmeHKs/GRIpaBFNEsdKmaAaYBepgP5738IyDKaCPIgliDz+zYk1RQG2hF5r7SnZ6sXgDQpAop5xDf9z1V67UoMbRvPtHCOfGHINVE0ploz8sZPAMcA1fHXI9ep0n73jvp4ZemUK2jEUdOtoRS4WCde36bOeY/CRk6H0WAbbfAYhM+3lJNjyMNXh2sEEVNxkAZ9W7aZfwMfsZzBnxOB12g1oWmtgC7MTZgGszE2rReAoDXqWzoDIIXK2b/xR9rv/8cJgb6o/hXkAfSKM5KwpMpRxm4ZOm3mmjPR/RZaNzWa90rg/yynUHkKSCCMmL21mCRcpULNegPv5YrQre/ur6mMQ8UVpk1y4+yZW2rUr+UUx/G5sIyJy7NH6QvzbrMY+SCO+SvFnyI="
+  on:
+    tags: true
