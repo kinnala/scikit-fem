@@ -90,6 +90,15 @@ if __name__ == '__main__':
     from os.path import splitext
     from sys import argv
     
+
+    T0 = {'skfem': basis.interpolator(temperature)(np.zeros((2, 1)))[0],
+          'exact':
+          (joule_heating * radii[0]**2 / 4 / thermal_conductivity[0] *
+           (2 * thermal_conductivity[0] / heat_transfer_coefficient / radii[1]
+            + (2 * thermal_conductivity[0] / thermal_conductivity[1]
+               * np.log(radii[1] /radii[0])) + 1))}
+    print('Central temperature:', T0)
+    
     ax = mesh.plot(temperature)
     ax.axis('off')
     fig = ax.get_figure()
