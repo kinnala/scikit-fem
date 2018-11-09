@@ -70,7 +70,7 @@ basis = InteriorBasis(mesh, element)
 replicate = partial(np.tile, reps=(len(basis.W), 1))
 L = asm(conduction, basis, w=replicate(thermal_conductivity[regions]).T)
 
-facet_basis = FacetBasis(mesh, element, submesh=mesh.submesh())
+facet_basis = FacetBasis(mesh, element, submesh=mesh.boundaries['convection'])
 H = heat_transfer_coefficient * asm(convection, facet_basis)
 
 
