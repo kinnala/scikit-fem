@@ -1,7 +1,7 @@
 import numpy as np
 from skfem.assembly.dofs import Dofs
 
-from typing import Dict, List, NamedTuple, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 from numpy import ndarray
 
@@ -153,12 +153,6 @@ class GlobalBasis():
             return {key: self._get_dofs(submesh[key]) for key in submesh}
         else:
             return self._get_dofs(submesh)
-
-    def init_gbasis(self, nvals, nqp, order):
-        if order == 0:
-            return np.empty((self.Nbfun, nvals, nqp))
-        else:
-            return np.empty((self.Nbfun,) + order*(self.dim,) + (nvals, nqp))
 
     def default_parameters(self):
         """This is used by :func:`skfem.assembly.asm` to get the default
