@@ -264,6 +264,7 @@ class Mesh():
                 # all mesh formats are not supported; raise warning for
                 # unsupported types
                 warnings.warn("Could not load submeshes.")
+            mesh.cell_data = meshdata.cell_data
             return mesh
         else:
             raise Exception("The mesh contains no elements of type " + cls.meshio_type)
