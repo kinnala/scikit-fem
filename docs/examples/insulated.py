@@ -15,15 +15,22 @@ with k1 ∂T/∂r + h T = 0 on r = b.
 
 """
 
+from functools import partial
 from typing import Optional
 
 import numpy as np
 
+import meshio
 from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
 
+from skfem.assembly import (InteriorBasis, FacetBasis,
+                            bilinear_form, linear_form, asm)
+from skfem.element import ElementTriP1
 from skfem.mesh import MeshTri
-from skfem.models.poisson import laplace, unit_load
+from skfem.mesh.submesh import Submesh
+from skfem.models.poisson import mass
+from skfem.utils import solve
 
 radii = [2., 3.]
 joule_heating = 5.
@@ -45,17 +52,46 @@ def make_mesh(a: float,         # radius of wire
     geom.add_physical_surface(insulation.plane_surface, 'insulation')
     geom.add_physical_line(insulation.line_loop.lines, 'convection')
 
-    points, cells, _, cell_data, __ = generate_mesh(geom)
-    
-    mesh = MeshTri(points[:, :2].T, cells['triangle'].T)
-    mesh.regions = cell_data['triangle']['gmsh:physical']
+    return MeshTri.from_meshio(meshio.Mesh(*generate_mesh(geom)))
 
     return mesh
 
 mesh = make_mesh(*radii)
-print(mesh)
-print(mesh.regions)
+regions = mesh.cell_data['triangle']['gmsh:physical'] - 1
 
-ax = mesh.plot(mesh.regions)
-ax.axis('off')
-ax.get_figure().savefig('regions.png')
+@bilinear_form
+def conduction(u, du, v, dv, w):
+    return w.w * sum(du * dv)
+
+convection = mass
+
+element = ElementTriP1()
+basis = InteriorBasis(mesh, element)
+replicate = partial(np.tile, reps=(len(basis.W), 1))
+L = asm(conduction, basis, w=replicate(thermal_conductivity[regions]).T)
+
+facet_basis = FacetBasis(mesh, element, submesh=mesh.submesh())
+H = heat_transfer_coefficient * asm(convection, facet_basis)
+
+
+in_wire = (regions == 0).astype(float)
+                    
+
+@linear_form
+def generation(v, dv, w):
+    return w.w * v
+
+f = joule_heating * asm(generation, basis, w=replicate(in_wire).T)
+
+temperature = solve(L + H, f)
+
+if __name__ == '__main__':
+
+    from os.path import splitext
+    from sys import argv
+    
+    ax = mesh.plot(temperature)
+    ax.axis('off')
+    fig = ax.get_figure()
+    fig.colorbar(ax.get_children()[0])
+    fig.savefig(splitext(argv[0])[0] + '.png')
