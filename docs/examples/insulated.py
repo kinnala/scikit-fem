@@ -67,21 +67,23 @@ convection = mass
 
 element = ElementTriP1()
 basis = InteriorBasis(mesh, element)
-replicate = partial(np.tile, reps=(len(basis.W), 1))
-L = asm(conduction, basis, w=replicate(thermal_conductivity[regions]).T)
+
+
+def elemental(x: np.ndarray) -> np.ndarray:
+    return np.tile(x, (len(basis.W), 1)).T
+
+
+L = asm(conduction, basis, w=elemental(thermal_conductivity[regions]))
 
 facet_basis = FacetBasis(mesh, element, submesh=mesh.boundaries['convection'])
 H = heat_transfer_coefficient * asm(convection, facet_basis)
 
 
-in_wire = (regions == 0).astype(float)
-                    
-
 @linear_form
 def generation(v, dv, w):
     return w.w * v
 
-f = joule_heating * asm(generation, basis, w=replicate(in_wire).T)
+f = joule_heating * asm(generation, basis, w=elemental(regions == 0))
 
 temperature = solve(L + H, f)
 
