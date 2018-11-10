@@ -76,7 +76,7 @@ class InteriorBasis(GlobalBasis):
 
         self.basis = list(zip(*[self.elem.gbasis(self.mapping, self.X, j) for j in range(self.Nbfun)]))
 
-        self.nelems = self.nt
+        self.nelems = self.mesh.t.shape[1]
         self.dx = np.abs(self.mapping.detDF(self.X)) * np.tile(self.W, (self.nelems, 1))
 
     def default_parameters(self):
@@ -108,7 +108,7 @@ class InteriorBasis(GlobalBasis):
             basis = self.elem.gbasis(self.mapping, X, j)
             w += interp[self.element_dofs[j, :]][:, None]*basis[0]
 
-        nt = self.nt
+        nt = self.nelems
         t = np.tile(m.t, (1, nt))
         dt = np.max(t)
         t += (dt+1)*np.tile(np.arange(nt), (m.t.shape[0]*m.t.shape[1], 1)).flatten('F').reshape((-1, m.t.shape[0])).T

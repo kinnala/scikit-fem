@@ -40,8 +40,7 @@ class GlobalBasis():
         else:
             self.intorder = intorder
 
-        self.dim = mesh.p.shape[0]
-        self.nt = mesh.t.shape[1]
+        self.nelems = None # subclasses should overwrite
 
         self.mesh = mesh
 
@@ -196,11 +195,12 @@ class GlobalBasis():
 
         """
         nqp = len(self.W)
+        dim = self.mesh.dim()
 
         if self.elem.order[0] == 0:
             W = np.zeros((self.nelems, nqp))
         elif self.elem.order[0] == 1:
-            W = np.zeros((self.dim, self.nelems, nqp))
+            W = np.zeros((dim, self.nelems, nqp))
         else:
             raise Exception("Interpolation not implemented for this Element.order.")
 
@@ -211,14 +211,14 @@ class GlobalBasis():
 
         if derivative:
             if self.elem.order[1] == 1:
-                dW = np.zeros((self.dim, self.nelems, nqp))
+                dW = np.zeros((dim, self.nelems, nqp))
             elif self.elem.order[1] == 2:
-                dW = np.zeros((self.dim, self.dim, self.nelems, nqp))
+                dW = np.zeros((dim, dim, self.nelems, nqp))
             else:
                 raise Exception("Interpolation not implemented for this Element.order.")
             for j in range(self.Nbfun):
                 jdofs = self.element_dofs[j, :]
-                for a in range(self.dim):
+                for a in range(dim):
                     dW[a, :, :] += w[jdofs][:, None] \
                                    * self.basis[1][j][a]
             return W, dW

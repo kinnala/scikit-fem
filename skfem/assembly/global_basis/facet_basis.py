@@ -105,11 +105,10 @@ class FacetBasis(GlobalBasis):
             Y0 = self.mapping.invF(x, tind=self.mesh.f2t[0, self.find]) # TODO check why without this works also (Y0 = Y)
             self.normals = self.mapping.normals(Y0, self.mesh.f2t[0, self.find], self.find, self.mesh.t2f)
 
-        self.nf = len(self.find)
+        self.nelems = len(self.find)
 
         self.basis = list(zip(*[self.elem.gbasis(self.mapping, Y, j, self.tind) for j in range(self.Nbfun)]))
 
-        self.nelems = self.nf
         self.dx = np.abs(self.mapping.detDG(self.X, find=self.find)) * np.tile(self.W, (self.nelems, 1))
 
         self.element_dofs = self.element_dofs[:, self.tind] # TODO this is required for asm(). Check for other options.
