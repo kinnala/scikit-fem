@@ -101,8 +101,29 @@ class GlobalBasis():
             D = tuple(D[0][key].all() for key in D[0])
         return np.setdiff1d(np.arange(self.N), np.concatenate(D))
 
-    def _get_dofs(self, submesh):
-        """Return global DOF numbers corresponding to a Submesh."""
+    def _expand_facets(self, facets):
+        from typing import NamedTuple
+        
+        class Submesh(NamedTuple):
+            p: ndarray = None
+            t: ndarray = None
+            edges: ndarray = None
+            facets: ndarray = None
+
+        p = np.unique(self.mesh.facets[:, facets].flatten())
+
+        if self.mesh.dim() == 3:
+            edges = np.intersect1d(self.mesh.boundary_edges(),
+                                   np.unique(self.mesh.t2e[:, self.mesh.f2t[0, facets]].flatten()))
+            return Submesh(p=p, edges=edges, facets=facets)
+        else:
+            return Submesh(p=p, facets=facets)
+
+    def _get_dofs(self, facets):
+        """Return global DOF numbers corresponding to a set of facets."""
+        
+        submesh = self._expand_facets(facets)
+        
         nodal_dofs = {}
         facet_dofs = {}
         edge_dofs = {}
@@ -127,32 +148,29 @@ class GlobalBasis():
 
         return Dofs(nodal_dofs, facet_dofs, edge_dofs, interior_dofs)
 
-    def get_dofs(self, arg = None):
-        """Return global DOF numbers.
+    def get_dofs(self, facets = None):
+        """Return global DOF numbers corresponding to facets (e.g. boundaries).
 
         Parameters
         ----------
-        arg
-            The argument can have multiple meanings:
-            
-            - If an object of type :class:`~skfem.mesh.Submesh`, return corresponding Dofs object.
-            - If a dictionary consisting of :class:`~skfem.mesh.Submesh` objects, return a dictionary
-              of :class:`~skfem.mesh.Submesh` objects with same keys as the original dictionary.
-            - If callable, first creates :class:`~skfem.mesh.Submesh` object through self.mesh.submesh(arg).
-            - If None, first creates :class:`~skfem.mesh.Submesh` through self.mesh.submesh().
+        facets
+            A list of facet indices. Alternatively:
+
+            - if None, find facets by Mesh.boundary_facets()
+            - if callable, call Mesh.facets_satisfying to get facets
+            - if array, find the corresponding dofs
+            - if dict of arrays, find dofs for each entry
 
         """
-        if arg is None:
-            submesh = self.mesh.submesh()
-        elif callable(arg):
-            submesh = self.mesh.submesh(arg)
-        else:
-            submesh = arg
+        if facets is None:
+            facets = self.mesh.boundary_facets()
+        elif callable(facets):
+            facets = self.mesh.facets_satisfying(facets)
             
-        if type(submesh) is dict:
-            return {key: self._get_dofs(submesh[key]) for key in submesh}
+        if type(facets) is dict:
+            return {key: self._get_dofs(facets[key]) for key in facets}
         else:
-            return self._get_dofs(submesh)
+            return self._get_dofs(facets)
 
     def default_parameters(self):
         """This is used by :func:`skfem.assembly.asm` to get the default

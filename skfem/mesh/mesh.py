@@ -2,8 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import warnings
 
-from .submesh import Submesh
-
 from typing import Dict, Optional, Tuple,\
                    Type, TypeVar, Union,\
                    Callable
@@ -225,46 +223,48 @@ class Mesh():
             'hexahedron':'quad',
         }[self.meshio_type]
 
+        def find_tagname(t):
+            for key in self.external.field_data:
+                if self.external.field_data[key][0] == t:
+                    return key 
+
+        # fill self.subdomains
+        if self.meshio_type in self.external.cell_data and \
+           'gmsh:physical' in self.external.cell_data[self.meshio_type]:
+            elements = self.external.cells[self.meshio_type]
+            elements_tag = self.external.cell_data[self.meshio_type]['gmsh:physical']
+            
+            self.subdomains = {}
+            tags = np.unique(elements_tag)
+            
+            for tag in tags:
+                t_set = np.nonzero(tag == elements_tag)[0]
+                self.subdomains[find_tagname(tag)] = t_set
+
         # fill self.boundaries
-        if bnd_type in self.external.cells:
+        if bnd_type in self.external.cell_data and \
+           'gmsh:physical' in self.external.cell_data[bnd_type]:
             facets = self.external.cells[bnd_type]
             facets_tag = self.external.cell_data[bnd_type]['gmsh:physical']
             bndfacets = self.boundary_facets()
             
-            # put Mesh.facets to dict
+            # put meshio facets to dict
             dic = {tuple(np.sort(facets[i])): facets_tag[i] for i in range(facets.shape[0])}
             
             # get index of corresponding Mesh.facets for each meshio
-            # facet is found in the dict
+            # facet found in the dict
             ix = np.array([[dic[tuple(np.sort(self.facets[:, i]))], i]
                              for i in bndfacets
                              if tuple(np.sort(self.facets[:, i])) in dic])
             
             # read meshio tag numbers and names
             tags = ix[:, 0]
-            facet_ix = {}
-            
-            def find_tagname(t):
-                for key in self.external.field_data:
-                    if self.external.field_data[key][0] == t:
-                        return key
+            self.boundaries = {}
                     
             for tag in np.unique(tags):
                 tagix = np.nonzero(tags == tag)[0]
-                facet_ix[find_tagname(tag)] = ix[tagix, 1]
+                self.boundaries[find_tagname(tag)] = ix[tagix, 1]
                 
-            nodes_ix = {key: np.unique(self.facets[:, facet_ix[key]].flatten())
-                             for key in facet_ix}
-            
-            # save submeshes to mesh.boundaries
-            self.boundaries = {key: Submesh(p = nodes_ix[key], facets = facet_ix[key])
-                                    for key in facet_ix}
-            
-            # TODO create edges from facets
-
-        # fill self.subdomains
-
-
     @classmethod
     def from_meshio(cls: Type[MeshType], meshdata) -> MeshType:
         """Translate a mesh from `meshio

@@ -68,8 +68,8 @@ class IntegrateFuncOverBoundaryPart(unittest.TestCase):
         mtype, etype = self.case
         m = mtype()
         m.refine(3)
-        sm = m.submesh(lambda x,y,z: x==1.0)
-        fb = FacetBasis(m, etype(), submesh=sm)
+        bnd = m.facets_satisfying(lambda x,y,z: x==1.0)
+        fb = FacetBasis(m, etype(), facets=bnd)
 
         @bilinear_form
         def uv(u, du, v, dv, w):

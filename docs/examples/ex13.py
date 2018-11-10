@@ -54,12 +54,12 @@ basis = InteriorBasis(mesh, elements, MappingAffine(mesh), 2)
 A = asm(laplace, basis)
 b = asm(unit_load, basis)
 
-dofs = basis.complement_dofs(mesh.boundaries['positive'].p,
-                             mesh.boundaries['ground'].p)
+boundary_dofs = basis.get_dofs(mesh.boundaries)
+interior_dofs = basis.complement_dofs(boundary_dofs)
 
 u = 0.*b
-u[mesh.boundaries['positive'].p] = 1.
-u[dofs] = solve(*condense(A, 0.*b, u, dofs))
+u[boundary_dofs['positive'].all()] = 1.
+u[interior_dofs] = solve(*condense(A, 0.*b, u, interior_dofs))
 
 u_exact = 2 * np.arctan2(mesh.p[1, :], mesh.p[0, :]) / np.pi
 u_error = u - u_exact
@@ -72,7 +72,7 @@ def port_flux(v, dv, w):
     return sum(w.n * dv)
 
 for port in mesh.boundaries:
-    basis = FacetBasis(mesh, elements, submesh=mesh.boundaries[port])
+    basis = FacetBasis(mesh, elements, facets=mesh.boundaries[port])
     form = asm(port_flux, basis)
     print('Current in through {} = {:.4f}'.format(port, form @ u))
 

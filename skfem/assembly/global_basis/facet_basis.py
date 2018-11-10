@@ -74,13 +74,13 @@ class FacetBasis(GlobalBasis):
                  mapping=None,
                  intorder: Optional[int] = None,
                  side: Optional[int] = None,
-                 submesh = None):
+                 facets = None):
         super(FacetBasis, self).__init__(mesh, elem, mapping, intorder)
 
         self.X, self.W = get_quadrature(self.brefdom, self.intorder)
 
-        # triangles where the basis is evaluated
-        if submesh is None:
+        # facets where the basis is evaluated
+        if facets is None:
             if side is None:
                 self.find = np.nonzero(self.mesh.f2t[1, :] == -1)[0]
                 self.tind = self.mesh.f2t[0, self.find]
@@ -90,7 +90,7 @@ class FacetBasis(GlobalBasis):
             else:
                 raise Exception("Parameter side must be 0 or 1. Facet shares only two elements.")
         else:
-            self.find = submesh.facets
+            self.find = facets
             self.tind = self.mesh.f2t[0, self.find]
 
         # boundary refdom to global facet

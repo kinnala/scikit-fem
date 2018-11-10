@@ -28,7 +28,6 @@ from skfem.assembly import (InteriorBasis, FacetBasis,
                             bilinear_form, linear_form, asm)
 from skfem.element import ElementTriP1
 from skfem.mesh import MeshTri
-from skfem.mesh.submesh import Submesh
 from skfem.models.poisson import mass
 from skfem.utils import solve
 
@@ -75,7 +74,7 @@ def elemental(x: np.ndarray) -> np.ndarray:
 
 L = asm(conduction, basis, w=elemental(thermal_conductivity[regions]))
 
-facet_basis = FacetBasis(mesh, element, submesh=mesh.boundaries['convection'])
+facet_basis = FacetBasis(mesh, element, facets=mesh.boundaries['convection'])
 H = heat_transfer_coefficient * asm(convection, facet_basis)
 
 
