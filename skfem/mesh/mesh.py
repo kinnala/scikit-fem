@@ -209,6 +209,62 @@ class Mesh():
         mesh = meshio.Mesh(self.p.T, cells, pointData, cellData)
         meshio.write(filename, mesh)
 
+    def _parse_submeshes(self) -> None:
+        """Parse submeshes from self.external.
+
+        Call after creating a mesh using Mesh.from_meshio to parse Mesh.external into
+        Mesh.boundaries and Mesh.subdomains. Supports currently gmsh only.
+
+        """
+
+        # element to boundary element type mapping
+        bnd_type = {
+            'triangle':'line',
+            'quad':'line',
+            'tetra':'triangle',
+            'hexahedron':'quad',
+        }[self.meshio_type]
+
+        # fill self.boundaries
+        if bnd_type in self.external.cells:
+            facets = self.external.cells[bnd_type]
+            facets_tag = self.external.cell_data[bnd_type]['gmsh:physical']
+            bndfacets = self.boundary_facets()
+            
+            # put Mesh.facets to dict
+            dic = {tuple(np.sort(facets[i])): facets_tag[i] for i in range(facets.shape[0])}
+            
+            # get index of corresponding Mesh.facets for each meshio
+            # facet is found in the dict
+            ix = np.array([[dic[tuple(np.sort(self.facets[:, i]))], i]
+                             for i in bndfacets
+                             if tuple(np.sort(self.facets[:, i])) in dic])
+            
+            # read meshio tag numbers and names
+            tags = ix[:, 0]
+            facet_ix = {}
+            
+            def find_tagname(t):
+                for key in self.external.field_data:
+                    if self.external.field_data[key][0] == t:
+                        return key
+                    
+            for tag in np.unique(tags):
+                tagix = np.nonzero(tags == tag)[0]
+                facet_ix[find_tagname(tag)] = ix[tagix, 1]
+                
+            nodes_ix = {key: np.unique(self.facets[:, facet_ix[key]].flatten())
+                             for key in facet_ix}
+            
+            # save submeshes to mesh.boundaries
+            self.boundaries = {key: Submesh(p = nodes_ix[key], facets = facet_ix[key])
+                                    for key in facet_ix}
+            
+            # TODO create edges from facets
+
+        # fill self.subdomains
+
+
     @classmethod
     def from_meshio(cls: Type[MeshType], meshdata) -> MeshType:
         """Translate a mesh from `meshio
@@ -219,51 +275,29 @@ class Mesh():
         meshdata
             A meshio.Mesh.
 
+        Returns
+        -------
+        mesh
+            The corresponding skfem.mesh object. The original meshio.Mesh
+            object is accessible via the attribute mesh.external.
+
         """
 
         if cls.meshio_type in meshdata.cells:
             p = cls.strip_extra_coordinates(meshdata.points).T
             t = meshdata.cells[cls.meshio_type].T
             mesh = cls(p, t)
+            mesh.external = meshdata
+            
             # load submeshes, currently gmsh only
             try:
-                bnd_type = {
-                        'triangle':'line',
-                        'quad':'line',
-                        'tetra':'triangle',
-                        'hexahedron':'quad',
-                        }[cls.meshio_type]
-                if bnd_type in meshdata.cells:
-                    facets = meshdata.cells[bnd_type]
-                    facets_tag = meshdata.cell_data[bnd_type]['gmsh:physical']
-                    bndfacets = mesh.boundary_facets()
-                    # put Mesh.facets to dict
-                    dic = {tuple(np.sort(facets[i])): facets_tag[i] for i in range(facets.shape[0])}
-                    # get index of corresponding Mesh.facets for each meshio
-                    # facet is found in the dict
-                    ix = np.array([[dic[tuple(np.sort(mesh.facets[:, i]))], i]
-                                     for i in bndfacets
-                                     if tuple(np.sort(mesh.facets[:, i])) in dic])
-                    # read meshio tag numbers and names
-                    tags = ix[:, 0]
-                    facet_ix = {}
-                    def find_tagname(t):
-                        for key in meshdata.field_data:
-                            if meshdata.field_data[key][0] == t:
-                                return key
-                    for tag in np.unique(tags):
-                        tagix = np.nonzero(tags == tag)[0]
-                        facet_ix[find_tagname(tag)] = ix[tagix, 1]
-                    nodes_ix = {key: np.unique(mesh.facets[:, facet_ix[key]].flatten())
-                                     for key in facet_ix}
-                    # save submesh info to mesh.boundaries
-                    mesh.boundaries = {key: Submesh(p = nodes_ix[key], facets = facet_ix[key])
-                                      for key in facet_ix}
-                    # TODO edges
-            except Exception:
+                mesh._parse_submeshes()
+            except Exception as e:
                 # all mesh formats are not supported; raise warning for
                 # unsupported types
-                warnings.warn("Could not load submeshes.")
+                warnings.warn("Unable to load submeshes.")
+                print(e)
+
             return mesh
         else:
             raise Exception("The mesh contains no elements of type " + cls.meshio_type)
