@@ -57,7 +57,7 @@ def make_mesh(a: float,         # radius of wire
     return mesh
 
 mesh = make_mesh(*radii)
-regions = mesh.cell_data['triangle']['gmsh:physical'] - 1
+regions = mesh.external.cell_data['triangle']['gmsh:physical'] - 1
 
 @bilinear_form
 def conduction(u, du, v, dv, w):
