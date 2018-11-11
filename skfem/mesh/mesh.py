@@ -109,6 +109,8 @@ class Mesh():
         reverse[ptix] = np.arange(len(ptix))
         newt = reverse[newt]
         newp = self.p[:, ptix]
+        if newp.shape[1]==0.0:
+            raise Exception("The new mesh contains no points!")
         meshclass = type(self)
         return meshclass(newp, newt.astype(np.intp))
 

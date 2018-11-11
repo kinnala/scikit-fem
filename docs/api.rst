@@ -72,11 +72,6 @@ Visualise
 
 .. automethod:: skfem.mesh.MeshTri.plot3
 
-Other methods
-^^^^^^^^^^^^^
-
-.. automethod:: skfem.mesh.MeshTri.submesh
-
 MeshQuad
 ~~~~~~~~
 

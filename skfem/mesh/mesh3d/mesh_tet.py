@@ -1,13 +1,13 @@
-from typing import Type
-
 import numpy as np
-from numpy import ndarray
+import matplotlib.pyplot as plt
 
 from skfem.mapping import MappingAffine
 
 from ..mesh import MeshType
 from .mesh3d import Mesh3D
 
+from typing import Type
+from numpy import ndarray
 
 class MeshTet(Mesh3D):
     """A mesh consisting of tetrahedral elements.
@@ -419,6 +419,19 @@ class MeshTet(Mesh3D):
         self._build_mappings()
 
         # TODO implement prolongation matrix
+
+    def draw(self):
+        """Draw the (surface) mesh."""
+        from mpl_toolkits.mplot3d import Axes3D
+        
+        bnd_facets = self.boundary_facets()
+        fig = plt.figure()
+        ax = Axes3D(fig)
+        indexing = self.facets[:, bnd_facets].T
+
+        ax.plot_trisurf(self.p[0, :], self.p[1, :], self.p[2,:],
+                        triangles=indexing, cmap=plt.cm.viridis, edgecolor='k')
+        return ax
 
     def shapereg(self):
         """Return the largest shape-regularity constant."""

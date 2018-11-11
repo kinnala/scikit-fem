@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.tri as mtri
 from scipy.sparse import coo_matrix
 from skfem.mapping import MappingAffine
 
@@ -300,10 +299,6 @@ class MeshTri(Mesh2D):
         >>> m.refine(3)
         >>> ax = m.plot(m.p[0, :]**2, smooth=True)
         >>> m.show()
-        
-        .. figure:: pics/api_MeshTri_plot.png
-        
-                    The function :math:`f(x)=x^2` plotted using :meth:`~skfem.mesh.MeshTri.plot`.
             
         """
         if ax is None:
@@ -329,16 +324,14 @@ class MeshTri(Mesh2D):
 
     def plot3(self,
               z: ndarray,
-              smooth: Optional[bool] = False,
               ax: Optional[Axes] = None) -> Axes:
         """Visualise piecewise-linear or piecewise-constant function, 3D plot.
         
         Parameters
         ----------
         z
-            An array of nodal values (Nvertices) or elemental values (Nelems).
-        smooth
-            If true, use gouraud shading.
+            An array of nodal values (Nvertices), elemental values (Nelems)
+            or three elemental values (3 x Nelems, piecewise linear DG).
         ax
             Plot onto the given preinitialised Matplotlib axes.
 
@@ -358,9 +351,6 @@ class MeshTri(Mesh2D):
         >>> ax = m.plot3(m.p[1, :]**2)
         >>> m.show()
         
-        .. figure:: pics/api_MeshTri_plot3.png
-
-                    The function :math:`f(x)=x^2` plotted using :meth:`~skfem.mesh.MeshTri.plot3`.
         """
         from mpl_toolkits.mplot3d import Axes3D
         if ax is None:
@@ -368,10 +358,9 @@ class MeshTri(Mesh2D):
             ax = Axes3D(fig)
         if len(z) == self.p.shape[1]:
             # use matplotlib
-            ts = mtri.Triangulation(self.p[0, :], self.p[1, :], self.t.T)
             ax.plot_trisurf(self.p[0, :], self.p[1, :], z,
-                            triangles=ts.triangles,
-                            cmap=plt.cm.Spectral)
+                            triangles=self.t.T,
+                            cmap=plt.cm.viridis)
         elif len(z) == self.t.shape[1]:
             # one value per element (piecewise const)
             nt = self.t.shape[1]
@@ -379,20 +368,18 @@ class MeshTri(Mesh2D):
             newpx = self.p[0, self.t].flatten(order='F')
             newpy = self.p[1, self.t].flatten(order='F')
             newz = np.vstack((z, z, z)).flatten(order='F')
-            ts = mtri.Triangulation(newpx, newpx, newt)
             ax.plot_trisurf(newpx, newpy, newz,
-                            triangles=ts.triangles,
-                            cmap=plt.cm.Spectral)
+                            triangles=newt.T,
+                            cmap=plt.cm.viridis)
         elif len(z) == 3*self.t.shape[1]:
             # three values per element (piecewise linear)
             nt = self.t.shape[1]
             newt = np.arange(3*nt, dtype=np.int64).reshape((nt, 3))
             newpx = self.p[0, self.t].flatten(order='F')
             newpy = self.p[1, self.t].flatten(order='F')
-            ts = mtri.Triangulation(newpx, newpx, newt)
             ax.plot_trisurf(newpx, newpy, z,
-                            triangles=ts.triangles,
-                            cmap=plt.cm.Spectral)
+                            triangles=newt.T,
+                            cmap=plt.cm.viridis)
         else:
             raise NotImplementedError("MeshTri.plot3: not implemented for "
                                       "the given shape of input vector!")
