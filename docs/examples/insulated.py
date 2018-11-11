@@ -24,12 +24,8 @@ import meshio
 from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
 
-from skfem.assembly import (InteriorBasis, FacetBasis,
-                            bilinear_form, linear_form, asm)
-from skfem.element import ElementTriP1
-from skfem.mesh import MeshTri
+from skfem import *
 from skfem.models.poisson import mass
-from skfem.utils import solve
 
 radii = [2., 3.]
 joule_heating = 5.
