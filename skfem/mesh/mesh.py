@@ -337,5 +337,5 @@ class Mesh():
     def element_finder(self) -> Callable[[ndarray], ndarray]:
         """Return a function, which returns element
         indices corresponding to the input points."""
-        raise NotImplementError("element_finder not implemented" +\
-                                "for the given Mesh type.")
+        raise NotImplementedError("element_finder not implemented" +\
+                                  "for the given Mesh type.")
