@@ -34,7 +34,7 @@ from skfem.utils import solve
 radii = [2., 3.]
 joule_heating = 5.
 heat_transfer_coefficient = 7.
-thermal_conductivity = np.array([101.,  11.])
+thermal_conductivity = {'wire': 101.,  'insulation': 11.}
 
 
 def make_mesh(a: float,         # radius of wire
@@ -53,10 +53,10 @@ def make_mesh(a: float,         # radius of wire
 
     return MeshTri.from_meshio(meshio.Mesh(*generate_mesh(geom)))
 
-    return mesh
-
 mesh = make_mesh(*radii)
-regions = mesh.external.cell_data['triangle']['gmsh:physical'] - 1
+regions = mesh.external.cell_data['triangle']['gmsh:physical']
+region_ids = {i: name for name, (i, d) in
+              mesh.external.field_data.items() if d == mesh.dim()}
 
 @bilinear_form
 def conduction(u, du, v, dv, w):
@@ -67,22 +67,22 @@ convection = mass
 element = ElementTriP1()
 basis = InteriorBasis(mesh, element)
 
-
 def elemental(x: np.ndarray) -> np.ndarray:
     return np.tile(x, (len(basis.W), 1)).T
 
-
-L = asm(conduction, basis, w=elemental(thermal_conductivity[regions]))
+L = asm(conduction, basis,
+        w=elemental([thermal_conductivity[region_ids[i]] for i in regions]))
 
 facet_basis = FacetBasis(mesh, element, facets=mesh.boundaries['convection'])
 H = heat_transfer_coefficient * asm(convection, facet_basis)
-
 
 @linear_form
 def generation(v, dv, w):
     return w.w * v
 
-f = joule_heating * asm(generation, basis, w=elemental(regions == 0))
+f = joule_heating * asm(generation, basis,
+                        w=elemental(regions ==
+                                    mesh.external.field_data['wire'][0]))
 
 temperature = solve(L + H, f)
 
@@ -94,9 +94,11 @@ if __name__ == '__main__':
 
     T0 = {'skfem': basis.interpolator(temperature)(np.zeros((2, 1)))[0],
           'exact':
-          (joule_heating * radii[0]**2 / 4 / thermal_conductivity[0] *
-           (2 * thermal_conductivity[0] / heat_transfer_coefficient / radii[1]
-            + (2 * thermal_conductivity[0] / thermal_conductivity[1]
+          (joule_heating * radii[0]**2 / 4 / thermal_conductivity['wire'] *
+           (2 * thermal_conductivity['wire'] / radii[1]
+            / heat_transfer_coefficient
+            + (2 * thermal_conductivity['wire']
+               / thermal_conductivity['insulation']
                * np.log(radii[1] /radii[0])) + 1))}
     print('Central temperature:', T0)
     
