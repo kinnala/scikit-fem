@@ -53,8 +53,6 @@ def make_mesh(a: float,         # radius of wire
 
     return MeshTri.from_meshio(meshio.Mesh(*generate_mesh(geom)))
 
-    return mesh
-
 mesh = make_mesh(*radii)
 regions = mesh.external.cell_data['triangle']['gmsh:physical']
 region_ids = {i: name for name, (i, d) in
@@ -69,17 +67,14 @@ convection = mass
 element = ElementTriP1()
 basis = InteriorBasis(mesh, element)
 
-
 def elemental(x: np.ndarray) -> np.ndarray:
     return np.tile(x, (len(basis.W), 1)).T
-
 
 L = asm(conduction, basis,
         w=elemental([thermal_conductivity[region_ids[i]] for i in regions]))
 
 facet_basis = FacetBasis(mesh, element, facets=mesh.boundaries['convection'])
 H = heat_transfer_coefficient * asm(convection, facet_basis)
-
 
 @linear_form
 def generation(v, dv, w):
