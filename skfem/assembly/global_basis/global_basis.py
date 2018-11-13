@@ -223,3 +223,12 @@ class GlobalBasis():
                                    * self.basis[1][j][a]
             return W, dW
         return W
+
+    def zero_w(self) -> ndarray:
+        """Return a zero array with correct dimensions
+
+        for :func:`~skfem.assembly.asm`.
+
+        """
+
+        return np.zeros((self.nelems, len(self.W)))
