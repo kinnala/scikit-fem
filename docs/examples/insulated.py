@@ -2,12 +2,12 @@
 
 Steady conduction with generation in an insulated wire
 
-Carslaw, H. S., & J. C. Jaeger (1959). _Conduction of Heat in Solids_ 
+Carslaw, H. S., & J. C. Jaeger (1959). _Conduction of Heat in Solids_
 (2nd ed.). Oxford University Press. §7.2.V, pp 191–192
 
 ∇ ⋅ (k0 ∇ T) + A = 0 in 0 < r < a
 
-and 
+and
 
 ∇ ⋅ (k1 ∇ T) = 0 in a < r < b
 
@@ -15,7 +15,6 @@ with k1 ∂T/∂r + h T = 0 on r = b.
 
 """
 
-from functools import partial
 from typing import Optional
 
 import numpy as np
@@ -36,7 +35,7 @@ thermal_conductivity = {'wire': 101.,  'insulation': 11.}
 def make_mesh(a: float,         # radius of wire
               b: float,         # radius of insulation
               dx: Optional[float] = None) -> MeshTri:
-    
+
     dx = a / 2 ** 3 if dx is None else dx
 
     origin = np.zeros(3)
@@ -49,11 +48,14 @@ def make_mesh(a: float,         # radius of wire
 
     return MeshTri.from_meshio(meshio.Mesh(*generate_mesh(geom)))
 
+
 mesh = make_mesh(*radii)
+
 
 @bilinear_form
 def conduction(u, du, v, dv, w):
     return w.w * sum(du * dv)
+
 
 convection = mass
 
@@ -63,16 +65,18 @@ basis = InteriorBasis(mesh, element)
 conductivity = basis.zero_w()
 for subdomain, elements in mesh.subdomains.items():
     conductivity[elements] = thermal_conductivity[subdomain]
-    
+
 L = asm(conduction, basis,
         w=conductivity)
 
 facet_basis = FacetBasis(mesh, element, facets=mesh.boundaries['convection'])
 H = heat_transfer_coefficient * asm(convection, facet_basis)
 
+
 @linear_form
 def generation(v, dv, w):
     return w.w * v
+
 
 heated = basis.zero_w()
 heated[mesh.subdomains['wire']] = 1.
@@ -84,7 +88,6 @@ if __name__ == '__main__':
 
     from os.path import splitext
     from sys import argv
-    
 
     T0 = {'skfem': basis.interpolator(temperature)(np.zeros((2, 1)))[0],
           'exact':
@@ -93,7 +96,7 @@ if __name__ == '__main__':
             / heat_transfer_coefficient
             + (2 * thermal_conductivity['wire']
                / thermal_conductivity['insulation']
-               * np.log(radii[1] /radii[0])) + 1))}
+               * np.log(radii[1] / radii[0])) + 1))}
     print('Central temperature:', T0)
 
     ax = mesh.plot(temperature)
