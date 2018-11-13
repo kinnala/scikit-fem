@@ -50,9 +50,6 @@ def make_mesh(a: float,         # radius of wire
     return MeshTri.from_meshio(meshio.Mesh(*generate_mesh(geom)))
 
 mesh = make_mesh(*radii)
-regions = mesh.external.cell_data['triangle']['gmsh:physical']
-region_ids = {i: name for name, (i, d) in
-              mesh.external.field_data.items() if d == mesh.dim()}
 
 @bilinear_form
 def conduction(u, du, v, dv, w):
@@ -63,11 +60,12 @@ convection = mass
 element = ElementTriP1()
 basis = InteriorBasis(mesh, element)
 
-def elemental(x: np.ndarray) -> np.ndarray:
-    return np.tile(x, (len(basis.W), 1)).T
-
+conductivity = basis.zero_w()
+for subdomain, elements in mesh.subdomains.items():
+    conductivity[elements] = thermal_conductivity[subdomain]
+    
 L = asm(conduction, basis,
-        w=elemental([thermal_conductivity[region_ids[i]] for i in regions]))
+        w=conductivity)
 
 facet_basis = FacetBasis(mesh, element, facets=mesh.boundaries['convection'])
 H = heat_transfer_coefficient * asm(convection, facet_basis)
@@ -76,9 +74,9 @@ H = heat_transfer_coefficient * asm(convection, facet_basis)
 def generation(v, dv, w):
     return w.w * v
 
-f = joule_heating * asm(generation, basis,
-                        w=elemental(regions ==
-                                    mesh.external.field_data['wire'][0]))
+heated = basis.zero_w()
+heated[mesh.subdomains['wire']] = 1.
+f = joule_heating * asm(generation, basis, w=heated)
 
 temperature = solve(L + H, f)
 
@@ -97,7 +95,7 @@ if __name__ == '__main__':
                / thermal_conductivity['insulation']
                * np.log(radii[1] /radii[0])) + 1))}
     print('Central temperature:', T0)
-    
+
     ax = mesh.plot(temperature)
     ax.axis('off')
     fig = ax.get_figure()
