@@ -66,8 +66,7 @@ conductivity = basis.zero_w()
 for subdomain, elements in mesh.subdomains.items():
     conductivity[elements] = thermal_conductivity[subdomain]
 
-L = asm(conduction, basis,
-        w=conductivity)
+L = asm(conduction, basis, w=conductivity)
 
 facet_basis = FacetBasis(mesh, element, facets=mesh.boundaries['convection'])
 H = heat_transfer_coefficient * asm(convection, facet_basis)
