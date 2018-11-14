@@ -19,7 +19,7 @@ so the conductance (for unit potential difference and conductivity) is
 """
 
 from skfem import *
-from skfem.models.poisson import laplace, mass, unit_load
+from skfem.models.poisson import laplace, mass
 
 import numpy as np
 
@@ -52,14 +52,13 @@ mesh = MeshTri.from_meshio(meshio.Mesh(*generate_mesh(geom,
 elements = ElementTriP1()
 basis = InteriorBasis(mesh, elements, MappingAffine(mesh), 2)
 A = asm(laplace, basis)
-b = asm(unit_load, basis)
 
 boundary_dofs = basis.get_dofs(mesh.boundaries)
 interior_dofs = basis.complement_dofs(boundary_dofs)
 
-u = 0.*b
+u = np.zeros(basis.N)
 u[boundary_dofs['positive'].all()] = 1.
-u[interior_dofs] = solve(*condense(A, 0.*b, u, interior_dofs))
+u[interior_dofs] = solve(*condense(A, 0.*u, u, interior_dofs))
 
 u_exact = 2 * np.arctan2(mesh.p[1, :], mesh.p[0, :]) / np.pi
 u_error = u - u_exact
