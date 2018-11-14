@@ -49,6 +49,19 @@ where :math:`\boldsymbol{rot}` is the adjoint of :math:`\mathrm{rot}`:
 .. math::
     \boldsymbol{rot}\,\phi \equiv \frac{\partial\phi}{\partial y}\hat{i} - \frac{\partial\phi}{\partial x}\hat{j}.
 
+
+.. figure:: taylorhood_stream-function.png
+
+   Stream function
+
+.. figure:: taylorhood_velocity.png
+
+   Velocity
+
+.. figure:: taylorhood_pressure.png
+
+   Pressure
+    
 The complete source code reads as follows:
 
 .. literalinclude:: taylorhood.py

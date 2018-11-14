@@ -32,6 +32,14 @@ polynomial solution with circular stream-lines:
 .. math::
     \psi = \left(1 - (x^2+y^2)/a^2\right)^2 / 64.
 
+.. figure:: creeping_stream-lines.png
+
+   Stream-lines
+
+.. figure:: creeping_velocity-vectors.png
+
+   Velocity
+    
 The complete source code reads as follows:
 
 .. literalinclude:: creeping.py
