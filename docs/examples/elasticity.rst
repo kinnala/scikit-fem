@@ -1,5 +1,5 @@
-Tutorial: Structural vibration
-------------------------------
+Structural vibration
+--------------------
 
 This tutorial demonstrates the solution of a three-dimensional
 vector-valued problem. For this purpose, we consider an elastic

@@ -1,20 +1,3 @@
-"""
-
-Steady conduction with generation in an insulated wire
-
-Carslaw, H. S., & J. C. Jaeger (1959). _Conduction of Heat in Solids_
-(2nd ed.). Oxford University Press. §7.2.V, pp 191–192
-
-∇ ⋅ (k0 ∇ T) + A = 0 in 0 < r < a
-
-and
-
-∇ ⋅ (k1 ∇ T) = 0 in a < r < b
-
-with k1 ∂T/∂r + h T = 0 on r = b.
-
-"""
-
 from typing import Optional
 
 import numpy as np

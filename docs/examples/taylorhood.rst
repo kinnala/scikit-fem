@@ -1,5 +1,8 @@
-Example: Stokes equations
--------------------------
+.. note::
+   This example requires the external package `dmsh <https://pypi.org/project/dmsh/>`_.
+
+Stokes equations
+----------------
 
 This solves for the same creeping flow problem as in :ref:`ex18` but in the primitive
 variables, i.e. velocity and pressure instead of the stream-function.  These are
@@ -33,7 +36,7 @@ around the impermeable perimeter; this constant can be taken as zero
 without loss of generality.  In the weak formulation
 
 .. math::
-    \left(\nabla\phi, \nabla\psi\right) = \left(\phi, \mathrm{rot}\,\boldsymbol{u}\right), \quad \forall \phi \in H^1_0(\Omega),
+    \left(\nabla\phi, \nabla\psi\right) = \left(\phi, \mathrm{rot}\,\boldsymbol{u}\right) \quad \forall \phi \in H^1_0(\Omega),
 
 the right-hand side can be converted using Green's theorem and the
 no-slip condition to not involve the derivatives of the velocity:

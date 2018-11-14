@@ -1,7 +1,10 @@
 .. _ex18:
 
-Example: Creeping flow
-----------------------
+.. note::
+   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_.
+
+Creeping flow
+-------------
 
 The stream-function :math:`\psi` for two-dimensional creeping flow is
 governed by the biharmonic equation
