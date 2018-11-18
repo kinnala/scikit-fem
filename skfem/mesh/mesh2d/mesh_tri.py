@@ -393,28 +393,112 @@ class MeshTri(Mesh2D):
         e = self.facets
         sz = p.shape[1]
         t2f = self.t2f + sz
+        
         # new vertices are the midpoints of edges
         newp = 0.5*np.vstack((p[0, e[0, :]] + p[0, e[1, :]],
                               p[1, e[0, :]] + p[1, e[1, :]]))
         newp = np.hstack((p, newp))
+        
         # build new triangle definitions
         newt = np.vstack((t[0, :], t2f[0, :], t2f[2, :]))
         newt = np.hstack((newt, np.vstack((t[1, :], t2f[0, :], t2f[1, :]))))
         newt = np.hstack((newt, np.vstack((t[2, :], t2f[2, :], t2f[1, :]))))
         newt = np.hstack((newt, np.vstack((t2f[0, :], t2f[1, :], t2f[2, :]))))
+        
         # update fields
         self.p = newp
         self.t = newt
 
         self._build_mappings()
 
-        # prolongation matrix
-        nsz = newp.shape[1]
-        return coo_matrix(
-            (np.hstack((np.ones(sz), .5 * np.ones(2 * (nsz - sz)))),
-             (np.hstack((np.arange(sz), np.arange(nsz - sz) + sz, np.arange(nsz - sz) + sz)),
-              np.hstack((np.arange(sz), e[0, :], e[1, :])))),
-            shape=(nsz, sz)).tocsr()
+    def _adaptive_refine(self, marked):
+        """Refine the set of provided elements."""
+        
+        def sort_mesh(p, t):
+            """Make (0, 2) the longest edge in t."""
+            l01 = np.sqrt(np.sum((p[:, t[0, :]] - p[:, t[1, :]])**2, axis=0))
+            l12 = np.sqrt(np.sum((p[:, t[1, :]] - p[:, t[2, :]])**2, axis=0))
+            l02 = np.sqrt(np.sum((p[:, t[0, :]] - p[:, t[2, :]])**2, axis=0))
+            
+            ix01 = (l01 > l02)*(l01 > l12)
+            ix12 = (l12 > l01)*(l12 > l02)
+            
+            # row swaps
+            tmp = t[2, ix01]
+            t[2, ix01] = t[1, ix01]
+            t[1, ix01] = tmp
+            
+            tmp = t[0, ix12]
+            t[0, ix12] = t[1, ix12]
+            t[1, ix12] = tmp
+            
+            return t
+        
+        def find_facets(m, marked_elems):
+            """Find the facets to split."""
+            facets = np.zeros(m.facets.shape[1], dtype=np.int64)
+            facets[m.t2f[:, marked_elems].flatten('F')] = 1
+            prev_nnz = -1e10
+            
+            while np.count_nonzero(facets) - prev_nnz > 0:
+                prev_nnz = np.count_nonzero(facets)
+                t2facets = facets[m.t2f]
+                t2facets[2, t2facets[0, :] + t2facets[1, :] > 0] = 1
+                facets[m.t2f[t2facets == 1]] = 1
+                
+            return facets
+            
+        def split_elements(m, facets):
+            """Define new elements."""
+            ix = (-1)*np.ones(m.facets.shape[1], dtype=np.int64)
+            ix[facets == 1] = np.arange(np.count_nonzero(facets)) + m.p.shape[1]
+            ix = ix[m.t2f] # (0, 1) (1, 2) (0, 2)
+            
+            red =   (ix[0, :] >= 0) * (ix[1, :] >= 0) * (ix[2, :] >= 0)
+            blue1 = (ix[0, :] ==-1) * (ix[1, :] >= 0) * (ix[2, :] >= 0)
+            blue2 = (ix[0, :] >= 0) * (ix[1, :] ==-1) * (ix[2, :] >= 0)
+            green = (ix[0, :] ==-1) * (ix[1, :] ==-1) * (ix[2, :] >= 0)
+            rest =  (ix[0, :] ==-1) * (ix[1, :] ==-1) * (ix[2, :] ==-1)
+            
+            # new red elements
+            t_red = np.hstack((
+                np.vstack((m.t[0, red], ix[0, red], ix[2, red])),
+                np.vstack((m.t[1, red], ix[0, red], ix[1, red])),
+                np.vstack((m.t[2, red], ix[1, red], ix[2, red])),
+                np.vstack(( ix[1, red], ix[2, red], ix[0, red])),
+            ))
+            
+            # new blue elements
+            t_blue1 = np.hstack((
+                np.vstack((m.t[1, blue1], m.t[0, blue1], ix[2, blue1])),
+                np.vstack((m.t[1, blue1],  ix[1, blue1], ix[2, blue1])),
+                np.vstack((m.t[2, blue1],  ix[2, blue1], ix[1, blue1])),
+            ))
+            
+            t_blue2 = np.hstack((
+                np.vstack((m.t[0, blue2], ix[0, blue2],  ix[2, blue2])),
+                np.vstack(( ix[2, blue2], ix[0, blue2], m.t[1, blue2])),
+                np.vstack((m.t[2, blue2], ix[2, blue2], m.t[1, blue2])),
+            ))
+            
+            # new green elements
+            t_green = np.hstack((
+                np.vstack((m.t[1, green], ix[2, green], m.t[0, green])),
+                np.vstack((m.t[2, green], ix[2, green], m.t[1, green])),
+            ))
+            
+            # new nodes
+            p = .5*(m.p[:, m.facets[0, facets == 1]]
+                  + m.p[:, m.facets[1, facets == 1]])
+            
+            return np.hstack((m.p, p)),\
+                   np.hstack((m.t[:, rest], t_red, t_blue1, t_blue2, t_green))
+            
+        sorted_mesh = MeshTri(self.p, sort_mesh(self.p, self.t), sort_t=False)
+        facets = find_facets(sorted_mesh, marked)
+        self.p, self.t = split_elements(sorted_mesh, facets)
+
+        self._build_mappings()
 
     def mapping(self):
         return MappingAffine(self)

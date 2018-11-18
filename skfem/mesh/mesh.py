@@ -72,20 +72,34 @@ class Mesh():
         raise NotImplementedError("Single refine not implemented " +
                                   "for this mesh type!")
 
-    def refine(self, no_refs: Optional[int] = None):
+    def _adaptive_refine(self, marked):
+        """Perform adaptive refinement."""
+        raise NotImplementedError("Adaptive refine not implemented " +
+                                  "for this mesh type!")
+
+    def refine(self, arg: Optional[Union[int, ndarray]] = None):
         """Refine the mesh.
         
         Parameters
         ----------
-        no_refs
-            Perform multiple refinements.
+        arg
+            Multiple variations:
+            - If None, refine all elements.
+            - If integer, perform multiple uniform refinements.
+            - If array of element indices, adaptively refine.
 
         """
-        if no_refs is None:
-            return self._uniform_refine()
-        else:
-            for itr in range(no_refs):
+        if arg is None:
+            self._uniform_refine()
+        elif type(arg) is int:
+            for itr in range(arg):
                 self._uniform_refine()
+        elif type(arg) is list:
+            self._adaptive_refine(np.array(arg))
+        elif type(arg) is ndarray:
+            self._adaptive_refine(arg)
+        else:
+            raise NotImplementedError("The given parameter type not supported.")
 
     def remove_elements(self, element_indices: ndarray) -> MeshType:
         """Construct new mesh with elements removed
