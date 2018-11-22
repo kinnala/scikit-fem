@@ -91,6 +91,7 @@ class Mesh2D(Mesh):
             fig = plt.figure()
             ax = fig.add_subplot(111)
             ax.set_aspect(aspect)
+            ax.set_axis_off()
         # visualize the mesh faster plotting is achieved through
         # None insertion trick.
         xs = []
