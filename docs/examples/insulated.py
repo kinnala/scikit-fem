@@ -82,7 +82,6 @@ if __name__ == '__main__':
     print('Central temperature:', T0)
 
     ax = mesh.plot(temperature)
-    ax.axis('off')
     fig = ax.get_figure()
     fig.colorbar(ax.get_children()[0])
     fig.savefig(splitext(argv[0])[0] + '.png')

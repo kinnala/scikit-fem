@@ -63,7 +63,6 @@ if __name__ == "__main__":
 
     ax = mesh.draw()
     ax.tricontour(Triangulation(M.p[0, :], M.p[1, :], M.t.T), Psi)
-    ax.axis('off')
     ax.get_figure().savefig(splitext(argv[0])[0] + '_stream-lines.png')
 
     refbasis = InteriorBasis(M, ElementTriP1())
@@ -75,5 +74,4 @@ if __name__ == "__main__":
     x = M.p[:, ::sparsity_factor]
     u = vector_factor * velocity[:, ::sparsity_factor]
     ax.quiver(x[0], x[1], u[0], u[1], x[0])
-    ax.axis('off')
     ax.get_figure().savefig(splitext(argv[0])[0] + '_velocity-vectors.png')

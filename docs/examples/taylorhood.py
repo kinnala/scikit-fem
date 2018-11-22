@@ -68,7 +68,6 @@ if __name__ == '__main__':
           '(cf. exact -/+ 1/8)')
 
     ax = mesh.plot(pressure)
-    ax.axis('off')
     ax.get_figure().savefig(f'{name}_pressure.png')
 
     ax = mesh.draw()
@@ -76,7 +75,6 @@ if __name__ == '__main__':
     ax.quiver(mesh.p[0, :], mesh.p[1, :],
               velocity1[0, :], velocity1[1, :],
               mesh.p[0, :])         # colour by buoyancy
-    ax.axis('off')
     ax.get_figure().savefig(f'{name}_velocity.png')
 
 
@@ -85,5 +83,4 @@ if __name__ == '__main__':
     ax = mesh.draw()
     ax.tricontour(Triangulation(mesh.p[0, :], mesh.p[1, :], mesh.t.T),
                   psi[basis['psi'].nodal_dofs.flatten()])
-    ax.axis('off')
     ax.get_figure().savefig(f'{name}_stream-function.png')
