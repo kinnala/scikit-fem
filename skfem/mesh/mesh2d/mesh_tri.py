@@ -305,6 +305,7 @@ class MeshTri(Mesh2D):
             fig = plt.figure()
             ax = fig.add_subplot(111)
             ax.set_aspect(aspect)
+            ax.set_axis_off()
         if edgecolors is None:
             edgecolors = 'k'
         if zlim == None:
