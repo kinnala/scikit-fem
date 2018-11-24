@@ -410,7 +410,9 @@ class MeshTri(Mesh2D):
         self.p = newp
         self.t = newt
 
+        # rebuild mappings
         self._build_mappings()
+
 
     def _adaptive_refine(self, marked):
         """Refine the set of provided elements."""

@@ -101,6 +101,13 @@ class Mesh():
         else:
             raise NotImplementedError("The given parameter type not supported.")
 
+        if hasattr(self, "subdomains"):
+            warnings.warn("Named subdomains are removed during refine.")
+            delattr(self, "subdomains")
+        if hasattr(self, "boundaries"):
+            warnings.warn("Named boundaries are removed during refine.")
+            delattr(self, "boundaries")
+
     def remove_elements(self, element_indices: ndarray) -> MeshType:
         """Construct new mesh with elements removed
         based on their indices.
