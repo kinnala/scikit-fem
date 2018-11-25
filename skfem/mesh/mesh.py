@@ -102,11 +102,17 @@ class Mesh():
             raise NotImplementedError("The given parameter type not supported.")
 
         if hasattr(self, "subdomains"):
-            warnings.warn("Named subdomains are removed during refine.")
+            warnings.warn("Named subdomains were removed due to refine.")
             delattr(self, "subdomains")
+            
         if hasattr(self, "boundaries"):
-            warnings.warn("Named boundaries are removed during refine.")
-            delattr(self, "boundaries")
+            if hasattr(self, "_new_facets"):
+                # fix self.boundaries to match the refined mesh
+                for name in self.boundaries:
+                    self.boundaries[name] = self._new_facets[:, self.boundaries[name]].flatten()
+            else:
+                warnings.warn("Named boundaries were removed due to refine.")
+                delattr(self, "boundaries")
 
     def remove_elements(self, element_indices: ndarray) -> MeshType:
         """Construct new mesh with elements removed

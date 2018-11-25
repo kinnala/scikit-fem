@@ -405,10 +405,24 @@ class MeshTri(Mesh2D):
             np.vstack((t[2, :], t2f[2, :], t2f[1, :])),
             np.vstack((t2f[0, :], t2f[1, :], t2f[2, :])),
             ))
+
+        # mapping between old and new facets
+        self._new_facets = np.zeros((2, e.shape[1]), dtype=np.int64)
+        ix0 = np.arange(t.shape[1], dtype=np.int64)
+        ix1 = ix0 + t.shape[1]
+        ix2 = ix0 + 2*t.shape[1]
         
         # rebuild mappings
         self._build_mappings()
 
+        # create mapping
+        self._new_facets[0, t2f[2, :] - sz] = self.t2f[2, ix0]
+        self._new_facets[0, t2f[1, :] - sz] = self.t2f[2, ix1]
+        self._new_facets[0, t2f[0, :] - sz] = self.t2f[0, ix0]
+        self._new_facets[1, t2f[2, :] - sz] = self.t2f[0, ix2]
+        self._new_facets[1, t2f[1, :] - sz] = self.t2f[2, ix2]
+        self._new_facets[1, t2f[0, :] - sz] = self.t2f[0, ix1]
+        
 
     def _adaptive_refine(self, marked):
         """Refine the set of provided elements."""

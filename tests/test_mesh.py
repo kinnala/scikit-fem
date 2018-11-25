@@ -60,3 +60,18 @@ class Loading(unittest.TestCase):
         self.assertTrue((m.boundaries['top'] == m.facets_satisfying(lambda x,y: y==1)).all())
         self.assertTrue((m.boundaries['left'] == m.facets_satisfying(lambda x,y: x==0)).all())
         self.assertTrue((m.boundaries['right'] == m.facets_satisfying(lambda x,y: x==1)).all())
+
+
+class RefinePreserveSubsets(unittest.TestCase):
+    """Check that uniform refinement preserves named boundaries."""
+    def runTest(self):
+        m = MeshTri()
+        m.refine(3)
+        m.boundaries = {'test': m.facets_satisfying(lambda x,y: x==0.0)}
+
+        m.refine()
+
+        self.assertTrue((np.sort(m.boundaries['test'])
+                         == np.sort(m.facets_satisfying(lambda x,y: x==0.0))).all())
+
+
