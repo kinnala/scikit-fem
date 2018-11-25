@@ -227,13 +227,11 @@ class MeshTri(Mesh2D):
             self.t = np.sort(self.t, axis=0)
 
         # define facets: in the order (0,1) (1,2) (0,2)
-        self.facets = np.sort(np.vstack((self.t[0, :], self.t[1, :])), axis=0)
-        self.facets = np.hstack((self.facets,
-                                 np.sort(np.vstack((self.t[1, :], self.t[2, :])),
-                                         axis=0)))
-        self.facets = np.hstack((self.facets,
-                                 np.sort(np.vstack((self.t[0, :], self.t[2, :])),
-                                         axis=0)))
+        self.facets = np.sort(np.hstack((
+            self.t[[0, 1], :],
+            self.t[[1, 2], :],
+            self.t[[0, 2], :],
+            )), axis=0)
 
         # get unique facets and build triangle-to-facet
         # mapping: 3 (edges) x Ntris
