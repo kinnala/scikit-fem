@@ -387,27 +387,25 @@ class MeshTri(Mesh2D):
     def _uniform_refine(self):
         """Perform a single mesh refine."""
         # rename variables
-        t = self.t
-        p = self.p
+        t = np.copy(self.t)
+        p = np.copy(self.p)
         e = self.facets
         sz = p.shape[1]
         t2f = self.t2f + sz
         
         # new vertices are the midpoints of edges
-        newp = 0.5*np.vstack((p[0, e[0, :]] + p[0, e[1, :]],
-                              p[1, e[0, :]] + p[1, e[1, :]]))
-        newp = np.hstack((p, newp))
+        new_p = 0.5*np.vstack((p[0, e[0, :]] + p[0, e[1, :]],
+                               p[1, e[0, :]] + p[1, e[1, :]]))
+        self.p = np.hstack((p, new_p))
         
         # build new triangle definitions
-        newt = np.vstack((t[0, :], t2f[0, :], t2f[2, :]))
-        newt = np.hstack((newt, np.vstack((t[1, :], t2f[0, :], t2f[1, :]))))
-        newt = np.hstack((newt, np.vstack((t[2, :], t2f[2, :], t2f[1, :]))))
-        newt = np.hstack((newt, np.vstack((t2f[0, :], t2f[1, :], t2f[2, :]))))
+        self.t = np.hstack((
+            np.vstack((t[0, :], t2f[0, :], t2f[2, :])),
+            np.vstack((t[1, :], t2f[0, :], t2f[1, :])),
+            np.vstack((t[2, :], t2f[2, :], t2f[1, :])),
+            np.vstack((t2f[0, :], t2f[1, :], t2f[2, :])),
+            ))
         
-        # update fields
-        self.p = newp
-        self.t = newt
-
         # rebuild mappings
         self._build_mappings()
 
