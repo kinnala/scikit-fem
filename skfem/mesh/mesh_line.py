@@ -8,6 +8,8 @@ from skfem.mapping import MappingAffine
 from ..mesh import Mesh, MeshType
 from .mesh2d import MeshQuad
 
+from numpy import ndarray
+
 
 class MeshLine(Mesh):
     """One-dimensional mesh."""
@@ -22,7 +24,7 @@ class MeshLine(Mesh):
     def __init__(self, p=None, t=None, validate=True):
         if p is None and t is None:
             p = np.array([[0, 1]])
-        if len(p.shape)==1:
+        if len(p.shape) == 1:
             p = np.array([p]) 
         self.p = p
         self._build_mappings()

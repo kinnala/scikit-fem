@@ -333,17 +333,32 @@ class Mesh():
             raise Exception("The mesh contains no elements of type " + cls.meshio_type)
 
     @classmethod
-    def load(cls: Type[MeshType], filename: str) -> MeshType:
-        """Load an external mesh from file using `meshio
+    def load(cls: Type[MeshType],
+             filename: str,
+             from_url: Optional[bool] = False) -> MeshType:
+        """Load an external mesh from file or url using `meshio
         <https://github.com/nschloe/meshio>`_.
         
         Parameters
         ----------
         filename
             The filename of the mesh.
+        from_url
+            If true, load the file over HTTP.
 
         """
         import meshio
+        
+        if from_url:
+            import tempfile
+            from urllib.request import urlopen
+
+            tmp = tempfile.NamedTemporaryFile(suffix='.' + filename.split('.')[-1],
+                                              delete=False)
+            tmp.write(urlopen(filename).read())
+            tmp.flush()
+            filename = tmp.name
+            
         return cls.from_meshio(meshio.read(filename))
 
     def boundary_nodes(self) -> ndarray:
