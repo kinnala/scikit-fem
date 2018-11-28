@@ -25,8 +25,9 @@ class Mesh():
     """
 
     refdom: str = "none"  
-    brefdom: str = "none" 
+    brefdom: str = "none"
     meshio_type: str = "none"
+    name: str = "Abstract"
 
     p: ndarray = np.array([]) 
     t: ndarray = np.array([]) 
@@ -51,9 +52,9 @@ class Mesh():
         return self.__repr__()
 
     def __repr__(self):
-        return "Mesh of type '" + str(type(self)) + "' "\
-               "with " + str(self.p.shape) + " vertices " \
-               "and " + str(self.t.shape) + " elements."
+        return self.name + " mesh "\
+               "with " + str(self.p.shape[1]) + " vertices " \
+               "and " + str(self.t.shape[1]) + " elements."
 
     def show(self):
         """A wrapper for matplotlib.pyplot.show()."""

@@ -12,11 +12,12 @@ from .mesh2d import MeshQuad
 class MeshLine(Mesh):
     """One-dimensional mesh."""
 
-    refdom = "line"
-    brefdom = "point"
+    refdom: str = "line"
+    brefdom: str = "point"
+    name: str = "One-dimensional"
 
-    p = np.array([])
-    t = np.array([])
+    p: ndarray = np.array([])
+    t: ndarray = np.array([])
 
     def __init__(self, p=None, t=None, validate=True):
         if p is None and t is None:

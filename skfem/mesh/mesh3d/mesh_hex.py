@@ -36,9 +36,10 @@ class MeshHex(Mesh3D):
 
     """
 
-    refdom = "hex"
-    brefdom = "quad"
-    meshio_type = "hexahedron"
+    refdom: str = "hex"
+    brefdom: str = "quad"
+    meshio_type: str = "hexahedron"
+    name: str = "Hexahedral"
 
     def __init__(self, p=None, t=None, validate=True):
         """Initialise a hexahedral mesh."""

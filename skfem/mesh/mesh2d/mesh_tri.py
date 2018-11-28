@@ -4,6 +4,7 @@ from scipy.sparse import coo_matrix
 from skfem.mapping import MappingAffine
 
 from .mesh2d import Mesh2D, MeshType
+import skfem.mesh.mesh2d.mesh_quad as mesh_quad
 
 from typing import Optional, Tuple, Type
 
@@ -73,15 +74,16 @@ class MeshTri(Mesh2D):
 
     """
 
-    refdom = "tri"
-    brefdom = "line"
-    meshio_type = "triangle"
+    refdom: str = "tri"
+    brefdom: str = "line"
+    meshio_type: str = "triangle"
+    name: str = "Triangular"
 
-    p = np.array([])
-    t = np.array([])
-    facets = np.array([])
-    f2t = np.array([])
-    t2f = np.array([])
+    p: ndarray = np.array([])
+    t: ndarray = np.array([])
+    facets: ndarray = np.array([])
+    f2t: ndarray = np.array([])
+    t2f: ndarray = np.array([])
 
     def __init__(self,
                  p: Optional[ndarray] = None,
@@ -143,7 +145,7 @@ class MeshTri(Mesh2D):
             The nodal coordinates in dimension y.
 
         """
-        return MeshQuad.init_tensor(x, y)._splitquads()
+        return mesh_quad.MeshQuad.init_tensor(x, y)._splitquads()
 
     @classmethod
     def init_symmetric(cls):

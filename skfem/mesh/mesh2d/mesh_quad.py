@@ -5,7 +5,7 @@ from skfem.element import ElementQuad1, ElementLineP1
 from skfem.mapping import MappingIsoparametric
 
 from .mesh2d import Mesh2D, MeshType
-from .mesh_tri import MeshTri
+import skfem.mesh.mesh2d.mesh_tri as mesh_tri
 
 from typing import Optional, Type
 
@@ -40,15 +40,16 @@ class MeshQuad(Mesh2D):
 
     """
 
-    refdom = "quad"
-    brefdom = "line"
-    meshio_type = "quad"
+    refdom: str = "quad"
+    brefdom: str = "line"
+    meshio_type: str = "quad"
+    name: str = "Quadrilateral"
 
-    p = np.array([])
-    t = np.array([])
-    facets = np.array([])
-    f2t = np.array([])
-    t2f = np.array([])
+    p: ndarray = np.array([])
+    t: ndarray = np.array([])
+    facets: ndarray = np.array([])
+    f2t: ndarray = np.array([])
+    t2f: ndarray = np.array([])
 
     def __init__(self,
                  p: Optional[ndarray] = None,
@@ -224,9 +225,9 @@ class MeshQuad(Mesh2D):
                 X = np.concatenate((x, x))
             else:
                 raise Exception("The parameter x must have one value per element.")
-            return MeshTri(self.p, t, validate=False), X
+            return mesh_tri.MeshTri(self.p, t, validate=False), X
         else:
-            return MeshTri(self.p, t, validate=False)
+            return mesh_tri.MeshTri(self.p, t, validate=False)
 
     def _splitquads_symmetric(self):
         """Split quads into four triangles."""

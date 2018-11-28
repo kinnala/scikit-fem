@@ -39,9 +39,10 @@ class MeshTet(Mesh3D):
 
     """
 
-    refdom = "tet"
-    brefdom = "tri"
-    meshio_type = "tetra"
+    refdom: str = "tet"
+    brefdom: str = "tri"
+    meshio_type: str = "tetra"
+    name: str = "Tetrahedral"
 
     def __init__(self, p=None, t=None, validate=True):
         if p is None and t is None:
