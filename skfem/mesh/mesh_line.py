@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from skfem.mapping import MappingAffine
 
 from ..mesh import Mesh, MeshType
-import skfem.mesh.mesh2d.mesh_quad as mesh_quad
+from .mesh2d.mesh_quad import MeshQuad
 
 from numpy import ndarray
 
@@ -136,7 +136,7 @@ class MeshLine(Mesh):
 
     def __mul__(self, other):
         """Tensor product mesh."""
-        return mesh_quad.MeshQuad.init_tensor(self.p[0, :], other.p[0, :])
+        return MeshQuad.init_tensor(self.p[0, :], other.p[0, :])
 
     def param(self):
         return np.max(np.abs(self.p[0, self.t[1, :]] - self.p[0, self.t[0, :]]))

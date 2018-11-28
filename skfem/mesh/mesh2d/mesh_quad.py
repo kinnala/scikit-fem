@@ -5,7 +5,7 @@ from skfem.element import ElementQuad1, ElementLineP1
 from skfem.mapping import MappingIsoparametric
 
 from .mesh2d import Mesh2D, MeshType
-import skfem.mesh.mesh2d.mesh_tri as mesh_tri
+from .mesh_tri import MeshTri
 
 from typing import Optional, Type
 
@@ -96,14 +96,14 @@ class MeshQuad(Mesh2D):
         npy = len(y)
         X, Y = np.meshgrid(np.sort(x), np.sort(y))   
         p = np.vstack((X.flatten('F'), Y.flatten('F')))
-        ix = np.arange(npx*npy)
-        ne = (npx-1)*(npy-1)
-        t = np.zeros((4, ne))
+        ix = np.arange(npx * npy)
+        nt = (npx - 1) * (npy - 1)
+        t = np.zeros((4, nt))
         ix = ix.reshape(npy, npx, order='F').copy()
-        t[0, :] = ix[0:(npy-1), 0:(npx-1)].reshape(ne, 1, order='F').copy().flatten()
-        t[1, :] = ix[1:npy, 0:(npx-1)].reshape(ne, 1, order='F').copy().flatten()
-        t[2, :] = ix[1:npy, 1:npx].reshape(ne, 1, order='F').copy().flatten()
-        t[3, :] = ix[0:(npy-1), 1:npx].reshape(ne, 1, order='F').copy().flatten()
+        t[0, :] = ix[0:(npy-1), 0:(npx-1)].reshape(nt, 1, order='F').copy().flatten()
+        t[1, :] = ix[1:npy,     0:(npx-1)].reshape(nt, 1, order='F').copy().flatten()
+        t[2, :] = ix[1:npy,     1:npx].reshape(nt, 1, order='F').copy().flatten()
+        t[3, :] = ix[0:(npy-1), 1:npx].reshape(nt, 1, order='F').copy().flatten()
         return cls(p, t.astype(np.int64))
 
     @classmethod
@@ -225,9 +225,9 @@ class MeshQuad(Mesh2D):
                 X = np.concatenate((x, x))
             else:
                 raise Exception("The parameter x must have one value per element.")
-            return mesh_tri.MeshTri(self.p, t, validate=False), X
+            return MeshTri(self.p, t, validate=False), X
         else:
-            return mesh_tri.MeshTri(self.p, t, validate=False)
+            return MeshTri(self.p, t, validate=False)
 
     def _splitquads_symmetric(self):
         """Split quads into four triangles."""
