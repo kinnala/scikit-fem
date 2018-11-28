@@ -314,8 +314,8 @@ class Mesh():
         """
 
         if cls.meshio_type in meshdata.cells:
-            p = cls.strip_extra_coordinates(meshdata.points).T
-            t = meshdata.cells[cls.meshio_type].T
+            p = np.ascontiguousarray(cls.strip_extra_coordinates(meshdata.points).T)
+            t = np.ascontiguousarray(meshdata.cells[cls.meshio_type].T)
             mesh = cls(p, t)
             mesh.external = meshdata
             
