@@ -43,9 +43,18 @@ For more cutting edge features, you can clone this repository.
 
 Please see the [user documentation](https://kinnala.github.io/scikit-fem-docs) for examples.
 
+## Acknowledgements
+
+This project was started while the author was finishing his doctoral studies
+under a grant from the [Finnish Cultural Foundation](https://skr.fi/).
+
+The approach used in the finite element assembly has been inspired by the work of A. Hannukainen and M. Juntunen:
+
+https://au.mathworks.com/matlabcentral/fileexchange/36108-hjfem_lite
+
 ## Contributors
 
-- Tom Gustafsson (Maintainer)
+- Tom Gustafsson (Author)
 - [Geordie McBain](https://github.com/gdmcbain)
 
 *By contributing code to scikit-fem, you are agreeing to release it under BSD-3-Clause, see LICENSE.md.*
