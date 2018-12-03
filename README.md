@@ -45,8 +45,7 @@ Please see the [user documentation](https://kinnala.github.io/scikit-fem-docs) f
 
 ## Acknowledgements
 
-This project was started while the author was finishing his doctoral studies
-under a grant from the [Finnish Cultural Foundation](https://skr.fi/). The approach used in the finite element assembly has been inspired by the [work of A. Hannukainen and M. Juntunen](https://au.mathworks.com/matlabcentral/fileexchange/36108-hjfem_lite).
+This project was started while working under a grant from the [Finnish Cultural Foundation](https://skr.fi/). The approach used in the finite element assembly has been inspired by the [work of A. Hannukainen and M. Juntunen](https://au.mathworks.com/matlabcentral/fileexchange/36108-hjfem_lite).
 
 ## Contributors
 
