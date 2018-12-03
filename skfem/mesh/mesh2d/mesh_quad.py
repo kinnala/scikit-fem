@@ -176,46 +176,56 @@ class MeshQuad(Mesh2D):
         """Perform a single mesh refine that halves 'h'. Each
         quadrilateral is split into four."""
         # rename variables
-        t = self.t
-        p = self.p
+        t = np.copy(self.t)
+        p = np.copy(self.p)
         e = self.facets
         sz = p.shape[1]
         t2f = self.t2f + sz
+        
         # quadrilateral middle point
         mid = range(self.t.shape[1]) + np.max(t2f) + 1
+        
         # new vertices are the midpoints of edges ...
         newp1 = 0.5*np.vstack((p[0, e[0, :]] + p[0, e[1, :]],
                                p[1, e[0, :]] + p[1, e[1, :]]))
+        
         # ... and element middle points
         newp2 = 0.25*np.vstack((p[0, t[0, :]] + p[0, t[1, :]] +
                                 p[0, t[2, :]] + p[0, t[3, :]],
                                 p[1, t[0, :]] + p[1, t[1, :]] +
                                 p[1, t[2, :]] + p[1, t[3, :]]))
-        newp = np.hstack((p, newp1, newp2))
+        self.p = np.hstack((p, newp1, newp2))
+        
         # build new quadrilateral definitions
-        newt = np.vstack((t[0, :],
-                          t2f[0, :],
-                          mid,
-                          t2f[3, :]))
-        newt = np.hstack((newt, np.vstack((t2f[0, :],
-                                           t[1, :],
-                                           t2f[1, :],
-                                           mid))))
-        newt = np.hstack((newt, np.vstack((mid,
-                                           t2f[1, :],
-                                           t[2, :],
-                                           t2f[2, :]))))
-        newt = np.hstack((newt, np.vstack((t2f[3, :],
-                                           mid,
-                                           t2f[2, :],
-                                           t[3, :]))))
-        # update fields
-        self.p = newp
-        self.t = newt
+        self.t = np.hstack((
+            np.vstack((t[0, :], t2f[0, :], mid, t2f[3, :])),
+            np.vstack((t2f[0, :], t[1, :], t2f[1, :], mid)),
+            np.vstack((mid, t2f[1, :], t[2, :], t2f[2, :])),
+            np.vstack((t2f[3, :], mid, t2f[2, :], t[3, :])),
+            ))
+        
+        # build mapping between old and new facets
+        new_facets = np.zeros((2, e.shape[1]), dtype=np.int64)
+        ix0 = np.arange(t.shape[1], dtype=np.int64)
+        ix1 = ix0 + t.shape[1]
+        ix2 = ix0 + 2*t.shape[1]
+        ix3 = ix0 + 3*t.shape[1]
 
         self._build_mappings()
 
-        # TODO implement prolongation
+        new_facets[0, t2f[0, :] - sz] = self.t2f[0, ix0]
+        new_facets[1, t2f[0, :] - sz] = self.t2f[0, ix1]
+
+        new_facets[0, t2f[1, :] - sz] = self.t2f[1, ix1]
+        new_facets[1, t2f[1, :] - sz] = self.t2f[1, ix2]
+
+        new_facets[0, t2f[2, :] - sz] = self.t2f[2, ix2]
+        new_facets[1, t2f[2, :] - sz] = self.t2f[2, ix3]
+
+        new_facets[0, t2f[3, :] - sz] = self.t2f[3, ix3]
+        new_facets[1, t2f[3, :] - sz] = self.t2f[3, ix0]
+
+        self._fix_boundaries(new_facets)
 
     def _splitquads(self, x=None):
         """Split each quad into two triangles and return MeshTri."""

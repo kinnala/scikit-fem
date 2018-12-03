@@ -102,18 +102,18 @@ class Mesh():
         else:
             raise NotImplementedError("The given parameter type not supported.")
 
-        if hasattr(self, "subdomains"):
-            warnings.warn("Named subdomains were removed due to refine.")
-            delattr(self, "subdomains")
-            
+    def _fix_boundaries(self, new_f: ndarray):
+        """This is called after each refine to update the indices in self.boundaries.
+
+        Parameters
+        ----------
+        new_f
+            An array of integers of size no-splitted-elems x no-facets.
+
+        """
         if hasattr(self, "boundaries"):
-            if hasattr(self, "_new_facets"):
-                # fix self.boundaries to match the refined mesh
-                for name in self.boundaries:
-                    self.boundaries[name] = self._new_facets[:, self.boundaries[name]].flatten()
-            else:
-                warnings.warn("Named boundaries were removed due to refine.")
-                delattr(self, "boundaries")
+            for name in self.boundaries:
+                self.boundaries[name] = new_f[:, self.boundaries[name]].flatten()
 
     def remove_elements(self, element_indices: ndarray) -> MeshType:
         """Construct new mesh with elements removed
