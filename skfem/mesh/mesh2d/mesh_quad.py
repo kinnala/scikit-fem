@@ -13,6 +13,13 @@ from numpy import ndarray
 
 class MeshQuad(Mesh2D):
     """A mesh consisting of quadrilateral elements.
+
+    The different constructors are
+
+        - :meth:`~skfem.mesh.MeshQuad.__init__`
+        - :meth:`~skfem.mesh.MeshQuad.load` (requires meshio)
+        - :meth:`~skfem.mesh.MeshQuad.init_refdom`
+        - :meth:`~skfem.mesh.MeshQuad.init_tensor`
     
     Attributes
     ----------
@@ -132,16 +139,12 @@ class MeshQuad(Mesh2D):
         # self.t=np.sort(self.t,axis=0)
 
         # define facets: in the order (0,1) (1,2) (2,3) (0,3)
-        self.facets = np.sort(np.vstack((self.t[0, :], self.t[1, :])), axis=0)
-        self.facets = np.hstack((self.facets,
-                                 np.sort(np.vstack((self.t[1, :],
-                                                    self.t[2, :])), axis=0)))
-        self.facets = np.hstack((self.facets,
-                                 np.sort(np.vstack((self.t[2, :],
-                                                    self.t[3, :])), axis=0)))
-        self.facets = np.hstack((self.facets,
-                                 np.sort(np.vstack((self.t[0, :],
-                                                    self.t[3, :])), axis=0)))
+        self.facets = np.sort(np.hstack((
+            self.t[[0, 1], :],
+            self.t[[1, 2], :],
+            self.t[[2, 3], :],
+            self.t[[0, 3], :],
+            )), axis=0)
 
         # get unique facets and build quad-to-facet mapping: 4 (edges) x Nquads
         tmp = np.ascontiguousarray(self.facets.T)
