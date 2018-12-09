@@ -25,7 +25,7 @@ K = asm(linear_elasticity(1.0, 1.0), gb)
 
 @bilinear_form
 def mass(u, du, v, dv, w):
-    return u[0]*v[0] + u[1]*v[1]
+    return u[0] * v[0] + u[1] * v[1]
 
 M = asm(mass, gb)
 

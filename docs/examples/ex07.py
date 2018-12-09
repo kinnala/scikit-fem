@@ -6,6 +6,7 @@ penalty method.
 """
 
 from skfem import *
+from skfem.models.poisson import laplace, unit_load
 import matplotlib.pyplot as plt
 
 m = MeshTri.init_sqsymmetric()
@@ -20,20 +21,12 @@ fb[1] = FacetBasis(m, e, map, 3, side=1)
 bb = FacetBasis(m, e, map, 3)
 
 @bilinear_form
-def bilin(u, du, v, dv, w):
-    return du[0]*dv[0] + du[1]*dv[1]
-
-@bilinear_form
 def bilin_bnd(u, du, v, dv, w):
     h = w.h
     return 1.0/h*u*v
 
-@linear_form
-def lin(v, dv, w):
-    return 1.0*v
-
-A = asm(bilin, ib)
-b = asm(lin, ib)
+A = asm(laplace, ib)
+b = asm(unit_load, ib)
 
 ieps = 1e-3
 beps = 10

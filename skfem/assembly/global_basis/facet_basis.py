@@ -49,7 +49,6 @@ class FacetBasis(GlobalBasis):
 
     Examples
     --------
-
     FacetBasis object is a combination of Mesh, Element,
     and Mapping:
 
@@ -107,13 +106,15 @@ class FacetBasis(GlobalBasis):
 
         self.nelems = len(self.find)
 
-        self.basis = list(zip(*[self.elem.gbasis(self.mapping, Y, j, self.tind) for j in range(self.Nbfun)]))
+        self.basis = [self.elem.gbasis(self.mapping, Y, j, self.tind)
+                      for j in range(self.Nbfun)]
 
         self.dx = np.abs(self.mapping.detDG(self.X, find=self.find)) * np.tile(self.W, (self.nelems, 1))
 
         self.element_dofs = self.element_dofs[:, self.tind] # TODO this is required for asm(). Check for other options.
 
-    def default_parameters(self) -> Dict[str, ndarray]:
+    def default_parameters(self):
+        """Return default parameters for `~skfem.assembly.asm`."""
         return {'x':self.global_coordinates(),
                 'h':self.mesh_parameters(),
                 'n':self.normals}

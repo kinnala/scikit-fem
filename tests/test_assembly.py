@@ -18,12 +18,14 @@ class IntegrateOneOverBoundaryQ1(unittest.TestCase):
 
         @bilinear_form
         def uv(u, du, v, dv, w):
-            return u*v
+            return u * v
+        
         B = asm(uv, self.fbasis)
         
         @linear_form
         def gv(v, dv, w):
-            return 1.0*v
+            return 1.0 * v
+        
         g = asm(gv, self.fbasis)
 
         ones = np.ones(g.shape)
@@ -55,6 +57,7 @@ class IntegrateFuncOverBoundary(unittest.TestCase):
             def uv(u, du, v, dv, w):
                 x, y, z = w.x
                 return x**2*y**2*z**2*u*v
+            
             B = asm(uv, fb)
 
             ones = np.ones(B.shape[0])
@@ -115,7 +118,7 @@ class BasisInterpolatorMorley(BasisInterpolator):
     def initOnes(self, basis):
         @bilinear_form
         def mass(u, du, ddu, v, dv, ddv, w):
-            return u*v
+            return u * v
 
         @linear_form
         def ones(v, dv, ddv, w):

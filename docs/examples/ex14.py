@@ -34,7 +34,7 @@ b = asm(load, basis)
 
 I = m.interior_nodes()
 
-u = (([1., 1.j] @ m.p) ** 2).real          # x**2 - y**2
+u = (([1., 1.j] @ m.p) ** 2).real  # x**2 - y**2
 u[I] = solve(*condense(A, 0.*b, u, I))
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@ Visualising high-order solutions by refining the mesh and
 interpolating the solution.
 """
 from skfem import *
-from skfem.models.poisson import laplace
+from skfem.models.poisson import laplace, unit_load
 import numpy as np
 
 m = MeshQuad()
@@ -18,11 +18,7 @@ ib = InteriorBasis(m, e, map, 4)
 
 K = asm(laplace, ib)
 
-@linear_form
-def linf(v, dv, w):
-    return v
-
-f = asm(linf, ib)
+f = asm(unit_load, ib)
 
 D = ib.get_dofs().all()
 x = np.zeros(ib.N)

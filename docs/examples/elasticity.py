@@ -14,7 +14,8 @@ K = asm(linear_elasticity(*lame_parameters(200.0e9, 0.3)), ib)
 rho = 8050.0
 
 @bilinear_form
-def mass(u, du, v, dv, w):
+def mass(u, v, w):
+    u, v = u[0], v[0]
     return rho*(u[0]*v[0] + u[1]*v[1] + u[2]*v[2])
 
 M = asm(mass, ib)

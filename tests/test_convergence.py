@@ -4,6 +4,7 @@
 import unittest
 import numpy as np
 from skfem import *
+from skfem.models.poisson import laplace
 
 
 class ConvergenceQ1(unittest.TestCase):
@@ -11,16 +12,7 @@ class ConvergenceQ1(unittest.TestCase):
     rateH1 = 1.0
     eps = 0.1
     def runTest(self):
-        @bilinear_form
-        def laplace(u, du, v, dv, w):
-            if du.shape[0] == 1:
-                return du[0]*dv[0]
-            elif du.shape[0] == 2:
-                return du[0]*dv[0] + du[1]*dv[1]
-            elif du.shape[0] == 3:
-                return du[0]*dv[0] + du[1]*dv[1] + du[2]*dv[2]
-            else:
-                raise Exception("The dimension not supported")
+        
         @linear_form
         def load(v, dv, w):
             x = w.x
@@ -68,7 +60,7 @@ class ConvergenceQ1(unittest.TestCase):
         self.assertLess(np.abs(rateH1-self.rateH1), self.eps)
 
     def compute_error(self, m, basis, U):
-        uh, duh = basis.interpolate(U, derivative=True)
+        uh, duh = basis.interpolate(U)
         dx = basis.dx
         x = basis.global_coordinates()
 

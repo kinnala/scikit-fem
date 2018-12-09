@@ -47,7 +47,6 @@ class InteriorBasis(GlobalBasis):
 
     Examples
     --------
-
     :class:`~skfem.assembly.InteriorBasis` object is a combination of
     :class:`~skfem.mesh.Mesh`, :class:`~skfem.element.Element`, and
     :class:`~skfem.mapping.Mapping`:
@@ -74,12 +73,14 @@ class InteriorBasis(GlobalBasis):
 
         self.X, self.W = get_quadrature(self.refdom, self.intorder)
 
-        self.basis = list(zip(*[self.elem.gbasis(self.mapping, self.X, j) for j in range(self.Nbfun)]))
+        self.basis = [self.elem.gbasis(self.mapping, self.X, j)
+                      for j in range(self.Nbfun)]
 
         self.nelems = self.mesh.t.shape[1]
         self.dx = np.abs(self.mapping.detDF(self.X)) * np.tile(self.W, (self.nelems, 1))
 
     def default_parameters(self):
+        """Return default parameters for `~skfem.assembly.asm`."""
         return {'x':self.global_coordinates(),
                 'h':self.mesh_parameters()}
 

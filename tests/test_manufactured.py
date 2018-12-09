@@ -93,7 +93,7 @@ class LineNeumann1D(unittest.TestCase):
 
         @linear_form
         def boundary_flux(v, dv, w):
-            return v*(w.x[0]==1) - v*(w.x[0]==0)
+            return v * (w.x[0]==1) - v * (w.x[0]==0)
 
         n = m.p.shape[-1]
         L = asm(laplace, ib)

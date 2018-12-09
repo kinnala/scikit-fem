@@ -1,7 +1,7 @@
 import numpy as np
 from skfem.assembly.dofs import Dofs
 
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union, NamedTuple, Any
 
 from numpy import ndarray
 
@@ -17,11 +17,6 @@ class GlobalBasis():
 
     """
 
-    nodal_dofs: ndarray = np.array([])
-    facet_dofs: ndarray = np.array([])
-    edge_dofs: ndarray = np.array([])
-    interior_dofs: ndarray = np.array([])
-    element_dofs: ndarray = np.array([])
     N: int = 0
     dofnames: List[str] = []
 
@@ -101,9 +96,8 @@ class GlobalBasis():
         return np.setdiff1d(np.arange(self.N), np.concatenate(D))
 
     def _expand_facets(self, facets):
-        from typing import NamedTuple
         
-        class Submesh(NamedTuple):
+        class IndexSet(NamedTuple):
             p: ndarray = None
             t: ndarray = None
             edges: ndarray = None
@@ -114,14 +108,14 @@ class GlobalBasis():
         if self.mesh.dim() == 3:
             edges = np.intersect1d(self.mesh.boundary_edges(),
                                    np.unique(self.mesh.t2e[:, self.mesh.f2t[0, facets]].flatten()))
-            return Submesh(p=p, edges=edges, facets=facets)
+            return IndexSet(p=p, edges=edges, facets=facets)
         else:
-            return Submesh(p=p, facets=facets)
+            return IndexSet(p=p, facets=facets)
 
     def _get_dofs(self, facets):
         """Return global DOF numbers corresponding to a set of facets."""
         
-        submesh = self._expand_facets(facets)
+        ix = self._expand_facets(facets)
         
         nodal_dofs = {}
         facet_dofs = {}
@@ -129,21 +123,21 @@ class GlobalBasis():
         interior_dofs = {}
         offset = 0
 
-        if submesh.p is not None:
+        if ix.p is not None:
             for i in range(self.nodal_dofs.shape[0]):
-                nodal_dofs[self.dofnames[i]] = self.nodal_dofs[i, submesh.p]
+                nodal_dofs[self.dofnames[i]] = self.nodal_dofs[i, ix.p]
             offset += self.nodal_dofs.shape[0]
-        if submesh.facets is not None:
+        if ix.facets is not None:
             for i in range(self.facet_dofs.shape[0]):
-                facet_dofs[self.dofnames[i + offset]] = self.facet_dofs[i, submesh.facets]
+                facet_dofs[self.dofnames[i + offset]] = self.facet_dofs[i, ix.facets]
             offset += self.facet_dofs.shape[0]
-        if submesh.edges is not None:
+        if ix.edges is not None:
             for i in range(self.edge_dofs.shape[0]):
-                edge_dofs[self.dofnames[i + offset]] = self.edge_dofs[i, submesh.edges]
+                edge_dofs[self.dofnames[i + offset]] = self.edge_dofs[i, ix.edges]
             offset += self.edge_dofs.shape[0]
-        if submesh.t is not None:
+        if ix.t is not None:
             for i in range(self.interior_dofs.shape[0]):
-                interior_dofs[self.dofnames[i + offset]] = self.interior_dofs[i, submesh.t]
+                interior_dofs[self.dofnames[i + offset]] = self.interior_dofs[i, ix.t]
 
         return Dofs(nodal_dofs, facet_dofs, edge_dofs, interior_dofs)
 
@@ -177,21 +171,20 @@ class GlobalBasis():
         raise NotImplementedError("Default parameters not implemented.")
 
     def interpolate(self,
-                    w: ndarray,
-                    derivative: Optional[bool] = False) -> Union[ndarray, Tuple[ndarray, ndarray]]:
+                    w: ndarray) -> Any:
         """Interpolate a solution vector to quadrature points.
 
         Parameters
         ----------
         w
             A solution vector.
-        derivative
-            If true, return also the derivative.
 
         Returns
         -------
         ndarray
-            Interpolated solution vector (Nelems x Nqp).
+            Interpolated solution vector.
+        ndarray
+            Interpolated derivatives of the solution vector.
 
         """
         nqp = len(self.W)
@@ -207,28 +200,22 @@ class GlobalBasis():
         for j in range(self.Nbfun):
             jdofs = self.element_dofs[j, :]
             W += w[jdofs][:, None] \
-                 * self.basis[0][j]
+                 * self.basis[j][0]
 
-        if derivative:
-            if self.elem.order[1] == 1:
-                dW = np.zeros((dim, self.nelems, nqp))
-            elif self.elem.order[1] == 2:
-                dW = np.zeros((dim, dim, self.nelems, nqp))
-            else:
-                raise Exception("Interpolation not implemented for this Element.order.")
-            for j in range(self.Nbfun):
-                jdofs = self.element_dofs[j, :]
-                for a in range(dim):
-                    dW[a, :, :] += w[jdofs][:, None] \
-                                   * self.basis[1][j][a]
-            return W, dW
-        return W
+        if self.elem.order[1] == 1:
+            dW = np.zeros((dim, self.nelems, nqp))
+        elif self.elem.order[1] == 2:
+            dW = np.zeros((dim, dim, self.nelems, nqp))
+        else:
+            raise Exception("Interpolation not implemented for this Element.order.")
+        for j in range(self.Nbfun):
+            jdofs = self.element_dofs[j, :]
+            for a in range(dim):
+                dW[a, :, :] += w[jdofs][:, None] \
+                               * self.basis[j][1][a]
+        return W, dW
 
     def zero_w(self) -> ndarray:
         """Return a zero array with correct dimensions
-
-        for :func:`~skfem.assembly.asm`.
-
-        """
-
+        for :func:`~skfem.assembly.asm`."""
         return np.zeros((self.nelems, len(self.W)))
