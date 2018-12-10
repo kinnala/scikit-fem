@@ -3,7 +3,7 @@ from skfem.models.elasticity import linear_elasticity,\
                                     lame_parameters
 import numpy as np
 
-m = MeshTet.load("beams.msh")
+m = MeshTet.load("docs/examples/beams.msh")
 e1 = ElementTetP1()
 e = ElementVectorH1(e1)
 
@@ -14,8 +14,7 @@ K = asm(linear_elasticity(*lame_parameters(200.0e9, 0.3)), ib)
 rho = 8050.0
 
 @bilinear_form
-def mass(u, v, w):
-    u, v = u[0], v[0]
+def mass(u, du, v, dv, w):
     return rho*(u[0]*v[0] + u[1]*v[1] + u[2]*v[2])
 
 M = asm(mass, ib)

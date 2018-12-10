@@ -21,6 +21,7 @@ class MeshTri(Mesh2D):
         - :meth:`~skfem.mesh.MeshTri.init_sqsymmetric`
         - :meth:`~skfem.mesh.MeshTri.init_refdom`
         - :meth:`~skfem.mesh.MeshTri.init_tensor`
+        - :mesh:`~skfem.mesh.MeshTri.init_lshaped`
     
     Attributes
     ----------
@@ -77,12 +78,6 @@ class MeshTri(Mesh2D):
     brefdom: str = "line"
     meshio_type: str = "triangle"
     name: str = "Triangular"
-
-    p: ndarray = np.array([])
-    t: ndarray = np.array([])
-    facets: ndarray = np.array([])
-    f2t: ndarray = np.array([])
-    t2f: ndarray = np.array([])
 
     def __init__(self,
                  p: Optional[ndarray] = None,
@@ -192,15 +187,15 @@ class MeshTri(Mesh2D):
         
         The mesh topology is as follows::
 
-            *------------*
-            |\    |     /|
-            |  \  |   /  |
-            |    \| /    |
-            |-----*------|
-            |    /| \    |
-            |  /  |   \  |
-            |/    |     \|
-            *------------*
+            *------*------*
+            |\     |     /|
+            |  \   |   /  |
+            |    \ | /    |
+            *------*------*
+            |    / | \    |
+            |  /   |   \  |
+            |/     |     \|
+            *------*------*
 
         """
         p = np.array([[0, 0.5, 1,   0, 0.5,   1, 0, 0.5, 1],
@@ -235,6 +230,36 @@ class MeshTri(Mesh2D):
         p = np.array([[0., 1., 0.],
                       [0., 0., 1.]], dtype=np.float_)
         t = np.array([[0, 1, 2]], dtype=np.intp).T
+        return cls(p, t)
+
+    @classmethod
+    def init_lshaped(cls: Type[MeshType]) -> MeshType:
+        """Initialise a mesh for the L-shaped domain.
+        
+        The mesh topology is as follows::
+
+            *-------*
+            | \     |
+            |   \   |
+            |     \ |
+            *-------*-------*
+            |     / | \     |
+            |   /   |   \   |
+            | /     |     \ |
+            *-------*-------*
+
+        where the origin is at the L-corner and the horizontal and vertical
+        edges have unit length.
+
+        """
+        p = np.array([[0., 1., 0., -1.,  0., -1., -1.,  1.],
+                      [0., 0., 1.,  0., -1., -1.,  1., -1.]], dtype=np.float_)
+        t = np.array([[0, 1, 7],
+                      [0, 2, 6],
+                      [0, 6, 3],
+                      [0, 7, 4],
+                      [0, 4, 5],
+                      [0, 3, 5]], dtype=np.intp).T
         return cls(p, t)
 
     def _build_mappings(self, sort_t=True):

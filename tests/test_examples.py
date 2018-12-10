@@ -6,17 +6,17 @@ from skfem import *
 These tests run the examples and check that their output stays constant.
 """
 
-#class TestEx01(unittest.TestCase):
-#    """Run examples/ex01.py"""
-#    def runTest(self):
-#        import examples.ex01
-#        self.assertAlmostEqual(np.max(examples.ex01.x), 0.07344576657)
-#
-#class TestEx02(unittest.TestCase):
-#    """Run examples/ex02.py"""
-#    def runTest(self):
-#        import examples.ex02
-#        self.assertAlmostEqual(np.max(examples.ex02.x), 0.001217973811129439)
+class TestEx01(unittest.TestCase):
+   """Run examples/ex01.py"""
+   def runTest(self):
+       import docs.examples.ex01 as ex01
+       self.assertAlmostEqual(np.max(ex01.x), 0.07344576657)
+
+class TestEx02(unittest.TestCase):
+   """Run examples/ex02.py"""
+   def runTest(self):
+       import docs.examples.ex02 as ex02
+       self.assertAlmostEqual(np.max(ex02.x), 0.001217973811129439)
 
 class TestEx03(unittest.TestCase):
     """Run examples/ex03.py"""
@@ -96,3 +96,27 @@ class TestEx16(unittest.TestCase):
         import docs.examples.ex16
         self.assertTrue(np.linalg.norm(np.array([0,2,6,12,20,30])-docs.examples.ex16.ks) < 0.4)
         self.assertTrue(docs.examples.ex16.ks[-1], 30.309720458315521)
+        
+# Requires pygmsh (TODO check if this could be installed to travis)
+#
+# class TestEx20(unittest.TestCase):
+#     def runTest(self):
+#         import docs.examples.ex20 as ex
+#         psi0 = ex.psi0
+#         self.assertTrue((psi0 - 1/64)<1e-3)
+        
+class TestEx21(unittest.TestCase):
+    def runTest(self):
+        import docs.examples.ex21 as ex
+        y = ex.y
+        K = ex.K
+        L = ex.L[0]
+        self.assertAlmostEqual(y.T @ K @ y, 253739.1255284172)
+        self.assertAlmostEqual(L, 253739.12552853522)
+        
+class TestEx22(unittest.TestCase):
+    def runTest(self):
+        import docs.examples.ex22 as ex
+        u = ex.u
+        K = ex.K
+        self.assertAlmostEqual(u.T @ K @ u, 0.2131280267335294)

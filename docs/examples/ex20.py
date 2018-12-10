@@ -16,7 +16,6 @@ element = ElementTriMorley()
 mapping = MappingAffine(mesh)
 ib = InteriorBasis(mesh, element, mapping, 2)
 
-
 @bilinear_form
 def biharmonic(u, du, ddu, v, dv, ddv, w):
 
@@ -48,16 +47,17 @@ D = np.concatenate((dofs.nodal['u'], dofs.facet['u_n']))
 psi = np.zeros_like(rotf)
 psi[ib.complement_dofs(D)] = solve(*condense(stokes, rotf, D=D))
 
+
+from os.path import splitext
+from sys import argv
+
+from matplotlib.tri import Triangulation
+
+# Evaluate the stream-function at the origin.
+psi0, = ib.interpolator(psi)(np.zeros((2, 1)))
+print('psi0 = {} (cf. exact = 1/64 = {})'.format(psi0, 1/64))
+    
 if __name__ == "__main__":
-
-    from os.path import splitext
-    from sys import argv
-
-    from matplotlib.tri import Triangulation
-
-    # Evaluate the stream-function at the origin.
-    psi0, = ib.interpolator(psi)(np.zeros((2, 1)))
-    print('psi0 = {} (cf. exact = 1/64 = {})'.format(psi0, 1/64))
     
     M, Psi = ib.refinterp(psi, 3)
 

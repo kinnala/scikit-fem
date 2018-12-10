@@ -42,5 +42,5 @@ polynomial solution with circular stream-lines:
     
 The complete source code reads as follows:
 
-.. literalinclude:: creeping.py
+.. literalinclude:: ex20.py
     :linenos:

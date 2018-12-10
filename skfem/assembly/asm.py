@@ -10,13 +10,14 @@ from scipy.sparse import csr_matrix
 from .global_basis import GlobalBasis
 
 
+
+        
 def asm(kernel,
         ubasis: GlobalBasis,
         vbasis: Optional[GlobalBasis] = None,
         w: Optional[Any] = (None, None, None),
-        nthreads: Optional[int] = 1,
-        assemble: Optional[bool] = True) -> csr_matrix:
-    """Assemble finite element matrices.
+        nthreads: Optional[int] = 1) -> csr_matrix:
+    """Assemble finite element matrices and vectors.
 
     Parameters
     ----------
@@ -29,15 +30,12 @@ def asm(kernel,
     w
         A tuple of ndarrays. In the form definition, w[0] is accessible as
         w.w, w[1] is accessible as w.dw, and w[2] is accessible as w.ddw.
-        The output of `~skfem.assembly.GlobalBasis.interpolate` can be
+        The output of :meth:`~skfem.assembly.GlobalBasis.interpolate` can be
         passed directly to this parameter.
     nthreads
         Number of threads to use in assembly. Due to Python global interpreter
         lock (GIL), this is only useful if kernel is numba function compiled
         with nogil = True, see Examples.
-    assemble
-        If True (default), return an assemble CSR matrix. If False,
-        return (value, row, col) triplets.
 
     Examples
     --------
@@ -62,6 +60,10 @@ def asm(kernel,
 
     nt = ubasis.nelems
     dx = ubasis.dx
+    nargs = len(signature(kernel).parameters)
+
+    if type(w) is list:
+        w = zip(*w)
 
     class FormParameters(NamedTuple):
         w: Optional[ndarray] = None
@@ -70,10 +72,10 @@ def asm(kernel,
         h: Optional[ndarray] = None
         n: Optional[ndarray] = None
         x: Optional[ndarray] = None
-
+    
     w = FormParameters(*w, **ubasis.default_parameters())
-
-    if kernel.bilinear:
+    
+    if nargs == 6:
         # initialize COO data structures
         data = np.zeros((vbasis.Nbfun, ubasis.Nbfun, nt))
         rows = np.zeros(ubasis.Nbfun * vbasis.Nbfun * nt)
@@ -83,7 +85,8 @@ def asm(kernel,
         for j in range(ubasis.Nbfun):
             for i in range(vbasis.Nbfun):
                 # find correct location in data,rows,cols
-                ixs = slice(nt * (vbasis.Nbfun * j + i), nt * (vbasis.Nbfun * j + i + 1))
+                ixs = slice(nt * (vbasis.Nbfun * j + i),
+                            nt * (vbasis.Nbfun * j + i + 1))
                 rows[ixs] = vbasis.element_dofs[i, :]
                 cols[ixs] = ubasis.element_dofs[j, :]
 
@@ -93,11 +96,8 @@ def asm(kernel,
         indices = np.array([ixs, jxs]).T
 
         # split local stiffness matrix elements to threads
-        threads = [threading.Thread(target=kernel, args=(data, ij,
-                                                         ubasis.basis,
-                                                         vbasis.basis,
-                                                         w, dx)) for ij
-                   in np.array_split(indices, nthreads, axis=0)]
+        threads = [threading.Thread(target=kernel, args=(data, ij, ubasis.basis, vbasis.basis, w, dx))
+                   for ij in np.array_split(indices, nthreads, axis=0)]
 
         # start threads and wait for finishing
         for t in threads:
@@ -105,14 +105,12 @@ def asm(kernel,
         for t in threads:
             t.join()
 
-        if assemble:
-            K = coo_matrix((np.transpose(data, (1, 0, 2)).flatten('C'), (rows, cols)),
-                              shape=(vbasis.N, ubasis.N))
-            K.eliminate_zeros()
-            return K.tocsr()
-        else:
-            return np.transpose(data, (1, 0, 2)).flatten('C'), rows, cols
-    else:
+        K = coo_matrix((np.transpose(data, (1, 0, 2)).flatten('C'), (rows, cols)),
+                        shape=(vbasis.N, ubasis.N))
+        K.eliminate_zeros()
+        return K.tocsr()
+
+    elif nargs == 5:
         data = np.zeros((vbasis.Nbfun, nt))
         rows = np.zeros(vbasis.Nbfun * nt)
         cols = np.zeros(vbasis.Nbfun * nt)
@@ -125,19 +123,19 @@ def asm(kernel,
 
         indices = range(vbasis.Nbfun)
 
-        threads = [threading.Thread(target=kernel, args=(data, ix, vbasis.basis, w, dx)) for ix
-                   in np.array_split(indices, nthreads, axis=0)]
+        threads = [threading.Thread(target=kernel, args=(data, ix, vbasis.basis, w, dx))
+                   for ix in np.array_split(indices, nthreads, axis=0)]
 
         for t in threads:
             t.start()
         for t in threads:
             t.join()
 
-        if assemble:
-            return coo_matrix((data.flatten('C'), (rows, cols)),
-                               shape=(vbasis.N, 1)).toarray().T[0]
-        else:
-            return data.flatten('C'), rows, cols
+        return coo_matrix((data.flatten('C'), (rows, cols)),
+                           shape=(vbasis.N, 1)).toarray().T[0]
+
+    else:
+        return kernel(w, dx)
 
 
 def bilinear_form(form):
@@ -151,7 +149,6 @@ def bilinear_form(form):
         for k in range(ix.shape[0]):
             i, j = ix[k]
             A[i, j] = np.sum(form(*ubasis[j], *vbasis[i], w) * dx, axis=1)
-    kernel.bilinear = True
     return kernel
 
 
@@ -165,5 +162,17 @@ def linear_form(form):
     def kernel(b, ix, vbasis, w, dx):
         for i in ix:
             b[i] = np.sum(form(*vbasis[i], w) * dx, axis=1)
-    kernel.bilinear = False
     return kernel
+
+
+def functional(form):
+    """Functional decorator.
+
+    This decorator is used for defining functionals that can be evaluated
+    using :func:`~skfem.assembly.asm`.
+
+    """
+    def kernel(w, dx):
+        return np.sum(form(w) * dx, axis=1)
+    return kernel
+    
