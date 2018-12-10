@@ -111,8 +111,8 @@ class TestEx21(unittest.TestCase):
         y = ex.y
         K = ex.K
         L = ex.L[0]
-        self.assertAlmostEqual(y.T @ K @ y, 253739.1255284172)
-        self.assertAlmostEqual(L, 253739.12552853522)
+        self.assertAlmostEqual(y.T @ K @ y, 253739.1255284172, 4)
+        self.assertAlmostEqual(L, 253739.12552853522, 4)
         
 class TestEx22(unittest.TestCase):
     def runTest(self):
