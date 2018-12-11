@@ -32,13 +32,13 @@ polynomial solution with circular stream-lines:
 .. math::
     \psi = \left(1 - (x^2+y^2)/a^2\right)^2 / 64.
 
-.. figure:: creeping_stream-lines.png
+.. figure:: ex20_stream-lines.png
 
-   Stream-lines
+   The solved stream-lines
 
-.. figure:: creeping_velocity-vectors.png
+.. figure:: ex20_velocity-vectors.png
 
-   Velocity
+   The solved velocity field
     
 The complete source code reads as follows:
 

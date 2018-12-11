@@ -1,7 +1,7 @@
 Structural vibration
 --------------------
 
-This tutorial demonstrates the solution of a three-dimensional
+This example demonstrates the solution of a three-dimensional
 vector-valued problem. For this purpose, we consider an elastic
 eigenvalue problem.
 
@@ -89,11 +89,15 @@ eigenvalue problems if another sparse matrix is given as an argument instead of 
 .. literalinclude:: ex21.py
 		    :lines: 22-32
 
-Finally, we displace the mesh before exporting to the VTK format.
+Finally, we displace the mesh before drawing
 
 .. literalinclude:: ex21.py
-		    :lines: 34-41
+		    :lines: 34-42
 
+.. figure:: ex21_solution.png
+
+   The first eigenmode.
+                            
 The complete source code reads as follows:
 
 .. literalinclude:: ex21.py

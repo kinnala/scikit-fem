@@ -304,7 +304,8 @@ class MeshTri(Mesh2D):
              ax: Optional[Axes] = None,
              zlim: Optional[Tuple[float, float]] = None,
              edgecolors: Optional[str] = None,
-             aspect: float = 1.) -> Axes:
+             aspect: float = 1.,
+             colorbar: bool = False) -> Axes:
         """Visualise piecewise-linear or piecewise-constant function, 2D plot.
         
         Parameters
@@ -349,17 +350,20 @@ class MeshTri(Mesh2D):
             edgecolors = 'k'
         if zlim == None:
             if smooth:
-                ax.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z,
-                              shading='gouraud', edgecolors=edgecolors)
+                im = ax.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z,
+                                  shading='gouraud', edgecolors=edgecolors)
             else:
-                ax.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z, edgecolors=edgecolors)
+                im = ax.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z, edgecolors=edgecolors)
         else:
             if smooth:
-                ax.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z,
+                im = ax.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z,
                               shading='gouraud', vmin=zlim[0], vmax=zlim[1], edgecolors=edgecolors)
             else:
-                ax.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z,
+                im = ax.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z,
                               vmin=zlim[0], vmax=zlim[1], edgecolors=edgecolors)
+
+        if colorbar:
+            plt.colorbar(im)
         return ax
 
     def plot3(self,

@@ -9,5 +9,7 @@ code distribution.
 .. toctree::
    :glob:
 
-   examples/poisson.ipynb
+   examples/ex01
+   examples/ex02
+   examples/ex21
    examples/*

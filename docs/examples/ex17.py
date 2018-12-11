@@ -84,4 +84,4 @@ if __name__ == '__main__':
     ax = mesh.plot(temperature)
     fig = ax.get_figure()
     fig.colorbar(ax.get_children()[0])
-    fig.savefig(splitext(argv[0])[0] + '.png')
+    fig.savefig(splitext(argv[0])[0] + '_solution.png')

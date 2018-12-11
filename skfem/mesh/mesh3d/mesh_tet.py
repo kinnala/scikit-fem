@@ -432,6 +432,7 @@ class MeshTet(Mesh3D):
 
         ax.plot_trisurf(self.p[0, :], self.p[1, :], self.p[2,:],
                         triangles=indexing, cmap=plt.cm.viridis, edgecolor='k')
+        ax.set_axis_off()
         return ax
 
     def shapereg(self):

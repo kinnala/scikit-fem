@@ -4,9 +4,9 @@
 Stokes equations
 ----------------
 
-This solves for the same creeping flow problem as in :ref:`ex18` but in the primitive
-variables, i.e. velocity and pressure instead of the stream-function.  These are
-governed by the Stokes momentum
+This solves for the creeping flow problem in the primitive variables,
+i.e. velocity and pressure instead of the stream-function.  These are governed
+by the Stokes momentum
 
 .. math::
     0 = -\rho^{-1}\nabla p + \boldsymbol{f} + \nu\Delta\boldsymbol{u}
@@ -19,19 +19,18 @@ and continuity equations
 This is an example of a mixed problem because it contains two
 different kinds of unknowns; pairs of elements for them have to be
 chosen carefully.  One of the simplest workable choices is the
-Taylor--Hood element: :code:`ElementVectorH1(ElementTriP2())` for velocity
-and :code:`ElementTriP1()` for pressure.
-
-This example also demonstrates the use of the external pure-Python package
-`dmsh <https://pypi.org/project/dmsh/>`_ to generate a :class:`skfem.mesh.MeshTri`.
+Taylor--Hood element: :math:`P_2` for velocity
+and :math:`P_1` for pressure.
 
 Once the velocity has been found, the stream-function :math:`\psi` can
 be calculated by solving the Poisson problem
 
 .. math::
-    -\Delta\psi = \mathrm{rot}\,\boldsymbol{u}.
+    -\Delta\psi = \mathrm{rot}\,\boldsymbol{u},
 
-The boundary conditions are that the stream-function be constant
+where :math:`\mathrm{rot}\,\boldsymbol{u} \equiv
+\partial u_y/\partial x - \partial u_x/\partial y`.
+The boundary conditions are that the stream-function is constant
 around the impermeable perimeter; this constant can be taken as zero
 without loss of generality.  In the weak formulation
 
@@ -50,18 +49,6 @@ where :math:`\boldsymbol{rot}` is the adjoint of :math:`\mathrm{rot}`:
     \boldsymbol{rot}\,\phi \equiv \frac{\partial\phi}{\partial y}\hat{i} - \frac{\partial\phi}{\partial x}\hat{j}.
 
 
-.. figure:: taylorhood_stream-function.png
-
-   Stream function
-
-.. figure:: taylorhood_velocity.png
-
-   Velocity
-
-.. figure:: taylorhood_pressure.png
-
-   Pressure
-    
 The complete source code reads as follows:
 
 .. literalinclude:: ex18.py

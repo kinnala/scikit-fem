@@ -5,8 +5,8 @@ m = MeshTri.init_symmetric()
 m.refine(3)
 
 e = ElementTriMorley()
-mapp = MappingAffine(m)
-ib = InteriorBasis(m, e, mapp, 2)
+mapping = MappingAffine(m)
+ib = InteriorBasis(m, e, mapping, 2)
 
 @bilinear_form
 def bilinf(u, du, ddu, v, dv, ddv, w):
@@ -60,5 +60,5 @@ x[I] = solve(*condense(K, f, I=I))
 if __name__ == "__main__":
     M, X = ib.refinterp(x, 3)
     ax = m.draw()
-    M.plot(X, smooth=True, ax=ax)
+    M.plot(X, smooth=True, ax=ax, colorbar=True)
     M.show()

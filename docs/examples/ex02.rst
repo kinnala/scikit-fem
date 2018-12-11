@@ -107,8 +107,7 @@ is now two calls to :func:`~skfem.assembly.asm`:
     :lines: 38-39
 
 Next we demonstrate setting different boundary conditions on different parts of
-the boundary.  An easy way is to create :class:`~skfem.mesh.Submesh` objects
-for each boundary:
+the boundary.  An easy way is to create facet index sets for each boundary:
 
 .. literalinclude:: ex02.py
     :lines: 41-45

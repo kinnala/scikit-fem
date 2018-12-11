@@ -1,18 +1,12 @@
-"""
-Author: kinnala
-
-Impose integral condition using a Lagrange multiplier.
-"""
 from skfem import *
 
 m = MeshTri()
 m.refine(5)
 
 e = ElementTriP1()
-map = MappingAffine(m)
 
-ib = InteriorBasis(m, e, map, 2)
-fb = FacetBasis(m, e, map, 2)
+ib = InteriorBasis(m, e)
+fb = FacetBasis(m, e)
 
 @bilinear_form
 def bilinf(u, du, v, dv, w):
@@ -52,5 +46,5 @@ I = np.append(I, K.shape[0]-1)
 x[I] = solve(*condense(K, f, I=I))
 
 if __name__ == "__main__":
-    m.plot3(x[:-1])
+    m.plot(x[:-1], colorbar=True)
     m.show()

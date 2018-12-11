@@ -10,8 +10,6 @@ from scipy.sparse import csr_matrix
 from .global_basis import GlobalBasis
 
 
-
-        
 def asm(kernel,
         ubasis: GlobalBasis,
         vbasis: Optional[GlobalBasis] = None,
@@ -64,6 +62,8 @@ def asm(kernel,
 
     if type(w) is list:
         w = zip(*w)
+    elif type(w) is ndarray:
+        w = (w, None, None)
 
     class FormParameters(NamedTuple):
         w: Optional[ndarray] = None

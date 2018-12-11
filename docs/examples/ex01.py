@@ -23,5 +23,5 @@ x = 0*b
 x[I] = solve(*condense(A, b, I=I))
 
 if __name__ == "__main__":
-    m.plot3(x)
+    m.plot(x, smooth=True, colorbar=True)
     m.show()
