@@ -19,8 +19,8 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'scikit-fem'
-copyright = '2018, Tom Gustafsson'
-author = 'Tom Gustafsson'
+copyright = '2018, Tom Gustafsson, Geordie McBain'
+author = 'Tom Gustafsson, Geordie McBain'
 
 
 import re
@@ -132,7 +132,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'scikit-fem.tex', 'scikit-fem Documentation',
-     'Tom Gustafsson', 'manual'),
+     author, 'manual'),
 ]
 
 
