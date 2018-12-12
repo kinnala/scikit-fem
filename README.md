@@ -23,12 +23,12 @@ elements and assemble a discrete Laplace operator, all in just a few seconds.
 from skfem import *
 import numpy as np
 
-mesh = MeshTet.init_tensor(*((np.linspace(0, 1, 60),)*3))
+mesh = MeshTet.init_tensor(*((np.linspace(0, 1, 60),) * 3))
 basis = InteriorBasis(mesh, ElementTetP1())
 
 @bilinear_form
 def laplace(u, du, v, dv, w):
-    return sum(du*dv)
+    return sum(du * dv)
 
 A = asm(laplace, basis)
 ```
@@ -41,7 +41,9 @@ For more cutting edge features, you can clone this repository.
 
 ## Getting started
 
-Please see the [user documentation](https://kinnala.github.io/scikit-fem-docs) for examples.
+If you installed a (recent) release using `pip`, you can find the accompanying documentation under [Releases](https://github.com/kinnala/scikit-fem/releases)
+
+The latest user documentation corresponding to the master branch can be found [online](https://kinnala.github.io/scikit-fem-docs).
 
 ## Acknowledgements
 
