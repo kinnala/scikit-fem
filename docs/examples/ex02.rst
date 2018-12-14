@@ -66,17 +66,18 @@ The correct weak formulation for the problem is: find :math:`u \in V` such that
 where :math:`V` is now a subspace of :math:`H^2` with the essential boundary
 conditions for :math:`u` and :math:`\frac{\partial u}{\partial n}`.
 
-Instead of constructing a subspace for :math:`H^2`, we discretise
-the problem using the non-conforming Morley finite element which
-is a piecewise quadratic :math:`C^0` element.  We begin by
-creating a simple symmetric mesh for the unit square.
+Instead of constructing a subspace for :math:`H^2`, we discretise the problem
+using the `non-conforming Morley finite element
+<https://users.aalto.fi/~jakke74/WebFiles/Slides-Niiranen-ADMOS-09.pdf>`_ which
+is a piecewise quadratic :math:`C^0`-continuous element for biharmonic problems.
+We begin by creating a simple symmetric mesh for the unit square.
 
 .. literalinclude:: ex02.py
     :lines: 1-5
 
 After creating the mesh, we evaluate the finite element basis at the global
-quadrature points. We demonstrate
-the extended syntax of :class:`~skfem.assembly.InteriorBasis`
+quadrature points. Here we demonstrate
+an extended syntax of :class:`~skfem.assembly.InteriorBasis`
 constructor which allows the user to input an object of type
 :class:`~skfem.mapping.Mapping` and the integration order as
 optional parameters:

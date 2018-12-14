@@ -1,9 +1,10 @@
-.. note::
-   This example requires the external package `dmsh <https://pypi.org/project/dmsh/>`_.
 
 Stokes equations
 ----------------
 
+.. note::
+   This example requires the external package `dmsh <https://pypi.org/project/dmsh/>`_.
+   
 This solves for the creeping flow problem in the primitive variables,
 i.e. velocity and pressure instead of the stream-function.  These are governed
 by the Stokes momentum

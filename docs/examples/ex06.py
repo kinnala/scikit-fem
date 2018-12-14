@@ -1,9 +1,3 @@
-"""
-Author: kinnala
-
-Visualising high-order solutions by refining the mesh and
-interpolating the solution.
-"""
 from skfem import *
 from skfem.models.poisson import laplace, unit_load
 import numpy as np
@@ -13,8 +7,8 @@ m.refine(2)
 
 e1 = ElementQuad1()
 e = ElementQuad2()
-map = MappingIsoparametric(m, e1)
-ib = InteriorBasis(m, e, map, 4)
+mapping = MappingIsoparametric(m, e1)
+ib = InteriorBasis(m, e, mapping, 4)
 
 K = asm(laplace, ib)
 

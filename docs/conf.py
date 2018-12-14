@@ -162,3 +162,4 @@ texinfo_documents = [
 
 import matplotlib
 matplotlib.use('agg')
+

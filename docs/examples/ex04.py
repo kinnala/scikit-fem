@@ -77,8 +77,14 @@ for i in range(2):
             def Eps(dw):
                 return np.array([[dw[0][0], 0.5*(dw[0][1] + dw[1][0])],
                                  [0.5*(dw[1][0] + dw[0][1]), dw[1][1]]])
-            mu = 0.5*(n[0]*C(Eps(du))[0, 0]*n[0] + n[0]*C(Eps(du))[0, 1]*n[1] + n[1]*C(Eps(du))[1, 0]*n[0] + n[1]*C(Eps(du))[1, 1]*n[1])
-            mv = 0.5*(n[0]*C(Eps(dv))[0, 0]*n[0] + n[0]*C(Eps(dv))[0, 1]*n[1] + n[1]*C(Eps(dv))[1, 0]*n[0] + n[1]*C(Eps(dv))[1, 1]*n[1])
+            mu = 0.5*(n[0]*C(Eps(du))[0, 0]*n[0] +\
+                      n[0]*C(Eps(du))[0, 1]*n[1] +\
+                      n[1]*C(Eps(du))[1, 0]*n[0] +\
+                      n[1]*C(Eps(du))[1, 1]*n[1])
+            mv = 0.5*(n[0]*C(Eps(dv))[0, 0]*n[0] +\
+                      n[0]*C(Eps(dv))[0, 1]*n[1] +\
+                      n[1]*C(Eps(dv))[1, 0]*n[0] +\
+                      n[1]*C(Eps(dv))[1, 1]*n[1])
             h = w.h
             return 1.0/(alpha*h)*ju*jv - mu*jv - mv*ju
 

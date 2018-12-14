@@ -1,12 +1,11 @@
 .. _insulated:
 
-.. note::
-   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_.
-
-   
 Insulated wire
 --------------
 
+.. note::
+   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_.
+   
 This example solves the steady heat conduction
 with generation in an insulated wire. In radial
 coordinates, the governing equations read: find :math:`T`

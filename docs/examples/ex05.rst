@@ -5,16 +5,15 @@ This short example demonstrates the implementation of an integral boundary condi
 
 .. math::
    
-   \int_\Gamma \nabla u \cdot n \, \mathrm{d}s = 1
+   \int_\Gamma \nabla u \cdot \boldsymbol{n} \, \mathrm{d}s = 1
 
 on a part of the boundary of the domain :math:`\Gamma \subset \partial \Omega`
 for the Laplace operator.
 In this example, :math:`\Gamma` is the right boundary of the unit square
-and the solution :math:`u` satisfies :math:`u=0` on the bottom boundary
-and :math:`\nabla u \cdot n = 0` on the rest of the boundaries.
+and the solution satisfies :math:`u=0` on the bottom boundary
+and :math:`\nabla u \cdot \boldsymbol{n} = 0` on the rest of the boundaries.
 
 .. figure:: ex05_solution.png
-
    The visualised solution of example 5.
 
 .. literalinclude:: ex05.py

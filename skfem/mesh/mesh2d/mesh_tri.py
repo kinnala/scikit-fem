@@ -21,7 +21,7 @@ class MeshTri(Mesh2D):
         - :meth:`~skfem.mesh.MeshTri.init_sqsymmetric`
         - :meth:`~skfem.mesh.MeshTri.init_refdom`
         - :meth:`~skfem.mesh.MeshTri.init_tensor`
-        - :mesh:`~skfem.mesh.MeshTri.init_lshaped`
+        - :meth:`~skfem.mesh.MeshTri.init_lshaped`
     
     Attributes
     ----------

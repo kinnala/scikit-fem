@@ -1,11 +1,9 @@
 Poisson equation
 ----------------
 
-In this example, we demonstrate the basic concepts
-and workflow of scikit-fem. This is done by solving
-the canonical model problem for second-order partial
-differential equations: find :math:`u : \Omega \rightarrow \mathbb{R}`
-that satisfies
+In this example, we demonstrate the basic concepts and workflow of
+scikit-fem. We solve the canonical model problem for second-order PDE's: find
+:math:`u : \Omega \rightarrow \mathbb{R}` that satisfies
 
 .. math::
     \begin{aligned}
@@ -14,18 +12,18 @@ that satisfies
     \end{aligned}
 
 where :math:`\Omega = (0,1)^2` and :math:`f` is the loading.  This simple model
-problem and its variants have applications, e.g., in `electrostatics
+problem has applications, e.g., in `electrostatics
 <https://en.wikipedia.org/wiki/Laplace%27s_equation#Electrostatics_2>`_,
 `acoustics <https://en.wikipedia.org/wiki/Helmholtz_equation>`_ and `fluid flow
 <https://en.wikipedia.org/wiki/Potential_flow#Analysis_for_two-dimensional_flow>`_.
-Finite element method can be used for solving the problem's weak formulation:
+Finite element method solves the problem's weak formulation:
 find :math:`u \in H^1_0(\Omega)` that satisfies
 
 .. math::
     (\nabla u, \nabla v) = (f, v)  \quad \forall v \in H^1_0(\Omega).
 
-We discretise this problem using piecewise-linear triangular finite elements.  A
-mesh for the unit square can be obtained using the default constructor of
+We discretise the problem using piecewise-linear triangular finite elements.  A
+mesh for the unit square is given by the default constructor of
 :class:`~skfem.mesh.MeshTri`.  In the following, we further refine the mesh four
 times:
 
@@ -33,15 +31,13 @@ times:
     :lines: 1-4
 
 After creating the mesh, we evaluate the finite element basis at the global
-quadrature points. This is done by creating
-:class:`~skfem.assembly.InteriorBasis` whose constructor requires the mesh and an
-:class:`~skfem.element.Element` object:
+quadrature points.
 
 .. literalinclude:: ex01.py
     :lines: 6-7
 
-:class:`~skfem.element.ElementTriP1` is derived from :class:`~skfem.element.Element` and it defines
-the basis functions and local-to-global transformation rules.
+:class:`~skfem.element.ElementTriP1` defines the piecewise linear basis
+functions and local-to-global transformation rules.
 
 The bilinear and linear forms are defined using the decorators
 :func:`~skfem.assembly.bilinear_form` and
@@ -51,20 +47,19 @@ form arguments correct.
 .. literalinclude:: ex01.py
     :lines: 9-15
 
-All assembly operations are performed with the function :func:`~skfem.assembly.asm`,
-which returns either SciPy sparse matrices or NumPy vectors depending on the
-input.
+All assembly operations are performed using the function :func:`~skfem.assembly.asm`.
 
 .. literalinclude:: ex01.py
     :lines: 17-18
 
-We are left with solving the assembled linear system.  Due to the zero boundary
-condition, we do this only in the interior nodes of the mesh.
+We are left with solving the assembled linear system.
+We eliminate the boundary degrees-of-freedom using
+:func:`~skfem.utils.condense` and call :func:`~skfem.utils.solve`.
 
 .. literalinclude:: ex01.py
     :lines: 20-23
 
-The solution can now be visualised using :meth:`~skfem.mesh.MeshTri.plot3`. 
+The solution can now be visualised using :meth:`~skfem.mesh.MeshTri.plot`. 
 
 .. literalinclude:: ex01.py
     :lines: 25-27
