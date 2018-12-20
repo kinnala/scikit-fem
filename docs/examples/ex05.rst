@@ -14,6 +14,7 @@ and the solution satisfies :math:`u=0` on the bottom boundary
 and :math:`\nabla u \cdot \boldsymbol{n} = 0` on the rest of the boundaries.
 
 .. figure:: ex05_solution.png
+            
    The visualised solution of example 5.
 
 .. literalinclude:: ex05.py

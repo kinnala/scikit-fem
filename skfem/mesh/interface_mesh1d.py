@@ -24,6 +24,8 @@ class InterfaceMesh1D(Mesh):
         self.t = np.hstack((mesh1.t, mesh2.t + np1))
         self.facets = np.array([ixorig[:-1], ixorig[1:]])
         self.t2f = -1 + 0*np.hstack((mesh1.t2f, mesh2.t2f))
+        self.mesh1 = mesh1
+        self.mesh2 = mesh2
 
         # construct normals
         tangent_x = self.p[0, self.facets[0, :]] - self.p[0, self.facets[1, :]]
@@ -114,6 +116,7 @@ class InterfaceMesh1D(Mesh):
                         # OK
                         self.f2t[1, itr] = mesh2.f2t[0, jtr] + nt1
                         break
+                    
         if (self.f2t>-1).all():
             self.f2t[0, :]
             return
