@@ -2,7 +2,7 @@
 Author: kinnala
 
 Solve a linearized contact problem between two linear elastic
-bodies using the penalty method.
+bodies using the Nitsche's method.
 """
 
 from skfem import *
