@@ -43,7 +43,8 @@ basis = InteriorBasis(m, e, map, 2)
 A = asm(laplace, basis)
 b = asm(unit_load, basis)
 
-I = m.interior_nodes()
+D = basis.get_dofs().all()
+I = basis.complement_dofs(D)
 
 x = 0*b
 x[I] = solve(*condense(A, b, I=I))
