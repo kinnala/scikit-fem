@@ -36,7 +36,7 @@ geom.add_physical_surface(geom.add_circle([0.] * 3, 1., .5**3).plane_surface,
 points, cells = generate_mesh(geom)[:2]
 m = MeshTri(points[:, :2].T, cells['triangle'].T)
 
-e = ElementTriP1()
+e = ElementTriP2()
 map = MappingAffine(m)
 basis = InteriorBasis(m, e, map, 2)
 
@@ -58,5 +58,5 @@ if __name__ == '__main__':
     print('k = {:.5f} (exact = 1/8/pi = {:.5f})'.format(k, 1/np.pi/8))
     print("k' = {:.5f} (exact = 1/4/pi = {:.5f})".format(k1, 1/np.pi/4))
 
-    m.plot3(x)
+    m.plot3(x[basis.nodal_dofs.flatten()])
     m.show()
