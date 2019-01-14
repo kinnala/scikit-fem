@@ -49,7 +49,7 @@ geom.add_physical_surface(
 mesh = MeshTri.from_meshio(meshio.Mesh(*generate_mesh(geom,
                                                       prune_vertices=False)))
 
-elements = ElementTriP1()
+elements = ElementTriP2()
 basis = InteriorBasis(mesh, elements, MappingAffine(mesh), 2)
 A = asm(laplace, basis)
 
@@ -60,9 +60,15 @@ u = np.zeros(basis.N)
 u[boundary_dofs['positive'].all()] = 1.
 u[interior_dofs] = solve(*condense(A, 0.*u, u, interior_dofs))
 
-u_exact = 2 * np.arctan2(mesh.p[1, :], mesh.p[0, :]) / np.pi
+@linear_form
+def exact(v, dv, w):
+    x = w.x
+    return v * 2 * np.arctan2(x[1, :], x[0, :]) / np.pi
+
+M = asm(mass, basis)
+u_exact = solve(M, asm(exact, basis))
 u_error = u - u_exact
-print('L2 error =', np.sqrt(u_error @ asm(mass, basis) @ u_error))
+print('L2 error =', np.sqrt(u_error @ M @ u_error))
 print('conductance = {:.4f} (exact = 2 ln 2 / pi = {:.4f})'.format(
     u @ A @ u, 2 * np.log(2) / np.pi))
 
@@ -75,5 +81,5 @@ for port in mesh.boundaries:
     form = asm(port_flux, basis)
     print('Current in through {} = {:.4f}'.format(port, form @ u))
 
-mesh.plot(u)
+mesh.plot(u[:mesh.p.shape[1]])
 mesh.show()
