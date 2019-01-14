@@ -81,5 +81,5 @@ for port in mesh.boundaries:
     form = asm(port_flux, basis)
     print('Current in through {} = {:.4f}'.format(port, form @ u))
 
-mesh.plot(u[:mesh.p.shape[1]])
+mesh.plot(u[basis.nodal_dofs.flatten()])
 mesh.show()
