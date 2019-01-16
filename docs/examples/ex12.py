@@ -36,9 +36,7 @@ geom.add_physical_surface(geom.add_circle([0.] * 3, 1., .5**3).plane_surface,
 points, cells = generate_mesh(geom)[:2]
 m = MeshTri(points[:, :2].T, cells['triangle'].T)
 
-e = ElementTriP2()
-map = MappingAffine(m)
-basis = InteriorBasis(m, e, map, 2)
+basis = InteriorBasis(m, ElementTriP2())
 
 A = asm(laplace, basis)
 b = asm(unit_load, basis)
