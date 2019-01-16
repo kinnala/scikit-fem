@@ -50,7 +50,7 @@ mesh = MeshTri.from_meshio(meshio.Mesh(*generate_mesh(geom,
                                                       prune_vertices=False)))
 
 elements = ElementTriP2()
-basis = InteriorBasis(mesh, elements, MappingAffine(mesh), 2)
+basis = InteriorBasis(mesh, elements)
 A = asm(laplace, basis)
 
 boundary_dofs = basis.get_dofs(mesh.boundaries)
