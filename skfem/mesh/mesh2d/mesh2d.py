@@ -179,7 +179,7 @@ class Mesh2D(Mesh):
         meshio.write(filename, mesh)
 
     def param(self) -> float:
-        """Return mesh parameter."""
+        """Return mesh parameter, viz. the length of the longest edge."""
         return np.max(np.linalg.norm(np.diff(self.p[:, self.facets], axis=1),
                                      axis=0))
 
