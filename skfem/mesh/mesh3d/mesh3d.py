@@ -83,9 +83,9 @@ class Mesh3D(Mesh):
         return np.setdiff1d(np.arange(self.edges.shape[1], dtype=np.int), self.boundary_edges())
 
     def param(self) -> float:
-        """Return (maximum) mesh parameter."""
-        return np.max(np.sqrt(np.sum((self.p[:, self.edges[0, :]] -
-                                      self.p[:, self.edges[1, :]])**2, axis=0)))
+        """Return mesh parameter, viz the length of the longest edge."""
+        return np.max(np.linalg.norm(np.diff(self.p[:, self.edges], axis=1),
+                                     axis=0))
 
     @staticmethod
     def strip_extra_coordinates(p: ndarray) -> ndarray:

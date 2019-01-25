@@ -179,9 +179,10 @@ class Mesh2D(Mesh):
         meshio.write(filename, mesh)
 
     def param(self) -> float:
-        """Return mesh parameter."""
-        return np.max(np.sqrt(np.sum((self.p[:, self.facets[0, :]] -
-                                      self.p[:, self.facets[1, :]])**2, axis=0)))
+        """Return mesh parameter, viz. the length of the longest edge."""
+        return np.max(np.linalg.norm(np.diff(self.p[:, self.facets], axis=1),
+                                     axis=0))
+
     @staticmethod
     def strip_extra_coordinates(p: ndarray) -> ndarray:
         return p[:, :2]
