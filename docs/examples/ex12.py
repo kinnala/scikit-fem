@@ -47,7 +47,7 @@ I = basis.complement_dofs(D)
 x = 0*b
 x[I] = solve(*condense(A, b, I=I))
 
-area = b @ np.ones_like(x)
+area = sum(b)
 k = b @ x / area**2
 k1, = basis.interpolator(x)(np.zeros((2, 1))) / area
 
