@@ -63,5 +63,4 @@ interior_dofs = basis['p'].complement_dofs(
                     boundary_dofs['outlet'].all()]))
 p[interior_dofs] = skfem.solve(*skfem.condense(L, 0*p, p, I=interior_dofs))
 
-mesh.plot(p)
-mesh.show()
+mesh.plot(p).get_figure().savefig('impulsive.png')
