@@ -1,3 +1,12 @@
+"""Flow over a backward-facing step
+
+The geometry is taken from `Barkley et al (2002); i.e. an expansion
+ratio of 2, one step-length upstream and 35 downstream.
+
+* Barkley, D., M. G. M. Gomes, & R. D. Henderson (2002). Three-dimensional instability in flow over a backward-facing step. *Journal of Fluid Mechanics* **473**:167–190. `doi:10.1017/s002211200200232x <http://dx.doi.org/10.1017/s002211200200232x>`_
+
+"""
+
 from itertools import cycle, islice
 
 import numpy as np
