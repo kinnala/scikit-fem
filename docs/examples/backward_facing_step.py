@@ -132,6 +132,9 @@ vorticity = asm(rot, basis['psi'],
 psi[I] = solve(*condense(A, vorticity, I=I))
 
 fig, ax = subplots()
+ax.plot(
+    *mesh.p[:, mesh.facets[:, np.concatenate(list(mesh.boundaries.values()))]],
+    color='k')
 ax.tricontour(Triangulation(mesh.p[0, :], mesh.p[1, :], mesh.t.T),
               psi[basis['psi'].nodal_dofs.flatten()])
 ax.set_aspect(1.)
