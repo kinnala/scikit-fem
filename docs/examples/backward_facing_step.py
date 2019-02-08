@@ -9,6 +9,8 @@ ratio of 2, one step-length upstream and 35 downstream.
 
 from itertools import cycle, islice
 
+from matplotlib.pyplot import subplots
+from matplotlib.tri import Triangulation
 import numpy as np
 from scipy.sparse import bmat
 
@@ -18,7 +20,7 @@ from pygmsh.built_in import Geometry
 
 from skfem import (MeshTri,
                    ElementVectorH1, ElementTriP2, ElementTriP1,
-                   InteriorBasis, asm,
+                   InteriorBasis, asm, linear_form,
                    condense, solve)
 from skfem.models.poisson import vector_laplace, mass, laplace
 from skfem.models.general import divergence
@@ -112,3 +114,27 @@ velocity1 = velocity[basis['u'].nodal_dofs]
 ax.quiver(mesh.p[0, :], mesh.p[1:, ],
           velocity1[0, :], velocity1[1, :])
 ax.get_figure().savefig('velocity.png')
+
+
+@linear_form
+def rot(v, dv, w):
+    return dv[1] * w.w[0] - dv[0] * w.w[1]
+
+
+basis['psi'] = InteriorBasis(mesh, ElementTriP2())
+A = asm(laplace, basis['psi'])
+psi = np.zeros(basis['psi'].N)
+D = basis['psi'].get_dofs(mesh.boundaries['ceiling']).all()
+I = basis['psi'].complement_dofs(D)
+vorticity = asm(rot, basis['psi'],
+                w=[basis['psi'].interpolate(velocity[i::2])
+                   for i in range(2)])
+psi[I] = solve(*condense(A, vorticity, I=I))
+
+fig, ax = subplots()
+ax.tricontour(Triangulation(mesh.p[0, :], mesh.p[1, :], mesh.t.T),
+              psi[basis['psi'].nodal_dofs.flatten()])
+ax.set_aspect(1.)
+ax.axis('off')
+fig.savefig('stream-function.png')
+
