@@ -18,10 +18,8 @@ import meshio
 from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
 
-from skfem import (MeshTri,
-                   ElementVectorH1, ElementTriP2, ElementTriP1,
-                   InteriorBasis, asm, linear_form,
-                   condense, solve)
+from skfem import (MeshTri, ElementVectorH1, ElementTriP2, ElementTriP1,
+                   InteriorBasis, asm, condense, solve)
 from skfem.models.poisson import vector_laplace, mass, laplace
 from skfem.models.general import divergence, rot
 
@@ -30,7 +28,7 @@ def make_geom(length: float = 35.,
               lcar: float = 1.) -> Geometry:
     # Barkley et al (2002, figure 3 a - c)
     geom = Geometry()
-    
+
     points = []
     for point in [[0, -1, 0],
                   [length, -1, 0],
@@ -39,7 +37,7 @@ def make_geom(length: float = 35.,
                   [-1, 0, 0],
                   [0, 0, 0]]:
         points.append(geom.add_point(point, lcar))
-        
+
     lines = []
     for termini in zip(points,
                        islice(cycle(points), 1, None)):
@@ -53,7 +51,7 @@ def make_geom(length: float = 35.,
 
     geom.add_physical_surface(
         geom.add_plane_surface(geom.add_line_loop(lines)), 'domain')
-    
+
     return geom
 
 
@@ -112,4 +110,3 @@ ax.tricontour(Triangulation(mesh.p[0, :], mesh.p[1, :], mesh.t.T),
 ax.set_aspect(1.)
 ax.axis('off')
 fig.savefig('stream-function.png')
-
