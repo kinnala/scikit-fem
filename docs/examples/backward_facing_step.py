@@ -23,7 +23,7 @@ from skfem import (MeshTri,
                    InteriorBasis, asm, linear_form,
                    condense, solve)
 from skfem.models.poisson import vector_laplace, mass, laplace
-from skfem.models.general import divergence
+from skfem.models.general import divergence, rot
 
 
 def make_geom(length: float = 35.,
@@ -69,22 +69,6 @@ element = {'u': ElementVectorH1(ElementTriP2()),
 basis = {variable: InteriorBasis(mesh, e, intorder=3)
          for variable, e in element.items()}
 
-boundary_dofs = basis['p'].get_dofs(mesh.boundaries)
-
-# impulsive pressure
-
-p = np.zeros(basis['p'].N)
-p[boundary_dofs['inlet'].all()] = 1.
-interior_dofs = basis['p'].complement_dofs(
-    np.concatenate([boundary_dofs['inlet'].all(),
-                    boundary_dofs['outlet'].all()]))
-L = asm(laplace, basis['p'])
-p[interior_dofs] = solve(*condense(L, 0*p, p, I=interior_dofs))
-
-mesh.plot(p).get_figure().savefig('impulsive.png')
-
-# creeping flow
-
 D = np.setdiff1d(basis['u'].get_dofs().all(),
                  basis['u'].get_dofs(mesh.boundaries['outlet']).all())
 
@@ -108,18 +92,6 @@ velocity, pressure = np.split(uvp, [A.shape[0]])
 
 ax = mesh.plot(pressure)
 ax.get_figure().savefig('pressure.png')
-
-ax = mesh.draw()
-velocity1 = velocity[basis['u'].nodal_dofs]
-ax.quiver(mesh.p[0, :], mesh.p[1:, ],
-          velocity1[0, :], velocity1[1, :])
-ax.get_figure().savefig('velocity.png')
-
-
-@linear_form
-def rot(v, dv, w):
-    return dv[1] * w.w[0] - dv[0] * w.w[1]
-
 
 basis['psi'] = InteriorBasis(mesh, ElementTriP2())
 A = asm(laplace, basis['psi'])
