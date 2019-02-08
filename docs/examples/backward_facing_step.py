@@ -10,13 +10,18 @@ ratio of 2, one step-length upstream and 35 downstream.
 from itertools import cycle, islice
 
 import numpy as np
+from scipy.sparse import bmat
 
 import meshio
 from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
 
-import skfem
-from skfem.models.poisson import laplace
+from skfem import (MeshTri,
+                   ElementVectorH1, ElementTriP2, ElementTriP1,
+                   InteriorBasis, asm,
+                   condense, solve)
+from skfem.models.poisson import vector_laplace, mass, laplace
+from skfem.models.general import divergence
 
 
 def make_geom(length: float = 35.,
@@ -50,26 +55,60 @@ def make_geom(length: float = 35.,
     return geom
 
 
-def make_mesh(*args, **kwargs) -> skfem.MeshTri:
-    return skfem.MeshTri.from_meshio(meshio.Mesh(*generate_mesh(
+def make_mesh(*args, **kwargs) -> MeshTri:
+    return MeshTri.from_meshio(meshio.Mesh(*generate_mesh(
         make_geom(*args, **kwargs))))
 
 
 mesh = make_mesh(lcar=.5**2)
 
-element = {'p': skfem.ElementTriP1()}
-basis = {variable: skfem.InteriorBasis(mesh, e, intorder=3)
+element = {'u': ElementVectorH1(ElementTriP2()),
+           'p': ElementTriP1()}
+basis = {variable: InteriorBasis(mesh, e, intorder=3)
          for variable, e in element.items()}
 
-L = skfem.asm(laplace, basis['p'])
-
 boundary_dofs = basis['p'].get_dofs(mesh.boundaries)
+
+# impulsive pressure
 
 p = np.zeros(basis['p'].N)
 p[boundary_dofs['inlet'].all()] = 1.
 interior_dofs = basis['p'].complement_dofs(
     np.concatenate([boundary_dofs['inlet'].all(),
                     boundary_dofs['outlet'].all()]))
-p[interior_dofs] = skfem.solve(*skfem.condense(L, 0*p, p, I=interior_dofs))
+L = asm(laplace, basis['p'])
+p[interior_dofs] = solve(*condense(L, 0*p, p, I=interior_dofs))
 
 mesh.plot(p).get_figure().savefig('impulsive.png')
+
+# creeping flow
+
+D = np.setdiff1d(basis['u'].get_dofs().all(),
+                 basis['u'].get_dofs(mesh.boundaries['outlet']).all())
+
+
+A = asm(vector_laplace, basis['u'])
+B = asm(divergence, basis['u'], basis['p'])
+C = asm(mass, basis['p'])
+
+K = bmat([[A, -B.T],
+          [-B, None]]).tocsr()
+uvp = np.zeros(K.shape[0])
+
+# TODO: u (y) = 4 y (1 - y) on 'inlet' (0 < y < 1)  #112
+
+# For the moment use the mean
+uvp[basis['u'].get_dofs(mesh.boundaries['inlet']).nodal['u^1']] = 2/3
+I = np.setdiff1d(np.arange(K.shape[0]), D)
+uvp[I] = solve(*condense(K, 0*uvp, uvp, I))
+
+velocity, pressure = np.split(uvp, [A.shape[0]])
+
+ax = mesh.plot(pressure)
+ax.get_figure().savefig('pressure.png')
+
+ax = mesh.draw()
+velocity1 = velocity[basis['u'].nodal_dofs]
+ax.quiver(mesh.p[0, :], mesh.p[1:, ],
+          velocity1[0, :], velocity1[1, :])
+ax.get_figure().savefig('velocity.png')
