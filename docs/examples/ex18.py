@@ -62,7 +62,11 @@ if __name__ == '__main__':
     from matplotlib.tri import Triangulation
 
     name = splitext(argv[0])[0]
-    
+
+    mesh.save(f'{name}_velocity.vtk',
+              np.vstack([velocity[basis['u'].nodal_dofs],
+                         np.zeros_like(mesh.p[0])]).T)
+
     print(basis['p'].interpolator(pressure)(np.array([[-0.5, 0.5],
                                                       [0.5, 0.5]])),
           '(cf. exact -/+ 1/8)')
@@ -76,9 +80,6 @@ if __name__ == '__main__':
               velocity1[0, :], velocity1[1, :],
               mesh.p[0, :])         # colour by buoyancy
     ax.get_figure().savefig(f'{name}_velocity.png')
-
-
-
 
     ax = mesh.draw()
     ax.tricontour(Triangulation(mesh.p[0, :], mesh.p[1, :], mesh.t.T),
