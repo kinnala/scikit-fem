@@ -94,7 +94,7 @@ ax.get_figure().savefig('pressure.png')
 basis['psi'] = InteriorBasis(mesh, ElementTriP2())
 A = asm(laplace, basis['psi'])
 psi = np.zeros(basis['psi'].N)
-D = basis['psi'].get_dofs(mesh.boundaries['ceiling']).all()
+D = basis['psi'].get_dofs(mesh.boundaries['floor']).all()
 I = basis['psi'].complement_dofs(D)
 vorticity = asm(rot, basis['psi'],
                 w=[basis['psi'].interpolate(velocity[i::2])
