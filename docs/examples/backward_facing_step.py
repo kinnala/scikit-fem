@@ -20,8 +20,7 @@ import meshio
 from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
 
-from skfem import (MeshTri, ElementVectorH1, ElementTriP2, ElementTriP1,
-                   InteriorBasis, asm, condense, solve)
+from skfem import *
 from skfem.models.poisson import vector_laplace, mass, laplace
 from skfem.models.general import divergence, rot
 
