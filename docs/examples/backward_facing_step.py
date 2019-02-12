@@ -79,10 +79,14 @@ K = bmat([[A, -B.T],
           [-B, None]]).tocsr()
 uvp = np.zeros(K.shape[0])
 
-# TODO: u (y) = 4 y (1 - y) on 'inlet' (0 < y < 1)  #112
+xy = np.hstack([mesh.p, mesh.p[:, mesh.facets].mean(axis=1)])
+inlet_dofs_ = basis['u'].get_dofs(mesh.boundaries['inlet'])
+inlet_dofs = [np.concatenate([inlet_dofs_.nodal[f'u^{i}'],
+                              inlet_dofs_.facet[f'u^{i}']])
+              for i in [1, 2]]
+y = xy.flatten('F')[inlet_dofs[1]]
 
-# For the moment use the mean
-uvp[basis['u'].get_dofs(mesh.boundaries['inlet']).nodal['u^1']] = 2/3
+uvp[inlet_dofs[0]] = 4 * y * (1 - y)
 I = np.setdiff1d(np.arange(K.shape[0]), D)
 uvp[I] = solve(*condense(K, 0*uvp, uvp, I))
 
