@@ -92,9 +92,6 @@ I = np.setdiff1d(np.arange(K.shape[0]), D)
 uvp[I] = solve(*condense(K, 0*uvp, uvp, I))
 
 velocity, pressure = np.split(uvp, [A.shape[0]])
-mesh.save('velocity.vtk',
-          np.pad(velocity[basis['u'].nodal_dofs],
-                 ((0, 1), (0, 0)), 'constant').T)  # meshio#325
 
 basis['psi'] = InteriorBasis(mesh, ElementTriP2())
 A = asm(laplace, basis['psi'])
@@ -117,6 +114,10 @@ if __name__ == '__main__':
     ax = mesh.plot(pressure)
     ax.get_figure().savefig(f'{name}-pressure.png')
 
+    mesh.save(f'{name}-velocity.vtk',
+              np.pad(velocity[basis['u'].nodal_dofs],
+                     ((0, 1), (0, 0)), 'constant').T)  # meshio#325
+    
     fig, ax = subplots()
     ax.plot(
         *mesh.p[:, mesh.facets[:, np.concatenate(list(mesh.boundaries.values()))]],
