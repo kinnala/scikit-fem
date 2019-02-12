@@ -96,9 +96,6 @@ mesh.save('velocity.vtk',
           np.pad(velocity[basis['u'].nodal_dofs],
                  ((0, 1), (0, 0)), 'constant').T)  # meshio#325
 
-ax = mesh.plot(pressure)
-ax.get_figure().savefig('pressure.png')
-
 basis['psi'] = InteriorBasis(mesh, ElementTriP2())
 A = asm(laplace, basis['psi'])
 psi = np.zeros(basis['psi'].N)
@@ -109,12 +106,23 @@ vorticity = asm(rot, basis['psi'],
                    for i in range(2)])
 psi[I] = solve(*condense(A, vorticity, I=I))
 
-fig, ax = subplots()
-ax.plot(
-    *mesh.p[:, mesh.facets[:, np.concatenate(list(mesh.boundaries.values()))]],
-    color='k')
-ax.tricontour(Triangulation(mesh.p[0, :], mesh.p[1, :], mesh.t.T),
-              psi[basis['psi'].nodal_dofs.flatten()])
-ax.set_aspect(1.)
-ax.axis('off')
-fig.savefig('stream-function.png')
+
+if __name__ == '__main__':
+
+    from os.path import splitext
+    from sys import argv
+
+    name = splitext(argv[0])[0]
+    
+    ax = mesh.plot(pressure)
+    ax.get_figure().savefig(f'{name}-pressure.png')
+
+    fig, ax = subplots()
+    ax.plot(
+        *mesh.p[:, mesh.facets[:, np.concatenate(list(mesh.boundaries.values()))]],
+        color='k')
+    ax.tricontour(Triangulation(mesh.p[0, :], mesh.p[1, :], mesh.t.T),
+                  psi[basis['psi'].nodal_dofs.flatten()])
+    ax.set_aspect(1.)
+    ax.axis('off')
+    fig.savefig(f'{name}-stream-function.png')
