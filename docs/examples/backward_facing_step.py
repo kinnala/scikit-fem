@@ -91,8 +91,9 @@ I = np.setdiff1d(np.arange(K.shape[0]), D)
 uvp[I] = solve(*condense(K, 0*uvp, uvp, I))
 
 velocity, pressure = np.split(uvp, [A.shape[0]])
-mesh.save('velocity.vtk', np.vstack([velocity[basis['u'].nodal_dofs],
-                                     np.zeros_like(mesh.p[0])]).T)
+mesh.save('velocity.vtk',
+          np.pad(velocity[basis['u'].nodal_dofs],
+                 ((0, 1), (0, 0)), 'constant').T)  # meshio#325
 
 ax = mesh.plot(pressure)
 ax.get_figure().savefig('pressure.png')
