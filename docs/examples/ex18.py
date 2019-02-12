@@ -47,7 +47,6 @@ A = asm(laplace, basis['psi'])
 psi = np.zeros(A.shape[0])
 D = basis['psi'].get_dofs().all()
 interior = basis['psi'].complement_dofs(D)
-psi[D] = 0.
 vorticity = asm(rot, basis['psi'],
                 w=[basis['psi'].interpolate(velocity[i::2])
                    for i in range(2)])
@@ -63,6 +62,9 @@ if __name__ == '__main__':
 
     name = splitext(argv[0])[0]
     
+    print(basis['psi'].interpolator(psi)(np.zeros((2, 1)))[0],
+          '(cf. exact 1/64)')
+
     print(basis['p'].interpolator(pressure)(np.array([[-0.5, 0.5],
                                                       [0.5, 0.5]])),
           '(cf. exact -/+ 1/8)')
