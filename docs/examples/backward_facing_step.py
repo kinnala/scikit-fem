@@ -12,7 +12,6 @@ ratio of 2, one step-length upstream and 35 downstream.
 from itertools import cycle, islice
 
 from matplotlib.pyplot import subplots
-from matplotlib.tri import Triangulation
 import numpy as np
 from scipy.sparse import bmat
 
@@ -23,6 +22,11 @@ from pygmsh.built_in import Geometry
 from skfem import *
 from skfem.models.poisson import vector_laplace, mass, laplace
 from skfem.models.general import divergence, rot
+
+
+def interior_basis_x(ib: InteriorBasis) -> np.ndarray:
+    #if isinstance(ib.
+    pass
 
 
 def make_geom(length: float = 35.,
@@ -106,13 +110,17 @@ psi[I] = solve(*condense(A, vorticity, I=I))
 
 if __name__ == '__main__':
 
+    from functools import partial
     from os.path import splitext
     from sys import argv
+
+    from matplotlib.tri import Triangulation
 
     name = splitext(argv[0])[0]
     
     ax = mesh.plot(pressure)
-    ax.get_figure().savefig(f'{name}-pressure.png')
+    ax.get_figure().savefig(f'{name}-pressure.png',
+                            bbox_inches='tight', pad_inches=0)
 
     mesh.save(f'{name}-velocity.vtk',
               np.pad(velocity[basis['u'].nodal_dofs],
@@ -122,8 +130,23 @@ if __name__ == '__main__':
     ax.plot(
         *mesh.p[:, mesh.facets[:, np.concatenate(list(mesh.boundaries.values()))]],
         color='k')
-    ax.tricontour(Triangulation(mesh.p[0, :], mesh.p[1, :], mesh.t.T),
-                  psi[basis['psi'].nodal_dofs.flatten()])
+
+    n_streamlines = 11
+    plot = partial(ax.tricontour,
+                   Triangulation(mesh.p[0, :], mesh.p[1, :], mesh.t.T),
+                   psi[basis['psi'].nodal_dofs.flatten()],
+                   linewidths=1.)
+    for levels, color, style in [
+            (np.linspace(0, 2/3, n_streamlines),
+             'k',
+             ['dashed'] + ['solid']*(n_streamlines - 2) + ['dashed']),
+            (np.linspace(2/3, max(psi), n_streamlines)[0:],
+             'r', 'solid'),
+            (np.linspace(min(psi), 0, n_streamlines)[:-1],
+             'g', 'solid')]:
+        plot(levels=levels, colors=color, linestyles=style)
+
     ax.set_aspect(1.)
     ax.axis('off')
-    fig.savefig(f'{name}-stream-function.png')
+    fig.savefig(f'{name}-stream-function.png',
+                bbox_inches='tight', pad_inches=0)
