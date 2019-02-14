@@ -1,6 +1,6 @@
 from skfem import *
 from skfem.models.poisson import vector_laplace, mass, laplace
-from skfem.models.general import divergence
+from skfem.models.general import divergence, rot
 
 import numpy as np
 from scipy.sparse import bmat
@@ -37,18 +37,15 @@ uvp[np.setdiff1d(np.arange(K.shape[0]), D)] = solve(*condense(K, f, D=D))
 
 velocity, pressure = np.split(uvp, [A.shape[0]])
 
-
 @linear_form
 def rot(v, dv, w):
     return dv[1] * w.w[0] - dv[0] * w.w[1]
-
 
 basis['psi'] = InteriorBasis(mesh, ElementTriP2())
 A = asm(laplace, basis['psi'])
 psi = np.zeros(A.shape[0])
 D = basis['psi'].get_dofs().all()
 interior = basis['psi'].complement_dofs(D)
-psi[D] = 0.
 vorticity = asm(rot, basis['psi'],
                 w=[basis['psi'].interpolate(velocity[i::2])
                    for i in range(2)])
@@ -67,6 +64,10 @@ if __name__ == '__main__':
     mesh.save(f'{name}_velocity.vtk',
               np.vstack([velocity[basis['u'].nodal_dofs],
                          np.zeros_like(mesh.p[0])]).T)
+
+    
+    print(basis['psi'].interpolator(psi)(np.zeros((2, 1)))[0],
+          '(cf. exact 1/64)')
 
     print(basis['p'].interpolator(pressure)(np.array([[-0.5, 0.5],
                                                       [0.5, 0.5]])),
