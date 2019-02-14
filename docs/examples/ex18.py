@@ -1,6 +1,6 @@
 from skfem import *
 from skfem.models.poisson import vector_laplace, mass, laplace
-from skfem.models.general import divergence
+from skfem.models.general import divergence, rot
 
 import numpy as np
 from scipy.sparse import bmat
@@ -36,10 +36,6 @@ uvp = np.zeros(K.shape[0])
 uvp[np.setdiff1d(np.arange(K.shape[0]), D)] = solve(*condense(K, f, D=D))
 
 velocity, pressure = np.split(uvp, [A.shape[0]])
-
-@linear_form
-def rot(v, dv, w):
-    return dv[1] * w.w[0] - dv[0] * w.w[1]
 
 
 basis['psi'] = InteriorBasis(mesh, ElementTriP2())
