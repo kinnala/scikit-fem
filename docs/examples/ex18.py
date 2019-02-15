@@ -37,6 +37,9 @@ uvp[np.setdiff1d(np.arange(K.shape[0]), D)] = solve(*condense(K, f, D=D))
 
 velocity, pressure = np.split(uvp, [A.shape[0]])
 
+@linear_form
+def rot(v, dv, w):
+    return dv[1] * w.w[0] - dv[0] * w.w[1]
 
 basis['psi'] = InteriorBasis(mesh, ElementTriP2())
 A = asm(laplace, basis['psi'])
@@ -57,6 +60,11 @@ if __name__ == '__main__':
     from matplotlib.tri import Triangulation
 
     name = splitext(argv[0])[0]
+
+    mesh.save(f'{name}_velocity.vtk',
+              np.vstack([velocity[basis['u'].nodal_dofs],
+                         np.zeros_like(mesh.p[0])]).T)
+
     
     print(basis['psi'].interpolator(psi)(np.zeros((2, 1)))[0],
           '(cf. exact 1/64)')
@@ -74,9 +82,6 @@ if __name__ == '__main__':
               velocity1[0, :], velocity1[1, :],
               mesh.p[0, :])         # colour by buoyancy
     ax.get_figure().savefig(f'{name}_velocity.png')
-
-
-
 
     ax = mesh.draw()
     ax.tricontour(Triangulation(mesh.p[0, :], mesh.p[1, :], mesh.t.T),
