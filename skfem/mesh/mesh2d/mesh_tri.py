@@ -320,9 +320,11 @@ class MeshTri(Mesh2D):
             Use the given minimum and maximum values for coloring.
         edgecolors
             A string describing the edge coloring, e.g. 'k' for black.
-        float
+        aspect
             The ratio of vertical to horizontal length-scales; ignored if ax
             specified.
+        colorbar
+            If True, show colorbar. By default not shown.
 
         Returns
         -------

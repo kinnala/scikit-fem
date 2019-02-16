@@ -216,9 +216,29 @@ def adaptive_theta(est, theta=0.5, max=None):
         return np.nonzero(theta*max < est)[0]
 
 
-def derivative(x, basis1, basis0, i=0):
-    """Calculate the i'th partial derivative through projection."""
-    from skfem.assembly import asm, bilinear_form
+def derivative(x: ndarray,
+               basis1: GlobalBasis,
+               basis0: GlobalBasis,
+               i: Optional[int] = 0) -> ndarray:
+    """Calculate the i'th partial derivative through projection.
+
+    Parameters
+    ----------
+    x
+        The solution vector.
+    basis1
+        The basis corresponding to the solution x (e.g. P_1).
+    basis0
+        The basis corresponding to the derivative field (e.g. P_0).
+    i
+        Return i'th partial derivative.
+
+    Returns
+    -------
+    ndarray
+        A new solution vector corresponding to the derivative.
+
+    """
 
     @bilinear_form
     def deriv(u, du, v, dv, w):
