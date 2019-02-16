@@ -11,4 +11,3 @@ dependencies:
     - pygmsh
     - dmsh
     - sphinx_rtd_theme
-    - nbsphinx
