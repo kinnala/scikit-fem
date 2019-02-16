@@ -56,8 +56,12 @@ class ConvergenceQ1(unittest.TestCase):
         rateL2 = np.polyfit(np.log(hs), np.log(L2s), 1)[0]
         rateH1 = np.polyfit(np.log(hs), np.log(H1s), 1)[0]
 
-        self.assertLess(np.abs(rateL2-self.rateL2), self.eps)
-        self.assertLess(np.abs(rateH1-self.rateH1), self.eps)
+        self.assertLess(np.abs(rateL2-self.rateL2),
+                        self.eps,
+                        msg = 'observed L2 rate: {}'.format(rateL2))
+        self.assertLess(np.abs(rateH1-self.rateH1),
+                        self.eps,
+                        msg = 'observed H1 rate: {}'.format(rateH1))
 
     def compute_error(self, m, basis, U):
         uh, duh = basis.interpolate(U)
