@@ -6,10 +6,12 @@ import scipy.sparse as sp
 import scipy.sparse.linalg as spl
 import scipy.sparse.csgraph as spg
 import warnings
+from skfem.assembly import asm, bilinear_form, linear_form
 
 from typing import Optional, Union, Tuple, Callable
 from numpy import ndarray
 from scipy.sparse import spmatrix
+from skfem.assembly.global_basis import GlobalBasis
 
 LinearSolver = Callable[[spmatrix, ndarray], ndarray]
 EigenSolver = Callable[[spmatrix, spmatrix], Tuple[ndarray, ndarray]]
@@ -231,3 +233,40 @@ def derivative(x, basis1, basis0, i=0):
 
     return solve(M, A @ x)
      
+
+def L2_projection(fun,
+                  basis: GlobalBasis,
+                  ix: Optional[ndarray] = None) -> ndarray:
+    """Initialize a solution vector with L2 projection.
+
+    Parameters
+    ----------
+    fun
+        The function to project.
+    basis
+        The finite element basis
+    ix
+        Do the projection only on a subset of DOF's.
+
+    Returns
+    -------
+    ndarray
+        The projected solution vector.
+
+    """
+
+    if ix is None:
+        ix = np.arange(basis.N)
+    
+    @bilinear_form
+    def mass(u, du, v, dv, w):
+        return u * v
+
+    @linear_form
+    def funv(v, dv, w):
+        return fun(*w.x) * v
+    
+    M = asm(mass, basis)
+    f = asm(funv, basis)
+
+    return solve(*condense(M, f, I=ix))
