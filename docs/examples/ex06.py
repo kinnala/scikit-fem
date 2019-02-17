@@ -25,4 +25,4 @@ M, X = ib.refinterp(x, 3)
 if __name__ == "__main__":
     ax = m.draw()
     M.plot(X, smooth=True, edgecolors='', ax=ax)
-    M.show()
+    M.savefig("docs/examples/ex06_solution.png")

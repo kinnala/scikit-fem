@@ -24,4 +24,4 @@ x[I] = solve(*condense(A, b, I=I))
 
 if __name__ == "__main__":
     m.plot(x, smooth=True, colorbar=True)
-    m.show()
+    m.savefig("docs/examples/ex01_solution.png")

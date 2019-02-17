@@ -60,6 +60,10 @@ class Mesh():
         """A wrapper for matplotlib.pyplot.show()."""
         plt.show()
 
+    def savefig(self, path):
+        """A wrapper for matplotlib.pyplot.savefig()."""
+        plt.savefig(path)
+
     def dim(self):
         """Return the spatial dimension of the mesh."""
         return int(self.p.shape[0])

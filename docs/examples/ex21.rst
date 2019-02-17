@@ -93,10 +93,6 @@ Finally, we displace the mesh before drawing
 
 .. literalinclude:: ex21.py
 		    :lines: 34-42
-
-.. figure:: ex21_solution.png
-
-   The first eigenmode.
                             
 The complete source code reads as follows:
 

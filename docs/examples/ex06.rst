@@ -13,14 +13,6 @@ interpolates any solution vector. The resulting mesh is non-conforming,
 i.e. the connectivity between neighboring elements is lost, and hence it can
 be used only for visualisation purposes.
 
-.. figure:: ex06_computational_mesh.png
-   
-            The original computational mesh.
-
-.. figure:: ex06_visualisation_mesh.png
-
-            A mesh created for visualising the high-order solution.
-
 As an example, we solve the Poisson equation in a unit square with zero boundary
 conditions and biquadratic basis on quadrilateral elements. The quadrilateral
 elements are defined using an isoparametric local-to-global mapping.

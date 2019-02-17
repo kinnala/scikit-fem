@@ -61,4 +61,4 @@ if __name__ == "__main__":
     M, X = ib.refinterp(x, 3)
     ax = m.draw()
     M.plot(X, smooth=True, ax=ax, colorbar=True)
-    M.show()
+    M.savefig("docs/examples/ex02_solution.png")
