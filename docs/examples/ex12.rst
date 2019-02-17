@@ -1,12 +1,15 @@
-Postprocessing
---------------
+.. _postprocess:
+
+Postprocessing Laplace equation
+-------------------------------
 
 .. note::
 
    This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_.
 
 In this example, `pygmsh <https://pypi.org/project/pygmsh/>`_ is used to
-generate a disk, replacing the default square of :class:`skfem.mesh.MeshTri`.
+generate a disk, replacing the default square of :class:`skfem.mesh.MeshTri`
+in :ref:`poisson`.
 
 A basic postprocessing step in finite element analysis is evaluating linear
 forms over the solution. For the boundary value problem of :ref:`poisson`, the integral

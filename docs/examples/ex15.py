@@ -1,8 +1,3 @@
-"""
-Author: kinnala
-
-One-dimensional adaptation of example 1.
-"""
 import numpy as np
 from skfem import *
 
