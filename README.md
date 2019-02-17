@@ -16,6 +16,8 @@ It contains *no compiled code* meaning that it's *easy to install* and
 use on all platforms that support NumPy.  Despite being fully interpreted, the
 code has a reasonably *good performance*.
 
+## Examples
+
 In the following snippet, we create a tetrahedral mesh with over 1 million
 elements and assemble a discrete Laplace operator, all in just a few seconds.
 
@@ -32,6 +34,8 @@ def laplace(u, du, v, dv, w):
 
 A = asm(laplace, basis)
 ```
+
+More examples can be found in the [documentation](https://kinnala.github.io/scikit-fem-docs/learning.html).
 
 ## Installation
 
