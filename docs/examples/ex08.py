@@ -1,8 +1,3 @@
-"""
-Author: kinnala
-
-Visualise the Argyris basis functions.
-"""
 from skfem import *
 import matplotlib.pyplot as plt
 import numpy as np

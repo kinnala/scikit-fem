@@ -18,6 +18,8 @@ For more recent features, you can clone the project's Github repository:
 
 See :ref:`learning` for usage instructions.
 
+.. _contribute:
+
 Contributing
 ------------
 

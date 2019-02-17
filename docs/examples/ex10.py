@@ -1,9 +1,3 @@
-"""
-Author: kinnala
-
-Solve the nonlinear minimal surface problem using Newton's method.
-
-"""
 from skfem import *
 import numpy as np
 import matplotlib.pyplot as plt

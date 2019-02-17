@@ -1,10 +1,3 @@
-"""
-Author: kinnala
-
-Solve Laplace equation with zero Dirichlet BC using linear tetrahedral elements
-and preconditioned conjugate gradient method.
-
-"""
 from skfem import *
 from skfem.models.poisson import *
 import numpy as np
