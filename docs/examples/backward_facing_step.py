@@ -122,9 +122,7 @@ if __name__ == '__main__':
     ax.get_figure().savefig(f'{name}-pressure.png',
                             bbox_inches='tight', pad_inches=0)
 
-    mesh.save(f'{name}-velocity.vtk',
-              np.pad(velocity[basis['u'].nodal_dofs],
-                     ((0, 1), (0, 0)), 'constant').T)  # meshio#325
+    mesh.save(f'{name}-velocity.vtk', velocity[basis['u'].nodal_dofs].T)
     
     fig, ax = subplots()
     ax.plot(
