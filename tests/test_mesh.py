@@ -1,3 +1,4 @@
+from pathlib import Path
 import unittest
 import numpy as np
 from skfem.mesh import *
@@ -44,9 +45,11 @@ class FaultyInputs(unittest.TestCase):
 
 class Loading(unittest.TestCase):
     """Check that Mesh.load works properly."""
+    
     def runTest(self):
         # submeshes
-        m = MeshTet.load('docs/examples/box.msh')
+        examples = Path(__file__).parents[1] / 'docs' / 'examples'
+        m = MeshTet.load(str(examples / 'box.msh'))
         #self.assertTrue((m.boundaries['front'].p == m.submesh(lambda x,y,z: z==1).p).all())
         #self.assertTrue((m.boundaries['back'].p == m.submesh(lambda x,y,z: z==0).p).all())
         #self.assertTrue((m.boundaries['top'].p == m.submesh(lambda x,y,z: y==1).p).all())
@@ -56,7 +59,7 @@ class Loading(unittest.TestCase):
         #self.assertTrue((m.boundaries['top'].edges == m.submesh(lambda x,y,z: y==1).edges).all())
         #self.assertTrue((m.boundaries['back'].edges == m.submesh(lambda x,y,z: z==0).edges).all())
         #self.assertTrue((m.boundaries['front'].edges == m.submesh(lambda x,y,z: z==1).edges).all())
-        m = MeshTri.load('docs/examples/square.msh')
+        m = MeshTri.load(str(examples / 'square.msh'))
         self.assertTrue((m.boundaries['top'] == m.facets_satisfying(lambda x,y: y==1)).all())
         self.assertTrue((m.boundaries['left'] == m.facets_satisfying(lambda x,y: x==0)).all())
         self.assertTrue((m.boundaries['right'] == m.facets_satisfying(lambda x,y: x==1)).all())
