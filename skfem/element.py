@@ -19,6 +19,35 @@ from typing import Optional, Tuple, Union, List
 from numpy import ndarray
 
 class Element():
+    """Finite element.
+
+    Attributes
+    ----------
+    nodal_dofs
+        Number of DOFs per node.
+    facet_dofs
+        Number of DOFs per facet.
+    interior_dofs
+        Number of DOFs inside the element.
+    edge_dofs
+        Number of DOFs per edge.
+    dim
+        The spatial dimension.
+    maxdeg
+        Polynomial degree of the basis. Used to calculate quadrature rules.
+    order
+        A tuple representing the tensorial order of u, du, (and ddu).
+    dofnames
+        A list of strings that indicate DOF types. Different possibilities:
+        - 'u' indicates that it is the point value
+        - 'u^1' indicates the first vectorial component
+        - 'u^n' indicates the normal component
+        - 'u^t' indicates the tangential component
+        - 'u_x' indicates the derivative wrt x
+        - 'u_n' indicates the normal derivative
+        - ...
+
+    """
     nodal_dofs: int = 0 
     facet_dofs: int = 0
     interior_dofs: int = 0
@@ -357,7 +386,7 @@ class ElementTriRT0(ElementHdiv):
     facet_dofs = 1
     dim = 2
     maxdeg = 1
-    dofnames = ['u_n']
+    dofnames = ['u^n']
 
     def lbasis(self, X, i):
         x, y = X[0, :], X[1, :]
@@ -631,7 +660,7 @@ class ElementTetRT0(ElementHdiv):
     facet_dofs = 1
     dim = 3
     maxdeg = 1
-    dofnames = ['u_n']
+    dofnames = ['u^n']
 
     def lbasis(self, X, i):
         x, y, z = X[0, :], X[1, :], X[2, :]
@@ -658,7 +687,7 @@ class ElementTetN0(ElementHcurl):
     edge_dofs = 1
     dim = 3
     maxdeg = 1
-    dofnames = ['u_t']
+    dofnames = ['u^t']
 
     def lbasis(self, X, i):
         x, y, z = X[0, :], X[1, :], X[2, :]
