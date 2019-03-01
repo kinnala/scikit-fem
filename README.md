@@ -64,7 +64,7 @@ The library has been used in the preparation of the following scientific works:
 - Gustafsson, T., Rajagopal, K. R., Stenberg, R., & Videman, J. (2018). An adaptive finite element method for the inequality-constrained Reynolds equation. Computer Methods in Applied Mechanics and Engineering, 336, 156-170. arXiv preprint [arXiv:1711.04274](https://arxiv.org/abs/1711.04274).
 - Gustafsson, T., Stenberg, R., & Videman, J. (2018). A stabilised finite element method for the plate obstacle problem. BIT Numerical Mathematics, 1-28. arXiv preprint [arXiv:1711.04166](https://arxiv.org/abs/1711.04166).
 - Gustafsson, T., Stenberg, R., & Videman, J. (2017). Nitsche’s Method for the Obstacle Problem of Clamped Kirchhoff Plates. In European Conference on Numerical Mathematics and Advanced Applications (pp. 407-415). Springer.
-- Gustafsson, T., Stenberg, R., & Videman, J. (2017). A posteriori analysis of classical plate elements. Rakenteiden Mekaniikka, 50(3), 141-145.
+- Gustafsson, T., Stenberg, R., & Videman, J. (2017). A posteriori analysis of classical plate elements. Rakenteiden Mekaniikka, 50(3), 141-145. [Open access](https://rakenteidenmekaniikka.journal.fi/article/view/65004/26450).
 
 In case you want to cite the library, you can use the DOI provided by [Zenodo](https://zenodo.org/badge/latestdoi/115345426).
 
