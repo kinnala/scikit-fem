@@ -60,9 +60,9 @@ The library has been used in the preparation of the following scientific works:
 - Gustafsson, T., Stenberg, R., & Videman, J. (2019). On Nitsche's method for elastic contact problems. arXiv preprint [arXiv:1902.09312](https://arxiv.org/abs/1902.09312).
 - Gustafsson, T., Stenberg, R., & Videman, J. (2018). Error analysis of Nitsche's mortar method. arXiv preprint [arXiv:1802.10430](https://arxiv.org/abs/1802.10430).
 - Gustafsson, T., Stenberg, R., & Videman, J. (2018). Nitsche's method for unilateral contact problems. arXiv preprint [arXiv:1805.04283](https://arxiv.org/abs/1805.04283).
-- Gustafsson, T., Stenberg, R. & Videman, J. (2018). A posteriori estimates for conforming Kirchhoff plate elements. SIAM Journal on Scientific Computing, 40.3, A1386-A1407.
-- Gustafsson, T., Rajagopal, K. R., Stenberg, R., & Videman, J. (2018). An adaptive finite element method for the inequality-constrained Reynolds equation. Computer Methods in Applied Mechanics and Engineering, 336, 156-170.
-- Gustafsson, T., Stenberg, R., & Videman, J. (2018). A stabilised finite element method for the plate obstacle problem. BIT Numerical Mathematics, 1-28.
+- Gustafsson, T., Stenberg, R. & Videman, J. (2018). A posteriori estimates for conforming Kirchhoff plate elements. SIAM Journal on Scientific Computing, 40.3, A1386-A1407. [arXiv:1707.08396](https://arxiv.org/abs/1707.08396).
+- Gustafsson, T., Rajagopal, K. R., Stenberg, R., & Videman, J. (2018). An adaptive finite element method for the inequality-constrained Reynolds equation. Computer Methods in Applied Mechanics and Engineering, 336, 156-170. arXiv preprint [arXiv:1711.04274](https://arxiv.org/abs/1711.04274).
+- Gustafsson, T., Stenberg, R., & Videman, J. (2018). A stabilised finite element method for the plate obstacle problem. BIT Numerical Mathematics, 1-28. arXiv preprint [arXiv:1711.04166](https://arxiv.org/abs/1711.04166).
 - Gustafsson, T., Stenberg, R., & Videman, J. (2017). Nitsche’s Method for the Obstacle Problem of Clamped Kirchhoff Plates. In European Conference on Numerical Mathematics and Advanced Applications (pp. 407-415). Springer.
 - Gustafsson, T., Stenberg, R., & Videman, J. (2017). A posteriori analysis of classical plate elements. Rakenteiden Mekaniikka, 50(3), 141-145.
 
