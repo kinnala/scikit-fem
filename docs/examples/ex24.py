@@ -13,11 +13,6 @@ from skfem.models.poisson import vector_laplace, mass, laplace
 from skfem.models.general import divergence, rot
 
 
-def interior_basis_x(ib: InteriorBasis) -> np.ndarray:
-    #if isinstance(ib.
-    pass
-
-
 def make_geom(length: float = 35.,
               lcar: float = 1.) -> Geometry:
     # Barkley et al (2002, figure 3 a - c)
