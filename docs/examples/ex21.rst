@@ -1,3 +1,5 @@
+.. _structural:
+
 Structural vibration
 --------------------
 

@@ -17,9 +17,9 @@ be simple enough to identify using the coordinates and
 :meth:`skfem.assembly.GlobalBasis.get_dofs`, the present technique generalizes
 to more complicated shapes.
 
-The exact solution is u = 2 θ / π. The field strength is |∇ u|² = 4/π² (x² + y²)
+The exact solution is :math:`u = 2 \theta / \pi`. The field strength is :math:`|\nabla u|^2 = 4 / \pi^2 (x^2 + y^2)`
 so the conductance (for unit potential difference and conductivity) is
-‖∇ u‖² = 2 ln 2 / π.
+:math:`\|\nabla u\|^2 = 2 \ln 2 / \pi`.
 
 .. literalinclude:: ex13.py
    :linenos:

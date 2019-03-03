@@ -1,22 +1,3 @@
-"""Bifurcation diagram for Bratu–Gelfand two-point boundary value problem
-
-.. math::
-    \begin{aligned}
-        u'' + \lambda \mathrm e^u &= 0, && 0 < x < 1,\\
-        u &= 0, && x = 0, 1},
-    \end{aligned}
-
-where :math:`\lambda > 0` is a parameter.
-
-Adapted from the example in the README.md of https://github.com/nschloe/pacopy.
-
-The resulting diagram matches figure 1.1 (left) of Farrell, Birkisson,
-& Funke (2015).
-
-* Farrell, P. E., Á. Birkisson, & S. W. Funke (2015). Deflation techniques for finding distinct solutions of nonlinear partial differential equations. *SIAM Journal on Scientific Computing* **37**(4):A2026–A2045. `doi:10.1137/140984798 <http://dx.doi.org/10.1137/140984798>`_
-
-"""
-
 from pathlib import Path
 
 from matplotlib.pyplot import subplots

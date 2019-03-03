@@ -1,0 +1,12 @@
+Linear elastic eigenvalue problem
+---------------------------------
+
+.. note::
+
+   This example is a stub. You could help us to improve it; c.f. :ref:`contribute`.
+
+This example solves a simplified version of the linear elastic eigenvalue problem.
+See :ref:`structural` for a 3D version.
+
+.. literalinclude:: ex03.py
+   :linenos:

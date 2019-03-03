@@ -1,7 +1,7 @@
 """Mappings define relationships between reference and global elements.
 
 :class:`~skfem.mesh.Mesh` provides default mappings for each mesh type,
-so normally the user is not required to access these classes.
+so normally the user is not required to initialize these classes.
 
 """
 

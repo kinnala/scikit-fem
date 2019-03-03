@@ -1,3 +1,4 @@
+.. _stokesex:
 
 Stokes equations
 ----------------

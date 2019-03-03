@@ -1,0 +1,11 @@
+Adaptive Poisson equation
+-------------------------
+
+.. note::
+
+   This example is a stub. You could help us to improve it; c.f. :ref:`contribute`.
+
+Solving the example :ref:`poisson` adaptively in an L-shaped domain.
+
+.. literalinclude:: ex22.py
+   :linenos:

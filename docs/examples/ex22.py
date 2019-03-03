@@ -1,4 +1,3 @@
-"""Adaptive Poisson equation on the L-shaped domain."""
 from skfem import *
 from skfem.models.poisson import laplace
 import numpy as np
