@@ -13,13 +13,14 @@ from .mesh3d import Mesh3D
 class MeshHex(Mesh3D):
     """A mesh consisting of hexahedral elements.
 
+    The different constructors are:
+
+    - :meth:`~skfem.mesh.MeshHex.__init__`
+    - :meth:`~skfem.mesh.MeshHex.load` (requires meshio)
+    - :meth:`~skfem.mesh.MeshHex.init_tensor`
+
     Attributes
     ----------
-    p : numpy array of size 3 x Nvertices
-        The vertices of the mesh. Each column corresponds to a point.
-    t : numpy array of size 8 x Nelements
-        The element connectivity. Each column corresponds to a element
-        and contains eight column indices to MeshHex.p.
     facets : numpy array of size 4 x Nfacets
         Each column contains four column indices to MeshHex.p.
     f2t : numpy array of size 2 x Nfacets

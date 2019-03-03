@@ -15,20 +15,16 @@ class MeshTri(Mesh2D):
 
     The different constructors are:
 
-        - :meth:`~skfem.mesh.MeshTri.__init__`
-        - :meth:`~skfem.mesh.MeshTri.load` (requires meshio)
-        - :meth:`~skfem.mesh.MeshTri.init_symmetric`
-        - :meth:`~skfem.mesh.MeshTri.init_sqsymmetric`
-        - :meth:`~skfem.mesh.MeshTri.init_refdom`
-        - :meth:`~skfem.mesh.MeshTri.init_tensor`
-        - :meth:`~skfem.mesh.MeshTri.init_lshaped`
+    - :meth:`~skfem.mesh.MeshTri.__init__`
+    - :meth:`~skfem.mesh.MeshTri.load` (requires meshio)
+    - :meth:`~skfem.mesh.MeshTri.init_symmetric`
+    - :meth:`~skfem.mesh.MeshTri.init_sqsymmetric`
+    - :meth:`~skfem.mesh.MeshTri.init_refdom`
+    - :meth:`~skfem.mesh.MeshTri.init_tensor`
+    - :meth:`~skfem.mesh.MeshTri.init_lshaped`
     
     Attributes
     ----------
-    p
-        An array containing the vertices of the mesh (2 x Nvertices).
-    t
-        An array containing the element connectivity (3 x Nelems).
     facets
         An array containing the facet vertices (2 x Nfacets).
     f2t

@@ -23,10 +23,6 @@ class MeshQuad(Mesh2D):
     
     Attributes
     ----------
-    p
-        An array containing the vertices of the mesh (2 x Nvertices).
-    t
-        An array containing the element connectivity (4 x Nelemens).
     facets
         Each column contains a pair of indices to p (2 x Nfacets).
     f2t

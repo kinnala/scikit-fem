@@ -22,6 +22,26 @@ class Mesh():
     - :class:`~skfem.mesh.MeshHex`, hexahedral mesh
     - :class:`~skfem.mesh.MeshLine`, one-dimensional mesh
 
+    Attributes
+    ----------
+    p
+        The vertices of the mesh (dim x Nvertices). Each column corresponds to a
+        point.
+    t
+        The element connectivity (dim x Nelements). Each column corresponds to a
+        element and contains four column indices to p.
+    refdom
+        A string describing the shape of the reference domain. Used to find
+        quadrature rules.
+    brefdom
+        A string describing the shape of the reference domain for element
+        boundaries. Used for finding quadrature rules.
+    meshio_type
+        A string which is used to convert between scikit-fem and meshio mesh
+        types.
+    name
+        A string which is used in pretty printing the object.
+
     """
 
     refdom: str = "none"  

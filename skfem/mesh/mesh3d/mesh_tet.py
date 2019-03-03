@@ -12,29 +12,28 @@ from numpy import ndarray
 class MeshTet(Mesh3D):
     """A mesh consisting of tetrahedral elements.
 
+    The different constructors are:
+
+    - :meth:`~skfem.mesh.MeshTet.__init__`
+    - :meth:`~skfem.mesh.MeshTet.load` (requires meshio)
+    - :meth:`~skfem.mesh.MeshTet.init_tensor`
+
     Attributes
     ----------
-    p : ndarray
-        The vertices of the mesh (3 x Nvertices). Each column
-        corresponds to a point.
-    t : ndarray
-        The element connectivity (4 x Nelements). Each column
-        corresponds to a element and contains four column indices to
-        MeshTet.p.
-    facets : ndarray
+    facets
         Each column contains a triplet of column indices to MeshTet.p
         (3 x Nfacets).  Order: (0, 1, 2) (0, 1, 3) (0, 2, 3) (1, 2, 3)
-    f2t : ndarray
+    f2t
         Each column contains a pair of column indices to MeshTet.t or
         -1 on the second row if the facet is located on the boundary
         (2 x Nfacets).
-    t2f : ndarray
+    t2f
         Each column contains four indices to MeshTet.facets (4 x Nelements).
-    edges : ndarray
+    edges
         Each column corresponds to an edge and contains two indices to
         MeshTet.p (2 x Nedges).
         Order: (0, 1) (1, 2) (0, 2) (0, 3) (1, 3) (2, 3)
-    t2e : ndarray
+    t2e
         Each column contains six indices to MeshTet.edges (6 x Nelements).
 
     """
