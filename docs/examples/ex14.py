@@ -4,8 +4,7 @@ m = MeshTri()
 m.refine(4)
 
 e = ElementTriP1()
-map = MappingAffine(m)
-basis = InteriorBasis(m, e, map, 2)
+basis = InteriorBasis(m, e)
 
 @bilinear_form
 def laplace(u, du, v, dv, w):
