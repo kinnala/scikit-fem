@@ -86,7 +86,3 @@ class Mesh3D(Mesh):
         """Return mesh parameter, viz the length of the longest edge."""
         return np.max(np.linalg.norm(np.diff(self.p[:, self.edges], axis=1),
                                      axis=0))
-
-    @staticmethod
-    def strip_extra_coordinates(p: ndarray) -> ndarray:
-        return p

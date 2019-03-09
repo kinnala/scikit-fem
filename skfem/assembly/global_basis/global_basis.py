@@ -170,7 +170,6 @@ class GlobalBasis():
         parameters for 'w'."""
         raise NotImplementedError("Default parameters not implemented.")
 
-
     def interpolate(self,
                     w: ndarray) -> Any:
         """Interpolate a solution vector to quadrature points.

@@ -289,17 +289,17 @@ class MeshHex(Mesh3D):
 
     def save(self,
             filename: str,
-            pointData: Optional[Union[ndarray, Dict[str, ndarray]]] = None,
-            cellData: Optional[Union[ndarray, Dict[str, ndarray]]] = None):
+            point_data: Optional[Union[ndarray, Dict[str, ndarray]]] = None,
+            cell_data: Optional[Union[ndarray, Dict[str, ndarray]]] = None):
         """Export the mesh and fields using meshio. (Hexahedron version.)
 
         Parameters
         ----------
         filename
             The filename for vtk-file.
-        pointData
+        point_data
             ndarray for one output or dict for multiple
-        cellData
+        cell_data
             ndarray for one output or dict for multiple
 
         """
@@ -308,16 +308,16 @@ class MeshHex(Mesh3D):
         # vtk requires a different ordering
         t = self.t[[0, 3, 6, 2, 1, 5, 7, 4], :]
 
-        if pointData is not None:
-            if type(pointData) != dict:
-                pointData = {'0':pointData}
+        if point_data is not None:
+            if type(point_data) != dict:
+                point_data = {'0':point_data}
 
-        if cellData is not None:
-            if type(cellData) != dict:
-                cellData = {'0':cellData}
+        if cell_data is not None:
+            if type(cell_data) != dict:
+                cell_data = {'0':cell_data}
 
         cells = { 'hexahedron' : t.T }
-        mesh = meshio.Mesh(self.p.T, cells, pointData, cellData)
+        mesh = meshio.Mesh(self.p.T, cells, point_data, cell_data)
         meshio.write(filename, mesh)
 
     def mapping(self):
