@@ -1,3 +1,4 @@
+from pathlib import Path
 from skfem import *
 
 m = MeshTri()
@@ -47,4 +48,4 @@ x[I] = solve(*condense(K, f, I=I))
 
 if __name__ == "__main__":
     m.plot(x[:-1], colorbar=True)
-    m.savefig("docs/examples/ex05_solution.png")
+    m.savefig(Path(__file__).stem + '_solution.png')

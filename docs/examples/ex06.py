@@ -1,3 +1,4 @@
+from pathlib import Path
 from skfem import *
 from skfem.models.poisson import laplace, unit_load
 import numpy as np
@@ -25,4 +26,4 @@ M, X = ib.refinterp(x, 3)
 if __name__ == "__main__":
     ax = m.draw()
     M.plot(X, smooth=True, edgecolors='', ax=ax)
-    M.savefig("docs/examples/ex06_solution.png")
+    M.savefig(Path(__file__).stem + '_solution.png')
