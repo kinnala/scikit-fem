@@ -68,14 +68,19 @@ K = bmat([[A, -B.T],
           [-B, None]]).tocsr()
 uvp = np.zeros(K.shape[0])
 
-xy = np.hstack([mesh.p, mesh.p[:, mesh.facets].mean(axis=1)])
-inlet_dofs_ = basis['u'].get_dofs(mesh.boundaries['inlet'])
-inlet_dofs = [np.concatenate([inlet_dofs_.nodal[f'u^{i}'],
-                              inlet_dofs_.facet[f'u^{i}']])
-              for i in [1, 2]]
-y = xy.flatten('F')[inlet_dofs[1]]
+inlet_basis = FacetBasis(mesh, element['u'], facets=mesh.boundaries['inlet'])
+inlet_dofs_ = inlet_basis.get_dofs(mesh.boundaries['inlet'])
+inlet_dofs = np.concatenate([inlet_dofs_.nodal[f'u^{1}'],
+                             inlet_dofs_.facet[f'u^{1}']])
 
-uvp[inlet_dofs[0]] = 4 * y * (1 - y)
+
+def parabolic(x, y):
+    """return the plane Poiseuille parabolic inlet profile"""
+    return np.moveaxis(np.dstack([4 * y * (1. - y), np.zeros_like(y), ]),
+                       [0, 1, 2], [1, 2, 0])
+
+
+uvp[inlet_dofs] = L2_projection(parabolic, inlet_basis, inlet_dofs)
 I = np.setdiff1d(np.arange(K.shape[0]), D)
 uvp[I] = solve(*condense(K, 0*uvp, uvp, I))
 
