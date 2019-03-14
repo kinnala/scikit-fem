@@ -92,9 +92,9 @@ class Mesh():
         """A wrapper for matplotlib.pyplot.show()."""
         plt.show()
 
-    def savefig(self, path):
+    def savefig(self, *args, **kwargs):
         """A wrapper for matplotlib.pyplot.savefig()."""
-        plt.savefig(path)
+        plt.savefig(*args, **kwargs)
 
     def dim(self):
         """Return the spatial dimension of the mesh."""
