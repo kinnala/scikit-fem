@@ -76,8 +76,8 @@ inlet_dofs = np.concatenate([inlet_dofs_.nodal[f'u^{1}'],
 
 def parabolic(x, y):
     """return the plane Poiseuille parabolic inlet profile"""
-    return np.transpose(np.dstack([4 * y * (1. - y), np.zeros_like(y)]),
-                        (2, 0, 1))
+    return np.stack((4 * y * (1. - y), np.zeros_like(y)))
+
 
 
 uvp[inlet_dofs] = L2_projection(parabolic, inlet_basis, inlet_dofs)
