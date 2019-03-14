@@ -76,7 +76,7 @@ inlet_dofs = np.concatenate([inlet_dofs_.nodal[f'u^{1}'],
 
 def parabolic(x, y):
     """return the plane Poiseuille parabolic inlet profile"""
-    return np.stack((4 * y * (1. - y), np.zeros_like(y)))
+    return ((4 * y * (1. - y), np.zeros_like(y)))
 
 
 
