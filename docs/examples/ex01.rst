@@ -30,13 +30,15 @@ mesh for the unit square is given by the default constructor of
 times:
 
 .. literalinclude:: ../examples/ex01.py
-    :lines: 1-4
+    :start-at: skfem
+    :end-at: refine	       
 
 After creating the mesh, we evaluate the finite element basis at the global
 quadrature points.
 
 .. literalinclude:: ex01.py
-    :lines: 6-7
+    :start-at: ElementTriP1
+    :end-at: InteriorBasis	       
 
 :class:`~skfem.element.ElementTriP1` defines the piecewise linear basis
 functions and local-to-global transformation rules.
@@ -47,24 +49,28 @@ The bilinear and linear forms are defined using the decorators
 form arguments correct.
 
 .. literalinclude:: ex01.py
-    :lines: 9-15
+    :start-at: bilinear_form
+    :end-at: 1.0*v
 
 All assembly operations are performed using the function :func:`~skfem.assembly.asm`.
 
 .. literalinclude:: ex01.py
-    :lines: 17-18
+    :start-at: asm(laplace, basis)
+    :end-at: asm(load, basis)
 
 We are left with solving the assembled linear system.
 We eliminate the boundary degrees-of-freedom using
 :func:`~skfem.utils.condense` and call :func:`~skfem.utils.solve`.
 
 .. literalinclude:: ex01.py
-    :lines: 20-23
+    :start-at: interior_nodes
+    :end-at: solve	       
 
 The solution can now be visualised using :meth:`~skfem.mesh.MeshTri.plot`. 
 
 .. literalinclude:: ex01.py
-    :lines: 25-27
+    :start-at: main
+    :end-at: savefig
 
 .. figure:: ex01_solution.png
 
