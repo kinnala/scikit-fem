@@ -107,9 +107,8 @@ if __name__ == '__main__':
 
     name = splitext(argv[0])[0]
     
-    ax = mesh.plot(pressure)
-    ax.get_figure().savefig(f'{name}-pressure.png',
-                            bbox_inches='tight', pad_inches=0)
+    mesh.plot(pressure)
+    mesh.savefig(f'{name}-pressure.png', bbox_inches='tight', pad_inches=0)
 
     mesh.save(f'{name}-velocity.vtk', velocity[basis['u'].nodal_dofs].T)
     
