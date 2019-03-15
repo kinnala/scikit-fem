@@ -3,7 +3,7 @@ Nonlinear Poisson equation
 
 .. note::
 
-   This example is a stub. You could help us to improve it; c.f. :ref:`contribute`.
+   This example is a stub. You could help us to improve it; see :ref:`contribute`.
 
 This example solves the nonlinear minimal surface problem using Newton's method.
 
