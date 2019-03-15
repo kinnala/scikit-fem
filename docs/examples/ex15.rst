@@ -3,7 +3,7 @@ One-dimensional Poisson
 
 .. note::
 
-   This example is a stub. You could help us to improve it; c.f. :ref:`contribute`.
+   This example is a stub. You could help us to improve it; see :ref:`contribute`.
 
 This example is a one-dimensional adaptation of :ref:`poisson`.
 

@@ -3,7 +3,7 @@ Linear elasticity
 
 .. note::
 
-   This example is a stub. You could help us to improve it; c.f. :ref:`contribute`.
+   This example is a stub. You could help us to improve it; see :ref:`contribute`.
 
 This example solves the linear elasticity problem using trilinear elements.  The
 weak form of the linear elasticity problem is defined in

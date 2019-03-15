@@ -3,7 +3,7 @@ Poisson using linear tetrahedra
 
 .. note::
 
-   This is an undocumented example. You could help us to improve it; c.f. :ref:`contribute`.
+   This is an undocumented example. You could help us to improve it; see :ref:`contribute`.
 
 .. literalinclude:: ex09.py
    :linenos:
