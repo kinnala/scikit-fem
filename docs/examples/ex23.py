@@ -48,7 +48,7 @@ class Bratu1d():
 
     def jacobian_solver(self,
                         u: np.ndarray,
-                        lmbda: np.ndarray,
+                        lmbda: float,
                         rhs: np.ndarray) -> np.ndarray:
         """A solver for the Jacobian problem."""
         du = np.zeros_like(u)
