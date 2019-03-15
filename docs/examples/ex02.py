@@ -1,3 +1,4 @@
+from pathlib import Path
 from skfem import *
 import numpy as np
 
@@ -61,4 +62,4 @@ if __name__ == "__main__":
     M, X = ib.refinterp(x, 3)
     ax = m.draw()
     M.plot(X, smooth=True, ax=ax, colorbar=True)
-    M.savefig("docs/examples/ex02_solution.png")
+    M.savefig(Path(__file__).stem + '_solution.png')
