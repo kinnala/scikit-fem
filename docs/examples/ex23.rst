@@ -50,7 +50,7 @@ The resulting bifurcation diagram, matches figure 1.1 (left) of Farrell, Birkiss
 .. figure:: ex23.png
 
 
-* P. E. Farrell, Á. Birkisson, & S. W. Funke (2015). Deflation techniques for finding distinct solutions of nonlinear partial differential equations. SIAM Journal on Scientific Computing 37(4). pp. A2026–A2045. `doi:10.1137/140984798 <http://dx.doi.org/10.1137/140984798>`_
+* P. E. Farrell, Á. Birkisson, & S. W. Funke (2015). Deflation techniques for finding distinct solutions of nonlinear partial differential equations. *SIAM Journal on Scientific Computing* 37(4). pp. A2026–A2045. `doi:10.1137/140984798 <http://dx.doi.org/10.1137/140984798>`_
   
 .. literalinclude:: ex23.py
    :linenos:
