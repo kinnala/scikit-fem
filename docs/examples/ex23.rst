@@ -5,15 +5,13 @@ Bratu-Gelfand
 
    This example requires the external package `pacopy <https://github.com/nschloe/pacopy>`_
 
-Bifurcation diagram for Bratu–Gelfand two-point boundary value problem:
+Here the bifurcation diagram for the Bratu–Gelfand two-point boundary value problem is reproduced by numerical continuation as implemented in pacopy, and adapted from the pacopy example `Bratu <https://github.com/nschloe/pacopy/blob/master/README.md#bratu>`_.
 
 .. math::
 
     u'' + \lambda \mathrm e^u = 0, \quad 0 < x < 1,
 
 with :math:`u(0)=u(1)=0` and where :math:`\lambda > 0` is a parameter.
-
-Adapted from the example in the README.md of https://github.com/nschloe/pacopy.
 
 For treatment by numerical continuation, we define the residual
 
