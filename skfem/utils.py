@@ -7,6 +7,7 @@ import scipy.sparse.linalg as spl
 import scipy.sparse.csgraph as spg
 import warnings
 from skfem.assembly import asm, bilinear_form, linear_form
+from skfem.element import ElementVectorH1
 
 from typing import Optional, Union, Tuple, Callable
 from numpy import ndarray
@@ -280,11 +281,13 @@ def L2_projection(fun,
     
     @bilinear_form
     def mass(u, du, v, dv, w):
-        return u * v
+        p = u * v
+        return sum(p) if isinstance(basis.elem, ElementVectorH1) else p
 
     @linear_form
     def funv(v, dv, w):
-        return fun(*w.x) * v
+        p = fun(*w.x) * v
+        return sum(p) if isinstance(basis.elem, ElementVectorH1) else p
     
     M = asm(mass, basis)
     f = asm(funv, basis)
