@@ -72,30 +72,35 @@ for the problem is loaded from an external file *beams.msh*, which is
 included in the source code distribution.
 
 .. literalinclude:: ex21.py
-		    :lines: 1-6
+    :start-at: skfem
+    :end-at: pathlib
 
 A vectorial :math:`H^1`-conforming element is defined by supplying another :class:`~skfem.element.Element` object to the constructor of :class:`~skfem.element.ElementVectorH1`.
 
 .. literalinclude:: ex21.py
-		    :lines: 7-10
+    :start-at: MeshTet
+    :end-at: ElementVectorH1	       
 
 The assembly is standard with the exception of vectorial
 solution and test functions.
 
 .. literalinclude:: ex21.py
-		    :lines: 12-20
+    :start-at: InteriorBasis
+    :end-at: return rho	       
 
 The function :func:`~skfem.utils.solve` automatically detects
 eigenvalue problems if another sparse matrix is given as an argument instead of a load vector.
 
 .. literalinclude:: ex21.py
-		    :lines: 22-32
+    :start-at: asm(mass, ib)			    
+    :end-at: complement_dofs
 
 Finally, we displace the mesh before drawing
 
 .. literalinclude:: ex21.py
-		    :lines: 34-42
-                            
+    :start-at: solve
+    :end-at: draw
+
 The complete source code reads as follows:
 
 .. literalinclude:: ex21.py

@@ -73,7 +73,8 @@ is a piecewise quadratic :math:`C^0`-continuous element for biharmonic problems.
 We begin by creating a simple symmetric mesh for the unit square.
 
 .. literalinclude:: ex02.py
-    :lines: 1-5
+    :start-at: skfem
+    :end-at: refine
 
 After creating the mesh, we evaluate the finite element basis at the global
 quadrature points. Here we demonstrate
@@ -83,7 +84,8 @@ constructor which allows the user to input an object of type
 optional parameters:
 
 .. literalinclude:: ex02.py
-    :lines: 8-9
+    :start-at: MappingAffine
+    :end-at: InteriorBasis
 
 The integration order refers to the highest order of exactly integrated
 polynomials. In this example, quadratic polynomials can be integrated exactly,
@@ -93,38 +95,44 @@ The rather complicated bilinear form :math:`(\boldsymbol{M}(u),
 \boldsymbol{K}(v))` can be written in several parts:
 
 .. literalinclude:: ex02.py
-    :lines: 11-32
+    :start-at: bilinear_form
+    :end-at: return d**3/12.0*ddot(C(Eps(ddu)), Eps(ddv))
 
 As loading, we shall consider a distributed force of :math:`1\,\text{MPa}`,
 i.e. :math:`f=10^6\,\text{Pa}`.
 
 .. literalinclude:: ex02.py
-    :lines: 34-36
+    :start-at: linear_form
+    :end-at: return 1e6*v
 
 Assembling the stiffness matrix and the load vector
 is now two calls to :func:`~skfem.assembly.asm`:
 
 .. literalinclude:: ex02.py
-    :lines: 38-39
+    :start-at: asm(bilinf, ib)
+    :end-at: asm(linf, ib)
 
 Next we demonstrate setting different boundary conditions on different parts of
 the boundary.  An easy way is to create facet index sets for each boundary:
 
 .. literalinclude:: ex02.py
-    :lines: 41-45
+    :start-at: boundary
+    :lines: 1-5
 
 The corresponding degree-of-freedom numbers (i.e. rows and columns
 of the stiffness matrix) can be found using
 :meth:`~skfem.assembly.GlobalBasis.get_dofs`.
 
 .. literalinclude:: ex02.py
-    :lines: 47-54
+    :start-at: get_dofs
+    :lines: 1-8
 
 The solution of the linear system is now done similarly as in the
 Poisson example.
 
 .. literalinclude:: ex02.py
-    :lines: 56-58
+    :start-at: complement_dofs
+    :end-at: solve
 
 Morley element uses quadratic basis
 functions, and we cannot fully appreciate the discrete solution
@@ -132,7 +140,8 @@ unless we refine the mesh for visualisation. This is done using
 :meth:`~skfem.assembly.InteriorBasis.refinterp` as follows:
 
 .. literalinclude:: ex02.py
-    :lines: 60-64
+    :start-at: main
+    :end-at: savefig
 
 .. figure:: ex02_solution.png
 
