@@ -19,7 +19,7 @@ For treatment by numerical continuation, we define the residual
 
 .. math::
 
-    F(u, \lambda) = u'' + \lambda \mathrm e^u
+    F(u, \lambda) = -u'' - \lambda \mathrm e^u
 
 .. literalinclude:: ex23.py
     :start-at: def f
@@ -39,7 +39,7 @@ and the Jacobian
 
 .. math::
 
-   J (u) = \frac{\mathrm d^2}{\mathrm dx^2} - \lambda \mathrm e^u
+   J (u) = -\frac{\mathrm d^2}{\mathrm dx^2} - \lambda \mathrm e^u
 
 .. literalinclude:: ex23.py
     :start-at: def jacobian_solver
