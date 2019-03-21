@@ -29,4 +29,7 @@ for itr in range(3):
     m.p[itr, :] += sf*u[ib.nodal_dofs[itr, :]]
 
 if __name__ == "__main__":
-    m.save('elasticity.vtk')
+    from os.path import splitext
+    from sys import argv
+    
+    m.save(splitext(argv[0])[0] + '.vtk')

@@ -28,4 +28,7 @@ Aint, bint = condense(A, b, I=I)
 x[I] = solve(Aint, bint, solver=solver_iter_pcg(pc=build_pc_ilu(Aint), verbose=verbose))
 
 if verbose:
-    m.save("ex09.vtk", x)
+    from os.path import splitext
+    from sys import argv
+
+    m.save(splitext(argv[0])[0] + ".vtk", x)
