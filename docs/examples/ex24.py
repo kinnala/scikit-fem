@@ -46,7 +46,7 @@ def make_geom(length: float = 35.,
 
 def make_mesh(*args, **kwargs) -> MeshTri:
     return MeshTri.from_meshio(meshio.Mesh(*generate_mesh(
-        make_geom(*args, **kwargs))))
+        make_geom(*args, **kwargs), dim=2)))
 
 
 mesh = make_mesh(lcar=.5**2)
