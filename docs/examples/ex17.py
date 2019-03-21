@@ -29,7 +29,7 @@ def make_mesh(a: float,         # radius of wire
     geom.add_physical_surface(insulation.plane_surface, 'insulation')
     geom.add_physical_line(insulation.line_loop.lines, 'convection')
 
-    return MeshTri.from_meshio(meshio.Mesh(*generate_mesh(geom)))
+    return MeshTri.from_meshio(meshio.Mesh(*generate_mesh(geom, dim=2)))
 
 
 mesh = make_mesh(*radii)
