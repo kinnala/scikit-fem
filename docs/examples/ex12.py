@@ -9,7 +9,7 @@ from pygmsh.built_in import Geometry
 geom = Geometry()
 geom.add_physical_surface(geom.add_circle([0.] * 3, 1., .5**3).plane_surface,
                           'disk')
-points, cells = generate_mesh(geom)[:2]
+points, cells = generate_mesh(geom, dim=2)[:2]
 m = MeshTri(points[:, :2].T, cells['triangle'].T)
 
 basis = InteriorBasis(m, ElementTriP2())

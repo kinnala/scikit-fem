@@ -27,6 +27,7 @@ geom.add_physical_surface(
     geom.add_plane_surface(geom.add_line_loop(lines)), 'domain')
 
 mesh = MeshTri.from_meshio(meshio.Mesh(*generate_mesh(geom,
+                                                      dim=2,
                                                       prune_vertices=False)))
 
 elements = ElementTriP2()

@@ -1,4 +1,3 @@
-from pathlib import Path
 from skfem import *
 
 m = MeshTri()
@@ -24,5 +23,8 @@ x = 0*b
 x[I] = solve(*condense(A, b, I=I))
 
 if __name__ == "__main__":
+    from os.path import splitext
+    from sys import argv
+    
     m.plot(x, smooth=True, colorbar=True)
-    m.savefig(Path(__file__).stem + '_solution.png')
+    m.savefig(splitext(argv[0])[0] + '_solution.png')
