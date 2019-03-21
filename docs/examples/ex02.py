@@ -1,4 +1,3 @@
-from pathlib import Path
 from skfem import *
 import numpy as np
 
@@ -59,7 +58,10 @@ x = np.zeros_like(f)
 x[I] = solve(*condense(K, f, I=I))
 
 if __name__ == "__main__":
+    from os.path import splitext
+    from sys import argv
+    
     M, X = ib.refinterp(x, 3)
     ax = m.draw()
     M.plot(X, smooth=True, ax=ax, colorbar=True)
-    M.savefig(Path(__file__).stem + '_solution.png')
+    M.savefig(splitext(argv[0])[0] + '_solution.png')

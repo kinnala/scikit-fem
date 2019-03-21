@@ -24,6 +24,9 @@ x[I] = solve(*condense(K, f, D=D))
 M, X = ib.refinterp(x, 3)
 
 if __name__ == "__main__":
+    from os.path import splitext
+    from sys import argv
+    
     ax = m.draw()
     M.plot(X, smooth=True, edgecolors='', ax=ax)
-    M.savefig(Path(__file__).stem + '_solution.png')
+    M.savefig(splitext(argv[0])[0] + '_solution.png')

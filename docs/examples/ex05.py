@@ -47,5 +47,8 @@ I = np.append(I, K.shape[0]-1)
 x[I] = solve(*condense(K, f, I=I))
 
 if __name__ == "__main__":
+    from os.path import splitext
+    from sys import argv
+    
     m.plot(x[:-1], colorbar=True)
-    m.savefig(Path(__file__).stem + '_solution.png')
+    m.savefig(splitext(argv[0])[0] + '_solution.png')
