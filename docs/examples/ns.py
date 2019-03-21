@@ -215,7 +215,7 @@ class BackwardFacingStep:
         return duvp
 
 
-bfs = BackwardFacingStep(lcar=.5**2)
+bfs = BackwardFacingStep(lcar=.5**3)
 
 
 class RangeException(Exception):
@@ -233,7 +233,7 @@ def callback(k, reynolds, uvp):
     ax.set_title(f'Re = {reynolds}')
     ax.get_figure().savefig('psi.png', bbox_inches="tight", pad_inches=0)
     
-    if reynolds > 150:
+    if reynolds > 1e3:
         raise RangeException
 
 
@@ -259,7 +259,7 @@ if __name__ == '__main__':
                                 bbox_inches="tight", pad_inches=0)
                                 
     try:
-        natural(bfs, uvp0, 0., callback)
+        natural(bfs, uvp0, 0., callback, lambda_stepsize_max=150.)
     except RangeException:
         print('Re = ', re)
         print('Left range')
