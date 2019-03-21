@@ -59,13 +59,6 @@ class BackwardFacingStep:
                        [-B, None]]).tocsr()
         self.I = np.setdiff1d(np.arange(self.S.shape[0]), self.D)
         
-    def make_vector(self):
-        """prepopulate solution vector with Dirichlet conditions"""
-        uvp = np.zeros(self.basis['u'].N + self.basis['p'].N)
-        I = self.inlet_dofs()
-        uvp[I] = L2_projection(self.parabolic, self.basis['inlet'], I)
-        return uvp
-
     def make_geom(self, length: float, lcar: float) -> Geometry:
         # Barkley et al (2002, figure 3 a - c)
         geom = Geometry()
@@ -110,6 +103,13 @@ class BackwardFacingStep:
     def parabolic(x, y):
         """return the plane Poiseuille parabolic inlet profile"""
         return ((4 * y * (1. - y), np.zeros_like(y)))
+
+    def make_vector(self):
+        """prepopulate solution vector with Dirichlet conditions"""
+        uvp = np.zeros(self.basis['u'].N + self.basis['p'].N)
+        I = self.inlet_dofs()
+        uvp[I] = L2_projection(self.parabolic, self.basis['inlet'], I)
+        return uvp
 
     def solve(self):
         uvp = self.make_vector()
