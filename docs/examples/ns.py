@@ -111,13 +111,6 @@ class BackwardFacingStep:
         """return the plane Poiseuille parabolic inlet profile"""
         return ((4 * y * (1. - y), np.zeros_like(y)))
 
-    def xy(self):
-        return np.hstack([self.mesh.p,
-                          self.mesh.p[:, self.mesh.facets].mean(axis=1)])
-
-    def y(self):
-        return self.xy().flatten('F')[self.inlet_dofs()[1]]
-
     def solve(self):
         uvp = self.make_vector()
         uvp[self.I] = solve(*condense(self.S, np.zeros_like(uvp), uvp, self.I))
