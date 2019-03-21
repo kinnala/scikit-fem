@@ -149,8 +149,9 @@ class BackwardFacingStep:
         return Triangulation(
             self.mesh.p[0, :], self.mesh.p[1, :], self.mesh.t.T)
 
-    def streamlines(self, psi: np.ndarray, n: int = 11):
-        ax = self.mesh_plot()
+    def streamlines(self, psi: np.ndarray, n: int = 11, ax=None):
+        if ax is None:
+            ax = self.mesh_plot()
         n_streamlines = n
         plot = partial(ax.tricontour,
                        self.triangulation(),
@@ -168,6 +169,7 @@ class BackwardFacingStep:
 
         ax.set_aspect(1.)
         ax.axis('off')
+        ax.set_xlim((self.mesh.p[0].min(), 6))
         return ax
 
     def inner(self, u: np.ndarray,  v: np.ndarray) -> float:
@@ -221,13 +223,15 @@ class RangeException(Exception):
 
 
 re = []
+ax = bfs.mesh_plot()
 
 def callback(k, reynolds, uvp):
     print(f'Re = {reynolds}')
     re.append(reynolds)
-    ax_psi = bfs.streamlines(bfs.streamfunction(bfs.split(uvp)[0]))
-    ax_psi.set_title(f'Re = {reynolds}')
-    ax_psi.get_figure().show()
+    
+    bfs.streamlines(bfs.streamfunction(bfs.split(uvp)[0]), ax=ax)
+    ax.set_title(f'Re = {reynolds}')
+    ax.get_figure().savefig('psi.png', bbox_inches="tight", pad_inches=0)
     
     if reynolds > 150:
         raise RangeException
