@@ -149,7 +149,7 @@ class BackwardFacingStep:
         return Triangulation(
             self.mesh.p[0, :], self.mesh.p[1, :], self.mesh.t.T)
 
-    def streamlines(self, psi: np.ndarray, n: int = 11, ax=None):
+    def streamlines(self, psi: np.ndarray, n: int = 21, ax=None):
         if ax is None:
             ax = self.mesh_plot()
         n_streamlines = n
@@ -169,7 +169,6 @@ class BackwardFacingStep:
 
         ax.set_aspect(1.)
         ax.axis('off')
-        ax.set_xlim((self.mesh.p[0].min(), 6))
         return ax
 
     def inner(self, u: np.ndarray,  v: np.ndarray) -> float:
