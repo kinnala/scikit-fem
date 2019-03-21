@@ -97,7 +97,7 @@ class BackwardFacingStep:
 
     @staticmethod
     def make_mesh(geom: Geometry) -> MeshTri:
-            return MeshTri.from_meshio(meshio.Mesh(*generate_mesh(geom)))
+            return MeshTri.from_meshio(meshio.Mesh(*generate_mesh(geom, dim=2)))
 
     def inlet_dofs(self):
         inlet_dofs_ = self.basis['u'].get_dofs(self.mesh.boundaries['inlet'])
