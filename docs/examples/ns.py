@@ -46,6 +46,8 @@ class BackwardFacingStep:
         self.mesh = self.make_mesh(self.make_geom(length, lcar))
         self.basis = {variable: InteriorBasis(self.mesh, e, intorder=3)
                       for variable, e in self.element.items()}
+        self.basis['inlet'] = FacetBasis(self.mesh, self.element['u'],
+                                         facets=self.mesh.boundaries['inlet'])
         self.basis['psi'] = InteriorBasis(self.mesh, ElementTriP2())
         self.D = np.setdiff1d(
             self.basis['u'].get_dofs().all(),
@@ -60,9 +62,8 @@ class BackwardFacingStep:
     def make_vector(self):
         """prepopulate solution vector with Dirichlet conditions"""
         uvp = np.zeros(self.basis['u'].N + self.basis['p'].N)
-
-        y = self.y()
-        uvp[self.inlet_dofs()[0]] = 4 * y * (1 - y)
+        I = self.inlet_dofs()
+        uvp[I] = L2_projection(self.parabolic, self.basis['inlet'], I)
         return uvp
 
     def make_geom(self, length: float, lcar: float) -> Geometry:
@@ -100,9 +101,15 @@ class BackwardFacingStep:
 
     def inlet_dofs(self):
         inlet_dofs_ = self.basis['u'].get_dofs(self.mesh.boundaries['inlet'])
-        return [np.concatenate([inlet_dofs_.nodal[f'u^{i}'],
-                                inlet_dofs_.facet[f'u^{i}']])
-                for i in [1, 2]]
+        inlet_dofs_ = self.basis['inlet'].get_dofs(
+            self.mesh.boundaries['inlet'])
+        return np.concatenate([inlet_dofs_.nodal[f'u^{1}'],
+                               inlet_dofs_.facet[f'u^{1}']])
+
+    @staticmethod
+    def parabolic(x, y):
+        """return the plane Poiseuille parabolic inlet profile"""
+        return ((4 * y * (1. - y), np.zeros_like(y)))
 
     def xy(self):
         return np.hstack([self.mesh.p,
@@ -183,7 +190,7 @@ class BackwardFacingStep:
         """Return the residual of a given velocity-pressure solution"""
         out = self.S @ uvp + reynolds * self.N(uvp)
 
-        out[self.D] -= self.make_vector()[self.D]
+        out[self.D] = uvp[self.D] - self.make_vector()[self.D]
         return out
 
     def jacobian_solver(self,
@@ -202,6 +209,7 @@ class BackwardFacingStep:
 
 
 bfs = BackwardFacingStep(lcar=.5**2)
+
 
 class RangeException(Exception):
     pass
@@ -227,9 +235,19 @@ if __name__ == '__main__':
 
     name = splitext(argv[0])[0]
 
+
+    uvp0 = bfs.solve()
+    u0, p0 = bfs.split(uvp0)
+    bfs.mesh.plot(p0)
+    bfs.mesh.savefig(f'{name}_p0.png', bbox_inches="tight", pad_inches=0)
+
+    psi0 = bfs.streamfunction(u0)
+    ax_psi = bfs.streamlines(psi0)
+    ax_psi.get_figure().savefig(f'{name}_psi0.png',
+                                bbox_inches="tight", pad_inches=0)
+                                
     try:
-        natural(
-            bfs, bfs.solve(), 0., callback, max_steps=3, newton_tol=1e-3)
+        natural(bfs, uvp0, 0., callback, max_steps=3)
     except RangeException:
         print('Re = ', re)
         print('Left range')
