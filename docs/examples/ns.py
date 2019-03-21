@@ -119,6 +119,7 @@ class BackwardFacingStep:
 
     def split(self, solution: np.ndarray) -> Tuple[np.ndarray,
                                                    np.ndarray]:
+        """return velocity and pressure separately"""
         return np.split(solution, [self.basis['u'].N])
 
     def streamfunction(self, velocity: np.ndarray) -> np.ndarray:
