@@ -193,6 +193,11 @@ class BackwardFacingStep:
         out[self.D] = uvp[self.D] - self.make_vector()[self.D]
         return out
 
+    def df_dlmbda(self, uvp: np.ndarray, reynolds: float) -> np.ndarray:
+        out = self.N(uvp)
+        out[self.D] = 0.
+        return out
+
     def jacobian_solver(self,
                         uvp: np.ndarray,
                         reynolds: float,
@@ -217,10 +222,13 @@ class RangeException(Exception):
 
 re = []
 
-
 def callback(k, reynolds, uvp):
     print(f'Re = {reynolds}')
     re.append(reynolds)
+    ax_psi = bfs.streamlines(bfs.streamfunction(bfs.split(uvp)[0]))
+    ax_psi.set_title(f'Re = {reynolds}')
+    ax_psi.get_figure().show()
+    
     if reynolds > 150:
         raise RangeException
 
@@ -247,7 +255,7 @@ if __name__ == '__main__':
                                 bbox_inches="tight", pad_inches=0)
                                 
     try:
-        natural(bfs, uvp0, 0., callback, max_steps=3)
+        natural(bfs, uvp0, 0., callback)
     except RangeException:
         print('Re = ', re)
         print('Left range')
