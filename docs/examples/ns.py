@@ -111,7 +111,8 @@ class BackwardFacingStep:
         uvp[I] = L2_projection(self.parabolic, self.basis['inlet'], I)
         return uvp
 
-    def solve(self):
+    def creeping(self):
+        """return the solution for zero Reynolds number"""
         uvp = self.make_vector()
         uvp[self.I] = solve(*condense(self.S, np.zeros_like(uvp), uvp, self.I))
         return uvp
@@ -241,7 +242,7 @@ if __name__ == '__main__':
     name = splitext(argv[0])[0]
 
 
-    uvp0 = bfs.solve()
+    uvp0 = bfs.creeping()
     u0, p0 = bfs.split(uvp0)
     bfs.mesh.plot(p0)
     bfs.mesh.savefig(f'{name}_p0.png', bbox_inches="tight", pad_inches=0)
