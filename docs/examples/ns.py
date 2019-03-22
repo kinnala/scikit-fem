@@ -255,13 +255,3 @@ if __name__ == '__main__':
                 lambda_stepsize_max=150.)
     except RangeException:
         print(f'Reynolds number sweep complete: {re}.')
-
-    bfs.mesh.plot(pressure)
-    bfs.mesh.savefig(f'{name}-pressure.png', bbox_inches='tight', pad_inches=0)
-
-    bfs.mesh.save(f'{name}-velocity.vtk',
-                  velocity[bfs.basis['u'].nodal_dofs].T)
-
-    ax = bfs.streamlines(psi)
-    ax.get_figure().savefig(f'{name}-stream-function.png',
-                            bbox_inches='tight', pad_inches=0)
