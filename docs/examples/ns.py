@@ -198,18 +198,18 @@ class BackwardFacingStep:
                         uvp: np.ndarray,
                         reynolds: float,
                         rhs: np.ndarray) -> np.ndarray:
-        duvp = np.zeros_like(uvp)
+        duvp = self.make_vector() - uvp
         u = self.basis['u'].interpolate(self.split(uvp)[0])
         duvp[self.I] = solve(*condense(
             self.S +
             reynolds
             * block_diag([asm(acceleration_jacobian, self.basis['u'], w=u),
                           csr_matrix((self.basis['p'].N,)*2)]),
-            rhs, I=self.I))
+            rhs, duvp, I=self.I))
         return duvp
 
 
-bfs = BackwardFacingStep(lcar=.5**4)
+bfs = BackwardFacingStep(lcar=.5**3)
 
 
 class RangeException(Exception):
@@ -245,16 +245,18 @@ if __name__ == '__main__':
 
     uvp0 = bfs.creeping()
     u0, p0 = bfs.split(uvp0)
-    bfs.mesh.plot(p0)
-    bfs.mesh.savefig(f'{name}_p0.png', bbox_inches="tight", pad_inches=0)
+    # bfs.mesh.plot(p0)
+    # bfs.mesh.savefig(f'{name}_p0.png', bbox_inches="tight", pad_inches=0)
 
     psi0 = bfs.streamfunction(u0)
-    ax_psi = bfs.streamlines(psi0)
-    ax_psi.get_figure().savefig(f'{name}_psi0.png',
-                                bbox_inches="tight", pad_inches=0)
+    # ax_psi = bfs.streamlines(psi0)
+    # ax_psi.get_figure().savefig(f'{name}_psi0.png',
+    #                             bbox_inches="tight", pad_inches=0)
                                 
     try:
-        natural(bfs, uvp0, 0., callback, lambda_stepsize_max=150.)
+        natural(bfs, uvp0, 150., callback,
+                lambda_stepsize0=150.,
+                lambda_stepsize_max=150.)
     except RangeException:
         print('Re = ', re)
         print('Left range')
