@@ -134,6 +134,7 @@ class BackwardFacingStep:
         return psi
 
     def mesh_plot(self):
+        """return Axes showing boundary of mesh"""
         termini = self.mesh.facets[:, np.concatenate(list(
             self.mesh.boundaries.values()))]
         _, ax = subplots()
@@ -253,11 +254,10 @@ if __name__ == '__main__':
                 lambda_stepsize0=50.,
                 lambda_stepsize_max=150.)
     except RangeException:
-        print('Re = ', re)
-        print('Left range')
+        print(f'Reynolds number sweep complete: {re}.')
 
-    mesh.plot(pressure)
-    mesh.savefig(f'{name}-pressure.png', bbox_inches='tight', pad_inches=0)
+    bfs.mesh.plot(pressure)
+    bfs.mesh.savefig(f'{name}-pressure.png', bbox_inches='tight', pad_inches=0)
 
     bfs.mesh.save(f'{name}-velocity.vtk',
                   velocity[bfs.basis['u'].nodal_dofs].T)
