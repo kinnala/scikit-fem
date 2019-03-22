@@ -21,17 +21,17 @@ def acceleration(v, dv, w):
     """Compute the vector (v, u . grad u) for given velocity u."""
     u, du = w.w, w.dw
     # TODO: Handle the indices more cleverly
-    return (v[0] * (u[0] * du[0][0] + u[1] * du[1][0])
-            + v[1] * (u[0] * du[0][1] + u[1] * du[1][1]))
+    return (v[0] * (u[0] * du[0][0] + u[1] * du[0][1])
+            + v[1] * (u[0] * du[1][0] + u[1] * du[1][1]))
 
 
 @bilinear_form
 def acceleration_jacobian(u, du, v, dv, w):
     """Compute (v, w . grad u + u . grad w) for given velocity w"""
-    return (v[0] * (w.w[0] * du[0][0] + w.w[1] * du[1][0]
-                    + u[0] * w.dw[0][0] + u[1] * w.dw[1][0])
-            + v[1] * (w.w[0] * du[0][1] + w.w[1] * du[1][1]
-                      + u[0] * w.dw[0][1] + u[1] * w.dw[1][1]))
+    return (v[0] * (w.w[0] * du[0][0] + w.w[1] * du[0][1]
+                    + u[0] * w.dw[0][0] + u[1] * w.dw[0][1])
+            + v[1] * (w.w[0] * du[1][0] + w.w[1] * du[1][1]
+                      + u[0] * w.dw[1][0] + u[1] * w.dw[1][1]))
 
 
 class BackwardFacingStep:
@@ -209,7 +209,7 @@ class BackwardFacingStep:
         return duvp
 
 
-bfs = BackwardFacingStep(lcar=.5**3)
+bfs = BackwardFacingStep(lcar=.2)
 
 
 class RangeException(Exception):
@@ -254,8 +254,8 @@ if __name__ == '__main__':
     #                             bbox_inches="tight", pad_inches=0)
                                 
     try:
-        natural(bfs, uvp0, 150., callback,
-                lambda_stepsize0=150.,
+        natural(bfs, uvp0, 0., callback,
+                lambda_stepsize0=50.,
                 lambda_stepsize_max=150.)
     except RangeException:
         print('Re = ', re)
