@@ -224,10 +224,10 @@ def callback(k, reynolds, uvp):
     print(f'Re = {reynolds}')
     re.append(reynolds)
 
-    ax.cla()
-    bfs.streamlines(bfs.streamfunction(bfs.split(uvp)[0]), ax=ax)
+    ax = bfs.streamlines(bfs.streamfunction(bfs.split(uvp)[0]))
     ax.set_title(f'Re = {reynolds}')
-    ax.get_figure().savefig('psi.png', bbox_inches="tight", pad_inches=0)
+    ax.get_figure().savefig(f'{name}-{reynolds:.2f}-psi.png',
+                            bbox_inches="tight", pad_inches=0)
     
     if reynolds > 750.:
         raise RangeException
