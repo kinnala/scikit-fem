@@ -14,4 +14,48 @@ Navier–Stokes equations
 
    -\nabla^2 \mathbf u + \nabla p - \mathrm{Re} \mathbf u \cdot\nabla\mathbf u = 0
 
-   \nabla\cdot\mathbf u = 0
+   \nabla\cdot\mathbf u = 0.
+
+The weak formulation can be written
+
+.. math::
+
+   (\nabla\mathbf v, \nabla\mathbf u) - (\nabla\cdot\mathbf v, p)
+   + (q, \nabla\cdot\mathbf u)
+     - \mathrm{Re} (\mathbf v, \mathbf u\cdot\nabla\mathbf u) = 0.
+
+In shorthand,
+
+.. math::
+
+   F (u; \mathrm{Re}) = S (u) - \mathrm{Re} N (u) = 0
+
+where the linear (creeping or Stokes) part is
+
+.. math::
+
+   S (u) = \sum_j \begin{bmatrix}
+   (\nabla v_i, \nabla v_j) & -(\nabla\cdot v_i, q_j) \\
+   (q_i, \nabla\cdot v_j) & 0
+   \end{bmatrix}\begin{Bmatrix} \mathbf u_j \\ p_j\end{Bmatrix}
+
+and the nonlinear part is
+
+.. math::
+
+   N(u) = (\mathbf v, \mathbf u\cdot\nabla\mathbf u).
+   
+
+The Jacobian is
+
+.. math::
+
+   J(u; \mathrm{Re}) \equiv \frac{\partial F}{\partial u} = -\mathrm{Re} N'(u)
+
+which is
+
+.. math::
+   N' (u) =
+   (\mathbf v,
+   \mathbf u\cdot\nabla\mathbf\delta u
+   + \delta\mathbf u\cdot\nabla\mathbf u).
