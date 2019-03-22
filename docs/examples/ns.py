@@ -245,13 +245,8 @@ if __name__ == '__main__':
 
     uvp0 = bfs.creeping()
     u0, p0 = bfs.split(uvp0)
-    # bfs.mesh.plot(p0)
-    # bfs.mesh.savefig(f'{name}_p0.png', bbox_inches="tight", pad_inches=0)
 
     psi0 = bfs.streamfunction(u0)
-    # ax_psi = bfs.streamlines(psi0)
-    # ax_psi.get_figure().savefig(f'{name}_psi0.png',
-    #                             bbox_inches="tight", pad_inches=0)
                                 
     try:
         natural(bfs, uvp0, 0., callback,
@@ -261,12 +256,12 @@ if __name__ == '__main__':
         print('Re = ', re)
         print('Left range')
 
-    # mesh.plot(pressure)
-    # mesh.savefig(f'{name}-pressure.png', bbox_inches='tight', pad_inches=0)
+    mesh.plot(pressure)
+    mesh.savefig(f'{name}-pressure.png', bbox_inches='tight', pad_inches=0)
 
-    # bfs.mesh.save(f'{name}-velocity.vtk',
-    #               velocity[bfs.basis['u'].nodal_dofs].T)
+    bfs.mesh.save(f'{name}-velocity.vtk',
+                  velocity[bfs.basis['u'].nodal_dofs].T)
 
-    # ax = bfs.streamlines(psi)
-    # ax.get_figure().savefig(f'{name}-stream-function.png',
-    #                         bbox_inches='tight', pad_inches=0)
+    ax = bfs.streamlines(psi)
+    ax.get_figure().savefig(f'{name}-stream-function.png',
+                            bbox_inches='tight', pad_inches=0)
