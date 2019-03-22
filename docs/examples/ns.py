@@ -184,7 +184,7 @@ class BackwardFacingStep:
 
     def f(self, uvp: np.ndarray, reynolds: float) -> np.ndarray:
         """Return the residual of a given velocity-pressure solution"""
-        out = self.S @ uvp - reynolds * self.N(uvp)
+        out = self.S @ uvp + reynolds * self.N(uvp)
 
         out[self.D] = uvp[self.D] - self.make_vector()[self.D]
         return out
@@ -201,7 +201,7 @@ class BackwardFacingStep:
         duvp = np.zeros_like(uvp)
         u = self.basis['u'].interpolate(self.split(uvp)[0])
         duvp[self.I] = solve(*condense(
-            self.S -
+            self.S +
             reynolds
             * block_diag([asm(acceleration_jacobian, self.basis['u'], w=u),
                           csr_matrix((self.basis['p'].N,)*2)]),
@@ -209,7 +209,7 @@ class BackwardFacingStep:
         return duvp
 
 
-bfs = BackwardFacingStep(lcar=.5**3)
+bfs = BackwardFacingStep(lcar=.5**4)
 
 
 class RangeException(Exception):
