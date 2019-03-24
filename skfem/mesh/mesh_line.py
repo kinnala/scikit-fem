@@ -104,8 +104,6 @@ class MeshLine(Mesh):
         self.p = newp
         self._build_mappings()
 
-        # TODO implement prolongation
-
     def boundary_nodes(self):
         """Find the boundary nodes of the mesh."""
         _, counts = np.unique(self.t.flatten(), return_counts=True)
