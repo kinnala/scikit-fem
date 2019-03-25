@@ -285,8 +285,6 @@ class MeshHex(Mesh3D):
 
         self._build_mappings()
 
-        # TODO implement prolongation
-
     def save(self,
             filename: str,
             point_data: Optional[Union[ndarray, Dict[str, ndarray]]] = None,

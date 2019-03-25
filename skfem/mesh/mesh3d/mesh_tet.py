@@ -418,8 +418,6 @@ class MeshTet(Mesh3D):
 
         self._build_mappings()
 
-        # TODO implement prolongation matrix
-
     def draw(self):
         """Draw the (surface) mesh."""
         from mpl_toolkits.mplot3d import Axes3D
