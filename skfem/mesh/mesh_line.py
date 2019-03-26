@@ -16,6 +16,7 @@ class MeshLine(Mesh):
 
     refdom: str = "line"
     brefdom: str = "point"
+    meshio_type: str = "line"
     name: str = "One-dimensional"
 
     p: ndarray = np.array([])
@@ -23,7 +24,7 @@ class MeshLine(Mesh):
 
     def __init__(self, p=None, t=None, validate=True):
         if p is None and t is None:
-            p = np.array([[0, 1]])
+            p = np.array([[0., 1.]], dtype=np.float_)
         if len(p.shape) == 1:
             p = np.array([p]) 
         self.p = p
