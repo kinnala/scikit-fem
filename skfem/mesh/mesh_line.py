@@ -16,6 +16,7 @@ class MeshLine(Mesh):
 
     refdom: str = "line"
     brefdom: str = "point"
+    meshio_type: str = "line"
     name: str = "One-dimensional"
 
     p: ndarray = np.array([])
