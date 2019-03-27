@@ -1,5 +1,5 @@
 from skfem import *
-from skfem.models.poisson import laplace, mass
+from skfem.models.poisson import mass
 
 from scipy.sparse import bmat
 
