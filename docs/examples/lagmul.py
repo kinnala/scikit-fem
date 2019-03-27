@@ -4,33 +4,32 @@ from skfem.models.poisson import laplace, mass
 from scipy.sparse import bmat
 
 import numpy as np
-mesh = MeshTri()
-mesh.refine(4)
 
-basis = {'interior': InteriorBasis(mesh, ElementTriP2()),
+from ex14 import basis as interior_basis
+from ex14 import dirichlet, A
+
+
+mesh = interior_basis.mesh
+basis = {'interior': interior_basis,
          'interior-facet': FacetBasis(mesh, ElementTriP2(), intorder=3),
          'facet': FacetBasis(mesh, ElementTriP1(), intorder=3)}
 
-A = asm(laplace, basis['interior'])
 B = asm(mass, basis['interior-facet'], basis['facet'])[mesh.boundary_nodes()]
 K = bmat([[A, B.T], [B, None]]).tocsr()
 
 
-def exact(x, y):
-    return ((x + 1.j * y)**2).real
-
 
 @linear_form
-def dirichlet(v, dv, w):
-    return v * exact(*w.x)
+def dirichlet_forcing(v, dv, w):
+    return v * dirichlet(*w.x)
 
 
 f = np.concatenate(
     [np.zeros(basis['interior'].N),
-     asm(dirichlet, basis['facet'])[mesh.boundary_nodes()]])
+     asm(dirichlet_forcing, basis['facet'])[mesh.boundary_nodes()]])
 
 u, p = np.split(solve(K, f), [basis['interior'].N])
-u_exact = L2_projection(exact, basis['interior'])
+u_exact = L2_projection(dirichlet, basis['interior'])
 
 
 if __name__ == '__main__':
