@@ -41,13 +41,8 @@ u = np.zeros(basis.N)
 u[boundary_dofs['positive'].all()] = 1.
 u[interior_dofs] = solve(*condense(A, 0.*u, u, interior_dofs))
 
-@linear_form
-def exact(v, dv, w):
-    x = w.x
-    return v * 2 * np.arctan2(x[1, :], x[0, :]) / np.pi
-
 M = asm(mass, basis)
-u_exact = solve(M, asm(exact, basis))
+u_exact = L2_projection(lambda x, y: 2 * np.arctan2(y, x) / np.pi, basis)
 u_error = u - u_exact
 print('L2 error =', np.sqrt(u_error @ M @ u_error))
 print('conductance = {:.4f} (exact = 2 ln 2 / pi = {:.4f})'.format(
