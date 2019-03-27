@@ -18,7 +18,6 @@ B = asm(mass, basis['interior-facet'], basis['facet'])[mesh.boundary_nodes()]
 K = bmat([[A, B.T], [B, None]]).tocsr()
 
 
-
 @linear_form
 def dirichlet_forcing(v, dv, w):
     return v * dirichlet(*w.x)
