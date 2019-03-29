@@ -26,12 +26,12 @@ def advection(u, du, v, dv, w):
 
 dofs = {'inlet': basis.get_dofs(lambda x, y: x == 0.),
         'floor': basis.get_dofs(lambda x, y: y == 0.)}
-D = np.concatenate([d.nodal['u'] for d in dofs.values()])
+D = np.concatenate([d.all() for d in dofs.values()])
 interior = basis.complement_dofs(D)
 
 A = asm(laplace, basis) + peclet * asm(advection, basis)
 t = np.zeros(basis.N)
-t[dofs['floor'].nodal['u']] = 1.
+t[dofs['floor'].all()] = 1.
 t[interior] = solve(*condense(A, np.zeros_like(t), t, D=D))
 
 
