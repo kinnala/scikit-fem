@@ -10,11 +10,10 @@ height = 1.
 length = 10.
 peclet = 1e2
 
-basis = InteriorBasis(
-    (MeshLine(np.linspace(0, length,
-                          ceil(mesh_inlet_n / height * length)))
-     * MeshLine(np.linspace(0, height / 2, mesh_inlet_n)))._splitquads(),
-    ElementTriP2())
+mesh = (MeshLine(np.linspace(0, length,
+                             ceil(mesh_inlet_n / height * length)))
+        * MeshLine(np.linspace(0, height / 2, mesh_inlet_n)))._splitquads()
+basis = InteriorBasis(mesh, ElementTriP2())
 
 
 @bilinear_form
@@ -39,6 +38,6 @@ if __name__ == '__main__':
 
     from pathlib import Path
 
-    basis.mesh.plot(t[basis.nodal_dofs.flatten()], edgecolors='none')
-    basis.mesh.savefig(Path(__file__).with_suffix('.png'),
-                       bbox_inches='tight', pad_inches=0)
+    mesh.plot(t[basis.nodal_dofs.flatten()], edgecolors='none')
+    mesh.savefig(Path(__file__).with_suffix('.png'),
+                 bbox_inches='tight', pad_inches=0)
