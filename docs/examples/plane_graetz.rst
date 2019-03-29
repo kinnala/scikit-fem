@@ -16,3 +16,5 @@ where the velocity profile is
    u (y) = 6 y (1 - y), \qquad (0 < y < 1)
 
 The equations here have been nondimensionalized by the width of the channel and the volumetric flow-rate.  The governing parameter is the Péclet number, being the mean velocity times the width divided by the thermal diffusivity.
+
+Because the problem is symmetric about :math:`y = \frac{1}{2}`, only half is solved here, with natural boundary conditions along the centreline.
