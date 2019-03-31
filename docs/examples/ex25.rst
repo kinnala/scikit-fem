@@ -7,7 +7,7 @@ The governing advection–diffusion equation is
 
 .. math::
 
-   \mathrm{Pe} u\cdot\frac{\partial T}{\partial x} = \nabla^2 T
+   \mathrm{Pe} \;u\frac{\partial T}{\partial x} = \nabla^2 T
 
 where the velocity profile is
 
