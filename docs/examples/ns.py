@@ -5,7 +5,6 @@ from matplotlib.pyplot import subplots
 import numpy as np
 from scipy.sparse import bmat, block_diag, csr_matrix
 
-import meshio
 from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
 
@@ -90,7 +89,7 @@ class BackwardFacingStep:
 
     @staticmethod
     def make_mesh(geom: Geometry) -> MeshTri:
-            return MeshTri.from_meshio(meshio.Mesh(*generate_mesh(geom, dim=2)))
+            return MeshTri.from_meshio(generate_mesh(geom, dim=2))
 
     def inlet_dofs(self):
         inlet_dofs_ = self.basis['u'].get_dofs(self.mesh.boundaries['inlet'])
