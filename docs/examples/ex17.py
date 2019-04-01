@@ -2,7 +2,6 @@ from typing import Optional
 
 import numpy as np
 
-import meshio
 from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
 
@@ -29,7 +28,7 @@ def make_mesh(a: float,         # radius of wire
     geom.add_physical_surface(insulation.plane_surface, 'insulation')
     geom.add_physical_line(insulation.line_loop.lines, 'convection')
 
-    return MeshTri.from_meshio(meshio.Mesh(*generate_mesh(geom, dim=2)))
+    return MeshTri.from_meshio(generate_mesh(geom, dim=2))
 
 
 mesh = make_mesh(*radii)

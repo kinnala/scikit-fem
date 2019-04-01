@@ -3,7 +3,6 @@ from skfem.models.poisson import laplace, mass
 
 import numpy as np
 
-import meshio
 from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
 
@@ -26,9 +25,7 @@ lines.append(geom.add_circle_arc(points[4], points[0], points[1]))
 geom.add_physical_surface(
     geom.add_plane_surface(geom.add_line_loop(lines)), 'domain')
 
-mesh = MeshTri.from_meshio(meshio.Mesh(*generate_mesh(geom,
-                                                      dim=2,
-                                                      prune_vertices=False)))
+mesh = MeshTri.from_meshio(generate_mesh(geom, dim=2))
 
 elements = ElementTriP2()
 basis = InteriorBasis(mesh, elements)
