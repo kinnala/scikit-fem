@@ -36,9 +36,9 @@ def make_geom(length: float = 35.,
                      ([2], 'ceiling'),
                      ([3], 'inlet'),
                      ([0, 4, 5], 'floor')]:
-        geom.add_physical_line(list(np.array(lines)[k]), label)
+        geom.add_physical(list(np.array(lines)[k]), label)
 
-    geom.add_physical_surface(
+    geom.add_physical(
         geom.add_plane_surface(geom.add_line_loop(lines)), 'domain')
 
     return geom

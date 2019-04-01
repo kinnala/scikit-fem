@@ -7,8 +7,8 @@ from pygmsh.built_in import Geometry
 
 geom = Geometry()
 circle = geom.add_circle([0.] * 3, 1., .5**3)
-geom.add_physical_line(circle.line_loop.lines, 'perimeter')
-geom.add_physical_surface(circle.plane_surface, 'disk')
+geom.add_physical(circle.line_loop.lines, 'perimeter')
+geom.add_physical(circle.plane_surface, 'disk')
 mesh = MeshTri.from_meshio(generate_mesh(geom, dim=2))
 
 element = ElementTriMorley()
