@@ -3,7 +3,6 @@ from skfem.models.poisson import laplace, mass
 
 import numpy as np
 
-import meshio
 from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
 
@@ -18,17 +17,14 @@ for x in radii:
 for y in reversed(radii):
     points.append(geom.add_point([0., y, 0.], lcar))
 lines.append(geom.add_line(*points[1:3]))
-geom.add_physical_line(lines[-1], 'ground')
+geom.add_physical(lines[-1], 'ground')
 lines.append(geom.add_circle_arc(points[2], points[0], points[3]))
 lines.append(geom.add_line(points[3], points[4]))
-geom.add_physical_line(lines[-1], 'positive')
+geom.add_physical(lines[-1], 'positive')
 lines.append(geom.add_circle_arc(points[4], points[0], points[1]))
-geom.add_physical_surface(
-    geom.add_plane_surface(geom.add_line_loop(lines)), 'domain')
+geom.add_physical(geom.add_plane_surface(geom.add_line_loop(lines)), 'domain')
 
-mesh = MeshTri.from_meshio(meshio.Mesh(*generate_mesh(geom,
-                                                      dim=2,
-                                                      prune_vertices=False)))
+mesh = MeshTri.from_meshio(generate_mesh(geom, dim=2))
 
 elements = ElementTriP2()
 basis = InteriorBasis(mesh, elements)
@@ -48,9 +44,11 @@ print('L2 error =', np.sqrt(u_error @ M @ u_error))
 print('conductance = {:.4f} (exact = 2 ln 2 / pi = {:.4f})'.format(
     u @ A @ u, 2 * np.log(2) / np.pi))
 
+
 @linear_form
 def port_flux(v, dv, w):
     return sum(w.n * dv)
+
 
 for port in mesh.boundaries:
     basis = FacetBasis(mesh, elements, facets=mesh.boundaries[port])
