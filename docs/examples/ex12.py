@@ -8,8 +8,7 @@ from pygmsh.built_in import Geometry
 
 geom = Geometry()
 geom.add_physical(geom.add_circle([0.] * 3, 1., .5**3).plane_surface, 'disk')
-m_ = generate_mesh(geom, dim=2)
-m = MeshTri(m_.points[:, :2].T, m_.cells['triangle'].T)
+m = MeshTri.from_meshio(generate_mesh(geom, dim=2))
 
 basis = InteriorBasis(m, ElementTriP2())
 
