@@ -22,8 +22,7 @@ lines.append(geom.add_circle_arc(points[2], points[0], points[3]))
 lines.append(geom.add_line(points[3], points[4]))
 geom.add_physical(lines[-1], 'positive')
 lines.append(geom.add_circle_arc(points[4], points[0], points[1]))
-geom.add_physical(
-    geom.add_plane_surface(geom.add_line_loop(lines)), 'domain')
+geom.add_physical(geom.add_plane_surface(geom.add_line_loop(lines)), 'domain')
 
 mesh = MeshTri.from_meshio(generate_mesh(geom, dim=2))
 
@@ -45,9 +44,11 @@ print('L2 error =', np.sqrt(u_error @ M @ u_error))
 print('conductance = {:.4f} (exact = 2 ln 2 / pi = {:.4f})'.format(
     u @ A @ u, 2 * np.log(2) / np.pi))
 
+
 @linear_form
 def port_flux(v, dv, w):
     return sum(w.n * dv)
+
 
 for port in mesh.boundaries:
     basis = FacetBasis(mesh, elements, facets=mesh.boundaries[port])
