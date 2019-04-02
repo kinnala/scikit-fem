@@ -250,7 +250,8 @@ class Mesh():
         Parameters
         ----------
         filename
-            The filename for vtk-file.
+            The output filename, with suffix determining format;
+            e.g. .msh, .vtk, .xdmf
         point_data
             Data related to the vertices of the mesh. Numpy array for one
             output, or dict for multiple.
