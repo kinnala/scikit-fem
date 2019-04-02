@@ -26,17 +26,17 @@ I = m.interior_nodes()
 D = m.boundary_nodes()
 x[D] = np.sin(np.pi*m.p[0, D]) 
 
-relaxation = 0.7
 for itr in range(100):
+    import copy
     w = basis.interpolate(x)
     J = asm(jacobian, basis, w=w)
     F = asm(rhs, basis, w=w)
-    decrement = solve(*condense(J, F, I=I))
-    x[I] -= relaxation * decrement
-    if np.linalg.norm(decrement) < 1e-8:
+    xprev = copy.deepcopy(x)
+    x[I] = 0.3*x[I] + 0.7*solve(*condense(J, -F, I=I))
+    if np.linalg.norm(x - xprev) < 1e-8:
         break
     if __name__ == "__main__":
-        print(np.linalg.norm(decrement))
+        print(np.linalg.norm(x - xprev))
 
 if __name__ == "__main__":
     m.plot3(x)
