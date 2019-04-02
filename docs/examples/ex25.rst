@@ -1,13 +1,13 @@
 Forced convection
 -----------------
 
-We begin the study of forced convection with the plane Graetz problem; viz. the steady distribution of temperature in a plane channel with unit inlet temperature and zero temperature on the walls and a steady laminar unidirectional parabolic plane-Poiseuille flow.
+We begin the study of forced convection with the plane Graetz problem; viz. the steady distribution of temperature in a plane channel with zero inlet temperature and unit temperature on the walls and a steady laminar unidirectional parabolic plane-Poiseuille flow.
 
 The governing advection–diffusion equation is
 
 .. math::
 
-   \mathrm{Pe} u\cdot\frac{\partial T}{\partial x} = \nabla^2 T
+   \mathrm{Pe} \;u\frac{\partial T}{\partial x} = \nabla^2 T
 
 where the velocity profile is
 
