@@ -32,7 +32,7 @@ for itr in range(100):
     J = asm(jacobian, basis, w=w)
     F = asm(rhs, basis, w=w)
     xprev = copy.deepcopy(x)
-    x[I] = 0.3*x[I] + 0.7*solve(*condense(J, -F, I=I))
+    x[I] = x[I] + 0.7*solve(*condense(J, -F, I=I))
     if np.linalg.norm(x - xprev) < 1e-8:
         break
     if __name__ == "__main__":
