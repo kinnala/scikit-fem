@@ -1,10 +1,12 @@
 """
 
-Solve the Dirichlet problem again, this time with a penalty method (e.g. Carey & Oden 1983, §3.5.2; Ern & Guermond 2004, pp. 379–380).
+Solve the Dirichlet problem again, this time with a penalty method (e.g. Carey & Oden 1983, §3.5.2; Ern & Guermond 2004, pp. 379–380; Juntunen & Stenberg 2009).
 
 * Carey, G. F., & Oden, J. T. (1983). *Finite Elements: A Second Course.*  Englewood Cliffs, New Jersey: Prentice-Hall
 
 * Ern, A., & Guermond, J.-L. (2004). *Theory and Practice of Finite Elements*. New York: Springer
+
+* Juntunen, M. & Stenberg, R. (2009). Nitsche's method for general boundary conditions. *Mathematics of Computation,* **78**:1353–1374, eq. 2.12
 
 """
 
