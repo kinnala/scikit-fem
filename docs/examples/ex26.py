@@ -1,11 +1,3 @@
-"""
-
-Demonstrate solving a partial differential equation only in a subdomain.
-
-Modified from ex17 'Insulated wire' to only solve the Poisson equation in the central subdomain 'wire', leaving the temperature in the rest as zero, implying homogeneous Dirichlet conditions on the wire.
-
-"""
-
 from typing import Optional
 
 import numpy as np
