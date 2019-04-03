@@ -8,31 +8,9 @@ from pygmsh.built_in import Geometry
 from skfem import *
 from skfem.models.poisson import laplace, unit_load
 
+from ex17 import (mesh, element, basis,
+                  radii, joule_heating, thermal_conductivity)
 
-def make_mesh(a: float,         # radius of wire
-              b: float,         # radius of insulation
-              dx: Optional[float] = None) -> MeshTri:
-
-    dx = a / 2 ** 3 if dx is None else dx
-
-    origin = np.zeros(3)
-    geom = Geometry()
-    wire = geom.add_circle(origin, a, dx, make_surface=True)
-    geom.add_physical(wire.plane_surface, 'wire')
-    insulation = geom.add_circle(origin, b, dx, holes=[wire.line_loop])
-    geom.add_physical(insulation.plane_surface, 'insulation')
-    geom.add_physical(insulation.line_loop.lines, 'convection')
-
-    return MeshTri.from_meshio(generate_mesh(geom, dim=2))
-
-
-radii = [2., 3.]
-joule_heating = 5.
-thermal_conductivity = {'wire': 101.}
-
-mesh = make_mesh(*radii)
-element = ElementTriP2()
-basis = InteriorBasis(mesh, element)
 
 L = asm(laplace, basis)
 f = asm(unit_load, basis)
