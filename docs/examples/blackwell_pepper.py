@@ -292,13 +292,15 @@ if __name__ == '__main__':
     for ax in axes:
         ax.plot(*bfs.mesh.p[:, bfs.termini], color='k')
     bfs.streamlines(bfs.streamfunction(v), ax=axes[0])
-    axes[0].set_title('stream-function')
+    axes[0].set_title('streamlines')
     
-    axes[1].tricontourf(bfs.triangulation(),
-                        temperature[bfs.basis['V'].nodal_dofs.flatten()])
+    axes[1].tricontour(         # Dyne & Heinrich (1992, figure 3)
+        bfs.triangulation(),
+        temperature[bfs.basis['V'].nodal_dofs.flatten()],
+        levels=np.linspace(-4., 1., 11))
     axes[1].set_aspect(1.)
     axes[1].set_xlim(axes[0].get_xlim())
-    axes[1].set_title('temperature')
+    axes[1].set_title('isotherms')
     
     fig.savefig(f'{name}_solution.png',
                 bbox_inches="tight", pad_inches=0)
