@@ -260,7 +260,8 @@ peclet = prandtl * reynolds
 print(f'Re = {reynolds}, Pe = {peclet}')
 A = (asm(laplace, bfs.basis['V']) +
      peclet * asm(advection, bfs.basis['V'],
-                  w=bfs.basis['u'].interpolate(velocity[reynolds])))
+                  w=[bfs.basis['V'].interpolate(velocity[reynolds][i::2])
+                     for i in range(2)]))
 inlet_basis = FacetBasis(bfs.mesh, bfs.basis['V'].elem,
                          facets=bfs.mesh.boundaries['inlet'])
 inlet_dofs = inlet_basis.get_dofs(bfs.mesh.boundaries['inlet']).all()
