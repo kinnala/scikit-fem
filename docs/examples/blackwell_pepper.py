@@ -244,7 +244,7 @@ natural(bfs, bfs.make_vector(), 1e2, callback,
 # Forced convection
 
 reynolds = re[-1]
-prandtl = 0.71                  # =kinematic viscosity / thermal diffusivity
+prandtl = 0.7                  # =kinematic viscosity / thermal diffusivity
 peclet = prandtl * reynolds
 print(f'Re = {reynolds}, Pe = {peclet}')
 
