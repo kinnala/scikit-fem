@@ -2,7 +2,6 @@ from typing import Optional
 
 import numpy as np
 
-import meshio
 from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
 
@@ -24,12 +23,12 @@ def make_mesh(a: float,         # radius of wire
     origin = np.zeros(3)
     geom = Geometry()
     wire = geom.add_circle(origin, a, dx, make_surface=True)
-    geom.add_physical_surface(wire.plane_surface, 'wire')
+    geom.add_physical(wire.plane_surface, 'wire')
     insulation = geom.add_circle(origin, b, dx, holes=[wire.line_loop])
-    geom.add_physical_surface(insulation.plane_surface, 'insulation')
-    geom.add_physical_line(insulation.line_loop.lines, 'convection')
+    geom.add_physical(insulation.plane_surface, 'insulation')
+    geom.add_physical(insulation.line_loop.lines, 'convection')
 
-    return MeshTri.from_meshio(meshio.Mesh(*generate_mesh(geom, dim=2)))
+    return MeshTri.from_meshio(generate_mesh(geom, dim=2))
 
 
 mesh = make_mesh(*radii)

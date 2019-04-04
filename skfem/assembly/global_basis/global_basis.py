@@ -44,25 +44,33 @@ class GlobalBasis():
 
     def _build_dofnum(self, mesh, element):
         # vertex dofs
-        self.nodal_dofs = np.reshape(np.arange(element.nodal_dofs * mesh.p.shape[1], dtype=np.int64),
-                                     (element.nodal_dofs, mesh.p.shape[1]), order='F')
+        self.nodal_dofs = np.reshape(
+            np.arange(element.nodal_dofs * mesh.p.shape[1], dtype=np.int64),
+            (element.nodal_dofs, mesh.p.shape[1]),
+            order='F')
         offset = element.nodal_dofs * mesh.p.shape[1]
 
         # edge dofs
         if mesh.dim() == 3: 
-            self.edge_dofs = np.reshape(np.arange(element.edge_dofs * mesh.edges.shape[1], dtype=np.int64),
-                                        (element.edge_dofs, mesh.edges.shape[1]), order='F') + offset
+            self.edge_dofs = np.reshape(
+                np.arange(element.edge_dofs * mesh.edges.shape[1], dtype=np.int64),
+                (element.edge_dofs, mesh.edges.shape[1]),
+                order='F') + offset
             offset = offset + element.edge_dofs * mesh.edges.shape[1]
 
         # facet dofs
         if mesh.dim() >= 2: # 2D or 3D mesh
-            self.facet_dofs = np.reshape(np.arange(element.facet_dofs * mesh.facets.shape[1], dtype=np.int64),
-                                         (element.facet_dofs, mesh.facets.shape[1]), order='F') + offset
+            self.facet_dofs = np.reshape(
+                np.arange(element.facet_dofs * mesh.facets.shape[1], dtype=np.int64),
+                (element.facet_dofs, mesh.facets.shape[1]),
+                order='F') + offset
             offset = offset + element.facet_dofs * mesh.facets.shape[1]
 
         # interior dofs
-        self.interior_dofs = np.reshape(np.arange(element.interior_dofs * mesh.t.shape[1], dtype=np.int64),
-                                        (element.interior_dofs, mesh.t.shape[1]), order='F') + offset
+        self.interior_dofs = np.reshape(
+            np.arange(element.interior_dofs * mesh.t.shape[1], dtype=np.int64),
+            (element.interior_dofs, mesh.t.shape[1]),
+            order='F') + offset
 
         # global numbering
         self.element_dofs = np.zeros((0, mesh.t.shape[1]), dtype=np.int64)
@@ -96,7 +104,7 @@ class GlobalBasis():
         return np.setdiff1d(np.arange(self.N), np.concatenate(D))
 
     def _expand_facets(self, facets):
-        
+        """Transform a set of facets into facets, edges and points."""
         class IndexSet(NamedTuple):
             p: ndarray = None
             t: ndarray = None
@@ -106,17 +114,16 @@ class GlobalBasis():
         p = np.unique(self.mesh.facets[:, facets].flatten())
 
         if self.mesh.dim() == 3:
-            edges = np.intersect1d(self.mesh.boundary_edges(),
-                                   np.unique(self.mesh.t2e[:, self.mesh.f2t[0, facets]].flatten()))
+            edges = np.intersect1d(
+                self.mesh.boundary_edges(),
+                np.unique(self.mesh.t2e[:, self.mesh.f2t[0, facets]].flatten()))
             return IndexSet(p=p, edges=edges, facets=facets)
         else:
             return IndexSet(p=p, facets=facets)
 
     def _get_dofs(self, facets):
         """Return global DOF numbers corresponding to a set of facets."""
-        
         ix = self._expand_facets(facets)
-        
         nodal_dofs = {}
         facet_dofs = {}
         edge_dofs = {}
@@ -159,7 +166,7 @@ class GlobalBasis():
             facets = self.mesh.boundary_facets()
         elif callable(facets):
             facets = self.mesh.facets_satisfying(facets)
-            
+
         if type(facets) is dict:
             return {key: self._get_dofs(facets[key]) for key in facets}
         else:

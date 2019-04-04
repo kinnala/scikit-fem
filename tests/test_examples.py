@@ -64,7 +64,7 @@ class TestEx10(unittest.TestCase):
     """Run examples/ex10.py"""
     def runTest(self):
         import docs.examples.ex10 as ex10
-        self.assertAlmostEqual(np.mean(ex10.x), 0.14566021189334058)
+        self.assertAlmostEqual(np.mean(ex10.x), 0.277931521728906)
 
 class TestEx11(unittest.TestCase):
     """Run examples/ex11.py"""

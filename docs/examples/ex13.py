@@ -3,7 +3,6 @@ from skfem.models.poisson import laplace, mass
 
 import numpy as np
 
-import meshio
 from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
 
@@ -18,17 +17,14 @@ for x in radii:
 for y in reversed(radii):
     points.append(geom.add_point([0., y, 0.], lcar))
 lines.append(geom.add_line(*points[1:3]))
-geom.add_physical_line(lines[-1], 'ground')
+geom.add_physical(lines[-1], 'ground')
 lines.append(geom.add_circle_arc(points[2], points[0], points[3]))
 lines.append(geom.add_line(points[3], points[4]))
-geom.add_physical_line(lines[-1], 'positive')
+geom.add_physical(lines[-1], 'positive')
 lines.append(geom.add_circle_arc(points[4], points[0], points[1]))
-geom.add_physical_surface(
-    geom.add_plane_surface(geom.add_line_loop(lines)), 'domain')
+geom.add_physical(geom.add_plane_surface(geom.add_line_loop(lines)), 'domain')
 
-mesh = MeshTri.from_meshio(meshio.Mesh(*generate_mesh(geom,
-                                                      dim=2,
-                                                      prune_vertices=False)))
+mesh = MeshTri.from_meshio(generate_mesh(geom, dim=2))
 
 elements = ElementTriP2()
 basis = InteriorBasis(mesh, elements)
@@ -41,21 +37,18 @@ u = np.zeros(basis.N)
 u[boundary_dofs['positive'].all()] = 1.
 u[interior_dofs] = solve(*condense(A, 0.*u, u, interior_dofs))
 
-@linear_form
-def exact(v, dv, w):
-    x = w.x
-    return v * 2 * np.arctan2(x[1, :], x[0, :]) / np.pi
-
 M = asm(mass, basis)
-u_exact = solve(M, asm(exact, basis))
+u_exact = L2_projection(lambda x, y: 2 * np.arctan2(y, x) / np.pi, basis)
 u_error = u - u_exact
 print('L2 error =', np.sqrt(u_error @ M @ u_error))
 print('conductance = {:.4f} (exact = 2 ln 2 / pi = {:.4f})'.format(
     u @ A @ u, 2 * np.log(2) / np.pi))
 
+
 @linear_form
 def port_flux(v, dv, w):
     return sum(w.n * dv)
+
 
 for port in mesh.boundaries:
     basis = FacetBasis(mesh, elements, facets=mesh.boundaries[port])

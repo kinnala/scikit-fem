@@ -36,17 +36,17 @@ def make_geom(length: float = 35.,
                      ([2], 'ceiling'),
                      ([3], 'inlet'),
                      ([0, 4, 5], 'floor')]:
-        geom.add_physical_line(list(np.array(lines)[k]), label)
+        geom.add_physical(list(np.array(lines)[k]), label)
 
-    geom.add_physical_surface(
+    geom.add_physical(
         geom.add_plane_surface(geom.add_line_loop(lines)), 'domain')
 
     return geom
 
 
 def make_mesh(*args, **kwargs) -> MeshTri:
-    return MeshTri.from_meshio(meshio.Mesh(*generate_mesh(
-        make_geom(*args, **kwargs), dim=2)))
+    return MeshTri.from_meshio(generate_mesh(make_geom(*args, **kwargs),
+                                             dim=2))
 
 
 mesh = make_mesh(lcar=.5**2)
