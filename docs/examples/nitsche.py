@@ -16,18 +16,18 @@ from ex14 import basis, A, u_exact, dirichlet
 
 fbasis = FacetBasis(basis.mesh, basis.elem)
 
-alpha = 1e-1                      # TODO: How is alpha chosen?
+alpha = 1e-3                    # TODO: How is alpha chosen?
 
 
 @bilinear_form
 def nitsche_bilinear(u, du, v, dv, w):
-    return (u * v) / w.h / alpha - sum(w.n * du) * v - sum(w.n * dv) * u
+    return u * v / w.h / alpha - u * sum(w.n * dv) - sum(w.n * du) * v
 
 
 @linear_form
 def nitsche_linear(v, dv, w):
     u0 = dirichlet(*w.x)
-    return u0 * v / w.h / alpha - sum(w.n * dv) * u0
+    return u0 * v / w.h / alpha - u0 * sum(w.n * dv)
 
     
 B = A + asm(nitsche_bilinear, fbasis)
