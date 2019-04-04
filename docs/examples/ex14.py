@@ -1,5 +1,5 @@
 from skfem import *
-from skfem.models.poisson import laplace
+from skfem.models.poisson import laplace, mass
 
 import numpy as np
 
@@ -20,13 +20,18 @@ def dirichlet(x, y):
     return ((x + 1.j * y) ** 2).real
 
 
-u = np.zeros(basis.N)
-u[D] = L2_projection(dirichlet,
-                     FacetBasis(m, e, facets=m.boundary_facets()), D)
+u_exact = L2_projection(dirichlet, basis)
+u = u_exact.copy()
 u[I] = solve(*condense(A, np.zeros_like(u), u, I))
 
 
 if __name__ == "__main__":
-    print('||grad u||**2 = {:f} (exact = 8/3 = {:f})'.format(u @ A @ u, 8/3))
+
+    from os.path import splitext
+    from sys import argv
+
+    u_error = u - u_exact
+    print('L2 error = ', np.sqrt(u_error.T @ (asm(mass, basis) @ u_error)))
+
     m.plot(u[basis.nodal_dofs.flatten()])
-    m.show()
+    m.savefig(splitext(argv[0])[0] + '_solution.png')
