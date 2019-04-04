@@ -243,10 +243,10 @@ natural(bfs, bfs.make_vector(), 1e2, callback,
 
 # Forced convection
 
-@bilinear_form
-def advection(u, du, v, dv, w):
-    velocity = w.w
-    return v * sum(velocity * du)
+reynolds = re[-1]
+prandtl = 0.71                  # =kinematic viscosity / thermal diffusivity
+peclet = prandtl * reynolds
+print(f'Re = {reynolds}, Pe = {peclet}')
 
 
 def fully_developed(x, y):
@@ -254,18 +254,11 @@ def fully_developed(x, y):
     return 1.5 * (1 - (4 * y - 1)**2) * (1 - (4 * y - 1)**2 / 5)
 
 
-reynolds = re[-1]
-prandtl = 0.71                  # =kinematic viscosity / thermal diffusivity
-peclet = prandtl * reynolds
-print(f'Re = {reynolds}, Pe = {peclet}')
-A = (asm(laplace, bfs.basis['V']) +
-     peclet * asm(advection, bfs.basis['V'],
-                  w=[bfs.basis['V'].interpolate(velocity[reynolds][i::2])
-                     for i in range(2)]))
-inlet_basis = FacetBasis(bfs.mesh, bfs.basis['V'].elem,
-                         facets=bfs.mesh.boundaries['inlet'])
-inlet_dofs = inlet_basis.get_dofs(bfs.mesh.boundaries['inlet']).all()
-interior = bfs.basis['V'].complement_dofs(inlet_dofs)
+@bilinear_form
+def advection(u, du, v, dv, w):
+    velocity = w.w
+    return v * sum(velocity * du)
+
 
 cooling = asm(
     unit_load,
@@ -273,10 +266,18 @@ cooling = asm(
                facets=np.concatenate(
                    [bfs.mesh.boundaries[patch] for patch in
                     ['floor', 'ceiling']])))
+A = (asm(laplace, bfs.basis['V']) +
+     peclet * asm(advection, bfs.basis['V'],
+                  w=[bfs.basis['V'].interpolate(velocity[reynolds][i::2])
+                     for i in range(2)]))
+inlet_basis = FacetBasis(bfs.mesh, bfs.basis['V'].elem,
+                         facets=bfs.mesh.boundaries['inlet'])
+inlet_dofs = inlet_basis.get_dofs(bfs.mesh.boundaries['inlet']).all()
+
 temperature = np.zeros(bfs.basis['V'].N)
 temperature[inlet_dofs] = L2_projection(
     fully_developed, inlet_basis, inlet_dofs)
-temperature[interior] = solve(*condense(
+temperature[bfs.basis['V'].complement_dofs(inlet_dofs)] = solve(*condense(
     A, -48/5*cooling, temperature, D=inlet_dofs))
 
 
