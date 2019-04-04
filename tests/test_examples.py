@@ -79,10 +79,8 @@ class TestEx11(unittest.TestCase):
 class TestEx14(unittest.TestCase):
     """Run examples/ex14.py"""
     def runTest(self):
-        import docs.examples.ex14
-        u = docs.examples.ex14.u
-        A = docs.examples.ex14.A
-        self.assertTrue(((u @ A @ u) - 8/3) < 0.01)
+        from docs.examples.ex14 import u_error
+        self.assertAlmostEqual(np.linalg.norm(u_error, np.inf), 0.0)
 
 class TestEx15(unittest.TestCase):
     """Run examples/ex15.py"""
