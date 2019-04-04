@@ -11,10 +11,10 @@ from skfem.models.poisson import mass
 
 import numpy as np
 
-from ex14 import basis, A, u_exact
+from ex14 import basis, A, u_exact, dirichlet
 
-fbasis = FacetBasis(basis.mesh, basis.elem,
-                    facets=basis.mesh.boundary_facets())
+
+fbasis = FacetBasis(basis.mesh, basis.elem)
 
 alpha = 1e-1                      # TODO: How is alpha chosen?
 
@@ -45,5 +45,5 @@ if __name__ == '__main__':
     print('L2 error = ',
           np.sqrt(u_error.T @ (asm(mass, basis) @ u_error)))
 
-    mesh.plot(u[basis.nodal_dofs.flatten()])
-    mesh.savefig(splitext(argv[0])[0] + '_solution.png')
+    basis.mesh.plot(u[basis.nodal_dofs.flatten()])
+    basis.mesh.savefig(splitext(argv[0])[0] + '_solution.png')
