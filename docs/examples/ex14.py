@@ -1,5 +1,5 @@
 from skfem import *
-from skfem.models.poisson import laplace, mass
+from skfem.models.poisson import laplace
 
 import numpy as np
 
@@ -24,13 +24,17 @@ u_exact = L2_projection(dirichlet, basis)
 u = u_exact.copy()
 u[I] = solve(*condense(A, np.zeros_like(u), u, I))
 
+u_error = u - u_exact
+
 
 if __name__ == "__main__":
 
     from os.path import splitext
     from sys import argv
 
-    u_error = u - u_exact
+    from skfem.models.poisson import mass
+    
+
     print('L2 error = ', np.sqrt(u_error.T @ (asm(mass, basis) @ u_error)))
 
     m.plot(u[basis.nodal_dofs.flatten()])
