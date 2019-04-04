@@ -234,7 +234,7 @@ def callback(k, reynolds, uvp):
         velocity[reynolds] = bfs.split(uvp)[0]
         
 
-natural(bfs, bfs.make_vector(), 2e2, callback,
+natural(bfs, bfs.make_vector(), 1e2, callback,
         lambda_stepsize0=200.,
         lambda_stepsize_max=200.,
         max_newton_steps=2**3,
