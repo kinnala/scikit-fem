@@ -1,15 +1,9 @@
-from typing import Optional
-
-import numpy as np
-
-from pygmsh import generate_mesh
-from pygmsh.built_in import Geometry
-
 from skfem import *
 from skfem.models.poisson import laplace, unit_load
 
-from ex17 import (mesh, element, basis,
-                  radii, joule_heating, thermal_conductivity)
+import numpy as np
+
+from ex17 import mesh, basis, radii, joule_heating, thermal_conductivity
 
 
 L = asm(laplace, basis)
