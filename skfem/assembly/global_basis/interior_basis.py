@@ -68,27 +68,37 @@ class InteriorBasis(GlobalBasis):
                  mesh: Mesh,
                  elem: Element,
                  mapping: Optional[Mapping] = None,
-                 intorder: Optional[int] = None):
+                 intorder: Optional[int] = None,
+                 elements: Optional[ndarray] = None):
         super(InteriorBasis, self).__init__(mesh, elem, mapping, intorder)
 
         self.X, self.W = get_quadrature(self.refdom, self.intorder)
 
-        self.basis = [self.elem.gbasis(self.mapping, self.X, j)
+        self.basis = [self.elem.gbasis(self.mapping, self.X, j, tind=elements)
                       for j in range(self.Nbfun)]
 
-        self.nelems = self.mesh.t.shape[1]
-        self.dx = np.abs(self.mapping.detDF(self.X)) * np.tile(self.W, (self.nelems, 1))
+        if elements is None:
+            self.nelems = self.mesh.t.shape[1]
+            self.tind = np.arange(self.nelems, dtype=np.int64)
+        else:
+            self.nelems = len(elements)
+            self.tind = elements
+
+        self.dx = np.abs(self.mapping.detDF(self.X, tind=elements)) *\
+            np.tile(self.W, (self.nelems, 1))
+
+        self.element_dofs = self.element_dofs[:, self.tind]
 
     def default_parameters(self):
         """Return default parameters for `~skfem.assembly.asm`."""
-        return {'x':self.global_coordinates(),
-                'h':self.mesh_parameters()}
+        return {'x': self.global_coordinates(),
+                'h': self.mesh_parameters()}
 
     def global_coordinates(self) -> ndarray:
-        return self.mapping.F(self.X)
+        return self.mapping.F(self.X, tind=self.tind)
 
     def mesh_parameters(self) -> ndarray:
-        return np.abs(self.mapping.detDF(self.X)) ** (1.0 / self.mesh.dim())
+        return np.abs(self.mapping.detDF(self.X, self.tind)) ** (1.0 / self.mesh.dim())
 
     def refinterp(self, interp: ndarray, Nrefs: Optional[int] = 1):
         """Refine and interpolate (for plotting)."""
@@ -112,14 +122,14 @@ class InteriorBasis(GlobalBasis):
         nt = self.nelems
         t = np.tile(m.t, (1, nt))
         dt = np.max(t)
-        t += (dt+1)*np.tile(np.arange(nt), (m.t.shape[0]*m.t.shape[1], 1)).flatten('F').reshape((-1, m.t.shape[0])).T
+        t += (dt + 1) * np.tile(np.arange(nt), (m.t.shape[0]*m.t.shape[1], 1)).flatten('F').reshape((-1, m.t.shape[0])).T
 
-        if X.shape[0]==1:
+        if X.shape[0] == 1:
             p = np.array([x.flatten()])
         else:
             p = x[0].flatten()
             for itr in range(len(x)-1):
-                p = np.vstack((p, x[itr+1].flatten()))
+                p = np.vstack((p, x[itr + 1].flatten()))
 
         M = meshclass(p, t, validate=False)
 
@@ -137,7 +147,7 @@ class InteriorBasis(GlobalBasis):
             w = np.zeros(x.shape[1])
             for k in range(self.Nbfun):
                 phi = self.elem.gbasis(self.mapping, pts, k, tind=tris)
-                w += y[self.element_dofs[k, tris]]*phi[0].flatten()
+                w += y[self.element_dofs[k, tris]] * phi[0].flatten()
             return w
 
         return interpfun

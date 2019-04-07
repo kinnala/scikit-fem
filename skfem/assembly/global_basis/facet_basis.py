@@ -73,7 +73,7 @@ class FacetBasis(GlobalBasis):
                  mapping=None,
                  intorder: Optional[int] = None,
                  side: Optional[int] = None,
-                 facets = None):
+                 facets: Optional[ndarray] = None):
         super(FacetBasis, self).__init__(mesh, elem, mapping, intorder)
 
         self.X, self.W = get_quadrature(self.brefdom, self.intorder)
