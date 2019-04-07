@@ -74,6 +74,28 @@ class FacetBasis(GlobalBasis):
                  intorder: Optional[int] = None,
                  side: Optional[int] = None,
                  facets: Optional[ndarray] = None):
+        """Combine :class:`~skfem.mesh.Mesh` and :class:`~skfem.element.Element` into a
+        set of precomputed global basis functions at element facets.
+
+        Parameters
+        ----------
+        mesh
+            An object of type :class:`~skfem.mesh.Mesh`.
+        elem
+            An object of type :class:`~skfem.element.Element`.
+        mapping
+            An object of type :class:`~skfem.mapping.Mapping`.
+        intorder
+            Optional integration order, i.e. the degree of polynomials that are
+            integrated exactly by the used quadrature.
+        side
+            If 0 or 1, the basis functions are evaluated on the interior facets.
+            The numbers 0 and 1 refer to the different sides of the facets.
+            Side 0 corresponds to the indices mesh.f2t[0, :].
+        facets
+            Optional subset of facet indices.
+
+        """
         super(FacetBasis, self).__init__(mesh, elem, mapping, intorder)
 
         self.X, self.W = get_quadrature(self.brefdom, self.intorder)

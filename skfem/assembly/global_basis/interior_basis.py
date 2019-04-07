@@ -1,6 +1,6 @@
 import numpy as np
 
-from typing import Optional, Callable
+from typing import Optional, Callable, Tuple
 
 from numpy import ndarray
 
@@ -70,6 +70,24 @@ class InteriorBasis(GlobalBasis):
                  mapping: Optional[Mapping] = None,
                  intorder: Optional[int] = None,
                  elements: Optional[ndarray] = None):
+        """Combine :class:`~skfem.mesh.Mesh` and :class:`~skfem.element.Element` into a
+        set of precomputed global basis functions.
+
+        Parameters
+        ----------
+        mesh
+            An object of type :class:`~skfem.mesh.Mesh`.
+        elem
+            An object of type :class:`~skfem.element.Element`.
+        mapping
+            An object of type :class:`~skfem.mapping.Mapping`.
+        intorder
+            Optional integration order, i.e. the degree of polynomials that are
+            integrated exactly by the used quadrature.
+        elements
+            Optional subset of element indices.
+
+        """
         super(InteriorBasis, self).__init__(mesh, elem, mapping, intorder)
 
         self.X, self.W = get_quadrature(self.refdom, self.intorder)
@@ -100,7 +118,9 @@ class InteriorBasis(GlobalBasis):
     def mesh_parameters(self) -> ndarray:
         return np.abs(self.mapping.detDF(self.X, self.tind)) ** (1.0 / self.mesh.dim())
 
-    def refinterp(self, interp: ndarray, Nrefs: Optional[int] = 1):
+    def refinterp(self,
+                  interp: ndarray,
+                  Nrefs: Optional[int] = 1) -> Tuple[Mesh, ndarray]:
         """Refine and interpolate (for plotting)."""
         # mesh reference domain, refine and take the vertices
         meshclass = type(self.mesh)
@@ -128,7 +148,7 @@ class InteriorBasis(GlobalBasis):
             p = np.array([x.flatten()])
         else:
             p = x[0].flatten()
-            for itr in range(len(x)-1):
+            for itr in range(len(x) - 1):
                 p = np.vstack((p, x[itr + 1].flatten()))
 
         M = meshclass(p, t, validate=False)
