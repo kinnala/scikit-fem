@@ -139,7 +139,7 @@ class MappingIsoparametric(Mapping):
                     out += p[i, t[itr, :]][:, None]*phi
                 return out
             else:
-                out = np.zeros((len(tind), X.shape[2]))
+                out = np.zeros((len(tind), X.shape[-1]))
                 for itr in range(t.shape[0]):
                     phi, _ = elem.lbasis(X, itr)
                     out += p[i, t[itr, tind]][:, None]*phi
@@ -153,7 +153,7 @@ class MappingIsoparametric(Mapping):
                     out += p[i, t[itr, :]][:, None]*dphi[j]
                 return out
             else:
-                out = np.zeros((len(tind), X.shape[2]))
+                out = np.zeros((len(tind), X.shape[-1]))
                 for itr in range(t.shape[0]):
                     _, dphi = elem.lbasis(X, itr)
                     out += p[i, t[itr, tind]][:, None]*dphi[j]
