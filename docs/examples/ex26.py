@@ -6,12 +6,13 @@ import numpy as np
 from ex17 import mesh, basis, radii, joule_heating, thermal_conductivity
 
 
-L = asm(laplace, basis)
-f = asm(unit_load, basis)
 
 insulation = np.unique(basis.element_dofs[:, mesh.subdomains['insulation']])
 temperature = np.zeros(basis.N)
 wire = basis.complement_dofs(insulation)
+wire_basis = InteriorBasis(mesh, basis.elem, elements=mesh.subdomains['wire'])
+L = asm(laplace, wire_basis)
+f = asm(unit_load, wire_basis)
 temperature[wire] = solve(*condense(thermal_conductivity['wire'] * L,
                                     joule_heating * f,
                                     D=insulation))
