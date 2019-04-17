@@ -242,14 +242,8 @@ if __name__ == '__main__':
 
     name = splitext(argv[0])[0]
 
-
-    uvp0 = bfs.creeping()
-    u0, p0 = bfs.split(uvp0)
-
-    psi0 = bfs.streamfunction(u0)
-                                
     try:
-        natural(bfs, uvp0, 0., callback,
+        natural(bfs, bfs.creeping(), 0., callback,
                 lambda_stepsize0=50.,
                 lambda_stepsize_max=150.)
     except RangeException:
