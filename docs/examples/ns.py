@@ -1,3 +1,8 @@
+from skfem import *
+from skfem.models.poisson import vector_laplace, laplace
+from skfem.models.general import divergence, rot
+
+from functools import partial
 from itertools import cycle, islice
 from typing import Tuple
 
@@ -7,10 +12,6 @@ from scipy.sparse import bmat, block_diag, csr_matrix
 
 from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
-
-from skfem import *
-from skfem.models.poisson import vector_laplace, laplace
-from skfem.models.general import divergence, rot
 
 from pacopy import natural
 
@@ -234,7 +235,6 @@ def callback(k, reynolds, uvp):
 
 if __name__ == '__main__':
 
-    from functools import partial
     from os.path import splitext
     from sys import argv
 
