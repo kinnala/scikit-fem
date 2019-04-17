@@ -221,7 +221,7 @@ class RangeException(Exception):
 re = []
 ax = bfs.mesh_plot()
 
-def callback(k, reynolds, uvp):
+def callback(k, reynolds, uvp, name: str):
     print(f'Re = {reynolds}')
     re.append(reynolds)
 
@@ -239,10 +239,9 @@ if __name__ == '__main__':
     from os.path import splitext
     from sys import argv
 
-    name = splitext(argv[0])[0]
-
     try:
-        natural(bfs, bfs.creeping(), 0., callback,
+        natural(bfs, bfs.creeping(), 0.,
+                partial(callback, name=splitext(argv[0])[0]),
                 lambda_stepsize0=50.,
                 lambda_stepsize_max=150.)
     except RangeException:
