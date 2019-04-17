@@ -125,6 +125,65 @@ def build_pc_diag(A: spmatrix) -> spmatrix:
     return sp.spdiags(1.0/A.diagonal(), 0, A.shape[0], A.shape[0])
 
 
+def solver_iter_krylov(krylov: Optional[LinearSolver] = spl.cg,
+                       pc: Optional[spmatrix] = None,
+                       guess: Optional[ndarray] = None,
+                       maxiter: Optional[int] = 100,
+                       tol: Optional[float] = 1e-8,
+                       verbose: Optional[bool] = False) -> LinearSolver:
+    """Krylov-subspace iterative linear solver.
+    
+    Parameters
+    ----------
+    krylov
+        A Krylov iterative linear solver, like, and by default, 
+        :func:`scipy.sparse.linalg.cg`
+    pc
+        A preconditioner for a Krylov algorithm.  By default, a
+        diagonal preconditioner is built using :func:`skfem.utils.build_pc_diag`.
+    guess
+        An initial guess. By default, a zero vector is used.
+    maxiter
+        Maximum number of iterations.
+    tol
+        Tolerance for convergence.
+    verbose
+        If True, print the norm of the iterate.
+
+    Returns
+    -------
+    LinearSolver
+        A solver function that can be passed to :func:`solve`.
+
+    """
+    def callback(x):
+        if verbose:
+            print(np.linalg.norm(x))
+
+    if pc is None:
+        if verbose:
+            print("Starting conjugate gradient with TOL=" + str(tol) + ", MAXITER=" + str(maxiter) + " and diagonal preconditioner ...")
+        def solver(A, b):
+            sol, info = krylov(
+                A, b, x0=guess, maxiter=maxiter, M=build_pc_diag(A), atol=tol, callback=callback)
+            if info > 0:
+                warnings.warn("Convergence not achieved!")
+            elif info == 0 and verbose:
+                print("Conjugate gradient converged to TOL=" + str(tol))
+            return sol
+    else:
+        if verbose:
+            print("Starting conjugate gradient with TOL=" + str(tol) + ", MAXITER=" + str(maxiter) + " and user-given preconditioner ...")
+        def solver(A, b):
+            sol, info = krylov(A, b, x0=guess, maxiter=maxiter, M=pc, atol=tol, callback=callback)
+            if info > 0:
+                warnings.warn("Convergence not achieved!")
+            elif info == 0 and verbose:
+                print("Conjugate gradient converged to TOL=" + str(tol))
+            return sol
+
+    return solver
+
 def solver_iter_pcg(pc: Optional[spmatrix] = None,
                     guess: Optional[ndarray] = None,
                     maxiter: Optional[int] = 100,
@@ -152,32 +211,7 @@ def solver_iter_pcg(pc: Optional[spmatrix] = None,
         A solver function that can be passed to :func:`solve`.
 
     """
-    def callback(x):
-        if verbose:
-            print(np.linalg.norm(x))
-
-    if pc is None:
-        if verbose:
-            print("Starting conjugate gradient with TOL=" + str(tol) + ", MAXITER=" + str(maxiter) + " and diagonal preconditioner ...")
-        def solver(A, b):
-            sol, info = spl.cg(A, b, x0=guess, maxiter=maxiter, M=build_pc_diag(A), atol=tol, callback=callback)
-            if info > 0:
-                warnings.warn("Convergence not achieved!")
-            elif info == 0 and verbose:
-                print("Conjugate gradient converged to TOL=" + str(tol))
-            return sol
-    else:
-        if verbose:
-            print("Starting conjugate gradient with TOL=" + str(tol) + ", MAXITER=" + str(maxiter) + " and user-given preconditioner ...")
-        def solver(A, b):
-            sol, info = spl.cg(A, b, x0=guess, maxiter=maxiter, M=pc, atol=tol, callback=callback)
-            if info > 0:
-                warnings.warn("Convergence not achieved!")
-            elif info == 0 and verbose:
-                print("Conjugate gradient converged to TOL=" + str(tol))
-            return sol
-
-    return solver
+    return solver_iter_krylov(pc, guess, maxiter, tol, verbose)
 
 
 def solve(A: spmatrix,
