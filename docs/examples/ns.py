@@ -7,6 +7,7 @@ from itertools import cycle, islice
 from typing import Tuple
 
 from matplotlib.pyplot import subplots
+from matplotlib.tri import Triangulation
 import numpy as np
 from scipy.sparse import bmat, block_diag, csr_matrix
 
@@ -237,8 +238,6 @@ if __name__ == '__main__':
 
     from os.path import splitext
     from sys import argv
-
-    from matplotlib.tri import Triangulation
 
     name = splitext(argv[0])[0]
 
