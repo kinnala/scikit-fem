@@ -162,7 +162,7 @@ def solver_iter_krylov(krylov: Optional[LinearSolver] = spl.cg,
 
     if pc is None:
         if verbose:
-            print(f"Starting {solver.__name__} with TOL={tol}, "
+            print(f"Starting {krylov.__name__} with TOL={tol}, "
                   f"MAXITER={maxiter} and diagonal preconditioner ...")
         def solver(A, b):
             sol, info = krylov(
@@ -172,11 +172,11 @@ def solver_iter_krylov(krylov: Optional[LinearSolver] = spl.cg,
             if info > 0:
                 warnings.warn("Convergence not achieved!")
             elif info == 0 and verbose:
-                print(f"{solver.__name__} converged to TOL=" + str(tol))
+                print(f"{krylov.__name__} converged to TOL=" + str(tol))
             return sol
     else:
         if verbose:
-            print(f"Starting {solver.__name__} with TOL={tol}, "
+            print(f"Starting {krylov.__name__} with TOL={tol}, "
                   f"MAXITER={maxiter} and user-given preconditioner ...")
         def solver(A, b):
             sol, info = krylov(
@@ -185,7 +185,7 @@ def solver_iter_krylov(krylov: Optional[LinearSolver] = spl.cg,
             if info > 0:
                 warnings.warn("Convergence not achieved!")
             elif info == 0 and verbose:
-                print(f"{solver.__name__} converged to TOL={tol}")
+                print(f"{krylov.__name__} converged to TOL={tol}")
             return sol
 
     return solver
