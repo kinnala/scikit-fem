@@ -4,7 +4,7 @@ from skfem.models.general import divergence, rot
 
 from functools import partial
 from itertools import cycle, islice
-from typing import Tuple
+from typing import Tuple, Iterable
 
 from matplotlib.pyplot import subplots
 from matplotlib.tri import Triangulation
@@ -59,7 +59,7 @@ class BackwardFacingStep:
         self.S = bmat([[A, -B.T],
                        [-B, None]]).tocsr()
         self.I = np.setdiff1d(np.arange(self.S.shape[0]), self.D)
-        
+
     def make_geom(self, length: float, lcar: float) -> Geometry:
         # Barkley et al (2002, figure 3 a - c)
         geom = Geometry()
@@ -91,7 +91,7 @@ class BackwardFacingStep:
 
     @staticmethod
     def make_mesh(geom: Geometry) -> MeshTri:
-            return MeshTri.from_meshio(generate_mesh(geom, dim=2))
+        return MeshTri.from_meshio(generate_mesh(geom, dim=2))
 
     def inlet_dofs(self):
         inlet_dofs_ = self.basis['u'].get_dofs(self.mesh.boundaries['inlet'])
@@ -110,12 +110,6 @@ class BackwardFacingStep:
         uvp = np.zeros(self.basis['u'].N + self.basis['p'].N)
         I = self.inlet_dofs()
         uvp[I] = L2_projection(self.parabolic, self.basis['inlet'], I)
-        return uvp
-
-    def creeping(self):
-        """return the solution for zero Reynolds number"""
-        uvp = self.make_vector()
-        uvp[self.I] = solve(*condense(self.S, np.zeros_like(uvp), uvp, self.I))
         return uvp
 
     def split(self, solution: np.ndarray) -> Tuple[np.ndarray,
@@ -214,24 +208,19 @@ class BackwardFacingStep:
 bfs = BackwardFacingStep(lcar=.2)
 
 
-class RangeException(Exception):
-    pass
-
-
-re = []
-ax = bfs.mesh_plot()
-
-def callback(k, reynolds, uvp, name: str):
+def callback(_: int,
+             reynolds: float,
+             uvp: np.ndarray,
+             name: str,
+             milestones=Iterable[float]):
+    """Echo the Reynolds number and plot streamlines at milestones"""
     print(f'Re = {reynolds}')
-    re.append(reynolds)
 
-    ax = bfs.streamlines(bfs.streamfunction(bfs.split(uvp)[0]))
-    ax.set_title(f'Re = {reynolds}')
-    ax.get_figure().savefig(f'{name}-{reynolds:.2f}-psi.png',
-                            bbox_inches="tight", pad_inches=0)
-    
-    if reynolds > 750.:
-        raise RangeException
+    if reynolds in milestones:
+        ax = bfs.streamlines(bfs.streamfunction(bfs.split(uvp)[0]))
+        ax.set_title(f'Re = {reynolds}')
+        ax.get_figure().savefig(f'{name}-{reynolds}-psi.png',
+                                bbox_inches="tight", pad_inches=0)
 
 
 if __name__ == '__main__':
@@ -239,10 +228,10 @@ if __name__ == '__main__':
     from os.path import splitext
     from sys import argv
 
-    try:
-        natural(bfs, bfs.creeping(), 0.,
-                partial(callback, name=splitext(argv[0])[0]),
-                lambda_stepsize0=50.,
-                lambda_stepsize_max=150.)
-    except RangeException:
-        print(f'Reynolds number sweep complete: {re}.')
+    milestones = [150., 450., 750.]
+    natural(bfs, bfs.make_vector(), 0.,
+            partial(callback,
+                    name=splitext(argv[0])[0],
+                    milestones=milestones),
+            lambda_stepsize0=50.,
+            milestones=milestones)
