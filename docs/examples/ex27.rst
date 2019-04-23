@@ -59,3 +59,16 @@ which is
    (\mathbf v,
    \mathbf u\cdot\nabla\mathbf\delta u
    + \delta\mathbf u\cdot\nabla\mathbf u).
+
+The stream-lines are plotted at Re = 150, 450, and 750 (as in figures 3 *a*–*c* of Barkley, Gomes, & Henderson 2002), these values being specified as ``milestones`` for :func:`~pacopy.natural`.
+
+.. figure:: ex27-ex27-150.0-psi.png
+
+.. figure:: ex27-ex27-450.0-psi.png
+	    
+.. figure:: ex27-ex27-750.0-psi.png
+
+   The stream-lines at Re = 150, 450, and 750.
+
+.. literalinclude:: ex27.py
+    :linenos:
