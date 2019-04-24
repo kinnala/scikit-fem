@@ -190,34 +190,9 @@ def solver_iter_krylov(krylov: Optional[LinearSolver] = spl.cg,
 
     return solver
 
-def solver_iter_pcg(pc: Optional[spmatrix] = None,
-                    guess: Optional[ndarray] = None,
-                    maxiter: Optional[int] = 100,
-                    tol: Optional[float] = 1e-8,
-                    verbose: Optional[bool] = False) -> LinearSolver:
-    """Conjugate gradient solver.
-    
-    Parameters
-    ----------
-    pc
-        A preconditioner for the conjugate gradient algorithm.  By default, a
-        diagonal preconditioner is built using :func:`skfem.utils.build_pc_diag`.
-    guess
-        An initial guess. By default, a zero vector is used.
-    maxiter
-        Maximum number of iterations.
-    tol
-        Tolerance for convergence.
-    verbose
-        If True, print the norm of the iterate.
-
-    Returns
-    -------
-    LinearSolver
-        A solver function that can be passed to :func:`solve`.
-
-    """
-    return solver_iter_krylov(pc, guess, maxiter, tol, verbose)
+def solver_iter_pcg(*args, **kwargs) -> LinearSolver:
+    """Conjugate gradient solver, specialized from solver_iter_krylov"""
+    return solver_iter_krylov(spl.cg, *args, **kwargs)
 
 
 def solve(A: spmatrix,
