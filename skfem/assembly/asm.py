@@ -14,7 +14,8 @@ def asm(kernel,
         ubasis: GlobalBasis,
         vbasis: Optional[GlobalBasis] = None,
         w: Optional[Any] = (None, None, None),
-        nthreads: Optional[int] = 1) -> csr_matrix:
+        nthreads: int = 1,
+        return_elemental: bool = False) -> csr_matrix:
     """Assemble finite element matrices and vectors.
 
     Parameters
@@ -34,6 +35,8 @@ def asm(kernel,
         Number of threads to use in assembly. Due to Python global interpreter
         lock (GIL), this is only useful if kernel is numba function compiled
         with nogil = True, see Examples.
+    return_elemental
+        If True, return the elemental system matrices.
 
     Examples
     --------
@@ -105,10 +108,13 @@ def asm(kernel,
         for t in threads:
             t.join()
 
-        K = coo_matrix((np.transpose(data, (1, 0, 2)).flatten('C'), (rows, cols)),
-                        shape=(vbasis.N, ubasis.N))
-        K.eliminate_zeros()
-        return K.tocsr()
+        if return_elemental:
+            return np.transpose(data, (1, 0, 2)).flatten('C'), rows, cols
+        else:
+            K = coo_matrix((np.transpose(data, (1, 0, 2)).flatten('C'), (rows, cols)),
+                           shape=(vbasis.N, ubasis.N))
+            K.eliminate_zeros()
+            return K.tocsr()
 
     elif nargs == 5:
         data = np.zeros((vbasis.Nbfun, nt))
