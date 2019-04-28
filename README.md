@@ -58,7 +58,7 @@ This project was started while working under a grant from the [Finnish Cultural 
 The library has been used in the preparation of the following scientific works:
 
 - Gustafsson, T., Stenberg, R., & Videman, J. (2019). On Nitsche's method for elastic contact problems. arXiv preprint [arXiv:1902.09312](https://arxiv.org/abs/1902.09312).
-- Gustafsson, T., Stenberg, R., & Videman, J. (2018). Error analysis of Nitsche's mortar method. arXiv preprint [arXiv:1802.10430](https://arxiv.org/abs/1802.10430).
+- Gustafsson, T., Stenberg, R., & Videman, J. (2019). Error analysis of Nitsche's mortar method. Numerische Mathematik. [Open access](https://link.springer.com/article/10.1007/s00211-019-01039-5).
 - Gustafsson, T., Stenberg, R., & Videman, J. (2018). Nitsche's method for unilateral contact problems. arXiv preprint [arXiv:1805.04283](https://arxiv.org/abs/1805.04283).
 - Gustafsson, T., Stenberg, R. & Videman, J. (2018). A posteriori estimates for conforming Kirchhoff plate elements. SIAM Journal on Scientific Computing, 40.3, A1386-A1407. arXiv preprint [arXiv:1707.08396](https://arxiv.org/abs/1707.08396).
 - Gustafsson, T., Rajagopal, K. R., Stenberg, R., & Videman, J. (2018). An adaptive finite element method for the inequality-constrained Reynolds equation. Computer Methods in Applied Mechanics and Engineering, 336, 156-170. arXiv preprint [arXiv:1711.04274](https://arxiv.org/abs/1711.04274).
