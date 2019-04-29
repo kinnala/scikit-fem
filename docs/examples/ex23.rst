@@ -1,3 +1,5 @@
+.. _bratu:
+
 Bratu–Gelfand
 -------------
 
