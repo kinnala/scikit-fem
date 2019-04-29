@@ -21,12 +21,14 @@ from pacopy import natural
 def acceleration(v, dv, w):
     """Compute the vector (v, u . grad u) for given velocity u
 
-    i.e. in Cartesian tensorial indicial notation, the integrand is
+    passed in via w after having been interpolated onto its quadrature
+    points.
+
+    In Cartesian tensorial indicial notation, the integrand is
 
     .. math::
 
         u_j u_{i,j} v_i.
-
 
     """
     u, du = w.w, w.dw
