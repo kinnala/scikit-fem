@@ -1,4 +1,4 @@
-.. _bratu:
+.. _bratug:
 
 Bratu–Gelfand
 -------------
