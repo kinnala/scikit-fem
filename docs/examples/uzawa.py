@@ -1,13 +1,12 @@
 from skfem import *
-from skfem.models.poisson import vector_laplace, mass, laplace
+from skfem.models.poisson import vector_laplace, laplace
 from skfem.models.general import divergence, rot
 
 
 from itertools import count
 
-from matplotlib.pyplot import subplots, pause
 import numpy as np
-from scipy.sparse import bmat, csr_matrix
+from scipy.sparse import csr_matrix
 
 from sksparse.cholmod import cholesky
 
@@ -84,7 +83,7 @@ if __name__ == '__main__':
     name = splitext(argv[0])[0]
 
     mesh.save(f'{name}_velocity.vtk', velocity[basis['u'].nodal_dofs].T)
-    
+
     print(basis['psi'].interpolator(psi)(np.zeros((2, 1)))[0],
           '(cf. exact 1/64)')
 
