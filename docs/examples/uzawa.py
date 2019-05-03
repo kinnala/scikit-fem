@@ -39,16 +39,27 @@ D = basis['u'].get_dofs().all()
 backsolve = cholesky(condense(A, D=D).T)  # cholesky prefers CSC
 I = basis['u'].complement_dofs(D)
 
+
+def flow(pressure: np.ndarray) -> np.ndarray:
+    """compute the velocity corresponding to a guessed pressure"""
+    velocity[I] = backsolve(condense(csr_matrix(A.shape),
+                                     f + B.T @ pressure, I=I)[1])
+    return velocity
+
+
+def dilatation(pressure: np.ndarray) -> np.ndarray:
+    """compute the dilatation corresponding to a guessed pressure"""
+    return B @ flow(pressure)
+
+
 for iteration in count():
-    _, f1 = condense(csr_matrix(A.shape), f + B.T @ pressure, I=I)
-    velocity[I] = backsolve(f1)
-    divergence = B @ velocity
 
-    pressure -= alpha * divergence
+    theta = dilatation(pressure)
+    pressure -= alpha * theta
 
-    divergence_norm = np.linalg.norm(divergence)
-    print(iteration, divergence_norm)
-    if divergence_norm < 1e-4:
+    dilatation_norm = np.linalg.norm(theta)
+    print(iteration, dilatation_norm)
+    if dilatation_norm < 1e-4:
         break
 
 
