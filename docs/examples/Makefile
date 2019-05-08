@@ -4,7 +4,7 @@ all: ex01_solution.png \
      ex06_solution.png \
      ex17_solution.png \
      ex20_stream-lines.png \
-     ex20_velocity-vectors.png
+     ex20_velocity-vectors.png \
      ex23.png \
      ex25.png \
      ex26_solution.png \
