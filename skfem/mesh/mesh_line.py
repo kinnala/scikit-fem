@@ -146,3 +146,7 @@ class MeshLine(Mesh):
 
     def mapping(self):
         return MappingAffine(self)
+
+    @staticmethod
+    def strip_extra_coordinates(p: ndarray) -> ndarray:
+        return p[:, :1]
