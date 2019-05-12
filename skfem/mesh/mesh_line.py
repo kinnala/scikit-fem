@@ -36,7 +36,7 @@ class MeshLine(Mesh):
 
     @classmethod
     def init_refdom(cls: Type[MeshType]) -> MeshType:
-        """Initialise a mesh constisting of the reference interval [0,1]."""
+        """Initialise a mesh consisting of the reference interval [0,1]."""
         return cls()
 
     def _build_mappings(self):
