@@ -40,8 +40,7 @@ class MeshLine(Mesh):
         return cls()
 
     def _build_mappings(self):
-        """Build t2f and f2t. Also sorts p and builds t."""
-        self.p = np.sort(self.p)
+        """Build t, t2f and f2t"""
         self.t = np.array([np.arange(np.max(self.p.shape)-1), np.arange(np.max(self.p.shape)-1)+1])
 
         self.facets = np.array([np.arange(self.p.shape[1])])
