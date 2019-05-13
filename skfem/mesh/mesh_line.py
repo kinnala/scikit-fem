@@ -28,6 +28,11 @@ class MeshLine(Mesh):
         if len(p.shape) == 1:
             p = np.array([p]) 
         self.p = p
+        if t is None:
+            self.t = np.vstack([self.p[:-1],
+                                self.p[1:]])
+        else:
+            self.t = t
         self._build_mappings()
 
         if validate:
@@ -41,9 +46,8 @@ class MeshLine(Mesh):
 
     def _build_mappings(self):
         """Build t, t2f and f2t"""
-        self.t = np.array([np.arange(np.max(self.p.shape)-1), np.arange(np.max(self.p.shape)-1)+1])
 
-        self.facets = np.array([np.arange(self.p.shape[1])])
+        self.facets = np.hstack([self.t[0], self.t[1, -1:]])
         self.t2f = self.t
         # build f2t
         e_tmp = np.hstack((self.t2f[0, :], self.t2f[1, :]))
