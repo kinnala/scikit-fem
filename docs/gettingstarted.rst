@@ -27,7 +27,7 @@ We are happy to welcome any contributions to the library.  Reasonable projects
 for first timers include:
 
 - Filing out a `bug report <https://github.com/kinnala/scikit-fem/issues>`_.
-- Writing an `example <https://github.com/kinnala/scikit-fem/tree/master/examples>`_.
+- Writing an `example <https://github.com/kinnala/scikit-fem/tree/master/docs/examples>`_.
 - Improving the `tests <https://github.com/kinnala/scikit-fem/tree/master/tests>`_.
 - Finding typos in the `documentation <https://github.com/kinnala/scikit-fem/tree/master/docs>`_.
 
