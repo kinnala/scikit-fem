@@ -100,19 +100,18 @@ class MeshLine(Mesh):
         p = self.p
 
         # new vertices and elements
-        midpoints = p[:, self.t].mean(axis=1)
-        newp = np.hstack((p, midpoints))
-        # update fields
-        self.p = newp
-        self.facets = np.hstack(
-            [self.facets,
-             self.facets.shape[1] + np.arange(self.t.shape[1])[None, :]])
+        newp = np.hstack((p, p[:, self.t].mean(axis=1)))
         newt = np.empty((self.t.shape[0], 2 * self.t.shape[1]),
                         dtype=self.t.dtype)
         newt[0, ::2] = self.t[0]
         newt[0, 1::2] = p.shape[1] + np.arange(self.t.shape[1])
         newt[1, ::2] = newt[0, 1::2]
         newt[1, 1::2] = self.t[1]
+        # update fields
+        self.p = newp
+        self.facets = np.hstack(
+            [self.facets,
+             self.facets.shape[1] + np.arange(self.t.shape[1])[None, :]])
         self.t = newt
         self._build_mappings()
 
