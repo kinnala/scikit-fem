@@ -99,11 +99,21 @@ class MeshLine(Mesh):
         # rename variables
         p = self.p
 
-        mid = range(self.t.shape[1]) + np.max(self.t) + 1
         # new vertices and elements
-        newp = np.hstack((p, p[:, self.t].mean(axis=1)))
+        midpoints = p[:, self.t].mean(axis=1)
+        newp = np.hstack((p, midpoints))
         # update fields
         self.p = newp
+        self.facets = np.hstack(
+            [self.facets,
+             self.facets.shape[1] + np.arange(self.t.shape[1])[None, :]])
+        newt = np.empty((self.t.shape[0], 2 * self.t.shape[1]),
+                        dtype=self.t.dtype)
+        newt[0, ::2] = self.t[0]
+        newt[0, 1::2] = p.shape[1] + np.arange(self.t.shape[1])
+        newt[1, ::2] = newt[0, 1::2]
+        newt[1, 1::2] = self.t[1]
+        self.t = newt
         self._build_mappings()
 
     def boundary_nodes(self):
