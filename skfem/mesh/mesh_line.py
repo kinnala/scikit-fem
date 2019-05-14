@@ -101,7 +101,7 @@ class MeshLine(Mesh):
 
         mid = range(self.t.shape[1]) + np.max(self.t) + 1
         # new vertices and elements
-        newp = np.hstack((p, 0.5*(p[:, self.t[0, :]] + p[:, self.t[1, :]])))
+        newp = np.hstack((p, p[:, self.t].mean(axis=1)))
         # update fields
         self.p = newp
         self._build_mappings()
