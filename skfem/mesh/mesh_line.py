@@ -28,6 +28,10 @@ class MeshLine(Mesh):
         if len(p.shape) == 1:
             p = np.array([p]) 
         self.p = p
+        
+        self.facets = np.arange(self.p.shape[1])[None, :]
+        self.t = np.vstack([self.facets[0, :-1],
+                            self.facets[0, 1:]]) if t is None else t
         self._build_mappings()
 
         if validate:
@@ -40,11 +44,8 @@ class MeshLine(Mesh):
         return cls()
 
     def _build_mappings(self):
-        """Build t2f and f2t. Also sorts p and builds t."""
-        self.p = np.sort(self.p)
-        self.t = np.array([np.arange(np.max(self.p.shape)-1), np.arange(np.max(self.p.shape)-1)+1])
+        """Build t2f and f2t"""
 
-        self.facets = np.array([np.arange(self.p.shape[1])])
         self.t2f = self.t
         # build f2t
         e_tmp = np.hstack((self.t2f[0, :], self.t2f[1, :]))
@@ -98,11 +99,20 @@ class MeshLine(Mesh):
         # rename variables
         p = self.p
 
-        mid = range(self.t.shape[1]) + np.max(self.t) + 1
         # new vertices and elements
-        newp = np.hstack((p, 0.5*(p[:, self.t[0, :]] + p[:, self.t[1, :]])))
+        newp = np.hstack((p, p[:, self.t].mean(axis=1)))
+        newt = np.empty((self.t.shape[0], 2 * self.t.shape[1]),
+                        dtype=self.t.dtype)
+        newt[0, ::2] = self.t[0]
+        newt[0, 1::2] = p.shape[1] + np.arange(self.t.shape[1])
+        newt[1, ::2] = newt[0, 1::2]
+        newt[1, 1::2] = self.t[1]
         # update fields
         self.p = newp
+        self.facets = np.hstack(
+            [self.facets,
+             self.facets.shape[1] + np.arange(self.t.shape[1])[None, :]])
+        self.t = newt
         self._build_mappings()
 
     def boundary_nodes(self):
@@ -146,3 +156,7 @@ class MeshLine(Mesh):
 
     def mapping(self):
         return MappingAffine(self)
+
+    @staticmethod
+    def strip_extra_coordinates(p: ndarray) -> ndarray:
+        return p[:, :1]

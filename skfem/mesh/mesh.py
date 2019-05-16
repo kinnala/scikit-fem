@@ -284,6 +284,7 @@ class Mesh():
 
         # element to boundary element type mapping
         bnd_type = {
+            'line': 'vertex',
             'triangle' : 'line',
             'quad' : 'line',
             'tetra' : 'triangle',
