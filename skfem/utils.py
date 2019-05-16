@@ -190,6 +190,7 @@ def solver_iter_krylov(krylov: Optional[LinearSolver] = spl.cg,
 
     return solver
 
+
 def solver_iter_pcg(*args, **kwargs) -> LinearSolver:
     """Conjugate gradient solver, specialized from solver_iter_krylov"""
     return solver_iter_krylov(spl.cg, *args, **kwargs)
