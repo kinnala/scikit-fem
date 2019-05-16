@@ -22,4 +22,5 @@ setup(
     ],
     packages=find_packages(exclude=['tests']),
     install_requires=['numpy', 'scipy', 'matplotlib', 'meshio'],
+    test_suite='tests',
 )
