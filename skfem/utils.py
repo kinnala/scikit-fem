@@ -126,29 +126,23 @@ def build_pc_diag(A: spmatrix) -> spmatrix:
 
 
 def solver_iter_krylov(krylov: Optional[LinearSolver] = spl.cg,
-                       pc: Optional[spmatrix] = None,
-                       guess: Optional[ndarray] = None,
-                       maxiter: Optional[int] = 100,
-                       tol: Optional[float] = 1e-8,
-                       verbose: Optional[bool] = False) -> LinearSolver:
+                       verbose: Optional[bool] = False,
+                       **kwargs) -> LinearSolver:
     """Krylov-subspace iterative linear solver.
-    
+
     Parameters
     ----------
     krylov
-        A Krylov iterative linear solver, like, and by default, 
+        A Krylov iterative linear solver, like, and by default,
         :func:`scipy.sparse.linalg.cg`
-    pc
-        A preconditioner for a Krylov algorithm.  By default, a
-        diagonal preconditioner is built using :func:`skfem.utils.build_pc_diag`.
-    guess
-        An initial guess. By default, a zero vector is used.
-    maxiter
-        Maximum number of iterations.
-    tol
-        Tolerance for convergence.
     verbose
         If True, print the norm of the iterate.
+
+    Any remaining keyword arguments are passed on to the solver, in
+    particular x0, the starting guess, and M, the preconditioner.  If
+    the latter is omitted, a diagonal preconditioner is supplied using
+    :func:`skfem.utils.build_pc_diag`.
+
 
     Returns
     -------
@@ -159,41 +153,25 @@ def solver_iter_krylov(krylov: Optional[LinearSolver] = spl.cg,
     def callback(x):
         if verbose:
             print(np.linalg.norm(x))
-
-    if pc is None:
-        if verbose:
-            print(f"Starting {krylov.__name__} with TOL={tol}, "
-                  f"MAXITER={maxiter} and diagonal preconditioner ...")
-        def solver(A, b):
-            sol, info = krylov(
-                A, b, x0=guess,
-                maxiter=maxiter, M=build_pc_diag(A), atol=tol,
-                callback=callback)
-            if info > 0:
-                warnings.warn("Convergence not achieved!")
-            elif info == 0 and verbose:
-                print(f"{krylov.__name__} converged to TOL=" + str(tol))
-            return sol
-    else:
-        if verbose:
-            print(f"Starting {krylov.__name__} with TOL={tol}, "
-                  f"MAXITER={maxiter} and user-given preconditioner ...")
-        def solver(A, b):
-            sol, info = krylov(
-                A, b, x0=guess,
-                maxiter=maxiter, M=pc, atol=tol, callback=callback)
-            if info > 0:
-                warnings.warn("Convergence not achieved!")
-            elif info == 0 and verbose:
-                print(f"{krylov.__name__} converged to TOL={tol}")
-            return sol
+    
+    def solver(A, b):
+        if 'M' not in kwargs:
+            kwargs['M'] = build_pc_diag(A)
+        sol, info = krylov(A, b, **{'callback': callback, **kwargs})
+        if info > 0:
+            warnings.warn("Convergence not achieved!")
+        elif info == 0 and verbose:
+            print(f"{krylov.__name__} converged to "
+                  + f"tol={kwargs.get('tol', 'default')} and "
+                  + f"atol={kwargs.get('atol', 'default')}")
+        return sol
 
     return solver
 
 
-def solver_iter_pcg(*args, **kwargs) -> LinearSolver:
+def solver_iter_pcg(**kwargs) -> LinearSolver:
     """Conjugate gradient solver, specialized from solver_iter_krylov"""
-    return solver_iter_krylov(spl.cg, *args, **kwargs)
+    return solver_iter_krylov(spl.cg, **kwargs)
 
 
 def solve(A: spmatrix,
