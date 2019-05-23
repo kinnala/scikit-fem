@@ -21,10 +21,10 @@ if __name__ == "__main__":
 else:
     verbose = False
 # run conjugate gradient with the default preconditioner
-x[I] = solve(*condense(A, b, I=I), solver=solver_iter_pcg(verbose=verbose))
+Aint, bint = condense(A, b, I=I)
+x[I] = solve(Aint, bint, solver=solver_iter_pcg(verbose=verbose))
 
 # run conjugate gradient with the incomplete LU preconditioner
-Aint, bint = condense(A, b, I=I)
 x[I] = solve(Aint, bint,
              solver=solver_iter_pcg(M=build_pc_ilu(Aint), verbose=verbose))
 
