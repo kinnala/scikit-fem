@@ -115,8 +115,7 @@ def build_pc_ilu(A: spmatrix,
                  fill_factor: Optional[float] = 20) -> spl.LinearOperator:
     """Incomplete LU preconditioner."""
     P = spl.spilu(A.tocsc(), drop_tol=drop_tol, fill_factor=fill_factor)
-    P_x = lambda x: P.solve(x)
-    M = spl.LinearOperator((A.shape[0], A.shape[0]), matvec=P_x)
+    M = spl.LinearOperator(A.shape, matvec=P.solve)
     return M
 
 
