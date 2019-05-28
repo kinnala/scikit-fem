@@ -8,9 +8,10 @@ from typing import Callable, Optional
 from numpy import ndarray
 from matplotlib.axes import Axes
 
+
 class Mesh2D(Mesh):
     """Two dimensional meshes, common methods.
-    
+
     See the following implementations:
 
     - :class:`~skfem.mesh.MeshTri`, triangular mesh
@@ -56,7 +57,7 @@ class Mesh2D(Mesh):
         """
         mx = np.sum(self.p[0, self.t], axis=0)/self.t.shape[0]
         my = np.sum(self.p[1, self.t], axis=0)/self.t.shape[0]
-        return np.nonzero(test(mx, my))[0]    
+        return np.nonzero(test(mx, my))[0]
 
     def draw(self,
              ax: Optional[Axes] = None,
