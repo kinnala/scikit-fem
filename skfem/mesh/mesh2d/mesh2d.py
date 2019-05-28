@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 from skfem.mesh import Mesh, MeshType
 
-from typing import Callable, Dict, Optional, Union
+from typing import Callable, Optional
 
 from numpy import ndarray
 from matplotlib.axes import Axes
