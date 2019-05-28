@@ -146,38 +146,6 @@ class Mesh2D(Mesh):
 
         return meshclass(points, tris)
 
-    def save(self,
-            filename: str,
-            point_data: Optional[Union[ndarray, Dict[str, ndarray]]] = None,
-            cell_data: Optional[Union[ndarray, Dict[str, ndarray]]] = None) -> None:
-        """Export the mesh and fields using meshio. (2D version.)
-
-        Parameters
-        ----------
-        filename
-            The filename for vtk-file.
-        point_data
-            Data related to the vertices of the mesh. Numpy array for one
-            output or dict for multiple.
-        cell_data
-            Data related to the elements of the mesh. Numpy array for one
-            output or dict for multiple
-
-        """
-        import meshio
-
-        if point_data is not None:
-            if type(point_data) != dict:
-                point_data = {'0':point_data}
-
-        if cell_data is not None:
-            if type(cell_data) != dict:
-                cell_data = {'0':cell_data}
-
-        cells = { self.meshio_type : self.t.T }
-        mesh = meshio.Mesh(self.p.T, cells, point_data, cell_data)
-        meshio.write(filename, mesh)
-
     def param(self) -> float:
         """Return mesh parameter, viz. the length of the longest edge."""
         return np.max(np.linalg.norm(np.diff(self.p[:, self.facets], axis=1),
