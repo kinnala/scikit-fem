@@ -3,14 +3,15 @@ import matplotlib.pyplot as plt
 
 from skfem.mesh import Mesh, MeshType
 
-from typing import Callable, Dict, Optional, Union
+from typing import Callable, Optional
 
 from numpy import ndarray
 from matplotlib.axes import Axes
 
+
 class Mesh2D(Mesh):
     """Two dimensional meshes, common methods.
-    
+
     See the following implementations:
 
     - :class:`~skfem.mesh.MeshTri`, triangular mesh
@@ -56,7 +57,7 @@ class Mesh2D(Mesh):
         """
         mx = np.sum(self.p[0, self.t], axis=0)/self.t.shape[0]
         my = np.sum(self.p[1, self.t], axis=0)/self.t.shape[0]
-        return np.nonzero(test(mx, my))[0]    
+        return np.nonzero(test(mx, my))[0]
 
     def draw(self,
              ax: Optional[Axes] = None,
@@ -145,38 +146,6 @@ class Mesh2D(Mesh):
         meshclass = type(self)
 
         return meshclass(points, tris)
-
-    def save(self,
-            filename: str,
-            point_data: Optional[Union[ndarray, Dict[str, ndarray]]] = None,
-            cell_data: Optional[Union[ndarray, Dict[str, ndarray]]] = None) -> None:
-        """Export the mesh and fields using meshio. (2D version.)
-
-        Parameters
-        ----------
-        filename
-            The filename for vtk-file.
-        point_data
-            Data related to the vertices of the mesh. Numpy array for one
-            output or dict for multiple.
-        cell_data
-            Data related to the elements of the mesh. Numpy array for one
-            output or dict for multiple
-
-        """
-        import meshio
-
-        if point_data is not None:
-            if type(point_data) != dict:
-                point_data = {'0':point_data}
-
-        if cell_data is not None:
-            if type(cell_data) != dict:
-                cell_data = {'0':cell_data}
-
-        cells = { self.meshio_type : self.t.T }
-        mesh = meshio.Mesh(self.p.T, cells, point_data, cell_data)
-        meshio.write(filename, mesh)
 
     def param(self) -> float:
         """Return mesh parameter, viz. the length of the longest edge."""
