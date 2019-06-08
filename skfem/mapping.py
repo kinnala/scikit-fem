@@ -195,20 +195,24 @@ class MappingIsoparametric(Mapping):
         self.mesh = mesh
 
     def G(self, X: ndarray, find: Optional[ndarray] = None) -> ndarray:
-        return np.array([self.bndmap(i, X, find=find) for i in range(self.mesh.dim())])
+        return np.array([self.bndmap(i, X, find=find)
+                         for i in range(self.mesh.dim())])
 
     def detDG(self, X: ndarray, find: Optional[ndarray] = None):
         dim = self.mesh.p.shape[0]
 
         if dim == 2:
-            return np.sqrt(self.bndJ(0, 0, X, find)**2 + self.bndJ(1, 0, X, find)**2)
+            return np.sqrt(self.bndJ(0, 0, X, find)**2 +
+                           self.bndJ(1, 0, X, find)**2)
         elif dim == 3:
-            return np.sqrt(( self.bndJ(1, 0, X, find)*self.bndJ(2, 1, X, find) -\
-                             self.bndJ(2, 0, X, find)*self.bndJ(1, 1, X, find))**2 +
-                           (-self.bndJ(0, 0, X, find)*self.bndJ(2, 1, X, find) +\
-                             self.bndJ(2, 0, X, find)*self.bndJ(0, 1, X, find))**2 +
-                           ( self.bndJ(0, 0, X, find)*self.bndJ(1, 1, X, find) -\
-                             self.bndJ(1, 0, X, find)*self.bndJ(0, 1, X, find))**2)
+            return np.sqrt(
+                (self.bndJ(1, 0, X, find) * self.bndJ(2, 1, X, find) -
+                 self.bndJ(2, 0, X, find) * self.bndJ(1, 1, X, find))**2 +
+                (-self.bndJ(0, 0, X, find) * self.bndJ(2, 1, X, find) +
+                 self.bndJ(2, 0, X, find) * self.bndJ(0, 1, X, find))**2 +
+                (self.bndJ(0, 0, X, find) * self.bndJ(1, 1, X, find) -
+                 self.bndJ(1, 0, X, find) * self.bndJ(0, 1, X, find))**2
+            )
         else:
             raise NotImplementedError("!")
 
@@ -227,15 +231,18 @@ class MappingIsoparametric(Mapping):
         dim = X.shape[0]
 
         if dim == 2:
-            detDF = self.J(0, 0, X, tind=tind) * self.J(1, 1, X, tind=tind) -\
-                    self.J(0, 1, X, tind=tind) * self.J(1, 0, X, tind=tind)
+            detDF = (self.J(0, 0, X, tind=tind) * self.J(1, 1, X, tind=tind) -
+                     self.J(0, 1, X, tind=tind) * self.J(1, 0, X, tind=tind))
         elif dim == 3:
-            detDF = self.J(0, 0, X, tind=tind) * (self.J(1, 1, X, tind=tind) * self.J(2, 2, X, tind=tind) -\
-                                                  self.J(1, 2, X, tind=tind) * self.J(2, 1, X, tind=tind)) \
-                  - self.J(0, 1, X, tind=tind) * (self.J(1, 0, X, tind=tind) * self.J(2, 2, X, tind=tind) -\
-                                                  self.J(1, 2, X, tind=tind) * self.J(2, 0, X, tind=tind)) \
-                  + self.J(0, 2, X, tind=tind) * (self.J(1, 0, X, tind=tind) * self.J(2, 1, X, tind=tind) -\
-                                                  self.J(1, 1, X, tind=tind) * self.J(2, 0, X, tind=tind))
+            detDF = (self.J(0, 0, X, tind=tind) *\
+                     (self.J(1, 1, X, tind=tind) * self.J(2, 2, X, tind=tind) -
+                      self.J(1, 2, X, tind=tind) * self.J(2, 1, X, tind=tind))
+                     - self.J(0, 1, X, tind=tind) *\
+                     (self.J(1, 0, X, tind=tind) * self.J(2, 2, X, tind=tind) -
+                      self.J(1, 2, X, tind=tind) * self.J(2, 0, X, tind=tind))
+                     + self.J(0, 2, X, tind=tind) *\
+                     (self.J(1, 0, X, tind=tind) * self.J(2, 1, X, tind=tind) -
+                      self.J(1, 1, X, tind=tind) * self.J(2, 0, X, tind=tind)))
         else:
             raise Exception("Not implemented for the given dimension.")
 
@@ -256,24 +263,42 @@ class MappingIsoparametric(Mapping):
             invDF[1, 1] =  self.J(0, 0, X, tind=tind) / detDF
         elif dim == 3:
             invDF = np.empty((3, 3) + self.J(0, 0, X, tind=tind).shape)
-            invDF[0, 0] = (-self.J(1, 2, X, tind=tind) * self.J(2, 1, X, tind=tind) +\
-                            self.J(1, 1, X, tind=tind) * self.J(2, 2, X, tind=tind)) / detDF
-            invDF[1, 0] = ( self.J(1, 2, X, tind=tind) * self.J(2, 0, X, tind=tind) -\
-                            self.J(1, 0, X, tind=tind) * self.J(2, 2, X, tind=tind)) / detDF
-            invDF[2, 0] = (-self.J(1, 1, X, tind=tind) * self.J(2, 0, X, tind=tind) +\
-                            self.J(1, 0, X, tind=tind) * self.J(2, 1, X, tind=tind)) / detDF
-            invDF[0, 1] = ( self.J(0, 2, X, tind=tind) * self.J(2, 1, X, tind=tind) -\
-                            self.J(0, 1, X, tind=tind) * self.J(2, 2, X, tind=tind)) / detDF
-            invDF[1, 1] = (-self.J(0, 2, X, tind=tind) * self.J(2, 0, X, tind=tind) +\
-                            self.J(0, 0, X, tind=tind) * self.J(2, 2, X, tind=tind)) / detDF
-            invDF[2, 1] = ( self.J(0, 1, X, tind=tind) * self.J(2, 0, X, tind=tind) -\
-                            self.J(0, 0, X, tind=tind) * self.J(2, 1, X, tind=tind)) / detDF
-            invDF[0, 2] = (-self.J(0, 2, X, tind=tind) * self.J(1, 1, X, tind=tind) +\
-                            self.J(0, 1, X, tind=tind) * self.J(1, 2, X, tind=tind)) / detDF
-            invDF[1, 2] = ( self.J(0, 2, X, tind=tind) * self.J(1, 0, X, tind=tind) -\
-                            self.J(0, 0, X, tind=tind) * self.J(1, 2, X, tind=tind)) / detDF
-            invDF[2, 2] = (-self.J(0, 1, X, tind=tind) * self.J(1, 0, X, tind=tind) +\
-                            self.J(0, 0, X, tind=tind) * self.J(1, 1, X, tind=tind)) / detDF
+            invDF[0, 0] = (-self.J(1, 2, X, tind=tind) *\
+                           self.J(2, 1, X, tind=tind) +
+                           self.J(1, 1, X, tind=tind) *\
+                           self.J(2, 2, X, tind=tind)) / detDF
+            invDF[1, 0] = (self.J(1, 2, X, tind=tind) *\
+                           self.J(2, 0, X, tind=tind) -
+                           self.J(1, 0, X, tind=tind) *\
+                           self.J(2, 2, X, tind=tind)) / detDF
+            invDF[2, 0] = (-self.J(1, 1, X, tind=tind) *\
+                           self.J(2, 0, X, tind=tind) +
+                           self.J(1, 0, X, tind=tind) *\
+                           self.J(2, 1, X, tind=tind)) / detDF
+            invDF[0, 1] = (self.J(0, 2, X, tind=tind) *\
+                           self.J(2, 1, X, tind=tind) +
+                           -self.J(0, 1, X, tind=tind) *\
+                           self.J(2, 2, X, tind=tind)) / detDF
+            invDF[1, 1] = (-self.J(0, 2, X, tind=tind) *\
+                           self.J(2, 0, X, tind=tind) +
+                           self.J(0, 0, X, tind=tind) *\
+                           self.J(2, 2, X, tind=tind)) / detDF
+            invDF[2, 1] = (self.J(0, 1, X, tind=tind) *\
+                           self.J(2, 0, X, tind=tind) -
+                           self.J(0, 0, X, tind=tind) *\
+                           self.J(2, 1, X, tind=tind)) / detDF
+            invDF[0, 2] = (-self.J(0, 2, X, tind=tind) *\
+                           self.J(1, 1, X, tind=tind) +
+                           self.J(0, 1, X, tind=tind) *\
+                           self.J(1, 2, X, tind=tind)) / detDF
+            invDF[1, 2] = (self.J(0, 2, X, tind=tind) *\
+                           self.J(1, 0, X, tind=tind) -
+                           self.J(0, 0, X, tind=tind) *\
+                           self.J(1, 2, X, tind=tind)) / detDF
+            invDF[2, 2] = (-self.J(0, 1, X, tind=tind) *\
+                           self.J(1, 0, X, tind=tind) +
+                           self.J(0, 0, X, tind=tind) *\
+                           self.J(1, 1, X, tind=tind)) / detDF
         else:
             raise Exception("Not implemented for the given dimension.")
 

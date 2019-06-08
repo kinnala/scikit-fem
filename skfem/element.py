@@ -73,27 +73,30 @@ class Element():
                                                         Tuple[ndarray, ndarray, ndarray]]:
         """Evaluate the global basis functions, given local points X.
 
-        The global points - at which the global basis is evaluated at -
-        are defined through x = F(X), where F corresponds to the given mapping.
+        The global points - at which the global basis is evaluated at - are
+        defined through x = F(X), where F corresponds to the given mapping.
 
         Parameters
         ----------
         mapping
-            Local-to-global mapping, an object of type :class:`~skfem.mapping.Mapping`.
+            Local-to-global mapping, an object of type
+            :class:`~skfem.mapping.Mapping`.
         X
-            An array of local points. The following shapes are supported: (Ndim x Npoints)
-            and (Ndim x Nelems x Npoints), i.e. local points shared by all elements
-            or different local points in each element.
+            An array of local points. The following shapes are supported: (Ndim
+            x Npoints) and (Ndim x Nelems x Npoints), i.e. local points shared
+            by all elements or different local points in each element.
         i
             Only the i'th basis function is evaluated.
         tind
-            Optionally, choose a subset of elements to evaluate the basis at.
+            Optionally, choose a subset of elements at which to evaluate the
+            basis.
 
         Returns
         -------
         (u, du) or (u, du, ddu)
             The number of return arguments depends on the length of self.order.
-            The shape of k'th return argument depends on the value of self.order[k].
+            The shape of k'th return argument depends on the value of
+            self.order[k].
 
         """
         raise NotImplementedError("Element must implement gbasis.")
@@ -109,7 +112,7 @@ class ElementH1(Element):
             return np.broadcast_to(phi, (invDF.shape[2], invDF.shape[3])),\
                    np.einsum('ijkl,il->jkl', invDF, dphi)
         elif len(X.shape) == 3:
-            return np.broadcast_to(phi, (invDF.shape[2], invDF.shape[3])), \
+            return np.broadcast_to(phi, (invDF.shape[2], invDF.shape[3])),\
                    np.einsum('ijkl,ikl->jkl', invDF, dphi)
 
     def lbasis(self, X, i):
@@ -128,11 +131,13 @@ class ElementVectorH1(Element):
         self.interior_dofs = self.elem.interior_dofs * self.dim
         self.edge_dofs = self.elem.edge_dofs * self.dim
 
-        self.dofnames = [i + "^" + str(j+1) for i in elem.dofnames for j in range(self.dim)]
+        self.dofnames = [i + "^" + str(j + 1)
+                         for i in elem.dofnames
+                         for j in range(self.dim)]
         self.maxdeg = elem.maxdeg
 
     def gbasis(self, mapping, X, i, tind=None):
-        ind = int(np.floor(float(i)/float(self.dim)))
+        ind = int(np.floor(float(i) / float(self.dim)))
         n = i - self.dim*ind
         phi, dphi = self.elem.gbasis(mapping, X, ind, tind)
         u = np.zeros((self.dim,) + phi.shape)
@@ -149,7 +154,7 @@ class ElementHdiv(Element):
         if tind is not None:
             # TODO fix
             raise NotImplementedError("TODO: fix tind support in ElementHdiv")
-        return -1 + 2*(mapping.mesh.f2t[0, mapping.mesh.t2f[i, :]] \
+        return -1 + 2*(mapping.mesh.f2t[0, mapping.mesh.t2f[i, :]]\
                        == np.arange(mapping.mesh.t.shape[1]))
 
     def gbasis(self, mapping, X, i, tind=None):
@@ -157,8 +162,11 @@ class ElementHdiv(Element):
         DF = mapping.DF(X, tind)
         detDF = mapping.detDF(X, tind)
         orient = self.orient(mapping, i, tind)
-        return np.einsum('ijkl,jl,kl->ikl', DF, phi, 1/np.abs(detDF)*orient[:, None]),\
-               dphi/(np.abs(detDF)*orient[:, None])
+        return np.einsum('ijkl,jl,kl->ikl',
+                         DF,
+                         phi,
+                         1 / np.abs(detDF) * orient[:, None]),\
+                         dphi / (np.abs(detDF) * orient[:, None])
 
     def lbasis(self, X, i):
         raise Exception("ElementHdiv lbasis method not found.")
@@ -255,23 +263,29 @@ class ElementH2(Element):
                                       for i in range(N+1)
                                       for j in range(N+1)
                                       if i + j <= N])
-            setattr(self, '_pbasisdx', [self._pbasis_create_xy(i, j, dx=1)
+            setattr(self, '_pbasisdx', [self._pbasis_create_xy(i, j,
+                                                               dx=1)
                                         for i in range(N+1)
                                         for j in range(N+1)
                                         if i + j <= N])
-            setattr(self, '_pbasisdy', [self._pbasis_create_xy(i, j, dy=1)
+            setattr(self, '_pbasisdy', [self._pbasis_create_xy(i, j,
+                                                               dy=1)
                                         for i in range(N+1)
                                         for j in range(N+1)
                                         if i + j <= N])
-            setattr(self, '_pbasisdxx', [self._pbasis_create_xy(i, j, dx=2)
+            setattr(self, '_pbasisdxx', [self._pbasis_create_xy(i, j,
+                                                                dx=2)
                                          for i in range(N+1)
                                          for j in range(N+1)
                                          if i + j <= N])
-            setattr(self, '_pbasisdxy', [self._pbasis_create_xy(i, j, dx=1, dy=1)
+            setattr(self, '_pbasisdxy', [self._pbasis_create_xy(i, j,
+                                                                dx=1,
+                                                                dy=1)
                                          for i in range(N+1)
                                          for j in range(N+1)
                                          if i + j <= N])
-            setattr(self, '_pbasisdyy', [self._pbasis_create_xy(i, j, dy=2)
+            setattr(self, '_pbasisdyy', [self._pbasis_create_xy(i, j,
+                                                                dy=2)
                                          for i in range(N+1)
                                          for j in range(N+1)
                                          if i + j <= N])
@@ -307,7 +321,8 @@ class ElementH2(Element):
                 n[itr] = np.array([n[itr, 1, :], -n[itr, 0, :]])
                 n[itr] /= np.linalg.norm(n[itr], axis=0)
         else:
-            raise NotImplementedError("The used mesh type not supported in ElementH2.")
+            raise NotImplementedError("The used mesh type not supported "
+                                      "in ElementH2.")
 
         # evaluate dofs, gdof implemented in subclasses
         for itr in range(N):
@@ -388,7 +403,9 @@ class ElementTriDG(ElementH1):
         # change all dofs to interior dofs
         self.elem = elem
         self.maxdeg = elem.maxdeg
-        self.interior_dofs = 3*elem.nodal_dofs + 3*elem.facet_dofs + elem.interior_dofs
+        self.interior_dofs = (3*elem.nodal_dofs +
+                              3*elem.facet_dofs +
+                              elem.interior_dofs)
 
     def lbasis(self, X, i):
         return self.elem.lbasis(X, i)
@@ -414,13 +431,13 @@ class ElementTriRT0(ElementHdiv):
         x, y = X[0, :], X[1, :]
 
         if i == 0:
-            phi = np.array([x, y-1])
+            phi = np.array([x, y - 1])
             dphi = 2 + 0*x
         elif i == 1:
             phi = np.array([x, y])
             dphi = 2 + 0*x
         elif i == 2:
-            phi = np.array([x-1, y])
+            phi = np.array([x - 1, y])
             dphi = 2 + 0*x
         else:
             raise Exception("!")
@@ -624,7 +641,8 @@ class ElementTetP2(ElementH1):
         x, y, z = X[0, :], X[1, :], X[2, :]
 
         if i == 0: # at (0,0,0)
-            phi = 1. - 3.*x + 2.*x**2 - 3.*y + 4.*x*y + 2.*y**2 - 3.*z + 4.*x*z + 4.*y*z + 2.*z**2
+            phi = (1. - 3.*x + 2.*x**2 - 3.*y + 4.*x*y +
+                   2.*y**2 - 3.*z + 4.*x*z + 4.*y*z + 2.*z**2)
             dphi = np.array([
                 -3. + 4.*x + 4.*y + 4.*z,
                 -3. + 4.*x + 4.*y + 4.*z,
