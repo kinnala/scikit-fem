@@ -78,6 +78,8 @@ class MeshTri(Mesh2D):
     def __init__(self,
                  p: Optional[ndarray] = None,
                  t: Optional[ndarray] = None,
+                 boundaries: Optional[ndarray] = None,
+                 subdomains: Optional[ndarray] = None,
                  validate: Optional[bool] = True,
                  sort_t: Optional[bool] = True):
         """Initialise a triangular mesh.
@@ -116,6 +118,8 @@ class MeshTri(Mesh2D):
             raise Exception("Must provide p AND t or neither")
         self.p = p
         self.t = t
+        self.boundaries = boundaries
+        self.subdomains = subdomains
         if validate:
             self._validate()
         self._build_mappings(sort_t=sort_t)

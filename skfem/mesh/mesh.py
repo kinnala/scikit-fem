@@ -9,7 +9,9 @@ import matplotlib.pyplot as plt
 
 
 MeshType = TypeVar('MeshType', bound='Mesh')
-DimTuple = Union[Tuple[float], Tuple[float, float], Tuple[float, float, float]]
+DimTuple = Union[Tuple[float],
+                 Tuple[float, float],
+                 Tuple[float, float, float]]
 
 
 class Mesh():
@@ -139,7 +141,8 @@ class Mesh():
             raise NotImplementedError("The given parameter type not supported.")
 
     def _fix_boundaries(self, new_f: ndarray):
-        """This is called after each refine to update the indices in self.boundaries.
+        """This is called after each refine to update the indices in
+        self.boundaries.
 
         Parameters
         ----------
@@ -147,7 +150,7 @@ class Mesh():
             An array of integers of size no-splitted-elems x no-facets.
 
         """
-        if hasattr(self, "boundaries"):
+        if hasattr(self, "boundaries") and self.boundaries is not None:
             for name in self.boundaries:
                 self.boundaries[name] = new_f[:, self.boundaries[name]].flatten()
 
@@ -211,7 +214,7 @@ class Mesh():
     def _validate(self):
         """Perform mesh validity checks."""
         # check that element connectivity contains integers
-        # NOTE: this is neccessary for some plotting functionality
+        # NOTE: this is necessary for some plotting functionality
         if not np.issubdtype(self.t[0, 0], np.signedinteger):
             msg = ("Mesh._validate(): Element connectivity "
                    "must consist of integers.")
@@ -274,130 +277,21 @@ class Mesh():
         mesh = meshio.Mesh(self.p.T, cells, point_data, cell_data)
         meshio.write(filename, mesh)
 
-    def _parse_submeshes(self) -> None:
-        """Parse submeshes from self.external.
-
-        Call after creating a mesh using Mesh.from_meshio to parse Mesh.external
-        into Mesh.boundaries and Mesh.subdomains. Supports currently gmsh only.
-
-        """
-
-        # element to boundary element type mapping
-        bnd_type = {
-            'line': 'vertex',
-            'triangle' : 'line',
-            'quad' : 'line',
-            'tetra' : 'triangle',
-            'hexahedron' : 'quad',
-        }[self.meshio_type]
-
-        def find_tagname(tag):
-            for key in self.external.field_data:
-                if self.external.field_data[key][0] == tag:
-                    return key
-            return None
-
-        # fill self.subdomains
-        if self.meshio_type in self.external.cell_data and\
-           'gmsh:physical' in self.external.cell_data[self.meshio_type]:
-            elements_tag = self.external.cell_data[self.meshio_type]['gmsh:physical']
-
-            self.subdomains = {}
-            tags = np.unique(elements_tag)
-
-            for tag in tags:
-                t_set = np.nonzero(tag == elements_tag)[0]
-                self.subdomains[find_tagname(tag)] = t_set
-
-        # fill self.boundaries
-        if bnd_type in self.external.cell_data and\
-           'gmsh:physical' in self.external.cell_data[bnd_type]:
-            facets = self.external.cells[bnd_type]
-            facets_tag = self.external.cell_data[bnd_type]['gmsh:physical']
-            bndfacets = self.boundary_facets()
-
-            # put meshio facets to dict
-            dic = {tuple(np.sort(facets[i])) : facets_tag[i]
-                   for i in range(facets.shape[0])}
-
-            # get index of corresponding Mesh.facets for each meshio
-            # facet found in the dict
-            index = np.array([[dic[tuple(np.sort(self.facets[:, i]))], i]
-                              for i in bndfacets
-                              if tuple(np.sort(self.facets[:, i])) in dic])
-
-            # read meshio tag numbers and names
-            tags = index[:, 0]
-            self.boundaries = {}
-            for tag in np.unique(tags):
-                tagindex = np.nonzero(tags == tag)[0]
-                self.boundaries[find_tagname(tag)] = index[tagindex, 1]
-
-    @classmethod
-    def from_meshio(cls: Type[MeshType], meshdata) -> MeshType:
-        """Translate a mesh from `meshio
-        <https://github.com/nschloe/meshio>`_.
-
-        Parameters
-        ----------
-        meshdata
-            A meshio.Mesh.
-
-        Returns
-        -------
-        mesh
-            The corresponding skfem.mesh object. The original meshio.Mesh
-            object is accessible via the attribute mesh.external.
-
-        """
-
-        if cls.meshio_type in meshdata.cells:
-            p = np.ascontiguousarray(cls.strip_extra_coordinates(meshdata.points).T)
-            t = np.ascontiguousarray(meshdata.cells[cls.meshio_type].T)
-            mesh = cls(p, t)
-            mesh.external = meshdata
-
-            # load submeshes, currently gmsh only
-            try:
-                mesh._parse_submeshes()
-            except Exception as e:
-                # all mesh formats are not supported; raise warning for
-                # unsupported types
-                warnings.warn("Unable to load submeshes.")
-                print(e)
-
-            return mesh
-
-        raise Exception("The mesh contains no elements of type " + cls.meshio_type)
-
     @classmethod
     def load(cls: Type[MeshType],
-             filename: str,
-             from_url: Optional[bool] = False) -> MeshType:
-        """Load an external mesh from file or url using `meshio
+             filename: str) -> MeshType:
+        """Load an external mesh from file using `meshio
         <https://github.com/nschloe/meshio>`_.
 
         Parameters
         ----------
         filename
             The filename of the mesh.
-        from_url
-            If true, load the file over HTTP.
 
         """
         import meshio
-
-        if from_url:
-            import tempfile
-            from urllib.request import urlopen
-
-            tmp = tempfile.NamedTemporaryFile(suffix='.' + filename.split('.')[-1],
-                                              delete=False)
-            tmp.write(urlopen(filename).read())
-            tmp.flush()
-            filename = tmp.name
-
-        return cls.from_meshio(meshio.read(filename))
+        from skfem.importers.meshio import from_meshio
+        return from_meshio(meshio.read(filename))
 
     def boundary_nodes(self) -> ndarray:
         """Return an array of boundary node indices."""
@@ -405,7 +299,8 @@ class Mesh():
 
     def interior_nodes(self) -> ndarray:
         """Return an array of interior node indices."""
-        return np.setdiff1d(np.arange(0, self.p.shape[1]), self.boundary_nodes())
+        return np.setdiff1d(np.arange(0, self.p.shape[1]),
+                            self.boundary_nodes())
 
     def boundary_facets(self) -> ndarray:
         """Return an array of boundary facet indices."""

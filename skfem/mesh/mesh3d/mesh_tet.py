@@ -6,8 +6,9 @@ from skfem.mapping import MappingAffine
 from ..mesh import MeshType
 from .mesh3d import Mesh3D
 
-from typing import Type
+from typing import Type, Optional
 from numpy import ndarray
+
 
 class MeshTet(Mesh3D):
     """A mesh consisting of tetrahedral elements.
@@ -43,7 +44,12 @@ class MeshTet(Mesh3D):
     meshio_type: str = "tetra"
     name: str = "Tetrahedral"
 
-    def __init__(self, p=None, t=None, validate=True):
+    def __init__(self,
+                 p=None,
+                 t=None,
+                 boundaries: Optional[ndarray] = None,
+                 subdomains: Optional[ndarray] = None,
+                 validate=True):
         if p is None and t is None:
             p = np.array([[0., 0., 0.], [0., 0., 1.], [0., 1., 0.], [1., 0., 0.],
                           [0., 1., 1.], [1., 0., 1.], [1., 1., 0.], [1., 1., 1.]]).T
@@ -53,6 +59,8 @@ class MeshTet(Mesh3D):
             raise Exception("Must provide p AND t or neither")
         self.p = p
         self.t = t
+        self.boundaries = boundaries
+        self.subdomains = subdomains
         if validate:
             self._validate()
         self.enable_facets = True
