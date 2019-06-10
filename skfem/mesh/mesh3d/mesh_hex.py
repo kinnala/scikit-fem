@@ -46,7 +46,7 @@ class MeshHex(Mesh3D):
                  p: Optional[ndarray] = None,
                  t: Optional[ndarray] = None,
                  boundaries: Optional[ndarray] = None,
-                 subdomains: Optional[ndarray] = None
+                 subdomains: Optional[ndarray] = None,
                  validate=True):
         """Initialise a hexahedral mesh."""
         if p is None and t is None:

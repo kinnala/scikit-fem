@@ -10,6 +10,7 @@ from typing import Optional, Tuple, Type
 from matplotlib.axes import Axes
 from numpy import ndarray
 
+
 class MeshTri(Mesh2D):
     """A mesh consisting of triangular elements.
 
@@ -364,17 +365,36 @@ class MeshTri(Mesh2D):
             edgecolors = 'k'
         if zlim == None:
             if smooth:
-                im = ax.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z,
-                                  shading='gouraud', edgecolors=edgecolors)
+                im = ax.tripcolor(self.p[0, :],
+                                  self.p[1, :],
+                                  self.t.T,
+                                  z,
+                                  shading='gouraud',
+                                  edgecolors=edgecolors)
             else:
-                im = ax.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z, edgecolors=edgecolors)
+                im = ax.tripcolor(self.p[0, :],
+                                  self.p[1, :],
+                                  self.t.T,
+                                  z,
+                                  edgecolors=edgecolors)
         else:
             if smooth:
-                im = ax.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z,
-                              shading='gouraud', vmin=zlim[0], vmax=zlim[1], edgecolors=edgecolors)
+                im = ax.tripcolor(self.p[0, :],
+                                  self.p[1, :],
+                                  self.t.T,
+                                  z,
+                                  shading='gouraud',
+                                  vmin=zlim[0],
+                                  vmax=zlim[1],
+                                  edgecolors=edgecolors)
             else:
-                im = ax.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z,
-                              vmin=zlim[0], vmax=zlim[1], edgecolors=edgecolors)
+                im = ax.tripcolor(self.p[0, :],
+                                  self.p[1, :],
+                                  self.t.T,
+                                  z,
+                                  vmin=zlim[0],
+                                  vmax=zlim[1],
+                                  edgecolors=edgecolors)
 
         if colorbar:
             plt.colorbar(im)
@@ -561,8 +581,8 @@ class MeshTri(Mesh2D):
             ))
             
             # new nodes
-            p = .5*(m.p[:, m.facets[0, facets == 1]]
-                  + m.p[:, m.facets[1, facets == 1]])
+            p = .5 * (m.p[:, m.facets[0, facets == 1]] +
+                      m.p[:, m.facets[1, facets == 1]])
             
             return np.hstack((m.p, p)),\
                    np.hstack((m.t[:, rest], t_red, t_blue1, t_blue2, t_green))
