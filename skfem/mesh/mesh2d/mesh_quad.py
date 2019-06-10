@@ -11,6 +11,7 @@ from typing import Optional, Type
 
 from numpy import ndarray
 
+
 class MeshQuad(Mesh2D):
     """A mesh consisting of quadrilateral elements.
 
@@ -101,10 +102,18 @@ class MeshQuad(Mesh2D):
         nt = (npx - 1) * (npy - 1)
         t = np.zeros((4, nt))
         ix = ix.reshape(npy, npx, order='F').copy()
-        t[0, :] = ix[0:(npy-1), 0:(npx-1)].reshape(nt, 1, order='F').copy().flatten()
-        t[1, :] = ix[1:npy,     0:(npx-1)].reshape(nt, 1, order='F').copy().flatten()
-        t[2, :] = ix[1:npy,     1:npx].reshape(nt, 1, order='F').copy().flatten()
-        t[3, :] = ix[0:(npy-1), 1:npx].reshape(nt, 1, order='F').copy().flatten()
+        t[0, :] = ix[0:(npy-1), 0:(npx-1)].reshape(nt, 1, order='F')\
+                                          .copy()\
+                                          .flatten()
+        t[1, :] = ix[1:npy, 0:(npx-1)].reshape(nt, 1, order='F')\
+                                      .copy()\
+                                      .flatten()
+        t[2, :] = ix[1:npy, 1:npx].reshape(nt, 1, order='F')\
+                                  .copy()\
+                                  .flatten()
+        t[3, :] = ix[0:(npy-1), 1:npx].reshape(nt, 1, order='F')\
+                                      .copy()\
+                                      .flatten()
         return cls(p, t.astype(np.int64))
 
     @classmethod
@@ -231,7 +240,8 @@ class MeshQuad(Mesh2D):
                 # preserve elemental constant functions
                 X = np.concatenate((x, x))
             else:
-                raise Exception("The parameter x must have one value per element.")
+                raise Exception("The parameter x must have one " +
+                                "value per element.")
             return MeshTri(self.p, t, validate=False), X
         else:
             return MeshTri(self.p, t, validate=False)
@@ -243,9 +253,11 @@ class MeshQuad(Mesh2D):
         newt = np.hstack((newt, t[[1, 2, 4], :]))
         newt = np.hstack((newt, t[[2, 3, 4], :]))
         newt = np.hstack((newt, t[[3, 0, 4], :]))
-        mx = np.sum(self.p[0, self.t], axis=0)/self.t.shape[0]
-        my = np.sum(self.p[1, self.t], axis=0)/self.t.shape[0]
-        return MeshTri(np.hstack((self.p, np.vstack((mx, my)))), newt, validate=False)
+        mx = np.sum(self.p[0, self.t], axis=0) / self.t.shape[0]
+        my = np.sum(self.p[1, self.t], axis=0) / self.t.shape[0]
+        return MeshTri(np.hstack((self.p, np.vstack((mx, my)))),
+                       newt,
+                       validate=False)
 
     def plot(self, z, smooth=False, edgecolors=None, ax=None, zlim=None):
         """Visualise piecewise-linear or piecewise-constant function.
@@ -274,5 +286,3 @@ class MeshQuad(Mesh2D):
 
     def mapping(self):
         return MappingIsoparametric(self, ElementQuad1(), ElementLineP1())
-
-

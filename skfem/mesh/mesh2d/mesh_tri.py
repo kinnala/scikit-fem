@@ -285,7 +285,7 @@ class MeshTri(Mesh2D):
             self.t[[0, 1], :],
             self.t[[1, 2], :],
             self.t[[0, 2], :],
-            )), axis=0)
+        )), axis=0)
 
         # get unique facets and build triangle-to-facet
         # mapping: 3 (edges) x Ntris
@@ -436,26 +436,30 @@ class MeshTri(Mesh2D):
             ax = Axes3D(fig)
         if len(z) == self.p.shape[1]:
             # use matplotlib
-            ax.plot_trisurf(self.p[0, :], self.p[1, :], z,
+            ax.plot_trisurf(self.p[0, :],
+                            self.p[1, :],
+                            z,
                             triangles=self.t.T,
                             cmap=plt.cm.viridis)
         elif len(z) == self.t.shape[1]:
             # one value per element (piecewise const)
             nt = self.t.shape[1]
-            newt = np.arange(3*nt, dtype=np.int64).reshape((nt, 3))
+            newt = np.arange(3 * nt, dtype=np.int64).reshape((nt, 3))
             newpx = self.p[0, self.t].flatten(order='F')
             newpy = self.p[1, self.t].flatten(order='F')
             newz = np.vstack((z, z, z)).flatten(order='F')
             ax.plot_trisurf(newpx, newpy, newz,
                             triangles=newt.T,
                             cmap=plt.cm.viridis)
-        elif len(z) == 3*self.t.shape[1]:
+        elif len(z) == 3 * self.t.shape[1]:
             # three values per element (piecewise linear)
             nt = self.t.shape[1]
-            newt = np.arange(3*nt, dtype=np.int64).reshape((nt, 3))
+            newt = np.arange(3 * nt, dtype=np.int64).reshape((nt, 3))
             newpx = self.p[0, self.t].flatten(order='F')
             newpy = self.p[1, self.t].flatten(order='F')
-            ax.plot_trisurf(newpx, newpy, z,
+            ax.plot_trisurf(newpx,
+                            newpy,
+                            z,
                             triangles=newt.T,
                             cmap=plt.cm.viridis)
         else:

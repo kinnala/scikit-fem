@@ -140,19 +140,19 @@ class Mesh():
         else:
             raise NotImplementedError("The given parameter type not supported.")
 
-    def _fix_boundaries(self, new_f: ndarray):
+    def _fix_boundaries(self, newf: ndarray):
         """This is called after each refine to update the indices in
         self.boundaries.
 
         Parameters
         ----------
-        new_f
+        newf
             An array of integers of size no-splitted-elems x no-facets.
 
         """
         if hasattr(self, "boundaries") and self.boundaries is not None:
             for name in self.boundaries:
-                self.boundaries[name] = new_f[:, self.boundaries[name]].flatten()
+                self.boundaries[name] = newf[:, self.boundaries[name]].flatten()
 
     def remove_elements(self, element_indices: ndarray) -> MeshType:
         """Construct new mesh with elements removed
@@ -312,7 +312,7 @@ class Mesh():
     def element_finder(self) -> Callable[[ndarray], ndarray]:
         """Return a function, which returns element
         indices corresponding to the input points."""
-        raise NotImplementedError("element_finder not implemented" +\
+        raise NotImplementedError("element_finder not implemented" +
                                   "for the given Mesh type.")
 
     @staticmethod

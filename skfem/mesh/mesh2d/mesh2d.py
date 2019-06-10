@@ -49,7 +49,8 @@ class Mesh2D(Mesh):
         my = 0.5*(self.p[1, self.facets[0, :]] + self.p[1, self.facets[1, :]])
         return np.nonzero(test(mx, my))[0]
 
-    def elements_satisfying(self, test: Callable[[float, float], bool]) -> ndarray:
+    def elements_satisfying(self,
+                            test: Callable[[float, float], bool]) -> ndarray:
         """Return elements whose midpoints satisfy some condition.
 
         Parameters
@@ -124,8 +125,8 @@ class Mesh2D(Mesh):
                 ax.text(mx[itr], my[itr], str(itr))
 
         if element_numbering:
-            mx = np.sum(self.p[0, self.t], axis=0)/self.t.shape[0]
-            my = np.sum(self.p[1, self.t], axis=0)/self.t.shape[0]
+            mx = np.sum(self.p[0, self.t], axis=0) / self.t.shape[0]
+            my = np.sum(self.p[1, self.t], axis=0) / self.t.shape[0]
             for itr in range(self.t.shape[1]):
                 ax.text(mx[itr], my[itr], str(itr))
 
@@ -134,7 +135,7 @@ class Mesh2D(Mesh):
     def mirror(self, a: float, b: float, c: float) -> MeshType:
         """Mirror a mesh by the line :math:`ax + by + c = 0`.  Returns a new
         :class:`~skfem.mesh.Mesh` object."""
-        tmp = -2.0*(a*self.p[0, :] + b*self.p[1, :] + c)/(a**2 + b**2)
+        tmp = -2.0*(a*self.p[0, :] + b*self.p[1, :] + c) / (a**2 + b**2)
         newx = a*tmp + self.p[0, :]
         newy = b*tmp + self.p[1, :]
         newpoints = np.vstack((newx, newy))
@@ -143,7 +144,9 @@ class Mesh2D(Mesh):
 
         # remove duplicates
         tmp = np.ascontiguousarray(points.T)
-        tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)]*tmp.shape[1]), return_index=True, return_inverse=True)
+        tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)]*tmp.shape[1]),
+                                  return_index=True,
+                                  return_inverse=True)
         points = points[:, ixa]
         tris = ixb[tris]
 
