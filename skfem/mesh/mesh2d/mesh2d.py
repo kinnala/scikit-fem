@@ -19,6 +19,10 @@ class Mesh2D(Mesh):
 
     """
 
+    facets: ndarray = np.array([])
+    f2t: ndarray = np.array([])
+    t2f: ndarray = np.array([])
+
     def nodes_satisfying(self, test: Callable[[float, float], bool]) -> ndarray:
         """Return nodes that satisfy some condition.
 

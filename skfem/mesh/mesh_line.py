@@ -19,15 +19,19 @@ class MeshLine(Mesh):
     meshio_type: str = "line"
     name: str = "One-dimensional"
 
-    p: ndarray = np.array([])
-    t: ndarray = np.array([])
-
-    def __init__(self, p=None, t=None, validate=True):
+    def __init__(self,
+                 p: Optional[ndarray] = None,
+                 t: Optional[ndarray] = None,
+                 boundaries: Optional[ndarray] = None,
+                 subdomains: Optional[ndarray] = None,
+                 validate=True):
         if p is None and t is None:
             p = np.array([[0., 1.]], dtype=np.float_)
         if len(p.shape) == 1:
             p = np.array([p]) 
         self.p = p
+        self.boundaries = boundaries
+        self.subdomains = subdomains
         
         self.facets = np.arange(self.p.shape[1])[None, :]
         self.t = np.vstack([self.facets[0, :-1],

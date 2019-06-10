@@ -48,15 +48,11 @@ class MeshQuad(Mesh2D):
     meshio_type: str = "quad"
     name: str = "Quadrilateral"
 
-    p: ndarray = np.array([])
-    t: ndarray = np.array([])
-    facets: ndarray = np.array([])
-    f2t: ndarray = np.array([])
-    t2f: ndarray = np.array([])
-
     def __init__(self,
                  p: Optional[ndarray] = None,
                  t: Optional[ndarray] = None,
+                 boundaries: Optional[ndarray] = None,
+                 subdomains: Optional[ndarray] = None,
                  validate: Optional[bool] = True):
         """Initialise a quadrilateral mesh.
 
@@ -76,6 +72,8 @@ class MeshQuad(Mesh2D):
             raise Exception("Must provide p AND t or neither")
         self.p = p
         self.t = t
+        self.boundaries = boundaries
+        self.subdomains = subdomains
         if validate:
             self._validate()
         self._build_mappings()

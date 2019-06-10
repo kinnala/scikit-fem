@@ -45,16 +45,25 @@ class MeshTet(Mesh3D):
     name: str = "Tetrahedral"
 
     def __init__(self,
-                 p=None,
-                 t=None,
+                 p: Optional[ndarray] = None,
+                 t: Optional[ndarray] = None,
                  boundaries: Optional[ndarray] = None,
                  subdomains: Optional[ndarray] = None,
                  validate=True):
         if p is None and t is None:
-            p = np.array([[0., 0., 0.], [0., 0., 1.], [0., 1., 0.], [1., 0., 0.],
-                          [0., 1., 1.], [1., 0., 1.], [1., 1., 0.], [1., 1., 1.]]).T
-            t = np.array([[0, 1, 2, 3], [3, 5, 1, 7], [2, 3, 6, 7],
-                          [2, 3, 1, 7], [1, 2, 4, 7]]).T
+            p = np.array([[0., 0., 0.],
+                          [0., 0., 1.],
+                          [0., 1., 0.],
+                          [1., 0., 0.],
+                          [0., 1., 1.],
+                          [1., 0., 1.],
+                          [1., 1., 0.],
+                          [1., 1., 1.]]).T
+            t = np.array([[0, 1, 2, 3],
+                          [3, 5, 1, 7],
+                          [2, 3, 6, 7],
+                          [2, 3, 1, 7],
+                          [1, 2, 4, 7]]).T
         elif p is None or t is None:
             raise Exception("Must provide p AND t or neither")
         self.p = p

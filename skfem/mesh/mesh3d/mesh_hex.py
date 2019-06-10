@@ -42,11 +42,22 @@ class MeshHex(Mesh3D):
     meshio_type: str = "hexahedron"
     name: str = "Hexahedral"
 
-    def __init__(self, p=None, t=None, validate=True):
+    def __init__(self,
+                 p: Optional[ndarray] = None,
+                 t: Optional[ndarray] = None,
+                 boundaries: Optional[ndarray] = None,
+                 subdomains: Optional[ndarray] = None
+                 validate=True):
         """Initialise a hexahedral mesh."""
         if p is None and t is None:
-            p = np.array([[0., 0., 0.], [0., 0., 1.], [0., 1., 0.], [1., 0., 0.],
-                          [0., 1., 1.], [1., 0., 1.], [1., 1., 0.], [1., 1., 1.]]).T
+            p = np.array([[0., 0., 0.],
+                          [0., 0., 1.],
+                          [0., 1., 0.],
+                          [1., 0., 0.],
+                          [0., 1., 1.],
+                          [1., 0., 1.],
+                          [1., 1., 0.],
+                          [1., 1., 1.]]).T
             t = np.array([[0, 1, 2, 3, 4, 5, 6, 7]]).T
         elif p is None or t is None:
             raise Exception("Must provide p AND t or neither")
@@ -64,6 +75,8 @@ class MeshHex(Mesh3D):
         #
         self.p = p
         self.t = t
+        self.boundaries = boundaries
+        self.subdomains = subdomains
         if validate:
             self._validate()
         self._build_mappings()
