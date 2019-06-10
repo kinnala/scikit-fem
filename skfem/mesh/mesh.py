@@ -267,13 +267,13 @@ class Mesh():
 
         if point_data is not None:
             if not isinstance(point_data, dict):
-                point_data = {'0' : point_data}
+                point_data = { '0': point_data }
 
         if cell_data is not None:
             if not isinstance(point_data, dict):
-                cell_data = {'0' : cell_data}
+                cell_data = { '0': cell_data }
 
-        cells = {self.meshio_type : self.t.T}
+        cells = { self.meshio_type: self.t.T }
         mesh = meshio.Mesh(self.p.T, cells, point_data, cell_data)
         meshio.write(filename, mesh)
 
@@ -289,9 +289,8 @@ class Mesh():
             The filename of the mesh.
 
         """
-        import meshio
-        from skfem.importers.meshio import from_meshio
-        return from_meshio(meshio.read(filename))
+        from skfem.importers.meshio import from_file
+        return from_file(filename)
 
     def boundary_nodes(self) -> ndarray:
         """Return an array of boundary node indices."""

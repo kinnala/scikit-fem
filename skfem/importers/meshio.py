@@ -1,4 +1,4 @@
-"""Import meshio objects."""
+import meshio
 import warnings
 import numpy as np
 import skfem
@@ -80,6 +80,10 @@ def from_meshio(m):
         warnings.warn("Unable to load tagged boundaries/subdomains.")
         print(e)
         return mtmp
+
+
+def from_file(filename):
+    return from_meshio(meshio.read(filename))
 
 
 def detect_type(m):
