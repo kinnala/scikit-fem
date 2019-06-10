@@ -147,13 +147,25 @@ class MeshTri(Mesh2D):
         nt = (npx - 1) * (npy - 1)
         t = np.zeros((3, 2*nt))
         ix = ix.reshape(npy, npx, order='F').copy()
-        t[0, :nt] = ix[0:(npy-1), 0:(npx-1)].reshape(nt, 1, order='F').copy().flatten()
-        t[1, :nt] = ix[1:npy,     0:(npx-1)].reshape(nt, 1, order='F').copy().flatten()
-        t[2, :nt] = ix[1:npy,     1:npx].reshape(nt, 1, order='F').copy().flatten()
-        t[0, nt:] = ix[0:(npy-1), 0:(npx-1)].reshape(nt, 1, order='F').copy().flatten()
-        t[1, nt:] = ix[0:(npy-1), 1:npx].reshape(nt, 1, order='F').copy().flatten()
-        t[2, nt:] = ix[1:npy,     1:npx].reshape(nt, 1, order='F').copy().flatten()
-        #t[3, :] = ix[0:(npy-1), 1:npx].reshape(nt, 1, order='F').copy().flatten()
+        t[0, :nt] = ix[0:(npy-1), 0:(npx-1)].reshape(nt, 1, order='F')\
+                                            .copy()\
+                                            .flatten()
+        t[1, :nt] = ix[1:npy, 0:(npx-1)].reshape(nt, 1, order='F')\
+                                        .copy()\
+                                        .flatten()
+        t[2, :nt] = ix[1:npy, 1:npx].reshape(nt, 1, order='F')\
+                                    .copy()\
+                                    .flatten()
+        t[0, nt:] = ix[0:(npy-1), 0:(npx-1)].reshape(nt, 1, order='F')\
+                                            .copy()\
+                                            .flatten()
+        t[1, nt:] = ix[0:(npy-1), 1:npx].reshape(nt, 1, order='F')\
+                                        .copy()\
+                                        .flatten()
+        t[2, nt:] = ix[1:npy, 1:npx].reshape(nt, 1, order='F')\
+                                    .copy()\
+                                    .flatten()
+
         return cls(p, t.astype(np.int64))
 
     @classmethod
