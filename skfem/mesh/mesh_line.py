@@ -67,8 +67,9 @@ class MeshLine(Mesh):
         self.f2t[1, np.nonzero(self.f2t[0, :] == self.f2t[1, :])[0]] = -1
 
     def _adaptive_refine(self, marked):
-        """Perform an adaptive refine which splits each marked element into two."""
-        
+        """Perform an adaptive refine which splits each marked element into
+        two."""
+
         t = self.t
         p = self.p
 
@@ -76,10 +77,11 @@ class MeshLine(Mesh):
 
         nonmarked = np.setdiff1d(np.arange(t.shape[1]), marked)
 
-        newp = np.hstack((p, 0.5*(p[:, self.t[0, marked]] + p[:, self.t[1, marked]])))
+        newp = np.hstack((p, 0.5*(p[:, self.t[0, marked]] +
+                                  p[:, self.t[1, marked]])))
         newt = np.vstack((t[0, marked], mid))
         newt = np.hstack((t[:, nonmarked], newt, np.vstack((mid, t[1, marked]))))
-        
+
         # update fields
         self.p = newp
         self.t = newt

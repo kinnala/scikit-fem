@@ -28,11 +28,11 @@ class Mesh():
     Attributes
     ----------
     p
-        The vertices of the mesh (dim x Nvertices). Each column corresponds to a
-        point.
+        The vertices of the mesh (dim x Nvertices). Each column corresponds to
+        a point.
     t
-        The element connectivity (dim x Nelements). Each column corresponds to a
-        element and contains four column indices to p.
+        The element connectivity (dim x Nelements). Each column corresponds to
+        a element and contains four column indices to p.
     refdom
         A string describing the shape of the reference domain. Used to find
         quadrature rules.
@@ -72,13 +72,13 @@ class Mesh():
         if self.p is not None:
             if self.p.flags['F_CONTIGUOUS']:
                 if self.p.shape[1] > 1000:
-                    warnings.warn("Mesh.__init__(): Transforming " +
+                    warnings.warn("Mesh.__init__(): Transforming "
                                   "over 100 vertices to C_CONTIGUOUS.")
                 self.p = np.ascontiguousarray(self.p)
         if self.t is not None:
             if self.t.flags['F_CONTIGUOUS']:
                 if self.t.shape[1] > 1000:
-                    warnings.warn("Mesh.__init__(): Transforming " +
+                    warnings.warn("Mesh.__init__(): Transforming "
                                   "over 100 elements to C_CONTIGUOUS.")
                 self.t = np.ascontiguousarray(self.t)
 
@@ -86,9 +86,9 @@ class Mesh():
         return self.__repr__()
 
     def __repr__(self):
-        return self.name + " mesh "\
-               "with " + str(self.p.shape[1]) + " vertices "\
-               "and " + str(self.t.shape[1]) + " elements."
+        return (self.name + " mesh "
+                "with " + str(self.p.shape[1]) + " vertices "
+                "and " + str(self.t.shape[1]) + " elements.")
 
     def show(self):
         """A wrapper for matplotlib.pyplot.show()."""
@@ -108,12 +108,12 @@ class Mesh():
 
     def _uniform_refine(self):
         """Perform a single uniform mesh refinement."""
-        raise NotImplementedError("Single refine not implemented " +
+        raise NotImplementedError("Single refine not implemented "
                                   "for this mesh type!")
 
     def _adaptive_refine(self, marked):
         """Perform adaptive refinement."""
-        raise NotImplementedError("Adaptive refine not implemented " +
+        raise NotImplementedError("Adaptive refine not implemented "
                                   "for this mesh type!")
 
     def refine(self, arg: Optional[Union[int, ndarray]] = None):
@@ -138,21 +138,22 @@ class Mesh():
         elif isinstance(arg, ndarray):
             self._adaptive_refine(arg)
         else:
-            raise NotImplementedError("The given parameter type not supported.")
+            raise NotImplementedError("The parameter type not supported.")
 
-    def _fix_boundaries(self, newf: ndarray):
-        """This is called after each refine to update the indices in
+    def _fix_boundaries(self, facets: ndarray):
+        """This should be called after each refine to update the indices in
         self.boundaries.
 
         Parameters
         ----------
-        newf
+        facets
             An array of integers of size no-splitted-elems x no-facets.
 
         """
         if hasattr(self, "boundaries") and self.boundaries is not None:
             for name in self.boundaries:
-                self.boundaries[name] = newf[:, self.boundaries[name]].flatten()
+                self.boundaries[name] = (facets[:, self.boundaries[name]]
+                                         .flatten())
 
     def remove_elements(self, element_indices: ndarray) -> MeshType:
         """Construct new mesh with elements removed
@@ -219,6 +220,7 @@ class Mesh():
             msg = ("Mesh._validate(): Element connectivity "
                    "must consist of integers.")
             raise Exception(msg)
+
         # check that vertex matrix has "correct" size
         if self.p.shape[0] > 3:
             msg = ("Mesh._validate(): We do not allow meshes "
@@ -226,28 +228,32 @@ class Mesh():
                    "Euclidean space! Please check that "
                    "the given vertex matrix is of size Ndim x Nvertices.")
             raise Exception(msg)
+
         # check that element connectivity matrix has correct size
         nvertices = {'line': 2, 'tri': 3, 'quad': 4, 'tet': 4, 'hex': 8}
         if self.t.shape[0] != nvertices[self.refdom]:
             msg = ("Mesh._validate(): The given connectivity "
                    "matrix has wrong shape!")
             raise Exception(msg)
+
         # check that there are no duplicate points
         tmp = np.ascontiguousarray(self.p.T)
         if self.p.shape[1] != np.unique(tmp.view([('', tmp.dtype)]
                                                  * tmp.shape[1])).shape[0]:
             msg = "Mesh._validate(): Mesh contains duplicate vertices."
             warnings.warn(msg)
+
         # check that all points are at least in some element
-        if len(np.setdiff1d(np.arange(self.p.shape[1]), np.unique(self.t))) > 0:
+        if len(np.setdiff1d(np.arange(self.p.shape[1]),
+                            np.unique(self.t))) > 0:
             msg = ("Mesh._validate(): Mesh contains a vertex "
                    "not belonging to any element.")
             raise Exception(msg)
 
-    def save(self,
-             filename: str,
-             point_data: Optional[Union[ndarray, Dict[str, ndarray]]] = None,
-             cell_data: Optional[Union[ndarray, Dict[str, ndarray]]] = None) -> None:
+    def to_file(self,
+                filename: str,
+                point_data: Optional[Dict[str, ndarray]] = None,
+                cell_data: Optional[Dict[str, ndarray]] = None) -> None:
         """Export the mesh and fields using meshio.
 
         Parameters
@@ -256,31 +262,31 @@ class Mesh():
             The output filename, with suffix determining format;
             e.g. .msh, .vtk, .xdmf
         point_data
-            Data related to the vertices of the mesh. Numpy array for one
-            output, or dict for multiple.
+            Data related to the vertices of the mesh.
         cell_data
-            Data related to the elements of the mesh. Numpy array for one
-            output, or dict for multiple
+            Data related to the elements of the mesh.
 
         """
         import meshio
 
         if point_data is not None:
             if not isinstance(point_data, dict):
-                point_data = { '0': point_data }
+                raise ValueError("point_data should be "
+                                 "a dictionary of ndarrays.")
 
         if cell_data is not None:
             if not isinstance(point_data, dict):
-                cell_data = { '0': cell_data }
+                raise ValueError("cell_data should be "
+                                 "a dictionary of ndarrays.")
 
-        cells = { self.meshio_type: self.t.T }
+        cells = {self.meshio_type: self.t.T}
         mesh = meshio.Mesh(self.p.T, cells, point_data, cell_data)
         meshio.write(filename, mesh)
 
     @classmethod
-    def load(cls: Type[MeshType],
-             filename: str) -> MeshType:
-        """Load an external mesh from file using `meshio
+    def from_file(cls: Type[MeshType],
+                  filename: str) -> MeshType:
+        """Import a mesh from file using `meshio
         <https://github.com/nschloe/meshio>`_.
 
         Parameters
@@ -312,7 +318,7 @@ class Mesh():
     def element_finder(self) -> Callable[[ndarray], ndarray]:
         """Return a function, which returns element
         indices corresponding to the input points."""
-        raise NotImplementedError("element_finder not implemented" +
+        raise NotImplementedError("element_finder not implemented "
                                   "for the given Mesh type.")
 
     @staticmethod

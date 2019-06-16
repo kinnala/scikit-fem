@@ -119,8 +119,10 @@ class Mesh2D(Mesh):
                 ax.text(self.p[0, itr], self.p[1, itr], str(itr))
 
         if facet_numbering:
-            mx = .5*(self.p[0, self.facets[0, :]] + self.p[0, self.facets[1, :]])
-            my = .5*(self.p[1, self.facets[0, :]] + self.p[1, self.facets[1, :]])
+            mx = .5*(self.p[0, self.facets[0, :]] +
+                     self.p[0, self.facets[1, :]])
+            my = .5*(self.p[1, self.facets[0, :]] +
+                     self.p[1, self.facets[1, :]])
             for itr in range(self.facets.shape[1]):
                 ax.text(mx[itr], my[itr], str(itr))
 

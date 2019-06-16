@@ -102,18 +102,18 @@ class MeshQuad(Mesh2D):
         nt = (npx - 1) * (npy - 1)
         t = np.zeros((4, nt))
         ix = ix.reshape(npy, npx, order='F').copy()
-        t[0, :] = ix[0:(npy-1), 0:(npx-1)].reshape(nt, 1, order='F')\
-                                          .copy()\
-                                          .flatten()
-        t[1, :] = ix[1:npy, 0:(npx-1)].reshape(nt, 1, order='F')\
-                                      .copy()\
-                                      .flatten()
-        t[2, :] = ix[1:npy, 1:npx].reshape(nt, 1, order='F')\
-                                  .copy()\
-                                  .flatten()
-        t[3, :] = ix[0:(npy-1), 1:npx].reshape(nt, 1, order='F')\
-                                      .copy()\
-                                      .flatten()
+        t[0, :] = (ix[0:(npy-1), 0:(npx-1)].reshape(nt, 1, order='F')
+                                           .copy()
+                                           .flatten())
+        t[1, :] = (ix[1:npy, 0:(npx-1)].reshape(nt, 1, order='F')
+                                       .copy()
+                                       .flatten())
+        t[2, :] = (ix[1:npy, 1:npx].reshape(nt, 1, order='F')
+                                   .copy()
+                                   .flatten())
+        t[3, :] = (ix[0:(npy-1), 1:npx].reshape(nt, 1, order='F')
+                                       .copy()
+                                       .flatten())
         return cls(p, t.astype(np.int64))
 
     @classmethod
@@ -184,21 +184,21 @@ class MeshQuad(Mesh2D):
         e = self.facets
         sz = p.shape[1]
         t2f = self.t2f + sz
-        
+
         # quadrilateral middle point
         mid = range(self.t.shape[1]) + np.max(t2f) + 1
         
         # new vertices are the midpoints of edges ...
         newp1 = 0.5*np.vstack((p[0, e[0, :]] + p[0, e[1, :]],
                                p[1, e[0, :]] + p[1, e[1, :]]))
-        
+
         # ... and element middle points
         newp2 = 0.25*np.vstack((p[0, t[0, :]] + p[0, t[1, :]] +
                                 p[0, t[2, :]] + p[0, t[3, :]],
                                 p[1, t[0, :]] + p[1, t[1, :]] +
                                 p[1, t[2, :]] + p[1, t[3, :]]))
         self.p = np.hstack((p, newp1, newp2))
-        
+
         # build new quadrilateral definitions
         self.t = np.hstack((
             np.vstack((t[0, :], t2f[0, :], mid, t2f[3, :])),
@@ -206,7 +206,7 @@ class MeshQuad(Mesh2D):
             np.vstack((mid, t2f[1, :], t[2, :], t2f[2, :])),
             np.vstack((t2f[3, :], mid, t2f[2, :], t[3, :])),
             ))
-        
+
         # build mapping between old and new facets
         new_facets = np.zeros((2, e.shape[1]), dtype=np.int64)
         ix0 = np.arange(t.shape[1], dtype=np.int64)
