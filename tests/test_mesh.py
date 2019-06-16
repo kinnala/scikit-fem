@@ -85,3 +85,17 @@ class RefinePreserveSubsets(unittest.TestCase):
             
             
 
+class SaveLoadCycle(unittest.TestCase):
+    """Save to temporary file and check import/export cycles."""
+    cls = MeshTet
+    def runTest(self):
+        from tempfile import NamedTemporaryFile
+        m = self.cls()
+        m.refine(2)
+        f = NamedTemporaryFile(delete=False)
+        m.to_file(f.name + ".vtk")
+        m2 = Mesh.from_file(f.name + ".vtk")
+        self.assertTrue(((m.p[0, :] - m2.p[0, :]) < 1e-6).all())
+
+class SaveLoadCycleHex(SaveLoadCycle):
+    cls = MeshHex
