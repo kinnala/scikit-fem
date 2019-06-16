@@ -250,10 +250,10 @@ class Mesh():
                    "not belonging to any element.")
             raise Exception(msg)
 
-    def to_file(self,
-                filename: str,
-                point_data: Optional[Dict[str, ndarray]] = None,
-                cell_data: Optional[Dict[str, ndarray]] = None) -> None:
+    def save(self,
+             filename: str,
+             point_data: Optional[Dict[str, ndarray]] = None,
+             cell_data: Optional[Dict[str, ndarray]] = None) -> None:
         """Export the mesh and fields using meshio.
 
         Parameters
@@ -284,8 +284,7 @@ class Mesh():
         meshio.write(filename, mesh)
 
     @classmethod
-    def from_file(cls: Type[MeshType],
-                  filename: str) -> MeshType:
+    def load(cls: Type[MeshType], filename: str) -> MeshType:
         """Import a mesh from file using `meshio
         <https://github.com/nschloe/meshio>`_.
 

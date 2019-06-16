@@ -5,7 +5,7 @@ import numpy as np
 
 from pathlib import Path
 
-m = MeshTet.from_file(str(Path(__file__).with_name("beams.msh")))
+m = MeshTet.load(str(Path(__file__).with_name("beams.msh")))
 e1 = ElementTetP1()
 e = ElementVectorH1(e1)
 

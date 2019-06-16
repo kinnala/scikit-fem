@@ -49,7 +49,7 @@ class Loading(unittest.TestCase):
     def runTest(self):
         # submeshes
         examples = Path(__file__).parents[1] / 'docs' / 'examples'
-        m = MeshTet.from_file(str(examples / 'box.msh'))
+        m = MeshTet.load(str(examples / 'box.msh'))
         #self.assertTrue((m.boundaries['front'].p == m.submesh(lambda x,y,z: z==1).p).all())
         #self.assertTrue((m.boundaries['back'].p == m.submesh(lambda x,y,z: z==0).p).all())
         #self.assertTrue((m.boundaries['top'].p == m.submesh(lambda x,y,z: y==1).p).all())
@@ -59,7 +59,7 @@ class Loading(unittest.TestCase):
         #self.assertTrue((m.boundaries['top'].edges == m.submesh(lambda x,y,z: y==1).edges).all())
         #self.assertTrue((m.boundaries['back'].edges == m.submesh(lambda x,y,z: z==0).edges).all())
         #self.assertTrue((m.boundaries['front'].edges == m.submesh(lambda x,y,z: z==1).edges).all())
-        m = MeshTri.from_file(str(examples / 'square.msh'))
+        m = MeshTri.load(str(examples / 'square.msh'))
         self.assertTrue((m.boundaries['top'] == m.facets_satisfying(lambda x,y: y==1)).all())
         self.assertTrue((m.boundaries['left'] == m.facets_satisfying(lambda x,y: x==0)).all())
         self.assertTrue((m.boundaries['right'] == m.facets_satisfying(lambda x,y: x==1)).all())
@@ -93,8 +93,8 @@ class SaveLoadCycle(unittest.TestCase):
         m = self.cls()
         m.refine(2)
         f = NamedTemporaryFile(delete=False)
-        m.to_file(f.name + ".vtk")
-        m2 = Mesh.from_file(f.name + ".vtk")
+        m.save(f.name + ".vtk")
+        m2 = Mesh.load(f.name + ".vtk")
         self.assertTrue(((m.p[0, :] - m2.p[0, :]) < 1e-6).all())
 
 class SaveLoadCycleHex(SaveLoadCycle):

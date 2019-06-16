@@ -328,10 +328,10 @@ class MeshHex(Mesh3D):
 
         self._build_mappings()
 
-    def to_file(self,
-                filename: str,
-                point_data: Optional[Union[ndarray, Dict[str, ndarray]]] = None,
-                cell_data: Optional[Union[ndarray, Dict[str, ndarray]]] = None):
+    def save(self,
+             filename: str,
+             point_data: Optional[Dict[str, ndarray]] = None,
+             cell_data: Optional[Dict[str, ndarray]] = None):
         """Export the mesh and fields using meshio. (Hexahedron version.)
 
         Parameters
