@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*- 
 """Unit tests for utils package."""
-
 import unittest
 import numpy as np
 
@@ -8,6 +6,7 @@ from skfem.assembly import asm, InteriorBasis
 from skfem.element import ElementTriP1
 from skfem.utils import L2_projection
 from skfem.mesh import MeshTri
+
 
 class InitializeScalarField(unittest.TestCase):
     def runTest(self):
