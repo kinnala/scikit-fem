@@ -23,6 +23,7 @@ class MeshTests(unittest.TestCase):
         # Mesh3D.facets_satisfying
         self.assertEqual(len(m.facets_satisfying(lambda x,y,z: x==0.5)), 1)
 
+
 class FaultyInputs(unittest.TestCase):
     """Check that faulty meshes are detected by the constructors."""
     def runTest(self):
@@ -43,6 +44,7 @@ class FaultyInputs(unittest.TestCase):
             m = MeshTri(np.array([[0,0],[0,1],[1,0],[1,1]]).T,
                         np.array([[0.0,1.0,2.0],[1.0,2.0,3.0]]).T)
 
+
 class Loading(unittest.TestCase):
     """Check that Mesh.load works properly."""
     
@@ -50,15 +52,9 @@ class Loading(unittest.TestCase):
         # submeshes
         examples = Path(__file__).parents[1] / 'docs' / 'examples'
         m = MeshTet.load(str(examples / 'box.msh'))
-        #self.assertTrue((m.boundaries['front'].p == m.submesh(lambda x,y,z: z==1).p).all())
-        #self.assertTrue((m.boundaries['back'].p == m.submesh(lambda x,y,z: z==0).p).all())
-        #self.assertTrue((m.boundaries['top'].p == m.submesh(lambda x,y,z: y==1).p).all())
         self.assertTrue((m.boundaries['top'] == m.facets_satisfying(lambda x,y,z: y==1)).all())
         self.assertTrue((m.boundaries['back'] == m.facets_satisfying(lambda x,y,z: z==0)).all())
         self.assertTrue((m.boundaries['front'] == m.facets_satisfying(lambda x,y,z: z==1)).all())
-        #self.assertTrue((m.boundaries['top'].edges == m.submesh(lambda x,y,z: y==1).edges).all())
-        #self.assertTrue((m.boundaries['back'].edges == m.submesh(lambda x,y,z: z==0).edges).all())
-        #self.assertTrue((m.boundaries['front'].edges == m.submesh(lambda x,y,z: z==1).edges).all())
         m = MeshTri.load(str(examples / 'square.msh'))
         self.assertTrue((m.boundaries['top'] == m.facets_satisfying(lambda x,y: y==1)).all())
         self.assertTrue((m.boundaries['left'] == m.facets_satisfying(lambda x,y: x==0)).all())
@@ -85,6 +81,7 @@ class RefinePreserveSubsets(unittest.TestCase):
             
             
 
+
 class SaveLoadCycle(unittest.TestCase):
     """Save to temporary file and check import/export cycles."""
     cls = MeshTet
@@ -96,6 +93,7 @@ class SaveLoadCycle(unittest.TestCase):
         m.save(f.name + ".vtk")
         m2 = Mesh.load(f.name + ".vtk")
         self.assertTrue(((m.p[0, :] - m2.p[0, :]) < 1e-6).all())
+
 
 class SaveLoadCycleHex(SaveLoadCycle):
     cls = MeshHex

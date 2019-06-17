@@ -126,13 +126,12 @@ class ConvergenceQ1(unittest.TestCase):
         self.mesh = MeshQuad()
         self.mesh.refine(2)
 
+
 class ConvergenceQ2(ConvergenceQ1):
-    """
-    It seems that superconvergence 
-    occurs here. Possibly due to
-    the symmetricity of the loading
-    and the presence of higher order
-    symmetric basis functions?
+    """It seems that superconvergence occurs here. Possibly due to the
+    symmetricity of the loading and the presence of higher order symmetric
+    basis functions?
+
     """
     rateL2 = 3.0
     rateH1 = 3.0
@@ -145,6 +144,7 @@ class ConvergenceQ2(ConvergenceQ1):
         self.mesh = MeshQuad()
         self.mesh.refine(2)
 
+
 class ConvergenceTriP1(ConvergenceQ1):
     def create_basis(self, m):
         e = ElementTriP1()
@@ -155,6 +155,7 @@ class ConvergenceTriP1(ConvergenceQ1):
         self.mesh = MeshTri.init_sqsymmetric()
         self.mesh.refine(2)
 
+
 class ConvergenceTriP2(ConvergenceTriP1):
     rateL2 = 3.0
     rateH1 = 2.0
@@ -162,6 +163,7 @@ class ConvergenceTriP2(ConvergenceTriP1):
         e = ElementTriP2()
         map = MappingAffine(m)
         return InteriorBasis(m, e, map, 2)
+
 
 class ConvergenceHex1(ConvergenceQ1):
     rateL2 = 2.0
@@ -175,6 +177,7 @@ class ConvergenceHex1(ConvergenceQ1):
         self.mesh = MeshHex()
         self.mesh.refine(2)
 
+
 class ConvergenceTetP1(ConvergenceQ1):
     rateL2 = 2.0
     rateH1 = 1.0
@@ -187,6 +190,7 @@ class ConvergenceTetP1(ConvergenceQ1):
         self.mesh = MeshTet()
         self.mesh.refine(2)
 
+
 class ConvergenceTetP2(ConvergenceTetP1):
     rateL2 = 3.0
     rateH1 = 2.0
@@ -198,6 +202,7 @@ class ConvergenceTetP2(ConvergenceTetP1):
     def setUp(self):
         self.mesh = MeshTet()
         self.mesh.refine(1)
+
 
 class ConvergenceLineP1(ConvergenceQ1):
     def create_basis(self, m):
