@@ -1,5 +1,6 @@
 from skfem import *
 from skfem.models.poisson import laplace, unit_load
+from skfem.importers import from_meshio
 
 import numpy as np
 
@@ -8,7 +9,7 @@ from pygmsh.built_in import Geometry
 
 geom = Geometry()
 geom.add_physical(geom.add_circle([0.] * 3, 1., .5**3).plane_surface, 'disk')
-m = MeshTri.from_meshio(generate_mesh(geom, dim=2))
+m = from_meshio(generate_mesh(geom, dim=2))
 
 basis = InteriorBasis(m, ElementTriP2())
 

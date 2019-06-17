@@ -101,13 +101,28 @@ class TestEx16(unittest.TestCase):
         self.assertTrue(np.linalg.norm(np.array([0,2,6,12,20,30])-docs.examples.ex16.ks) < 0.4)
         self.assertTrue(docs.examples.ex16.ks[-1], 30.309720458315521)
 
-# Requires pygmsh (TODO check if this could be installed to travis)
-#
+
+class TestEx12(unittest.TestCase):
+    def runTest(self):
+        import docs.examples.ex12 as ex
+        area = ex.area
+        self.assertTrue((area - np.pi)<1e-3)
+
+
+class TestEx13(unittest.TestCase):
+    def runTest(self):
+        import docs.examples.ex13 as ex
+        u = ex.u
+        A = ex.A
+        self.assertTrue((u @ A @ u - 2 * np.log(2) / np.pi)<1e-3)
+
+
 class TestEx20(unittest.TestCase):
     def runTest(self):
         import docs.examples.ex20 as ex
         psi0 = ex.psi0
         self.assertTrue((psi0 - 1/64)<1e-3)
+
 
 class TestEx21(unittest.TestCase):
     def runTest(self):
