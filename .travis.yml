@@ -3,6 +3,7 @@ python:
   - "3.6"
 install:
   - sudo apt-get update
+  - sudo apt-get install gmsh
   - wget http://gmsh.info/bin/Linux/gmsh-4.3.0-Linux64.tgz
   - tar zvxf gmsh-4.3.0-Linux64.tgz
   - sudo cp gmsh-4.3.0-Linux64/bin/gmsh /usr/bin
