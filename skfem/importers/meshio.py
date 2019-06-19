@@ -1,3 +1,4 @@
+"""Import any formats supported by meshio."""
 import meshio
 import warnings
 import numpy as np

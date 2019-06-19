@@ -323,17 +323,22 @@ class MappingAffine(Mapping):
             for i in range(dim):
                 self.b[i] = mesh.p[i, mesh.t[0, :]]
                 for j in range(dim):
-                    self.A[i, j] = mesh.p[i, mesh.t[j+1, :]] - mesh.p[i, mesh.t[0, :]]
+                    self.A[i, j] = (mesh.p[i, mesh.t[j + 1, :]] -
+                                    mesh.p[i, mesh.t[0, :]])
 
             # determinants
             if dim == 1:
                 self.detA = self.A[0, 0]
             elif dim == 2:
-                self.detA = self.A[0, 0] * self.A[1, 1] - self.A[0, 1] * self.A[1, 0]
+                self.detA = (self.A[0, 0] * self.A[1, 1] -
+                             self.A[0, 1] * self.A[1, 0])
             elif dim == 3:
-                self.detA = self.A[0, 0] * (self.A[1, 1] * self.A[2, 2] - self.A[1, 2] * self.A[2, 1]) -\
-                            self.A[0, 1] * (self.A[1, 0] * self.A[2, 2] - self.A[1, 2] * self.A[2, 0]) +\
-                            self.A[0, 2] * (self.A[1, 0] * self.A[2, 1] - self.A[1, 1] * self.A[2, 0])
+                self.detA = self.A[0, 0] * (self.A[1, 1] * self.A[2, 2] -
+                                            self.A[1, 2] * self.A[2, 1]) -\
+                            self.A[0, 1] * (self.A[1, 0] * self.A[2, 2] -
+                                            self.A[1, 2] * self.A[2, 0]) +\
+                            self.A[0, 2] * (self.A[1, 0] * self.A[2, 1] -
+                                            self.A[1, 1] * self.A[2, 0])
             else:
                 raise Exception("Not implemented for the given dimension.")
 
@@ -347,28 +352,38 @@ class MappingAffine(Mapping):
                 self.invA[1, 0] = -self.A[1, 0] / self.detA
                 self.invA[1, 1] =  self.A[0, 0] / self.detA
             elif dim == 3:
-                self.invA[0, 0] = (-self.A[1, 2] * self.A[2, 1] + self.A[1, 1] * self.A[2, 2]) / self.detA
-                self.invA[1, 0] = ( self.A[1, 2] * self.A[2, 0] - self.A[1, 0] * self.A[2, 2]) / self.detA
-                self.invA[2, 0] = (-self.A[1, 1] * self.A[2, 0] + self.A[1, 0] * self.A[2, 1]) / self.detA
-                self.invA[0, 1] = ( self.A[0, 2] * self.A[2, 1] - self.A[0, 1] * self.A[2, 2]) / self.detA
-                self.invA[1, 1] = (-self.A[0, 2] * self.A[2, 0] + self.A[0, 0] * self.A[2, 2]) / self.detA
-                self.invA[2, 1] = ( self.A[0, 1] * self.A[2, 0] - self.A[0, 0] * self.A[2, 1]) / self.detA
-                self.invA[0, 2] = (-self.A[0, 2] * self.A[1, 1] + self.A[0, 1] * self.A[1, 2]) / self.detA
-                self.invA[1, 2] = ( self.A[0, 2] * self.A[1, 0] - self.A[0, 0] * self.A[1, 2]) / self.detA
-                self.invA[2, 2] = (-self.A[0, 1] * self.A[1, 0] + self.A[0, 0] * self.A[1, 1]) / self.detA
+                self.invA[0, 0] = (-self.A[1, 2] * self.A[2, 1] +
+                                   self.A[1, 1] * self.A[2, 2]) / self.detA
+                self.invA[1, 0] = (self.A[1, 2] * self.A[2, 0] -
+                                   self.A[1, 0] * self.A[2, 2]) / self.detA
+                self.invA[2, 0] = (-self.A[1, 1] * self.A[2, 0] +
+                                   self.A[1, 0] * self.A[2, 1]) / self.detA
+                self.invA[0, 1] = (self.A[0, 2] * self.A[2, 1] -
+                                   self.A[0, 1] * self.A[2, 2]) / self.detA
+                self.invA[1, 1] = (-self.A[0, 2] * self.A[2, 0] +
+                                   self.A[0, 0] * self.A[2, 2]) / self.detA
+                self.invA[2, 1] = (self.A[0, 1] * self.A[2, 0] -
+                                   self.A[0, 0] * self.A[2, 1]) / self.detA
+                self.invA[0, 2] = (-self.A[0, 2] * self.A[1, 1] +
+                                   self.A[0, 1] * self.A[1, 2]) / self.detA
+                self.invA[1, 2] = (self.A[0, 2] * self.A[1, 0] -
+                                   self.A[0, 0] * self.A[1, 2]) / self.detA
+                self.invA[2, 2] = (-self.A[0, 1] * self.A[1, 0] +
+                                   self.A[0, 0] * self.A[1, 1]) / self.detA
             else:
                 raise Exception("Not implemented for the given dimension.")
 
         if hasattr(mesh, 'facets'):
             nf = mesh.facets.shape[1]
             # initialize the boundary mapping
-            self.B = np.empty((dim, dim-1, nf))
+            self.B = np.empty((dim, dim - 1, nf))
             self.c = np.empty((dim, nf))
 
             for i in range(dim):
                 self.c[i] = mesh.p[i, mesh.facets[0, :]]
                 for j in range(dim-1):
-                    self.B[i, j] = mesh.p[i, mesh.facets[j+1, :]] - mesh.p[i, mesh.facets[0, :]]
+                    self.B[i, j] = (mesh.p[i, mesh.facets[j + 1, :]] -
+                                    mesh.p[i, mesh.facets[0, :]])
 
             # area scaling
             if dim == 1:
@@ -376,9 +391,12 @@ class MappingAffine(Mapping):
             elif dim == 2:
                 self.detB = np.sqrt(self.B[0, 0]**2 + self.B[1, 0]**2)
             elif dim == 3:
-                self.detB = np.sqrt(( self.B[1, 0]*self.B[2, 1] - self.B[2, 0]*self.B[1, 1])**2 +
-                                    (-self.B[0, 0]*self.B[2, 1] + self.B[2, 0]*self.B[0, 1])**2 +
-                                    ( self.B[0, 0]*self.B[1, 1] - self.B[1, 0]*self.B[0, 1])**2)
+                self.detB = np.sqrt((self.B[1, 0]*self.B[2, 1] -
+                                     self.B[2, 0]*self.B[1, 1])**2 +
+                                    (-self.B[0, 0]*self.B[2, 1] +
+                                     self.B[2, 0]*self.B[0, 1])**2 +
+                                    (self.B[0, 0]*self.B[1, 1] -
+                                     self.B[1, 0]*self.B[0, 1])**2)
             else:
                 raise Exception("Not implemented for the given dimension.")
 
@@ -477,4 +495,3 @@ class MappingAffine(Mapping):
         n = np.einsum('ijkl,ik->jkl', invDF, N)
         nlength = np.sqrt(np.sum(n**2, axis=0))
         return np.einsum('ijk,jk->ijk', n, 1.0/nlength)
-
