@@ -74,9 +74,8 @@ class Mesh3D(Mesh):
 
     def boundary_edges(self) -> ndarray:
         """Return an array of boundary edge indices."""
-        bnodes = self.boundary_nodes()[:, None]
-        return np.nonzero(np.sum(self.edges[0, :] == bnodes, axis=0) *
-                          np.sum(self.edges[1, :] == bnodes, axis=0))[0]
+        return np.nonzero(np.isin(self.edges,
+                                  self.boundary_nodes()).all(axis=0))[0]
 
     def interior_edges(self) -> ndarray:
         """Return an array of interior edge indices."""
