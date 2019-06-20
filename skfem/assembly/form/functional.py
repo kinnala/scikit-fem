@@ -12,7 +12,7 @@ class Functional(Form):
 
     def kernel(self,
                w: FormParameters,
-               dx: ndarray) -> None:
+               dx: ndarray) -> ndarray:
         return np.sum(self.form(w) * dx, axis=1)
 
     def elemental(self,
@@ -22,7 +22,7 @@ class Functional(Form):
 
     def assemble(self,
                  vbasis: GlobalBasis,
-                 w: Optional[Any] = (None, None, None)) -> ndarray:
+                 w: Optional[Any] = (None, None, None)) -> float:
         return sum(self.elemental(vbasis, w))
 
 
