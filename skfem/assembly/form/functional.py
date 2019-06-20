@@ -15,7 +15,7 @@ class Functional(Form):
                dx: ndarray) -> None:
         return np.sum(self.form(w) * dx, axis=1)
 
-    def assemble(self,
+    def elemental(self,
                  ubasis: GlobalBasis,
                  vbasis: Optional[GlobalBasis] = None,
                  w: Optional[Any] = (None, None, None),
@@ -24,6 +24,12 @@ class Functional(Form):
         vbasis = ubasis
         return self.kernel(self.parameters(w, vbasis), vbasis.dx)
 
+    def assemble(self,
+                 ubasis: GlobalBasis,
+                 vbasis: Optional[GlobalBasis] = None,
+                 w: Optional[Any] = (None, None, None),
+                 nthreads: Optional[int] = 1) -> ndarray:
+        return sum(self.elemental(ubasis, vbasis, w, nthreads))
 
 def functional(form: Callable) -> Functional:
     return Functional(form)
