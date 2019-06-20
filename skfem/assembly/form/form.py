@@ -1,4 +1,9 @@
-from typing import Callable
+from typing import Any, Callable, Optional
+
+from numpy import ndarray
+
+from .form_parameters import FormParameters
+from ..global_basis import GlobalBasis
 
 
 class Form:
@@ -14,3 +19,11 @@ class Form:
 
     def assemble(self):
         raise NotImplementedError
+
+    @staticmethod
+    def parameters(w: Optional[Any], ubasis: GlobalBasis) -> FormParameters:
+        if type(w) is list:
+            w = zip(*w)
+        elif type(w) is ndarray:
+            w = (w, None, None)
+        return FormParameters(*w, **ubasis.default_parameters())

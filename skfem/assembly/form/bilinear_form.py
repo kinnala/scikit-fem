@@ -51,13 +51,7 @@ class BilinearForm(Form):
 
         nt = ubasis.nelems
         dx = ubasis.dx
-
-        if type(w) is list:
-            w = zip(*w)
-        elif type(w) is ndarray:
-            w = (w, None, None)
-
-        w = FormParameters(*w, **ubasis.default_parameters())
+        w = self.parameters(w, ubasis)
 
         # initialize COO data structures
         data = np.zeros((vbasis.Nbfun, ubasis.Nbfun, nt))

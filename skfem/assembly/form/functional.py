@@ -22,16 +22,7 @@ class Functional(Form):
                  nthreads: Optional[int] = 1) -> ndarray:
         assert vbasis is None
         vbasis = ubasis
-        dx = vbasis.dx
-
-        if type(w) is list:
-            w = zip(*w)
-        elif type(w) is ndarray:
-            w = (w, None, None)
-
-        w = FormParameters(*w, **vbasis.default_parameters())
-
-        return self.kernel(w, dx)
+        return self.kernel(self.parameters(w, vbasis), vbasis.dx)
 
 
 def functional(form: Callable) -> Functional:

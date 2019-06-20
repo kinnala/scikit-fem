@@ -33,13 +33,7 @@ class LinearForm(Form):
 
         nt = vbasis.nelems
         dx = vbasis.dx
-
-        if type(w) is list:
-            w = zip(*w)
-        elif type(w) is ndarray:
-            w = (w, None, None)
-
-        w = FormParameters(*w, **vbasis.default_parameters())
+        w = self.parameters(w, vbasis)
 
         data = np.zeros((vbasis.Nbfun, nt))
         rows = np.zeros(vbasis.Nbfun * nt)
