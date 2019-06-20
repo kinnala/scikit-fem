@@ -18,8 +18,7 @@ class Functional(Form):
     def elemental(self,
                  ubasis: GlobalBasis,
                  vbasis: Optional[GlobalBasis] = None,
-                 w: Optional[Any] = (None, None, None),
-                 nthreads: Optional[int] = 1) -> ndarray:
+                 w: Optional[Any] = (None, None, None)) -> ndarray:
         assert vbasis is None
         vbasis = ubasis
         return self.kernel(self.parameters(w, vbasis), vbasis.dx)
@@ -27,9 +26,8 @@ class Functional(Form):
     def assemble(self,
                  ubasis: GlobalBasis,
                  vbasis: Optional[GlobalBasis] = None,
-                 w: Optional[Any] = (None, None, None),
-                 nthreads: Optional[int] = 1) -> ndarray:
-        return sum(self.elemental(ubasis, vbasis, w, nthreads))
+                 w: Optional[Any] = (None, None, None)) -> ndarray:
+        return sum(self.elemental(ubasis, vbasis, w))
 
 def functional(form: Callable) -> Functional:
     return Functional(form)
