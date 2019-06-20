@@ -4,8 +4,7 @@ from skfem.mapping import *
 from skfem.element import *
 from skfem.utils import *
 
-__all__ = ['InterfaceMesh1D',
-           'Mesh',
+__all__ = ['Mesh',
            'Mesh2D',
            'Mesh3D',
            'MeshHex',

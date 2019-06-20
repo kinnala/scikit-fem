@@ -6,6 +6,10 @@ from typing import Callable, Optional
 
 from numpy import ndarray
 
+
+BoolFun = Callable[[float, float, float], bool]
+
+
 class Mesh3D(Mesh):
     """Three dimensional meshes, common methods.
 
@@ -16,7 +20,7 @@ class Mesh3D(Mesh):
 
     """
 
-    def nodes_satisfying(self, test: Callable[[float, float, float], bool]) -> ndarray:
+    def nodes_satisfying(self, test: BoolFun) -> ndarray:
         """Return nodes that satisfy some condition.
 
         Parameters
@@ -27,7 +31,7 @@ class Mesh3D(Mesh):
         """
         return np.nonzero(test(self.p[0, :], self.p[1, :], self.p[2, :]))[0]
 
-    def facets_satisfying(self, test: Callable[[float, float, float], bool]) -> ndarray:
+    def facets_satisfying(self, test: BoolFun) -> ndarray:
         """Return facets whose midpoints satisfy some condition.
         
         Parameters
@@ -37,12 +41,12 @@ class Mesh3D(Mesh):
             to the output set.
 
         """
-        mx = np.sum(self.p[0, self.facets], axis=0)/self.facets.shape[0]
-        my = np.sum(self.p[1, self.facets], axis=0)/self.facets.shape[0]
-        mz = np.sum(self.p[2, self.facets], axis=0)/self.facets.shape[0]
+        mx = np.sum(self.p[0, self.facets], axis=0) / self.facets.shape[0]
+        my = np.sum(self.p[1, self.facets], axis=0) / self.facets.shape[0]
+        mz = np.sum(self.p[2, self.facets], axis=0) / self.facets.shape[0]
         return np.nonzero(test(mx, my, mz))[0]
 
-    def edges_satisfying(self, test: Callable[[float, float, float], bool]) -> ndarray:
+    def edges_satisfying(self, test: BoolFun) -> ndarray:
         """Return edges whose midpoints satisfy some condition.
 
         Parameters
@@ -52,12 +56,12 @@ class Mesh3D(Mesh):
             the output set.
 
         """
-        mx = 0.5*(self.p[0, self.edges[0, :]] + self.p[0, self.edges[1, :]])
-        my = 0.5*(self.p[1, self.edges[0, :]] + self.p[1, self.edges[1, :]])
-        mz = 0.5*(self.p[2, self.edges[0, :]] + self.p[2, self.edges[1, :]])
+        mx = 0.5 * (self.p[0, self.edges[0, :]] + self.p[0, self.edges[1, :]])
+        my = 0.5 * (self.p[1, self.edges[0, :]] + self.p[1, self.edges[1, :]])
+        mz = 0.5 * (self.p[2, self.edges[0, :]] + self.p[2, self.edges[1, :]])
         return np.nonzero(test(mx, my, mz))[0]
 
-    def elements_satisfying(self, test: Callable[[float, float, float], bool]) -> ndarray:
+    def elements_satisfying(self, test: BoolFun) -> ndarray:
         """Return elements whose midpoints satisfy some condition.
 
         Parameters
@@ -67,9 +71,9 @@ class Mesh3D(Mesh):
             belonging to the output set.
 
         """
-        mx = np.sum(self.p[0, self.t], axis=0)/self.t.shape[0]
-        my = np.sum(self.p[1, self.t], axis=0)/self.t.shape[0]
-        mz = np.sum(self.p[2, self.t], axis=0)/self.t.shape[0]
+        mx = np.sum(self.p[0, self.t], axis=0) / self.t.shape[0]
+        my = np.sum(self.p[1, self.t], axis=0) / self.t.shape[0]
+        mz = np.sum(self.p[2, self.t], axis=0) / self.t.shape[0]
         return np.nonzero(test(mx, my, mz))[0]
 
     def boundary_edges(self) -> ndarray:
@@ -80,9 +84,10 @@ class Mesh3D(Mesh):
 
     def interior_edges(self) -> ndarray:
         """Return an array of interior edge indices."""
-        return np.setdiff1d(np.arange(self.edges.shape[1], dtype=np.int), self.boundary_edges())
+        return np.setdiff1d(np.arange(self.edges.shape[1], dtype=np.int),
+                            self.boundary_edges())
 
     def param(self) -> float:
         """Return mesh parameter, viz the length of the longest edge."""
-        return np.max(np.linalg.norm(np.diff(self.p[:, self.edges], axis=1),
-                                     axis=0))
+        lengths = np.linalg.norm(np.diff(self.p[:, self.edges], axis=1), axis=0)
+        return np.max(lengths)

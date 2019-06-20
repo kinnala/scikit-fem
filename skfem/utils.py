@@ -21,7 +21,9 @@ def condense(A: spmatrix,
              b: Optional[Union[ndarray, spmatrix]] = None,
              x: Optional[ndarray] = None,
              I: Optional[ndarray] = None,
-             D: Optional[ndarray] = None) -> Union[spmatrix, Tuple[spmatrix, ndarray], Tuple[spmatrix, spmatrix]]:
+             D: Optional[ndarray] = None) -> Union[spmatrix,
+                                                   Tuple[spmatrix, ndarray],
+                                                   Tuple[spmatrix, spmatrix]]:
     """Eliminate DOF's from a linear system.
 
     Supports also generalized eigenvalue problems.

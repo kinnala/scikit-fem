@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, Optional
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -19,15 +19,19 @@ class MeshLine(Mesh):
     meshio_type: str = "line"
     name: str = "One-dimensional"
 
-    p: ndarray = np.array([])
-    t: ndarray = np.array([])
-
-    def __init__(self, p=None, t=None, validate=True):
+    def __init__(self,
+                 p: Optional[ndarray] = None,
+                 t: Optional[ndarray] = None,
+                 boundaries: Optional[ndarray] = None,
+                 subdomains: Optional[ndarray] = None,
+                 validate=True):
         if p is None and t is None:
             p = np.array([[0., 1.]], dtype=np.float_)
         if len(p.shape) == 1:
             p = np.array([p]) 
         self.p = p
+        self.boundaries = boundaries
+        self.subdomains = subdomains
         
         self.facets = np.arange(self.p.shape[1])[None, :]
         self.t = np.vstack([self.facets[0, :-1],
@@ -63,8 +67,9 @@ class MeshLine(Mesh):
         self.f2t[1, np.nonzero(self.f2t[0, :] == self.f2t[1, :])[0]] = -1
 
     def _adaptive_refine(self, marked):
-        """Perform an adaptive refine which splits each marked element into two."""
-        
+        """Perform an adaptive refine which splits each marked element into
+        two."""
+
         t = self.t
         p = self.p
 
@@ -72,10 +77,11 @@ class MeshLine(Mesh):
 
         nonmarked = np.setdiff1d(np.arange(t.shape[1]), marked)
 
-        newp = np.hstack((p, 0.5*(p[:, self.t[0, marked]] + p[:, self.t[1, marked]])))
+        newp = np.hstack((p, 0.5*(p[:, self.t[0, marked]] +
+                                  p[:, self.t[1, marked]])))
         newt = np.vstack((t[0, marked], mid))
         newt = np.hstack((t[:, nonmarked], newt, np.vstack((mid, t[1, marked]))))
-        
+
         # update fields
         self.p = newp
         self.t = newt

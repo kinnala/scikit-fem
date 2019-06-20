@@ -1,19 +1,22 @@
 from skfem import *
+from skfem.importers.meshio import from_meshio
 
 import numpy as np
 
 from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
 
+
 geom = Geometry()
 circle = geom.add_circle([0.] * 3, 1., .5**3)
 geom.add_physical(circle.line_loop.lines, 'perimeter')
 geom.add_physical(circle.plane_surface, 'disk')
-mesh = MeshTri.from_meshio(generate_mesh(geom, dim=2))
+mesh = from_meshio(generate_mesh(geom, dim=2))
 
 element = ElementTriMorley()
 mapping = MappingAffine(mesh)
 ib = InteriorBasis(mesh, element, mapping, 2)
+
 
 @bilinear_form
 def biharmonic(u, du, ddu, v, dv, ddv, w):

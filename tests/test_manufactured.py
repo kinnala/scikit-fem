@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*- 
 """Solve problems that have manufactured solutions."""
-
 import unittest
 import numpy as np
 from skfem import *

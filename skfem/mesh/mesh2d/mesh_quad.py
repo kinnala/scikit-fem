@@ -11,6 +11,7 @@ from typing import Optional, Type
 
 from numpy import ndarray
 
+
 class MeshQuad(Mesh2D):
     """A mesh consisting of quadrilateral elements.
 
@@ -48,15 +49,11 @@ class MeshQuad(Mesh2D):
     meshio_type: str = "quad"
     name: str = "Quadrilateral"
 
-    p: ndarray = np.array([])
-    t: ndarray = np.array([])
-    facets: ndarray = np.array([])
-    f2t: ndarray = np.array([])
-    t2f: ndarray = np.array([])
-
     def __init__(self,
                  p: Optional[ndarray] = None,
                  t: Optional[ndarray] = None,
+                 boundaries: Optional[ndarray] = None,
+                 subdomains: Optional[ndarray] = None,
                  validate: Optional[bool] = True):
         """Initialise a quadrilateral mesh.
 
@@ -76,6 +73,8 @@ class MeshQuad(Mesh2D):
             raise Exception("Must provide p AND t or neither")
         self.p = p
         self.t = t
+        self.boundaries = boundaries
+        self.subdomains = subdomains
         if validate:
             self._validate()
         self._build_mappings()
@@ -103,10 +102,18 @@ class MeshQuad(Mesh2D):
         nt = (npx - 1) * (npy - 1)
         t = np.zeros((4, nt))
         ix = ix.reshape(npy, npx, order='F').copy()
-        t[0, :] = ix[0:(npy-1), 0:(npx-1)].reshape(nt, 1, order='F').copy().flatten()
-        t[1, :] = ix[1:npy,     0:(npx-1)].reshape(nt, 1, order='F').copy().flatten()
-        t[2, :] = ix[1:npy,     1:npx].reshape(nt, 1, order='F').copy().flatten()
-        t[3, :] = ix[0:(npy-1), 1:npx].reshape(nt, 1, order='F').copy().flatten()
+        t[0, :] = (ix[0:(npy-1), 0:(npx-1)].reshape(nt, 1, order='F')
+                                           .copy()
+                                           .flatten())
+        t[1, :] = (ix[1:npy, 0:(npx-1)].reshape(nt, 1, order='F')
+                                       .copy()
+                                       .flatten())
+        t[2, :] = (ix[1:npy, 1:npx].reshape(nt, 1, order='F')
+                                   .copy()
+                                   .flatten())
+        t[3, :] = (ix[0:(npy-1), 1:npx].reshape(nt, 1, order='F')
+                                       .copy()
+                                       .flatten())
         return cls(p, t.astype(np.int64))
 
     @classmethod
@@ -177,21 +184,21 @@ class MeshQuad(Mesh2D):
         e = self.facets
         sz = p.shape[1]
         t2f = self.t2f + sz
-        
+
         # quadrilateral middle point
         mid = range(self.t.shape[1]) + np.max(t2f) + 1
         
         # new vertices are the midpoints of edges ...
         newp1 = 0.5*np.vstack((p[0, e[0, :]] + p[0, e[1, :]],
                                p[1, e[0, :]] + p[1, e[1, :]]))
-        
+
         # ... and element middle points
         newp2 = 0.25*np.vstack((p[0, t[0, :]] + p[0, t[1, :]] +
                                 p[0, t[2, :]] + p[0, t[3, :]],
                                 p[1, t[0, :]] + p[1, t[1, :]] +
                                 p[1, t[2, :]] + p[1, t[3, :]]))
         self.p = np.hstack((p, newp1, newp2))
-        
+
         # build new quadrilateral definitions
         self.t = np.hstack((
             np.vstack((t[0, :], t2f[0, :], mid, t2f[3, :])),
@@ -199,7 +206,7 @@ class MeshQuad(Mesh2D):
             np.vstack((mid, t2f[1, :], t[2, :], t2f[2, :])),
             np.vstack((t2f[3, :], mid, t2f[2, :], t[3, :])),
             ))
-        
+
         # build mapping between old and new facets
         new_facets = np.zeros((2, e.shape[1]), dtype=np.int64)
         ix0 = np.arange(t.shape[1], dtype=np.int64)
@@ -233,7 +240,8 @@ class MeshQuad(Mesh2D):
                 # preserve elemental constant functions
                 X = np.concatenate((x, x))
             else:
-                raise Exception("The parameter x must have one value per element.")
+                raise Exception("The parameter x must have one " +
+                                "value per element.")
             return MeshTri(self.p, t, validate=False), X
         else:
             return MeshTri(self.p, t, validate=False)
@@ -245,9 +253,11 @@ class MeshQuad(Mesh2D):
         newt = np.hstack((newt, t[[1, 2, 4], :]))
         newt = np.hstack((newt, t[[2, 3, 4], :]))
         newt = np.hstack((newt, t[[3, 0, 4], :]))
-        mx = np.sum(self.p[0, self.t], axis=0)/self.t.shape[0]
-        my = np.sum(self.p[1, self.t], axis=0)/self.t.shape[0]
-        return MeshTri(np.hstack((self.p, np.vstack((mx, my)))), newt, validate=False)
+        mx = np.sum(self.p[0, self.t], axis=0) / self.t.shape[0]
+        my = np.sum(self.p[1, self.t], axis=0) / self.t.shape[0]
+        return MeshTri(np.hstack((self.p, np.vstack((mx, my)))),
+                       newt,
+                       validate=False)
 
     def plot(self, z, smooth=False, edgecolors=None, ax=None, zlim=None):
         """Visualise piecewise-linear or piecewise-constant function.
@@ -276,5 +286,3 @@ class MeshQuad(Mesh2D):
 
     def mapping(self):
         return MappingIsoparametric(self, ElementQuad1(), ElementLineP1())
-
-

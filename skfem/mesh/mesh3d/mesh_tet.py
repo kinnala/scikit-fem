@@ -6,8 +6,9 @@ from skfem.mapping import MappingAffine
 from ..mesh import MeshType
 from .mesh3d import Mesh3D
 
-from typing import Type
+from typing import Type, Optional
 from numpy import ndarray
+
 
 class MeshTet(Mesh3D):
     """A mesh consisting of tetrahedral elements.
@@ -43,16 +44,32 @@ class MeshTet(Mesh3D):
     meshio_type: str = "tetra"
     name: str = "Tetrahedral"
 
-    def __init__(self, p=None, t=None, validate=True):
+    def __init__(self,
+                 p: Optional[ndarray] = None,
+                 t: Optional[ndarray] = None,
+                 boundaries: Optional[ndarray] = None,
+                 subdomains: Optional[ndarray] = None,
+                 validate=True):
         if p is None and t is None:
-            p = np.array([[0., 0., 0.], [0., 0., 1.], [0., 1., 0.], [1., 0., 0.],
-                          [0., 1., 1.], [1., 0., 1.], [1., 1., 0.], [1., 1., 1.]]).T
-            t = np.array([[0, 1, 2, 3], [3, 5, 1, 7], [2, 3, 6, 7],
-                          [2, 3, 1, 7], [1, 2, 4, 7]]).T
+            p = np.array([[0., 0., 0.],
+                          [0., 0., 1.],
+                          [0., 1., 0.],
+                          [1., 0., 0.],
+                          [0., 1., 1.],
+                          [1., 0., 1.],
+                          [1., 1., 0.],
+                          [1., 1., 1.]]).T
+            t = np.array([[0, 1, 2, 3],
+                          [3, 5, 1, 7],
+                          [2, 3, 6, 7],
+                          [2, 3, 1, 7],
+                          [1, 2, 4, 7]]).T
         elif p is None or t is None:
             raise Exception("Must provide p AND t or neither")
         self.p = p
         self.t = t
+        self.boundaries = boundaries
+        self.subdomains = subdomains
         if validate:
             self._validate()
         self.enable_facets = True
@@ -82,23 +99,24 @@ class MeshTet(Mesh3D):
 
         Copyright (c) 2016-2018 Nico Schlömer
 
-        Permission is hereby granted, free of charge, to any person obtaining a copy
-        of this software and associated documentation files (the "Software"), to deal
-        in the Software without restriction, including without limitation the rights
-        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-        copies of the Software, and to permit persons to whom the Software is
-        furnished to do so, subject to the following conditions:
+        Permission is hereby granted, free of charge, to any person obtaining a
+        copy of this software and associated documentation files (the
+        "Software"), to deal in the Software without restriction, including
+        without limitation the rights to use, copy, modify, merge, publish,
+        distribute, sublicense, and/or sell copies of the Software, and to
+        permit persons to whom the Software is furnished to do so, subject to
+        the following conditions:
 
-        The above copyright notice and this permission notice shall be included in all
-        copies or substantial portions of the Software.
+        The above copyright notice and this permission notice shall be included
+        in all copies or substantial portions of the Software.
 
-        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-        SOFTWARE.
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+        OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+        MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+        NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+        LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+        OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+        WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         """
         # Create the vertices.
@@ -256,13 +274,17 @@ class MeshTet(Mesh3D):
                       1, 3,
                       2, 3])
         for i in range(5):
-            self.edges = np.hstack((self.edges,
-                                    np.sort(np.vstack((self.t[e[2*i], :],
-                                                       self.t[e[2*i+1], :])),
-                                            axis=0)))
+            self.edges = np.hstack((
+                self.edges,
+                np.sort(np.vstack((self.t[e[2*i], :],
+                                   self.t[e[2*i+1], :])), axis=0)
+            ))
 
         # unique edges
-        self.edges, ixa, ixb = np.unique(self.edges, axis=1, return_index=True, return_inverse=True)
+        self.edges, ixa, ixb = np.unique(self.edges,
+                                         axis=1,
+                                         return_index=True,
+                                         return_inverse=True)
         self.edges = np.ascontiguousarray(self.edges)
 
         self.t2e = ixb.reshape((6, self.t.shape[1]))
@@ -276,14 +298,18 @@ class MeshTet(Mesh3D):
                           0, 2, 3,
                           1, 2, 3])
             for i in range(3):
-                self.facets = np.hstack((self.facets,
-                                         np.sort(np.vstack((self.t[f[2*i], :],
-                                                            self.t[f[2*i+1], :],
-                                                            self.t[f[2*i+2]])),
-                                                 axis=0)))
+                self.facets = np.hstack((
+                    self.facets,
+                    np.sort(np.vstack((self.t[f[2*i], :],
+                                       self.t[f[2*i+1], :],
+                                       self.t[f[2*i+2]])), axis=0)
+                ))
 
             # unique facets
-            self.facets, ixa, ixb = np.unique(self.facets, axis=1, return_index=True, return_inverse=True)
+            self.facets, ixa, ixb = np.unique(self.facets,
+                                              axis=1,
+                                              return_index=True,
+                                              return_inverse=True)
             self.facets = np.ascontiguousarray(self.facets)
 
             self.t2f = ixb.reshape((4, self.t.shape[1]))

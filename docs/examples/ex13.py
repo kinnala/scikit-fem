@@ -1,5 +1,6 @@
 from skfem import *
 from skfem.models.poisson import laplace, mass
+from skfem.importers import from_meshio
 
 import numpy as np
 
@@ -24,7 +25,7 @@ geom.add_physical(lines[-1], 'positive')
 lines.append(geom.add_circle_arc(points[4], points[0], points[1]))
 geom.add_physical(geom.add_plane_surface(geom.add_line_loop(lines)), 'domain')
 
-mesh = MeshTri.from_meshio(generate_mesh(geom, dim=2))
+mesh = from_meshio(generate_mesh(geom, dim=2))
 
 elements = ElementTriP2()
 basis = InteriorBasis(mesh, elements)
