@@ -105,8 +105,9 @@ class TestEx16(unittest.TestCase):
 class TestEx12(unittest.TestCase):
     def runTest(self):
         import docs.examples.ex12 as ex
-        area = ex.area
-        self.assertTrue((area - np.pi)<1e-3)
+        self.assertTrue(abs(ex.area - np.pi) < 1e-2)
+        self.assertTrue(abs(ex.k - 1/8/np.pi) < 1e-5)
+        self.assertTrue(abs(ex.k1 - 1/4/np.pi) < 1e-5)
 
 
 class TestEx13(unittest.TestCase):
