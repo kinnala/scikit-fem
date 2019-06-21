@@ -114,7 +114,7 @@ class TestEx13(unittest.TestCase):
         import docs.examples.ex13 as ex
         u = ex.u
         A = ex.A
-        self.assertTrue((u @ A @ u - 2 * np.log(2) / np.pi)<1e-3)
+        self.assertAlmostEqual(u @ A @ u, 2 * np.log(2) / np.pi, delta=1e-3)
 
 
 class TestEx20(unittest.TestCase):
