@@ -41,9 +41,9 @@ u[interior_dofs] = solve(*condense(A, 0.*u, u, interior_dofs))
 M = asm(mass, basis)
 u_exact = L2_projection(lambda x, y: 2 * np.arctan2(y, x) / np.pi, basis)
 u_error = u - u_exact
-print('L2 error =', np.sqrt(u_error @ M @ u_error))
-print('conductance = {:.4f} (exact = 2 ln 2 / pi = {:.4f})'.format(
-    u @ A @ u, 2 * np.log(2) / np.pi))
+error_L2 = np.sqrt(u_error @ M @ u_error)
+conductance = {'skfem': u @ A @ u,
+               'exact': 2 * np.log(2) / np.pi}
 
 
 @linear_form
@@ -51,10 +51,17 @@ def port_flux(v, dv, w):
     return sum(w.n * dv)
 
 
-for port in mesh.boundaries:
-    basis = FacetBasis(mesh, elements, facets=mesh.boundaries[port])
+current = {}
+for port, boundary in mesh.boundaries.items():
+    basis = FacetBasis(mesh, elements, facets=boundary)
     form = asm(port_flux, basis)
-    print('Current in through {} = {:.4f}'.format(port, form @ u))
+    current[port] = form @ u
 
-mesh.plot(u[basis.nodal_dofs.flatten()])
-mesh.show()
+if __name__ == '__main__':
+
+    print('L2 error:', error_L2)
+    print('conductance:', conductance)
+    print('Current in through ports:', current)
+
+    mesh.plot(u[basis.nodal_dofs.flatten()])
+    mesh.show()
