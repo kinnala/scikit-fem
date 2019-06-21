@@ -46,16 +46,15 @@ conductance = {'skfem': u @ A @ u,
                'exact': 2 * np.log(2) / np.pi}
 
 
-@linear_form
-def port_flux(v, dv, w):
-    return sum(w.n * dv)
+@functional
+def port_flux(w):
+    return sum(w.n * w.dw)
 
 
 current = {}
 for port, boundary in mesh.boundaries.items():
     basis = FacetBasis(mesh, elements, facets=boundary)
-    form = asm(port_flux, basis)
-    current[port] = form @ u
+    current[port] = asm(port_flux, basis, w=basis.interpolate(u))
 
 if __name__ == '__main__':
 
