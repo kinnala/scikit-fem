@@ -121,7 +121,7 @@ class TestEx20(unittest.TestCase):
     def runTest(self):
         import docs.examples.ex20 as ex
         psi0 = ex.psi0
-        self.assertTrue((psi0 - 1/64)<1e-3)
+        self.assertAlmostEqual(psi0, 1/64, delta=1e-3)
 
 
 class TestEx21(unittest.TestCase):
