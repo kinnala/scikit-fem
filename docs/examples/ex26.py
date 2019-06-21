@@ -3,8 +3,8 @@ from skfem.models.poisson import laplace, unit_load
 
 import numpy as np
 
-from ex17 import mesh, basis, radii, joule_heating, thermal_conductivity
-
+from docs.examples.ex17 import mesh, basis, radii,\
+    joule_heating, thermal_conductivity
 
 
 insulation = np.unique(basis.element_dofs[:, mesh.subdomains['insulation']])

@@ -78,6 +78,22 @@ class TestEx11(unittest.TestCase):
         self.assertAlmostEqual(np.mean(u[ib.nodal_dofs[1, :]]), 0.0)
 
 
+class TestEx12(unittest.TestCase):
+    def runTest(self):
+        import docs.examples.ex12 as ex
+        self.assertAlmostEqual(ex.area, np.pi, delta=1e-2)
+        self.assertAlmostEqual(ex.k, 1/8/np.pi, delta=1e-5)
+        self.assertAlmostEqual(ex.k1, 1/4/np.pi, delta=1e-5)
+
+
+class TestEx13(unittest.TestCase):
+    def runTest(self):
+        import docs.examples.ex13 as ex
+        u = ex.u
+        A = ex.A
+        self.assertAlmostEqual(u @ A @ u, 2 * np.log(2) / np.pi, delta=1e-3)
+
+
 class TestEx14(unittest.TestCase):
     """Run examples/ex14.py"""
     def runTest(self):
@@ -102,20 +118,21 @@ class TestEx16(unittest.TestCase):
         self.assertTrue(docs.examples.ex16.ks[-1], 30.309720458315521)
 
 
-class TestEx12(unittest.TestCase):
-    def runTest(self):
-        import docs.examples.ex12 as ex
-        self.assertAlmostEqual(ex.area, np.pi, delta=1e-2)
-        self.assertAlmostEqual(ex.k, 1/8/np.pi, delta=1e-5)
-        self.assertAlmostEqual(ex.k1, 1/4/np.pi, delta=1e-5)
+class TestEx17(unittest.TestCase):
+   def runTest(self):
+      import docs.examples.ex17 as ex
 
 
-class TestEx13(unittest.TestCase):
-    def runTest(self):
-        import docs.examples.ex13 as ex
-        u = ex.u
-        A = ex.A
-        self.assertAlmostEqual(u @ A @ u, 2 * np.log(2) / np.pi, delta=1e-3)
+# TODO: no dmsh in testsuite
+# class TestEx18(unittest.TestCase):
+#    def runTest(self):
+#       import docs.examples.ex18 as ex
+
+
+# TODO: no sksparse in testsuite
+# class TestEx19(unittest.TestCase):
+#    def runTest(self):
+#       import docs.examples.ex19 as ex
 
 
 class TestEx20(unittest.TestCase):
@@ -141,6 +158,33 @@ class TestEx22(unittest.TestCase):
         u = ex.u
         K = ex.K
         self.assertAlmostEqual(u.T @ K @ u, 0.2131280267335294)
+
+
+# TODO: no pacopy in testsuite
+# class TestEx23(unittest.TestCase):
+#    def runTest(self):
+#       import docs.examples.ex23 as ex
+
+
+class TestEx24(unittest.TestCase):
+   def runTest(self):
+      import docs.examples.ex24 as ex
+
+
+class TestEx25(unittest.TestCase):
+   def runTest(self):
+      import docs.examples.ex25 as ex
+
+
+class TestEx26(unittest.TestCase):
+   def runTest(self):
+      import docs.examples.ex26 as ex
+
+
+# TODO: no pacopy in testsuite
+# class TestEx27(unittest.TestCase):
+#    def runTest(self):
+#       import docs.examples.ex27 as ex
 
 
 if __name__ == '__main__':
