@@ -24,3 +24,7 @@ class InitializeScalarField(unittest.TestCase):
 
         self.assertTrue(normest < 0.011,
                         msg = "|x-y| = {}".format(normest))
+
+
+if __name__ == '__main__':
+    unittest.main()

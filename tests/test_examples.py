@@ -140,3 +140,7 @@ class TestEx22(unittest.TestCase):
         u = ex.u
         K = ex.K
         self.assertAlmostEqual(u.T @ K @ u, 0.2131280267335294)
+
+
+if __name__ == '__main__':
+    unittest.main()

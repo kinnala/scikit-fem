@@ -101,3 +101,7 @@ class LineNeumann1D(unittest.TestCase):
         u = solve(L + 1e-6*M, b) 
 
         self.assertTrue(np.sum(np.abs(u - m.p[0, :] + 0.5)) < 1e-4)
+
+
+if __name__ == '__main__':
+    unittest.main()
