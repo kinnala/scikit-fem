@@ -12,17 +12,18 @@ class Functional(Form):
 
     def kernel(self,
                w: FormParameters,
-               dx: ndarray) -> None:
+               dx: ndarray) -> ndarray:
         return np.sum(self.form(w) * dx, axis=1)
 
-    def assemble(self,
-                 ubasis: GlobalBasis,
-                 vbasis: Optional[GlobalBasis] = None,
-                 w: Optional[Any] = (None, None, None),
-                 nthreads: Optional[int] = 1) -> ndarray:
-        assert vbasis is None
-        vbasis = ubasis
+    def elemental(self,
+                  vbasis: GlobalBasis,
+                  w: Optional[Any] = (None, None, None)) -> ndarray:
         return self.kernel(self.parameters(w, vbasis), vbasis.dx)
+
+    def assemble(self,
+                 vbasis: GlobalBasis,
+                 w: Optional[Any] = (None, None, None)) -> float:
+        return sum(self.elemental(vbasis, w))
 
 
 def functional(form: Callable) -> Functional:
