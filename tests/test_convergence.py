@@ -211,3 +211,7 @@ class ConvergenceLineP1(ConvergenceQ1):
     def setUp(self):
         self.mesh = MeshLine()
         self.mesh.refine(3)
+
+
+if __name__ == '__main__':
+    unittest.main()

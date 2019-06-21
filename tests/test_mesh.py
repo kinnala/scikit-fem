@@ -97,3 +97,7 @@ class SaveLoadCycle(unittest.TestCase):
 
 class SaveLoadCycleHex(SaveLoadCycle):
     cls = MeshHex
+
+
+if __name__ == '__main__':
+    unittest.main()
