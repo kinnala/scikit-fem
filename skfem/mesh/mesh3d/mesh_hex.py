@@ -1,7 +1,7 @@
-from typing import Dict, Optional, Type, Union
-
 import numpy as np
 from numpy import ndarray
+
+from typing import Dict, Optional, Type, Union
 
 from skfem.element import ElementHex1, ElementQuad1
 from skfem.mapping import MappingIsoparametric
@@ -45,8 +45,8 @@ class MeshHex(Mesh3D):
     def __init__(self,
                  p: Optional[ndarray] = None,
                  t: Optional[ndarray] = None,
-                 boundaries: Optional[ndarray] = None,
-                 subdomains: Optional[ndarray] = None,
+                 boundaries: Optional[Dict[str, ndarray]] = None,
+                 subdomains: Optional[Dict[str, ndarray]] = None,
                  validate=True):
         """Initialise a hexahedral mesh."""
         if p is None and t is None:

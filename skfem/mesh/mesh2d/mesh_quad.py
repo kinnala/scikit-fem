@@ -7,7 +7,7 @@ from skfem.mapping import MappingIsoparametric
 from .mesh2d import Mesh2D, MeshType
 from .mesh_tri import MeshTri
 
-from typing import Optional, Type
+from typing import Optional, Type, Dict
 
 from numpy import ndarray
 
@@ -52,8 +52,8 @@ class MeshQuad(Mesh2D):
     def __init__(self,
                  p: Optional[ndarray] = None,
                  t: Optional[ndarray] = None,
-                 boundaries: Optional[ndarray] = None,
-                 subdomains: Optional[ndarray] = None,
+                 boundaries: Optional[Dict[str, ndarray]] = None,
+                 subdomains: Optional[Dict[str, ndarray]] = None,
                  validate: Optional[bool] = True):
         """Initialise a quadrilateral mesh.
 

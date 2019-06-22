@@ -85,6 +85,15 @@ class Mesh():
                     warnings.warn("Mesh.__init__(): Transforming "
                                   "over 100 elements to C_CONTIGUOUS.")
                 self.t = np.ascontiguousarray(self.t)
+        # transform lists to ndarrays
+        if self.boundaries is not None:
+            for k, v in self.boundaries.items():
+                if not isinstance(v, ndarray):
+                    self.boundaries[k] = np.array(v, dtype=np.intp)
+        if self.subdomains is not None:
+            for k, v in self.subdomains.items():
+                if not isinstance(v, ndarray):
+                    self.subdomains[k] = np.array(v, dtype=np.intp)
 
     def __str__(self):
         return self.__repr__()

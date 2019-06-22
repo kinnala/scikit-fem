@@ -1,7 +1,7 @@
-from typing import Type, Optional
-
 import numpy as np
 import matplotlib.pyplot as plt
+
+from typing import Type, Optional, Dict
 
 from skfem.mapping import MappingAffine
 
@@ -22,8 +22,8 @@ class MeshLine(Mesh):
     def __init__(self,
                  p: Optional[ndarray] = None,
                  t: Optional[ndarray] = None,
-                 boundaries: Optional[ndarray] = None,
-                 subdomains: Optional[ndarray] = None,
+                 boundaries: Optional[Dict[str, ndarray]] = None,
+                 subdomains: Optional[Dict[str, ndarray]] = None,
                  validate=True):
         if p is None and t is None:
             p = np.array([[0., 1.]], dtype=np.float_)

@@ -109,9 +109,15 @@ class SerializeUnserializeCycle(unittest.TestCase):
         for cls in self.clss:
             m = cls()
             m.refine(2)
-            m.boundaries = {'down': m.facets_satisfying(lambda x: x==0)}
-            m.submeshes = {'upper': m.elements_satisfying(lambda x: x[0]>0.5)}
+            m.boundaries = {'down': m.facets_satisfying(lambda x: x[0]==0)}
+            m.subdomains = {'upper': m.elements_satisfying(lambda x: x[0]>0.5)}
             M = cls(**m.to_dict())
+            self.assertTrue(np.sum(m.p - M.p) < 1e-13)
+            self.assertTrue(np.sum(m.t - M.t) < 1e-13)
+            for k in m.boundaries:
+                self.assertTrue((m.boundaries[k] == M.boundaries[k]).all())
+            for k in m.subdomains:
+                self.assertTrue((m.subdomains[k] == M.subdomains[k]).all())
 
 
 if __name__ == '__main__':
