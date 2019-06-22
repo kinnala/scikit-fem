@@ -75,10 +75,10 @@ class MeshQuad(Mesh2D):
         self.t = t
         self.boundaries = boundaries
         self.subdomains = subdomains
+        super(MeshQuad, self).__init__()
         if validate:
             self._validate()
         self._build_mappings()
-        super(MeshQuad, self).__init__()
 
     @classmethod
     def init_tensor(cls: Type[MeshType],

@@ -121,10 +121,10 @@ class MeshTri(Mesh2D):
         self.t = t
         self.boundaries = boundaries
         self.subdomains = subdomains
+        super(MeshTri, self).__init__()
         if validate:
             self._validate()
         self._build_mappings(sort_t=sort_t)
-        super(MeshTri, self).__init__()
 
     @classmethod
     def init_tensor(cls: Type[MeshType],

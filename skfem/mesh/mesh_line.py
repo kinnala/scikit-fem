@@ -36,11 +36,11 @@ class MeshLine(Mesh):
         self.facets = np.arange(self.p.shape[1])[None, :]
         self.t = np.vstack([self.facets[0, :-1],
                             self.facets[0, 1:]]) if t is None else t
+        super(MeshLine, self).__init__()
         self._build_mappings()
 
         if validate:
             self._validate()
-        super(MeshLine, self).__init__()
 
     @classmethod
     def init_refdom(cls: Type[MeshType]) -> MeshType:

@@ -21,7 +21,7 @@ class MeshTests(unittest.TestCase):
         self.assertGreater(np.min(m.p), 0.4999)
 
         # Mesh3D.facets_satisfying
-        self.assertEqual(len(m.facets_satisfying(lambda x,y,z: x==0.5)), 1)
+        self.assertEqual(len(m.facets_satisfying(lambda x: x[0]==0.5)), 1)
 
 
 class FaultyInputs(unittest.TestCase):
@@ -52,13 +52,13 @@ class Loading(unittest.TestCase):
         # submeshes
         examples = Path(__file__).parents[1] / 'docs' / 'examples'
         m = MeshTet.load(str(examples / 'box.msh'))
-        self.assertTrue((m.boundaries['top'] == m.facets_satisfying(lambda x,y,z: y==1)).all())
-        self.assertTrue((m.boundaries['back'] == m.facets_satisfying(lambda x,y,z: z==0)).all())
-        self.assertTrue((m.boundaries['front'] == m.facets_satisfying(lambda x,y,z: z==1)).all())
+        self.assertTrue((m.boundaries['top'] == m.facets_satisfying(lambda x: x[1]==1)).all())
+        self.assertTrue((m.boundaries['back'] == m.facets_satisfying(lambda x: x[2]==0)).all())
+        self.assertTrue((m.boundaries['front'] == m.facets_satisfying(lambda x: x[2]==1)).all())
         m = MeshTri.load(str(examples / 'square.msh'))
-        self.assertTrue((m.boundaries['top'] == m.facets_satisfying(lambda x,y: y==1)).all())
-        self.assertTrue((m.boundaries['left'] == m.facets_satisfying(lambda x,y: x==0)).all())
-        self.assertTrue((m.boundaries['right'] == m.facets_satisfying(lambda x,y: x==1)).all())
+        self.assertTrue((m.boundaries['top'] == m.facets_satisfying(lambda x: x[1]==1)).all())
+        self.assertTrue((m.boundaries['left'] == m.facets_satisfying(lambda x: x[0]==0)).all())
+        self.assertTrue((m.boundaries['right'] == m.facets_satisfying(lambda x: x[0]==1)).all())
 
 
 class RefinePreserveSubsets(unittest.TestCase):
@@ -67,17 +67,17 @@ class RefinePreserveSubsets(unittest.TestCase):
         for mtype in (MeshTri, MeshQuad):            
             m = mtype()
             m.refine(2)
-            m.boundaries = {'test': m.facets_satisfying(lambda x,y: x==0.0)}
+            m.boundaries = {'test': m.facets_satisfying(lambda x: x[0]==0.0)}
             
             m.refine()
             
             self.assertTrue((np.sort(m.boundaries['test'])
-                             == np.sort(m.facets_satisfying(lambda x,y: x==0.0))).all())
+                             == np.sort(m.facets_satisfying(lambda x: x[0]==0.0))).all())
             
             m.refine(2)
             
             self.assertTrue((np.sort(m.boundaries['test'])
-                             == np.sort(m.facets_satisfying(lambda x,y: x==0.0))).all())
+                             == np.sort(m.facets_satisfying(lambda x: x[0]==0.0))).all())
             
             
 
@@ -97,6 +97,21 @@ class SaveLoadCycle(unittest.TestCase):
 
 class SaveLoadCycleHex(SaveLoadCycle):
     cls = MeshHex
+
+
+class SerializeUnserializeCycle(unittest.TestCase):
+    """Check to_dict/initialize cycles."""
+    clss = [MeshTet,
+            MeshTri,
+            MeshHex,
+            MeshQuad]
+    def runTest(self):
+        for cls in self.clss:
+            m = cls()
+            m.refine(2)
+            m.boundaries = {'down': m.facets_satisfying(lambda x: x==0)}
+            m.submeshes = {'upper': m.elements_satisfying(lambda x: x[0]>0.5)}
+            M = cls(**m.to_dict())
 
 
 if __name__ == '__main__':

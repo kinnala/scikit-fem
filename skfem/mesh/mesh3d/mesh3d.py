@@ -7,9 +7,6 @@ from typing import Callable, Optional
 from numpy import ndarray
 
 
-BoolFun = Callable[[float, float, float], bool]
-
-
 class Mesh3D(Mesh):
     """Three dimensional meshes, common methods.
 
@@ -20,33 +17,7 @@ class Mesh3D(Mesh):
 
     """
 
-    def nodes_satisfying(self, test: BoolFun) -> ndarray:
-        """Return nodes that satisfy some condition.
-
-        Parameters
-        ----------
-        test
-            Evaluates to 1 or True for nodes belonging to the output set.
-
-        """
-        return np.nonzero(test(self.p[0, :], self.p[1, :], self.p[2, :]))[0]
-
-    def facets_satisfying(self, test: BoolFun) -> ndarray:
-        """Return facets whose midpoints satisfy some condition.
-        
-        Parameters
-        ----------
-        test
-            Evaluates to 1 or True for facet midpoints of the facets belonging
-            to the output set.
-
-        """
-        mx = np.sum(self.p[0, self.facets], axis=0) / self.facets.shape[0]
-        my = np.sum(self.p[1, self.facets], axis=0) / self.facets.shape[0]
-        mz = np.sum(self.p[2, self.facets], axis=0) / self.facets.shape[0]
-        return np.nonzero(test(mx, my, mz))[0]
-
-    def edges_satisfying(self, test: BoolFun) -> ndarray:
+    def edges_satisfying(self, test: Callable[[ndarray], bool]) -> ndarray:
         """Return edges whose midpoints satisfy some condition.
 
         Parameters
@@ -59,21 +30,6 @@ class Mesh3D(Mesh):
         mx = 0.5 * (self.p[0, self.edges[0, :]] + self.p[0, self.edges[1, :]])
         my = 0.5 * (self.p[1, self.edges[0, :]] + self.p[1, self.edges[1, :]])
         mz = 0.5 * (self.p[2, self.edges[0, :]] + self.p[2, self.edges[1, :]])
-        return np.nonzero(test(mx, my, mz))[0]
-
-    def elements_satisfying(self, test: BoolFun) -> ndarray:
-        """Return elements whose midpoints satisfy some condition.
-
-        Parameters
-        ----------
-        test
-            Evaluates to 1 or True for element midpoints of the elements
-            belonging to the output set.
-
-        """
-        mx = np.sum(self.p[0, self.t], axis=0) / self.t.shape[0]
-        my = np.sum(self.p[1, self.t], axis=0) / self.t.shape[0]
-        mz = np.sum(self.p[2, self.t], axis=0) / self.t.shape[0]
         return np.nonzero(test(mx, my, mz))[0]
 
     def boundary_edges(self) -> ndarray:

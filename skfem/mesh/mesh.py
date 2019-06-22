@@ -62,20 +62,24 @@ class Mesh():
     p: ndarray = np.array([])
     t: ndarray = np.array([])
 
-    subdomains: Dict[str, ndarray] = {}
-    boundaries: Dict[str, ndarray] = {}
+    subdomains: Optional[Dict[str, ndarray]] = None
+    boundaries: Optional[Dict[str, ndarray]] = None
     external: Any = None
 
     def __init__(self):
         """Check that p and t are C_CONTIGUOUS as this leads
         to better performance."""
         if self.p is not None:
+            if not isinstance(self.p, ndarray):
+                self.p = np.array(self.p, dtype=np.float_)
             if self.p.flags['F_CONTIGUOUS']:
                 if self.p.shape[1] > 1000:
                     warnings.warn("Mesh.__init__(): Transforming "
                                   "over 100 vertices to C_CONTIGUOUS.")
                 self.p = np.ascontiguousarray(self.p)
         if self.t is not None:
+            if not isinstance(self.t, ndarray):
+                self.t = np.array(self.t, dtype=np.intp)
             if self.t.flags['F_CONTIGUOUS']:
                 if self.t.shape[1] > 1000:
                     warnings.warn("Mesh.__init__(): Transforming "
@@ -319,6 +323,64 @@ class Mesh():
         indices corresponding to the input points."""
         raise NotImplementedError("element_finder not implemented "
                                   "for the given Mesh type.")
+
+    def nodes_satisfying(self, test: Callable[[ndarray], bool]) -> ndarray:
+        """Return nodes that satisfy some condition.
+
+        Parameters
+        ----------
+        test
+            A function which returns True for the set of nodes that are to be
+            included in the return set.
+
+        """
+        return np.nonzero(test(self.p))[0]
+
+    def facets_satisfying(self, test: Callable[[ndarray], bool]) -> ndarray:
+        """Return facets whose midpoints satisfy some condition.
+
+        Parameters
+        ----------
+        test
+            A function which returns True for the facet midpoints that are to
+            be included in the return set.
+
+        """
+        midp = [np.sum(self.p[itr, self.facets], axis=0) / self.facets.shape[0]
+                for itr in range(self.p.shape[0])]
+        return np.nonzero(test(np.array(midp)))[0]
+
+    def elements_satisfying(self,
+                            test: Callable[[ndarray], bool]) -> ndarray:
+        """Return elements whose midpoints satisfy some condition.
+
+        Parameters
+        ----------
+        test
+            A function which returns True for the element midpoints that are to
+            be included in the return set.
+
+        """
+        midp = [np.sum(self.p[itr, self.t], axis=0) / self.t.shape[0]
+                for itr in range(self.p.shape[0])]
+        return np.nonzero(test(np.array(midp)))[0]
+
+    def to_dict(self) -> Dict[str, ndarray]:
+        """Return json serializable dictionary."""
+        if self.boundaries is not None:
+            boundaries = {k: v.tolist() for k, v in self.boundaries.items()}
+        else:
+            boundaries = self.boundaries
+        if self.subdomains is not None:
+            subdomains = {k: v.tolist() for k, v in self.subdomains.items()}
+        else:
+            subdomains = self.subdomains
+        return {
+            'p': self.p.tolist(),
+            't': self.t.tolist(),
+            'boundaries': boundaries,
+            'subdomains': subdomains,
+        }
 
     @staticmethod
     def strip_extra_coordinates(p: ndarray) -> ndarray:

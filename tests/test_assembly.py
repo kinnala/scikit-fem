@@ -70,7 +70,7 @@ class IntegrateFuncOverBoundaryPart(unittest.TestCase):
         mtype, etype = self.case
         m = mtype()
         m.refine(3)
-        bnd = m.facets_satisfying(lambda x,y,z: x==1.0)
+        bnd = m.facets_satisfying(lambda x: x[0]==1.0)
         fb = FacetBasis(m, etype(), facets=bnd)
 
         @bilinear_form
@@ -109,7 +109,8 @@ class BasisInterpolator(unittest.TestCase):
         x = self.initOnes(ib)
         f = ib.interpolator(x)
 
-        self.assertTrue(np.sum(f(np.array([np.sin(m.p[0, :]), np.sin(3.0*m.p[1, :])]))-1.0) < 1e-10)
+        self.assertTrue(np.sum(f(np.array([np.sin(m.p[0, :]),
+                                           np.sin(3.0*m.p[1, :])]))-1.0) < 1e-10)
 
 class BasisInterpolatorMorley(BasisInterpolator):
     case = (MeshTri, ElementTriMorley)

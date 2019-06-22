@@ -23,47 +23,6 @@ class Mesh2D(Mesh):
     f2t: ndarray = np.array([])
     t2f: ndarray = np.array([])
 
-    def nodes_satisfying(self, test: Callable[[float, float], bool]) -> ndarray:
-        """Return nodes that satisfy some condition.
-
-        Parameters
-        ----------
-        test
-            A function which returns True for the set of nodes that are to be
-            included in the return set.
-
-        """
-        return np.nonzero(test(self.p[0, :], self.p[1, :]))[0]
-
-    def facets_satisfying(self, test: Callable[[float, float], bool]) -> ndarray:
-        """Return facets whose midpoints satisfy some condition.
-
-        Parameters
-        ----------
-        test
-            A function which returns True for the facet midpoints that are to
-            be included in the return set.
-
-        """
-        mx = 0.5*(self.p[0, self.facets[0, :]] + self.p[0, self.facets[1, :]])
-        my = 0.5*(self.p[1, self.facets[0, :]] + self.p[1, self.facets[1, :]])
-        return np.nonzero(test(mx, my))[0]
-
-    def elements_satisfying(self,
-                            test: Callable[[float, float], bool]) -> ndarray:
-        """Return elements whose midpoints satisfy some condition.
-
-        Parameters
-        ----------
-        test
-            A function which returns True for the element midpoints that are to
-            be included in the return set.
-
-        """
-        mx = np.sum(self.p[0, self.t], axis=0)/self.t.shape[0]
-        my = np.sum(self.p[1, self.t], axis=0)/self.t.shape[0]
-        return np.nonzero(test(mx, my))[0]
-
     def draw(self,
              ax: Optional[Axes] = None,
              node_numbering: Optional[bool] = False,

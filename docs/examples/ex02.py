@@ -16,18 +16,20 @@ def bilinf(u, du, ddu, v, dv, ddv, w):
 
     def C(T):
         trT = T[0,0] + T[1,1]
-        return np.array([[E/(1.0+nu)*(T[0, 0]+nu/(1.0-nu)*trT), E/(1.0+nu)*T[0, 1]],
-                         [E/(1.0+nu)*T[1, 0], E/(1.0+nu)*(T[1, 1]+nu/(1.0-nu)*trT)]])
+        return np.array([[E/(1.0+nu)*(T[0, 0]+nu/(1.0-nu)*trT),
+                          E/(1.0+nu)*T[0, 1]],
+                         [E/(1.0+nu)*T[1, 0],
+                          E/(1.0+nu)*(T[1, 1]+nu/(1.0-nu)*trT)]])
 
     def Eps(ddw):
         return np.array([[ddw[0][0], ddw[0][1]],
                          [ddw[1][0], ddw[1][1]]])
 
     def ddot(T1, T2):
-        return T1[0, 0]*T2[0, 0] +\
-               T1[0, 1]*T2[0, 1] +\
-               T1[1, 0]*T2[1, 0] +\
-               T1[1, 1]*T2[1, 1]
+        return (T1[0, 0]*T2[0, 0] +
+                T1[0, 1]*T2[0, 1] +
+                T1[1, 0]*T2[1, 0] +
+                T1[1, 1]*T2[1, 1])
 
     return d**3/12.0*ddot(C(Eps(ddu)), Eps(ddv))
 
@@ -39,9 +41,9 @@ K = asm(bilinf, ib)
 f = asm(linf, ib)
 
 boundary = {
-        'left':  m.facets_satisfying(lambda x, y: x==0),
-        'right': m.facets_satisfying(lambda x, y: x==1),
-        'top':   m.facets_satisfying(lambda x, y: y==1),
+        'left':  m.facets_satisfying(lambda x: x[0]==0),
+        'right': m.facets_satisfying(lambda x: x[0]==1),
+        'top':   m.facets_satisfying(lambda x: x[1]==1),
         }
 
 dofs = ib.get_dofs(boundary)

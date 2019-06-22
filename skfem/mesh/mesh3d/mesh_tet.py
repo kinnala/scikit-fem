@@ -70,11 +70,11 @@ class MeshTet(Mesh3D):
         self.t = t
         self.boundaries = boundaries
         self.subdomains = subdomains
+        super(MeshTet, self).__init__()
         if validate:
             self._validate()
         self.enable_facets = True
         self._build_mappings()
-        super(MeshTet, self).__init__()
 
     @classmethod
     def init_tensor(cls: Type[MeshType],

@@ -23,8 +23,8 @@ def advection(u, du, v, dv, w):
     return v * velocity_0 * du[0]
 
 
-dofs = {'inlet': basis.get_dofs(lambda x, y: x == 0.),
-        'floor': basis.get_dofs(lambda x, y: y == 0.)}
+dofs = {'inlet': basis.get_dofs(lambda x: x[0] == 0.),
+        'floor': basis.get_dofs(lambda x: x[1] == 0.)}
 D = np.concatenate([d.all() for d in dofs.values()])
 interior = basis.complement_dofs(D)
 

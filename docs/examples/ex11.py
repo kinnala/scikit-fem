@@ -13,8 +13,8 @@ ib = InteriorBasis(m, e, map, 3)
 K = asm(linear_elasticity(*lame_parameters(1e3, 0.3)), ib)
 
 dofs = {
-    'left' : ib.get_dofs(lambda x,y,z: x==0.0),
-    'right': ib.get_dofs(lambda x,y,z: x==1.0),
+    'left' : ib.get_dofs(lambda x: x[0]==0.0),
+    'right': ib.get_dofs(lambda x: x[0]==1.0),
     }
 
 u = np.zeros(K.shape[0])
