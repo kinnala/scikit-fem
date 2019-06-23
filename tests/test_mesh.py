@@ -52,13 +52,19 @@ class Loading(unittest.TestCase):
         # submeshes
         examples = Path(__file__).parents[1] / 'docs' / 'examples'
         m = MeshTet.load(str(examples / 'box.msh'))
-        self.assertTrue((m.boundaries['top'] == m.facets_satisfying(lambda x: x[1]==1)).all())
-        self.assertTrue((m.boundaries['back'] == m.facets_satisfying(lambda x: x[2]==0)).all())
-        self.assertTrue((m.boundaries['front'] == m.facets_satisfying(lambda x: x[2]==1)).all())
+        self.assertTrue((m.boundaries['top']
+                         == m.facets_satisfying(lambda x: x[1]==1)).all())
+        self.assertTrue((m.boundaries['back']
+                         == m.facets_satisfying(lambda x: x[2]==0)).all())
+        self.assertTrue((m.boundaries['front']
+                         == m.facets_satisfying(lambda x: x[2]==1)).all())
         m = MeshTri.load(str(examples / 'square.msh'))
-        self.assertTrue((m.boundaries['top'] == m.facets_satisfying(lambda x: x[1]==1)).all())
-        self.assertTrue((m.boundaries['left'] == m.facets_satisfying(lambda x: x[0]==0)).all())
-        self.assertTrue((m.boundaries['right'] == m.facets_satisfying(lambda x: x[0]==1)).all())
+        self.assertTrue((m.boundaries['top']
+                         == m.facets_satisfying(lambda x: x[1]==1)).all())
+        self.assertTrue((m.boundaries['left']
+                         == m.facets_satisfying(lambda x: x[0]==0)).all())
+        self.assertTrue((m.boundaries['right']
+                         == m.facets_satisfying(lambda x: x[0]==1)).all())
 
 
 class RefinePreserveSubsets(unittest.TestCase):
@@ -68,18 +74,12 @@ class RefinePreserveSubsets(unittest.TestCase):
             m = mtype()
             m.refine(2)
             m.boundaries = {'test': m.facets_satisfying(lambda x: x[0]==0.0)}
-            
             m.refine()
-            
             self.assertTrue((np.sort(m.boundaries['test'])
                              == np.sort(m.facets_satisfying(lambda x: x[0]==0.0))).all())
-            
             m.refine(2)
-            
             self.assertTrue((np.sort(m.boundaries['test'])
-                             == np.sort(m.facets_satisfying(lambda x: x[0]==0.0))).all())
-            
-            
+                             == np.sort(m.facets_satisfying(lambda x: x[0]==0.0))).all())   
 
 
 class SaveLoadCycle(unittest.TestCase):
