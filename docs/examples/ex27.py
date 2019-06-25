@@ -1,6 +1,7 @@
 from skfem import *
 from skfem.models.poisson import vector_laplace, laplace
 from skfem.models.general import divergence, rot
+from skfem.importers.meshio import from_meshio
 
 from functools import partial
 from itertools import cycle, islice
@@ -109,7 +110,7 @@ class BackwardFacingStep:
 
     @staticmethod
     def make_mesh(geom: Geometry) -> MeshTri:
-        return MeshTri.from_meshio(generate_mesh(geom, dim=2))
+        return from_meshio(generate_mesh(geom, dim=2))
 
     def inlet_dofs(self):
         inlet_dofs_ = self.basis['u'].get_dofs(self.mesh.boundaries['inlet'])
