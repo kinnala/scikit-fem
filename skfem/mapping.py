@@ -193,6 +193,7 @@ class MappingIsoparametric(Mapping):
         self.bndJ = bndJ
         self.elem = elem
         self.mesh = mesh
+        self.dim = mesh.p.shape[0]
 
     def G(self, X: ndarray, find: Optional[ndarray] = None) -> ndarray:
         return np.array([self.bndmap(i, X, find=find)
@@ -305,8 +306,35 @@ class MappingIsoparametric(Mapping):
         return invDF
     
     def normals(self, X, tind, find, t2f):
-        # TODO implement this
-        return 0
+        if self.dim == 1:
+            Nref = np.array([[-1.0],
+                             [ 1.0]])
+        elif self.dim == 2:
+            Nref = np.array([[0.0, -1.0],
+                             [1.0, 0.0],
+                             [0.0, 1.0],
+                             [-1.0, 0.0]])
+        elif self.dim == 3:
+            Nref = np.array([[-1.0, 0.0, 0.0],
+                             [0.0, 0.0, -1.0],
+                             [0.0, -1.0, 0.0],
+                             [0.0, 1.0, 0.0],
+                             [0.0, 0.0, 1.0],
+                             [1.0, 0.0, 0.0]])
+        else:
+            raise Exception("Not implemented for the given dimension.")
+
+        invDF = self.invDF(X, tind)
+        N = np.empty((self.dim, len(find)))
+
+        for itr in range(Nref.shape[0]):
+            ix = np.nonzero(t2f[itr, tind] == find)[0]
+            for jtr in range(Nref.shape[1]):
+                N[jtr, ix] = Nref[itr, jtr]
+
+        n = np.einsum('ijkl,ik->jkl', invDF, N)
+        nlength = np.sqrt(np.sum(n**2, axis=0))
+        return np.einsum('ijk,jk->ijk', n, 1.0/nlength)
 
 
 class MappingAffine(Mapping):
