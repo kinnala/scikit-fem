@@ -75,12 +75,13 @@ def from_meshio(m):
                 tagindex = np.nonzero(tags == tag)[0]
                 boundaries[find_tagname(tag)] = index[tagindex, 1]
 
-        return mesh_type(p, t, boundaries, subdomains)
+        mtmp.boundaries = boundaries
+        mtmp.subdomains = subdomains
 
     except Exception as e:
         warnings.warn("Unable to load tagged boundaries/subdomains.")
-        print(e)
-        return mtmp
+
+    return mtmp
 
 
 def from_file(filename):
