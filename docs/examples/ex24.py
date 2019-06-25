@@ -110,7 +110,8 @@ if __name__ == '__main__':
     mesh.plot(pressure)
     mesh.savefig(f'{name}-pressure.png', bbox_inches='tight', pad_inches=0)
 
-    mesh.save(f'{name}-velocity.vtk', velocity[basis['u'].nodal_dofs].T)
+    mesh.save(f'{name}-velocity.vtk',
+              {'velocity': velocity[basis['u'].nodal_dofs].T})
     
     fig, ax = subplots()
     ax.plot(

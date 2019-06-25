@@ -32,4 +32,4 @@ if verbose:
     from os.path import splitext
     from sys import argv
 
-    m.save(splitext(argv[0])[0] + ".vtk", x)
+    m.save(splitext(argv[0])[0] + ".vtk", {'potential': x})

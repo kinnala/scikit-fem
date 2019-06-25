@@ -61,7 +61,8 @@ if __name__ == '__main__':
 
     name = splitext(argv[0])[0]
 
-    mesh.save(f'{name}_velocity.vtk', velocity[basis['u'].nodal_dofs].T)
+    mesh.save(f'{name}_velocity.vtk',
+              {'velocity': velocity[basis['u'].nodal_dofs].T})
     
     print(basis['psi'].interpolator(psi)(np.zeros((2, 1)))[0],
           '(cf. exact 1/64)')
