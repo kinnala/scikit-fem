@@ -213,5 +213,108 @@ class ConvergenceLineP1(ConvergenceQ1):
         self.mesh.refine(3)
 
 
+class TetP2Test(unittest.TestCase):
+    """Test second order tetrahedral element and facet
+    assembly."""
+    case = (MeshTet, ElementTetP2)
+    limits = (1.9, 2.2)
+
+    def runTest(self):
+        @bilinear_form
+        def dudv(u,du,v,dv,w):
+            return du[0]*dv[0]+du[1]*dv[1]+du[2]*dv[2]
+
+        @bilinear_form
+        def uv(u,du,v,dv,w):
+            return u*v
+
+        def F(x,y,z):
+            return 2*x**2+2*y**2-6*x*y*z
+
+        @linear_form
+        def fv(v,dv,w):
+            x = w.x
+            return F(x[0],x[1],x[2])*v
+
+        def G(x,y,z):
+            return (x==1)*(3-3*y**2+2*y*z**3)+\
+                   (x==0)*(-y*z**3)+\
+                   (y==1)*(1+x-3*x**2+2*x*z**3)+\
+                   (y==0)*(1+x-x*z**3)+\
+                   (z==1)*(1+x+4*x*y-x**2*y**2)+\
+                   (z==0)*(1+x-x**2*y**2)
+
+        @linear_form
+        def gv(v,dv,w):
+            x = w.x
+            return G(x[0],x[1],x[2])*v
+
+        hs = np.array([])
+        H1err = np.array([])
+        L2err = np.array([])
+
+        for itr in range(1,4):
+            mesh = self.case[0]()
+            mesh.refine(itr)
+
+            ib = InteriorBasis(mesh, self.case[1]())
+            fb = FacetBasis(mesh, self.case[1]())
+
+            A = asm(dudv, ib)
+            f = asm(fv, ib)
+
+            B = asm(uv, fb)
+            g = asm(gv, fb)
+
+            u = np.zeros(ib.N)
+
+            u = solve(A+B,f+g)
+
+            L2, H1 = self.compute_error(mesh, ib, u)
+            hs = np.append(hs,mesh.param())
+            L2err = np.append(L2err, L2)
+            H1err = np.append(H1err, H1)
+
+        pfit = np.polyfit(np.log10(hs),np.log10(np.sqrt(L2err**2+H1err**2)),1)
+        self.assertGreater(pfit[0], self.limits[0])
+        self.assertLess(pfit[0], self.limits[1])
+
+    def compute_error(self, m, basis, U):
+        uh, duh = basis.interpolate(U)
+        dx = basis.dx
+        x = basis.global_coordinates()
+
+        def u(x):
+            return 1+x[0]-x[0]**2*x[1]**2+x[0]*x[1]*x[2]**3
+
+        def ux(x):
+            return 1-2*x[0]*x[1]**2+x[1]*x[2]**3
+
+        def uy(x):
+            return -2*x[0]**2*x[1]+x[0]*x[2]**3
+
+        def uz(x):
+            return 3*x[0]*x[1]*x[2]**2
+
+        L2 = np.sqrt(np.sum(np.sum((uh - u(x))**2*dx, axis=1)))
+
+        if x.shape[0] == 3:
+            H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x))**2 +\
+                                        (duh[1] - uy(x))**2 +\
+                                        (duh[2] - uz(x))**2)*dx, axis=1)))
+        elif x.shape[0] == 2:
+            H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x))**2 +\
+                                        (duh[1] - uy(x))**2)*dx, axis=1)))
+        else:
+            H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x))**2)*dx, axis=1)))
+
+        return L2, H1
+
+
+class TestHexFacet(TetP2Test):
+    case = (MeshHex, ElementHex1)
+    limits = (0.9, 1.1)
+
+
 if __name__ == '__main__':
     unittest.main()
