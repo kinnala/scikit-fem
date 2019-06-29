@@ -37,9 +37,11 @@ class MortarBasis(GlobalBasis):
 
         self.nelems = len(self.find)
 
-        self.basis = [self.elem.gbasis(self.mapping, Y, j, self.tind) for j in range(self.Nbfun)]
+        self.basis = [self.elem.gbasis(self.mapping, Y, j, self.tind)
+                      for j in range(self.Nbfun)]
 
-        self.dx = np.abs(self.mapping.detDG(self.X, find=self.find)) * np.tile(self.W, (self.nelems, 1))
+        self.dx = np.abs(self.mapping.detDG(self.X, find=self.find)) *\
+            np.tile(self.W, (self.nelems, 1))
 
         if side == 0:
             self.element_dofs = self.ib1.element_dofs[:, self.tind]

@@ -153,8 +153,9 @@ class NormalVectorTestTri(unittest.TestCase):
             # by Gauss theorem this integrates to one
             @linear_form
             def linf(v, dv, w):
-                return np.sum(w.n, axis=0)*v
+                return w.n[0]*v
             b = asm(linf, basis)
+            #import pdb; pdb.set_trace()
             self.assertAlmostEqual(b @ m.p[0, :], 1.0, places=5)
 
 
