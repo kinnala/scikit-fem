@@ -218,6 +218,7 @@ class TetP2Test(unittest.TestCase):
     assembly."""
     case = (MeshTet, ElementTetP2)
     limits = (1.9, 2.2)
+    preref = 1
 
     def runTest(self):
         @bilinear_form
@@ -247,14 +248,15 @@ class TetP2Test(unittest.TestCase):
         @linear_form
         def gv(v,dv,w):
             x = w.x
-            return G(x[0],x[1],x[2])*v
+            return G(x[0], x[1], x[2])*v
 
         hs = np.array([])
         H1err = np.array([])
         L2err = np.array([])
 
-        for itr in range(1,4):
+        for itr in range(0,3):
             mesh = self.case[0]()
+            mesh.refine(self.preref)
             mesh.refine(itr)
 
             ib = InteriorBasis(mesh, self.case[1]())
@@ -268,12 +270,15 @@ class TetP2Test(unittest.TestCase):
 
             u = np.zeros(ib.N)
 
-            u = solve(A+B,f+g)
+            u = solve(A + B, f + g)
 
             L2, H1 = self.compute_error(mesh, ib, u)
             hs = np.append(hs,mesh.param())
             L2err = np.append(L2err, L2)
             H1err = np.append(H1err, H1)
+
+        print(L2err)
+        print(H1err)
 
         pfit = np.polyfit(np.log10(hs),np.log10(np.sqrt(L2err**2+H1err**2)),1)
         self.assertGreater(pfit[0], self.limits[0])
@@ -314,6 +319,7 @@ class TetP2Test(unittest.TestCase):
 class TestHexFacet(TetP2Test):
     case = (MeshHex, ElementHex1)
     limits = (0.9, 1.1)
+    preref = 2
 
 
 if __name__ == '__main__':

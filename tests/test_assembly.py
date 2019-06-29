@@ -137,6 +137,7 @@ class BasisInterpolatorMorley(BasisInterpolator):
 
 class NormalVectorTestTri(unittest.TestCase):
     case = (MeshTri(), ElementTriP1())
+    test_integrate_volume = True
 
     def runTest(self):
         basis = FacetBasis(*self.case)
@@ -144,9 +145,17 @@ class NormalVectorTestTri(unittest.TestCase):
         def linf(v, dv, w):
             return np.sum(w.n**2, axis=0)*v
         b = asm(linf, basis)
+        m = self.case[0]
         self.assertAlmostEqual(b @ np.ones(b.shape),
-                               2*self.case[0].p.shape[0],
+                               2*m.p.shape[0],
                                places=10)
+        if self.test_integrate_volume:
+            # by Gauss theorem this integrates to one
+            @linear_form
+            def linf(v, dv, w):
+                return np.sum(w.n, axis=0)*v
+            b = asm(linf, basis)
+            self.assertAlmostEqual(b @ m.p[0, :], 1.0, places=5)
 
 
 class NormalVectorTestTet(NormalVectorTestTri):
@@ -155,6 +164,7 @@ class NormalVectorTestTet(NormalVectorTestTri):
 
 class NormalVectorTestTetP2(NormalVectorTestTri):
     case = (MeshTet(), ElementTetP2())
+    test_integrate_volume = False
 
 
 class NormalVectorTestQuad(NormalVectorTestTri):

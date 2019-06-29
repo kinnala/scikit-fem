@@ -103,5 +103,51 @@ class LineNeumann1D(unittest.TestCase):
         self.assertTrue(np.sum(np.abs(u - m.p[0, :] + 0.5)) < 1e-4)
 
 
+class TestExactHexElement(unittest.TestCase):
+    mesh = MeshHex
+    elem = ElementHex1
+    funs = [
+        lambda x: 1 + x[0]*x[1]*x[2],
+        lambda x: 1 + x[0]*x[1] + x[1]*x[2] + x[0],
+    ]
+
+    def runTest(self):
+        @bilinear_form
+        def dudv(u, du, v, dv, w):
+            return sum(du * dv)
+
+        m = self.mesh()
+        m.refine(4)
+
+        ib = InteriorBasis(m, self.elem())
+
+        A = asm(dudv, ib)
+
+        I = ib.get_dofs().all()
+
+        for X in self.funs:
+            x = X(m.p)
+            x[I] = solve(*condense(A, 0*x, x=X(m.p), I=I))
+            self.assertLessEqual(np.sum(x - X(m.p)), 1e-12)
+
+
+class TestExactQuadElement(TestExactHexElement):
+    mesh = MeshQuad
+    elem = ElementQuad1
+    funs = [
+        lambda x: 1 + 0*x[0],
+        lambda x: 1 + x[0] + x[1] + x[0]*x[1],
+    ]
+
+
+class TestExactTetElement(TestExactHexElement):
+    mesh = MeshTet
+    elem = ElementTetP1
+    funs = [
+        lambda x: 1 + 0*x[0],
+        lambda x: 1 + x[0] + x[1],
+    ]
+
+
 if __name__ == '__main__':
     unittest.main()
