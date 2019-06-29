@@ -147,7 +147,7 @@ class MeshQuad(Mesh2D):
             self.t[[1, 2], :],
             self.t[[2, 3], :],
             self.t[[0, 3], :],
-            )), axis=0)
+        )), axis=0)
 
         # get unique facets and build quad-to-facet mapping: 4 (edges) x Nquads
         tmp = np.ascontiguousarray(self.facets.T)
