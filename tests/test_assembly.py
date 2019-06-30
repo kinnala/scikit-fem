@@ -1,5 +1,4 @@
 """Unit tests for assembly operations."""
-
 import unittest
 import numpy as np
 from skfem import *
@@ -138,9 +137,13 @@ class BasisInterpolatorMorley(BasisInterpolator):
 class NormalVectorTestTri(unittest.TestCase):
     case = (MeshTri(), ElementTriP1())
     test_integrate_volume = True
+    intorder = None
 
     def runTest(self):
-        basis = FacetBasis(*self.case)
+        if self.intorder is not None:
+            basis = FacetBasis(*self.case, intorder=self.intorder)
+        else:
+            basis = FacetBasis(*self.case)
         @linear_form
         def linf(v, dv, w):
             return np.sum(w.n**2, axis=0)*v
@@ -155,7 +158,6 @@ class NormalVectorTestTri(unittest.TestCase):
             def linf(v, dv, w):
                 return w.n[0]*v
             b = asm(linf, basis)
-            #import pdb; pdb.set_trace()
             self.assertAlmostEqual(b @ m.p[0, :], 1.0, places=5)
 
 
@@ -174,6 +176,7 @@ class NormalVectorTestQuad(NormalVectorTestTri):
 
 class NormalVectorTestHex(NormalVectorTestTri):
     case = (MeshHex(), ElementHex1())
+    intorder = 3
 
 
 if __name__ == '__main__':

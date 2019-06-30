@@ -6,6 +6,7 @@ so normally the user is not required to initialize these classes.
 """
 
 import numpy as np
+import warnings
 
 from typing import Optional
 
@@ -219,10 +220,15 @@ class MappingIsoparametric(Mapping):
 
     def invF(self, x, tind=None):
         X = np.zeros(x.shape) + 0.1
-        for itr in range(2):
+        for itr in range(50):
             F = self.F(X, tind)
             invDF = self.invDF(X, tind)
-            X = X + np.einsum('ijkl,jkl->ikl', invDF, x - F)
+            dX = np.einsum('ijkl,jkl->ikl', invDF, x - F)
+            X = X + dX
+            if np.sum(dX) < 1e-12:
+                 break
+        if (np.abs(X) > 1.0).any():
+            raise ValueError("Inverse mapped point outside reference element!")
         return X
 
     def F(self, X, tind=None):
