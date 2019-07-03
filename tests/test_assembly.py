@@ -140,6 +140,8 @@ class NormalVectorTestTri(unittest.TestCase):
     intorder = None
 
     def runTest(self):
+        self.case[0].refine()
+
         if self.intorder is not None:
             basis = FacetBasis(*self.case, intorder=self.intorder)
         else:

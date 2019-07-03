@@ -12,45 +12,85 @@ class ElementHex1(ElementH1):
         x, y, z = X
 
         if i == 0:
-            phi = (1 - x)*(1 - y)*(1 - z)
-            dphi = np.array([-(1 - y)*(1 - z),
-                             -(1 - x)*(1 - z),
-                             -(1 - x)*(1 - y)])
-        elif i == 1:
-            phi = (1 + x)*(1 - y)*(1 - z)
-            dphi = np.array([(1 - y)*(1 - z),
-                             -(1 + x)*(1 - z),
-                             -(1 + x)*(1 - y)])
-        elif i == 2:
-            phi = (1 + x)*(1 + y)*(1 - z)
-            dphi = np.array([(1 + y)*(1 - z),
-                             (1 + x)*(1 - z),
-                             -(1 + x)*(1 + y)])
-        elif i == 3:
-            phi = (1 - x)*(1 + y)*(1 - z)
-            dphi = np.array([-(1 + y)*(1 - z),
-                             (1 - x)*(1 - z),
-                             -(1 - x)*(1 + y)])
-        elif i == 4:
-            phi = (1 - x)*(1 - y)*(1 + z)
-            dphi = np.array([-(1 - y)*(1 + z),
-                             -(1 - x)*(1 + z),
-                             (1 - x)*(1 - y)])
-        elif i == 5:
-            phi = (1 + x)*(1 - y)*(1 + z)
-            dphi = np.array([(1 - y)*(1 + z),
-                             -(1 + x)*(1 + z),
-                             (1 + x)*(1 - y)])
-        elif i == 6:
             phi = (1 + x)*(1 + y)*(1 + z)
             dphi = np.array([(1 + y)*(1 + z),
                              (1 + x)*(1 + z),
                              (1 + x)*(1 + y)])
-        elif i == 7:
+        elif i == 1:
+            phi = (1 + x)*(1 + y)*(1 - z)
+            dphi = np.array([(1 + y)*(1 - z),
+                             (1 + x)*(1 - z),
+                             -(1 + x)*(1 + y)])
+        elif i == 2:
+            phi = (1 + x)*(1 - y)*(1 + z)
+            dphi = np.array([(1 - y)*(1 + z),
+                             -(1 + x)*(1 + z),
+                             (1 + x)*(1 - y)])
+        elif i == 3:
             phi = (1 - x)*(1 + y)*(1 + z)
             dphi = np.array([-(1 + y)*(1 + z),
                              (1 - x)*(1 + z),
                              (1 - x)*(1 + y)])
+        elif i == 4:
+            phi = (1 + x)*(1 - y)*(1 - z)
+            dphi = np.array([(1 - y)*(1 - z),
+                             -(1 + x)*(1 - z),
+                             -(1 + x)*(1 - y)])
+        elif i == 5:
+            phi = (1 - x)*(1 + y)*(1 - z)
+            dphi = np.array([-(1 + y)*(1 - z),
+                             (1 - x)*(1 - z),
+                             -(1 - x)*(1 + y)])
+        elif i == 6:
+            phi = (1 - x)*(1 - y)*(1 + z)
+            dphi = np.array([-(1 - y)*(1 + z),
+                             -(1 - x)*(1 + z),
+                             (1 - x)*(1 - y)])
+        elif i == 7:
+            phi = (1 - x)*(1 - y)*(1 - z)
+            dphi = np.array([-(1 - y)*(1 - z),
+                             -(1 - x)*(1 - z),
+                             -(1 - x)*(1 - y)])
+        #         if i == 0:
+        #     phi = (1 - x)*(1 - y)*(1 - z)
+        #     dphi = np.array([-(1 - y)*(1 - z),
+        #                      -(1 - x)*(1 - z),
+        #                      -(1 - x)*(1 - y)])
+        # elif i == 1:
+        #     phi = (1 + x)*(1 - y)*(1 - z)
+        #     dphi = np.array([(1 - y)*(1 - z),
+        #                      -(1 + x)*(1 - z),
+        #                      -(1 + x)*(1 - y)])
+        # elif i == 2:
+        #     phi = (1 + x)*(1 + y)*(1 - z)
+        #     dphi = np.array([(1 + y)*(1 - z),
+        #                      (1 + x)*(1 - z),
+        #                      -(1 + x)*(1 + y)])
+        # elif i == 3:
+        #     phi = (1 - x)*(1 + y)*(1 - z)
+        #     dphi = np.array([-(1 + y)*(1 - z),
+        #                      (1 - x)*(1 - z),
+        #                      -(1 - x)*(1 + y)])
+        # elif i == 4:
+        #     phi = (1 - x)*(1 - y)*(1 + z)
+        #     dphi = np.array([-(1 - y)*(1 + z),
+        #                      -(1 - x)*(1 + z),
+        #                      (1 - x)*(1 - y)])
+        # elif i == 5:
+        #     phi = (1 + x)*(1 - y)*(1 + z)
+        #     dphi = np.array([(1 - y)*(1 + z),
+        #                      -(1 + x)*(1 + z),
+        #                      (1 + x)*(1 - y)])
+        # elif i == 6:
+        #     phi = (1 + x)*(1 + y)*(1 + z)
+        #     dphi = np.array([(1 + y)*(1 + z),
+        #                      (1 + x)*(1 + z),
+        #                      (1 + x)*(1 + y)])
+        # elif i == 7:
+        #     phi = (1 - x)*(1 + y)*(1 + z)
+        #     dphi = np.array([-(1 + y)*(1 + z),
+        #                      (1 - x)*(1 + z),
+        #                      (1 - x)*(1 + y)])
         else:
             raise Exception("!")
 
