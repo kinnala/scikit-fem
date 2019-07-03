@@ -1,0 +1,22 @@
+Conjugate heat transfer
+-----------------------
+
+.. note::
+   This example requires the external package
+   `pygmsh <https://pypi.org/project/pygmsh/>`_.
+
+
+In this example, the forced convection example :ref:`forcedconvection` is extended to conjugate heat transfer by giving a finite thickness and thermal conductivity to one of the walls.
+
+The example is modified to a configuration for which there is a fully developed solution which can be found in closed form: given a uniform (but possibly different) heat flux over each of the walls, the temperature field asymptotically is the superposition of a uniform longitudinal gradient and a transverse profile (Mallinson, McBain, & Brown 2019).
+
+In conjugate heat transfer, part of the domain is advection–conduction (like :ref:forcedconvection:) while the rest is pure conduction; the main difficulty is specifying different governing equations on different subdomains.  One way to do this has been demonstrated in :ref:`subdomain`: restricting an operator to a subdomain by only assembling it over a basis restricted to the elements belonging to a particular subdomain.
+
+* Mallinson, S. G., McBain, G. D. & Brown, B. R. (2019). `Conjugate
+  heat transfer in thermal inkjet printheads
+  <https://www.researchgate.net/publication/334028691_Conjugate_Heat_Transfer_in_Thermal_Inkjet_Printheads>`_.
+  14th International Conference on Heat Transfer, Fluid Mechanics and
+  Thermodynamics, Wicklow, Ireland.
+
+.. literalinclude:: ex28.py
+   :linenos:
