@@ -84,7 +84,7 @@ def conduction(u, du, v, dv, w):
 @bilinear_form
 def advection(u, du, v, dv, w):
     _, y = w.x
-    velocity_x = 1 - (y / halfheight)**2
+    velocity_x = 1 - (y / halfheight)**2  # plane Poiseuille
     return v * velocity_x * du[0]
 
 
@@ -102,22 +102,23 @@ D = basis['heat'].get_dofs(
      if label.endswith('-inlet')})
 I = basis['heat'].complement_dofs(D)
 
-# prescribe exact fully developed solution on inlet plane
+def exact(x: np.ndarray, y: np.ndarray) -> np.ndarray:
+    """return the exact fully developed solution at specified points"""
+    return heat_flux * np.where(
+        y > -halfheight,
+        3 / 4 / halfheight / volumetric_heat_capacity
+        * (x
+           - volumetric_heat_capacity * u0 / 12
+           / thermal_conductivity['fluid'] / halfheight**2
+           * (5 * halfheight**2 - y**2) * (halfheight**2 - y**2))
+        - y / 2 / thermal_conductivity['fluid'],
+        3 / 4 / halfheight / volumetric_heat_capacity * x
+        + halfheight / 2 / thermal_conductivity['fluid']
+        - (halfheight + y) / thermal_conductivity['wall'])
+    
 temperature = np.zeros(basis['heat'].N)
-temperature[D['fluid-inlet'].all()] = heat_flux * (
-    3 / 4 / halfheight / volumetric_heat_capacity
-    * (mesh.p[0, D['fluid-inlet'].all()]
-       - volumetric_heat_capacity * u0 / 12
-       / thermal_conductivity['fluid'] / halfheight**2
-       * (5 * halfheight**2 - mesh.p[1, D['fluid-inlet'].all()]**2)
-       * (halfheight**2 - mesh.p[1, D['fluid-inlet'].all()]**2))
-    - mesh.p[1, D['fluid-inlet'].all()] / 2 / thermal_conductivity['fluid'])
-temperature[D['solid-inlet'].all()] = heat_flux * (
-    3 / 4 / halfheight / volumetric_heat_capacity
-    * mesh.p[0, D['solid-inlet'].all()]
-    + halfheight / 2 / thermal_conductivity['fluid']
-    - (halfheight + mesh.p[1, D['solid-inlet'].all()]) /
-    thermal_conductivity['wall'])
+inlet_dofs = basis['heat'].complement_dofs(I)
+temperature[inlet_dofs] = exact(*mesh.p[:, inlet_dofs])
 
 temperature[I] = solve(*condense(A, b, temperature, I=I))
 
