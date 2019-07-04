@@ -148,18 +148,19 @@ if __name__ == '__main__':
     y = {label: mesh.p[1, d] for label, d in dofs.items()}
     ii = {label: np.argsort(yy) for label, yy in y.items()}
 
-    for label, d in dofs.items():
-        color = (('' if label[-5:-3] == 'in' else 'dark')
-                 + {'fluid': 'green', 'solid': 'red'}[label[:5]])
-        data, = ax.plot(
-            temperature[d[ii[label]]], y[label][ii[label]],
-            marker={'fluid': 'x', 'solid': '+'}[label[:5]],
-            color=color,
-            linestyle='none', label=f'{label}, skfem')
-        ax.plot(exact(*mesh.p[:, d[ii[label]]]), y[label][ii[label]],
-                color=data.get_color(),
-                linestyle={'inlet': '--', 'utlet': '-'}[label[-5:]],
-                label=f'{label}, exact')
+    for phase, hue, marker in [('fluid', 'green', 'x'),
+                               ('solid', 'red', '+')]:
+        for port, saturation, linestyle in [('inlet', '', '--'),
+                                            ('outlet', 'dark', '-')]:
+            color = saturation + hue
+            label = f'{phase}-{port}'
+            ax.plot(temperature[dofs[label][ii[label]]], y[label][ii[label]],
+                    marker=marker, color=color, linestyle='none',
+                    label=f'{label}, skfem')
+            ax.plot(exact(*mesh.p[:, dofs[label][ii[label]]]),
+                    y[label][ii[label]],
+                    color=color, linestyle=linestyle,
+                    label=f'{label}, exact')
     
     ax.set_xlabel('temperature / K')
     ax.set_ylabel('$y$ / mm')
