@@ -30,7 +30,7 @@ def make_mesh(halfheight: float,  # mm
     points = []
     lines = []
 
-    lcar = halfheight / 2**3
+    lcar = halfheight / 2**2
 
     for xy in [(0., halfheight),
                (0., -halfheight),
@@ -148,24 +148,24 @@ if __name__ == '__main__':
     y = {label: mesh.p[1, d] for label, d in dofs.items()}
     ii = {label: np.argsort(yy) for label, yy in y.items()}
 
-    for phase, hue, marker in [('fluid', 'green', 'x'),
-                               ('solid', 'red', '+')]:
-        for port, saturation, linestyle in [('inlet', '', '--'),
-                                            ('outlet', 'dark', '-')]:
+    y['exact'] = np.linspace(min(y['solid-inlet']),
+                             max(y['fluid-inlet']))
+    for port, saturation, linestyle in [('inlet', '', '--'),
+                                        ('outlet', 'dark', '-')]:
+        for phase, hue, marker in [('fluid', 'green', 'x'),
+                                   ('solid', 'red', '+')]:
             color = saturation + hue
             label = f'{phase}-{port}'
             ax.plot(temperature[dofs[label][ii[label]]], y[label][ii[label]],
                     marker=marker, color=color, linestyle='none',
                     label=f'{label}, skfem')
-            ax.plot(exact(*mesh.p[:, dofs[label][ii[label]]]),
-                    y[label][ii[label]],
-                    color=color, linestyle=linestyle,
-                    label=f'{label}, exact')
+        ax.plot(exact(mesh.p[0, dofs[label][0]], y['exact']), y['exact'],
+                color='k', linestyle=linestyle, label=f'{port}, exact')
     
     ax.set_xlabel('temperature / K')
     ax.set_ylabel('$y$ / mm')
     ax.set_ylim((-halfheight - thickness, halfheight))
-    ax.axhline(-halfheight, color='k', linestyle='dashed')
+    ax.axhline(-halfheight, color='k', linestyle=':')
     ax.legend()
     fig.savefig(Path(__file__).with_name(
         Path(__file__).stem + '-inlet-outlet.png'))
