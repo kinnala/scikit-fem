@@ -102,6 +102,7 @@ D = basis['heat'].get_dofs(
      if label.endswith('-inlet')})
 I = basis['heat'].complement_dofs(D)
 
+
 def exact(x: np.ndarray, y: np.ndarray) -> np.ndarray:
     """return the exact fully developed solution at specified points"""
     return heat_flux * np.where(
@@ -115,7 +116,7 @@ def exact(x: np.ndarray, y: np.ndarray) -> np.ndarray:
         3 / 4 / halfheight / volumetric_heat_capacity * x
         + halfheight / 2 / thermal_conductivity['fluid']
         - (halfheight + y) / thermal_conductivity['wall'])
-    
+
 temperature = np.zeros(basis['heat'].N)
 inlet_dofs = basis['heat'].complement_dofs(I)
 temperature[inlet_dofs] = exact(*mesh.p[:, inlet_dofs])
