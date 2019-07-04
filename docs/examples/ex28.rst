@@ -8,7 +8,7 @@ Conjugate heat transfer
 
 In this example, the forced convection example :ref:`forcedconvection` is extended to conjugate heat transfer by giving a finite thickness and thermal conductivity to one of the walls.
 
-The example is modified to a configuration for which there is a fully developed solution which can be found in closed form: given a uniform (but possibly different) heat flux over each of the walls, the temperature field asymptotically is the superposition of a uniform longitudinal gradient and a transverse profile (Mallinson, McBain, & Brown 2019).  The two-dimensional equation in the fluid
+The example is modified to a configuration for which there is a fully developed solution which can be found in closed form: given a uniform (but possibly different) heat flux over each of the walls, the temperature field asymptotically is the superposition of a uniform longitudinal gradient and a transverse profile; here the analysis of a pipe of circular section (Bird, Stewart, & Lightfoot 1960, eq. 9.8-23; Eckert & Gross 1963, §3–13) is modified for a planar duct (Mallinson, McBain, & Brown 2019).  The two-dimensional equation in the fluid
 
 .. math::
    \rho c u (y) \frac{\partial T}{\partial x} = k\nabla^2 T
@@ -28,6 +28,8 @@ subject to :math:`\theta (\pm h) = 0`.
 
 In conjugate heat transfer, part of the domain is advection–conduction (like :ref:forcedconvection:) while the rest is pure conduction; the main difficulty is specifying different governing equations on different subdomains.  One way to do this has been demonstrated in :ref:`subdomain`: restricting an operator to a subdomain by only assembling it over a basis restricted to the elements belonging to a particular subdomain.
 
+* Bird, R. B., W. E. Stewart, & E. N. Lightfoot (1960). Transport Phenomena. New York: Wiley
+* Eckert, E. R. G., & J. F. Gross (1963). Introduction to Heat and Mass Transfer. New York: McGraw-Hill
 * Mallinson, S. G., McBain, G. D. & Brown, B. R. (2019). `Conjugate
   heat transfer in thermal inkjet printheads
   <https://www.researchgate.net/publication/334028691_Conjugate_Heat_Transfer_in_Thermal_Inkjet_Printheads>`_.
