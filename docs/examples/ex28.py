@@ -146,5 +146,6 @@ if __name__ == '__main__':
     ax.set_xlabel('temperature / K')
     ax.set_ylabel('$y$ / mm')
     ax.set_ylim((-halfheight - thickness, halfheight))
+    ax.axhline(-halfheight, color='k', linestyle='dashed')
     ax.legend()
     fig.savefig(Path(__file__).stem + '-inlet-outlet.png')
