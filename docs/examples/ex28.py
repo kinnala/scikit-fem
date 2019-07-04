@@ -16,7 +16,7 @@ volumetric_heat_capacity = 1. * 4181.  # uJ/uL.K
 
 thermal_conductivity = {
     'fluid': 4.181 / 7.14,
-    'wall': 80.
+    'solid': 80.
 }                               # mW/mm.K
 
 u0 = 1.                                          # mm/ms
@@ -46,7 +46,7 @@ def make_mesh(halfheight: float,  # mm
     lines.append(geom.add_line(*points[1:3]))
 
     lines.append(geom.add_line(*points[2:4]))
-    outlet_lines = [lines[-1]]
+    geom.add_physical(lines[-1], 'fluid-outlet')
 
     lines.append(geom.add_line(points[3], points[0]))
 
@@ -60,10 +60,10 @@ def make_mesh(halfheight: float,  # mm
     geom.add_physical(lines[-1], 'heated')
 
     lines.append(geom.add_line(points[5], points[2]))
-    geom.add_physical(outlet_lines + lines[-1:], 'outlet')
+    geom.add_physical(lines[-1], 'solid-outlet')
 
     geom.add_physical(geom.add_plane_surface(geom.add_line_loop(
-        [*lines[-3:], -lines[1]])), 'wall')
+        [*lines[-3:], -lines[1]])), 'solid')
 
     return from_meshio(generate_mesh(geom, dim=2))
 
@@ -73,7 +73,8 @@ element = ElementTriP1()
 basis = {
     'heat': InteriorBasis(mesh, element),
     'fluid': InteriorBasis(mesh, element, elements=mesh.subdomains['fluid']),
-    'heating': FacetBasis(mesh, element, facets=mesh.boundaries['heated'])}
+    **{label: FacetBasis(mesh, element, facets=mesh.boundaries[label])
+       for label in ['heated', 'fluid-outlet', 'solid-outlet']}}
 
 
 @bilinear_form
@@ -92,9 +93,16 @@ conductivity = basis['heat'].zero_w()
 for subdomain, elements in mesh.subdomains.items():
     conductivity[elements] = thermal_conductivity[subdomain]
 
+longitudinal_gradient = (3 * heat_flux
+                         / 4 / volumetric_heat_capacity / halfheight / u0)
+
 A = (asm(conduction, basis['heat'], w=conductivity)
      + volumetric_heat_capacity * u0 * asm(advection, basis['fluid']))
-b = heat_flux * asm(unit_load, basis['heating'])
+b = (heat_flux * asm(unit_load, basis['heated'])
+     + longitudinal_gradient * (
+         thermal_conductivity['fluid'] * asm(unit_load, basis['fluid-outlet'])
+         + thermal_conductivity['solid'] * asm(unit_load, basis['solid-outlet'])
+     ))
 
 D = basis['heat'].get_dofs(
     {label: boundary for
@@ -113,9 +121,9 @@ def exact(x: np.ndarray, y: np.ndarray) -> np.ndarray:
            / thermal_conductivity['fluid'] / halfheight**2
            * (5 * halfheight**2 - y**2) * (halfheight**2 - y**2))
         - y / 2 / thermal_conductivity['fluid'],
-        3 / 4 / halfheight / volumetric_heat_capacity * x
+        3 * x / 4 / volumetric_heat_capacity / halfheight / u0
         + halfheight / 2 / thermal_conductivity['fluid']
-        - (halfheight + y) / thermal_conductivity['wall'])
+        - (halfheight + y) / thermal_conductivity['solid'])
 
 temperature = np.zeros(basis['heat'].N)
 inlet_dofs = basis['heat'].complement_dofs(I)
@@ -133,19 +141,30 @@ if __name__ == '__main__':
 
     fig, ax = subplots()
     ax.set_title('transverse temperature profiles')
-    outlet = basis['heat'].get_dofs(mesh.boundaries['outlet']).all()
-    y = mesh.p[1, outlet]
-    ii = np.argsort(y)
-    ax.plot(temperature[outlet[ii]], y[ii], marker='o', label='outlet')
-    inlet = basis['heat'].get_dofs(
-        np.hstack([mesh.boundaries['fluid-inlet'],
-                   mesh.boundaries['solid-inlet']])).all()
-    y = mesh.p[1, inlet]
-    ii = np.argsort(y)
-    ax.plot(temperature[inlet[ii]], y[ii], marker='x', label='inlet')
+    
+    dofs = {label: basis['heat'].get_dofs(facets).all()
+            for label, facets in mesh.boundaries.items()
+            if label.endswith('let')}
+    y = {label: mesh.p[1, d] for label, d in dofs.items()}
+    ii = {label: np.argsort(yy) for label, yy in y.items()}
+
+    for label, d in dofs.items():
+        color = (('' if label[-5:-3] == 'in' else 'dark')
+                 + {'fluid': 'green', 'solid': 'red'}[label[:5]])
+        data, = ax.plot(
+            temperature[d[ii[label]]], y[label][ii[label]],
+            marker={'fluid': 'x', 'solid': '+'}[label[:5]],
+            color=color,
+            linestyle='none', label=f'{label}, skfem')
+        ax.plot(exact(*mesh.p[:, d[ii[label]]]), y[label][ii[label]],
+                color=data.get_color(),
+                linestyle={'inlet': '--', 'utlet': '-'}[label[-5:]],
+                label=f'{label}, exact')
+    
     ax.set_xlabel('temperature / K')
     ax.set_ylabel('$y$ / mm')
     ax.set_ylim((-halfheight - thickness, halfheight))
     ax.axhline(-halfheight, color='k', linestyle='dashed')
     ax.legend()
-    fig.savefig(Path(__file__).stem + '-inlet-outlet.png')
+    fig.savefig(Path(__file__).with_name(
+        Path(__file__).stem + '-inlet-outlet.png'))
