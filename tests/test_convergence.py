@@ -237,12 +237,15 @@ class TetP2Test(unittest.TestCase):
             return F(*w.x)*v
 
         def G(x, y, z):
-            return (x==1)*(3-3*y**2+2*y*z**3)+\
-                   (x==0)*(-y*z**3)+\
-                   (y==1)*(1+x-3*x**2+2*x*z**3)+\
-                   (y==0)*(1+x-x*z**3)+\
-                   (z==1)*(1+x+4*x*y-x**2*y**2)+\
-                   (z==0)*(1+x-x**2*y**2)
+            eps = 1e-6
+            def cirka(a, b):
+                return (a-b<eps) * (a-b>-eps)
+            return (cirka(x, 1))*(3-3*y**2+2*y*z**3)+\
+                   (cirka(x, 0))*(-y*z**3)+\
+                   (cirka(y, 1))*(1+x-3*x**2+2*x*z**3)+\
+                   (cirka(y, 0))*(1+x-x*z**3)+\
+                   (cirka(z, 1))*(1+x+4*x*y-x**2*y**2)+\
+                   (cirka(z, 0))*(1+x-x**2*y**2)
 
         @linear_form
         def gv(v, dv, w):
@@ -254,8 +257,7 @@ class TetP2Test(unittest.TestCase):
 
         for itr in range(0,3):
             m = self.case[0]()
-            m.refine(self.preref)
-            m.refine(itr)
+            m.refine(self.preref + itr)
 
             ib = InteriorBasis(m, self.case[1]())
             fb = FacetBasis(m, self.case[1]())
@@ -274,9 +276,6 @@ class TetP2Test(unittest.TestCase):
             hs = np.append(hs, m.param())
             L2err = np.append(L2err, L2)
             H1err = np.append(H1err, H1)
-
-        print(L2err)
-        print(H1err)
 
         pfit = np.polyfit(np.log10(hs),
                           np.log10(np.sqrt(L2err**2+H1err**2)), 1)

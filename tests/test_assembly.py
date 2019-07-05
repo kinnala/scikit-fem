@@ -154,13 +154,15 @@ class NormalVectorTestTri(unittest.TestCase):
         self.assertAlmostEqual(b @ np.ones(b.shape),
                                2*m.p.shape[0],
                                places=10)
+
         if self.test_integrate_volume:
             # by Gauss theorem this integrates to one
-            @linear_form
-            def linf(v, dv, w):
-                return w.n[0]*v
-            b = asm(linf, basis)
-            self.assertAlmostEqual(b @ m.p[0, :], 1.0, places=5)
+            for itr in range(m.p.shape[0]):
+                @linear_form
+                def linf(v, dv, w):
+                    return w.n[itr]*v
+                b = asm(linf, basis)
+                self.assertAlmostEqual(b @ m.p[itr, :], 1.0, places=5)
 
 
 class NormalVectorTestTet(NormalVectorTestTri):

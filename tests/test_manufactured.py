@@ -127,7 +127,7 @@ class TestExactHexElement(unittest.TestCase):
 
         for X in self.funs:
             x = X(m.p)
-            x[I] = solve(*condense(A, 0*x, x=X(m.p), I=I))
+            x[I] = solve(*condense(A, 0*x, x=x, I=I))
             self.assertLessEqual(np.sum(x - X(m.p)), 1e-12)
 
 
