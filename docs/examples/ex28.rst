@@ -25,6 +25,19 @@ This fully developed solution applies throughout the domain if it is specified a
 
 In conjugate heat transfer, part of the domain is advection–conduction (like :ref:forcedconvection:) while the rest is pure conduction; the main difficulty is specifying different governing equations on different subdomains.  One way to do this has been demonstrated in :ref:`subdomain`: restricting an operator to a subdomain by only assembling it over a basis restricted to the elements belonging to a particular subdomain.
 
+.. figure:: ex28.png
+
+   The temperature field
+
+.. figure:: ex28-inlet-outlet.png
+
+   The temperature profiles across inlet (prescribed) and outlet (result).
+
+
+
+.. literalinclude:: ex28.py
+   :linenos:
+
 * Bird, R. B., W. E. Stewart, & E. N. Lightfoot (1960). Transport Phenomena. New York: Wiley
 * Mallinson, S. G., McBain, G. D. & Brown, B. R. (2019). `Conjugate
   heat transfer in thermal inkjet printheads
@@ -32,5 +45,3 @@ In conjugate heat transfer, part of the domain is advection–conduction (like :
   14th International Conference on Heat Transfer, Fluid Mechanics and
   Thermodynamics, Wicklow, Ireland.
 
-.. literalinclude:: ex28.py
-   :linenos:
