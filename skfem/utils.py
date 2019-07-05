@@ -17,6 +17,7 @@ from skfem.assembly.global_basis import GlobalBasis
 LinearSolver = Callable[[spmatrix, ndarray], ndarray]
 EigenSolver = Callable[[spmatrix, spmatrix], Tuple[ndarray, ndarray]]
 
+
 def condense(A: spmatrix,
              b: Optional[Union[ndarray, spmatrix]] = None,
              x: Optional[ndarray] = None,

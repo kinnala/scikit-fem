@@ -144,24 +144,20 @@ class MeshHex(Mesh3D):
 
     def _build_mappings(self):
         """Build element-to-facet, element-to-edges, etc. mappings."""
-        self.edges = np.sort(np.vstack((self.t[0, :], self.t[1, :])), axis=0)
-        e = np.array([0, 2,
-                      0, 3,
-                      1, 4,
-                      1, 5,
-                      2, 4,
-                      2, 6,
-                      3, 5,
-                      3, 6,
-                      4, 7,
-                      5, 7,
-                      6, 7]) # see the picture in init
-        for i in range(11):
-            self.edges = np.hstack((
-                self.edges,
-                np.sort(np.vstack((self.t[e[2*i], :],
-                                   self.t[e[2*i+1], :])), axis=0)
-            ))
+        self.edges = np.sort(np.hstack((
+            self.t[[0, 1], :],
+            self.t[[0, 2], :],
+            self.t[[0, 3], :],
+            self.t[[1, 4], :],
+            self.t[[1, 5], :],
+            self.t[[2, 4], :],
+            self.t[[2, 6], :],
+            self.t[[3, 5], :],
+            self.t[[3, 6], :],
+            self.t[[4, 7], :],
+            self.t[[5, 7], :],
+            self.t[[6, 7], :],
+        )), axis=0)
 
         # unique edges
         self.edges, ixa, ixb = np.unique(self.edges,
@@ -173,23 +169,14 @@ class MeshHex(Mesh3D):
         self.t2e = ixb.reshape((12, self.t.shape[1]))
 
         # define facets
-        self.facets = np.vstack((self.t[0, :],
-                                 self.t[1, :],
-                                 self.t[4, :],
-                                 self.t[2, :]))
-        f = np.array([0, 2, 6, 3,
-                      0, 3, 5, 1,
-                      2, 4, 7, 6,
-                      1, 5, 7, 4,
-                      3, 6, 7, 5])
-        for i in range(5):
-            self.facets = np.hstack((
-                self.facets,
-                np.vstack((self.t[f[4*i], :],
-                           self.t[f[4*i+1], :],
-                           self.t[f[4*i+2], :],
-                           self.t[f[4*i+3], :]))
-            ))
+        self.facets = np.hstack((
+            self.t[[0, 1, 4, 2], :],
+            self.t[[0, 2, 6, 3], :],
+            self.t[[0, 3, 5, 1], :],
+            self.t[[2, 4, 7, 6], :],
+            self.t[[1, 5, 7, 4], :],
+            self.t[[3, 6, 7, 5], :],
+        ))
 
         sorted_facets = np.sort(self.facets, axis=0)
 
