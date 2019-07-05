@@ -8,19 +8,13 @@ import numpy as np
 from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
 
-halfheight = 0.1 / 2                  # mm
-length = 1.
+halfheight = 1.
+length = 10.
 thickness = halfheight
 
-volumetric_heat_capacity = 1. * 4181.  # uJ/uL.K
+kratio = 80. / (4.181 / 7.14)
 
-thermal_conductivity = {
-    'fluid': 4.181 / 7.14,
-    'solid': 80.
-}                               # mW/mm.K
-
-u0 = 1.                                          # mm/ms
-heat_flux = 100. * thermal_conductivity['fluid']  # mW/mm**2
+peclet = 357.
 
 
 def make_mesh(halfheight: float,  # mm
@@ -89,20 +83,17 @@ def advection(u, du, v, dv, w):
     return v * velocity_x * du[0]
 
 
-conductivity = basis['heat'].zero_w()
-for subdomain, elements in mesh.subdomains.items():
-    conductivity[elements] = thermal_conductivity[subdomain]
+conductivity = basis['heat'].zero_w() + 1
+conductivity[mesh.subdomains['solid']] = kratio
 
-longitudinal_gradient = (3 * heat_flux
-                         / 4 / volumetric_heat_capacity / halfheight / u0)
+longitudinal_gradient = 3 / 4 / peclet
 
 A = (asm(conduction, basis['heat'], w=conductivity)
-     + volumetric_heat_capacity * u0 * asm(advection, basis['fluid']))
-b = (heat_flux * asm(unit_load, basis['heated'])
-     + longitudinal_gradient * (
-         thermal_conductivity['fluid'] * asm(unit_load, basis['fluid-outlet'])
-         + thermal_conductivity['solid'] * asm(unit_load, basis['solid-outlet'])
-     ))
+     + peclet * asm(advection, basis['fluid']))
+b = (asm(unit_load, basis['heated'])
+     + longitudinal_gradient
+     * (asm(unit_load, basis['fluid-outlet'])
+        + kratio * asm(unit_load, basis['solid-outlet'])))
 
 D = basis['heat'].get_dofs(
     {label: boundary for
@@ -113,17 +104,9 @@ I = basis['heat'].complement_dofs(D)
 
 def exact(x: np.ndarray, y: np.ndarray) -> np.ndarray:
     """return the exact fully developed solution at specified points"""
-    return heat_flux * np.where(
-        y > -halfheight,
-        3 / 4 / halfheight / volumetric_heat_capacity
-        * (x
-           - volumetric_heat_capacity * u0 / 12
-           / thermal_conductivity['fluid'] / halfheight**2
-           * (5 * halfheight**2 - y**2) * (halfheight**2 - y**2))
-        - y / 2 / thermal_conductivity['fluid'],
-        3 * x / 4 / volumetric_heat_capacity / halfheight / u0
-        + halfheight / 2 / thermal_conductivity['fluid']
-        - (halfheight + y) / thermal_conductivity['solid'])
+    return np.where(y > -halfheight,
+                    - (5 - y**2) * (1 - y**2) / 16 - y / 2,
+                    1 / 2 - (1 + y) / kratio) + longitudinal_gradient * x
 
 temperature = np.zeros(basis['heat'].N)
 inlet_dofs = basis['heat'].complement_dofs(I)
@@ -162,8 +145,8 @@ if __name__ == '__main__':
         ax.plot(exact(mesh.p[0, dofs[label][0]], y['exact']), y['exact'],
                 color='k', linestyle=linestyle, label=f'{port}, exact')
     
-    ax.set_xlabel('temperature / K')
-    ax.set_ylabel('$y$ / mm')
+    ax.set_xlabel('temperature')
+    ax.set_ylabel('$y$')
     ax.set_ylim((-halfheight - thickness, halfheight))
     ax.axhline(-halfheight, color='k', linestyle=':')
     ax.legend()
