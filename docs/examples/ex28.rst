@@ -6,12 +6,12 @@ Conjugate heat transfer
    `pygmsh <https://pypi.org/project/pygmsh/>`_.
 
 
-In this example, the forced convection example :ref:`forcedconvection` is extended to conjugate heat transfer by giving a finite thickness and thermal conductivity to one of the walls.
+In this example, the :ref:`forcedconvection` example is extended to conjugate heat transfer by giving a finite thickness and thermal conductivity to one of the walls.
 
 The example is modified to a configuration for which there is a fully developed solution which can be found in closed form: given a uniform (but possibly different) heat flux over each of the walls, the temperature field asymptotically is the superposition of a uniform longitudinal gradient and a transverse profile; here the analysis of a pipe of circular section (Bird, Stewart, & Lightfoot 1960, §3–13) is modified for a planar duct (Mallinson, McBain, & Brown 2019).  The two-dimensional equation in the fluid :math:`-1 < y < 1`
 
 .. math::
-   \mathrm{Pe} \left(1 - y^2)\right) \frac{\partial T}{\partial x} =
+   \mathrm{Pe} \left(1 - y^2\right) \frac{\partial T}{\partial x} =
    \nabla \cdot k \nabla  T
 
 admits solutions of the form
@@ -19,11 +19,11 @@ admits solutions of the form
 .. math::
    T(x, y) = \frac{3x}{4\mathrm{Pe}} - \frac{(5-y^2)(1-y^2)}{16} - \frac{y}{2}.
 
-Here Pe is the dimensionless Péclet number and :math:`k` the ratio of the thermal conductivity of the solid to that of the fluid.
+Here Pe is the dimensionless Péclet number and :math:`k` the ratio of the local thermal conductivity to that of the fluid.
 
-This fully developed solution applies throughout the domain if it is specified along the fluid and solid inlet :math:`x=0`, if the ceiling is insulated :math:`\partial T/\partial y = 0` on :math:`y = 1`, if the floor is uniformly heated :math:`k\partial t/\partial y = 1`: on :math:`y = -2`, and if the longitudinal gradient is applied as a uniform Neumann condition on the outlet, :math:`\partial T/\partial x = 3/4\mathrm{Pe}` on :math:`x = \ell`.
+This fully developed solution applies throughout the domain if it is specified along the fluid and solid inlet :math:`x=0`, if the ceiling is insulated :math:`\partial T/\partial y = 0` on :math:`y = 1`, if the floor is uniformly heated :math:`k\partial t/\partial y = 1` on :math:`y = -2`, and if the longitudinal gradient is applied as a uniform Neumann condition on the outlet, :math:`k\partial T/\partial x = 3k/4\mathrm{Pe}` on :math:`x = \ell`.
 
-In conjugate heat transfer, part of the domain is advection–conduction (like :ref:forcedconvection:) while the rest is pure conduction; the main difficulty is specifying different governing equations on different subdomains.  One way to do this has been demonstrated in :ref:`subdomain`: restricting an operator to a subdomain by only assembling it over a basis restricted to the elements belonging to a particular subdomain.
+In conjugate heat transfer, part of the domain is advection–conduction (like :ref:`forcedconvection`) while the rest is pure conduction; the main difficulty is specifying different governing equations on different subdomains.  One way to do this has already been demonstrated :ref:`subdomain` by only assembling the operator over a basis restricted to the elements belonging to a particular subdomain.
 
 .. figure:: ex28.png
 
