@@ -157,6 +157,3 @@ class FacetBasis(GlobalBasis):
         else:
             return (np.abs(self.mapping.detDG(self.X, self.find)) **
                     (1.0 / (self.mesh.dim() - 1)))
-
-
-
