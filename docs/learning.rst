@@ -34,6 +34,7 @@ Advanced examples
    examples/ex24.rst
    examples/ex26.rst
    examples/ex27.rst
+   examples/ex28.rst
    
 Stubs and undocumented
 ######################

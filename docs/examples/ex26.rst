@@ -1,3 +1,5 @@
+.. _subdomain:
+
 Restricting a problem to a subdomain
 ------------------------------------
 
