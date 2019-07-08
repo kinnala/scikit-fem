@@ -120,7 +120,7 @@ if __name__ == '__main__':
 
     n_streamlines = 11
     plot = partial(ax.tricontour,
-                   Triangulation(mesh.p[0, :], mesh.p[1, :], mesh.t.T),
+                   Triangulation(*mesh.p, mesh.t.T),
                    psi[basis['psi'].nodal_dofs.flatten()],
                    linewidths=1.)
     for levels, color, style in [

@@ -33,6 +33,5 @@ L, x = eigsh(K[I].T[I].T, k=6, M=M[I].T[I].T, which='SM')
 y[I] = x[:, 4]
 
 if __name__ == "__main__":
-    MeshQuad(np.array([m.p[0, :] + y[gb.nodal_dofs[0, :]],
-                       m.p[1, :] + y[gb.nodal_dofs[1, :]]]), m.t).draw()
+    MeshQuad(np.array(m.p + y[gb.nodal_dofs]), m.t).draw()
     m.show()

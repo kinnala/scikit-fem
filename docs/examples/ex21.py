@@ -38,7 +38,5 @@ y[I] = x[:, 0]
 
 if __name__ == "__main__":
     sf = 2.0
-    MeshTet(np.array([m.p[0, :] + sf*y[ib.nodal_dofs[0, :]],\
-                      m.p[1, :] + sf*y[ib.nodal_dofs[1, :]],
-                      m.p[2, :] + sf*y[ib.nodal_dofs[2, :]]]), m.t).draw()
+    MeshTet(np.array(m.p + sf*y[ib.nodal_dofs]), m.t).draw()
     m.show()
