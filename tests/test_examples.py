@@ -5,17 +5,17 @@ from skfem import *
 
 
 class TestEx01(unittest.TestCase):
-   """Run examples/ex01.py"""
-   def runTest(self):
-       import docs.examples.ex01 as ex01
-       self.assertAlmostEqual(np.max(ex01.x), 0.07344576657)
+    """Run examples/ex01.py"""
+    def runTest(self):
+        import docs.examples.ex01 as ex01
+        self.assertAlmostEqual(np.max(ex01.x), 0.07344576657)
 
 
 class TestEx02(unittest.TestCase):
-   """Run examples/ex02.py"""
-   def runTest(self):
-       import docs.examples.ex02 as ex02
-       self.assertAlmostEqual(np.max(ex02.x), 0.001217973811129439)
+    """Run examples/ex02.py"""
+    def runTest(self):
+        import docs.examples.ex02 as ex02
+        self.assertAlmostEqual(np.max(ex02.x), 0.001217973811129439)
 
 
 class TestEx03(unittest.TestCase):
@@ -119,8 +119,8 @@ class TestEx16(unittest.TestCase):
 
 
 class TestEx17(unittest.TestCase):
-   def runTest(self):
-      import docs.examples.ex17 as ex
+    def runTest(self):
+        import docs.examples.ex17 as ex
 
 
 # TODO: no dmsh in testsuite
@@ -167,18 +167,18 @@ class TestEx22(unittest.TestCase):
 
 
 class TestEx24(unittest.TestCase):
-   def runTest(self):
-      import docs.examples.ex24 as ex
+    def runTest(self):
+        import docs.examples.ex24 as ex
 
 
 class TestEx25(unittest.TestCase):
-   def runTest(self):
-      import docs.examples.ex25 as ex
+    def runTest(self):
+        import docs.examples.ex25 as ex
 
 
 class TestEx26(unittest.TestCase):
-   def runTest(self):
-      import docs.examples.ex26 as ex
+    def runTest(self):
+        import docs.examples.ex26 as ex
 
 
 # TODO: no pacopy in testsuite
