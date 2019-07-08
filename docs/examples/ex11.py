@@ -25,8 +25,7 @@ I = ib.complement_dofs(dofs)
 u[I] = solve(*condense(K, 0*u, I=I, x=u))
 
 sf = 1.0
-for itr in range(3):
-    m.p[itr, :] += sf*u[ib.nodal_dofs[itr, :]]
+m.p += sf * u[ib.nodal_dofs]
 
 if __name__ == "__main__":
     from os.path import splitext
