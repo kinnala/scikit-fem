@@ -156,8 +156,7 @@ class BackwardFacingStep:
         return ax
 
     def triangulation(self):
-        return Triangulation(
-            self.mesh.p[0, :], self.mesh.p[1, :], self.mesh.t.T)
+        return Triangulation(*self.mesh.p, self.mesh.t.T)
 
     def streamlines(self, psi: np.ndarray, n: int = 11, ax=None):
         if ax is None:

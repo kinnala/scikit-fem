@@ -76,12 +76,10 @@ if __name__ == '__main__':
 
     ax = mesh.draw()
     velocity1 = velocity[basis['u'].nodal_dofs]
-    ax.quiver(mesh.p[0, :], mesh.p[1, :],
-              velocity1[0, :], velocity1[1, :],
-              mesh.p[0, :])         # colour by buoyancy
+    ax.quiver(*mesh.p, *velocity1, mesh.p[0, :])  # colour by buoyancy
     ax.get_figure().savefig(f'{name}_velocity.png')
 
     ax = mesh.draw()
-    ax.tricontour(Triangulation(mesh.p[0, :], mesh.p[1, :], mesh.t.T),
+    ax.tricontour(Triangulation(*mesh.p, mesh.t.T),
                   psi[basis['psi'].nodal_dofs.flatten()])
     ax.get_figure().savefig(f'{name}_stream-function.png')

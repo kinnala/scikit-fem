@@ -65,7 +65,7 @@ if __name__ == "__main__":
     M, Psi = ib.refinterp(psi, 3)
 
     ax = mesh.draw()
-    ax.tricontour(Triangulation(M.p[0, :], M.p[1, :], M.t.T), Psi)
+    ax.tricontour(Triangulation(*M.p, M.t.T), Psi)
     name = splitext(argv[0])[0]
     ax.get_figure().savefig(f'{name}_stream-lines.png')
 
@@ -77,5 +77,5 @@ if __name__ == "__main__":
     vector_factor = 2**3        # lengthen the arrows
     x = M.p[:, ::sparsity_factor]
     u = vector_factor * velocity[:, ::sparsity_factor]
-    ax.quiver(x[0], x[1], u[0], u[1], x[0])
+    ax.quiver(*x, *u, x[0])
     ax.get_figure().savefig(f'{name}_velocity-vectors.png')
