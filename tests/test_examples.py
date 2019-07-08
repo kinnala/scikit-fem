@@ -187,5 +187,11 @@ class TestEx26(unittest.TestCase):
 #       import docs.examples.ex27 as ex
 
 
+class TestEx28(unittest.TestCase):
+    def runTest(self):
+        from docs.examples.ex28 import exit_interface_temperature as t
+        self.assertAlmostEqual(*t.values(), delta=2e-4)
+
+
 if __name__ == '__main__':
     unittest.main()
