@@ -114,6 +114,16 @@ temperature[inlet_dofs] = exact(*mesh.p[:, inlet_dofs])
 
 temperature[I] = solve(*condense(A, b, temperature, I=I))
 
+dofs = {label: basis['heat'].get_dofs(facets).all()
+        for label, facets in mesh.boundaries.items()
+        if label.endswith('let')}
+
+exit_interface_temperature = {
+    'skfem': temperature[np.intersect1d(dofs['fluid-outlet'],
+                                        dofs['solid-outlet'])[0]],
+    'exact': exact(length, -1.)}
+                         
+
 if __name__ == '__main__':
 
     from pathlib import Path
@@ -125,9 +135,6 @@ if __name__ == '__main__':
     fig, ax = subplots()
     ax.set_title('transverse temperature profiles')
     
-    dofs = {label: basis['heat'].get_dofs(facets).all()
-            for label, facets in mesh.boundaries.items()
-            if label.endswith('let')}
     y = {label: mesh.p[1, d] for label, d in dofs.items()}
     ii = {label: np.argsort(yy) for label, yy in y.items()}
 
