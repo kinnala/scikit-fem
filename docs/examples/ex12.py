@@ -8,7 +8,9 @@ from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
 
 geom = Geometry()
-geom.add_physical(geom.add_circle([0.] * 3, 1., .5**3).plane_surface, 'disk')
+circle = geom.add_circle([0.] * 3, 1., .5**3)
+geom.add_physical(circle.line_loop.lines, 'circle')
+geom.add_physical(circle.plane_surface, 'disk')
 m = from_meshio(generate_mesh(geom, dim=2))
 
 basis = InteriorBasis(m, ElementTriP2())
@@ -16,7 +18,7 @@ basis = InteriorBasis(m, ElementTriP2())
 A = asm(laplace, basis)
 b = asm(unit_load, basis)
 
-D = basis.get_dofs().all()
+D = basis.get_dofs(m.boundaries)
 I = basis.complement_dofs(D)
 
 x = 0*b

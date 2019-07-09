@@ -91,7 +91,10 @@ class SaveLoadCycle(unittest.TestCase):
         m.refine(2)
         f = NamedTemporaryFile(delete=False)
         m.save(f.name + ".vtk")
-        m2 = Mesh.load(f.name + ".vtk")
+
+        with self.assertWarnsRegex(UserWarning, '^Unable to load tagged'):
+            m2 = Mesh.load(f.name + ".vtk")
+
         self.assertTrue(((m.p[0, :] - m2.p[0, :]) < 1e-6).all())
 
 
