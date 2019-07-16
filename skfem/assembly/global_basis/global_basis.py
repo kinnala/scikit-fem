@@ -187,14 +187,20 @@ class GlobalBasis():
             - if callable, call Mesh.facets_satisfying to get facets
             - if array, find the corresponding dofs
             - if dict of arrays, find dofs for each entry
+            - if dict of callables, call Mesh.facets_satisfying for each entry
+              to get facets and then find dofs for those
 
         """
         if facets is None:
             facets = self.mesh.boundary_facets()
         elif callable(facets):
             facets = self.mesh.facets_satisfying(facets)
-        if type(facets) is dict:
-            return {key: self._get_dofs(facets[key]) for key in facets}
+        if isinstance(facets, dict):
+            def to_indices(f):
+                if callable(f):
+                    return self.mesh.facets_satisfying(f)
+                return f
+            return {k: self._get_dofs(to_indices(facets[k])) for k in facets}
         else:
             return self._get_dofs(facets)
 
