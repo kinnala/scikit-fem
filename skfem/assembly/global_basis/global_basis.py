@@ -13,7 +13,8 @@ class GlobalBasis():
     Please see the following implementations:
 
     - :class:`~skfem.assembly.InteriorBasis`, for basis functions inside elements
-    - :class:`~skfem.assembly.FacetBasis`, for basis functions on element boundaries
+    - :class:`~skfem.assembly.FacetBasis`, for basis functions on element
+      boundaries
 
     """
 
@@ -27,22 +28,23 @@ class GlobalBasis():
             self.mapping = mapping
 
         self._build_dofnum(mesh, elem)
+        self.mesh = mesh
         self.elem = elem
+
         self.Nbfun = self.element_dofs.shape[0]
 
         if intorder is None:
-            self.intorder = 2*self.elem.maxdeg
+            self.intorder = 2 * self.elem.maxdeg
         else:
             self.intorder = intorder
 
         self.nelems = None # subclasses should overwrite
 
-        self.mesh = mesh
-
         self.refdom = mesh.refdom
         self.brefdom = mesh.brefdom
 
     def _build_dofnum(self, mesh, element):
+        """Build global degree-of-freedom numbering."""
         # vertex dofs
         self.nodal_dofs = np.reshape(
             np.arange(element.nodal_dofs * mesh.p.shape[1], dtype=np.int64),
@@ -53,7 +55,8 @@ class GlobalBasis():
         # edge dofs
         if mesh.dim() == 3: 
             self.edge_dofs = np.reshape(
-                np.arange(element.edge_dofs * mesh.edges.shape[1], dtype=np.int64),
+                np.arange(element.edge_dofs * mesh.edges.shape[1],
+                          dtype=np.int64),
                 (element.edge_dofs, mesh.edges.shape[1]),
                 order='F') + offset
             offset = offset + element.edge_dofs * mesh.edges.shape[1]
@@ -61,7 +64,8 @@ class GlobalBasis():
         # facet dofs
         if mesh.dim() >= 2: # 2D or 3D mesh
             self.facet_dofs = np.reshape(
-                np.arange(element.facet_dofs * mesh.facets.shape[1], dtype=np.int64),
+                np.arange(element.facet_dofs * mesh.facets.shape[1],
+                          dtype=np.int64),
                 (element.facet_dofs, mesh.facets.shape[1]),
                 order='F') + offset
             offset = offset + element.facet_dofs * mesh.facets.shape[1]
@@ -77,25 +81,41 @@ class GlobalBasis():
 
         # nodal dofs
         for itr in range(mesh.t.shape[0]):
-            self.element_dofs = np.vstack((self.element_dofs,
-                                           self.nodal_dofs[:, mesh.t[itr, :]]))
+            self.element_dofs = np.vstack((
+                self.element_dofs,
+                self.nodal_dofs[:, mesh.t[itr, :]]
+            ))
 
         # edge dofs
         if mesh.dim() == 3:
             for itr in range(mesh.t2e.shape[0]):
-                self.element_dofs = np.vstack((self.element_dofs,
-                                               self.edge_dofs[:, mesh.t2e[itr, :]]))
+                self.element_dofs = np.vstack((
+                    self.element_dofs,
+                    self.edge_dofs[:, mesh.t2e[itr, :]]
+                ))
 
         # facet dofs
         if mesh.dim() >= 2:
             for itr in range(mesh.t2f.shape[0]):
-                self.element_dofs = np.vstack((self.element_dofs,
-                                               self.facet_dofs[:, mesh.t2f[itr, :]]))
+                self.element_dofs = np.vstack((
+                    self.element_dofs,
+                    self.facet_dofs[:, mesh.t2f[itr, :]]
+                ))
 
+        # interior dofs
         self.element_dofs = np.vstack((self.element_dofs, self.interior_dofs))
 
+        # number-of-dofs and human readable names
         self.N = np.max(self.element_dofs) + 1
         self.dofnames = element.dofnames
+
+        if hasattr(element, 'doflocs'):
+            doflocs = self.mapping.F(element.doflocs.T)
+            self.doflocs = np.zeros((doflocs.shape[0], self.N))
+            for itr in range(doflocs.shape[0]):
+                for jtr in range(self.element_dofs.shape[0]):
+                    self.doflocs[itr, self.element_dofs[jtr]] =\
+                        doflocs[itr, :, jtr]
 
     def complement_dofs(self, *D):
         if type(D[0]) is dict:
@@ -105,13 +125,13 @@ class GlobalBasis():
 
     def _expand_facets(self, facets):
         """Transform a set of facets into facets, edges and points."""
+        p = np.unique(self.mesh.facets[:, facets].flatten())
+
         class IndexSet(NamedTuple):
             p: ndarray = None
             t: ndarray = None
             edges: ndarray = None
             facets: ndarray = None
-
-        p = np.unique(self.mesh.facets[:, facets].flatten())
 
         if self.mesh.dim() == 3:
             edges = np.intersect1d(
@@ -124,51 +144,63 @@ class GlobalBasis():
     def _get_dofs(self, facets):
         """Return global DOF numbers corresponding to a set of facets."""
         ix = self._expand_facets(facets)
+
         nodal_dofs = {}
         facet_dofs = {}
         edge_dofs = {}
         interior_dofs = {}
+
         offset = 0
 
         if ix.p is not None:
             for i in range(self.nodal_dofs.shape[0]):
                 nodal_dofs[self.dofnames[i]] = self.nodal_dofs[i, ix.p]
             offset += self.nodal_dofs.shape[0]
+
         if ix.facets is not None:
             for i in range(self.facet_dofs.shape[0]):
-                facet_dofs[self.dofnames[i + offset]] = self.facet_dofs[i, ix.facets]
+                facet_dofs[self.dofnames[i + offset]] =\
+                    self.facet_dofs[i, ix.facets]
             offset += self.facet_dofs.shape[0]
+
         if ix.edges is not None:
             for i in range(self.edge_dofs.shape[0]):
-                edge_dofs[self.dofnames[i + offset]] = self.edge_dofs[i, ix.edges]
+                edge_dofs[self.dofnames[i + offset]] =\
+                    self.edge_dofs[i, ix.edges]
             offset += self.edge_dofs.shape[0]
+
         if ix.t is not None:
             for i in range(self.interior_dofs.shape[0]):
-                interior_dofs[self.dofnames[i + offset]] = self.interior_dofs[i, ix.t]
+                interior_dofs[self.dofnames[i + offset]] =\
+                    self.interior_dofs[i, ix.t]
 
         return Dofs(nodal_dofs, facet_dofs, edge_dofs, interior_dofs)
 
-    def get_dofs(self, facets = None):
+    def get_dofs(self, facets: Optional[Any] = None):
         """Return global DOF numbers corresponding to facets (e.g. boundaries).
 
         Parameters
         ----------
         facets
             A list of facet indices. Alternatively:
-
             - if None, find facets by Mesh.boundary_facets()
             - if callable, call Mesh.facets_satisfying to get facets
             - if array, find the corresponding dofs
             - if dict of arrays, find dofs for each entry
+            - if dict of callables, call Mesh.facets_satisfying for each entry
+              to get facets and then find dofs for those
 
         """
         if facets is None:
             facets = self.mesh.boundary_facets()
         elif callable(facets):
             facets = self.mesh.facets_satisfying(facets)
-
-        if type(facets) is dict:
-            return {key: self._get_dofs(facets[key]) for key in facets}
+        if isinstance(facets, dict):
+            def to_indices(f):
+                if callable(f):
+                    return self.mesh.facets_satisfying(f)
+                return f
+            return {k: self._get_dofs(to_indices(facets[k])) for k in facets}
         else:
             return self._get_dofs(facets)
 
@@ -177,8 +209,7 @@ class GlobalBasis():
         parameters for 'w'."""
         raise NotImplementedError("Default parameters not implemented.")
 
-    def interpolate(self,
-                    w: ndarray) -> Any:
+    def interpolate(self, w: ndarray) -> Any:
         """Interpolate a solution vector to quadrature points.
 
         Parameters
@@ -202,24 +233,24 @@ class GlobalBasis():
         elif self.elem.order[0] == 1:
             W = np.zeros((dim, self.nelems, nqp))
         else:
-            raise Exception("Interpolation not implemented for this Element.order.")
+            raise Exception("Interpolation not implemented "
+                            "for this Element.order.")
 
         for j in range(self.Nbfun):
             jdofs = self.element_dofs[j, :]
-            W += w[jdofs][:, None] \
-                 * self.basis[j][0]
+            W += w[jdofs][:, None] * self.basis[j][0]
 
         if self.elem.order[1] == 1:
             dW = np.zeros((dim, self.nelems, nqp))
         elif self.elem.order[1] == 2:
             dW = np.zeros((dim, dim, self.nelems, nqp))
         else:
-            raise Exception("Interpolation not implemented for this Element.order.")
+            raise Exception("Interpolation not implemented "
+                            "for this Element.order.")
         for j in range(self.Nbfun):
             jdofs = self.element_dofs[j, :]
             for a in range(dim):
-                dW[a, :, :] += w[jdofs][:, None] \
-                               * self.basis[j][1][a]
+                dW[a, :, :] += w[jdofs][:, None] * self.basis[j][1][a]
         return W, dW
 
     def zero_w(self) -> ndarray:

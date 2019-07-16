@@ -10,8 +10,7 @@ height = 1.
 length = 10.
 peclet = 1e2
 
-mesh = (MeshLine(np.linspace(0, length,
-                             ceil(mesh_inlet_n / height * length)))
+mesh = (MeshLine(np.linspace(0, length, ceil(mesh_inlet_n / height * length)))
         * MeshLine(np.linspace(0, height / 2, mesh_inlet_n)))._splitquads()
 basis = InteriorBasis(mesh, ElementTriP2())
 
@@ -23,15 +22,14 @@ def advection(u, du, v, dv, w):
     return v * velocity_0 * du[0]
 
 
-dofs = {'inlet': basis.get_dofs(lambda x: x[0] == 0.),
-        'floor': basis.get_dofs(lambda x: x[1] == 0.)}
-D = np.concatenate([d.all() for d in dofs.values()])
-interior = basis.complement_dofs(D)
+dofs = basis.get_dofs({'inlet': lambda x: x[0] == 0.,
+                       'floor': lambda x: x[1] == 0.})
+interior = basis.complement_dofs(dofs)
 
 A = asm(laplace, basis) + peclet * asm(advection, basis)
 t = np.zeros(basis.N)
 t[dofs['floor'].all()] = 1.
-t[interior] = solve(*condense(A, np.zeros_like(t), t, D=D))
+t[interior] = solve(*condense(A, np.zeros_like(t), t, I=interior))
 
 
 if __name__ == '__main__':

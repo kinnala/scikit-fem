@@ -21,8 +21,7 @@ def dirichlet(x, y):
 
 
 u = np.zeros(basis.N)
-u[D] = L2_projection(dirichlet,
-                     FacetBasis(m, e, facets=m.boundary_facets()), D)
+u[D] = dirichlet(*basis.doflocs[:, D])
 u[I] = solve(*condense(A, np.zeros_like(u), u, I))
 
 

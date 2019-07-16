@@ -172,8 +172,9 @@ class TestEx24(unittest.TestCase):
 
 
 class TestEx25(unittest.TestCase):
-    def runTest(self):
-        import docs.examples.ex25 as ex
+   def runTest(self):
+      import docs.examples.ex25 as ex
+      self.assertAlmostEqual(np.mean(ex.t), 0.4642600944590631, places=5)
 
 
 class TestEx26(unittest.TestCase):
