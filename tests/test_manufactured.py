@@ -111,6 +111,9 @@ class TestExactHexElement(unittest.TestCase):
         lambda x: 1 + x[0]*x[1] + x[1]*x[2] + x[0],
     ]
 
+    def set_bc(self, fun, basis):
+        return fun(basis.mesh.p)
+
     def runTest(self):
         @bilinear_form
         def dudv(u, du, v, dv, w):
@@ -123,12 +126,14 @@ class TestExactHexElement(unittest.TestCase):
 
         A = asm(dudv, ib)
 
-        I = ib.get_dofs().all()
+        D = ib.get_dofs().all()
+        I = ib.complement_dofs(D)
 
         for X in self.funs:
-            x = X(m.p)
+            x = self.set_bc(X, ib)
+            Xh = x.copy()
             x[I] = solve(*condense(A, 0*x, x=x, I=I))
-            self.assertLessEqual(np.sum(x - X(m.p)), 1e-12)
+            self.assertLessEqual(np.sum(x - Xh), 1e-12)
 
 
 class TestExactQuadElement(TestExactHexElement):
@@ -147,6 +152,17 @@ class TestExactTetElement(TestExactHexElement):
         lambda x: 1 + 0*x[0],
         lambda x: 1 + x[0] + x[1],
     ]
+
+
+class TestExactTriElementP2(TestExactHexElement):
+    mesh = MeshTri
+    elem = ElementTriP2
+    funs = [
+        lambda x: 1 + 0*x[0],
+        lambda x: 1 + x[0] + x[1] + x[0] * x[1],
+    ]
+    def set_bc(self, fun, basis):
+        return fun(basis.doflocs)
 
 
 if __name__ == '__main__':

@@ -46,9 +46,9 @@ class Element():
     def orient(self, mapping, i, tind=None):
         """Orient basis functions. By default all = 1."""
         if tind is None:
-            return 1 + 0*mapping.mesh.t[0, :]
+            return 1 + 0 * mapping.mesh.t[0, :]
         else:
-            return 1 + 0*tind
+            return 1 + 0 * tind
 
     def gbasis(self,
                mapping,
