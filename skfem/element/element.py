@@ -3,6 +3,12 @@ from typing import Optional, Tuple, Union, List
 from numpy import ndarray
 
 
+OrderTuple = Union[Tuple[int, int],
+                   Tuple[int, int, int]]
+OrderOutput = Union[Tuple[ndarray, ndarray],
+                    Tuple[ndarray, ndarray, ndarray]]
+
+
 class Element():
     """Finite element.
 
@@ -40,7 +46,7 @@ class Element():
     dim: int = -1
     maxdeg: int = -1
     # 0 - scalar, 1 - vector, 2 - tensor, etc
-    order: Union[Tuple[int, int], Tuple[int, int, int]] = (-1, -1)
+    order: OrderTuple = (-1, -1)
     dofnames: List[str] = []
 
     def orient(self, mapping, i, tind=None):
@@ -54,8 +60,7 @@ class Element():
                mapping,
                X: ndarray,
                i: int,
-               tind: Optional[ndarray] = None) -> Union[Tuple[ndarray, ndarray],
-                                                        Tuple[ndarray, ndarray, ndarray]]:
+               tind: Optional[ndarray] = None) -> OrderOutput:
         """Evaluate the global basis functions, given local points X.
 
         The global points - at which the global basis is evaluated at - are
