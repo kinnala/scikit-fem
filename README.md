@@ -4,6 +4,7 @@
 [![Build Status](https://travis-ci.com/kinnala/scikit-fem.svg?branch=master)](https://travis-ci.com/kinnala/scikit-fem)
 [![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://kinnala.github.io/scikit-fem-docs)
 [![Join the chat at https://gitter.im/scikit-fem/Lobby](https://badges.gitter.im/scikit-fem/Lobby.svg)](https://gitter.im/scikit-fem/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![DOI](https://zenodo.org/badge/115345426.svg)](https://zenodo.org/badge/latestdoi/115345426)
 
 Easy to use finite element assemblers and the related tools.
@@ -45,8 +46,6 @@ For more cutting edge features, you can clone this repository.
 
 ## Getting started
 
-If you installed a (recent) release using `pip`, you can find the accompanying documentation under [Releases](https://github.com/kinnala/scikit-fem/releases)
-
 The latest user documentation corresponding to the master branch can be found [online](https://kinnala.github.io/scikit-fem-docs).
 
 ## Acknowledgements
@@ -57,6 +56,7 @@ This project was started while working under a grant from the [Finnish Cultural 
 
 The library has been used in the preparation of the following scientific works:
 
+- McBain, G., Mallison, S., Brown, B., Gustafsson, T. (2019). Three ways to compute multiport inertance. [In press](https://hal.archives-ouvertes.fr/hal-02159726/document).
 - Gustafsson, T., Stenberg, R., & Videman, J. (2019). On Nitsche's method for elastic contact problems. arXiv preprint [arXiv:1902.09312](https://arxiv.org/abs/1902.09312).
 - Gustafsson, T., Stenberg, R., & Videman, J. (2019). Error analysis of Nitsche's mortar method. Numerische Mathematik. [Open access](https://link.springer.com/article/10.1007/s00211-019-01039-5).
 - Gustafsson, T., Stenberg, R., & Videman, J. (2018). Nitsche's method for unilateral contact problems. arXiv preprint [arXiv:1805.04283](https://arxiv.org/abs/1805.04283).

@@ -23,7 +23,7 @@ class MeshTri(Mesh2D):
     - :meth:`~skfem.mesh.MeshTri.init_refdom`
     - :meth:`~skfem.mesh.MeshTri.init_tensor`
     - :meth:`~skfem.mesh.MeshTri.init_lshaped`
-    
+
     Attributes
     ----------
     facets
@@ -70,7 +70,6 @@ class MeshTri(Mesh2D):
     (2, 81)
 
     """
-
     refdom: str = "tri"
     brefdom: str = "line"
     meshio_type: str = "triangle"
@@ -113,8 +112,10 @@ class MeshTri(Mesh2D):
 
         """
         if p is None and t is None:
-            p = np.array([[0., 1., 0., 1.], [0., 0., 1., 1.]], dtype=np.float_)
-            t = np.array([[0, 1, 2], [1, 3, 2]], dtype=np.intp).T
+            p = np.array([[0., 1., 0., 1.],
+                          [0., 0., 1., 1.]], dtype=np.float_)
+            t = np.array([[0, 1, 2],
+                          [1, 3, 2]], dtype=np.intp).T
         elif p is None or t is None:
             raise Exception("Must provide p AND t or neither")
         self.p = p
@@ -475,12 +476,12 @@ class MeshTri(Mesh2D):
         e = self.facets
         sz = p.shape[1]
         t2f = self.t2f + sz
-        
+
         # new vertices are the midpoints of edges
-        new_p = 0.5*np.vstack((p[0, e[0, :]] + p[0, e[1, :]],
-                               p[1, e[0, :]] + p[1, e[1, :]]))
+        new_p = 0.5 * np.vstack((p[0, e[0, :]] + p[0, e[1, :]],
+                                 p[1, e[0, :]] + p[1, e[1, :]]))
         self.p = np.hstack((p, new_p))
-        
+
         # build new triangle definitions
         self.t = np.hstack((
             np.vstack((t[0, :], t2f[0, :], t2f[2, :])),
@@ -494,7 +495,7 @@ class MeshTri(Mesh2D):
         ix0 = np.arange(t.shape[1], dtype=np.int64)
         ix1 = ix0 + t.shape[1]
         ix2 = ix0 + 2*t.shape[1]
-        
+
         # rebuild mappings
         self._build_mappings()
 
@@ -510,7 +511,7 @@ class MeshTri(Mesh2D):
 
     def _adaptive_refine(self, marked):
         """Refine the set of provided elements."""
-        
+
         def sort_mesh(p, t):
             """Make (0, 2) the longest edge in t."""
             l01 = np.sqrt(np.sum((p[:, t[0, :]] - p[:, t[1, :]])**2, axis=0))

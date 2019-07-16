@@ -21,7 +21,7 @@ class MeshTests(unittest.TestCase):
         self.assertGreater(np.min(m.p), 0.4999)
 
         # Mesh3D.facets_satisfying
-        self.assertEqual(len(m.facets_satisfying(lambda x: x[0]==0.5)), 1)
+        self.assertEqual(len(m.facets_satisfying(lambda x: x[0] == 0.5)), 1)
 
 
 class FaultyInputs(unittest.TestCase):
@@ -70,16 +70,17 @@ class Loading(unittest.TestCase):
 class RefinePreserveSubsets(unittest.TestCase):
     """Check that uniform refinement preserves named boundaries."""
     def runTest(self):
-        for mtype in (MeshTri, MeshQuad):            
+        for mtype in (MeshTri, MeshQuad):
             m = mtype()
             m.refine(2)
-            m.boundaries = {'test': m.facets_satisfying(lambda x: x[0]==0.0)}
+            handle = lambda x: x[0] == 0.0
+            m.boundaries = {'test': m.facets_satisfying(handle)}
             m.refine()
             self.assertTrue((np.sort(m.boundaries['test'])
-                             == np.sort(m.facets_satisfying(lambda x: x[0]==0.0))).all())
+                             == np.sort(m.facets_satisfying(handle))).all())
             m.refine(2)
             self.assertTrue((np.sort(m.boundaries['test'])
-                             == np.sort(m.facets_satisfying(lambda x: x[0]==0.0))).all())   
+                             == np.sort(m.facets_satisfying(handle))).all())
 
 
 class SaveLoadCycle(unittest.TestCase):
@@ -91,7 +92,8 @@ class SaveLoadCycle(unittest.TestCase):
         m.refine(2)
         f = NamedTemporaryFile(delete=False)
         m.save(f.name + ".vtk")
-        m2 = Mesh.load(f.name + ".vtk")
+        with self.assertWarnsRegex(UserWarning, '^Unable to load tagged'):
+            m2 = Mesh.load(f.name + ".vtk")
         self.assertTrue(((m.p[0, :] - m2.p[0, :]) < 1e-6).all())
 
 
@@ -109,9 +111,9 @@ class SerializeUnserializeCycle(unittest.TestCase):
         for cls in self.clss:
             m = cls()
             m.refine(2)
-            m.boundaries = {'down': m.facets_satisfying(lambda x: x[0]==0)}
-            m.subdomains = {'upper': m.elements_satisfying(lambda x: x[0]>0.5)}
-            M = cls(**m.to_dict())
+            m.boundaries = {'down': m.facets_satisfying(lambda x: x[0] == 0)}
+            m.subdomains = {'up': m.elements_satisfying(lambda x: x[0] > 0.5)}
+            M = cls.from_dict(m.to_dict())
             self.assertTrue(np.sum(m.p - M.p) < 1e-13)
             self.assertTrue(np.sum(m.t - M.t) < 1e-13)
             for k in m.boundaries:

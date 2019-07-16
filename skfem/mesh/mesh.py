@@ -374,19 +374,35 @@ class Mesh():
                 for itr in range(self.p.shape[0])]
         return np.nonzero(test(np.array(midp)))[0]
 
+    @classmethod
+    def from_dict(cls: Type[MeshType], d) -> MeshType:
+        """Initialize a mesh from a dictionary."""
+        if 'p' not in d or 't' not in d:
+            raise ValueError("Dictionary must contain keys 'p' and 't'")
+        else:
+            d['p'] = np.array(d['p']).T
+            d['t'] = np.array(d['t']).T
+        if 'boundaries' in d and d['boundaries'] is not None:
+            d['boundaries'] = {k: np.array(v)
+                               for k, v in d['boundaries'].items()}
+        if 'subdomains' in d and d['subdomains'] is not None:
+            d['subdomains'] = {k: np.array(v)
+                               for k, v in d['subdomains'].items()}
+        return cls(**d)
+
     def to_dict(self) -> Dict[str, ndarray]:
         """Return json serializable dictionary."""
         if self.boundaries is not None:
             boundaries = {k: v.tolist() for k, v in self.boundaries.items()}
         else:
-            boundaries = self.boundaries
+            boundaries = None
         if self.subdomains is not None:
             subdomains = {k: v.tolist() for k, v in self.subdomains.items()}
         else:
-            subdomains = self.subdomains
+            subdomains = None
         return {
-            'p': self.p.tolist(),
-            't': self.t.tolist(),
+            'p': self.p.T.tolist(),
+            't': self.t.T.tolist(),
             'boundaries': boundaries,
             'subdomains': subdomains,
         }

@@ -38,7 +38,6 @@ class MeshTet(Mesh3D):
         Each column contains six indices to MeshTet.edges (6 x Nelements).
 
     """
-
     refdom: str = "tet"
     brefdom: str = "tri"
     meshio_type: str = "tetra"

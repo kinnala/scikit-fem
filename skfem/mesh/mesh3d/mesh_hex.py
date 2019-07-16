@@ -220,29 +220,11 @@ class MeshHex(Mesh3D):
         # hex middle point
         mid = range(self.t.shape[1]) + np.max(t2f) + 1
         # new vertices are the midpoints of edges ...
-        newp1 = 0.5*np.vstack((p[0, e[0, :]] + p[0, e[1, :]],
-                               p[1, e[0, :]] + p[1, e[1, :]],
-                               p[2, e[0, :]] + p[2, e[1, :]]))
+        newp1 = 0.5 * np.sum(p[:, e], axis=1)
         # ... midpoints of facets ...
-        newp2 = 0.25*np.vstack((p[0, f[0, :]] + p[0, f[1, :]] +
-                                p[0, f[2, :]] + p[0, f[3, :]],
-                                p[1, f[0, :]] + p[1, f[1, :]] +
-                                p[1, f[2, :]] + p[1, f[3, :]],
-                                p[2, f[0, :]] + p[2, f[1, :]] +
-                                p[2, f[2, :]] + p[2, f[3, :]]))
+        newp2 = 0.25 * np.sum(p[:, f], axis=1)
         # ... and element middle points
-        newp3 = 0.125*np.vstack((p[0, t[0, :]] + p[0, t[1, :]] +
-                                 p[0, t[2, :]] + p[0, t[3, :]] +
-                                 p[0, t[4, :]] + p[0, t[5, :]] +
-                                 p[0, t[6, :]] + p[0, t[7, :]],
-                                 p[1, t[0, :]] + p[1, t[1, :]] +
-                                 p[1, t[2, :]] + p[1, t[3, :]] +
-                                 p[1, t[4, :]] + p[1, t[5, :]] +
-                                 p[1, t[6, :]] + p[1, t[7, :]],
-                                 p[2, t[0, :]] + p[2, t[1, :]] +
-                                 p[2, t[2, :]] + p[2, t[3, :]] +
-                                 p[2, t[4, :]] + p[2, t[5, :]] +
-                                 p[2, t[6, :]] + p[2, t[7, :]]))
+        newp3 = 0.125 * np.sum(p[:, t], axis=1)
         newp = np.hstack((p, newp1, newp2, newp3))
         # build new hex indexing (this requires some serious meditation)
         newt = np.vstack((t[0, :],
