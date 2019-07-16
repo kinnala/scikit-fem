@@ -9,9 +9,18 @@ class ElementQuad2(ElementH1):
     dim = 2
     maxdeg = 3
     dofnames = ['u', 'u', 'u']
+    doflocs = np.array([[-1., -1.],
+                        [ 1., -1.],
+                        [ 1., 1.],
+                        [-1., 1.],
+                        [.0, -1.],
+                        [1., .0],
+                        [.0, 1.],
+                        [-1., .0],
+                        [.0, .0]])
 
     def lbasis(self, X, i):
-        x, y = X[0, :], X[1, :]
+        x, y = X
 
         if i == 0:
             phi = 0.25*(x**2-x)*(y**2-y)

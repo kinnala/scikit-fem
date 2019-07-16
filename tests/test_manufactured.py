@@ -133,7 +133,7 @@ class TestExactHexElement(unittest.TestCase):
             x = self.set_bc(X, ib)
             Xh = x.copy()
             x[I] = solve(*condense(A, 0*x, x=x, I=I))
-            self.assertLessEqual(np.sum(x - Xh), 1e-12)
+            self.assertLessEqual(np.sum(x - Xh), 1e-11)
 
 
 class TestExactQuadElement(TestExactHexElement):
@@ -163,6 +163,11 @@ class TestExactTriElementP2(TestExactHexElement):
     ]
     def set_bc(self, fun, basis):
         return fun(basis.doflocs)
+
+
+class TestExactQuadElement2(TestExactTriElementP2):
+    mesh = MeshQuad
+    elem = ElementQuad2
 
 
 if __name__ == '__main__':

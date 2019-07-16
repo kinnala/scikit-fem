@@ -9,7 +9,7 @@ class ElementTriP1(ElementH1):
     dofnames = ['u']
 
     def lbasis(self, X, i):
-        x, y = X[0, :], X[1, :]
+        x, y = X
 
         if i == 0:
             phi = 1 - x - y

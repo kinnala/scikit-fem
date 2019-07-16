@@ -16,7 +16,7 @@ class ElementTriP2(ElementH1):
                         [0., .5]])
 
     def lbasis(self, X, i):
-        x, y = X[0, :], X[1, :]
+        x, y = X
 
         if i == 0:
             phi = 1 - 3*x - 3*y + 2*x**2 + 4*x*y + 2*y**2
