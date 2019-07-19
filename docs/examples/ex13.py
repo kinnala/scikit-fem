@@ -39,7 +39,7 @@ u[boundary_dofs['positive'].all()] = 1.
 u[interior_dofs] = solve(*condense(A, 0.*u, u, interior_dofs))
 
 M = asm(mass, basis)
-u_exact = L2_projection(lambda x, y: 2 * np.arctan2(y, x) / np.pi, basis)
+u_exact = 2 * np.arctan2(*basis.doflocs[::-1]) / np.pi
 u_error = u - u_exact
 error_L2 = np.sqrt(u_error @ M @ u_error)
 conductance = {'skfem': u @ A @ u,
