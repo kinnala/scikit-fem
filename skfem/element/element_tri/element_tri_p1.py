@@ -7,6 +7,9 @@ class ElementTriP1(ElementH1):
     dim = 2
     maxdeg = 1
     dofnames = ['u']
+    doflocs = np.array([[0., 0.],
+                        [1., 0.],
+                        [0., 1.]])
 
     def lbasis(self, X, i):
         x, y = X

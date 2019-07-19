@@ -19,10 +19,26 @@ class ElementVectorH1(Element):
                          for j in range(self.dim)]
         self.maxdeg = elem.maxdeg
 
+        if hasattr(elem, 'doflocs'):
+            self.doflocs = np.array([
+                elem.doflocs[int(np.floor(float(i) / float(self.dim)))]
+                for i in range(self.dim * elem.doflocs.shape[0])
+            ])
+
     def gbasis(self, mapping, X, i, tind=None):
         ind = int(np.floor(float(i) / float(self.dim)))
-        n = i - self.dim*ind
+        n = i - self.dim * ind
         phi, dphi = self.elem.gbasis(mapping, X, ind, tind)
+        u = np.zeros((self.dim,) + phi.shape)
+        du = np.zeros((self.dim,) + dphi.shape)
+        u[n] = phi
+        du[n] = dphi
+        return u, du
+
+    def lbasis(self, X, i):
+        ind = int(np.floor(float(i) / float(self.dim)))
+        n = i - self.dim * ind
+        phi, dphi = self.elem.lbasis(X, ind)
         u = np.zeros((self.dim,) + phi.shape)
         du = np.zeros((self.dim,) + dphi.shape)
         u[n] = phi
