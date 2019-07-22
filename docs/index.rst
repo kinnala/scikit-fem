@@ -18,5 +18,6 @@ questions, do not hesitate to drop in and say hello at our `Gitter chat
     :maxdepth: 2
 
     gettingstarted
+    tutorial
     learning
     api
