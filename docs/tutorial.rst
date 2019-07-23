@@ -16,7 +16,7 @@ classes create simple meshes of unit intervals :math:`\Omega = [0,1]^d`.
    In [1]: from skfem.mesh import MeshTri
    In [2]: m = MeshTri()
    In [3]: m
-   Out[3]: # Triangular mesh with 4 vertices and 2 elements.
+   Out[3]: "Triangular mesh with 4 vertices and 2 elements."
 
 There are also a few additional constructors available such as
 :meth:`skfem.mesh.MeshTri.init_tensor` and
@@ -27,18 +27,17 @@ mesh types can be loaded from file formats supported by meshio:
 
    In [4]: from skfem.mesh import Mesh
    In [5]: Mesh.load("docs/examples/square.msh")
-   Out[5]: # Triangular mesh with 109 vertices and 184 elements.
+   Out[5]: "Triangular mesh with 109 vertices and 184 elements."
 
-You can also visualize meshes and solutions via
-:meth:`skfem.mesh.MeshTri.draw` and :meth:`skfem.mesh.MeshTri.plot`.
+Meshes can be visualized using :meth:`skfem.mesh.MeshTri.draw`.
 
 Choosing basis functions
 ########################
 
 The local basis functions are defined in :class:`~skfem.element.Element`
 classes. They are combined with meshes to create
-:class:`~skfem.assembly.GlobalBasis` objects such as
-:class:`~skfem.assembly.InteriorBasis` and :class:`~skfem.assembly.FacetBasis`
+:class:`~skfem.assembly.GlobalBasis` objects, such as
+:class:`~skfem.assembly.InteriorBasis` and :class:`~skfem.assembly.FacetBasis`,
 that contain global basis functions evaluated at global quadrature points:
 
 .. code-block:: python
@@ -76,8 +75,19 @@ For example, the mass matrix can be assembled as follows:
       ...:
    In [8]: asm(mass, basis)
    Out[8]:
-   # <289x289 sparse matrix of type '<class 'numpy.float64'>'
-   # with 3073 stored elements in Compressed Sparse Row format>"""
+   """
+   <289x289 sparse matrix of type '<class 'numpy.float64'>'
+   with 3073 stored elements in Compressed Sparse Row format>
+   """
+
+In the bilinear form definition ``u`` refers to the solution values and ``du``
+refers to its derivatives, ``v`` and ``dv`` refer to the test function values
+and derivatives, and ``w`` contains any additional variables such as the global
+coordinates and the local mesh parameters.
+
+The number of arguments required in the form definition depends on the type of
+element.  In particular, the number of positional arguments in the bilinear form
+definition should be exactly ``2 * len(Element.order) + 1``.
 
 A load vector corresponding to the linear form :math:`F(v)=\int_\Omega x^2 v
 \,\mathrm{d}x` can be assembled as follows:
@@ -89,8 +99,7 @@ A load vector corresponding to the linear form :math:`F(v)=\int_\Omega x^2 v
       ...:     return w.x[0] ** 2 * v
       ...:
    In [10]: asm(F, basis)
-   Out[13]: 
-   # array([-1.35633681e-06,  9.22309028e-05, -5.42534722e-06,  ...])
+   Out[11]: array([-1.35633681e-06,  9.22309028e-05, -5.42534722e-06,  ...])
 
 Setting boundary conditions
 ###########################
