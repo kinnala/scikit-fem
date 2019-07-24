@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'scikit-fem'
-copyright = '2018, Tom Gustafsson, Geordie McBain'
+copyright = '2018-2019, Tom Gustafsson, Geordie McBain'
 author = 'Tom Gustafsson, Geordie McBain'
 
 
