@@ -159,5 +159,13 @@ examples.
 Solving linear systems
 ######################
 
+The assembly routines output either scipy sparse matrices or numpy arrays.
+These can be used, e.g., together with any scipy linear algebra routines.  For
+convenience, we have wrapped some of the most commonly used scipy functions into
+:func:`skfem.utils.solve`.
+
+
+
+
 Postprocessing the results
 ##########################

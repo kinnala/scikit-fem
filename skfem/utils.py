@@ -22,30 +22,37 @@ def condense(A: spmatrix,
              b: Optional[Union[ndarray, spmatrix]] = None,
              x: Optional[ndarray] = None,
              I: Optional[ndarray] = None,
-             D: Optional[ndarray] = None) -> Union[spmatrix,
-                                                   Tuple[spmatrix, ndarray],
-                                                   Tuple[spmatrix, spmatrix]]:
+             D: Optional[ndarray] = None,
+             expand: bool = False) -> Union[spmatrix,
+                                            Tuple[spmatrix, ndarray],
+                                            Tuple[spmatrix, spmatrix]]:
     """Eliminate DOF's from a linear system.
 
     Supports also generalized eigenvalue problems.
-    
+
     Parameters
     ----------
     A
         The system matrix
     b
-        The right hand side vector or the mass matrix
-        for generalized eigenvalue problems.
+        The right hand side vector or the mass matrix for generalized eigenvalue
+        problems.
+    x
+        The values of the condensed DOF's. If not given, assumed to be zero.
     I
         The set of DOF numbers to keep
     D
         The set of DOF numbers to dismiss
-        
+    expand
+        If True, return x and I: :func:`skfem.utils.solve` will then expand the
+        solution vector automatically. By default, the solution vector is not
+        expanded.
+
     Returns
     -------
     spmatrix or (spmatrix, ndarray) or (spmatrix, spmatrix)
         The condensed system.
-        
+
     """
     if x is None:
         x = np.zeros(A.shape[0])
@@ -62,11 +69,17 @@ def condense(A: spmatrix,
     else:
         if isinstance(b, spmatrix):
             # generalized eigenvalue problem: don't modify rhs
-            return A[I].T[I].T, b[I].T[I].T 
+            Aout = A[I].T[I].T
+            bout = b[I].T[I].T
         elif isinstance(b, ndarray):
-            return A[I].T[I].T, b[I] - A[I].T[D].T @ x[D]
+            Aout = A[I].T[I].T
+            bout = b[I] - A[I].T[D].T @ x[D]
         else:
             raise Exception("The second arg type not supported.")
+        if expand:
+            return Aout, bout, x, I
+        else:
+            return Aout, bout
 
 
 def rcm(A: spmatrix,
@@ -79,7 +92,7 @@ def solver_eigen_scipy(sigma: float,
                        n: Optional[int] = 3,
                        mode: Optional[str] = 'normal') -> EigenSolver:
     """Solve generalized eigenproblem using SciPy (ARPACK).
-    
+
     Parameters
     ----------
     sigma
@@ -92,7 +105,7 @@ def solver_eigen_scipy(sigma: float,
     -------
     EigenSolver
         A solver function that can be passed to :func:`solve`.
-    
+
     """
     def solver(K, M):
         from scipy.sparse.linalg import eigsh
@@ -145,7 +158,6 @@ def solver_iter_krylov(krylov: Optional[LinearSolver] = spl.cg,
     the latter is omitted, a diagonal preconditioner is supplied using
     :func:`skfem.utils.build_pc_diag`.
 
-
     Returns
     -------
     LinearSolver
@@ -178,6 +190,8 @@ def solver_iter_pcg(**kwargs) -> LinearSolver:
 
 def solve(A: spmatrix,
           b: Union[ndarray, spmatrix],
+          x: Optional[ndarray] = None,
+          I: Optional[ndarray] = None,
           solver: Optional[Union[LinearSolver, EigenSolver]] = None) -> ndarray:
     """Solve a linear system or a generalized eigenvalue problem.
 
@@ -203,7 +217,12 @@ def solve(A: spmatrix,
         elif isinstance(b, ndarray):
             solver = solver_direct_scipy()
 
-    return solver(A, b)
+    if x is not None and I is not None:
+        y = x.copy()
+        y[I] = solver(A, b)
+        return y
+    else:
+        return solver(A, b)
 
 
 def adaptive_theta(est, theta=0.5, max=None):
