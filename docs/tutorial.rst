@@ -164,8 +164,22 @@ These can be used, e.g., together with any scipy linear algebra routines.  For
 convenience, we have wrapped some of the most commonly used scipy functions into
 :func:`skfem.utils.solve`.
 
+.. code-block:: python
 
+   In [1]: from skfem import *
+   In [2]: m = MeshTri()
+   In [3]: m.refine(3)
+   In [4]: basis = InteriorBasis(m, ElementTriP2())
+   In [5]: from skfem.models.poisson import laplace, unit_load
+   In [6]: A = asm(laplace, basis)
+   In [7]: b = asm(unit_load, basis)
+   In [8]: x = solve(*condense(A, b, D=basis.get_dofs().all(), expand=True))
+   In [9]: x.max()
+   Out[9]: 0.07367588634940822
 
+On line 8, ``expand=True`` causes :func:`skfem.utils.solve` to expand
+the solution of the condensed system to contain the eliminated degrees-of-freedom.
+By default, :func:`skfem.utils.solve` uses :func:`scipy.sparse.linalg.spsolve`.
 
 Postprocessing the results
 ##########################
