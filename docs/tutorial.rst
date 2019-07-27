@@ -3,13 +3,21 @@
 Tutorial
 --------
 
-This is a walkthrough of the basic features of scikit-fem.
+This is a walkthrough of the basic features of scikit-fem that are needed in
+most finite element computations.
 
 Creating meshes
 ###############
 
+The finite element assembly requires using subclasses of
+:class:`skfem.mesh.Mesh`. Underneath, the mesh is stored in two arrays: vertex
+locations and :math:`n`-tuples defining the elements. Based on these two arrays,
+:meth:`skfem.mesh.Mesh.__init__` precomputes various useful mappings between the
+topological entities of the mesh.
+
 The default constructors of :class:`~skfem.mesh.Mesh`
-classes create simple meshes of unit intervals :math:`\Omega = [0,1]^d`.
+classes create simple meshes of unit intervals :math:`\Omega = [0,1]^d`
+where :math:`d` is the dimension of the domain.
 
 .. code-block:: python
 
@@ -21,8 +29,9 @@ classes create simple meshes of unit intervals :math:`\Omega = [0,1]^d`.
 
 There are also a few additional constructors available such as
 :meth:`skfem.mesh.MeshTri.init_tensor` and
-:meth:`skfem.mesh.MeshTri.init_lshaped`. More importantly, all
-mesh types can be loaded from file formats supported by meshio:
+:meth:`skfem.mesh.MeshTri.init_lshaped`. More importantly, all mesh types can be
+loaded from file formats supported by `meshio
+<https://github.com/nschloe/meshio>`_:
 
 .. code-block:: python
 
@@ -31,7 +40,18 @@ mesh types can be loaded from file formats supported by meshio:
    Out[5]:
    "Triangular mesh with 109 vertices and 184 elements."
 
-Meshes can be visualized using :meth:`skfem.mesh.MeshTri.draw`.
+You can also create meshes with the help of external packages, see
+e.g. :ref:`insulated`. Meshes can be visualized using
+:meth:`skfem.mesh.Mesh.draw` or with external tools after exporting them to VTK
+using :meth:`skfem.mesh.Mesh.save`. It is also possible to create
+the meshes by hand:
+
+.. code-block:: python
+
+   In [6]: import numpy as np
+   In [7]: p = np.array([[0., 0.], [1., 0.], [1., 1.], [0., 1.]]).T # points
+   In [8]: t = np.array([[0, 1, 2], [1, 2, 3]], dtype=int).T # triangles
+   In [9]: m = MeshTri(p, t)
 
 Choosing basis functions
 ########################
@@ -60,6 +80,11 @@ a keyword argument:
 Now polynomials of order 5 can be integrated exactly by the quadrature
 rule. By default, the order of the rule is chosen so that a mass matrix
 for the chosen finite element basis can be integrated exactly.
+
+The object ``basis`` can be used to assemble weak forms defined over the
+entire domain. In order to assemble weak forms defined on the
+boundary of the domain use :class:`~skfem.assembly.FacetBasis`
+such as, e.g., in :ref:`integralcondition`.
 
 Assembling finite element matrices
 ##################################
@@ -105,7 +130,7 @@ Setting essential boundary conditions
 #####################################
 
 The simplest way of obtaining degrees-of-freedom corresponding to a specific
-boundary is through :meth:`~skfem.assembly.GlobalBasis.get_dofs`.
+boundary is through :meth:`skfem.assembly.InteriorBasis.get_dofs`.
 
 .. code-block:: python
 
@@ -151,7 +176,7 @@ system, e.g., with the help of :func:`skfem.utils.condense`.
            3.33333333e-01, 3.33333333e-01, 1.66666667e-01, 1.66666667e-01,
            1.66666667e-01, 1.66666667e-01, 1.66666667e-01, 1.66666667e-01]))
 
-The previous commands cause the corresponding degrees-of-freedom to be zero.
+The previous commands cause the boundary degrees-of-freedom to be zero.
 In order to set them to prescribed values, you can experiment with the
 different keyword arguments of :func:`skfem.utils.condense`; c.f. the
 examples.
@@ -183,3 +208,20 @@ By default, :func:`skfem.utils.solve` uses :func:`scipy.sparse.linalg.spsolve`.
 
 Postprocessing the results
 ##########################
+
+We can now visualize the solution ``x`` from the previous section using
+matplotlib:
+
+.. code-block:: python
+
+   In [10]: M, X = basis.refinterp(x, 3)
+   In [11]: ax = m.draw()
+   In [12]: M.plot(X, smooth=True, edgecolors='', ax=ax)
+   In [13]: M.savefig('tutorial_solution.png')
+
+.. figure:: tutorial_solution.png
+
+   The visualized result of the tutorial.
+
+Other postprocessing  evaluate functionals, saving the result
+to VTK, adaptively refining the mesh, etc.
