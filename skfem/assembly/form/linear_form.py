@@ -4,7 +4,7 @@ import numpy as np
 from numpy import ndarray
 from scipy.sparse import coo_matrix
 
-from .form import Form
+from .form import Form, BasisTuple
 from .form_parameters import FormParameters
 from ..global_basis import GlobalBasis
 
@@ -14,7 +14,7 @@ class LinearForm(Form):
     def kernel(self,
                b: ndarray,
                ix: ndarray,
-               vbasis: GlobalBasis,
+               vbasis: BasisTuple,
                w: FormParameters,
                dx: ndarray) -> None:
         for i in ix:

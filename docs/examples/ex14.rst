@@ -1,9 +1,11 @@
+.. _inhomo:
+
 Laplace with inhomogeneous boundary
 -----------------------------------
 
 Another simple modification of :ref:`poisson`, this time showing how
 to impose coordinate-dependent Dirichlet conditions with
-:func:`~skfem.utils.condense` and :func:`~skfem.InteriorBasis.doflocs`.
+:func:`~skfem.utils.condense` and :attr:`~skfem.InteriorBasis.doflocs`.
 The forcing term is suppressed for simplicity. The boundary values are
 set as the real part :math:`x^2 - y^2` of an analytic complex function
 :math:`(x + \mathrm i y)^2` which is harmonic and so that is the exact

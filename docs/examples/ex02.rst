@@ -77,14 +77,10 @@ We begin by creating a simple symmetric mesh for the unit square.
     :end-at: refine
 
 After creating the mesh, we evaluate the finite element basis at the global
-quadrature points. Here we demonstrate
-an extended syntax of :class:`~skfem.assembly.InteriorBasis`
-constructor which allows the user to input an object of type
-:class:`~skfem.mapping.Mapping` and the integration order as
-optional parameters:
+quadrature points.
 
 .. literalinclude:: ex02.py
-    :start-at: MappingAffine
+    :start-at: ElementTriMorley
     :end-at: InteriorBasis
 
 The integration order refers to the highest order of exactly integrated
@@ -96,14 +92,14 @@ The rather complicated bilinear form :math:`(\boldsymbol{M}(u),
 
 .. literalinclude:: ex02.py
     :start-at: bilinear_form
-    :end-at: return d**3/12.0*ddot(C(Eps(ddu)), Eps(ddv))
+    :end-at: return d**3
 
 As loading, we shall consider a distributed force of :math:`1\,\text{MPa}`,
 i.e. :math:`f=10^6\,\text{Pa}`.
 
 .. literalinclude:: ex02.py
-    :start-at: linear_form
-    :end-at: return 1e6*v
+    :start-at: @linear_form
+    :end-at: return 1e6
 
 Assembling the stiffness matrix and the load vector
 is now two calls to :func:`~skfem.assembly.asm`:
@@ -131,8 +127,8 @@ The solution of the linear system is now done similarly as in the
 Poisson example.
 
 .. literalinclude:: ex02.py
-    :start-at: complement_dofs
-    :end-at: solve
+    :start-at: solve
+    :lines: 1-1
 
 Morley element uses quadratic basis
 functions, and we cannot fully appreciate the discrete solution
@@ -141,7 +137,7 @@ unless we refine the mesh for visualisation. This is done using
 
 .. literalinclude:: ex02.py
     :start-at: main
-    :end-at: savefig
+    :end-at: plot
 
 .. figure:: ex02_solution.png
 

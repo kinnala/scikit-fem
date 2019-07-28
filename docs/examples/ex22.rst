@@ -1,3 +1,5 @@
+.. _adaptivepoisson:
+
 Adaptive Poisson equation
 -------------------------
 
@@ -5,7 +7,20 @@ Adaptive Poisson equation
 
    This example is a stub. You could help us to improve it; see :ref:`contribute`.
 
-Solving the example :ref:`poisson` adaptively in an L-shaped domain.
+This example solves :ref:`poisson` adaptively in an L-shaped domain.
+Using linear elements, the error indicators read
+
+.. math::
+
+   \eta_K^2 = h_K^2 \|f\|_{0,K}^2
+
+for each element :math:`K`, and
+
+.. math::
+
+   \eta_E^2 = h_E \| [[\nabla u_h \cdot n ]] \|_{0,E}^2
+
+for each edge :math:`E`.
 
 .. literalinclude:: ex22.py
    :linenos:

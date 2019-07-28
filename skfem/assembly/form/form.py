@@ -1,9 +1,13 @@
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Tuple, Union
 
 from numpy import ndarray
 
 from .form_parameters import FormParameters
 from ..global_basis import GlobalBasis
+
+
+BasisTuple = Union[Tuple[ndarray, ndarray],
+                   Tuple[ndarray, ndarray, ndarray]]
 
 
 class Form:

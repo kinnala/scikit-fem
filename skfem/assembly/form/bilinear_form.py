@@ -4,7 +4,7 @@ import numpy as np
 from numpy import ndarray
 from scipy.sparse import coo_matrix, csr_matrix
 
-from .form import Form
+from .form import Form, BasisTuple
 from .form_parameters import FormParameters
 from ..global_basis import GlobalBasis
 
@@ -14,8 +14,8 @@ class BilinearForm(Form):
     def kernel(self,
                A: ndarray,
                ix: ndarray,
-               ubasis: GlobalBasis,
-               vbasis: GlobalBasis,
+               ubasis: BasisTuple,
+               vbasis: BasisTuple,
                w: FormParameters,
                dx: ndarray) -> None:
         for k in range(ix.shape[0]):
