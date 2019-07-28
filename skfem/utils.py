@@ -6,7 +6,7 @@ import scipy.sparse as sp
 import scipy.sparse.linalg as spl
 import scipy.sparse.csgraph as spg
 import warnings
-from skfem.assembly import asm, bilinear_form, linear_form
+from skfem.assembly import asm, bilinear_form, linear_form, Dofs
 from skfem.element import ElementVectorH1
 
 from typing import Optional, Union, Tuple, Callable
@@ -54,6 +54,10 @@ def condense(A: spmatrix,
         The condensed system.
 
     """
+    if isinstance(D, Dofs):
+        D = D.all()
+    if isinstance(I, Dofs):
+        I = I.all()
     if x is None:
         x = np.zeros(A.shape[0])
     if I is None and D is None:
