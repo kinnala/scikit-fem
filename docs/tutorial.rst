@@ -11,7 +11,8 @@ Creating meshes
 
 The finite element assembly requires using subclasses of
 :class:`skfem.mesh.Mesh`. Underneath, the mesh is stored in two arrays: vertex
-locations and :math:`n`-tuples defining the elements. Based on these two arrays,
+locations (:attr:`skfem.mesh.Mesh.p`) and :math:`n`-tuples defining the elements
+(:attr:`skfem.mesh.Mesh.t`). Based on these two arrays,
 :meth:`skfem.mesh.Mesh.__init__` precomputes various useful mappings between the
 topological entities of the mesh.
 
@@ -24,8 +25,7 @@ where :math:`d` is the dimension of the domain.
    In [1]: from skfem.mesh import MeshTri
    In [2]: m = MeshTri()
    In [3]: m
-   Out[3]:
-   "Triangular mesh with 4 vertices and 2 elements."
+   Out[3]: "Triangular mesh with 4 vertices and 2 elements."
 
 There are also a few additional constructors available such as
 :meth:`skfem.mesh.MeshTri.init_tensor` and
@@ -37,28 +37,28 @@ loaded from file formats supported by `meshio
 
    In [4]: from skfem.mesh import Mesh
    In [5]: Mesh.load("docs/examples/square.msh")
-   Out[5]:
-   "Triangular mesh with 109 vertices and 184 elements."
+   Out[5]: "Triangular mesh with 109 vertices and 184 elements."
 
 You can also create meshes with the help of external packages, see
 e.g. :ref:`insulated`. Meshes can be visualized using
 :meth:`skfem.mesh.Mesh.draw` or with external tools after exporting them to VTK
 using :meth:`skfem.mesh.Mesh.save`. It is also possible to create
-the meshes by hand:
+the meshes manually:
 
 .. code-block:: python
 
    In [6]: import numpy as np
    In [7]: p = np.array([[0., 0.], [1., 0.], [1., 1.], [0., 1.]]).T # points
    In [8]: t = np.array([[0, 1, 2], [1, 2, 3]], dtype=int).T # triangles
-   In [9]: m = MeshTri(p, t)
+   In [9]: MeshTri(p, t)
+   Out[9]: "Triangular mesh with 4 vertices and 2 elements."
 
 Choosing basis functions
 ########################
 
-The local basis functions are defined in :class:`~skfem.element.Element`
+The local basis functions are defined in :class:`skfem.element.Element`
 classes. They are combined with meshes to create
-:class:`~skfem.assembly.GlobalBasis` objects, such as
+:class:`skfem.assembly.GlobalBasis` objects, such as
 :class:`~skfem.assembly.InteriorBasis` and :class:`~skfem.assembly.FacetBasis`,
 that contain global basis functions evaluated at global quadrature points:
 
@@ -81,10 +81,10 @@ Now polynomials of order 5 can be integrated exactly by the quadrature
 rule. By default, the order of the rule is chosen so that a mass matrix
 for the chosen finite element basis can be integrated exactly.
 
-The object ``basis`` can be used to assemble weak forms defined over the
-entire domain. In order to assemble weak forms defined on the
-boundary of the domain use :class:`~skfem.assembly.FacetBasis`
-such as, e.g., in :ref:`integralcondition`.
+:class:`~skfem.assembly.InteriorBasis` can be used to assemble weak forms with
+integral over the domain. In order to assemble weak forms defined on the
+boundary of the domain use :class:`~skfem.assembly.FacetBasis`, see e.g.
+:ref:`integralcondition`.
 
 Assembling finite element matrices
 ##################################
@@ -101,9 +101,8 @@ For example, the mass matrix can be assembled as follows:
       ...:     return u * v
       ...:
    In [8]: asm(mass, basis)
-   Out[8]:
-   """<289x289 sparse matrix of type '<class 'numpy.float64'>'
-   with 3073 stored elements in Compressed Sparse Row format>"""
+   Out[8]: """<289x289 sparse matrix of type '<class 'numpy.float64'>'
+           with 3073 stored elements in Compressed Sparse Row format>"""
 
 In the definition of the form ``mass``, ``u`` refers to the solution values and
 ``du`` refers to its derivatives, ``v`` and ``dv`` refer to the test function
@@ -125,6 +124,8 @@ A load vector corresponding to the linear form :math:`F(v)=\int_\Omega x^2 v
       ...:
    In [10]: asm(F, basis)
    Out[11]: array([-1.35633681e-06,  9.22309028e-05, -5.42534722e-06,  ...])
+
+See :ref:`learning` for more use cases and instructions.
 
 Setting essential boundary conditions
 #####################################
@@ -149,9 +150,8 @@ the degrees-of-freedom at the facets of the elements on the boundary :math:`x=0`
    In [4]: from skfem.models.poisson import laplace, unit_load
    In [5]: A, b = asm(laplace, basis), asm(unit_load, basis)
    In [6]: A
-   Out[6]:
-   """<21x21 sparse matrix of type '<class 'numpy.float64'>'
-   with 165 stored elements in Compressed Sparse Row format>"""
+   Out[6]: """<21x21 sparse matrix of type '<class 'numpy.float64'>'
+           with 165 stored elements in Compressed Sparse Row format>"""
 
    In [7]: b
    Out[7]:
@@ -178,8 +178,8 @@ system, e.g., with the help of :func:`skfem.utils.condense`.
 
 The previous commands cause the boundary degrees-of-freedom to be zero.
 In order to set them to prescribed values, you can experiment with the
-different keyword arguments of :func:`skfem.utils.condense`; c.f. the
-examples.
+different keyword arguments of :func:`skfem.utils.condense`; see e.g.
+:ref:`inhomo`.
 
 Solving linear systems
 ######################
@@ -223,5 +223,8 @@ matplotlib:
 
    The visualized result of the tutorial.
 
-Other postprocessing  evaluate functionals, saving the result
-to VTK, adaptively refining the mesh, etc.
+For other examples on postprocessing see, e.g., :ref:`tetrapoisson` for saving
+the solution to VTK, :ref:`postprocess` and :ref:`laplacemixed` for evaluating
+functionals, or :ref:`adaptivepoisson` for evaluating error estimators.
+
+You have now finished the tutorial and continue with :ref:`stepbystep`.

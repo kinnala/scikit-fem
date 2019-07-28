@@ -6,6 +6,8 @@ Examples
 This page includes all examples contained in the source
 code distribution.
 
+.. _stepbystep:
+
 Step-by-step examples
 #####################
 

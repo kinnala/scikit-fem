@@ -1,3 +1,5 @@
+.. _laplacemixed:
+
 Laplace with mixed boundary conditions
 --------------------------------------
 
