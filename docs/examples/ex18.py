@@ -49,7 +49,7 @@ interior = basis['psi'].complement_dofs(D)
 vorticity = asm(rot, basis['psi'],
                 w=[basis['psi'].interpolate(velocity[i::2])
                    for i in range(2)])
-psi[interior] = solve(*condense(A, vorticity, I=interior))
+psi = solve(*condense(A, vorticity, I=interior))
 
 
 if __name__ == '__main__':

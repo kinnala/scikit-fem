@@ -112,7 +112,7 @@ temperature = np.zeros(basis['heat'].N)
 inlet_dofs = basis['heat'].complement_dofs(I)
 temperature[inlet_dofs] = exact(*mesh.p[:, inlet_dofs])
 
-temperature[I] = solve(*condense(A, b, temperature, I=I))
+temperature = solve(*condense(A, b, temperature, I=I))
 
 dofs = {label: basis['heat'].get_dofs(facets).all()
         for label, facets in mesh.boundaries.items()

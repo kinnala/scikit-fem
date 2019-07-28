@@ -60,7 +60,7 @@ for itr in range(10): # 10 adaptive refinements
     u = np.zeros_like(f)
     
     I = m.interior_nodes()
-    u[I] = solve(*condense(K, f, I=I))
+    u = solve(*condense(K, f, I=I))
 
 if __name__ == "__main__":
     m.draw()

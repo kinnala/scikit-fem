@@ -82,7 +82,7 @@ def parabolic(x, y):
 
 uvp[inlet_dofs] = L2_projection(parabolic, inlet_basis, inlet_dofs)
 I = np.setdiff1d(np.arange(K.shape[0]), D)
-uvp[I] = solve(*condense(K, 0*uvp, uvp, I))
+uvp = solve(*condense(K, 0*uvp, uvp, I))
 
 velocity, pressure = np.split(uvp, [A.shape[0]])
 
@@ -94,7 +94,7 @@ I = basis['psi'].complement_dofs(D)
 vorticity = asm(rot, basis['psi'],
                 w=[basis['psi'].interpolate(velocity[i::2])
                    for i in range(2)])
-psi[I] = solve(*condense(A, vorticity, I=I))
+psi = solve(*condense(A, vorticity, I=I))
 
 
 if __name__ == '__main__':

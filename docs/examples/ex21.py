@@ -17,7 +17,7 @@ rho = 8050.0
 
 @bilinear_form
 def mass(u, du, v, dv, w):
-    return rho*(u[0]*v[0] + u[1]*v[1] + u[2]*v[2])
+    return rho * sum(u * v)
 
 M = asm(mass, ib)
 
@@ -27,7 +27,7 @@ D = np.concatenate((
         dofs['fixed'].nodal['u^1'],
         dofs['fixed'].nodal['u^2'],
         dofs['fixed'].nodal['u^3'],
-        ))
+))
 
 I = ib.complement_dofs(D)
 
@@ -38,5 +38,5 @@ y[I] = x[:, 0]
 
 if __name__ == "__main__":
     sf = 2.0
-    MeshTet(np.array(m.p + sf*y[ib.nodal_dofs]), m.t).draw()
+    MeshTet(np.array(m.p + sf * y[ib.nodal_dofs]), m.t).draw()
     m.show()

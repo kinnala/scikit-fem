@@ -17,26 +17,24 @@ def rhs(v, dv, w):
     w, dw = w.w, w.dw
     return 1.0/np.sqrt(1.0 + dw[0]**2 + dw[1]**2)*(dw[0]*dv[0] + dw[1]*dv[1])
 
-map = MappingAffine(m)
-basis = InteriorBasis(m, ElementTriP1(), map, 2)
+basis = InteriorBasis(m, ElementTriP1())
 
-x = 0*m.p[0, :]
+x = np.zeros(basis.N)
 
 I = m.interior_nodes()
 D = m.boundary_nodes()
-x[D] = np.sin(np.pi*m.p[0, D]) 
+x[D] = np.sin(np.pi * m.p[0, D]) 
 
 for itr in range(100):
-    import copy
     w = basis.interpolate(x)
     J = asm(jacobian, basis, w=w)
     F = asm(rhs, basis, w=w)
-    xprev = copy.deepcopy(x)
-    x[I] = x[I] + 0.7*solve(*condense(J, -F, I=I))
-    if np.linalg.norm(x - xprev) < 1e-8:
+    x_prev = x.copy()
+    x += 0.7 * solve(*condense(J, -F, I=I))
+    if np.linalg.norm(x - x_prev) < 1e-8:
         break
     if __name__ == "__main__":
-        print(np.linalg.norm(x - xprev))
+        print(np.linalg.norm(x - x_prev))
 
 if __name__ == "__main__":
     m.plot3(x)

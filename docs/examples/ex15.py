@@ -20,7 +20,7 @@ b = asm(load, basis)
 I = m.interior_nodes()
 
 x = 0*b
-x[I] = solve(*condense(A, b, I=I))
+x = solve(*condense(A, b, I=I))
 
 if __name__ == "__main__":
     m.plot(x)

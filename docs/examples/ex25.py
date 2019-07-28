@@ -29,7 +29,7 @@ interior = basis.complement_dofs(dofs)
 A = asm(laplace, basis) + peclet * asm(advection, basis)
 t = np.zeros(basis.N)
 t[dofs['floor'].all()] = 1.
-t[interior] = solve(*condense(A, np.zeros_like(t), t, I=interior))
+t = solve(*condense(A, np.zeros_like(t), t, I=interior))
 
 
 if __name__ == '__main__':

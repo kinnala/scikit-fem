@@ -218,6 +218,7 @@ def solve(A: spmatrix,
     if solver is None:
         if isinstance(b, spmatrix):
             solver = solver_eigen_scipy(10.0)
+            return solver(A, b)
         elif isinstance(b, ndarray):
             solver = solver_direct_scipy()
 
@@ -311,4 +312,4 @@ def L2_projection(fun,
     M = asm(mass, basis)
     f = asm(funv, basis)
 
-    return solve(*condense(M, f, I=ix))
+    return solve(*condense(M, f, I=ix, expand=False))

@@ -50,12 +50,11 @@ class Bratu1d():
                         u: np.ndarray,
                         lmbda: float,
                         rhs: np.ndarray) -> np.ndarray:
-        """A solver for the Jacobian problem."""
+        """Solver for the Jacobian problem."""
+        A = self.lap - lmbda * dia_matrix((self.mass @ np.exp(u), 0),
+                                          self.mass.shape)
         du = np.zeros_like(u)
-        du[self.I] = solve(*condense(
-            self.lap - lmbda * dia_matrix((self.mass @ np.exp(u), 0),
-                                          self.mass.shape),
-            rhs, I=self.I))
+        du = solve(*condense(A, rhs, I=self.I))
         return du
 
 

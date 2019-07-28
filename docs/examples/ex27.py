@@ -143,7 +143,7 @@ class BackwardFacingStep:
         vorticity = asm(rot, self.basis['psi'],
                         w=[self.basis['psi'].interpolate(velocity[i::2])
                            for i in range(2)])
-        psi[I] = solve(*condense(A, vorticity, I=I))
+        psi = solve(*condense(A, vorticity, I=I))
         return psi
 
     def mesh_plot(self):
