@@ -140,10 +140,13 @@ boundary is through :meth:`skfem.assembly.InteriorBasis.get_dofs`.
    In [3]: basis.get_dofs(lambda x: x[0]==0.0)
    Out[3]: Dofs(nodal={'u': array([0, 2, 4])}, facet={'u': array([ 9, 11])}, edge={}, interior={})
 
-This result tells us that when assembling matrices and vectors using ``basis``
-object, the rows 0, 2 and 4 correspond to the degrees-of-freedom at the vertices
-of the elements on the boundary :math:`x=0`, and the rows 9 and 11 correspond to
-the degrees-of-freedom at the facets of the elements on the boundary :math:`x=0`.
+The result value is :class:`skfem.assembly.Dofs` object (a named tuple)
+containing the degree-of-freedom numbers corresponding to :math:`x=0`.  In
+particular, the result tells us that when assembling matrices and vectors using
+``basis`` object, the rows 0, 2 and 4 correspond to the degrees-of-freedom at
+the vertices of the elements on the boundary :math:`x=0`, and the rows 9 and 11
+correspond to the degrees-of-freedom at the facets of the elements on the
+boundary :math:`x=0`.
 
 .. code-block:: python
 
@@ -167,7 +170,7 @@ system, e.g., with the help of :func:`skfem.utils.condense`.
 
 .. code-block:: python
 
-   In [10]: condense(A, b, D=basis.get_dofs(lambda x: x[0]==0.0).all())
+   In [10]: condense(A, b, D=basis.get_dofs(lambda x: x[0]==0.0))
    Out[10]:
    ("""<16x16 sparse matrix of type '<class 'numpy.float64'>'
     with 86 stored elements in Compressed Sparse Row format>""",
@@ -198,12 +201,10 @@ convenience, we have wrapped some of the most commonly used scipy functions into
    In [5]: from skfem.models.poisson import laplace, unit_load
    In [6]: A = asm(laplace, basis)
    In [7]: b = asm(unit_load, basis)
-   In [8]: x = solve(*condense(A, b, D=basis.get_dofs().all(), expand=True))
+   In [8]: x = solve(*condense(A, b, D=basis.get_dofs()))
    In [9]: x.max()
    Out[9]: 0.07367588634940822
 
-On line 8, ``expand=True`` causes :func:`skfem.utils.solve` to expand
-the solution of the condensed system to contain the eliminated degrees-of-freedom.
 By default, :func:`skfem.utils.solve` uses :func:`scipy.sparse.linalg.spsolve`.
 
 Postprocessing the results
