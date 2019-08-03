@@ -40,9 +40,12 @@ def condense(A: spmatrix,
     x
         The values of the condensed DOF's. If not given, assumed to be zero.
     I
-        The set of DOF numbers to keep
+        The set of DOF numbers to keep. If :class:`skfem.assembly.Dofs` object
+        is given, then it's flattened via :meth:`skfem.assembly.Dofs.all`.
     D
-        The set of DOF numbers to dismiss
+        The set of DOF numbers to dismiss.  If :class:`skfem.assembly.Dofs`
+        object is given, then it's flattened via
+        :meth:`skfem.assembly.Dofs.all`.
     expand
         If True, return x and I: :func:`skfem.utils.solve` will then expand the
         solution vector automatically. By default, the solution vector is not
