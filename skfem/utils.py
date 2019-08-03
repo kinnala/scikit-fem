@@ -21,8 +21,8 @@ EigenSolver = Callable[[spmatrix, spmatrix], Tuple[ndarray, ndarray]]
 def condense(A: spmatrix,
              b: Optional[Union[ndarray, spmatrix]] = None,
              x: Optional[ndarray] = None,
-             I: Optional[ndarray] = None,
-             D: Optional[ndarray] = None,
+             I: Optional[Union[ndarray, Dofs]] = None,
+             D: Optional[Union[ndarray, Dofs]] = None,
              expand: bool = True) -> Union[spmatrix,
                                            Tuple[spmatrix, ndarray],
                                            Tuple[spmatrix, spmatrix]]:
