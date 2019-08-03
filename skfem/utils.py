@@ -40,8 +40,8 @@ def condense(A: spmatrix,
     A
         The system matrix
     b
-        The right hand side vector or the mass matrix for generalized eigenvalue
-        problems.
+        The right hand side vector or the mass matrix for generalized
+        eigenvalue problems.
     x
         The values of the condensed DOF's. If not given, assumed to be zero.
     I
@@ -185,7 +185,7 @@ def solver_iter_krylov(krylov: Optional[LinearSolver] = spl.cg,
     def callback(x):
         if verbose:
             print(np.linalg.norm(x))
-    
+
     def solver(A, b):
         if 'M' not in kwargs:
             kwargs['M'] = build_pc_diag(A)
@@ -287,7 +287,7 @@ def derivative(x: ndarray,
     M = asm(mass, basis0)
 
     return solve(M, A @ x)
-     
+
 
 def L2_projection(fun,
                   basis: GlobalBasis,
@@ -312,7 +312,7 @@ def L2_projection(fun,
 
     if ix is None:
         ix = np.arange(basis.N)
-    
+
     @bilinear_form
     def mass(u, du, v, dv, w):
         p = u * v
@@ -322,7 +322,7 @@ def L2_projection(fun,
     def funv(v, dv, w):
         p = fun(*w.x) * v
         return sum(p) if isinstance(basis.elem, ElementVectorH1) else p
-    
+
     M = asm(mass, basis)
     f = asm(funv, basis)
 
