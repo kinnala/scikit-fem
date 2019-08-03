@@ -8,14 +8,21 @@ import scipy.sparse.csgraph as spg
 import warnings
 from skfem.assembly import asm, bilinear_form, linear_form, Dofs
 from skfem.element import ElementVectorH1
-
 from typing import Optional, Union, Tuple, Callable
 from numpy import ndarray
 from scipy.sparse import spmatrix
 from skfem.assembly.global_basis import GlobalBasis
 
+
 LinearSolver = Callable[[spmatrix, ndarray], ndarray]
 EigenSolver = Callable[[spmatrix, spmatrix], Tuple[ndarray, ndarray]]
+# complex type for describing the return value of :func:`skfem.utils.condense`
+CondensedSystem = Union[spmatrix,
+                        Tuple[spmatrix, ndarray],
+                        Tuple[spmatrix, spmatrix],
+                        Tuple[spmatrix, ndarray, ndarray],
+                        Tuple[spmatrix, ndarray, ndarray, ndarray],
+                        Tuple[spmatrix, spmatrix, ndarray, ndarray]]
 
 
 def condense(A: spmatrix,
@@ -23,9 +30,7 @@ def condense(A: spmatrix,
              x: Optional[ndarray] = None,
              I: Optional[Union[ndarray, Dofs]] = None,
              D: Optional[Union[ndarray, Dofs]] = None,
-             expand: bool = True) -> Union[spmatrix,
-                                           Tuple[spmatrix, ndarray],
-                                           Tuple[spmatrix, spmatrix]]:
+             expand: bool = True) -> CondensedSystem:
     """Eliminate DOF's from a linear system.
 
     Supports also generalized eigenvalue problems.
@@ -59,10 +64,13 @@ def condense(A: spmatrix,
     """
     if isinstance(D, Dofs):
         D = D.all()
+
     if isinstance(I, Dofs):
         I = I.all()
+
     if x is None:
         x = np.zeros(A.shape[0])
+
     if I is None and D is None:
         raise Exception("Either I or D must be given!")
     elif I is None and D is not None:
@@ -71,8 +79,9 @@ def condense(A: spmatrix,
         D = np.setdiff1d(np.arange(A.shape[0]), I)
     else:
         raise Exception("Give only I or only D!")
+
     if b is None:
-        return A[I].T[I].T
+        ret_value = (A[I].T[I].T,)
     else:
         if isinstance(b, spmatrix):
             # generalized eigenvalue problem: don't modify rhs
@@ -83,10 +92,12 @@ def condense(A: spmatrix,
             bout = b[I] - A[I].T[D].T @ x[D]
         else:
             raise Exception("The second arg type not supported.")
-        if expand:
-            return Aout, bout, x, I
-        else:
-            return Aout, bout
+        ret_value = (Aout, bout)
+
+    if expand:
+        ret_value += (x, I)
+
+    return ret_value if len(ret_value) > 1 else ret_value[0]
 
 
 def rcm(A: spmatrix,
