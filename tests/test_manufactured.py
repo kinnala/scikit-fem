@@ -32,8 +32,7 @@ class Line1D(unittest.TestCase):
         b = asm(boundary_flux, fb)
         D = m.nodes_satisfying(lambda x: x==0.0) 
         I = ib.complement_dofs(D)  # noqa E741
-        u = np.zeros_like(b)
-        u[I] = solve(*condense(L, b, I=I)) # noqa E741
+        u = solve(*condense(L, b, I=I)) # noqa E741
 
         self.assertTrue(np.sum(np.abs(u - m.p[0, :])) < 1e-10)
 
@@ -65,8 +64,7 @@ class LineNegative1D(unittest.TestCase):
         b = asm(boundary_flux, fb)
         D = m.nodes_satisfying(lambda x: x==0.0) 
         I = ib.complement_dofs(D)  # noqa E741
-        u = np.zeros_like(b)
-        u[I] = solve(*condense(L, b, I=I)) # noqa E741
+        u = solve(*condense(L, b, I=I)) # noqa E741
 
         self.assertTrue(np.sum(np.abs(u + m.p[0, :])) < 1e-10)
 
@@ -97,8 +95,7 @@ class LineNeumann1D(unittest.TestCase):
         L = asm(laplace, ib)
         M = asm(mass, ib)
         b = asm(boundary_flux, fb)
-        u = np.zeros_like(b)
-        u = solve(L + 1e-6*M, b) 
+        u = solve(L + 1e-6*M, b)
 
         self.assertTrue(np.sum(np.abs(u - m.p[0, :] + 0.5)) < 1e-4)
 
@@ -132,7 +129,7 @@ class TestExactHexElement(unittest.TestCase):
         for X in self.funs:
             x = self.set_bc(X, ib)
             Xh = x.copy()
-            x[I] = solve(*condense(A, 0*x, x=x, I=I))
+            x = solve(*condense(A, 0*x, x=x, I=I))
             self.assertLessEqual(np.sum(x - Xh), 1e-11)
 
 

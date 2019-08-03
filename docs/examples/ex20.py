@@ -46,8 +46,7 @@ dofs = ib.get_dofs(mesh.boundaries['perimeter'])
 
 D = np.concatenate((dofs.nodal['u'], dofs.facet['u_n']))
 
-psi = np.zeros_like(rotf)
-psi[ib.complement_dofs(D)] = solve(*condense(stokes, rotf, D=D))
+psi = solve(*condense(stokes, rotf, D=D))
 
 
 from matplotlib.tri import Triangulation

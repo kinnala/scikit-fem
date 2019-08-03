@@ -3,11 +3,10 @@ from skfem.models.poisson import *
 import numpy as np
 
 p = np.linspace(0, 1, 16)
-m = MeshTet.init_tensor(p, p, p)
+m = MeshTet.init_tensor(*(p,)*3)
 
 e = ElementTetP1()
-map = MappingAffine(m)
-basis = InteriorBasis(m, e, map)
+basis = InteriorBasis(m, e)
 
 A = asm(laplace, basis)
 b = asm(unit_load, basis)
@@ -21,7 +20,7 @@ if __name__ == "__main__":
 else:
     verbose = False
 # run conjugate gradient with the default preconditioner
-Aint, bint = condense(A, b, I=I)
+Aint, bint = condense(A, b, I=I, expand=False)
 x[I] = solve(Aint, bint, solver=solver_iter_pcg(verbose=verbose))
 
 # run conjugate gradient with the incomplete LU preconditioner

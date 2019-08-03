@@ -15,11 +15,7 @@ K = asm(laplace, ib)
 
 f = asm(unit_load, ib)
 
-D = ib.get_dofs().all()
-x = np.zeros(ib.N)
-I = ib.complement_dofs(D)
-
-x[I] = solve(*condense(K, f, D=D))
+x = solve(*condense(K, f, D=ib.get_dofs()))
 
 M, X = ib.refinterp(x, 3)
 

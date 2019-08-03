@@ -40,11 +40,9 @@ K = scipy.sparse.bmat([[A+B, b.T], [b, None]]).tocsr()
 import numpy as np
 f = np.concatenate((np.zeros(A.shape[0]), -1.0*np.ones(1)))
 
-x = np.zeros(K.shape[0])
+I = np.append(I, K.shape[0] - 1)
 
-I = np.append(I, K.shape[0]-1)
-
-x[I] = solve(*condense(K, f, I=I))
+x = solve(*condense(K, f, I=I))
 
 if __name__ == "__main__":
     from os.path import splitext

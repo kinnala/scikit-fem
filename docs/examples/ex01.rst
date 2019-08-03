@@ -63,7 +63,7 @@ We eliminate the boundary degrees-of-freedom using
 :func:`~skfem.utils.condense` and call :func:`~skfem.utils.solve`.
 
 .. literalinclude:: ex01.py
-    :start-at: interior_nodes
+    :start-at: solve
     :end-at: solve	       
 
 The solution can now be visualised using :meth:`~skfem.mesh.MeshTri.plot`. 

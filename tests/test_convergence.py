@@ -45,7 +45,7 @@ class ConvergenceQ1(unittest.TestCase):
                 x = np.zeros(ib.N)
                 I = ib.complement_dofs(D)
 
-            x[I] = solve(*condense(A, b, I=I))
+            x = solve(*condense(A, b, I=I))
 
             # calculate error
             L2s[itr], H1s[itr] = self.compute_error(m, ib, x)
@@ -267,8 +267,6 @@ class TetP2Test(unittest.TestCase):
 
             B = asm(uv, fb)
             g = asm(gv, fb)
-
-            u = np.zeros(ib.N)
 
             u = solve(A + B, f + g)
 

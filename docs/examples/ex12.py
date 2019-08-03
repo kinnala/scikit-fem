@@ -22,7 +22,7 @@ D = basis.get_dofs(m.boundaries)
 I = basis.complement_dofs(D)
 
 x = 0*b
-x[I] = solve(*condense(A, b, I=I))
+x = solve(*condense(A, b, I=I))
 
 area = sum(b)
 k = b @ x / area**2

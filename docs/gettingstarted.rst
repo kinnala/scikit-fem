@@ -16,7 +16,7 @@ For more recent features, you can clone the project's Github repository:
 
     git clone https://github.com/kinnala/scikit-fem
 
-See :ref:`learning` for usage instructions.
+See :ref:`tutorial` and :ref:`learning` for usage instructions.
 
 .. _contribute:
 

@@ -22,7 +22,7 @@ def dirichlet(x, y):
 
 u = np.zeros(basis.N)
 u[D] = dirichlet(*basis.doflocs[:, D])
-u[I] = solve(*condense(A, np.zeros_like(u), u, I))
+u = solve(*condense(A, np.zeros_like(u), u, I))
 
 
 if __name__ == "__main__":

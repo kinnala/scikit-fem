@@ -6,7 +6,7 @@ import scipy.sparse as sp
 import scipy.sparse.linalg as spl
 import scipy.sparse.csgraph as spg
 import warnings
-from skfem.assembly import asm, bilinear_form, linear_form
+from skfem.assembly import asm, bilinear_form, linear_form, Dofs
 from skfem.element import ElementVectorH1
 
 from typing import Optional, Union, Tuple, Callable
@@ -23,9 +23,9 @@ def condense(A: spmatrix,
              x: Optional[ndarray] = None,
              I: Optional[ndarray] = None,
              D: Optional[ndarray] = None,
-             expand: bool = False) -> Union[spmatrix,
-                                            Tuple[spmatrix, ndarray],
-                                            Tuple[spmatrix, spmatrix]]:
+             expand: bool = True) -> Union[spmatrix,
+                                           Tuple[spmatrix, ndarray],
+                                           Tuple[spmatrix, spmatrix]]:
     """Eliminate DOF's from a linear system.
 
     Supports also generalized eigenvalue problems.
@@ -54,6 +54,10 @@ def condense(A: spmatrix,
         The condensed system.
 
     """
+    if isinstance(D, Dofs):
+        D = D.all()
+    if isinstance(I, Dofs):
+        I = I.all()
     if x is None:
         x = np.zeros(A.shape[0])
     if I is None and D is None:
@@ -214,6 +218,7 @@ def solve(A: spmatrix,
     if solver is None:
         if isinstance(b, spmatrix):
             solver = solver_eigen_scipy(10.0)
+            return solver(A, b)
         elif isinstance(b, ndarray):
             solver = solver_direct_scipy()
 
@@ -307,4 +312,4 @@ def L2_projection(fun,
     M = asm(mass, basis)
     f = asm(funv, basis)
 
-    return solve(*condense(M, f, I=ix))
+    return solve(*condense(M, f, I=ix, expand=False))
