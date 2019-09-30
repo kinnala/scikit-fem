@@ -56,7 +56,7 @@ This project was started while working under a grant from the [Finnish Cultural 
 
 The library has been used in the preparation of the following scientific works:
 
-- McBain, G., Mallison, S., Brown, B., Gustafsson, T. (2019). Three ways to compute multiport inertance. [In press](https://hal.archives-ouvertes.fr/hal-02159726/document).
+- McBain, G. D., Mallinson, S. G., Brown, B. R., Gustafsson, T. (2019). Three ways to compute multiport inertance. The ANZIAM Journal, 60, C140–C155.  [Open access](https://doi.org/10.21914/anziamj.v60i0.14058).
 - Gustafsson, T., Stenberg, R., & Videman, J. (2019). On Nitsche's method for elastic contact problems. arXiv preprint [arXiv:1902.09312](https://arxiv.org/abs/1902.09312).
 - Gustafsson, T., Stenberg, R., & Videman, J. (2019). Error analysis of Nitsche's mortar method. Numerische Mathematik. [Open access](https://link.springer.com/article/10.1007/s00211-019-01039-5).
 - Gustafsson, T., Stenberg, R., & Videman, J. (2018). Nitsche's method for unilateral contact problems. arXiv preprint [arXiv:1805.04283](https://arxiv.org/abs/1805.04283).
