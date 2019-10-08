@@ -32,8 +32,7 @@ f = np.concatenate([asm(body_force, basis['u']),
                     np.zeros(B.shape[0])])
 
 D = basis['u'].get_dofs().all()
-uvp = np.zeros(K.shape[0])
-uvp[np.setdiff1d(np.arange(K.shape[0]), D)] = solve(*condense(K, f, D=D))
+uvp = solve(*condense(K, f, D=D))
 
 velocity, pressure = np.split(uvp, [A.shape[0]])
 
