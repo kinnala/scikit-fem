@@ -35,10 +35,11 @@ where the linear (creeping or Stokes) part is
 
 .. math::
 
-   S (u) = \sum_j \begin{bmatrix}
-   (\nabla v_i, \nabla v_j) & -(\nabla\cdot v_i, q_j) \\
-   (q_i, \nabla\cdot v_j) & 0
-   \end{bmatrix}\begin{Bmatrix} \mathbf u_j \\ p_j\end{Bmatrix}
+   S (u) = \begin{bmatrix}
+   (\nabla \mathbf v, \nabla \mathbf v) & -(\nabla\cdot \mathbf v, q) \\
+   (q_i, \nabla\cdot \mathbf v) & 0
+   \end{bmatrix}\begin{Bmatrix} \mathbf u \\ p\end{Bmatrix}
+   \equiv \mathsf S u
 
 and the nonlinear part is
 
@@ -51,9 +52,9 @@ The Jacobian is
 
 .. math::
 
-   J(u; \mathrm{Re}) \equiv \frac{\partial F}{\partial u} = -\mathrm{Re}\; N'(u)
+   J(u; \mathrm{Re}) \equiv \frac{\partial F}{\partial u} = \mathsf S -\mathrm{Re}\; N'(u)
 
-which is
+which augments the matrix of the Stokes parts with the Jacobian of the nonlinear terms,
 
 .. math::
    N' (u) =
