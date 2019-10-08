@@ -36,7 +36,8 @@ interior = basis.complement_dofs(boundary)
 u = (np.cos(np.pi * mesh.p[0, :] / 2 / halfwidth[0])
      * np.cos(np.pi * mesh.p[1, :] / 2 / halfwidth[1]))
 
-backsolve = cholesky(condense(A, D=boundary).T)  # cholesky prefers CSC
+backsolve = cholesky(condense(A, D=boundary, expand=False)
+                     .T)  # cholesky prefers CSC
 
 
 if __name__ == '__main__':
@@ -64,7 +65,7 @@ if __name__ == '__main__':
         pause(0.1)
 
         _, b1 = condense(csr_matrix(A.shape),  # ignore condensed matrix
-                         B @ u, D=boundary)
+                         B @ u, D=boundary, expand=False)
 
         u[interior] = backsolve(b1)
         t += dt
