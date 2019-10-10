@@ -79,7 +79,8 @@ class BackwardFacingStep:
                        [-B, None]]).tocsr()
         self.I = np.setdiff1d(np.arange(self.S.shape[0]), self.D)
 
-    def make_geom(self, length: float, lcar: float) -> Geometry:
+    @staticmethod
+    def make_geom(length: float, lcar: float) -> Geometry:
         # Barkley et al (2002, figure 3 a - c)
         geom = Geometry()
 
