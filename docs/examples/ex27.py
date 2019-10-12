@@ -211,14 +211,13 @@ class BackwardFacingStep:
                         uvp: np.ndarray,
                         reynolds: float,
                         rhs: np.ndarray) -> np.ndarray:
-        duvp = self.make_vector() - uvp
         u = self.basis['u'].interpolate(self.split(uvp)[0])
-        duvp[self.I] = solve(*condense(
+        duvp = solve(*condense(
             self.S +
             reynolds
             * block_diag([asm(acceleration_jacobian, self.basis['u'], w=u),
                           csr_matrix((self.basis['p'].N,)*2)]),
-            rhs, duvp, I=self.I))
+            rhs, self.make_vector() - uvp, I=self.I))
         return duvp
 
 
