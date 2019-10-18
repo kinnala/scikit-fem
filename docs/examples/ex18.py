@@ -36,10 +36,6 @@ uvp = solve(*condense(K, f, D=D))
 
 velocity, pressure = np.split(uvp, [A.shape[0]])
 
-@linear_form
-def rot(v, dv, w):
-    return dv[1] * w.w[0] - dv[0] * w.w[1]
-
 basis['psi'] = InteriorBasis(mesh, ElementTriP2())
 A = asm(laplace, basis['psi'])
 psi = np.zeros(A.shape[0])
