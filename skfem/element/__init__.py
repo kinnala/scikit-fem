@@ -25,5 +25,4 @@ from .element_quad import ElementQuad1, ElementQuad2
 from .element_tet import ElementTetP0, ElementTetP1, ElementTetP2,\
     ElementTetRT0, ElementTetN0
 from .element_hex import ElementHex1
-from .element_line import ElementLineP1
-
+from .element_line import ElementLineP1, ElementLineP2

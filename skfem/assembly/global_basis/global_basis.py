@@ -62,13 +62,12 @@ class GlobalBasis():
             offset = offset + element.edge_dofs * mesh.edges.shape[1]
 
         # facet dofs
-        if mesh.dim() >= 2: # 2D or 3D mesh
-            self.facet_dofs = np.reshape(
-                np.arange(element.facet_dofs * mesh.facets.shape[1],
-                          dtype=np.int64),
-                (element.facet_dofs, mesh.facets.shape[1]),
-                order='F') + offset
-            offset = offset + element.facet_dofs * mesh.facets.shape[1]
+        self.facet_dofs = np.reshape(
+            np.arange(element.facet_dofs * mesh.facets.shape[1],
+                      dtype=np.int64),
+            (element.facet_dofs, mesh.facets.shape[1]),
+            order='F') + offset
+        offset = offset + element.facet_dofs * mesh.facets.shape[1]
 
         # interior dofs
         self.interior_dofs = np.reshape(
@@ -95,12 +94,11 @@ class GlobalBasis():
                 ))
 
         # facet dofs
-        if mesh.dim() >= 2:
-            for itr in range(mesh.t2f.shape[0]):
-                self.element_dofs = np.vstack((
-                    self.element_dofs,
-                    self.facet_dofs[:, mesh.t2f[itr, :]]
-                ))
+        for itr in range(mesh.t2f.shape[0]):
+            self.element_dofs = np.vstack((
+                self.element_dofs,
+                self.facet_dofs[:, mesh.t2f[itr, :]]
+            ))
 
         # interior dofs
         self.element_dofs = np.vstack((self.element_dofs, self.interior_dofs))
