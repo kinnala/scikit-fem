@@ -24,7 +24,8 @@ u /= u[basis.get_dofs().all()[-1], :]
 if __name__ == "__main__":
     fig, ax = subplots()
     for n, (k, u) in enumerate(zip(ks, u.T)):
-        dots, = ax.plot(x, u, label=n, marker='o', linestyle='None')
+        dots, = ax.plot(x, u[basis.nodal_dofs[0]],
+                        label=n, marker='o', linestyle='None')
         ax.plot(x, legendre(n)(x), color=dots.get_color())
         print('{:2d}  {:5.2f}'.format(n * (n + 1), k))
 
