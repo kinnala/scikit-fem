@@ -19,7 +19,6 @@ b = asm(load, basis)
 
 D = basis.get_dofs().all()
 
-x = 0*b
 x = solve(*condense(A, b, D=D))
 
 if __name__ == "__main__":
