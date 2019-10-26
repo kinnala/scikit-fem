@@ -37,13 +37,9 @@ class ConvergenceQ1(unittest.TestCase):
             A = asm(laplace, ib)
             b = asm(load, ib)
 
-            if m.dim() == 1: # TODO works only for elements with one DOF/node
-                I = m.interior_nodes()
-                x = np.zeros(ib.N)
-            else:
-                D = ib.get_dofs().all()
-                x = np.zeros(ib.N)
-                I = ib.complement_dofs(D)
+            D = ib.get_dofs().all()
+            x = np.zeros(ib.N)
+            I = ib.complement_dofs(D)
 
             x = solve(*condense(A, b, I=I))
 
@@ -207,6 +203,17 @@ class ConvergenceTetP2(ConvergenceTetP1):
 class ConvergenceLineP1(ConvergenceQ1):
     def create_basis(self, m):
         e = ElementLineP1()
+        return InteriorBasis(m, e)
+    def setUp(self):
+        self.mesh = MeshLine()
+        self.mesh.refine(3)
+
+
+class ConvergenceLineP2(ConvergenceQ1):
+    rateL2 = 3.0
+    rateH1 = 2.0
+    def create_basis(self, m):
+        e = ElementLineP2()
         return InteriorBasis(m, e)
     def setUp(self):
         self.mesh = MeshLine()
