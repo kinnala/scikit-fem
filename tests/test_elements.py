@@ -48,5 +48,15 @@ class TestTri0Nodality(TestNodality):
     N = 1
 
 
+class TestLineP1Nodality(TestNodality):
+    elem = ElementLineP1()
+    N = 2
+
+
+class TestLineP2Nodality(TestNodality):
+    elem = ElementLineP2()
+    N = 3
+
+
 if __name__ == '__main__':
     unittest.main()    
