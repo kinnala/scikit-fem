@@ -17,10 +17,9 @@ def load(v, dv, w):
 A = asm(laplace, basis)
 b = asm(load, basis)
 
-I = m.interior_nodes()
+D = basis.get_dofs().all()
 
-x = 0*b
-x = solve(*condense(A, b, I=I))
+x = solve(*condense(A, b, D=D))
 
 if __name__ == "__main__":
     m.plot(x)
