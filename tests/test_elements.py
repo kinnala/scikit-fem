@@ -1,11 +1,12 @@
 import unittest
-import numpy as np
+
 from skfem.element import *
 
 
 class TestNodality(unittest.TestCase):
     elem = ElementTriP2()
     N = 6
+
     def runTest(self):
         for itr in range(self.N):
             self.assertAlmostEqual(
@@ -59,4 +60,4 @@ class TestLineP2Nodality(TestNodality):
 
 
 if __name__ == '__main__':
-    unittest.main()    
+    unittest.main()

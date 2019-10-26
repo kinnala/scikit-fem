@@ -1,17 +1,20 @@
-from pathlib import Path
 import unittest
+from pathlib import Path
+
 import numpy as np
+
 from skfem.mesh import *
 
 
 class MeshTests(unittest.TestCase):
     """Test some of the methods in mesh classes
     that are not tested elsewhere."""
+
     def runTest(self):
         # Mesh.remove_elements
         m = MeshTri()
         m.refine()
-        M = m.remove_elements([0])
+        M = m.remove_elements(np.array([0]))
         self.assertEqual(M.t.shape[1], 7)
 
         # Mesh.scale, Mesh.translate
@@ -26,49 +29,51 @@ class MeshTests(unittest.TestCase):
 
 class FaultyInputs(unittest.TestCase):
     """Check that faulty meshes are detected by the constructors."""
+
     def runTest(self):
         with self.assertRaises(Exception):
             # point belonging to no element
-            m = MeshTri(np.array([[0,0],[0,1],[1,0],[1,1]]).T,
-                        np.array([[0,1,2]]).T)
+            m = MeshTri(np.array([[0, 0], [0, 1], [1, 0], [1, 1]]).T,
+                        np.array([[0, 1, 2]]).T)
         with self.assertRaises(Exception):
             # wrong size inputs (t not matching to Mesh type)
-            m = MeshTet(np.array([[0,0],[0,1],[1,0],[1,1]]).T,
-                        np.array([[0,1,2]]).T)
+            m = MeshTet(np.array([[0, 0], [0, 1], [1, 0], [1, 1]]).T,
+                        np.array([[0, 1, 2]]).T)
         with self.assertRaises(Exception):
             # inputting trasposes
-            m = MeshTri(np.array([[0,0],[0,1],[1,0],[1,1]]),
-                        np.array([[0,1,2],[1,2,3]]))
+            m = MeshTri(np.array([[0, 0], [0, 1], [1, 0], [1, 1]]),
+                        np.array([[0, 1, 2], [1, 2, 3]]))
         with self.assertRaises(Exception):
             # floats in element connectivity
-            m = MeshTri(np.array([[0,0],[0,1],[1,0],[1,1]]).T,
-                        np.array([[0.0,1.0,2.0],[1.0,2.0,3.0]]).T)
+            m = MeshTri(np.array([[0, 0], [0, 1], [1, 0], [1, 1]]).T,
+                        np.array([[0.0, 1.0, 2.0], [1.0, 2.0, 3.0]]).T)
 
 
 class Loading(unittest.TestCase):
     """Check that Mesh.load works properly."""
-    
+
     def runTest(self):
         # submeshes
         examples = Path(__file__).parents[1] / 'docs' / 'examples'
         m = MeshTet.load(str(examples / 'box.msh'))
         self.assertTrue((m.boundaries['top']
-                         == m.facets_satisfying(lambda x: x[1]==1)).all())
+                         == m.facets_satisfying(lambda x: x[1] == 1)).all())
         self.assertTrue((m.boundaries['back']
-                         == m.facets_satisfying(lambda x: x[2]==0)).all())
+                         == m.facets_satisfying(lambda x: x[2] == 0)).all())
         self.assertTrue((m.boundaries['front']
-                         == m.facets_satisfying(lambda x: x[2]==1)).all())
+                         == m.facets_satisfying(lambda x: x[2] == 1)).all())
         m = MeshTri.load(str(examples / 'square.msh'))
         self.assertTrue((m.boundaries['top']
-                         == m.facets_satisfying(lambda x: x[1]==1)).all())
+                         == m.facets_satisfying(lambda x: x[1] == 1)).all())
         self.assertTrue((m.boundaries['left']
-                         == m.facets_satisfying(lambda x: x[0]==0)).all())
+                         == m.facets_satisfying(lambda x: x[0] == 0)).all())
         self.assertTrue((m.boundaries['right']
-                         == m.facets_satisfying(lambda x: x[0]==1)).all())
+                         == m.facets_satisfying(lambda x: x[0] == 1)).all())
 
 
 class RefinePreserveSubsets(unittest.TestCase):
     """Check that uniform refinement preserves named boundaries."""
+
     def runTest(self):
         for mtype in (MeshTri, MeshQuad):
             m = mtype()
@@ -86,6 +91,7 @@ class RefinePreserveSubsets(unittest.TestCase):
 class SaveLoadCycle(unittest.TestCase):
     """Save to temporary file and check import/export cycles."""
     cls = MeshTet
+
     def runTest(self):
         from tempfile import NamedTemporaryFile
         m = self.cls()
@@ -107,6 +113,7 @@ class SerializeUnserializeCycle(unittest.TestCase):
             MeshTri,
             MeshHex,
             MeshQuad]
+
     def runTest(self):
         for cls in self.clss:
             m = cls()

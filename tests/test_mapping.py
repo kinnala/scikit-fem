@@ -1,5 +1,5 @@
 import unittest
-import numpy as np
+
 from skfem import *
 
 
@@ -7,6 +7,7 @@ class TestIsoparamNormals(unittest.TestCase):
     """Test that normals on x[i] == 0 are correct."""
     mesh = MeshHex
     elem = ElementHex1
+
     def runTest(self):
         m = self.mesh()
         m.refine()

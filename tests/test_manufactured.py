@@ -1,6 +1,8 @@
 """Solve problems that have manufactured solutions."""
 import unittest
+
 import numpy as np
+
 from skfem import *
 from skfem.models.poisson import laplace, mass
 
@@ -15,7 +17,7 @@ class Line1D(unittest.TestCase):
     Solution is u(x) = x.
 
     """
-    
+
     def runTest(self):
         m = MeshLine(np.linspace(0., 1.))
         m.refine(2)
@@ -30,9 +32,9 @@ class Line1D(unittest.TestCase):
         n = m.p.shape[-1]
         L = asm(laplace, ib)
         b = asm(boundary_flux, fb)
-        D = m.nodes_satisfying(lambda x: x==0.0) 
+        D = m.nodes_satisfying(lambda x: x == 0.0)
         I = ib.complement_dofs(D)  # noqa E741
-        u = solve(*condense(L, b, I=I)) # noqa E741
+        u = solve(*condense(L, b, I=I))  # noqa E741
 
         self.assertTrue(np.sum(np.abs(u - m.p[0, :])) < 1e-10)
 
@@ -47,7 +49,7 @@ class LineNegative1D(unittest.TestCase):
     Solution is u(x) = -x.
 
     """
-    
+
     def runTest(self):
         m = MeshLine(np.linspace(0., 1.))
         m.refine(2)
@@ -62,9 +64,9 @@ class LineNegative1D(unittest.TestCase):
         n = m.p.shape[-1]
         L = asm(laplace, ib)
         b = asm(boundary_flux, fb)
-        D = m.nodes_satisfying(lambda x: x==0.0) 
+        D = m.nodes_satisfying(lambda x: x == 0.0)
         I = ib.complement_dofs(D)  # noqa E741
-        u = solve(*condense(L, b, I=I)) # noqa E741
+        u = solve(*condense(L, b, I=I))  # noqa E741
 
         self.assertTrue(np.sum(np.abs(u + m.p[0, :])) < 1e-10)
 
@@ -79,7 +81,7 @@ class LineNeumann1D(unittest.TestCase):
     Solution is u(x) = x-0.5.
 
     """
-    
+
     def runTest(self):
         m = MeshLine(np.linspace(0., 1.))
         m.refine(2)
@@ -89,13 +91,13 @@ class LineNeumann1D(unittest.TestCase):
 
         @linear_form
         def boundary_flux(v, dv, w):
-            return v * (w.x[0]==1) - v * (w.x[0]==0)
+            return v * (w.x[0] == 1) - v * (w.x[0] == 0)
 
         n = m.p.shape[-1]
         L = asm(laplace, ib)
         M = asm(mass, ib)
         b = asm(boundary_flux, fb)
-        u = solve(L + 1e-6*M, b)
+        u = solve(L + 1e-6 * M, b)
 
         self.assertTrue(np.sum(np.abs(u - m.p[0, :] + 0.5)) < 1e-4)
 
@@ -104,8 +106,8 @@ class TestExactHexElement(unittest.TestCase):
     mesh = MeshHex
     elem = ElementHex1
     funs = [
-        lambda x: 1 + x[0]*x[1]*x[2],
-        lambda x: 1 + x[0]*x[1] + x[1]*x[2] + x[0],
+        lambda x: 1 + x[0] * x[1] * x[2],
+        lambda x: 1 + x[0] * x[1] + x[1] * x[2] + x[0],
     ]
 
     def set_bc(self, fun, basis):
@@ -129,7 +131,7 @@ class TestExactHexElement(unittest.TestCase):
         for X in self.funs:
             x = self.set_bc(X, ib)
             Xh = x.copy()
-            x = solve(*condense(A, 0*x, x=x, I=I))
+            x = solve(*condense(A, 0 * x, x=x, I=I))
             self.assertLessEqual(np.sum(x - Xh), 1e-11)
 
 
@@ -137,8 +139,8 @@ class TestExactQuadElement(TestExactHexElement):
     mesh = MeshQuad
     elem = ElementQuad1
     funs = [
-        lambda x: 1 + 0*x[0],
-        lambda x: 1 + x[0] + x[1] + x[0]*x[1],
+        lambda x: 1 + 0 * x[0],
+        lambda x: 1 + x[0] + x[1] + x[0] * x[1],
     ]
 
 
@@ -146,7 +148,7 @@ class TestExactTetElement(TestExactHexElement):
     mesh = MeshTet
     elem = ElementTetP1
     funs = [
-        lambda x: 1 + 0*x[0],
+        lambda x: 1 + 0 * x[0],
         lambda x: 1 + x[0] + x[1],
     ]
 
@@ -155,9 +157,10 @@ class TestExactTriElementP2(TestExactHexElement):
     mesh = MeshTri
     elem = ElementTriP2
     funs = [
-        lambda x: 1 + 0*x[0],
+        lambda x: 1 + 0 * x[0],
         lambda x: 1 + x[0] + x[1] + x[0] * x[1],
     ]
+
     def set_bc(self, fun, basis):
         return fun(basis.doflocs)
 
