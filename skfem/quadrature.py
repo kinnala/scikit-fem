@@ -1,20 +1,20 @@
 """Tabulated and generated quadrature points for various reference domains."""
 
-import numpy as np
-
 from typing import Tuple
+
+import numpy as np
 
 
 def get_quadrature(refdom: str, norder: int) -> Tuple[np.ndarray, np.ndarray]:
     """Return a nth order accurate quadrature rule for different reference
     domains.
-    
+
     Parameters
     ----------
     refdom
         The name of the reference domain. Valid reference domains can be found
         in the following table.
-    
+
         +-------+-----------------+----------------+
         | Name  | Corner points   | Maximum order  |
         +-------+-----------------+----------------+
@@ -49,31 +49,31 @@ def get_quadrature(refdom: str, norder: int) -> Tuple[np.ndarray, np.ndarray]:
         return get_quadrature_tri(norder)
     elif refdom is "tet":
         return get_quadrature_tet(norder)
-    elif refdom is "line": # [0,1]
+    elif refdom is "line":  # [0,1]
         return get_quadrature_line(norder)
     elif refdom is "point":
         return get_quadrature_point(norder)
-    elif refdom is "quad": # (-1,-1) (1,-1) (1,1) (-1,1)
+    elif refdom is "quad":  # (-1,-1) (1,-1) (1,1) (-1,1)
         X, W = get_quadrature_line(norder)
         # generate tensor product rule from 1D rule
         A, B = np.meshgrid(X, X)
-        Y = 2.0*np.vstack((A.flatten(order='F'),
-                           B.flatten(order='F'))) - 1.0
+        Y = 2.0 * np.vstack((A.flatten(order='F'),
+                             B.flatten(order='F'))) - 1.0
         # transform weights
-        A, B = np.meshgrid(2*W, 2*W)
-        Z = A*B 
+        A, B = np.meshgrid(2 * W, 2 * W)
+        Z = A * B
         W = Z.flatten(order='F')
         return Y, W
-    elif refdom is "hex": # (-1,-1,-1), (1,1,1), etc.
+    elif refdom is "hex":  # (-1,-1,-1), (1,1,1), etc.
         X, W = get_quadrature_line(norder)
         # generate tensor product rule from 1D rule
         A, B, C = np.meshgrid(X, X, X)
-        Y = 2.0*np.vstack((A.flatten(order='F'),
-                           B.flatten(order='F'),
-                           C.flatten(order='F'))) - 1.0
+        Y = 2.0 * np.vstack((A.flatten(order='F'),
+                             B.flatten(order='F'),
+                             C.flatten(order='F'))) - 1.0
         # transform weights
-        A, B, C = np.meshgrid(2*W, 2*W, 2*W)
-        Z = A*B*C
+        A, B, C = np.meshgrid(2 * W, 2 * W, 2 * W)
+        Z = A * B * C
         W = Z.flatten(order='F')
         return Y, W
     else:
@@ -87,24 +87,25 @@ def get_quadrature_tet(norder: int) -> Tuple[np.ndarray, np.ndarray]:
         norder = 2
     try:
         return {
-            2: (np.array([[0.5854101966249685, 0.1381966011250105, 0.1381966011250105, 0.1381966011250105], \
-                          [0.1381966011250105, 0.1381966011250105, 0.1381966011250105, 0.5854101966249685], \
-                          [0.1381966011250105, 0.1381966011250105, 0.5854101966249685, 0.1381966011250105]]), \
+            2: (np.array([[0.5854101966249685, 0.1381966011250105, 0.1381966011250105, 0.1381966011250105],
+                          [0.1381966011250105, 0.1381966011250105, 0.1381966011250105, 0.5854101966249685],
+                          [0.1381966011250105, 0.1381966011250105, 0.5854101966249685, 0.1381966011250105]]),
                 np.array([0.2500000000000000, 0.2500000000000000, 0.2500000000000000, 0.2500000000000000]) / 6.),
-            3: (np.array([[0.2500000000000000, 0.5000000000000000, 0.1666666666666667, 0.1666666666666667, 0.1666666666666667], \
-                          [0.2500000000000000, 0.1666666666666667, 0.1666666666666667, 0.1666666666666667, 0.5000000000000000], \
-                          [0.2500000000000000, 0.1666666666666667, 0.1666666666666667, 0.5000000000000000, 0.1666666666666667]]), \
+            3: (np.array(
+                [[0.2500000000000000, 0.5000000000000000, 0.1666666666666667, 0.1666666666666667, 0.1666666666666667],
+                 [0.2500000000000000, 0.1666666666666667, 0.1666666666666667, 0.1666666666666667, 0.5000000000000000],
+                 [0.2500000000000000, 0.1666666666666667, 0.1666666666666667, 0.5000000000000000, 0.1666666666666667]]),
                 np.array([-0.8000000000000000, 0.4500000000000000, 0.4500000000000000, 0.4500000000000000,
                           0.4500000000000000]) / 6.),
             4: (np.array([[0.2500000000000000, 0.7857142857142857, 0.0714285714285714, 0.0714285714285714,
                            0.0714285714285714, 0.1005964238332008, 0.3994035761667992, 0.3994035761667992,
-                           0.3994035761667992, 0.1005964238332008, 0.1005964238332008], \
+                           0.3994035761667992, 0.1005964238332008, 0.1005964238332008],
                           [0.2500000000000000, 0.0714285714285714, 0.0714285714285714, 0.0714285714285714,
                            0.7857142857142857, 0.3994035761667992, 0.1005964238332008, 0.3994035761667992,
-                           0.1005964238332008, 0.3994035761667992, 0.1005964238332008], \
+                           0.1005964238332008, 0.3994035761667992, 0.1005964238332008],
                           [0.2500000000000000, 0.0714285714285714, 0.0714285714285714, 0.7857142857142857,
                            0.0714285714285714, 0.3994035761667992, 0.3994035761667992, 0.1005964238332008,
-                           0.1005964238332008, 0.1005964238332008, 0.3994035761667992]]), \
+                           0.1005964238332008, 0.1005964238332008, 0.3994035761667992]]),
                 np.array([-0.0789333333333333, 0.0457333333333333, 0.0457333333333333, 0.0457333333333333,
                           0.0457333333333333, 0.1493333333333333, 0.1493333333333333, 0.1493333333333333,
                           0.1493333333333333, 0.1493333333333333, 0.1493333333333333]) / 6.)
@@ -545,8 +546,8 @@ def get_quadrature_line(norder: int) -> Tuple[np.ndarray, np.ndarray]:
     """Return a nth order accurate quadrature rule for line [0,1]."""
     if norder <= 1:
         norder = 2
-    X, W = np.polynomial.legendre.leggauss(int(np.ceil((norder + 1.0)/2.0)))
-    return np.array([0.5*X + 0.5]), W/2.0
+    X, W = np.polynomial.legendre.leggauss(int(np.ceil((norder + 1.0) / 2.0)))
+    return np.array([0.5 * X + 0.5]), W / 2.0
 
 
 def get_quadrature_point(norder: int = 0) -> Tuple[np.ndarray, np.ndarray]:
