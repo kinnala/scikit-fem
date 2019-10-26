@@ -7,6 +7,8 @@ class ElementLineP1(ElementH1):
     dim = 1
     maxdeg = 1
     dofnames = ['u']
+    doflocs = np.array([[0.],
+                        [1.]])
 
     def lbasis(self, X, i):
         x = X[0, :]
