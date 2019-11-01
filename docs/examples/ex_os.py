@@ -72,7 +72,7 @@ if __name__ == '__main__':
     ax.set_xlabel(r'real wavespeed, $\Re c$')
     ax.set_xlim((0, 1))
     ax.set_ylabel(r'imaginary wavespeed, $\Im c$')
-    ax.set_ylim((-.8, max(c['skfem'].imag)))
+    ax.set_ylim((-.8, .1))
     ax.grid(True)
     ax.legend(loc=3)
     fig.savefig(Path(__file__).with_suffix('.png'))
