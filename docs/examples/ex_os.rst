@@ -9,7 +9,7 @@ The fourth-order derivatives would require :math:`C^1` finite elements, e.g. of 
    
    \left(\mathrm j\alpha R U(z) + \alpha^2 - \frac{\mathrm d^2}{\mathrm dz^2}\right)u + RU'(z)w + \mathrm j\alpha  Rp &= \mathrm j\alpha Rc u \\
    \left(\mathrm j\alpha R U(z) + \alpha^2 - \frac{\mathrm d^2}{\mathrm dz^2}\right)w + R\frac{\mathrm dp}{\mathrm dz} &= \mathrm j\alpha Rc w \\
-   \mathrm j\alpha u + \frac{\mathrm dw}{\mathrm dz} &= 0
+   \mathrm j\alpha R u + R\;\frac{\mathrm dw}{\mathrm dz} &= 0
    
 where :math:`U(z)` is the base velocity profile, :math:`\alpha` is the longitudinal wavenumber of the perturbation, and :math:`R` is the Reynolds number.  This system can be discretized using one-dimensional Taylor–Hood elements, analogous to the two-dimensional elements used for the :ref:`stokesex` and :ref:`navierstokes`.
 
