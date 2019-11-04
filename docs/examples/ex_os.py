@@ -57,10 +57,11 @@ walls = np.concatenate([u_boundaries,
                         u_boundaries[1:] + basis['u'].N])
 
 pencil = condense(stiffness, mass_matrix, D=walls, expand=False)
-c = {'scikit-fem': eigs(pencil[0], M=pencil[1], k=2**5, sigma=0.,
-                   return_eigenvectors=False) / jare,
-     'Criminale et al': np.loadtxt(Path(__file__).with_suffix('.csv'),
+c = {'Criminale et al': np.loadtxt(Path(__file__).with_suffix('.csv'),
                                    dtype=complex)}
+c['scikit-fem'] = eigs(pencil[0], M=pencil[1],
+                       k=len(c['Criminale et al']), sigma=0.,
+                       return_eigenvectors=False) / jare
 
 
 if __name__ == '__main__':
