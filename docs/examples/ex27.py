@@ -76,7 +76,7 @@ class BackwardFacingStep:
         A = asm(vector_laplace, self.basis['u'])
         B = asm(divergence, self.basis['u'], self.basis['p'])
         self.S = bmat([[A, -B.T],
-                       [-B, None]]).tocsr()
+                       [-B, None]], 'csr')
         self.I = np.setdiff1d(np.arange(self.S.shape[0]), self.D)
 
     @staticmethod
