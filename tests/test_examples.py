@@ -212,7 +212,7 @@ class TestEx29(unittest.TestCase):
         from docs.examples.ex29 import c
         wavespeed = tuple(
             np.array(sorted(wavespeed, key=np.imag, reverse=True))
-            for label, wavespeed in c.items())
+            for wavespeed in c.values())
         self.assertLess(np.linalg.norm(wavespeed[1] - wavespeed[0], np.inf),
                         5e-3)
 
