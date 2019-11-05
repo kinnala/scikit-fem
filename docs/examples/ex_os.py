@@ -5,8 +5,12 @@ from pathlib import Path
 
 from matplotlib.pyplot import subplots
 import numpy as np
+from numpy.polynomial.polynomial import Polynomial
 from scipy.sparse import block_diag, bmat, csr_matrix
 from scipy.sparse.linalg import eigs
+
+
+U = Polynomial([1, 0, -1])      # base-flow profile
 
 
 @bilinear_form
@@ -17,14 +21,12 @@ def divergence(u, du, v, dv, w):
 
 @bilinear_form
 def base_velocity(u, du, v, dv, w):
-    """plane Poiseuille flow, normalized by centre-line velocity"""
-    return v * (1 - w.x[0]**2) * u
+    return v * U(w.x[0]) * u
 
 
 @bilinear_form
 def base_shear(u, du, v, dv, w):
-    """plane Poiseuille flow, normalized by centre-line velocity"""
-    return -2 * v * w.x[0] * u
+    return v * U.deriv()(w.x[0]) * u
 
 
 mesh = MeshLine(np.linspace(0, 1, 2**6))
