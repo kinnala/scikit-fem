@@ -207,7 +207,7 @@ class TestEx28(unittest.TestCase):
         self.assertAlmostEqual(*t.values(), delta=2e-4)
 
 
-class TestExOS(unittest.TestCase):
+class TestEx29(unittest.TestCase):
     def runTest(self):
         from docs.examples.ex29 import c
         wavespeed = tuple(
