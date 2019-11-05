@@ -39,7 +39,7 @@ Documented examples
    examples/ex27.rst
    examples/ex05.rst
    examples/ex28.rst
-   examples/ex_os.rst
+   examples/ex29.rst
    
 Stubs and undocumented examples
 ###############################

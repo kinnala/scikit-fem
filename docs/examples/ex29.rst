@@ -32,12 +32,12 @@ This primitive system is second-order and can be discretized using one-dimension
 The classical test-case for this problem is plane Poiseuille flow :math:`U(z) = 1 - z^2` on :math:`-1 < z < 1` at :math:`\alpha = 1` and :math:`R = 10^4` (Drazin & Reid 2004, figure 4.19; Mamou & Khalid 2004), typically seeking only the 'even' modes for which :math:`u(0) = u(1) = w'(0) = w(1) = 0`.  Good agreement with reference results for the complex wavespeed spectrum  (Criminale, Jackson, & Joslin 2003, table 3.1) is obtained on a uniform mesh of 64 segments.
 
 
-.. figure:: ex_os.png
+.. figure:: ex29.png
 
     The spectrum of 'even'-mode complex wavespeeds for plane Poiseuille flow at Re = 10 000 and :math:`\alpha = 1` (cf. Criminale, Jackson, & Joslin 2003, table 3.1; Drazin & Reid 2004, figure 4.19)
 
 
-.. literalinclude:: ex_os.py
+.. literalinclude:: ex29.py
    :linenos:
 
 * Criminale, W. O., Jackson, T. L.,, Joslin, R. D. (2003). *Theory and Computation in Hydrodynamic Stability.* Cambridge: Cambridge University Press. `doi:10.1017/CBO9780511550317 <https://doi.org/10.1017%2fCBO9780511550317>`_
