@@ -209,7 +209,7 @@ class TestEx28(unittest.TestCase):
 
 class TestExOS(unittest.TestCase):
     def runTest(self):
-        from docs.examples.ex_os import c
+        from docs.examples.ex29 import c
         wavespeed = tuple(
             np.array(sorted(wavespeed, key=np.imag, reverse=True))
             for label, wavespeed in c.items())
