@@ -35,7 +35,7 @@ I = ib.complement_dofs(D)
 
 import scipy.sparse
 b = scipy.sparse.csr_matrix(b)
-K = scipy.sparse.bmat([[A+B, b.T], [b, None]]).tocsr()
+K = scipy.sparse.bmat([[A+B, b.T], [b, None]], 'csr')
 
 import numpy as np
 f = np.concatenate((np.zeros(A.shape[0]), -1.0*np.ones(1)))

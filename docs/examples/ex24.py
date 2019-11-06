@@ -65,7 +65,7 @@ B = asm(divergence, basis['u'], basis['p'])
 C = asm(mass, basis['p'])
 
 K = bmat([[A, -B.T],
-          [-B, None]]).tocsr()
+          [-B, None]], 'csr')
 uvp = np.zeros(K.shape[0])
 
 inlet_basis = FacetBasis(mesh, element['u'], facets=mesh.boundaries['inlet'])
