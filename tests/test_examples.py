@@ -207,5 +207,15 @@ class TestEx28(unittest.TestCase):
         self.assertAlmostEqual(*t.values(), delta=2e-4)
 
 
+class TestEx29(unittest.TestCase):
+    def runTest(self):
+        from docs.examples.ex29 import c
+        wavespeed = tuple(
+            np.array(sorted(wavespeed, key=np.imag, reverse=True))
+            for wavespeed in c.values())
+        self.assertLess(np.linalg.norm(wavespeed[1] - wavespeed[0], np.inf),
+                        5e-3)
+
+
 if __name__ == '__main__':
     unittest.main()
