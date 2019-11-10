@@ -10,7 +10,7 @@ from scipy.sparse.linalg import cg, LinearOperator
 
 from sksparse.cholmod import cholesky
 
-mesh = MeshTri.init_tensor(*(np.linspace(0., 1., 2**9),)*2)
+mesh = MeshTri.init_tensor(*(np.linspace(0., 1., 2**5),)*2)
 
 element = {'u': ElementVectorH1(ElementTriP2()),
            'p': ElementTriP1()}
