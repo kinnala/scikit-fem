@@ -35,7 +35,7 @@ A = asm(vector_laplace, basis['u'])
 B = asm(divergence, basis['u'], basis['p'])
 f = asm(body_force, basis['u'])
 D = basis['u'].get_dofs().all()
-backsolve = cholesky(condense(A, D=D).T)  # cholesky prefers CSC
+backsolve = cholesky(condense(A, D=D, expand=False).T)  # cholesky prefers CSC
 I = basis['u'].complement_dofs(D)
 
 
