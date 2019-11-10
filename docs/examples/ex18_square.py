@@ -7,7 +7,7 @@ from scipy.sparse import bmat
 
 from time import time
 
-mesh = MeshTri.init_tensor(*(np.linspace(0., 1., 2**8),)*2)
+mesh = MeshTri.init_tensor(*(np.linspace(0., 1., 2**5),)*2)
 
 element = {'u': ElementVectorH1(ElementTriP2()),
            'p': ElementTriP1()}
