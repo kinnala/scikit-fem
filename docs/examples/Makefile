@@ -8,7 +8,8 @@ all: ex01_solution.png \
      ex25.png \
      ex26_solution.png \
      ex27-150.0-psi.png ex27-450.0-psi.png ex27-750.0-psi.png \
-     ex28.png ex28-inlet-outlet.png
+     ex28.png ex28-inlet-outlet.png \
+     ex29.png
 %.png: %.py
 	python $<
 %_solution.png: %.py
