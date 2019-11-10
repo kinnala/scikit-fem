@@ -7,6 +7,7 @@ from pygmsh.built_in import Geometry
 
 from skfem import *
 from skfem.models.poisson import mass
+from skfem.importers.meshio import from_meshio
 
 radii = [2., 3.]
 joule_heating = 5.
@@ -28,7 +29,7 @@ def make_mesh(a: float,         # radius of wire
     geom.add_physical(insulation.plane_surface, 'insulation')
     geom.add_physical(insulation.line_loop.lines, 'convection')
 
-    return MeshTri.from_meshio(generate_mesh(geom, dim=2))
+    return from_meshio(generate_mesh(geom, dim=2))
 
 
 mesh = make_mesh(*radii)

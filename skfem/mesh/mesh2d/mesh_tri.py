@@ -5,10 +5,11 @@ from skfem.mapping import MappingAffine
 
 from .mesh2d import Mesh2D, MeshType
 
-from typing import Optional, Tuple, Type
+from typing import Optional, Tuple, Type, Dict
 
 from matplotlib.axes import Axes
 from numpy import ndarray
+
 
 class MeshTri(Mesh2D):
     """A mesh consisting of triangular elements.
@@ -22,7 +23,7 @@ class MeshTri(Mesh2D):
     - :meth:`~skfem.mesh.MeshTri.init_refdom`
     - :meth:`~skfem.mesh.MeshTri.init_tensor`
     - :meth:`~skfem.mesh.MeshTri.init_lshaped`
-    
+
     Attributes
     ----------
     facets
@@ -69,7 +70,6 @@ class MeshTri(Mesh2D):
     (2, 81)
 
     """
-
     refdom: str = "tri"
     brefdom: str = "line"
     meshio_type: str = "triangle"
@@ -78,6 +78,8 @@ class MeshTri(Mesh2D):
     def __init__(self,
                  p: Optional[ndarray] = None,
                  t: Optional[ndarray] = None,
+                 boundaries: Optional[Dict[str, ndarray]] = None,
+                 subdomains: Optional[Dict[str, ndarray]] = None,
                  validate: Optional[bool] = True,
                  sort_t: Optional[bool] = True):
         """Initialise a triangular mesh.
@@ -110,16 +112,20 @@ class MeshTri(Mesh2D):
 
         """
         if p is None and t is None:
-            p = np.array([[0., 1., 0., 1.], [0., 0., 1., 1.]], dtype=np.float_)
-            t = np.array([[0, 1, 2], [1, 3, 2]], dtype=np.intp).T
+            p = np.array([[0., 1., 0., 1.],
+                          [0., 0., 1., 1.]], dtype=np.float_)
+            t = np.array([[0, 1, 2],
+                          [1, 3, 2]], dtype=np.intp).T
         elif p is None or t is None:
             raise Exception("Must provide p AND t or neither")
         self.p = p
         self.t = t
+        self.boundaries = boundaries
+        self.subdomains = subdomains
+        super(MeshTri, self).__init__()
         if validate:
             self._validate()
         self._build_mappings(sort_t=sort_t)
-        super(MeshTri, self).__init__()
 
     @classmethod
     def init_tensor(cls: Type[MeshType],
@@ -143,13 +149,25 @@ class MeshTri(Mesh2D):
         nt = (npx - 1) * (npy - 1)
         t = np.zeros((3, 2*nt))
         ix = ix.reshape(npy, npx, order='F').copy()
-        t[0, :nt] = ix[0:(npy-1), 0:(npx-1)].reshape(nt, 1, order='F').copy().flatten()
-        t[1, :nt] = ix[1:npy,     0:(npx-1)].reshape(nt, 1, order='F').copy().flatten()
-        t[2, :nt] = ix[1:npy,     1:npx].reshape(nt, 1, order='F').copy().flatten()
-        t[0, nt:] = ix[0:(npy-1), 0:(npx-1)].reshape(nt, 1, order='F').copy().flatten()
-        t[1, nt:] = ix[0:(npy-1), 1:npx].reshape(nt, 1, order='F').copy().flatten()
-        t[2, nt:] = ix[1:npy,     1:npx].reshape(nt, 1, order='F').copy().flatten()
-        #t[3, :] = ix[0:(npy-1), 1:npx].reshape(nt, 1, order='F').copy().flatten()
+        t[0, :nt] = (ix[0:(npy-1), 0:(npx-1)].reshape(nt, 1, order='F')
+                                             .copy()
+                                             .flatten())
+        t[1, :nt] = (ix[1:npy, 0:(npx-1)].reshape(nt, 1, order='F')
+                                         .copy()
+                                         .flatten())
+        t[2, :nt] = (ix[1:npy, 1:npx].reshape(nt, 1, order='F')
+                                     .copy()
+                                     .flatten())
+        t[0, nt:] = (ix[0:(npy-1), 0:(npx-1)].reshape(nt, 1, order='F')
+                                             .copy()
+                                             .flatten())
+        t[1, nt:] = (ix[0:(npy-1), 1:npx].reshape(nt, 1, order='F')
+                                         .copy()
+                                         .flatten())
+        t[2, nt:] = (ix[1:npy, 1:npx].reshape(nt, 1, order='F')
+                                     .copy()
+                                     .flatten())
+
         return cls(p, t.astype(np.int64))
 
     @classmethod
@@ -268,7 +286,7 @@ class MeshTri(Mesh2D):
             self.t[[0, 1], :],
             self.t[[1, 2], :],
             self.t[[0, 2], :],
-            )), axis=0)
+        )), axis=0)
 
         # get unique facets and build triangle-to-facet
         # mapping: 3 (edges) x Ntris
@@ -348,17 +366,36 @@ class MeshTri(Mesh2D):
             edgecolors = 'k'
         if zlim == None:
             if smooth:
-                im = ax.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z,
-                                  shading='gouraud', edgecolors=edgecolors)
+                im = ax.tripcolor(self.p[0, :],
+                                  self.p[1, :],
+                                  self.t.T,
+                                  z,
+                                  shading='gouraud',
+                                  edgecolors=edgecolors)
             else:
-                im = ax.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z, edgecolors=edgecolors)
+                im = ax.tripcolor(self.p[0, :],
+                                  self.p[1, :],
+                                  self.t.T,
+                                  z,
+                                  edgecolors=edgecolors)
         else:
             if smooth:
-                im = ax.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z,
-                              shading='gouraud', vmin=zlim[0], vmax=zlim[1], edgecolors=edgecolors)
+                im = ax.tripcolor(self.p[0, :],
+                                  self.p[1, :],
+                                  self.t.T,
+                                  z,
+                                  shading='gouraud',
+                                  vmin=zlim[0],
+                                  vmax=zlim[1],
+                                  edgecolors=edgecolors)
             else:
-                im = ax.tripcolor(self.p[0, :], self.p[1, :], self.t.T, z,
-                              vmin=zlim[0], vmax=zlim[1], edgecolors=edgecolors)
+                im = ax.tripcolor(self.p[0, :],
+                                  self.p[1, :],
+                                  self.t.T,
+                                  z,
+                                  vmin=zlim[0],
+                                  vmax=zlim[1],
+                                  edgecolors=edgecolors)
 
         if colorbar:
             plt.colorbar(im)
@@ -392,7 +429,7 @@ class MeshTri(Mesh2D):
         >>> m.refine(3)
         >>> ax = m.plot3(m.p[1, :]**2)
         >>> m.show()
-        
+
         """
         from mpl_toolkits.mplot3d import Axes3D
         if ax is None:
@@ -400,26 +437,30 @@ class MeshTri(Mesh2D):
             ax = Axes3D(fig)
         if len(z) == self.p.shape[1]:
             # use matplotlib
-            ax.plot_trisurf(self.p[0, :], self.p[1, :], z,
+            ax.plot_trisurf(self.p[0, :],
+                            self.p[1, :],
+                            z,
                             triangles=self.t.T,
                             cmap=plt.cm.viridis)
         elif len(z) == self.t.shape[1]:
             # one value per element (piecewise const)
             nt = self.t.shape[1]
-            newt = np.arange(3*nt, dtype=np.int64).reshape((nt, 3))
+            newt = np.arange(3 * nt, dtype=np.int64).reshape((nt, 3))
             newpx = self.p[0, self.t].flatten(order='F')
             newpy = self.p[1, self.t].flatten(order='F')
             newz = np.vstack((z, z, z)).flatten(order='F')
             ax.plot_trisurf(newpx, newpy, newz,
                             triangles=newt.T,
                             cmap=plt.cm.viridis)
-        elif len(z) == 3*self.t.shape[1]:
+        elif len(z) == 3 * self.t.shape[1]:
             # three values per element (piecewise linear)
             nt = self.t.shape[1]
-            newt = np.arange(3*nt, dtype=np.int64).reshape((nt, 3))
+            newt = np.arange(3 * nt, dtype=np.int64).reshape((nt, 3))
             newpx = self.p[0, self.t].flatten(order='F')
             newpy = self.p[1, self.t].flatten(order='F')
-            ax.plot_trisurf(newpx, newpy, z,
+            ax.plot_trisurf(newpx,
+                            newpy,
+                            z,
                             triangles=newt.T,
                             cmap=plt.cm.viridis)
         else:
@@ -435,26 +476,26 @@ class MeshTri(Mesh2D):
         e = self.facets
         sz = p.shape[1]
         t2f = self.t2f + sz
-        
+
         # new vertices are the midpoints of edges
-        new_p = 0.5*np.vstack((p[0, e[0, :]] + p[0, e[1, :]],
-                               p[1, e[0, :]] + p[1, e[1, :]]))
+        new_p = 0.5 * np.vstack((p[0, e[0, :]] + p[0, e[1, :]],
+                                 p[1, e[0, :]] + p[1, e[1, :]]))
         self.p = np.hstack((p, new_p))
-        
+
         # build new triangle definitions
         self.t = np.hstack((
             np.vstack((t[0, :], t2f[0, :], t2f[2, :])),
             np.vstack((t[1, :], t2f[0, :], t2f[1, :])),
             np.vstack((t[2, :], t2f[2, :], t2f[1, :])),
             np.vstack((t2f[0, :], t2f[1, :], t2f[2, :])),
-            ))
+        ))
 
         # mapping of indices between old and new facets
         new_facets = np.zeros((2, e.shape[1]), dtype=np.int64)
         ix0 = np.arange(t.shape[1], dtype=np.int64)
         ix1 = ix0 + t.shape[1]
         ix2 = ix0 + 2*t.shape[1]
-        
+
         # rebuild mappings
         self._build_mappings()
 
@@ -470,33 +511,33 @@ class MeshTri(Mesh2D):
 
     def _adaptive_refine(self, marked):
         """Refine the set of provided elements."""
-        
+
         def sort_mesh(p, t):
             """Make (0, 2) the longest edge in t."""
             l01 = np.sqrt(np.sum((p[:, t[0, :]] - p[:, t[1, :]])**2, axis=0))
             l12 = np.sqrt(np.sum((p[:, t[1, :]] - p[:, t[2, :]])**2, axis=0))
             l02 = np.sqrt(np.sum((p[:, t[0, :]] - p[:, t[2, :]])**2, axis=0))
-            
+
             ix01 = (l01 > l02)*(l01 > l12)
             ix12 = (l12 > l01)*(l12 > l02)
-            
+
             # row swaps
             tmp = t[2, ix01]
             t[2, ix01] = t[1, ix01]
             t[1, ix01] = tmp
-            
+
             tmp = t[0, ix12]
             t[0, ix12] = t[1, ix12]
             t[1, ix12] = tmp
-            
+
             return t
-        
+
         def find_facets(m, marked_elems):
             """Find the facets to split."""
             facets = np.zeros(m.facets.shape[1], dtype=np.int64)
             facets[m.t2f[:, marked_elems].flatten('F')] = 1
             prev_nnz = -1e10
-            
+
             while np.count_nonzero(facets) - prev_nnz > 0:
                 prev_nnz = np.count_nonzero(facets)
                 t2facets = facets[m.t2f]
@@ -504,19 +545,19 @@ class MeshTri(Mesh2D):
                 facets[m.t2f[t2facets == 1]] = 1
                 
             return facets
-            
+
         def split_elements(m, facets):
             """Define new elements."""
             ix = (-1)*np.ones(m.facets.shape[1], dtype=np.int64)
             ix[facets == 1] = np.arange(np.count_nonzero(facets)) + m.p.shape[1]
             ix = ix[m.t2f] # (0, 1) (1, 2) (0, 2)
-            
+
             red =   (ix[0, :] >= 0) * (ix[1, :] >= 0) * (ix[2, :] >= 0)
             blue1 = (ix[0, :] ==-1) * (ix[1, :] >= 0) * (ix[2, :] >= 0)
             blue2 = (ix[0, :] >= 0) * (ix[1, :] ==-1) * (ix[2, :] >= 0)
             green = (ix[0, :] ==-1) * (ix[1, :] ==-1) * (ix[2, :] >= 0)
             rest =  (ix[0, :] ==-1) * (ix[1, :] ==-1) * (ix[2, :] ==-1)
-            
+
             # new red elements
             t_red = np.hstack((
                 np.vstack((m.t[0, red], ix[0, red], ix[2, red])),
@@ -524,33 +565,33 @@ class MeshTri(Mesh2D):
                 np.vstack((m.t[2, red], ix[1, red], ix[2, red])),
                 np.vstack(( ix[1, red], ix[2, red], ix[0, red])),
             ))
-            
+
             # new blue elements
             t_blue1 = np.hstack((
                 np.vstack((m.t[1, blue1], m.t[0, blue1], ix[2, blue1])),
                 np.vstack((m.t[1, blue1],  ix[1, blue1], ix[2, blue1])),
                 np.vstack((m.t[2, blue1],  ix[2, blue1], ix[1, blue1])),
             ))
-            
+
             t_blue2 = np.hstack((
                 np.vstack((m.t[0, blue2], ix[0, blue2],  ix[2, blue2])),
                 np.vstack(( ix[2, blue2], ix[0, blue2], m.t[1, blue2])),
                 np.vstack((m.t[2, blue2], ix[2, blue2], m.t[1, blue2])),
             ))
-            
+
             # new green elements
             t_green = np.hstack((
                 np.vstack((m.t[1, green], ix[2, green], m.t[0, green])),
                 np.vstack((m.t[2, green], ix[2, green], m.t[1, green])),
             ))
-            
+
             # new nodes
-            p = .5*(m.p[:, m.facets[0, facets == 1]]
-                  + m.p[:, m.facets[1, facets == 1]])
-            
+            p = .5 * (m.p[:, m.facets[0, facets == 1]] +
+                      m.p[:, m.facets[1, facets == 1]])
+
             return np.hstack((m.p, p)),\
                    np.hstack((m.t[:, rest], t_red, t_blue1, t_blue2, t_green))
-            
+
         sorted_mesh = MeshTri(self.p, sort_mesh(self.p, self.t), sort_t=False)
         facets = find_facets(sorted_mesh, marked)
         self.p, self.t = split_elements(sorted_mesh, facets)

@@ -6,24 +6,27 @@ Examples
 This page includes all examples contained in the source
 code distribution.
 
-Basic features
-##############
+.. _stepbystep:
+
+Step-by-step examples
+#####################
 
 .. toctree::
 
    examples/ex01.rst
    examples/ex02.rst
-   examples/ex06.rst
-   examples/ex14.rst
-   examples/ex16.rst
    examples/ex21.rst
-   examples/ex25.rst
 
-Advanced examples
-#################
+
+Documented examples
+###################
 
 .. toctree::
 
+   examples/ex25.rst
+   examples/ex06.rst
+   examples/ex14.rst
+   examples/ex16.rst
    examples/ex12.rst
    examples/ex13.rst
    examples/ex17.rst
@@ -34,14 +37,16 @@ Advanced examples
    examples/ex24.rst
    examples/ex26.rst
    examples/ex27.rst
+   examples/ex05.rst
+   examples/ex28.rst
+   examples/ex29.rst
    
-Stubs and undocumented
-######################
+Stubs and undocumented examples
+###############################
 
 .. toctree::
 
    examples/ex03.rst
-   examples/ex05.rst
    examples/ex07.rst
    examples/ex08.rst
    examples/ex09.rst

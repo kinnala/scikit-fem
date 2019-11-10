@@ -1,6 +1,7 @@
 from skfem import *
 from skfem.models.poisson import vector_laplace, laplace
 from skfem.models.general import divergence, rot
+from skfem.importers.meshio import from_meshio
 
 from functools import partial
 from itertools import cycle, islice
@@ -75,10 +76,11 @@ class BackwardFacingStep:
         A = asm(vector_laplace, self.basis['u'])
         B = asm(divergence, self.basis['u'], self.basis['p'])
         self.S = bmat([[A, -B.T],
-                       [-B, None]]).tocsr()
+                       [-B, None]], 'csr')
         self.I = np.setdiff1d(np.arange(self.S.shape[0]), self.D)
 
-    def make_geom(self, length: float, lcar: float) -> Geometry:
+    @staticmethod
+    def make_geom(length: float, lcar: float) -> Geometry:
         # Barkley et al (2002, figure 3 a - c)
         geom = Geometry()
 
@@ -109,10 +111,9 @@ class BackwardFacingStep:
 
     @staticmethod
     def make_mesh(geom: Geometry) -> MeshTri:
-        return MeshTri.from_meshio(generate_mesh(geom, dim=2))
+        return from_meshio(generate_mesh(geom, dim=2))
 
     def inlet_dofs(self):
-        inlet_dofs_ = self.basis['u'].get_dofs(self.mesh.boundaries['inlet'])
         inlet_dofs_ = self.basis['inlet'].get_dofs(
             self.mesh.boundaries['inlet'])
         return np.concatenate([inlet_dofs_.nodal[f'u^{1}'],
@@ -143,7 +144,7 @@ class BackwardFacingStep:
         vorticity = asm(rot, self.basis['psi'],
                         w=[self.basis['psi'].interpolate(velocity[i::2])
                            for i in range(2)])
-        psi[I] = solve(*condense(A, vorticity, I=I))
+        psi = solve(*condense(A, vorticity, I=I))
         return psi
 
     def mesh_plot(self):
@@ -155,8 +156,7 @@ class BackwardFacingStep:
         return ax
 
     def triangulation(self):
-        return Triangulation(
-            self.mesh.p[0, :], self.mesh.p[1, :], self.mesh.t.T)
+        return Triangulation(*self.mesh.p, self.mesh.t.T)
 
     def streamlines(self, psi: np.ndarray, n: int = 11, ax=None):
         if ax is None:
@@ -212,14 +212,13 @@ class BackwardFacingStep:
                         uvp: np.ndarray,
                         reynolds: float,
                         rhs: np.ndarray) -> np.ndarray:
-        duvp = self.make_vector() - uvp
         u = self.basis['u'].interpolate(self.split(uvp)[0])
-        duvp[self.I] = solve(*condense(
+        duvp = solve(*condense(
             self.S +
             reynolds
             * block_diag([asm(acceleration_jacobian, self.basis['u'], w=u),
                           csr_matrix((self.basis['p'].N,)*2)]),
-            rhs, duvp, I=self.I))
+            rhs, self.make_vector() - uvp, I=self.I))
         return duvp
 
 

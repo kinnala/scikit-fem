@@ -1,5 +1,6 @@
 from skfem import *
 from skfem.models.poisson import laplace, mass
+from skfem.importers import from_meshio
 
 import numpy as np
 
@@ -24,7 +25,7 @@ geom.add_physical(lines[-1], 'positive')
 lines.append(geom.add_circle_arc(points[4], points[0], points[1]))
 geom.add_physical(geom.add_plane_surface(geom.add_line_loop(lines)), 'domain')
 
-mesh = MeshTri.from_meshio(generate_mesh(geom, dim=2))
+mesh = from_meshio(generate_mesh(geom, dim=2))
 
 elements = ElementTriP2()
 basis = InteriorBasis(mesh, elements)
@@ -35,25 +36,31 @@ interior_dofs = basis.complement_dofs(boundary_dofs)
 
 u = np.zeros(basis.N)
 u[boundary_dofs['positive'].all()] = 1.
-u[interior_dofs] = solve(*condense(A, 0.*u, u, interior_dofs))
+u = solve(*condense(A, 0.*u, u, interior_dofs))
 
 M = asm(mass, basis)
-u_exact = L2_projection(lambda x, y: 2 * np.arctan2(y, x) / np.pi, basis)
+u_exact = 2 * np.arctan2(*basis.doflocs[::-1]) / np.pi
 u_error = u - u_exact
-print('L2 error =', np.sqrt(u_error @ M @ u_error))
-print('conductance = {:.4f} (exact = 2 ln 2 / pi = {:.4f})'.format(
-    u @ A @ u, 2 * np.log(2) / np.pi))
+error_L2 = np.sqrt(u_error @ M @ u_error)
+conductance = {'skfem': u @ A @ u,
+               'exact': 2 * np.log(2) / np.pi}
 
 
-@linear_form
-def port_flux(v, dv, w):
-    return sum(w.n * dv)
+@functional
+def port_flux(w):
+    return sum(w.n * w.dw)
 
 
-for port in mesh.boundaries:
-    basis = FacetBasis(mesh, elements, facets=mesh.boundaries[port])
-    form = asm(port_flux, basis)
-    print('Current in through {} = {:.4f}'.format(port, form @ u))
+current = {}
+for port, boundary in mesh.boundaries.items():
+    basis = FacetBasis(mesh, elements, facets=boundary)
+    current[port] = asm(port_flux, basis, w=basis.interpolate(u))
 
-mesh.plot(u[basis.nodal_dofs.flatten()])
-mesh.show()
+if __name__ == '__main__':
+
+    print('L2 error:', error_L2)
+    print('conductance:', conductance)
+    print('Current in through ports:', current)
+
+    mesh.plot(u[basis.nodal_dofs.flatten()])
+    mesh.show()

@@ -24,7 +24,7 @@ def eval_estimator(m, u):
         x, y = w.x
         return h**2 * load_func(x, y)**2
 
-    eta_K = asm(interior_residual, basis, w=basis.interpolate(u))
+    eta_K = interior_residual.elemental(basis, w=basis.interpolate(u))
     
     # facet jump
     fbasis = [FacetBasis(m, e, side=i) for i in [0, 1]]   
@@ -38,7 +38,7 @@ def eval_estimator(m, u):
         return h * ((du1[0] - du2[0])*n[0] +\
                     (du1[1] - du2[1])*n[1])**2
 
-    eta_E = asm(edge_jump, fbasis[0], w=w)
+    eta_E = edge_jump.elemental(fbasis[0], w=w)
     
     tmp = np.zeros(m.facets.shape[1])
     np.add.at(tmp, fbasis[0].find, eta_E)
@@ -60,7 +60,7 @@ for itr in range(10): # 10 adaptive refinements
     u = np.zeros_like(f)
     
     I = m.interior_nodes()
-    u[I] = solve(*condense(K, f, I=I))
+    u = solve(*condense(K, f, I=I))
 
 if __name__ == "__main__":
     m.draw()

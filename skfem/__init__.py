@@ -4,8 +4,7 @@ from skfem.mapping import *
 from skfem.element import *
 from skfem.utils import *
 
-__all__ = ['InterfaceMesh1D',
-           'Mesh',
+__all__ = ['Mesh',
            'Mesh2D',
            'Mesh3D',
            'MeshHex',
@@ -34,6 +33,7 @@ __all__ = ['InterfaceMesh1D',
            'solver_direct_scipy',
            'solver_direct_umfpack',
            'solver_iter_pcg',
+           'solver_iter_krylov',
            'Element',
            'ElementTriArgyris',
            'ElementH1',
@@ -55,4 +55,5 @@ __all__ = ['InterfaceMesh1D',
            'ElementTriP2',
            'ElementTriRT0',
            'ElementVectorH1',
-           'ElementLineP1',]
+           'ElementLineP1',
+           'ElementLineP2',]

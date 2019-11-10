@@ -3,6 +3,10 @@ python:
   - "3.6"
 install:
   - sudo apt-get update
+  - sudo apt-get install gmsh
+  - wget http://gmsh.info/bin/Linux/gmsh-4.3.0-Linux64.tgz
+  - tar zvxf gmsh-4.3.0-Linux64.tgz
+  - sudo cp gmsh-4.3.0-Linux64/bin/gmsh /usr/bin
   - wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
@@ -13,6 +17,7 @@ install:
   - conda create -q -n scikit-fem python=$TRAVIS_PYTHON_VERSION nomkl numpy scipy matplotlib ipython pip
   - source activate scikit-fem
   - pip install meshio
+  - pip install pygmsh
 script:
   - python -m unittest discover 
 deploy:

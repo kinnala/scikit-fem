@@ -17,10 +17,7 @@ def load(v, dv, w):
 A = asm(laplace, basis)
 b = asm(load, basis)
 
-I = m.interior_nodes()
-
-x = 0*b
-x[I] = solve(*condense(A, b, I=I))
+x = solve(*condense(A, b, I=m.interior_nodes()))
 
 if __name__ == "__main__":
     from os.path import splitext

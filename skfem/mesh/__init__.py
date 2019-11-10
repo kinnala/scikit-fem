@@ -14,7 +14,6 @@ implementations:
 """
 
 from .mesh import Mesh, MeshType
-from .interface_mesh1d import InterfaceMesh1D
 from .mesh_line import MeshLine
 from .mesh2d import Mesh2D, MeshTri, MeshQuad
 from .mesh3d import Mesh3D, MeshTet, MeshHex

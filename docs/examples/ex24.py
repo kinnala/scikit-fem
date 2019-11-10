@@ -11,6 +11,7 @@ from pygmsh.built_in import Geometry
 from skfem import *
 from skfem.models.poisson import vector_laplace, mass, laplace
 from skfem.models.general import divergence, rot
+from skfem.importers.meshio import from_meshio
 
 
 def make_geom(length: float = 35.,
@@ -45,8 +46,7 @@ def make_geom(length: float = 35.,
 
 
 def make_mesh(*args, **kwargs) -> MeshTri:
-    return MeshTri.from_meshio(generate_mesh(make_geom(*args, **kwargs),
-                                             dim=2))
+    return from_meshio(generate_mesh(make_geom(*args, **kwargs), dim=2))
 
 
 mesh = make_mesh(lcar=.5**2)
@@ -65,7 +65,7 @@ B = asm(divergence, basis['u'], basis['p'])
 C = asm(mass, basis['p'])
 
 K = bmat([[A, -B.T],
-          [-B, None]]).tocsr()
+          [-B, None]], 'csr')
 uvp = np.zeros(K.shape[0])
 
 inlet_basis = FacetBasis(mesh, element['u'], facets=mesh.boundaries['inlet'])
@@ -82,7 +82,7 @@ def parabolic(x, y):
 
 uvp[inlet_dofs] = L2_projection(parabolic, inlet_basis, inlet_dofs)
 I = np.setdiff1d(np.arange(K.shape[0]), D)
-uvp[I] = solve(*condense(K, 0*uvp, uvp, I))
+uvp = solve(*condense(K, 0*uvp, uvp, I))
 
 velocity, pressure = np.split(uvp, [A.shape[0]])
 
@@ -94,7 +94,7 @@ I = basis['psi'].complement_dofs(D)
 vorticity = asm(rot, basis['psi'],
                 w=[basis['psi'].interpolate(velocity[i::2])
                    for i in range(2)])
-psi[I] = solve(*condense(A, vorticity, I=I))
+psi = solve(*condense(A, vorticity, I=I))
 
 
 if __name__ == '__main__':
@@ -110,7 +110,8 @@ if __name__ == '__main__':
     mesh.plot(pressure)
     mesh.savefig(f'{name}-pressure.png', bbox_inches='tight', pad_inches=0)
 
-    mesh.save(f'{name}-velocity.vtk', velocity[basis['u'].nodal_dofs].T)
+    mesh.save(f'{name}-velocity.vtk',
+              {'velocity': velocity[basis['u'].nodal_dofs].T})
     
     fig, ax = subplots()
     ax.plot(
@@ -119,7 +120,7 @@ if __name__ == '__main__':
 
     n_streamlines = 11
     plot = partial(ax.tricontour,
-                   Triangulation(mesh.p[0, :], mesh.p[1, :], mesh.t.T),
+                   Triangulation(*mesh.p, mesh.t.T),
                    psi[basis['psi'].nodal_dofs.flatten()],
                    linewidths=1.)
     for levels, color, style in [

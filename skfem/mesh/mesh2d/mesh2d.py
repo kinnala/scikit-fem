@@ -3,14 +3,15 @@ import matplotlib.pyplot as plt
 
 from skfem.mesh import Mesh, MeshType
 
-from typing import Callable, Dict, Optional, Union
+from typing import Callable, Optional
 
 from numpy import ndarray
 from matplotlib.axes import Axes
 
+
 class Mesh2D(Mesh):
     """Two dimensional meshes, common methods.
-    
+
     See the following implementations:
 
     - :class:`~skfem.mesh.MeshTri`, triangular mesh
@@ -18,45 +19,9 @@ class Mesh2D(Mesh):
 
     """
 
-    def nodes_satisfying(self, test: Callable[[float, float], bool]) -> ndarray:
-        """Return nodes that satisfy some condition.
-
-        Parameters
-        ----------
-        test
-            A function which returns True for the set of nodes that are to be
-            included in the return set.
-
-        """
-        return np.nonzero(test(self.p[0, :], self.p[1, :]))[0]
-
-    def facets_satisfying(self, test: Callable[[float, float], bool]) -> ndarray:
-        """Return facets whose midpoints satisfy some condition.
-
-        Parameters
-        ----------
-        test
-            A function which returns True for the facet midpoints that are to
-            be included in the return set.
-
-        """
-        mx = 0.5*(self.p[0, self.facets[0, :]] + self.p[0, self.facets[1, :]])
-        my = 0.5*(self.p[1, self.facets[0, :]] + self.p[1, self.facets[1, :]])
-        return np.nonzero(test(mx, my))[0]
-
-    def elements_satisfying(self, test: Callable[[float, float], bool]) -> ndarray:
-        """Return elements whose midpoints satisfy some condition.
-
-        Parameters
-        ----------
-        test
-            A function which returns True for the element midpoints that are to
-            be included in the return set.
-
-        """
-        mx = np.sum(self.p[0, self.t], axis=0)/self.t.shape[0]
-        my = np.sum(self.p[1, self.t], axis=0)/self.t.shape[0]
-        return np.nonzero(test(mx, my))[0]    
+    facets: ndarray = np.array([])
+    f2t: ndarray = np.array([])
+    t2f: ndarray = np.array([])
 
     def draw(self,
              ax: Optional[Axes] = None,
@@ -113,14 +78,16 @@ class Mesh2D(Mesh):
                 ax.text(self.p[0, itr], self.p[1, itr], str(itr))
 
         if facet_numbering:
-            mx = .5*(self.p[0, self.facets[0, :]] + self.p[0, self.facets[1, :]])
-            my = .5*(self.p[1, self.facets[0, :]] + self.p[1, self.facets[1, :]])
+            mx = .5*(self.p[0, self.facets[0, :]] +
+                     self.p[0, self.facets[1, :]])
+            my = .5*(self.p[1, self.facets[0, :]] +
+                     self.p[1, self.facets[1, :]])
             for itr in range(self.facets.shape[1]):
                 ax.text(mx[itr], my[itr], str(itr))
 
         if element_numbering:
-            mx = np.sum(self.p[0, self.t], axis=0)/self.t.shape[0]
-            my = np.sum(self.p[1, self.t], axis=0)/self.t.shape[0]
+            mx = np.sum(self.p[0, self.t], axis=0) / self.t.shape[0]
+            my = np.sum(self.p[1, self.t], axis=0) / self.t.shape[0]
             for itr in range(self.t.shape[1]):
                 ax.text(mx[itr], my[itr], str(itr))
 
@@ -129,7 +96,7 @@ class Mesh2D(Mesh):
     def mirror(self, a: float, b: float, c: float) -> MeshType:
         """Mirror a mesh by the line :math:`ax + by + c = 0`.  Returns a new
         :class:`~skfem.mesh.Mesh` object."""
-        tmp = -2.0*(a*self.p[0, :] + b*self.p[1, :] + c)/(a**2 + b**2)
+        tmp = -2.0*(a*self.p[0, :] + b*self.p[1, :] + c) / (a**2 + b**2)
         newx = a*tmp + self.p[0, :]
         newy = b*tmp + self.p[1, :]
         newpoints = np.vstack((newx, newy))
@@ -138,45 +105,15 @@ class Mesh2D(Mesh):
 
         # remove duplicates
         tmp = np.ascontiguousarray(points.T)
-        tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)]*tmp.shape[1]), return_index=True, return_inverse=True)
+        tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)]*tmp.shape[1]),
+                                  return_index=True,
+                                  return_inverse=True)
         points = points[:, ixa]
         tris = ixb[tris]
 
         meshclass = type(self)
 
         return meshclass(points, tris)
-
-    def save(self,
-            filename: str,
-            point_data: Optional[Union[ndarray, Dict[str, ndarray]]] = None,
-            cell_data: Optional[Union[ndarray, Dict[str, ndarray]]] = None) -> None:
-        """Export the mesh and fields using meshio. (2D version.)
-
-        Parameters
-        ----------
-        filename
-            The filename for vtk-file.
-        point_data
-            Data related to the vertices of the mesh. Numpy array for one
-            output or dict for multiple.
-        cell_data
-            Data related to the elements of the mesh. Numpy array for one
-            output or dict for multiple
-
-        """
-        import meshio
-
-        if point_data is not None:
-            if type(point_data) != dict:
-                point_data = {'0':point_data}
-
-        if cell_data is not None:
-            if type(cell_data) != dict:
-                cell_data = {'0':cell_data}
-
-        cells = { self.meshio_type : self.t.T }
-        mesh = meshio.Mesh(self.p.T, cells, point_data, cell_data)
-        meshio.write(filename, mesh)
 
     def param(self) -> float:
         """Return mesh parameter, viz. the length of the longest edge."""

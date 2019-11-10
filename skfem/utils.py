@@ -6,46 +6,71 @@ import scipy.sparse as sp
 import scipy.sparse.linalg as spl
 import scipy.sparse.csgraph as spg
 import warnings
-from skfem.assembly import asm, bilinear_form, linear_form
+from skfem.assembly import asm, bilinear_form, linear_form, Dofs
 from skfem.element import ElementVectorH1
-
 from typing import Optional, Union, Tuple, Callable
 from numpy import ndarray
 from scipy.sparse import spmatrix
 from skfem.assembly.global_basis import GlobalBasis
 
+
 LinearSolver = Callable[[spmatrix, ndarray], ndarray]
 EigenSolver = Callable[[spmatrix, spmatrix], Tuple[ndarray, ndarray]]
+# complex type for describing the return value of :func:`skfem.utils.condense`
+CondensedSystem = Union[spmatrix,
+                        Tuple[spmatrix, ndarray],
+                        Tuple[spmatrix, spmatrix],
+                        Tuple[spmatrix, ndarray, ndarray],
+                        Tuple[spmatrix, ndarray, ndarray, ndarray],
+                        Tuple[spmatrix, spmatrix, ndarray, ndarray]]
+
 
 def condense(A: spmatrix,
              b: Optional[Union[ndarray, spmatrix]] = None,
              x: Optional[ndarray] = None,
-             I: Optional[ndarray] = None,
-             D: Optional[ndarray] = None) -> Union[spmatrix, Tuple[spmatrix, ndarray], Tuple[spmatrix, spmatrix]]:
+             I: Optional[Union[ndarray, Dofs]] = None,
+             D: Optional[Union[ndarray, Dofs]] = None,
+             expand: bool = True) -> CondensedSystem:
     """Eliminate DOF's from a linear system.
 
     Supports also generalized eigenvalue problems.
-    
+
     Parameters
     ----------
     A
         The system matrix
     b
-        The right hand side vector or the mass matrix
-        for generalized eigenvalue problems.
+        The right hand side vector or the mass matrix for generalized
+        eigenvalue problems.
+    x
+        The values of the condensed DOF's. If not given, assumed to be zero.
     I
-        The set of DOF numbers to keep
+        The set of DOF numbers to keep. If :class:`skfem.assembly.Dofs` object
+        is given, then it's flattened via :meth:`skfem.assembly.Dofs.all`.
     D
-        The set of DOF numbers to dismiss
-        
+        The set of DOF numbers to dismiss.  If :class:`skfem.assembly.Dofs`
+        object is given, then it's flattened via
+        :meth:`skfem.assembly.Dofs.all`.
+    expand
+        If True, return x and I: :func:`skfem.utils.solve` will then expand the
+        solution vector automatically. By default, the solution vector is not
+        expanded.
+
     Returns
     -------
     spmatrix or (spmatrix, ndarray) or (spmatrix, spmatrix)
         The condensed system.
-        
+
     """
+    if isinstance(D, Dofs):
+        D = D.all()
+
+    if isinstance(I, Dofs):
+        I = I.all()
+
     if x is None:
         x = np.zeros(A.shape[0])
+
     if I is None and D is None:
         raise Exception("Either I or D must be given!")
     elif I is None and D is not None:
@@ -54,16 +79,25 @@ def condense(A: spmatrix,
         D = np.setdiff1d(np.arange(A.shape[0]), I)
     else:
         raise Exception("Give only I or only D!")
+
     if b is None:
-        return A[I].T[I].T
+        ret_value = (A[I].T[I].T,)
     else:
         if isinstance(b, spmatrix):
             # generalized eigenvalue problem: don't modify rhs
-            return A[I].T[I].T, b[I].T[I].T 
+            Aout = A[I].T[I].T
+            bout = b[I].T[I].T
         elif isinstance(b, ndarray):
-            return A[I].T[I].T, b[I] - A[I].T[D].T @ x[D]
+            Aout = A[I].T[I].T
+            bout = b[I] - A[I].T[D].T @ x[D]
         else:
             raise Exception("The second arg type not supported.")
+        ret_value = (Aout, bout)
+
+    if expand:
+        ret_value += (x, I)
+
+    return ret_value if len(ret_value) > 1 else ret_value[0]
 
 
 def rcm(A: spmatrix,
@@ -76,7 +110,7 @@ def solver_eigen_scipy(sigma: float,
                        n: Optional[int] = 3,
                        mode: Optional[str] = 'normal') -> EigenSolver:
     """Solve generalized eigenproblem using SciPy (ARPACK).
-    
+
     Parameters
     ----------
     sigma
@@ -89,7 +123,7 @@ def solver_eigen_scipy(sigma: float,
     -------
     EigenSolver
         A solver function that can be passed to :func:`solve`.
-    
+
     """
     def solver(K, M):
         from scipy.sparse.linalg import eigsh
@@ -115,8 +149,7 @@ def build_pc_ilu(A: spmatrix,
                  fill_factor: Optional[float] = 20) -> spl.LinearOperator:
     """Incomplete LU preconditioner."""
     P = spl.spilu(A.tocsc(), drop_tol=drop_tol, fill_factor=fill_factor)
-    P_x = lambda x: P.solve(x)
-    M = spl.LinearOperator((A.shape[0], A.shape[0]), matvec=P_x)
+    M = spl.LinearOperator(A.shape, matvec=P.solve)
     return M
 
 
@@ -125,26 +158,23 @@ def build_pc_diag(A: spmatrix) -> spmatrix:
     return sp.spdiags(1.0/A.diagonal(), 0, A.shape[0], A.shape[0])
 
 
-def solver_iter_pcg(pc: Optional[spmatrix] = None,
-                    guess: Optional[ndarray] = None,
-                    maxiter: Optional[int] = 100,
-                    tol: Optional[float] = 1e-8,
-                    verbose: Optional[bool] = False) -> LinearSolver:
-    """Conjugate gradient solver.
-    
+def solver_iter_krylov(krylov: Optional[LinearSolver] = spl.cg,
+                       verbose: Optional[bool] = False,
+                       **kwargs) -> LinearSolver:
+    """Krylov-subspace iterative linear solver.
+
     Parameters
     ----------
-    pc
-        A preconditioner for the conjugate gradient algorithm.  By default, a
-        diagonal preconditioner is built using :func:`skfem.utils.build_pc_diag`.
-    guess
-        An initial guess. By default, a zero vector is used.
-    maxiter
-        Maximum number of iterations.
-    tol
-        Tolerance for convergence.
+    krylov
+        A Krylov iterative linear solver, like, and by default,
+        :func:`scipy.sparse.linalg.cg`
     verbose
         If True, print the norm of the iterate.
+
+    Any remaining keyword arguments are passed on to the solver, in
+    particular x0, the starting guess, and M, the preconditioner.  If
+    the latter is omitted, a diagonal preconditioner is supplied using
+    :func:`skfem.utils.build_pc_diag`.
 
     Returns
     -------
@@ -156,32 +186,30 @@ def solver_iter_pcg(pc: Optional[spmatrix] = None,
         if verbose:
             print(np.linalg.norm(x))
 
-    if pc is None:
-        if verbose:
-            print("Starting conjugate gradient with TOL=" + str(tol) + ", MAXITER=" + str(maxiter) + " and diagonal preconditioner ...")
-        def solver(A, b):
-            sol, info = spl.cg(A, b, x0=guess, maxiter=maxiter, M=build_pc_diag(A), atol=tol, callback=callback)
-            if info > 0:
-                warnings.warn("Convergence not achieved!")
-            elif info == 0 and verbose:
-                print("Conjugate gradient converged to TOL=" + str(tol))
-            return sol
-    else:
-        if verbose:
-            print("Starting conjugate gradient with TOL=" + str(tol) + ", MAXITER=" + str(maxiter) + " and user-given preconditioner ...")
-        def solver(A, b):
-            sol, info = spl.cg(A, b, x0=guess, maxiter=maxiter, M=pc, atol=tol, callback=callback)
-            if info > 0:
-                warnings.warn("Convergence not achieved!")
-            elif info == 0 and verbose:
-                print("Conjugate gradient converged to TOL=" + str(tol))
-            return sol
+    def solver(A, b):
+        if 'M' not in kwargs:
+            kwargs['M'] = build_pc_diag(A)
+        sol, info = krylov(A, b, **{'callback': callback, **kwargs})
+        if info > 0:
+            warnings.warn("Convergence not achieved!")
+        elif info == 0 and verbose:
+            print(f"{krylov.__name__} converged to "
+                  + f"tol={kwargs.get('tol', 'default')} and "
+                  + f"atol={kwargs.get('atol', 'default')}")
+        return sol
 
     return solver
 
 
+def solver_iter_pcg(**kwargs) -> LinearSolver:
+    """Conjugate gradient solver, specialized from solver_iter_krylov"""
+    return solver_iter_krylov(spl.cg, **kwargs)
+
+
 def solve(A: spmatrix,
           b: Union[ndarray, spmatrix],
+          x: Optional[ndarray] = None,
+          I: Optional[ndarray] = None,
           solver: Optional[Union[LinearSolver, EigenSolver]] = None) -> ndarray:
     """Solve a linear system or a generalized eigenvalue problem.
 
@@ -204,10 +232,16 @@ def solve(A: spmatrix,
     if solver is None:
         if isinstance(b, spmatrix):
             solver = solver_eigen_scipy(10.0)
+            return solver(A, b)
         elif isinstance(b, ndarray):
             solver = solver_direct_scipy()
 
-    return solver(A, b)
+    if x is not None and I is not None:
+        y = x.copy()
+        y[I] = solver(A, b)
+        return y
+    else:
+        return solver(A, b)
 
 
 def adaptive_theta(est, theta=0.5, max=None):
@@ -253,7 +287,7 @@ def derivative(x: ndarray,
     M = asm(mass, basis0)
 
     return solve(M, A @ x)
-     
+
 
 def L2_projection(fun,
                   basis: GlobalBasis,
@@ -278,7 +312,7 @@ def L2_projection(fun,
 
     if ix is None:
         ix = np.arange(basis.N)
-    
+
     @bilinear_form
     def mass(u, du, v, dv, w):
         p = u * v
@@ -288,8 +322,8 @@ def L2_projection(fun,
     def funv(v, dv, w):
         p = fun(*w.x) * v
         return sum(p) if isinstance(basis.elem, ElementVectorH1) else p
-    
+
     M = asm(mass, basis)
     f = asm(funv, basis)
 
-    return solve(*condense(M, f, I=ix))
+    return solve(*condense(M, f, I=ix, expand=False))

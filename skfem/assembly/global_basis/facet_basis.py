@@ -70,12 +70,12 @@ class FacetBasis(GlobalBasis):
     def __init__(self,
                  mesh,
                  elem,
-                 mapping=None,
+                 mapping = None,
                  intorder: Optional[int] = None,
                  side: Optional[int] = None,
                  facets: Optional[ndarray] = None):
-        """Combine :class:`~skfem.mesh.Mesh` and :class:`~skfem.element.Element` into a
-        set of precomputed global basis functions at element facets.
+        """Combine :class:`~skfem.mesh.Mesh` and :class:`~skfem.element.Element`
+        into a set of precomputed global basis functions at element facets.
 
         Parameters
         ----------
@@ -121,7 +121,9 @@ class FacetBasis(GlobalBasis):
         Y = self.mapping.invF(x, tind=self.tind)
 
         if hasattr(mesh, 'normals'):
-            self.normals = np.repeat(mesh.normals[:, :, None], len(self.W), axis=2)
+            self.normals = np.repeat(mesh.normals[:, :, None],
+                                     len(self.W),
+                                     axis=2)
         else:
             # construct normal vectors from side=0 always
             Y0 = self.mapping.invF(x, tind=self.mesh.f2t[0, self.find])
@@ -145,7 +147,7 @@ class FacetBasis(GlobalBasis):
         return {'x': self.global_coordinates(),
                 'h': self.mesh_parameters(),
                 'n': self.normals}
-    
+
     def global_coordinates(self) -> ndarray:
         return self.mapping.G(self.X, find=self.find)
 
@@ -153,4 +155,5 @@ class FacetBasis(GlobalBasis):
         if self.mesh.dim() == 1:
             return np.array([0.0])
         else:
-            return np.abs(self.mapping.detDG(self.X, self.find)) ** (1.0 / (self.mesh.dim() - 1))
+            return (np.abs(self.mapping.detDG(self.X, self.find)) **
+                    (1.0 / (self.mesh.dim() - 1)))

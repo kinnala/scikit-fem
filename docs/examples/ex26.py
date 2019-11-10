@@ -3,8 +3,8 @@ from skfem.models.poisson import laplace, unit_load
 
 import numpy as np
 
-from ex17 import mesh, basis, radii, joule_heating, thermal_conductivity
-
+from docs.examples.ex17 import mesh, basis, radii,\
+    joule_heating, thermal_conductivity
 
 
 insulation = np.unique(basis.element_dofs[:, mesh.subdomains['insulation']])
@@ -13,9 +13,9 @@ wire = basis.complement_dofs(insulation)
 wire_basis = InteriorBasis(mesh, basis.elem, elements=mesh.subdomains['wire'])
 L = asm(laplace, wire_basis)
 f = asm(unit_load, wire_basis)
-temperature[wire] = solve(*condense(thermal_conductivity['wire'] * L,
-                                    joule_heating * f,
-                                    D=insulation))
+temperature = solve(*condense(thermal_conductivity['wire'] * L,
+                              joule_heating * f,
+                              D=insulation))
 
 if __name__ == '__main__':
 

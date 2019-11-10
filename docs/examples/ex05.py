@@ -30,21 +30,19 @@ B = asm(facetbilinf, fb)
 
 b = asm(facetlinf, fb)
 
-D = ib.get_dofs(lambda x, y: (y == 0.0)).all()
+D = ib.get_dofs(lambda x: (x[1] == 0.0)).all()
 I = ib.complement_dofs(D)
 
 import scipy.sparse
 b = scipy.sparse.csr_matrix(b)
-K = scipy.sparse.bmat([[A+B, b.T], [b, None]]).tocsr()
+K = scipy.sparse.bmat([[A+B, b.T], [b, None]], 'csr')
 
 import numpy as np
 f = np.concatenate((np.zeros(A.shape[0]), -1.0*np.ones(1)))
 
-x = np.zeros(K.shape[0])
+I = np.append(I, K.shape[0] - 1)
 
-I = np.append(I, K.shape[0]-1)
-
-x[I] = solve(*condense(K, f, I=I))
+x = solve(*condense(K, f, I=I))
 
 if __name__ == "__main__":
     from os.path import splitext

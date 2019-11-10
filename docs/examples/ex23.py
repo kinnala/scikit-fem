@@ -17,8 +17,7 @@ class Bratu1d():
                                    ElementLineP1())
         self.lap = asm(laplace, self.basis)
         self.mass = asm(mass, self.basis)
-        self.I = self.basis.mesh.interior_nodes()
-        self.D = self.basis.complement_dofs(self.I)
+        self.D = self.basis.get_dofs().all()
 
     def inner(self, a: np.ndarray, b: np.ndarray) -> float:
         """return the inner product of two solutions"""
@@ -50,12 +49,11 @@ class Bratu1d():
                         u: np.ndarray,
                         lmbda: float,
                         rhs: np.ndarray) -> np.ndarray:
-        """A solver for the Jacobian problem."""
+        """Solver for the Jacobian problem."""
+        A = self.lap - lmbda * dia_matrix((self.mass @ np.exp(u), 0),
+                                          self.mass.shape)
         du = np.zeros_like(u)
-        du[self.I] = solve(*condense(
-            self.lap - lmbda * dia_matrix((self.mass @ np.exp(u), 0),
-                                          self.mass.shape),
-            rhs, I=self.I))
+        du = solve(*condense(A, rhs, D=self.D))
         return du
 
 
