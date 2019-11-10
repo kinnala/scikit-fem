@@ -83,12 +83,10 @@ if __name__ == '__main__':
 
     mesh.save(f'{name}_velocity.vtk', {'u': velocity[basis['u'].nodal_dofs].T})
 
-    print(basis['psi'].interpolator(psi)(np.zeros((2, 1)))[0],
-          '(cf. exact 1/64)')
+    print(basis['psi'].interpolator(psi)(np.zeros((2, 1)))[0])
 
     print(basis['p'].interpolator(pressure)(np.array([[-0.5, 0.5],
-                                                      [0.5, 0.5]])),
-          '(cf. exact -/+ 1/8)')
+                                                      [0.5, 0.5]])))
 
     mesh.plot(pressure, colorbar=True).get_figure().savefig(
         f'{name}_pressure.png')
