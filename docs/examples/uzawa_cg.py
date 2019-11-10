@@ -65,12 +65,10 @@ velocity = flow(pressure)
 basis['psi'] = InteriorBasis(mesh, ElementTriP2())
 psi = np.zeros(A.shape[0])
 D = basis['psi'].get_dofs().all()
-interior = basis['psi'].complement_dofs(D)
 vorticity = asm(rot, basis['psi'],
                 w=[basis['psi'].interpolate(velocity[i::2])
                    for i in range(2)])
-psi[interior] = solve(*condense(asm(laplace, basis['psi']), vorticity,
-                                I=interior))
+psi = solve(*condense(asm(laplace, basis['psi']), vorticity, D=D))
 
 
 if __name__ == '__main__':

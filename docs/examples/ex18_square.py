@@ -32,7 +32,7 @@ f = np.concatenate([asm(body_force, basis['u']),
 
 D = basis['u'].get_dofs().all()
 uvp = np.zeros(K.shape[0])
-uvp[np.setdiff1d(np.arange(K.shape[0]), D)] = solve(*condense(K, f, D=D))
+uvp = solve(*condense(K, f, D=D))
 
 velocity, pressure = np.split(uvp, [A.shape[0]])
 print('elapsed time:', time() - tic)
@@ -46,11 +46,10 @@ basis['psi'] = InteriorBasis(mesh, ElementTriP2())
 A = asm(laplace, basis['psi'])
 psi = np.zeros(A.shape[0])
 D = basis['psi'].get_dofs().all()
-interior = basis['psi'].complement_dofs(D)
 vorticity = asm(rot, basis['psi'],
                 w=[basis['psi'].interpolate(velocity[i::2])
                    for i in range(2)])
-psi[interior] = solve(*condense(A, vorticity, I=interior))
+psi = solve(*condense(A, vorticity, D=D))
 
 
 if __name__ == '__main__':
