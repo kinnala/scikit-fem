@@ -1,5 +1,6 @@
 """Import any formats supported by meshio."""
 import meshio
+from typing import Tuple
 import warnings
 import numpy as np
 import skfem
@@ -88,16 +89,16 @@ def from_file(filename):
     return from_meshio(meshio.read(filename))
 
 
-def detect_type(m):
-    if 'tetra' in m.cell_data:
+def detect_type(m: meshio.Mesh) -> Tuple[str, skfem.Mesh]:
+    if 'tetra' in m.cells:
         return 'tetra', skfem.MeshTet
-    elif 'hexahedron' in m.cell_data:
+    elif 'hexahedron' in m.cells:
         return 'hexahedron', skfem.MeshHex
-    elif 'triangle' in m.cell_data:
+    elif 'triangle' in m.cells:
         return 'triangle', skfem.MeshTri
-    elif 'quad' in m.cell_data:
+    elif 'quad' in m.cells:
         return 'quad', skfem.MeshQuad
-    elif 'line' in m.cell_data:
+    elif 'line' in m.cells:
         return 'line', skfem.MeshLine
     else:
         raise Exception("Unknown mesh type.")
