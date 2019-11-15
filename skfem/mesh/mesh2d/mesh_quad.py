@@ -259,7 +259,7 @@ class MeshQuad(Mesh2D):
                        newt,
                        validate=False)
 
-    def plot(self, z, smooth=False, edgecolors=None, ax=None, zlim=None):
+    def plot(self, z, **kwargs):
         """Visualise piecewise-linear or piecewise-constant function.
 
         The quadrilaterals are split into two triangles
@@ -271,9 +271,9 @@ class MeshQuad(Mesh2D):
             m, z = self._splitquads(z)
         else:
             m = self._splitquads()
-        return m.plot(z, smooth, ax=ax, zlim=zlim, edgecolors=edgecolors)
+        return m.plot(z, **kwargs)
 
-    def plot3(self, z, smooth=False, ax=None):
+    def plot3(self, z, **kwargs):
         """Visualise nodal function (3d i.e. three axes).
 
         The quadrilateral mesh is split into triangular mesh (MeshTri)
@@ -282,7 +282,7 @@ class MeshQuad(Mesh2D):
 
         """
         m, z = self._splitquads(z)
-        return m.plot3(z, smooth, ax=ax)
+        return m.plot3(z, **kwargs)
 
     def mapping(self):
         return MappingIsoparametric(self, ElementQuad1(), ElementLineP1())
