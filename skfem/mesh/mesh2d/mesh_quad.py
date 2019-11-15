@@ -286,3 +286,9 @@ class MeshQuad(Mesh2D):
 
     def mapping(self):
         return MappingIsoparametric(self, ElementQuad1(), ElementLineP1())
+
+    def element_finder(self):
+        tri_finder = self._splitquads().element_finder()
+
+        def finder(*args):
+            return tri_finder(*args) % self.t.shape[1]
