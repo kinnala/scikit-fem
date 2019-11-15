@@ -27,5 +27,7 @@ if __name__ == '__main__':
           joule_heating * radii[0]**2 / 4 / thermal_conductivity['wire']}
     print('Central temperature:', T0)
 
-    mesh.plot(temperature[basis.nodal_dofs.flatten()], colorbar=True)
-    mesh.savefig(splitext(argv[0])[0] + '_solution.png')
+    ax = mesh.draw()
+    mesh.plot(temperature[basis.nodal_dofs.flatten()],
+              ax=ax, edgecolors='none', colorbar=True)
+    ax.get_figure().savefig(splitext(argv[0])[0] + '_solution.png')

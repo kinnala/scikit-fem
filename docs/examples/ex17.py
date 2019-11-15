@@ -82,5 +82,6 @@ if __name__ == '__main__':
                * np.log(radii[1] / radii[0])) + 1))}
     print('Central temperature:', T0)
 
-    mesh.plot(temperature, colorbar=True)
-    mesh.savefig(splitext(argv[0])[0] + '_solution.png')
+    ax = mesh.draw()
+    mesh.plot(temperature, ax=ax, edgecolors='none', colorbar=True)
+    ax.get_figure().savefig(splitext(argv[0])[0] + '_solution.png')
