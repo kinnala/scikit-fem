@@ -292,3 +292,5 @@ class MeshQuad(Mesh2D):
 
         def finder(*args):
             return tri_finder(*args) % self.t.shape[1]
+
+        return finder
