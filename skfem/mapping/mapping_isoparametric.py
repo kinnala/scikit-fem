@@ -139,7 +139,7 @@ class MappingIsoparametric(Mapping):
             X = X + dX
             if (np.linalg.norm(dX, 1, (0, 2)) < 1e-6).all():
                  break
-        if (np.abs(X) > 1.0).any():
+        if (np.abs(X) > 1.0 + 1e-12).any():
             raise ValueError("Inverse mapped point outside reference element!")
         return X
 
