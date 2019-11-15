@@ -29,5 +29,18 @@ class TestIsoparamNormalsQuad(TestIsoparamNormals):
     elem = ElementQuad1
 
 
+class TestNoCrash(unittest.TestCase):
+    """Test that mappings don't crash for non-rectangular elements."""
+
+    def runTest(self):
+        m0 = MeshQuad()
+        m = MeshQuad([[0, 1, 1, 0],
+                      [0, .1, 1, 1]],
+                     m0.t)
+        e = ElementQuad1()
+        FacetBasis(m0, e)
+        FacetBasis(m, e)
+
+
 if __name__ == '__main__':
     unittest.main()
