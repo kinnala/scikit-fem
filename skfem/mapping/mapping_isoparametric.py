@@ -1,6 +1,6 @@
-import numpy as np
-
 from typing import Optional
+
+import numpy as np
 from numpy import ndarray
 
 from skfem.mesh import Mesh
@@ -23,7 +23,7 @@ class MappingIsoparametric(Mapping):
 
         .. math::
             x = F(\widehat{x}) = \sum_{i=1}^N x_i \phi_i(\widehat{x}),
-        
+
         where :math:`N` is the number of basis functions in the provided
         element and :math:`x_i` are the locations of the corresponding
         global nodes.
@@ -132,13 +132,13 @@ class MappingIsoparametric(Mapping):
     def invF(self, x, tind=None):
         """Newton iteration for evaluating inverse isoparametric mapping."""
         X = np.zeros(x.shape)
-        for itr in range(50):
+        for _ in range(50):
             F = self.F(X, tind)
             invDF = self.invDF(X, tind)
             dX = np.einsum('ijkl,jkl->ikl', invDF, x - F)
             X = X + dX
             if (np.linalg.norm(dX, 1, (0, 2)) < 1e-6).all():
-                 break
+                break
         if (np.abs(X) > 1.0 + 1e-12).any():
             raise ValueError("Inverse mapped point outside reference element!")
         return X
