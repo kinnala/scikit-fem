@@ -137,7 +137,7 @@ class MappingIsoparametric(Mapping):
             invDF = self.invDF(X, tind)
             dX = np.einsum('ijkl,jkl->ikl', invDF, x - F)
             X = X + dX
-            if np.sum(dX) < 1e-6:
+            if (np.linalg.norm(dX, 1, (0, 2)) < 1e-6).all():
                  break
         if (np.abs(X) > 1.0).any():
             raise ValueError("Inverse mapped point outside reference element!")
