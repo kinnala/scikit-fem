@@ -28,8 +28,7 @@ def make_mesh(a: float,         # radius of wire
     insulation = geom.add_circle(origin, b, dx, holes=[wire.line_loop])
     geom.add_physical(insulation.plane_surface, 'insulation')
     geom.add_physical(insulation.line_loop.lines, 'convection')
-    geom.add_raw_code('Mesh.RecombineAll=1;')
-    
+
     return from_meshio(generate_mesh(geom, dim=2))
 
 
@@ -43,7 +42,7 @@ def conduction(u, du, v, dv, w):
 
 convection = mass
 
-element = ElementQuad1()
+element = ElementTriP1()
 basis = InteriorBasis(mesh, element)
 
 conductivity = basis.zero_w()
