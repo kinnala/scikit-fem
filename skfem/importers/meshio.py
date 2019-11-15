@@ -1,22 +1,24 @@
 """Import any formats supported by meshio."""
-import meshio
+
 from typing import Tuple
 import warnings
+
 import numpy as np
 import skfem
 
+import meshio
+
 
 def from_meshio(m):
-    # detect type
+    """Convert meshio mesh into :class:`skfem.mesh.Mesh`."""
     meshio_type, mesh_type = detect_type(m)
 
     def strip_extra_coordinates(p):
         if meshio_type == "line":
             return p[:, :1]
-        elif meshio_type == "quad" or meshio_type == "triangle":
+        if meshio_type in ("quad", "triangle"):
             return p[:, :2]
-        else:
-            return p
+        return p
 
     # create p and t
     p = np.ascontiguousarray(strip_extra_coordinates(m.points).T)
@@ -41,8 +43,7 @@ def from_meshio(m):
             return None
 
         # find subdomains
-        if meshio_type in m.cell_data and\
-           'gmsh:physical' in m.cell_data[meshio_type]:
+        if meshio_type in m.cell_data and 'gmsh:physical' in m.cell_data[meshio_type]:
             elements_tag = m.cell_data[meshio_type]['gmsh:physical']
 
             subdomains = {}
@@ -53,8 +54,7 @@ def from_meshio(m):
                 subdomains[find_tagname(tag)] = t_set
 
         # find tagged boundaries
-        if bnd_type in m.cell_data and\
-           'gmsh:physical' in m.cell_data[bnd_type]:
+        if bnd_type in m.cell_data and 'gmsh:physical' in m.cell_data[bnd_type]:
             facets = m.cells[bnd_type]
             facets_tag = m.cell_data[bnd_type]['gmsh:physical']
             bndfacets = mtmp.boundary_facets()
