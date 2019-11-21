@@ -14,12 +14,12 @@ halfwidth = np.array([2., 3.])
 ncells = 2**3
 diffusivity = 5.
 
-mesh = MeshTri.init_tensor(
+mesh = MeshQuad.init_tensor(
     np.linspace(-1, 1, 2 * ncells) * halfwidth[0],
     np.linspace(-1, 1, 2 * ncells * ceil(halfwidth[1] //
                                          halfwidth[0])) * halfwidth[1])
 
-element = ElementTriP1()
+element = ElementQuad1()
 basis = InteriorBasis(mesh, element)
 
 L = diffusivity * asm(laplace, basis)
