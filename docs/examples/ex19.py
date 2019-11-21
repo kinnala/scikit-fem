@@ -14,10 +14,10 @@ halfwidth = np.array([2., 3.])
 ncells = 2**3
 diffusivity = 5.
 
-mesh = (MeshLine(np.linspace(-1, 1, 2 * ncells) * halfwidth[0]) *
-        MeshLine(np.linspace(-1, 1,
-                             2 * ncells * ceil(halfwidth[1] // halfwidth[0]))
-                 * halfwidth[1]))._splitquads()
+mesh = MeshTri.init_tensor(
+    np.linspace(-1, 1, 2 * ncells) * halfwidth[0],
+    np.linspace(-1, 1, 2 * ncells * ceil(halfwidth[1] //
+                                         halfwidth[0])) * halfwidth[1])
 
 element = ElementTriP1()
 basis = InteriorBasis(mesh, element)
@@ -50,7 +50,7 @@ def step(t: float,
     return t + dt, u_new
 
 
-def evolve(t: float = 0.
+def evolve(t: float,
            u: np.ndarray) -> Iterator[Tuple[float, np.ndarray]]:
 
     while np.linalg.norm(u, np.inf) > 2**-3:
