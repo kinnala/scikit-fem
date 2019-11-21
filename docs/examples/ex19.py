@@ -1,7 +1,5 @@
 from math import ceil
 
-from matplotlib.animation import FuncAnimation
-import matplotlib.pyplot as plt
 import numpy as np
 from scipy.sparse import csr_matrix
 
@@ -43,6 +41,16 @@ backsolve = cholesky(condense(A, D=boundary, expand=False)
 
 if __name__ == '__main__':
 
+    from argparse import ArgumentParser
+    from pathlib import Path
+
+    from matplotlib.animation import FuncAnimation
+    import matplotlib.pyplot as plt
+
+    parser = ArgumentParser(description='heat equation')
+    parser.add_argument('-o', '--output')
+    args = parser.parse_args()
+    
     ax = mesh.plot(u, smooth=True)
     field = ax.get_children()[0]
     fig = ax.get_figure()
@@ -50,7 +58,7 @@ if __name__ == '__main__':
 
     def evolve():
         t = 0.
-        while np.linalg.norm(u) > 2**-4:
+        while np.linalg.norm(u, np.inf) > 2**-4:
             _, b1 = condense(csr_matrix(A.shape),  # ignore condensed matrix
                              B @ u, D=boundary, expand=False)
             u[interior] = backsolve(b1)
@@ -58,9 +66,21 @@ if __name__ == '__main__':
             yield t, u
 
     def update(event):
-        _, u = event
+        t, u = event
+
+        u0 = {'skfem': basis.interpolator(u)(np.zeros((2, 1)))[0],
+              'exact': np.exp(-diffusivity * np.pi**2 * t / 4 *
+                              sum(halfwidth**-2))}
+        print(','.join(map(' {:.4f}'.format,
+                           (t, u0['skfem'], u0['skfem'] - u0['exact']))))
+        
         field.set_array(u)
         return field,
 
-    FuncAnimation(fig, update, evolve, blit=True, repeat=False)
-    plt.show()
+    animation = FuncAnimation(fig, update, evolve, blit=True, repeat=False)
+    if args.output:
+        animation.save(
+            args.output,
+            {'.gif': 'imagemagick'}.get(Path(args.output).suffix))
+    else:
+          plt.show()
