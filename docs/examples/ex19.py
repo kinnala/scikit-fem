@@ -1,6 +1,7 @@
 from math import ceil
 
-from matplotlib.pyplot import subplots, pause
+from matplotlib.animation import FuncAnimation
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy.sparse import csr_matrix
 
@@ -41,31 +42,25 @@ backsolve = cholesky(condense(A, D=boundary, expand=False)
 
 
 if __name__ == '__main__':
-    fig, ax = subplots()
-    ax.axis('off')
 
-    t = 0.
-    while True:
+    ax = mesh.plot(u, smooth=True)
+    field = ax.get_children()[0]
+    fig = ax.get_figure()
+    fig.colorbar(field)
 
-        u0 = {'skfem': basis.interpolator(u)(np.zeros((2, 1)))[0],
-              'exact': np.exp(-diffusivity * np.pi**2 * t / 4 *
-                              sum(halfwidth**-2))}
-        print(','.join(map('  {:.4f}'.format,
-                           [t, u0['skfem'], u0['skfem'] - u0['exact']])))
-        if u0['skfem'] < 2**-4:
-            break
+    def evolve():
+        t = 0.
+        while np.linalg.norm(u) > 2**-4:
+            _, b1 = condense(csr_matrix(A.shape),  # ignore condensed matrix
+                             B @ u, D=boundary, expand=False)
+            u[interior] = backsolve(b1)
+            t += dt
+            yield t, u
 
-        ax.cla()
-        ax.axis('off')
-        fig.suptitle('t = {:.4f}'.format(t))
-        mesh.plot(u, ax=ax, zlim=(0, 1))
-        if t == 0.:
-            fig.colorbar(ax.get_children()[0])
-        fig.show()
-        pause(0.1)
+    def update(event):
+        _, u = event
+        field.set_array(u)
+        return field,
 
-        _, b1 = condense(csr_matrix(A.shape),  # ignore condensed matrix
-                         B @ u, D=boundary, expand=False)
-
-        u[interior] = backsolve(b1)
-        t += dt
+    FuncAnimation(fig, update, evolve, blit=True, repeat=False)
+    plt.show()
