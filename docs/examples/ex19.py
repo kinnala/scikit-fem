@@ -72,12 +72,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     ax = mesh.plot(u_init, smooth=True)  # smooth is vertex-based
-
-    text = ax.text(.5, .9, 't = 0.',
-                   bbox={'color': 'w'}, transform=ax.transAxes)
-
+    title = ax.set_title('t = 0.00')
     field = ax.get_children()[0]  # vertex-based temperature-colour
-
     fig = ax.get_figure()
     fig.colorbar(field)
 
@@ -90,12 +86,10 @@ if __name__ == '__main__':
         print('{:4.2f}, {:5.3f}, {:+7.4f}'.format(
             t, u0['skfem'], u0['skfem'] - u0['exact']))
 
-        text.set_text(f'$t$ = {t:.2f}')
+        title.set_text(f'$t$ = {t:.2f}')
         field.set_array(u)
-        return text, field
 
-    animation = FuncAnimation(fig, update, evolve(0., u_init),
-                              blit=False, repeat=False)
+    animation = FuncAnimation(fig, update, evolve(0., u_init), repeat=False)
     if args.gif:
         animation.save(Path(__file__).with_suffix('.gif'), 'imagemagick')
     else:
