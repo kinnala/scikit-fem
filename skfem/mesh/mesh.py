@@ -266,7 +266,8 @@ class Mesh():
     def save(self,
              filename: str,
              point_data: Optional[Dict[str, ndarray]] = None,
-             cell_data: Optional[Dict[str, ndarray]] = None) -> None:
+             cell_data: Optional[Dict[str, Dict[str, ndarray]]] = None,
+             ) -> None:
         """Export the mesh and fields using meshio.
 
         Parameters
@@ -290,7 +291,7 @@ class Mesh():
         if cell_data is not None:
             if not isinstance(point_data, dict):
                 raise ValueError("cell_data should be "
-                                 "a dictionary of ndarrays.")
+                                 "a dictionary of dictionary of ndarrays.")
 
         cells = {self.meshio_type: self.t.T}
         mesh = meshio.Mesh(self.p.T, cells, point_data, cell_data)
