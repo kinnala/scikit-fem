@@ -4,7 +4,6 @@ from matplotlib.pyplot import subplots
 import numpy as np
 from scipy.sparse import bmat
 
-import meshio
 from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
 
