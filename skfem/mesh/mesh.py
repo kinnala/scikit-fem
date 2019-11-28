@@ -288,9 +288,10 @@ class Mesh():
                                  "a dictionary of ndarrays.")
 
         if cell_data is not None:
-            if not isinstance(point_data, dict):
+            if not isinstance(cell_data, dict):
                 raise ValueError("cell_data should be "
                                  "a dictionary of ndarrays.")
+            cell_data = {self.meshio_type: cell_data}
 
         cells = {self.meshio_type: self.t.T}
         mesh = meshio.Mesh(self.p.T, cells, point_data, cell_data)
