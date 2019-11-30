@@ -1,7 +1,5 @@
-from pathlib import Path
 from skfem import *
 from skfem.models.poisson import laplace, unit_load
-import numpy as np
 
 m = MeshQuad()
 m.refine(2)

@@ -1,6 +1,5 @@
 from skfem import *
 import numpy as np
-import matplotlib.pyplot as plt
 
 m = MeshTri()
 m.refine(5)
