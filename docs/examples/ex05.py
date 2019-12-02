@@ -1,4 +1,3 @@
-from pathlib import Path
 from skfem import *
 
 m = MeshTri()
