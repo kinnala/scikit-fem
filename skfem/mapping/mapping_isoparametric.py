@@ -8,10 +8,6 @@ from skfem.element import Element
 from .mapping import Mapping
 
 
-NEWTON_MAX_ITERS = 50
-NEWTON_TOL = 1e-8
-
-
 class MappingIsoparametric(Mapping):
     """An isoparametric mapping, e.g., for quadrilateral and
     hexahedral elements."""
@@ -133,20 +129,18 @@ class MappingIsoparametric(Mapping):
         else:
             raise NotImplementedError("!")
 
-    def invF(self, x, tind=None):
+    def invF(self, x, tind=None, newton_max_iters = 50, newton_tol = 1e-8):
         """Newton iteration for evaluating inverse isoparametric mapping."""
         X = np.zeros(x.shape)
-        for _ in range(NEWTON_MAX_ITERS):
+        for _ in range(newton_max_iters):
             F = self.F(X, tind)
             invDF = self.invDF(X, tind)
             dX = np.einsum('ijkl,jkl->ikl', invDF, x - F)
             X = X + dX
-            if (np.linalg.norm(dX, 1, (0, 2)) < NEWTON_TOL).all():
-                break
-        if _ == NEWTON_MAX_ITERS - 1:
-            raise Exception(("Newton iteration didn't converge "
-                             "up to TOL={}".format(NEWTON_TOL)))
-        return X
+            if (np.linalg.norm(dX, 1, (0, 2)) < newton_tol).all():
+                return X
+        raise Exception(("Newton iteration didn't converge "
+                         "up to TOL={}".format(newton_tol)))
 
     def F(self, X, tind=None):
         return np.array([self.map(i, X, tind) for i in range(X.shape[0])])
