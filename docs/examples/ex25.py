@@ -10,9 +10,10 @@ height = 1.
 length = 10.
 peclet = 1e2
 
-mesh = (MeshLine(np.linspace(0, length, ceil(mesh_inlet_n / height * length)))
-        * MeshLine(np.linspace(0, height / 2, mesh_inlet_n)))._splitquads()
-basis = InteriorBasis(mesh, ElementTriP2())
+mesh = MeshQuad.init_tensor(
+    np.linspace(0, length, ceil(mesh_inlet_n / height * length)),
+    np.linspace(0, height / 2, mesh_inlet_n))
+basis = InteriorBasis(mesh, ElementQuad2())
 
 
 @bilinear_form
