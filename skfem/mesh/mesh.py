@@ -1,7 +1,7 @@
 import warnings
 from typing import Dict, Optional, Tuple,\
                    Type, TypeVar, Union,\
-                   Callable, Any
+                   Callable
 
 import numpy as np
 from numpy import ndarray
