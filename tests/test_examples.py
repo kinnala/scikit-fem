@@ -192,7 +192,6 @@ class TestEx25(unittest.TestCase):
         self.assertAlmostEqual(np.mean(ex.t0), mu, places=2)
 
 
-
 class TestEx26(unittest.TestCase):
     def runTest(self):
         pass
