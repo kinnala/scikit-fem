@@ -48,9 +48,6 @@ class Mesh():
         Named subsets of elements.
     boundaries
         Named subsets of boundary facets.
-    external
-        If Mesh is loaded from external format (object), the original
-        representation is kept here.
 
     """
 
@@ -64,7 +61,6 @@ class Mesh():
 
     subdomains: Optional[Dict[str, ndarray]] = None
     boundaries: Optional[Dict[str, ndarray]] = None
-    external: Any = None
 
     def __init__(self):
         """Check that p and t are C_CONTIGUOUS as this leads
