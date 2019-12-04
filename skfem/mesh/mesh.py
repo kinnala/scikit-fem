@@ -1,7 +1,7 @@
 import warnings
 from typing import Dict, Optional, Tuple,\
                    Type, TypeVar, Union,\
-                   Callable, Any
+                   Callable
 
 import numpy as np
 from numpy import ndarray
@@ -48,9 +48,6 @@ class Mesh():
         Named subsets of elements.
     boundaries
         Named subsets of boundary facets.
-    external
-        If Mesh is loaded from external format (object), the original
-        representation is kept here.
 
     """
 
@@ -64,7 +61,6 @@ class Mesh():
 
     subdomains: Optional[Dict[str, ndarray]] = None
     boundaries: Optional[Dict[str, ndarray]] = None
-    external: Any = None
 
     def __init__(self):
         """Check that p and t are C_CONTIGUOUS as this leads
@@ -288,9 +284,10 @@ class Mesh():
                                  "a dictionary of ndarrays.")
 
         if cell_data is not None:
-            if not isinstance(point_data, dict):
+            if not isinstance(cell_data, dict):
                 raise ValueError("cell_data should be "
                                  "a dictionary of ndarrays.")
+            cell_data = {self.meshio_type: cell_data}
 
         cells = {self.meshio_type: self.t.T}
         mesh = meshio.Mesh(self.p.T, cells, point_data, cell_data)

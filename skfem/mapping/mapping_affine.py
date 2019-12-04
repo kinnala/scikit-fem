@@ -5,6 +5,7 @@ from .mapping import Mapping
 
 class MappingAffine(Mapping):
     """An affine mapping for simplical elements."""
+
     def __init__(self, mesh):
         dim = mesh.p.shape[0]
 

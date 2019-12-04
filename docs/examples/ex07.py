@@ -1,6 +1,5 @@
 from skfem import *
 from skfem.models.poisson import laplace, unit_load
-import matplotlib.pyplot as plt
 
 m = MeshTri.init_sqsymmetric()
 m.refine()

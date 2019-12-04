@@ -46,6 +46,10 @@ in turn requires the CHOLMOD library from `SuiteSparse
 <http://faculty.cse.tamu.edu/davis/suitesparse.html>`_.  The latter may not be
 available for all systems.
 
+.. figure:: ex19.gif
+
+   The decaying temperature field
+
 The complete source code reads as follows:
 
 .. literalinclude:: ex19.py

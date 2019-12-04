@@ -1,21 +1,24 @@
 """Import any formats supported by meshio."""
-import meshio
+
+from typing import Tuple
 import warnings
+
 import numpy as np
 import skfem
 
+import meshio
+
 
 def from_meshio(m):
-    # detect type
+    """Convert meshio mesh into :class:`skfem.mesh.Mesh`."""
     meshio_type, mesh_type = detect_type(m)
 
     def strip_extra_coordinates(p):
         if meshio_type == "line":
             return p[:, :1]
-        elif meshio_type == "quad" or meshio_type == "triangle":
+        if meshio_type in ("quad", "triangle"):
             return p[:, :2]
-        else:
-            return p
+        return p
 
     # create p and t
     p = np.ascontiguousarray(strip_extra_coordinates(m.points).T)
@@ -40,8 +43,7 @@ def from_meshio(m):
             return None
 
         # find subdomains
-        if meshio_type in m.cell_data and\
-           'gmsh:physical' in m.cell_data[meshio_type]:
+        if meshio_type in m.cell_data and 'gmsh:physical' in m.cell_data[meshio_type]:
             elements_tag = m.cell_data[meshio_type]['gmsh:physical']
 
             subdomains = {}
@@ -52,8 +54,7 @@ def from_meshio(m):
                 subdomains[find_tagname(tag)] = t_set
 
         # find tagged boundaries
-        if bnd_type in m.cell_data and\
-           'gmsh:physical' in m.cell_data[bnd_type]:
+        if bnd_type in m.cell_data and 'gmsh:physical' in m.cell_data[bnd_type]:
             facets = m.cells[bnd_type]
             facets_tag = m.cell_data[bnd_type]['gmsh:physical']
             bndfacets = mtmp.boundary_facets()
@@ -88,16 +89,16 @@ def from_file(filename):
     return from_meshio(meshio.read(filename))
 
 
-def detect_type(m):
-    if 'tetra' in m.cell_data:
+def detect_type(m: meshio.Mesh) -> Tuple[str, skfem.Mesh]:
+    if 'tetra' in m.cells:
         return 'tetra', skfem.MeshTet
-    elif 'hexahedron' in m.cell_data:
+    elif 'hexahedron' in m.cells:
         return 'hexahedron', skfem.MeshHex
-    elif 'triangle' in m.cell_data:
+    elif 'triangle' in m.cells:
         return 'triangle', skfem.MeshTri
-    elif 'quad' in m.cell_data:
+    elif 'quad' in m.cells:
         return 'quad', skfem.MeshQuad
-    elif 'line' in m.cell_data:
+    elif 'line' in m.cells:
         return 'line', skfem.MeshLine
     else:
         raise Exception("Unknown mesh type.")
