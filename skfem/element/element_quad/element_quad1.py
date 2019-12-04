@@ -13,7 +13,7 @@ class ElementQuad1(ElementH1):
                         [-1., 1.]])
 
     def lbasis(self, X, i):
-        x, y = X[0, :], X[1, :]
+        x, y = X
 
         if i == 0:
             phi = 0.25 * (1 - x) * (1 - y)
