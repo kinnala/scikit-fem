@@ -29,8 +29,7 @@ x[I] = solve(Aint, bint,
 
 try:
     from pyamg import smoothed_aggregation_solver
-
-    tol = 1e-6
+    
     def solver_amg_sa(**kwargs) -> 'LinearSolver':
 
         if kwargs.pop('verbose', False):
@@ -45,11 +44,8 @@ try:
 
         return solver
 
-    x[I] = solve(Aint, bint,
-                 solver=solver_amg_sa(verbose=verbose,
-                                      tol=tol,
-                                      accel='cg'))
-    print(smoothed_aggregation_solver.__name__, 'converged to tol =', tol)
+    x[I] = solve(Aint, bint, solver=solver_amg_sa(verbose=verbose, accel='cg'))
+    print('CG + AMG(SA) converged to default tol')
     
 except ImportError:
     print('Skipping PyAMG')
