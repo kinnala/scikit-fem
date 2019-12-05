@@ -7,5 +7,9 @@ Poisson using linear tetrahedra
 
    This is an undocumented example. You could help us to improve it; see :ref:`contribute`.
 
+.. note::
+
+   This example demonstrates a number of iterative linear solvers, including one from the external package `PyAMG <https://pypi.org/project/pyamg/>`_ if installed.
+
 .. literalinclude:: ex09.py
    :linenos:
