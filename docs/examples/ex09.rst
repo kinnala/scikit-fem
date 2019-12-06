@@ -1,7 +1,7 @@
 .. _tetrapoisson:
 
-Poisson using linear tetrahedra
--------------------------------
+Preconditioned conjugate gradients for Poisson in cube
+------------------------------------------------------
 
 .. note::
 
