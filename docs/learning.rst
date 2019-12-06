@@ -40,6 +40,7 @@ Documented examples
    examples/ex05.rst
    examples/ex28.rst
    examples/ex29.rst
+   examples/ex09.rst
    
 Stubs and undocumented examples
 ###############################
@@ -49,7 +50,6 @@ Stubs and undocumented examples
    examples/ex03.rst
    examples/ex07.rst
    examples/ex08.rst
-   examples/ex09.rst
    examples/ex10.rst
    examples/ex11.rst
    examples/ex15.rst
