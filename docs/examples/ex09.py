@@ -34,7 +34,7 @@ try:
         return smoothed_aggregation_solver(A, **kwargs).aspreconditioner()
 
     preconditioners.append(build_pc_amgsa(Aint))
-    
+
 except ImportError:
     print('Skipping PyAMG')
 
@@ -44,7 +44,7 @@ try:
     def build_pc_amgcl(A: spmatrix, **kwargs) -> LinearOperator:
         """AMG preconditioner"""
 
-        if hasattr(pyamgcl, 'amgcl'): # v. 1.3.99+
+        if hasattr(pyamgcl, 'amgcl'):  # v. 1.3.99+
             return pyamgcl.amgcl(A, **kwargs)
         else:
             return pyamgcl.amg(A, **kwargs)
@@ -56,8 +56,6 @@ except ImportError:
 
 for pc in preconditioners:
     x[I] = solve(Aint, bint, solver=solver_iter_pcg(M=pc, verbose=verbose))
-
-
 
 
 if verbose:
