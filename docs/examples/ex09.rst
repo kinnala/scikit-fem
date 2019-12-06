@@ -5,7 +5,7 @@ Preconditioned conjugate gradient for 3-D Poisson
 
 .. note::
 
-   This example demonstrates a number of preconditioners for iterative linear solvers, including from the external packages `PyAMG <https://pypi.org/project/pyamg/>`_ and `pyamgcl <https://pypi.org/project/pyamgcl/>`_, if installed.
+   This example will make use of the external packages `PyAMG <https://pypi.org/project/pyamg/>`_ or `pyamgcl <https://pypi.org/project/pyamgcl/>`_, if installed.
 
 Whereas most of the examples thus far have used direct linear solvers, this is not appropriate for larger problems, which includes most of those posed in three dimensions.
    
