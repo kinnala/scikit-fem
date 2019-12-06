@@ -21,13 +21,30 @@ if __name__ == "__main__":
     verbose = True
 else:
     verbose = False
-# run conjugate gradient with the default preconditioner
-Aint, bint = condense(A, b, I=I, expand=False)
-x[I] = solve(Aint, bint, solver=solver_iter_pcg(verbose=verbose))
 
-# run conjugate gradient with the incomplete LU preconditioner
-x[I] = solve(Aint, bint,
-             solver=solver_iter_pcg(M=build_pc_ilu(Aint), verbose=verbose))
+Aint, bint = condense(A, b, I=I, expand=False)
+
+preconditioners = [None, build_pc_ilu(Aint)]
+
+try:
+    import pyamgcl
+
+    def build_pc_amgcl(A: spmatrix, **kwargs) -> LinearOperator:
+        """AMG preconditioner"""
+
+        if hasattr(pyamgcl, 'amgcl'): # v. 1.3.99+
+            return pyamgcl.amgcl(A, **kwargs)
+        else:
+            return pyamgcl.amg(A, **kwargs)
+
+    preconditioners.append(build_pc_amgcl(Aint))
+
+except ImportError:
+    print('Skipping pyamgcl')
+
+for pc in preconditioners:
+    x[I] = solve(Aint, bint, solver=solver_iter_pcg(M=pc, verbose=verbose))
+
 
 try:
     from pyamg import smoothed_aggregation_solver
@@ -52,22 +69,6 @@ try:
 except ImportError:
     print('Skipping PyAMG')
 
-try:
-    import pyamgcl
-
-    def build_pc_amgcl(A: spmatrix, **kwargs) -> LinearOperator:
-        """AMG preconditioner"""
-
-        if hasattr(pyamgcl, 'amgcl'): # v. 1.3.99+
-            return pyamgcl.amgcl(A, **kwargs)
-        else:
-            return pyamgcl.amg(A, **kwargs)
-    
-
-    x[I] = solve(Aint, bint, solver=solver_iter_pcg(M=build_pc_amgcl(Aint),
-                                                    verbose=verbose))
-except ImportError:
-    print('Skipping pyamgcl')
 
 if verbose:
     from os.path import splitext
