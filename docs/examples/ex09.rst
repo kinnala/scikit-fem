@@ -8,8 +8,7 @@ Preconditioned conjugate gradients for Poisson in cube
    This example demonstrates a number of preconditioners for iterative linear solvers, including from the external packages `PyAMG <https://pypi.org/project/pyamg/>`_ and `pyamgcl <https://pypi.org/project/pyamgcl/>`_, if installed.
 
 
-    Direct methods fail to scale beyond a certain size, typically of the order of a few millions of unknowns, due to their intrinsic memory requirements and shear computational cost. This makes preconditioned iterative methods the only
-viable approach for solution of large scale problems.  (Demidov 2019)
+    Direct methods fail to scale beyond a certain size, typically of the order of a few millions of unknowns, due to their intrinsic memory requirements and shear computational cost. This makes preconditioned iterative methods the only viable approach for solution of large scale problems.  (Demidov 2019)
 
 scikit-fem provides access to simple preconditioners (diagonal and incomplete-LU) from SciPy, but it's also easy to connect others from external packages, e.g. for algebraic multigrid.
 
