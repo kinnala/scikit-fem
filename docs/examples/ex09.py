@@ -27,6 +27,18 @@ Aint, bint = condense(A, b, I=I, expand=False)
 preconditioners = [None, build_pc_ilu(Aint)]
 
 try:
+    from pyamg import smoothed_aggregation_solver
+
+    def build_pc_amgsa(A: spmatrix, **kwargs) -> LinearOperator:
+        """AMG (smoothed aggregation) precondtioner"""
+        return smoothed_aggregation_solver(A, **kwargs).aspreconditioner()
+
+    preconditioners.append(build_pc_amgsa(Aint))
+    
+except ImportError:
+    print('Skipping PyAMG')
+
+try:
     import pyamgcl
 
     def build_pc_amgcl(A: spmatrix, **kwargs) -> LinearOperator:
@@ -46,28 +58,6 @@ for pc in preconditioners:
     x[I] = solve(Aint, bint, solver=solver_iter_pcg(M=pc, verbose=verbose))
 
 
-try:
-    from pyamg import smoothed_aggregation_solver
-
-    def solver_amg_sa(**kwargs) -> 'LinearSolver':
-
-        if kwargs.pop('verbose', False):
-
-            def callback(x):
-                print(np.linalg.norm(x))
-
-            kwargs['callback'] = callback
-
-        def solver(A, b):
-            return smoothed_aggregation_solver(A).solve(b, **kwargs)
-
-        return solver
-
-    x[I] = solve(Aint, bint, solver=solver_amg_sa(verbose=verbose, accel='cg'))
-    print('CG + AMG(SA) from PyAMG converged to default tol')
-
-except ImportError:
-    print('Skipping PyAMG')
 
 
 if verbose:
