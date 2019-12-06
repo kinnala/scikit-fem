@@ -131,9 +131,9 @@ class TestEx16(unittest.TestCase):
         self.assertTrue(docs.examples.ex16.ks[-1], 30.309720458315521)
 
 
-# class TestEx17(unittest.TestCase):
-#     def runTest(self):
-#         import docs.examples.ex17 as ex
+class TestEx17(unittest.TestCase):
+    def runTest(self):
+        import docs.examples.ex17 as ex
 
 
 class TestEx18(unittest.TestCase):
