@@ -5,10 +5,6 @@ Poisson using linear tetrahedra
 
 .. note::
 
-   This is an undocumented example. You could help us to improve it; see :ref:`contribute`.
-
-.. note::
-
    This example demonstrates a number of preconditioners for iterative linear solvers, including from the external packages `PyAMG <https://pypi.org/project/pyamg/>`_ and `pyamgcl <https://pypi.org/project/pyamgcl/>`_, if installed.
 
 
