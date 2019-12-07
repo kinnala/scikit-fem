@@ -5,7 +5,7 @@ from skfem.assembly import bilinear_form, linear_form
 
 @bilinear_form
 def divergence(u, du, v, dv, w):
-    from .helpers import div    
+    from .helpers import div
     return div(du) * v
 
 
