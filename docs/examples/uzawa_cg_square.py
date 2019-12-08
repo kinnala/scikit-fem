@@ -2,18 +2,16 @@ from skfem import *
 from skfem.models.poisson import vector_laplace, laplace
 from skfem.models.general import divergence, rot
 
-from time import time
-
 import numpy as np
 from scipy.sparse import csr_matrix
 from scipy.sparse.linalg import cg, LinearOperator
 
-from sksparse.cholmod import cholesky
+import pyamgcl
 
-mesh = MeshTri.init_tensor(*(np.linspace(0., 1., 2**5),)*2)
+mesh = MeshQuad.init_tensor(*(np.linspace(-.5, .5, 2**5),)*2)
 
-element = {'u': ElementVectorH1(ElementTriP2()),
-           'p': ElementTriP1()}
+element = {'u': ElementVectorH1(ElementQuad2()),
+           'p': ElementQuad1()}
 basis = {variable: InteriorBasis(mesh, e, intorder=3)
          for variable, e in element.items()}
 
@@ -23,20 +21,31 @@ def body_force(v, dv, w):
     return w.x[0] * v[1]
 
 
-tic = time()
+def build_pc_amgcl(A: csr_matrix, **kwargs) -> LinearOperator:
+    """AMG preconditioner"""
+
+    if hasattr(pyamgcl, 'amgcl'):  # v. 1.3.99+
+        return pyamgcl.amgcl(A, **kwargs)
+    else:
+        return pyamgcl.amg(A, **kwargs)
+
+
 velocity = np.zeros(basis['u'].N)
 A = asm(vector_laplace, basis['u'])
 B = asm(divergence, basis['u'], basis['p'])
 f = asm(body_force, basis['u'])
 D = basis['u'].get_dofs().all()
-backsolve = cholesky(condense(A, D=D, expand=False).T)  # cholesky prefers CSC
+Aint = condense(A, D=D, expand=False)
+solver = pyamgcl.solver(build_pc_amgcl(Aint))
 I = basis['u'].complement_dofs(D)
 
 
 def flow(pressure: np.ndarray) -> np.ndarray:
     """compute the velocity corresponding to a guessed pressure"""
-    velocity[I] = backsolve(condense(csr_matrix(A.shape),
-                                     f + B.T @ pressure, I=I)[1])
+    velocity[I] = solve(Aint,
+                        condense(csr_matrix(A.shape),
+                                 f + B.T @ pressure, I=I)[1],
+                        solver=solver)
     return velocity
 
 
@@ -61,9 +70,8 @@ if info != 0:
                        'illegal input or breakdown')
 
 velocity = flow(pressure)
-print('elapsed time:', time() - tic)
 
-basis['psi'] = InteriorBasis(mesh, ElementTriP2())
+basis['psi'] = InteriorBasis(mesh, ElementQuad2())
 psi = np.zeros(A.shape[0])
 D = basis['psi'].get_dofs().all()
 vorticity = asm(rot, basis['psi'],
@@ -99,6 +107,6 @@ if __name__ == '__main__':
     ax.get_figure().savefig(f'{name}_velocity.png')
 
     ax = mesh.draw()
-    ax.tricontour(Triangulation(mesh.p[0, :], mesh.p[1, :], mesh.t.T),
+    ax.tricontour(Triangulation(*mesh.p, mesh._splitquads().t.T),
                   psi[basis['psi'].nodal_dofs.flatten()])
     ax.get_figure().savefig(f'{name}_stream-function.png')
