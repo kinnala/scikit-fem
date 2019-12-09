@@ -133,7 +133,7 @@ class TestEx16(unittest.TestCase):
 
 class TestEx17(unittest.TestCase):
     def runTest(self):
-        pass
+        import docs.examples.ex17 as ex
 
 
 # TODO: no dmsh in testsuite
