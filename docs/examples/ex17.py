@@ -29,8 +29,9 @@ def make_mesh(a: float,         # radius of wire
     geom.add_physical(insulation.plane_surface, 'insulation')
     geom.add_physical(insulation.line_loop.lines, 'convection')
     geom.add_raw_code('Mesh.RecombineAll=1;')
-    
-    return from_meshio(generate_mesh(geom, dim=2))
+
+    return from_meshio(generate_mesh(geom, dim=2),
+                       force_mesh_type='quad')
 
 
 mesh = make_mesh(*radii)
