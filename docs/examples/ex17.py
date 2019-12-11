@@ -28,7 +28,8 @@ def make_mesh(a: float,         # radius of wire
     insulation = geom.add_circle(origin, b, dx, holes=[wire.line_loop])
     geom.add_physical(insulation.plane_surface, 'insulation')
     geom.add_physical(insulation.line_loop.lines, 'convection')
-    geom.add_raw_code('Mesh.RecombineAll=1;')
+    geom.add_raw_code('Mesh.RecombineAll=1;\n')
+    geom.add_raw_code('Mesh.RecombinationAlgorithm=2;\n')
     
     return from_meshio(generate_mesh(geom, dim=2))
 
