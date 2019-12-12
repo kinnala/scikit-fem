@@ -27,10 +27,7 @@ class Mesh3D(Mesh):
             the output set.
 
         """
-        mx = 0.5 * (self.p[0, self.edges[0, :]] + self.p[0, self.edges[1, :]])
-        my = 0.5 * (self.p[1, self.edges[0, :]] + self.p[1, self.edges[1, :]])
-        mz = 0.5 * (self.p[2, self.edges[0, :]] + self.p[2, self.edges[1, :]])
-        return np.nonzero(test(mx, my, mz))[0]
+        return np.nonzero(test(self.p[:, self.edges].mean(1)))[0]
 
     def boundary_edges(self) -> ndarray:
         """Return an array of boundary edge indices."""
