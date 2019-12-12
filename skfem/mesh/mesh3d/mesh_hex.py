@@ -316,7 +316,7 @@ class MeshHex(Mesh3D):
         import meshio
 
         # vtk requires a different ordering
-        t = self.t[[0, 3, 6, 2, 1, 5, 7, 4], :]
+        t = self.t[[0, 3, 6, 2, 1, 5, 7, 4]]
 
         if point_data is not None:
             if not isinstance(point_data, dict):

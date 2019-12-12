@@ -53,11 +53,11 @@ def from_meshio(m, force_mesh_type=None):
     p = np.ascontiguousarray(strip_extra_coordinates(m.points).T)
     t = np.ascontiguousarray(m.cells[meshio_type].T)
 
-    # meshio (following VTK) numbers hexahedral points differently.
-    
     mtmp = mesh_type(p,
                      (t[[0, 4, 3, 1, 7, 5, 2, 6]]
-                      if meshio_type == 'hexahedron' else t))
+                      if meshio_type == 'hexahedron'
+                      # vtk requires a different ordering
+                      else t))
 
     try:
         # element to boundary element type mapping
