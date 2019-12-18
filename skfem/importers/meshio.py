@@ -1,6 +1,7 @@
 """Import any formats supported by meshio."""
 
 from typing import Tuple
+from collections import OrderedDict
 import warnings
 
 import numpy as np
@@ -9,9 +10,37 @@ import skfem
 import meshio
 
 
-def from_meshio(m):
-    """Convert meshio mesh into :class:`skfem.mesh.Mesh`."""
-    meshio_type, mesh_type = detect_type(m)
+MESH_TYPE_MAPPING = OrderedDict([
+    ('tetra', skfem.MeshTet),
+    ('hexahedron', skfem.MeshHex),
+    ('triangle', skfem.MeshTri),
+    ('quad', skfem.MeshQuad),
+    ('line', skfem.MeshLine),
+])
+
+
+def from_meshio(m, force_mesh_type=None):
+    """Convert meshio mesh into :class:`skfem.mesh.Mesh`.
+
+    Parameters
+    ----------
+    m
+        The mesh object from meshio.
+    force_mesh_type
+        An optional string forcing the mesh type if automatic detection
+        fails. See skfem.importers.meshio.MESH_TYPE_MAPPING for possible values.
+
+    """
+
+    if force_mesh_type is None:
+        for k, v in MESH_TYPE_MAPPING.items():
+            # find first if match
+            if k in m.cells:
+                meshio_type, mesh_type = (k, MESH_TYPE_MAPPING[k])
+                break
+    else:
+        meshio_type, mesh_type = (force_mesh_type,
+                                  MESH_TYPE_MAPPING[force_mesh_type])
 
     def strip_extra_coordinates(p):
         if meshio_type == "line":
@@ -24,7 +53,11 @@ def from_meshio(m):
     p = np.ascontiguousarray(strip_extra_coordinates(m.points).T)
     t = np.ascontiguousarray(m.cells[meshio_type].T)
 
-    mtmp = mesh_type(p, t)
+    mtmp = mesh_type(p,
+                     (t[[0, 4, 3, 1, 7, 5, 2, 6]]
+                      if meshio_type == 'hexahedron'
+                      # vtk requires a different ordering
+                      else t))
 
     try:
         # element to boundary element type mapping
@@ -87,18 +120,3 @@ def from_meshio(m):
 
 def from_file(filename):
     return from_meshio(meshio.read(filename))
-
-
-def detect_type(m: meshio.Mesh) -> Tuple[str, skfem.Mesh]:
-    if 'tetra' in m.cells:
-        return 'tetra', skfem.MeshTet
-    elif 'hexahedron' in m.cells:
-        return 'hexahedron', skfem.MeshHex
-    elif 'triangle' in m.cells:
-        return 'triangle', skfem.MeshTri
-    elif 'quad' in m.cells:
-        return 'quad', skfem.MeshQuad
-    elif 'line' in m.cells:
-        return 'line', skfem.MeshLine
-    else:
-        raise Exception("Unknown mesh type.")
