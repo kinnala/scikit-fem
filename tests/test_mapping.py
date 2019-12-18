@@ -22,7 +22,7 @@ class TestIsoparamNormals(unittest.TestCase):
                 if itr == jtr:
                     self.assertTrue((fb.normals[jtr][case] == -1).all())
                 else:
-                    self.assertTrue((fb.normals[jtr][case] == 0).all())
+                    self.assertTrue((np.abs(fb.normals[jtr][case]) < 1e-14).all())
 
 
 class TestIsoparamNormalsQuad(TestIsoparamNormals):
