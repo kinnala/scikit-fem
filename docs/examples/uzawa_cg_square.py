@@ -4,11 +4,9 @@ from skfem.models.general import divergence, rot
 
 import numpy as np
 from scipy.sparse import csr_matrix
-from scipy.sparse.linalg import cg, LinearOperator
+from scipy.sparse.linalg import cg, LinearOperator, minres
 
-import pyamgcl
-
-mesh = MeshQuad.init_tensor(*(np.linspace(-.5, .5, 2**5),)*2)
+mesh = MeshQuad.init_tensor(*(np.linspace(-.5, .5, 2**6),)*2)
 
 element = {'u': ElementVectorH1(ElementQuad2()),
            'p': ElementQuad1()}
@@ -21,27 +19,19 @@ def body_force(v, dv, w):
     return w.x[0] * v[1]
 
 
-def build_pc_amgcl(A: csr_matrix, **kwargs) -> LinearOperator:
-    """AMG preconditioner"""
-
-    if hasattr(pyamgcl, 'amgcl'):  # v. 1.3.99+
-        return pyamgcl.amgcl(A, **kwargs)
-    else:
-        return pyamgcl.amg(A, **kwargs)
-
-
-velocity = np.zeros(basis['u'].N)
 A = asm(vector_laplace, basis['u'])
 B = asm(divergence, basis['u'], basis['p'])
 f = asm(body_force, basis['u'])
 D = basis['u'].get_dofs().all()
 Aint = condense(A, D=D, expand=False)
-solver = pyamgcl.solver(build_pc_amgcl(Aint))
+solver = solver_iter_krylov(minres, M=build_pc_ilu(Aint))
 I = basis['u'].complement_dofs(D)
+
 
 
 def flow(pressure: np.ndarray) -> np.ndarray:
     """compute the velocity corresponding to a guessed pressure"""
+    velocity = np.zeros(basis['u'].N)
     velocity[I] = solve(Aint,
                         condense(csr_matrix(A.shape),
                                  f + B.T @ pressure, I=I)[1],
