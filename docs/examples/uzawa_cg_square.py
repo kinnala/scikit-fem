@@ -1,5 +1,7 @@
+from functools import partial
+
 from skfem import *
-from skfem.models.poisson import vector_laplace, laplace
+from skfem.models.poisson import vector_laplace, laplace, mass
 from skfem.models.general import divergence, rot
 
 import numpy as np
@@ -51,13 +53,10 @@ K = LinearOperator((basis['p'].N,) * 2,
                    lambda p: dilatation(p) - dilatation0,
                    dtype=pressure.dtype)
 
-pressure, info = minres(K, -dilatation0)
-
-if info != 0:
-    raise RuntimeError('conjugate gradient '
-                       f'not converging after {info} iterations'
-                       if info > 0 else
-                       'illegal input or breakdown')
+pressure = solve(K, -dilatation0,
+                 solver=solver_iter_krylov(
+                     minres,
+                     M=build_pc_diag(asm(mass, basis['p']))))
 
 velocity = flow(pressure)
 
