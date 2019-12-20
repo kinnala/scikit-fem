@@ -24,7 +24,7 @@ B = asm(divergence, basis['u'], basis['p'])
 f = asm(body_force, basis['u'])
 D = basis['u'].get_dofs().all()
 Aint = condense(A, D=D, expand=False)
-solver = solver_iter_krylov(minres, M=build_pc_ilu(Aint))
+solver = solver_iter_krylov(cg, M=build_pc_ilu(Aint))
 I = basis['u'].complement_dofs(D)
 
 
@@ -51,7 +51,7 @@ K = LinearOperator((basis['p'].N,) * 2,
                    lambda p: dilatation(p) - dilatation0,
                    dtype=pressure.dtype)
 
-pressure, info = cg(K, -dilatation0)
+pressure, info = minres(K, -dilatation0)
 
 if info != 0:
     raise RuntimeError('conjugate gradient '
