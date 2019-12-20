@@ -74,14 +74,6 @@ if __name__ == '__main__':
     from matplotlib.tri import Triangulation
 
     name = splitext(argv[0])[0]
-
-    mesh.save(f'{name}_velocity.vtk', {'u': velocity[basis['u'].nodal_dofs].T})
-
-    print(basis['psi'].interpolator(psi)(np.zeros((2, 1)))[0])
-
-    print(basis['p'].interpolator(pressure)(np.array([[-0.5, 0.5],
-                                                      [0.5, 0.5]])))
-
     mesh.plot(pressure, colorbar=True).get_figure().savefig(
         f'{name}_pressure.png')
 
