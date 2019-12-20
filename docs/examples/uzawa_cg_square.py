@@ -1,5 +1,3 @@
-from functools import partial
-
 from skfem import *
 from skfem.models.poisson import vector_laplace, laplace, mass
 from skfem.models.general import divergence, rot
@@ -28,7 +26,6 @@ D = basis['u'].get_dofs().all()
 Aint = condense(A, D=D, expand=False)
 solver = solver_iter_krylov(cg, M=build_pc_ilu(Aint))
 I = basis['u'].complement_dofs(D)
-
 
 
 def flow(pressure: np.ndarray) -> np.ndarray:
@@ -87,13 +84,6 @@ if __name__ == '__main__':
 
     mesh.plot(pressure, colorbar=True).get_figure().savefig(
         f'{name}_pressure.png')
-
-    ax = mesh.draw()
-    velocity1 = velocity[basis['u'].nodal_dofs]
-    ax.quiver(mesh.p[0, :], mesh.p[1, :],
-              velocity1[0, :], velocity1[1, :],
-              mesh.p[0, :])         # colour by buoyancy
-    ax.get_figure().savefig(f'{name}_velocity.png')
 
     ax = mesh.draw()
     ax.tricontour(Triangulation(*mesh.p, mesh._splitquads().t.T),
