@@ -217,11 +217,10 @@ class TestEx29(unittest.TestCase):
                         5e-3)
 
 
-class TestUzawaCGSquare(unittest.TestCase):
+class TestEx30(unittest.TestCase):
     def runTest(self):
-        import docs.examples.uzawa_cg_square as ex
-        self.assertAlmostEqual(ex.basis['psi'].interpolator(ex.psi)(
-            np.zeros((2, 1)))[0], 0.001265, delta=1e-6)
+        from docs.examples.ex30 import psi0
+        self.assertAlmostEqual(psi0, 0.162/128, delta=1e-6)
 
 
 if __name__ == '__main__':

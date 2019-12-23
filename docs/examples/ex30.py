@@ -64,6 +64,7 @@ vorticity = asm(rot, basis['psi'],
                 w=[basis['psi'].interpolate(velocity[i::2])
                    for i in range(2)])
 psi = solve(*condense(asm(laplace, basis['psi']), vorticity, D=D))
+psi0 = basis['psi'].interpolator(psi)(np.zeros((2, 1)))[0]
 
 
 if __name__ == '__main__':
@@ -73,6 +74,8 @@ if __name__ == '__main__':
 
     from matplotlib.tri import Triangulation
 
+    print(psi0)
+    
     name = splitext(argv[0])[0]
     mesh.plot(pressure, colorbar=True).get_figure().savefig(
         f'{name}_pressure.png')
