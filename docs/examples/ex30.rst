@@ -10,7 +10,7 @@ Direct solvers for the Stokes equation do not scale; iterative solvers are requi
 A classical iterative procedure for the Stokes equation is the Uzawa congugate gradient method in which an auxiliary operator is formed which maps a guessed pressure field to the divergence of the velocity field which satisfies the momentum equation with that pressure [GLOWINSKI-PIRONNEAU]_
 [BRAESS]_.
 
-.. [BRAESS] Braess, D. (2001). *Finite Elements.*_ Cambridge University Press, §IV.5.1
+.. [BRAESS] Braess, D. (2001). *Finite Elements.* Cambridge University Press, §IV.5.1
   
 .. [GLOWINSKI-PIRONNEAU] Glowinski, R. & Pironneau, O. (1979). On numerical methods for the Stokes problem. In R. Glowinski, E. Y. Rodin & O. C. Zienkiewicz (eds.), *Energy Methods in Finite Element Analysis* (pp. 243–264), Wiley
 
