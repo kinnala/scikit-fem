@@ -15,7 +15,7 @@ A classical iterative procedure for the Stokes equation is the Uzawa congugate g
 
 This operator is affine but subtracting the divergence given by zero pressure gives a linear operator which can be solved by a Krylov method, classically the method of conjugate gradients.
 
-At each iteration, the above vector Poisson equation is solved for a velocity field.  As the problem gets larger, this too should be solved iteratively.  The method of conjugate gradients could be used for this too, but a catch is that :func:scipy.sparse.linalg.cg is not re-entrant can so cannot be used at both levels.  This is simply avoided here by using :func:scipy.sparse.linalg.minres for the pressure.
+At each iteration, the above vector Poisson equation is solved for a velocity field.  As the problem gets larger, this too should be solved iteratively.  The method of conjugate gradients could be used for this too, but a catch is that :func:`scipy.sparse.linalg.cg` is not re-entrant can so cannot be used at both levels.  This is simply avoided here by using :func:`scipy.sparse.linalg.minres` for the pressure.
 
 .. figure:: ex30_stream-lines.png
 
