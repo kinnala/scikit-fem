@@ -7,11 +7,11 @@ This example solves :ref:`stokesex` iteratively in a square domain.
 
 Direct solvers for the Stokes equation do not scale; iterative solvers are required for all but the smallest two-dimensional problems.  A square domain is used here instead of the disk since it easier to generate the finer mesh required to demonstrate the time taken for a slightly larger problem.
 
-A classical iterative procedure for the Stokes equation is the Uzawa congugate gradient method [GLOWINSKI-PIRONNEAU] [BRAESS] in which an auxiliary operator is formed which maps a guessed pressure field to the divergence of the velocity field which satisfies the momentum equation with that pressure.
+A classical iterative procedure for the Stokes equation is the Uzawa congugate gradient method [GLOWINSKI-PIRONNEAU]_ [BRAESS]_ in which an auxiliary operator is formed which maps a guessed pressure field to the divergence of the velocity field which satisfies the momentum equation with that pressure.
 
-.. [BRAESS]_ Braess, D. (2001). _Finite Elements._ Cambridge University Press, §IV.5.1
+.. [BRAESS] Braess, D. (2001). *Finite Elements.*_ Cambridge University Press, §IV.5.1
   
-.. [GLOWINSKI-PIRONNEAU]_ Glowinski, R. & Pironneau, O. (1979). On numerical methods for the Stokes problem. In R. Glowinski, E. Y. Rodin & O. C. Zienkiewicz (eds.), _Energy Methods in Finite Element Analysis_ (pp. 243–264), Wiley
+.. [GLOWINSKI-PIRONNEAU] Glowinski, R. & Pironneau, O. (1979). On numerical methods for the Stokes problem. In R. Glowinski, E. Y. Rodin & O. C. Zienkiewicz (eds.), *Energy Methods in Finite Element Analysis* (pp. 243–264), Wiley
 
 .. math::
     \nu\Delta\boldsymbol{u} = -\rho^{-1}\nabla p + \boldsymbol{f} + 
@@ -25,7 +25,7 @@ At each iteration, the above vector Poisson equation is solved for a velocity fi
 
 The results may be assessed using the value of the stream-function at the centre.  As in :ref:`biharmonic`, the stream-function satisfies the same boundary value problem as the deflection of a clamped plate, for which the central deflection is known to be approximately 0.162/128 [LOVE]_.
 	    
-.. [LOVE] Love, A. E. H. (1944). _A Treatise on the Mathematical Theory of Elasticity._ Dover
+.. [LOVE] Love, A. E. H. (1944). *A Treatise on the Mathematical Theory of Elasticity.* Dover
 
 .. literalinclude:: ex30.py
    :linenos:
