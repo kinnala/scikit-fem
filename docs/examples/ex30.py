@@ -83,4 +83,4 @@ if __name__ == '__main__':
     ax = mesh.draw()
     ax.tricontour(Triangulation(*mesh.p, mesh._splitquads().t.T),
                   psi[basis['psi'].nodal_dofs.flatten()])
-    ax.get_figure().savefig(f'{name}_stream-function.png')
+    ax.get_figure().savefig(f'{name}_stream-lines.png')

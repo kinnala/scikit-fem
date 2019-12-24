@@ -20,7 +20,7 @@ all: ex01_solution.png \
 	python $< --gif
 %_stream-lines.png: %.py
 	python $<
-ex20_velocity-vectors.png: ex20_stream_lines.png
+ex20_velocity-vectors.png: ex20_stream-lines.png
 ex27-750.0-psi.png: ex27.py
 	python $<
 ex27-150.0-psi.png ex27-450.0-psi.png: ex27-750.0-psi.png
