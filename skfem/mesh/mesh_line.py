@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 from typing import Type, Optional, Dict
 
@@ -130,28 +129,6 @@ class MeshLine(Mesh):
         """Find the interior nodes of the mesh."""
         _, counts = np.unique(self.t.flatten(), return_counts=True)
         return np.nonzero(counts == 2)[0]
-
-    def plot(self, u, ax=None, color='ko-'):
-        """Plot a function defined at the nodes of the mesh."""
-        if ax is None:
-            # create new figure
-            fig = plt.figure()
-            ax = fig.add_subplot(111)
-        xs = []
-        ys = []
-        for y1, y2, s, t in zip(u[self.t[0, :]],
-                                u[self.t[1, :]],
-                                self.p[0, self.t[0, :]],
-                                self.p[0, self.t[1, :]]):
-            xs.append(s)
-            xs.append(t)
-            xs.append(None)
-            ys.append(y1)
-            ys.append(y2)
-            ys.append(None)
-        ax.plot(xs, ys, color)
-
-        return ax
 
     def __mul__(self, other):
         """Tensor product mesh."""
