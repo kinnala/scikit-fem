@@ -217,5 +217,11 @@ class TestEx29(unittest.TestCase):
                         5e-3)
 
 
+class TestEx30(unittest.TestCase):
+    def runTest(self):
+        from docs.examples.ex30 import psi0
+        self.assertAlmostEqual(psi0, 0.162/128, delta=1e-6)
+
+
 if __name__ == '__main__':
     unittest.main()

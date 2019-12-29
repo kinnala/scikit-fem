@@ -10,16 +10,17 @@ all: ex01_solution.png \
      ex26_solution.png \
      ex27-150.0-psi.png ex27-450.0-psi.png ex27-750.0-psi.png \
      ex28.png ex28-inlet-outlet.png \
-     ex29.png
+     ex29.png \
+     ex30_stream-lines.png
 %.png: %.py
 	python $<
 %_solution.png: %.py
 	python $<
 %.gif: %.py
 	python $< --gif
-ex20_velocity-vectors.png: ex20.py
+%_stream-lines.png: %.py
 	python $<
-ex20_stream-lines.png: ex20_velocity-vectors.png
+ex20_velocity-vectors.png: ex20_stream-lines.png
 ex27-750.0-psi.png: ex27.py
 	python $<
 ex27-150.0-psi.png ex27-450.0-psi.png: ex27-750.0-psi.png
