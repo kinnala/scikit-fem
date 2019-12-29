@@ -7,7 +7,7 @@ This example solves :ref:`stokesex` iteratively in a square domain.
 
 Direct solvers for the Stokes equation do not scale; iterative solvers are required for all but the smallest two-dimensional problems.  A square domain is used here instead of the disk since it easier to generate the finer mesh required to demonstrate the time taken for a slightly larger problem.
 
-A classical iterative procedure for the Stokes equation is the Uzawa congugate gradient method in which an auxiliary operator is formed which maps a guessed pressure field :math:`p` to the divergence
+A classical iterative procedure for the Stokes equation is the Uzawa conjugate gradient method in which an auxiliary operator is formed which maps a guessed pressure field :math:`p` to the divergence
 
 .. math::
    \Theta (p) = \nabla\cdot\boldsymbol \{u (p)\}
@@ -31,7 +31,7 @@ for which the linear operator equation
    
 can be solved by a Krylov method, classically the method of conjugate gradients.  The solution is the pressure :math:`p` that gives the velocity :math:`\boldsymbol u` that has zero divergence.
 
-At each iteration, the above vector Poisson equation is solved for a velocity field.  As the problem gets larger, this too should be solved iteratively.  The method of conjugate gradients could be used for this too, but a catch is that :func:`scipy.sparse.linalg.cg` is not re-entrant can so cannot be used at both levels.  This is simply avoided here by using :func:`scipy.sparse.linalg.minres` for the pressure.
+At each iteration, the above vector Poisson equation is solved for a velocity field.  As the problem gets larger, this too should be solved iteratively.  The method of conjugate gradients could be used for this too, but a catch is that :func:`scipy.sparse.linalg.cg` is not re-entrant and so cannot be used at both levels.  This is simply avoided here by using :func:`scipy.sparse.linalg.minres` for the pressure.
 
 .. figure:: ex30_stream-lines.png
 
