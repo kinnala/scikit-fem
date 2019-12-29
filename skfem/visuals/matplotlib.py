@@ -8,6 +8,7 @@ from matplotlib.axes import Axes
 from numpy import ndarray
 
 from ..mesh import *
+from ..assembly import InteriorBasis
 
 
 @singledispatch
@@ -200,6 +201,13 @@ def _(m: MeshQuad, z, **kwargs):
     else:
         m = m._splitquads()
     return plot(m, z, **kwargs)
+
+
+@plot.register
+def _(basis: InteriorBasis, z: ndarray, **kwargs) -> Axes:
+    """Plot on a refined mesh via :meth:`InteriorBasis.refinterp`."""
+    Nrefs = kwargs["Nrefs"] if "Nrefs" in kwargs else 1
+    return plot(*basis.refinterp(z, Nrefs=Nrefs), **kwargs)
 
 
 @singledispatch
