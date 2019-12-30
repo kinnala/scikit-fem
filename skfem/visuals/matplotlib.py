@@ -121,6 +121,7 @@ def _(m: MeshLine, z: ndarray, **kwargs):
         ys = []
     else:
         ax = kwargs["ax"]
+
     color = kwargs["color"] if "color" in kwargs else 'ko-'
     for y1, y2, s, t in zip(z[m.t[0, :]],
                             z[m.t[1, :]],
@@ -133,6 +134,7 @@ def _(m: MeshLine, z: ndarray, **kwargs):
         ys.append(y2)
         ys.append(None)
         ax.plot(xs, ys, color)
+
     return ax
 
 
@@ -174,6 +176,8 @@ def _(m: MeshTri, z: ndarray, **kwargs) -> Axes:
         aspect = kwargs["aspect"] if "aspect" in kwargs else 1.0
         ax.set_aspect(aspect)
         ax.set_axis_off()
+    else:
+        ax = kwargs["ax"]
 
     im = ax.tripcolor(m.p[0, :], m.p[1, :], m.t.T, z,
                       **{k: v for k, v in kwargs.items()
@@ -236,6 +240,8 @@ def _(m: MeshTri, z: ndarray, **kwargs) -> Axes:
     if "ax" not in kwargs:
         fig = plt.figure()
         ax = Axes3D(fig)
+    else:
+        ax = kwargs["ax"]
 
     ax.plot_trisurf(m.p[0], m.p[1], z,
                     triangles=m.t.T,
