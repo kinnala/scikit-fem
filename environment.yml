@@ -1,0 +1,16 @@
+name: scikit-fem-dev
+dependencies:
+  - python=3.7
+  - numpy
+  - scipy
+  - matplotlib
+  - pytest
+  - ipython
+  - sphinx
+  - pip
+  - pip:
+    - meshio
+    - dmsh
+    - pygmsh
+    - scikit-sparse
+    - pacopy
