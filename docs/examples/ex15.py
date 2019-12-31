@@ -22,5 +22,6 @@ D = basis.get_dofs().all()
 x = solve(*condense(A, b, D=D))
 
 if __name__ == "__main__":
-    m.plot(x)
-    m.show()
+    from skfem.visuals.matplotlib import plot, show
+    plot(m, x)
+    show()

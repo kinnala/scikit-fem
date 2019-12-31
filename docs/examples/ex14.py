@@ -26,6 +26,7 @@ u = solve(*condense(A, np.zeros_like(u), u, I))
 
 
 if __name__ == "__main__":
+    from skfem.visuals.matplotlib import plot, show
     print('||grad u||**2 = {:f} (exact = 8/3 = {:f})'.format(u @ A @ u, 8/3))
-    m.plot(u[basis.nodal_dofs.flatten()])
-    m.show()
+    plot(m, u[basis.nodal_dofs.flatten()])
+    show()

@@ -47,7 +47,8 @@ def eval_estimator(m, u):
     return eta_K + eta_E
 
 if __name__ == "__main__":
-    m.draw()
+    from skfem.visuals.matplotlib import draw, plot, show
+    draw(m)
 
 for itr in range(10): # 10 adaptive refinements
     if itr > 1:
@@ -63,6 +64,6 @@ for itr in range(10): # 10 adaptive refinements
     u = solve(*condense(K, f, I=I))
 
 if __name__ == "__main__":
-    m.draw()
-    m.plot(u, smooth=True)
-    m.show()
+    draw(m)
+    plot(m, u, shading='gouraud')
+    show()
