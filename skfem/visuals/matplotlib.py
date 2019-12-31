@@ -140,7 +140,7 @@ def _(m: MeshLine, z: ndarray, **kwargs):
 
 @plot.register
 def _(m: MeshTri, z: ndarray, **kwargs) -> Axes:
-    """Visualise piecewise-linear function.
+    """Visualise piecewise-linear function on a triangular mesh.
 
     Parameters
     ----------
@@ -193,7 +193,7 @@ def _(m: MeshTri, z: ndarray, **kwargs) -> Axes:
 
 @plot.register
 def _(m: MeshQuad, z, **kwargs):
-    """Visualise piecewise-linear.
+    """Visualise nodal functions on quadrilateral meshes.
 
     The quadrilaterals are split into two triangles
     (:class:`skfem.mesh.MeshTri`) and the respective plotting function for the
