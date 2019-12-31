@@ -1,3 +1,5 @@
+"""Drawing meshes and solutions using matplotlib."""
+
 from typing import Tuple
 from functools import singledispatch
 
