@@ -46,6 +46,6 @@ x = solve(*condense(K, f, I=I))
 if __name__ == "__main__":
     from os.path import splitext
     from sys import argv
-    
-    m.plot(x[:-1], colorbar=True)
-    m.savefig(splitext(argv[0])[0] + '_solution.png')
+    from skfem.visuals.matplotlib import plot, savefig
+    plot(m, x[:-1], colorbar=True)
+    savefig(splitext(argv[0])[0] + '_solution.png')

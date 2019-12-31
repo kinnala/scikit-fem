@@ -55,15 +55,15 @@ from matplotlib.tri import Triangulation
 psi0, = ib.interpolator(psi)(np.zeros((2, 1)))
     
 if __name__ == "__main__":
-    
     from os.path import splitext
     from sys import argv
+    from skfem.visuals.matplotlib import draw
 
     print('psi0 = {} (cf. exact = 1/64 = {})'.format(psi0, 1/64))
 
     M, Psi = ib.refinterp(psi, 3)
 
-    ax = mesh.draw()
+    ax = draw(mesh)
     ax.tricontour(Triangulation(*M.p, M.t.T), Psi)
     name = splitext(argv[0])[0]
     ax.get_figure().savefig(f'{name}_stream-lines.png')
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     refbasis = InteriorBasis(M, ElementTriP1())
     velocity = np.vstack([derivative(Psi, refbasis, refbasis, 1),
                           -derivative(Psi, refbasis, refbasis, 0)])
-    ax = mesh.draw()
+    ax = draw(mesh)
     sparsity_factor = 2**3      # subsample the arrows
     vector_factor = 2**3        # lengthen the arrows
     x = M.p[:, ::sparsity_factor]

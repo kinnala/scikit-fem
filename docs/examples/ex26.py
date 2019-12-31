@@ -18,16 +18,16 @@ temperature = solve(*condense(thermal_conductivity['wire'] * L,
                               D=insulation))
 
 if __name__ == '__main__':
-
     from os.path import splitext
     from sys import argv
+    from skfem.visuals.matplotlib import draw, plot
 
     T0 = {'skfem': basis.interpolator(temperature)(np.zeros((2, 1)))[0],
           'exact':
           joule_heating * radii[0]**2 / 4 / thermal_conductivity['wire']}
     print('Central temperature:', T0)
 
-    ax = mesh.draw()
-    mesh.plot(temperature[basis.nodal_dofs.flatten()],
-              ax=ax, edgecolors='none', colorbar=True)
+    ax = draw(mesh)
+    plot(mesh, temperature[basis.nodal_dofs.flatten()],
+         ax=ax, edgecolors='none', colorbar=True)
     ax.get_figure().savefig(splitext(argv[0])[0] + '_solution.png')
