@@ -6,7 +6,7 @@ from scipy.sparse import coo_matrix, csr_matrix
 
 from .form import Form, BasisTuple
 from .form_parameters import FormParameters
-from ..global_basis import GlobalBasis
+from ..basis import Basis
 
 
 class BilinearForm(Form):
@@ -24,8 +24,8 @@ class BilinearForm(Form):
                              axis=1)
 
     def assemble(self,
-                 ubasis: GlobalBasis,
-                 vbasis: Optional[GlobalBasis] = None,
+                 ubasis: Basis,
+                 vbasis: Optional[Basis] = None,
                  w: Optional[Any] = (None, None, None),
                  nthreads: Optional[int] = 1) -> csr_matrix:
         """return sparse CSR matrix discretizing form
@@ -38,7 +38,7 @@ class BilinearForm(Form):
 
           * :code:`w[2]` is accessible as :code:`w.ddw`.
 
-        The output of :meth:`~skfem.assembly.GlobalBasis.interpolate`
+        The output of :meth:`~skfem.assembly.Basis.interpolate`
         can be passed directly to this parameter.
 
         """

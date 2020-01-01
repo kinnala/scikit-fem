@@ -5,7 +5,7 @@ import numpy as np
 
 from .form import Form
 from .form_parameters import FormParameters
-from ..global_basis import GlobalBasis
+from ..basis import Basis
 
 
 class Functional(Form):
@@ -16,12 +16,12 @@ class Functional(Form):
         return np.sum(self.form(w) * dx, axis=1)
 
     def elemental(self,
-                  vbasis: GlobalBasis,
+                  vbasis: Basis,
                   w: Optional[Any] = (None, None, None)) -> ndarray:
         return self.kernel(self.parameters(w, vbasis), vbasis.dx)
 
     def assemble(self,
-                 vbasis: GlobalBasis,
+                 vbasis: Basis,
                  w: Optional[Any] = (None, None, None)) -> float:
         return sum(self.elemental(vbasis, w))
 

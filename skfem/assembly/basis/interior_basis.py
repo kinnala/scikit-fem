@@ -9,10 +9,10 @@ from skfem.quadrature import get_quadrature
 from skfem.mesh import Mesh
 from skfem.element import Element
 from skfem.mapping import Mapping
-from .global_basis import GlobalBasis
+from .basis import Basis
 
 
-class InteriorBasis(GlobalBasis):
+class InteriorBasis(Basis):
     """Global basis functions evaluated at integration points inside the
     elements.
 

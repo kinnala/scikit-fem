@@ -159,7 +159,7 @@ skfem.assembly
 Defining a global basis
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: skfem.assembly.GlobalBasis
+.. autoclass:: skfem.assembly.Basis
 
 .. autoclass:: skfem.assembly.InteriorBasis
 

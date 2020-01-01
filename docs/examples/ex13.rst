@@ -17,7 +17,7 @@ The example is :math:`\Delta u = 0` in
 :math:`\Omega=\{(x,y):1<x^2+y^2<4,~0<\theta<\pi/2\}`, where :math:`\tan \theta =
 y/x`, with :math:`u = 0` on :math:`y = 0` and :math:`u = 1` on :math:`x =
 0`. Although these boundaries would be simple enough to identify using the
-coordinates and :meth:`skfem.assembly.GlobalBasis.get_dofs`, the present
+coordinates and :meth:`skfem.assembly.Basis.get_dofs`, the present
 technique generalizes to more complicated shapes.
 
 The exact solution is :math:`u = 2 \theta / \pi`. The field strength is :math:`|\nabla u|^2 = 4 / \pi^2 (x^2 + y^2)`

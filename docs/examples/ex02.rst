@@ -117,7 +117,7 @@ the boundary.  An easy way is to create facet index sets for each boundary:
 
 The corresponding degree-of-freedom numbers (i.e. rows and columns
 of the stiffness matrix) can be found using
-:meth:`~skfem.assembly.GlobalBasis.get_dofs`.
+:meth:`~skfem.assembly.Basis.get_dofs`.
 
 .. literalinclude:: ex02.py
     :start-at: get_dofs

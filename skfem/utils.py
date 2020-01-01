@@ -11,7 +11,7 @@ from skfem.element import ElementVectorH1
 from typing import Optional, Union, Tuple, Callable
 from numpy import ndarray
 from scipy.sparse import spmatrix
-from skfem.assembly.global_basis import GlobalBasis
+from skfem.assembly.basis import Basis
 
 
 LinearSolver = Callable[[spmatrix, ndarray], ndarray]
@@ -252,8 +252,8 @@ def adaptive_theta(est, theta=0.5, max=None):
 
 
 def derivative(x: ndarray,
-               basis1: GlobalBasis,
-               basis0: GlobalBasis,
+               basis1: Basis,
+               basis0: Basis,
                i: Optional[int] = 0) -> ndarray:
     """Calculate the i'th partial derivative through projection.
 
@@ -290,7 +290,7 @@ def derivative(x: ndarray,
 
 
 def L2_projection(fun,
-                  basis: GlobalBasis,
+                  basis: Basis,
                   ix: Optional[ndarray] = None) -> ndarray:
     """Initialize a solution vector with L2 projection.
 

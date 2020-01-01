@@ -3,7 +3,7 @@ from typing import Any, Callable, Optional, Tuple, Union
 from numpy import ndarray
 
 from .form_parameters import FormParameters
-from ..global_basis import GlobalBasis
+from ..basis import Basis
 
 
 BasisTuple = Union[Tuple[ndarray, ndarray],
@@ -25,7 +25,7 @@ class Form:
         raise NotImplementedError
 
     @staticmethod
-    def parameters(w: Optional[Any], ubasis: GlobalBasis) -> FormParameters:
+    def parameters(w: Optional[Any], ubasis: Basis) -> FormParameters:
         if type(w) is list:
             w = zip(*w)
         elif type(w) is ndarray:

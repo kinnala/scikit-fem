@@ -5,10 +5,10 @@ from numpy import ndarray
 
 from skfem.quadrature import get_quadrature
 
-from .global_basis import GlobalBasis
+from .basis import Basis
 
 
-class FacetBasis(GlobalBasis):
+class FacetBasis(Basis):
     """Global basis functions evaluated at integration points on the element
     boundaries.
 
