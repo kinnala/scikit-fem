@@ -29,9 +29,11 @@ k = b @ x / area**2
 k1, = basis.interpolator(x)(np.zeros((2, 1))) / area
 
 if __name__ == '__main__':
+    from skfem.visuals.matplotlib import plot3, show
+
     print('area = {:.4f} (exact = {:.4f})'.format(area, np.pi))
     print('k = {:.5f} (exact = 1/8/pi = {:.5f})'.format(k, 1/np.pi/8))
     print("k' = {:.5f} (exact = 1/4/pi = {:.5f})".format(k1, 1/np.pi/4))
 
-    m.plot3(x[basis.nodal_dofs.flatten()])
-    m.show()
+    plot3(m, x[basis.nodal_dofs.flatten()])
+    show()

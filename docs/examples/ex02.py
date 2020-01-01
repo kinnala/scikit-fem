@@ -58,8 +58,7 @@ x = solve(*condense(K, f, D=D, expand=True))
 if __name__ == "__main__":
     from os.path import splitext
     from sys import argv
-    
-    M, X = ib.refinterp(x, 3)
-    ax = m.draw()
-    M.plot(X, smooth=True, ax=ax, colorbar=True)
-    M.savefig(splitext(argv[0])[0] + '_solution.png')
+    from skfem.visuals.matplotlib import *
+    ax = draw(m)
+    plot(ib, x, ax=ax, shading='gouraud', colorbar=True, Nref=3)
+    savefig(splitext(argv[0])[0] + '_solution.png')

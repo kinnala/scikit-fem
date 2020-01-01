@@ -121,16 +121,16 @@ dofs = {label: basis['heat'].get_dofs(facets).all()
 exit_interface_temperature = {
     'skfem': temperature[np.intersect1d(dofs['fluid-outlet'],
                                         dofs['solid-outlet'])[0]],
-    'exact': exact(length, -1.)}
-                         
+    'exact': exact(length, -1.)
+}
 
 if __name__ == '__main__':
-
     from pathlib import Path
+    from skfem.visuals.matplotlib import plot, savefig
 
-    mesh.plot(temperature, edgecolors='none')
-    mesh.savefig(Path(__file__).with_suffix('.png'),
-                 bbox_inches='tight', pad_inches=0)
+    plot(mesh, temperature, edgecolors='none')
+    savefig(Path(__file__).with_suffix('.png'),
+            bbox_inches='tight', pad_inches=0)
 
     fig, ax = subplots()
     ax.set_title('transverse temperature profiles')
@@ -151,7 +151,7 @@ if __name__ == '__main__':
                     label=f'{label}, skfem')
         ax.plot(exact(mesh.p[0, dofs[label][0]], y['exact']), y['exact'],
                 color='k', linestyle=linestyle, label=f'{port}, exact')
-    
+
     ax.set_xlabel('temperature')
     ax.set_ylabel('$y$')
     ax.set_ylim((-halfheight - thickness, halfheight))

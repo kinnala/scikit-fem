@@ -142,7 +142,9 @@ class InteriorBasis(Basis):
         nt = self.nelems
         t = np.tile(m.t, (1, nt))
         dt = np.max(t)
-        t += (dt + 1) * np.tile(np.arange(nt), (m.t.shape[0]*m.t.shape[1], 1)).flatten('F').reshape((-1, m.t.shape[0])).T
+        t += (dt + 1) * (np.tile(np.arange(nt), (m.t.shape[0]*m.t.shape[1], 1))
+                         .flatten('F')
+                         .reshape((-1, m.t.shape[0])).T)
 
         if X.shape[0] == 1:
             p = np.array([x.flatten()])

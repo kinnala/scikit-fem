@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 from skfem.element import ElementQuad1, ElementLineP1
 from skfem.mapping import MappingIsoparametric
@@ -258,31 +257,6 @@ class MeshQuad(Mesh2D):
         return MeshTri(np.hstack((self.p, np.vstack((mx, my)))),
                        newt,
                        validate=False)
-
-    def plot(self, z, **kwargs):
-        """Visualise piecewise-linear or piecewise-constant function.
-
-        The quadrilaterals are split into two triangles
-        (:class:`skfem.mesh.MeshTri`) and the respective plotting function for
-        the triangular mesh is used.
-
-        """
-        if len(z) == self.t.shape[-1]:
-            m, z = self._splitquads(z)
-        else:
-            m = self._splitquads()
-        return m.plot(z, **kwargs)
-
-    def plot3(self, z, **kwargs):
-        """Visualise nodal function (3d i.e. three axes).
-
-        The quadrilateral mesh is split into triangular mesh (MeshTri)
-        and the respective plotting function for the triangular mesh is
-        used.
-
-        """
-        m, z = self._splitquads(z)
-        return m.plot3(z, **kwargs)
 
     def mapping(self):
         return MappingIsoparametric(self, ElementQuad1(), ElementLineP1())

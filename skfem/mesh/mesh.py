@@ -5,7 +5,6 @@ from typing import Dict, Optional, Tuple,\
 
 import numpy as np
 from numpy import ndarray
-import matplotlib.pyplot as plt
 
 
 MeshType = TypeVar('MeshType', bound='Mesh')
@@ -98,14 +97,6 @@ class Mesh():
         return (self.name + " mesh "
                 "with " + str(self.p.shape[1]) + " vertices "
                 "and " + str(self.t.shape[1]) + " elements.")
-
-    def show(self):
-        """A wrapper for matplotlib.pyplot.show()."""
-        plt.show()
-
-    def savefig(self, *args, **kwargs):
-        """A wrapper for matplotlib.pyplot.savefig()."""
-        plt.savefig(*args, **kwargs)
 
     def dim(self):
         """Return the spatial dimension of the mesh."""

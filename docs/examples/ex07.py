@@ -45,5 +45,6 @@ x = solve(A+B+C, b)
 M, X = ib.refinterp(x, 3)
 
 if __name__ == "__main__":
-    M.plot(X, smooth=True, colorbar=True)
-    M.show()
+    from skfem.visuals.matplotlib import plot, show
+    plot(M, X, shading="gouraud", colorbar=True)
+    show()

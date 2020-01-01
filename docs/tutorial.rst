@@ -41,7 +41,7 @@ loaded from file formats supported by `meshio
 
 You can also create meshes with the help of external packages, see
 e.g. :ref:`insulated`. Meshes can be visualized using
-:meth:`skfem.mesh.Mesh.draw` or with external tools after exporting them to VTK
+:meth:`skfem.visuals.matplotlib.draw` or with external tools after exporting them to VTK
 using :meth:`skfem.mesh.Mesh.save`. It is also possible to create
 the meshes manually:
 
@@ -215,14 +215,10 @@ matplotlib:
 
 .. code-block:: python
 
-   In [10]: M, X = basis.refinterp(x, 3)
-   In [11]: ax = m.draw()
-   In [12]: M.plot(X, smooth=True, edgecolors='', ax=ax)
-   In [13]: M.savefig('tutorial_solution.png')
-
-.. figure:: tutorial_solution.png
-
-   The visualized result of the tutorial.
+   In [10]: from skfem.visuals.matplotlib import draw, plot, savefig
+   In [11]: ax = draw(m)   
+   In [12]: plot(basis, x, Nrefs=3, shading='gouraud', ax=ax)
+   In [13]: savefig('tutorial_solution.png')
 
 For other examples on postprocessing see, e.g., :ref:`tetrapoisson` for saving
 the solution to VTK, :ref:`postprocess` and :ref:`laplacemixed` for evaluating

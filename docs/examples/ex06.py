@@ -20,7 +20,7 @@ M, X = ib.refinterp(x, 3)
 if __name__ == "__main__":
     from os.path import splitext
     from sys import argv
-    
-    ax = m.draw()
-    M.plot(X, smooth=True, edgecolors='', ax=ax)
-    M.savefig(splitext(argv[0])[0] + '_solution.png')
+    from skfem.visuals.matplotlib import *
+    ax = draw(m)
+    plot(M, X, ax=ax, shading='gouraud', edgecolors='')
+    savefig(splitext(argv[0])[0] + '_solution.png')
