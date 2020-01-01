@@ -31,46 +31,6 @@ Constructors
 
 .. automethod:: skfem.mesh.MeshTri.init_tensor
 
-Modify
-^^^^^^
-
-.. automethod:: skfem.mesh.MeshTri.refine
-
-.. automethod:: skfem.mesh.MeshTri.remove_elements
-
-.. automethod:: skfem.mesh.MeshTri.scale
-
-.. automethod:: skfem.mesh.MeshTri.translate
-
-.. automethod:: skfem.mesh.MeshTri.mirror
-
-Explore
-^^^^^^^
-
-.. automethod:: skfem.mesh.MeshTri.nodes_satisfying
-
-.. automethod:: skfem.mesh.MeshTri.facets_satisfying
-
-.. automethod:: skfem.mesh.MeshTri.elements_satisfying
-
-.. automethod:: skfem.mesh.MeshTri.interior_nodes
-
-.. automethod:: skfem.mesh.MeshTri.boundary_nodes
-
-.. automethod:: skfem.mesh.MeshTri.interior_facets
-
-.. automethod:: skfem.mesh.MeshTri.boundary_facets
-
-Visualise
-^^^^^^^^^
-
-.. automethod:: skfem.mesh.MeshTri.save
-
-.. automethod:: skfem.mesh.MeshTri.draw
-
-.. automethod:: skfem.mesh.MeshTri.plot
-
-.. automethod:: skfem.mesh.MeshTri.plot3
 
 MeshQuad
 ~~~~~~~~
@@ -88,44 +48,6 @@ Constructors
 
 .. automethod:: skfem.mesh.MeshQuad.init_tensor
 
-Modify
-^^^^^^
-
-.. automethod:: skfem.mesh.MeshQuad.refine
-
-.. automethod:: skfem.mesh.MeshQuad.remove_elements
-
-.. automethod:: skfem.mesh.MeshQuad.scale
-
-.. automethod:: skfem.mesh.MeshQuad.translate
-
-.. automethod:: skfem.mesh.MeshQuad.mirror
-
-Explore
-^^^^^^^
-
-.. automethod:: skfem.mesh.MeshQuad.nodes_satisfying
-
-.. automethod:: skfem.mesh.MeshQuad.facets_satisfying
-
-.. automethod:: skfem.mesh.MeshQuad.elements_satisfying
-
-.. automethod:: skfem.mesh.MeshQuad.interior_nodes
-
-.. automethod:: skfem.mesh.MeshQuad.boundary_nodes
-
-.. automethod:: skfem.mesh.MeshQuad.interior_facets
-
-.. automethod:: skfem.mesh.MeshQuad.boundary_facets
-
-Visualise
-^^^^^^^^^
-
-.. automethod:: skfem.mesh.MeshQuad.draw
-
-.. automethod:: skfem.mesh.MeshQuad.plot
-
-.. automethod:: skfem.mesh.MeshQuad.plot3
 
 MeshTet
 ~~~~~~~
@@ -139,20 +61,6 @@ Constructors
 
 .. automethod:: skfem.mesh.MeshTet.load
 
-Modify
-^^^^^^
-.. automethod:: skfem.mesh.MeshTet.refine
-
-.. automethod:: skfem.mesh.MeshTet.remove_elements
-
-.. automethod:: skfem.mesh.MeshTet.scale
-
-.. automethod:: skfem.mesh.MeshTet.translate
-
-Visualisation
-^^^^^^^^^^^^^
-
-.. automethod:: skfem.mesh.MeshTet.save
 
 MeshHex
 ~~~~~~~
@@ -166,21 +74,6 @@ Constructors
 
 .. automethod:: skfem.mesh.MeshHex.init_tensor
 
-Modify
-^^^^^^
-
-.. automethod:: skfem.mesh.MeshHex.refine
-
-.. automethod:: skfem.mesh.MeshHex.remove_elements
-
-.. automethod:: skfem.mesh.MeshHex.scale
-
-.. automethod:: skfem.mesh.MeshHex.translate
-
-Visualisation
-^^^^^^^^^^^^^
-
-.. automethod:: skfem.mesh.MeshHex.save
 
 MeshLine
 ~~~~~~~~
@@ -201,6 +94,8 @@ skfem.element
 -------------
 
 .. automodule:: skfem.element
+
+.. automodule:: skfem.element.Element
 
 Triangular elements
 ~~~~~~~~~~~~~~~~~~~
@@ -225,6 +120,8 @@ Quadrilateral elements
 .. autoclass:: skfem.element.ElementQuad1
 
 .. autoclass:: skfem.element.ElementQuad2
+
+.. autoclass:: skfem.element.ElementQuad0
 
 Tetrahedral elements
 ~~~~~~~~~~~~~~~~~~~~
@@ -285,3 +182,14 @@ skfem.utils
 .. autofunction:: skfem.utils.solve
 
 .. autofunction:: skfem.utils.condense
+
+skfem.visuals
+-------------
+
+.. automodule:: skfem.utils.matplotlib
+
+.. autofunction:: skfem.utils.matplotlib.draw
+
+.. autofunction:: skfem.utils.matplotlib.plot
+
+.. autofunction:: skfem.utils.matplotlib.plot3

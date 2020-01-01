@@ -21,6 +21,6 @@ setup(
         'Topic :: Scientific/Engineering :: Mathematics',
     ],
     packages=find_packages(exclude=['tests']),
-    install_requires=['numpy', 'scipy', 'matplotlib', 'meshio'],
+    install_requires=['numpy', 'scipy', 'meshio'],
     test_suite='tests',
 )

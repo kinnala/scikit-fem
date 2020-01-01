@@ -66,12 +66,14 @@ if __name__ == '__main__':
     from matplotlib.animation import FuncAnimation
     import matplotlib.pyplot as plt
 
+    from skfem.visuals.matplotlib import plot
+
     parser = ArgumentParser(description='heat equation in a rectangle')
     parser.add_argument('-g', '--gif', action='store_true',
                         help='write animated GIF', )
     args = parser.parse_args()
 
-    ax = mesh.plot(u_init, smooth=True)  # smooth is vertex-based
+    ax = plot(mesh, u_init, shading='gouraud')
     title = ax.set_title('t = 0.00')
     field = ax.get_children()[0]  # vertex-based temperature-colour
     fig = ax.get_figure()

@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 from skfem.mapping import MappingAffine
 
@@ -442,20 +441,6 @@ class MeshTet(Mesh3D):
         self.t = newt
 
         self._build_mappings()
-
-    def draw(self):
-        """Draw the (surface) mesh."""
-        from mpl_toolkits.mplot3d import Axes3D
-        
-        bnd_facets = self.boundary_facets()
-        fig = plt.figure()
-        ax = Axes3D(fig)
-        indexing = self.facets[:, bnd_facets].T
-
-        ax.plot_trisurf(self.p[0, :], self.p[1, :], self.p[2,:],
-                        triangles=indexing, cmap=plt.cm.viridis, edgecolor='k')
-        ax.set_axis_off()
-        return ax
 
     def shapereg(self):
         """Return the largest shape-regularity constant."""

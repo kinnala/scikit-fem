@@ -38,9 +38,9 @@ t0 = solve(asm(mass, basis0),
 
 
 if __name__ == '__main__':
-
     from pathlib import Path
+    from skfem.visuals.matplotlib import plot, savefig
 
-    mesh.plot(t0, edgecolors='none')
-    mesh.savefig(Path(__file__).with_suffix('.png'),
-                 bbox_inches='tight', pad_inches=0)
+    plot(mesh, t0, edgecolors='none')
+    savefig(Path(__file__).with_suffix('.png'),
+            bbox_inches='tight', pad_inches=0)

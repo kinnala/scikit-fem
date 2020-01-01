@@ -36,5 +36,6 @@ for itr in range(100):
         print(np.linalg.norm(x - x_prev))
 
 if __name__ == "__main__":
-    m.plot3(x)
-    m.show()
+    from skfem.visuals.matplotlib import plot3
+    plot3(m, x)
+    show()
