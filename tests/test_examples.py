@@ -171,10 +171,9 @@ class TestEx22(unittest.TestCase):
         self.assertAlmostEqual(u.T @ K @ u, 0.2131280267335294)
 
 
-# TODO: no pacopy in testsuite
-# class TestEx23(unittest.TestCase):
-#    def runTest(self):
-#       import docs.examples.ex23 as ex
+class TestEx23(unittest.TestCase):
+   def runTest(self):
+      import docs.examples.ex23 as ex
 
 
 class TestEx24(unittest.TestCase):
