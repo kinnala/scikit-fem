@@ -4,7 +4,7 @@ from matplotlib.pyplot import subplots
 import numpy as np
 from scipy.sparse import dia_matrix
 
-import pacopy
+from pacopy import euler_newton
 from skfem import *
 from skfem.models.poisson import laplace, mass
 
@@ -80,7 +80,7 @@ def callback(k, lmbda, sol):
 
 
 try:
-    pacopy.euler_newton(
+    euler_newton(
         problem, u0, lmbda0, callback, max_steps=500, newton_tol=1.0e-10
     )
 except RangeException:
