@@ -59,6 +59,6 @@ class ElementQuad2(ElementH1):
             dphi = np.array([2*x*(-1 + y**2),
                              2*(-1 + x**2)*y])
         else:
-            raise Exception("!")
+            self._index_error()
 
         return phi, dphi

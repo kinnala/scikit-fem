@@ -89,3 +89,7 @@ class Element():
 
         """
         raise NotImplementedError("Element must implement gbasis.")
+
+    @classmethod
+    def _index_error(cls):
+        raise ValueError("Index larger than the number of basis functions.")

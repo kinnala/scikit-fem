@@ -30,6 +30,6 @@ class ElementTetN0(ElementHcurl):
             phi = np.array([0*x, -z, y])
             dphi = np.array([2 + 0*x, 0*x, 0*x])
         else:
-            raise Exception("!")
+            self._index_error()
 
         return phi, dphi

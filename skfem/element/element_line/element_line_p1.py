@@ -20,6 +20,6 @@ class ElementLineP1(ElementH1):
             phi = x
             dphi = np.array([1 + 0*x])
         else:
-            raise Exception("!")
+            self._index_error()
 
         return phi, dphi

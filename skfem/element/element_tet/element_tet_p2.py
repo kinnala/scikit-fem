@@ -94,6 +94,6 @@ class ElementTetP2(ElementH1):
                 4*y,
             ])
         else:
-            raise Exception("!")
+            self._index_error()
 
         return phi, dphi

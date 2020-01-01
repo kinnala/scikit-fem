@@ -36,6 +36,6 @@ class ElementTetP1(ElementH1):
                              0*x,
                              1 + 0*x])
         else:
-            raise Exception("!")
+            self._index_error()
 
         return phi, dphi
