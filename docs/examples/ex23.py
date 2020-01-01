@@ -9,7 +9,7 @@ from skfem import *
 from skfem.models.poisson import laplace, mass
 
 
-class Bratu1d():
+class Bratu1d:
 
     def __init__(self, n: int):
 
