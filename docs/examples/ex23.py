@@ -85,8 +85,8 @@ try:
     )
 except RangeException:
     fig, ax = subplots()
-    ax.set_xlabel('$\lambda$')
-    ax.set_ylabel('$||u||_2$')
+    ax.set_xlabel(r'$\lambda$')
+    ax.set_ylabel(r'$||u||_2$')
     ax.grid()
     ax.plot(lmbda_list, values_list, '-o')
     ax.axvline(3.51383, linestyle='dotted')  # turning point (Farrell et al)
