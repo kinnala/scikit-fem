@@ -18,7 +18,7 @@ from numpy import ndarray
 
 from scipy.sparse import csr_matrix
 
-from .global_basis import GlobalBasis, InteriorBasis, FacetBasis, MortarBasis
+from .basis import Basis, InteriorBasis, FacetBasis, MortarBasis
 from .dofs import Dofs
 from .form import Form, bilinear_form, linear_form, functional
 

@@ -58,7 +58,7 @@ Choosing basis functions
 
 The local basis functions are defined in :class:`skfem.element.Element`
 classes. They are combined with meshes to create
-:class:`skfem.assembly.GlobalBasis` objects, such as
+:class:`skfem.assembly.Basis` objects, such as
 :class:`~skfem.assembly.InteriorBasis` and :class:`~skfem.assembly.FacetBasis`,
 that contain global basis functions evaluated at global quadrature points:
 

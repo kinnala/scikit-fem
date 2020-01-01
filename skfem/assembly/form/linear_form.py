@@ -6,7 +6,7 @@ from scipy.sparse import coo_matrix
 
 from .form import Form, BasisTuple
 from .form_parameters import FormParameters
-from ..global_basis import GlobalBasis
+from ..basis import Basis
 
 
 class LinearForm(Form):
@@ -21,8 +21,8 @@ class LinearForm(Form):
             b[i] = np.sum(self.form(*vbasis[i], w) * dx, axis=1)
 
     def assemble(self,
-                 ubasis: GlobalBasis,
-                 vbasis: Optional[GlobalBasis] = None,
+                 ubasis: Basis,
+                 vbasis: Optional[Basis] = None,
                  w: Optional[Any] = (None, None, None),
                  nthreads: Optional[int] = 1) -> ndarray:
 

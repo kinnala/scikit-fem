@@ -5,11 +5,11 @@ from numpy import ndarray
 
 from skfem.quadrature import get_quadrature
 
-from .global_basis import GlobalBasis
+from .basis import Basis
 from .interior_basis import InteriorBasis
 
 
-class MortarBasis(GlobalBasis):
+class MortarBasis(Basis):
     """Global basis functions evaluated at integration points on the mortar
     boundary. """
     def __init__(self,

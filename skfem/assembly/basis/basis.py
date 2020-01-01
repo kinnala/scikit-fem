@@ -6,7 +6,7 @@ from typing import List, Optional, Tuple, Union, NamedTuple, Any
 from numpy import ndarray
 
 
-class GlobalBasis():
+class Basis():
     """The finite element basis is evaluated at global quadrature points
     and cached inside this object.
 
