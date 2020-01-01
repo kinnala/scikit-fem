@@ -24,5 +24,5 @@ if __name__ == "__main__":
     from sys import argv
     from skfem.visuals.matplotlib import plot, savefig
     
-    plot(m, x, smooth=True, colorbar=True)
+    plot(m, x, shading='gouraud', colorbar=True)
     savefig(splitext(argv[0])[0] + '_solution.png')
