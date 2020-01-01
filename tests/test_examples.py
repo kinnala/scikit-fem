@@ -195,10 +195,12 @@ class TestEx26(unittest.TestCase):
         pass
 
 
-# TODO: no pacopy in testsuite
-# class TestEx27(unittest.TestCase):
-#    def runTest(self):
-#       import docs.examples.ex27 as ex
+class TestEx27(unittest.TestCase):
+   def runTest(self):
+      import docs.examples.ex27 as ex
+      _, psi = ex.psi.popitem()
+      self.assertAlmostEqual(min(psi), -0.027510982599400716)
+      self.assertAlmostEqual(max(psi), 0.6670038654518545)
 
 
 class TestEx28(unittest.TestCase):
