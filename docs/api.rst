@@ -146,6 +146,8 @@ Hexahedral elements
 
 .. autoclass:: skfem.element.ElementLineP1
 
+.. autoclass:: skfem.element.ElementLineP2
+
 Other
 ~~~~~
 
