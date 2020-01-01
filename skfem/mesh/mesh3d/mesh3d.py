@@ -1,10 +1,9 @@
+from typing import Callable
+
 import numpy as np
+from numpy import ndarray
 
 from ..mesh import Mesh
-
-from typing import Callable, Optional
-
-from numpy import ndarray
 
 
 class Mesh3D(Mesh):

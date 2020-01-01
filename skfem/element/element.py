@@ -1,7 +1,6 @@
-import numpy as np
 from typing import Optional, Tuple, Union, List
-from numpy import ndarray
 
+from numpy import ndarray
 
 OrderTuple = Union[Tuple[int, int],
                    Tuple[int, int, int]]

@@ -1,13 +1,11 @@
-import numpy as np
-
 from typing import Type, Optional, Dict
 
-from skfem.mapping import MappingAffine
-
-from ..mesh import Mesh, MeshType
-from .mesh2d.mesh_quad import MeshQuad
-
+import numpy as np
 from numpy import ndarray
+
+from skfem.mapping import MappingAffine
+from .mesh2d.mesh_quad import MeshQuad
+from ..mesh import Mesh, MeshType
 
 
 class MeshLine(Mesh):

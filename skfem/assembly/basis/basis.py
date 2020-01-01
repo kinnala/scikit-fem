@@ -1,9 +1,9 @@
+from typing import List, Optional, NamedTuple, Any
+
 import numpy as np
-from skfem.assembly.dofs import Dofs
-
-from typing import List, Optional, Tuple, Union, NamedTuple, Any
-
 from numpy import ndarray
+
+from skfem.assembly.dofs import Dofs
 
 
 class Basis():

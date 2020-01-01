@@ -1,5 +1,6 @@
-from numpy import ndarray
 from typing import Optional
+
+from numpy import ndarray
 
 
 class Mapping():
