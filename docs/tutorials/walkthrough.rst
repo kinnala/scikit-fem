@@ -68,6 +68,11 @@ which contain global basis functions evaluated at global quadrature points:
    In [3]: m.refine(3)
    In [4]: basis = InteriorBasis(m, ElementTriP2())
 
+.. note::
+
+   You can find a list of supported elements from the documentation of
+   :mod:`skfem.element`.
+   
 Here :class:`~skfem.element.ElementTriP2` refers to the quadratic Lagrange
 finite element for triangular meshes.  You can control the integration order via
 a keyword argument:
@@ -91,9 +96,9 @@ for the chosen finite element basis can be integrated exactly.
 Assembling finite element matrices
 ##################################
 
-Assembly requires defining forms with the decorators
+Forms are defined using the decorators
 :func:`~skfem.assembly.bilinear_form` and :func:`~skfem.assembly.linear_form`.
-For example, the mass matrix can be assembled as follows:
+For example, the mass matrix is assembled as follows:
 
 .. code-block:: python
 
@@ -106,14 +111,13 @@ For example, the mass matrix can be assembled as follows:
    Out[8]: """<289x289 sparse matrix of type '<class 'numpy.float64'>'
            with 3073 stored elements in Compressed Sparse Row format>"""
 
-In the definition of the form ``mass``, ``u`` refers to the solution values and
-``du`` refers to its derivatives, ``v`` and ``dv`` refer to the test function
-values and derivatives, and ``w`` contains any additional variables such as the
-global coordinates (``w.x``) and the local mesh parameters (``w.h``).
 
-The number of arguments required in the form definition depends on the type of
-element.  In particular, the number of positional arguments in the bilinear form
-definition should be exactly ``2 * len(Element.order) + 1``.
+.. note::
+
+   Below :func:`~skfem.assembly.bilinear_form`, ``u`` refers to the solution and
+   ``du`` refers to its derivatives, ``v`` and ``dv`` refer to the test function
+   values and derivatives, and ``w`` contains any additional variables such as the
+   global coordinates (``w.x``) and the local mesh parameters (``w.h``).
 
 A load vector corresponding to the linear form :math:`F(v)=\int_\Omega x^2 v
 \,\mathrm{d}x` is assembled similarly:

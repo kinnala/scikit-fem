@@ -7,8 +7,8 @@ This page contains all examples included in the source
 code distribution.
 
 
-Poisson equations
-#################
+Poisson equation
+################
 
 .. toctree::
 
