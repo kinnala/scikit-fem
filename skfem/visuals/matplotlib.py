@@ -252,6 +252,13 @@ def _(m: MeshTri, z: ndarray, **kwargs) -> Axes:
     return ax
 
 
+@plot3.register
+def _(basis: InteriorBasis, z: ndarray, **kwargs) -> Axes:
+    """Plot on a refined mesh via :meth:`InteriorBasis.refinterp`."""
+    Nrefs = kwargs["Nrefs"] if "Nrefs" in kwargs else 1
+    return plot3(*basis.refinterp(z, Nrefs=Nrefs), **kwargs)
+
+
 def savefig(*args, **kwargs):
     plt.savefig(*args, **kwargs)
 
