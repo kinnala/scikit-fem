@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2020-01-03
+
 ### Changed
 - Renamed GlobalBasis to Basis.
 - Moved all Mesh.plot and Mesh.draw methods to skfem.visuals module.
