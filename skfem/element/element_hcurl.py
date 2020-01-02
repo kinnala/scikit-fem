@@ -5,7 +5,7 @@ from .element import Element
 class ElementHcurl(Element):
     """Note: only 3D support. Piola transformation
     is different in 2D."""
-    
+
     order = (1, 1)
 
     def orient(self, mapping, i, tind=None):

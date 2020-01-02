@@ -4,7 +4,7 @@ from .element import Element
 
 class ElementH2(Element):
     """Elements defined implicitly through global degrees-of-freedom."""
-    
+
     order = (0, 1, 2)
     V = None  # For caching inverse Vandermonde matrix
 
