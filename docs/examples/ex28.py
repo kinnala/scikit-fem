@@ -128,7 +128,7 @@ if __name__ == '__main__':
     from pathlib import Path
     from skfem.visuals.matplotlib import plot, savefig
 
-    plot(mesh, temperature, edgecolors='none')
+    plot(mesh, temperature)
     savefig(Path(__file__).with_suffix('.png'),
             bbox_inches='tight', pad_inches=0)
 
