@@ -5,6 +5,7 @@ from skfem.importers.meshio import from_meshio
 
 from functools import partial
 from itertools import cycle, islice
+from pathlib import Path
 from typing import Tuple, Iterable
 
 from matplotlib.pyplot import subplots
@@ -223,32 +224,35 @@ class BackwardFacingStep:
 
 
 bfs = BackwardFacingStep(lcar=.2)
+psi = {}
 
 
 def callback(_: int,
              reynolds: float,
              uvp: np.ndarray,
-             name: str,
              milestones=Iterable[float]):
     """Echo the Reynolds number and plot streamlines at milestones"""
     print(f'Re = {reynolds}')
 
     if reynolds in milestones:
-        ax = bfs.streamlines(bfs.streamfunction(bfs.split(uvp)[0]))
-        ax.set_title(f'Re = {reynolds}')
-        ax.get_figure().savefig(f'{name}-{reynolds}-psi.png',
-                                bbox_inches="tight", pad_inches=0)
+
+        psi[reynolds] = bfs.streamfunction(bfs.split(uvp)[0])
+
+        if __name__ == '__main__':
+            ax = bfs.streamlines(psi[reynolds])
+            ax.set_title(f'Re = {reynolds}')
+            ax.get_figure().savefig(Path(__file__).with_name(
+                f'{Path(__file__).stem}-{reynolds}-psi.png'),
+                                    bbox_inches="tight", pad_inches=0)
 
 
 if __name__ == '__main__':
-
-    from os.path import splitext
-    from sys import argv
-
     milestones = [50., 150., 450., 750.]
-    natural(bfs, bfs.make_vector(), 0.,
-            partial(callback,
-                    name=splitext(argv[0])[0],
-                    milestones=milestones),
-            lambda_stepsize0=50.,
-            milestones=milestones)
+else:
+    milestones = [50.]
+
+natural(bfs, bfs.make_vector(), 0.,
+        partial(callback,
+                milestones=milestones),
+        lambda_stepsize0=50.,
+        milestones=milestones)

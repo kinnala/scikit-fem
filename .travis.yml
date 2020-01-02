@@ -21,6 +21,7 @@ install:
   - pip install dmsh
   - pip install pygmsh
   - pip install scikit-sparse
+  - pip install pacopy
 script:
   - python -m unittest discover 
 deploy:

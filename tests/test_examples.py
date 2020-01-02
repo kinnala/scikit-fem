@@ -171,11 +171,11 @@ class TestEx22(unittest.TestCase):
         self.assertAlmostEqual(u.T @ K @ u, 0.2131280267335294)
 
 
-# TODO: no pacopy in testsuite
-# class TestEx23(unittest.TestCase):
-#    def runTest(self):
-#       import docs.examples.ex23 as ex
-
+class TestEx23(unittest.TestCase):
+   def runTest(self):
+      import docs.examples.ex23 as ex
+      self.assertAlmostEqual(max(ex.lmbda_list), ex.turning_point,
+                             delta=5e-5)
 
 class TestEx24(unittest.TestCase):
     def runTest(self):
@@ -195,10 +195,12 @@ class TestEx26(unittest.TestCase):
         pass
 
 
-# TODO: no pacopy in testsuite
-# class TestEx27(unittest.TestCase):
-#    def runTest(self):
-#       import docs.examples.ex27 as ex
+class TestEx27(unittest.TestCase):
+   def runTest(self):
+      import docs.examples.ex27 as ex
+      _, psi = ex.psi.popitem()
+      self.assertAlmostEqual(min(psi), -0.027510982599400716)
+      self.assertAlmostEqual(max(psi), 0.6670038654518545)
 
 
 class TestEx28(unittest.TestCase):

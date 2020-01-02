@@ -4,12 +4,12 @@ from matplotlib.pyplot import subplots
 import numpy as np
 from scipy.sparse import dia_matrix
 
-import pacopy
+from pacopy import euler_newton
 from skfem import *
 from skfem.models.poisson import laplace, mass
 
 
-class Bratu1d():
+class Bratu1d:
 
     def __init__(self, n: int):
 
@@ -78,18 +78,21 @@ def callback(k, lmbda, sol):
     if values_list[-1] > upper:
         raise RangeException
 
+turning_point = 3.51383         # Farrell et al
 
 try:
-    pacopy.euler_newton(
+    euler_newton(
         problem, u0, lmbda0, callback, max_steps=500, newton_tol=1.0e-10
     )
 except RangeException:
-    fig, ax = subplots()
-    ax.set_xlabel('$\lambda$')
-    ax.set_ylabel('$||u||_2$')
-    ax.grid()
-    ax.plot(lmbda_list, values_list, '-o')
-    ax.axvline(3.51383, linestyle='dotted')  # turning point (Farrell et al)
-    ax.set_xlim(0.0, 4.0)
-    ax.set_ylim(0.0, upper)
-    fig.savefig(Path(__file__).with_suffix('.png'))
+
+    if __name__ == '__main__':
+        fig, ax = subplots()
+        ax.set_xlabel(r'$\lambda$')
+        ax.set_ylabel(r'$||u||_2$')
+        ax.grid()
+        ax.plot(lmbda_list, values_list, '-o')
+        ax.axvline(turning_point, linestyle='dotted')
+        ax.set_xlim(0.0, 4.0)
+        ax.set_ylim(0.0, upper)
+        fig.savefig(Path(__file__).with_suffix('.png'))
