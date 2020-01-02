@@ -11,6 +11,8 @@ skfem.mesh
 
 .. automodule:: skfem.mesh
 
+.. automethod:: skfem.mesh.Mesh.save
+
 MeshTri
 ~~~~~~~
 
@@ -30,6 +32,8 @@ Constructors
 .. automethod:: skfem.mesh.MeshTri.init_refdom
 
 .. automethod:: skfem.mesh.MeshTri.init_tensor
+
+.. automethod:: skfem.mesh.MeshTri.init_lshaped
 
 
 MeshQuad
