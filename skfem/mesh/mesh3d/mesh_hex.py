@@ -1,13 +1,12 @@
+from typing import Dict, Optional, Type
+
 import numpy as np
 from numpy import ndarray
 
-from typing import Dict, Optional, Type, Union
-
 from skfem.element import ElementHex1, ElementQuad1
 from skfem.mapping import MappingIsoparametric
-
-from ..mesh import MeshType
 from .mesh3d import Mesh3D
+from ..mesh import MeshType
 
 
 class MeshHex(Mesh3D):

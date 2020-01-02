@@ -3,8 +3,8 @@ from typing import Optional
 import numpy as np
 from numpy import ndarray
 
-from skfem.mesh import Mesh
 from skfem.element import Element
+from skfem.mesh import Mesh
 from .mapping import Mapping
 
 

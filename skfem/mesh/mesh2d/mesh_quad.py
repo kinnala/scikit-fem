@@ -1,14 +1,12 @@
+from typing import Optional, Type, Dict
+
 import numpy as np
+from numpy import ndarray
 
 from skfem.element import ElementQuad1, ElementLineP1
 from skfem.mapping import MappingIsoparametric
-
 from .mesh2d import Mesh2D, MeshType
 from .mesh_tri import MeshTri
-
-from typing import Optional, Type, Dict
-
-from numpy import ndarray
 
 
 class MeshQuad(Mesh2D):

@@ -1,7 +1,6 @@
-import numpy as np
 from typing import Optional, Tuple, Union, List
-from numpy import ndarray
 
+from numpy import ndarray
 
 OrderTuple = Union[Tuple[int, int],
                    Tuple[int, int, int]]
@@ -90,3 +89,7 @@ class Element():
 
         """
         raise NotImplementedError("Element must implement gbasis.")
+
+    @classmethod
+    def _index_error(cls):
+        raise ValueError("Index larger than the number of basis functions.")

@@ -73,14 +73,15 @@ if __name__ == '__main__':
     from sys import argv
 
     from matplotlib.tri import Triangulation
+    from skfem.visuals.matplotlib import plot, draw
 
     print(psi0)
     
     name = splitext(argv[0])[0]
-    mesh.plot(pressure, colorbar=True).get_figure().savefig(
+    plot(mesh, pressure, colorbar=True).get_figure().savefig(
         f'{name}_pressure.png')
 
-    ax = mesh.draw()
+    ax = draw(mesh)
     ax.tricontour(Triangulation(*mesh.p, mesh._splitquads().t.T),
                   psi[basis['psi'].nodal_dofs.flatten()])
     ax.get_figure().savefig(f'{name}_stream-lines.png')

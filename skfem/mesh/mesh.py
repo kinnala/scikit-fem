@@ -1,11 +1,10 @@
 import warnings
-from typing import Dict, Optional, Tuple,\
-                   Type, TypeVar, Union,\
-                   Callable
+from typing import Dict, Optional, Tuple, \
+    Type, TypeVar, Union, \
+    Callable
 
 import numpy as np
 from numpy import ndarray
-
 
 MeshType = TypeVar('MeshType', bound='Mesh')
 DimTuple = Union[Tuple[float],

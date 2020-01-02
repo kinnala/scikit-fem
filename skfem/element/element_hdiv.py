@@ -9,7 +9,7 @@ class ElementHdiv(Element):
         if tind is not None:
             # TODO fix
             raise NotImplementedError("TODO: fix tind support in ElementHdiv")
-        return -1 + 2*(mapping.mesh.f2t[0, mapping.mesh.t2f[i, :]]\
+        return -1 + 2*(mapping.mesh.f2t[0, mapping.mesh.t2f[i, :]]
                        == np.arange(mapping.mesh.t.shape[1]))
 
     def gbasis(self, mapping, X, i, tind=None):

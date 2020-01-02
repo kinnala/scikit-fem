@@ -1,16 +1,15 @@
 """Drawing meshes and solutions using matplotlib."""
 
-from typing import Tuple
 from functools import singledispatch
 
-import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
 from matplotlib.axes import Axes
+from mpl_toolkits.mplot3d import Axes3D
 from numpy import ndarray
 
-from ..mesh import *
 from ..assembly import InteriorBasis
+from ..mesh import *
 
 
 @singledispatch
