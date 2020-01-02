@@ -54,11 +54,13 @@ if __name__ == '__main__':
 
     from matplotlib.tri import Triangulation
 
+    from skfem.visuals.matplotlib import plot, draw
+
     name = splitext(argv[0])[0]
 
     mesh.save(f'{name}_velocity.vtk',
               {'velocity': velocity[basis['u'].nodal_dofs].T})
-    
+
     print(basis['psi'].interpolator(psi)(np.zeros((2, 1)))[0],
           '(cf. exact 1/64)')
 
@@ -66,15 +68,15 @@ if __name__ == '__main__':
                                                       [0.5, 0.5]])),
           '(cf. exact -/+ 1/8)')
 
-    ax = mesh.plot(pressure)
+    ax = plot(mesh, pressure)
     ax.get_figure().savefig(f'{name}_pressure.png')
 
-    ax = mesh.draw()
+    ax = draw(mesh)
     velocity1 = velocity[basis['u'].nodal_dofs]
     ax.quiver(*mesh.p, *velocity1, mesh.p[0, :])  # colour by buoyancy
     ax.get_figure().savefig(f'{name}_velocity.png')
 
-    ax = mesh.draw()
+    ax = draw(mesh)
     ax.tricontour(Triangulation(*mesh.p, mesh.t.T),
                   psi[basis['psi'].nodal_dofs.flatten()])
     ax.get_figure().savefig(f'{name}_stream-function.png')
