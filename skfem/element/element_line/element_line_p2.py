@@ -25,6 +25,6 @@ class ElementLineP2(ElementH1):
             phi = 4*x - 4*x**2
             dphi = np.array([4 - 8*x])
         else:
-            raise Exception("!")
+            self._index_error()
 
         return phi, dphi

@@ -52,6 +52,6 @@ class ElementHex1(ElementH1):
                              -(1 - x)*(1 - z),
                              -(1 - x)*(1 - y)])
         else:
-            raise Exception("!")
+            self._index_error()
 
         return 0.125*phi, 0.125*dphi

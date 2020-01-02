@@ -1,7 +1,6 @@
-import numpy as np
-
 from typing import NamedTuple, Optional, Dict
 
+import numpy as np
 from numpy import ndarray
 
 

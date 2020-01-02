@@ -1,14 +1,12 @@
-import numpy as np
-
 from typing import Optional, Callable, Tuple
 
+import numpy as np
 from numpy import ndarray
 
-from skfem.quadrature import get_quadrature
-
-from skfem.mesh import Mesh
 from skfem.element import Element
 from skfem.mapping import Mapping
+from skfem.mesh import Mesh
+from skfem.quadrature import get_quadrature
 from .basis import Basis
 
 

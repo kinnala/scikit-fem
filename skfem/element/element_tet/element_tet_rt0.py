@@ -24,6 +24,6 @@ class ElementTetRT0(ElementHdiv):
             phi = np.array([x, y, z])
             dphi = 3 + 0*x
         else:
-            raise Exception("!")
+            self._index_error()
 
         return phi, dphi

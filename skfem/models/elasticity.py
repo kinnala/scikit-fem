@@ -1,7 +1,6 @@
 """Linear elasticity."""
 
-import numpy as np
-from skfem.assembly import bilinear_form, linear_form
+from skfem.assembly import bilinear_form
 
 
 def lame_parameters(E, nu):

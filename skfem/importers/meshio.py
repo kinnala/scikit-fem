@@ -1,14 +1,12 @@
 """Import any formats supported by meshio."""
 
-from typing import Tuple
-from collections import OrderedDict
 import warnings
-
-import numpy as np
-import skfem
+from collections import OrderedDict
 
 import meshio
+import numpy as np
 
+import skfem
 
 MESH_TYPE_MAPPING = OrderedDict([
     ('tetra', skfem.MeshTet),

@@ -1,12 +1,10 @@
+from typing import Optional, Type, Dict
+
 import numpy as np
-from scipy.sparse import coo_matrix
-from skfem.mapping import MappingAffine
-
-from .mesh2d import Mesh2D, MeshType
-
-from typing import Optional, Tuple, Type, Dict
-
 from numpy import ndarray
+
+from skfem.mapping import MappingAffine
+from .mesh2d import Mesh2D, MeshType
 
 
 class MeshTri(Mesh2D):

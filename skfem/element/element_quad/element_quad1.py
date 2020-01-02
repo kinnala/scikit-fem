@@ -32,6 +32,6 @@ class ElementQuad1(ElementH1):
             dphi = np.array([0.25 * (-1 - y),
                              0.25 * (1 - x)])
         else:
-            raise Exception("!")
+            self._index_error()
 
         return phi, dphi

@@ -1,12 +1,11 @@
+from typing import Type, Optional, Dict
+
 import numpy as np
+from numpy import ndarray
 
 from skfem.mapping import MappingAffine
-
-from ..mesh import MeshType
 from .mesh3d import Mesh3D
-
-from typing import Type, Optional, Dict
-from numpy import ndarray
+from ..mesh import MeshType
 
 
 class MeshTet(Mesh3D):

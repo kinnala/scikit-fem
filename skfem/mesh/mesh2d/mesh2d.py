@@ -1,10 +1,7 @@
 import numpy as np
+from numpy import ndarray
 
 from skfem.mesh import Mesh, MeshType
-
-from typing import Callable, Optional
-
-from numpy import ndarray
 
 
 class Mesh2D(Mesh):

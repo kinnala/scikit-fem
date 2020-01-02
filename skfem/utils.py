@@ -1,18 +1,19 @@
 """This module contains utility functions such as convenient access to
 SciPy linear solvers."""
 
+import warnings
+from typing import Optional, Union, Tuple, Callable
+
 import numpy as np
 import scipy.sparse as sp
-import scipy.sparse.linalg as spl
 import scipy.sparse.csgraph as spg
-import warnings
-from skfem.assembly import asm, bilinear_form, linear_form, Dofs
-from skfem.element import ElementVectorH1
-from typing import Optional, Union, Tuple, Callable
+import scipy.sparse.linalg as spl
 from numpy import ndarray
 from scipy.sparse import spmatrix
-from skfem.assembly.basis import Basis
 
+from skfem.assembly import asm, bilinear_form, linear_form, Dofs
+from skfem.assembly.basis import Basis
+from skfem.element import ElementVectorH1
 
 LinearSolver = Callable[[spmatrix, ndarray], ndarray]
 EigenSolver = Callable[[spmatrix, spmatrix], Tuple[ndarray, ndarray]]

@@ -188,10 +188,10 @@ skfem.utils
 skfem.visuals
 -------------
 
-.. automodule:: skfem.utils.matplotlib
+.. automodule:: skfem.visuals.matplotlib
 
-.. autofunction:: skfem.utils.matplotlib.draw
+.. autofunction:: skfem.visuals.matplotlib.draw
 
-.. autofunction:: skfem.utils.matplotlib.plot
+.. autofunction:: skfem.visuals.matplotlib.plot
 
-.. autofunction:: skfem.utils.matplotlib.plot3
+.. autofunction:: skfem.visuals.matplotlib.plot3
