@@ -72,7 +72,7 @@ if __name__ == '__main__':
 
     from os.path import splitext
     from sys import argv
-    from skfem.visuals.matplotlib import draw, plot
+    from skfem.visuals.matplotlib import draw, plot, savefig
 
     T0 = {'skfem': basis.interpolator(temperature)(np.zeros((2, 1)))[0],
           'exact':
@@ -85,5 +85,5 @@ if __name__ == '__main__':
     print('Central temperature:', T0)
 
     ax = draw(mesh)
-    plot(mesh, temperature, ax=ax, edgecolors='none', colorbar=True)
-    ax.get_figure().savefig(splitext(argv[0])[0] + '_solution.png')
+    plot(basis, temperature, ax=ax, colorbar=True)
+    savefig(splitext(argv[0])[0] + '_solution.png')
