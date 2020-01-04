@@ -8,7 +8,7 @@ setup(
     name='scikit-fem',
     version='0.4.0',
     description='Simple finite element assemblers',
-    long_description='Easy to use finite element assemblers and related tools. See Github page for more information and examples.',  # Optional
+    long_description='Easy to use finite element assemblers and related tools. See Github page for more information and examples.',
     url='https://github.com/kinnala/scikit-fem',
     author='Tom Gustafsson',
     # https://pypi.python.org/pypi?%3Aaction=list_classifiers
