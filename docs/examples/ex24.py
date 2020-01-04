@@ -78,7 +78,6 @@ def parabolic(x, y):
     return ((4 * y * (1. - y), np.zeros_like(y)))
 
 
-
 uvp[inlet_dofs] = L2_projection(parabolic, inlet_basis, inlet_dofs)
 I = np.setdiff1d(np.arange(K.shape[0]), D)
 uvp = solve(*condense(K, 0*uvp, uvp, I))
@@ -104,18 +103,20 @@ if __name__ == '__main__':
 
     from matplotlib.tri import Triangulation
 
+    from skfem.visuals.matplotlib import plot, savefig
+
     name = splitext(argv[0])[0]
-    
-    mesh.plot(pressure)
-    mesh.savefig(f'{name}-pressure.png', bbox_inches='tight', pad_inches=0)
+
+    plot(mesh, pressure)
+    savefig(f'{name}-pressure.png', bbox_inches='tight', pad_inches=0)
 
     mesh.save(f'{name}-velocity.vtk',
               {'velocity': velocity[basis['u'].nodal_dofs].T})
-    
+
     fig, ax = subplots()
-    ax.plot(
-        *mesh.p[:, mesh.facets[:, np.concatenate(list(mesh.boundaries.values()))]],
-        color='k')
+    ax.plot(*mesh.p[:, mesh.facets[:, np.concatenate(
+        list(mesh.boundaries.values()))]],
+            color='k')
 
     n_streamlines = 11
     plot = partial(ax.tricontour,

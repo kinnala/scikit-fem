@@ -125,6 +125,9 @@ M.p[0, :] = M.p[0, :] + sf*x[i2][Ib.nodal_dofs[0, :]]
 M.p[1, :] = M.p[1, :] + sf*x[i2][Ib.nodal_dofs[1, :]]
 
 if __name__ == "__main__":
-    ax = m.draw()
-    M.draw(ax=ax)
-    m.show()
+
+    from skfem.visuals.matplotlib import draw, show
+
+    ax = draw(m)
+    draw(M, ax=ax)
+    show()

@@ -53,14 +53,16 @@ def port_flux(w):
 
 current = {}
 for port, boundary in mesh.boundaries.items():
-    basis = FacetBasis(mesh, elements, facets=boundary)
-    current[port] = asm(port_flux, basis, w=basis.interpolate(u))
+    fbasis = FacetBasis(mesh, elements, facets=boundary)
+    current[port] = asm(port_flux, fbasis, w=fbasis.interpolate(u))
 
 if __name__ == '__main__':
+
+    from skfem.visuals.matplotlib import plot, show
 
     print('L2 error:', error_L2)
     print('conductance:', conductance)
     print('Current in through ports:', current)
 
-    mesh.plot(u[basis.nodal_dofs.flatten()])
-    mesh.show()
+    plot(basis, u)
+    show()

@@ -15,6 +15,7 @@ K = asm(linear_elasticity(*lame_parameters(200.0e9, 0.3)), ib)
 
 rho = 8050.0
 
+
 @bilinear_form
 def mass(u, du, v, dv, w):
     return rho * sum(u * v)
@@ -37,6 +38,7 @@ y = np.zeros(K.shape[0])
 y[I] = x[:, 0]
 
 if __name__ == "__main__":
+    from skfem.visuals.matplotlib import draw, show
     sf = 2.0
-    MeshTet(np.array(m.p + sf * y[ib.nodal_dofs]), m.t).draw()
-    m.show()
+    draw(MeshTet(np.array(m.p + sf * y[ib.nodal_dofs]), m.t))
+    show()
