@@ -181,13 +181,12 @@ class Basis():
         Parameters
         ----------
         facets
-            A list of facet indices. Alternatively:
-            - if None, find facets by Mesh.boundary_facets()
-            - if callable, call Mesh.facets_satisfying to get facets
-            - if array, find the corresponding dofs
-            - if dict of arrays, find dofs for each entry
-            - if dict of callables, call Mesh.facets_satisfying for each entry
-              to get facets and then find dofs for those
+            A list of facet indices. If None, find facets by
+            Mesh.boundary_facets().  If callable, call Mesh.facets_satisfying to
+            get facets. If array, find the corresponding dofs. If dict of
+            arrays, find dofs for each entry. If dict of callables, call
+            Mesh.facets_satisfying for each entry to get facets and then find
+            dofs for those.
 
         """
         if facets is None:

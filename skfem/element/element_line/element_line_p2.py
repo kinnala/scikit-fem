@@ -21,7 +21,7 @@ class ElementLineP2(ElementH1):
         elif i == 1:
             phi = -x + 2*x**2
             dphi = np.array([-1 + 4*x])
-        elif i == 2:            # 0->1
+        elif i == 2:
             phi = 4*x - 4*x**2
             dphi = np.array([4 - 8*x])
         else:

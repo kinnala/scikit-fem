@@ -1,9 +1,9 @@
 .. _poisson:
 
-Poisson equation
-----------------
+Solving Poisson equation
+------------------------
 
-In this example, we demonstrate the basic concepts and workflow of
+In this short tutorial, we demonstrate the basic concepts and workflow of
 scikit-fem. We solve the canonical model problem for second-order PDE's: find
 :math:`u : \Omega \rightarrow \mathbb{R}` that satisfies
 
@@ -24,6 +24,9 @@ find :math:`u \in H^1_0(\Omega)` that satisfies
 .. math::
     (\nabla u, \nabla v) = (f, v)  \quad \forall v \in H^1_0(\Omega).
 
+Mesh and basis
+##############
+    
 We discretise the problem using piecewise-linear triangular finite elements.  A
 mesh for the unit square is given by the default constructor of
 :class:`~skfem.mesh.MeshTri`.  In the following, we further refine the mesh four
@@ -43,6 +46,9 @@ quadrature points.
 :class:`~skfem.element.ElementTriP1` defines the piecewise linear basis
 functions and local-to-global transformation rules.
 
+Assembly
+########
+
 The bilinear and linear forms are defined using the decorators
 :func:`~skfem.assembly.bilinear_form` and
 :func:`~skfem.assembly.linear_form`. It is important to have the order of the
@@ -58,6 +64,9 @@ All assembly operations are performed using the function :func:`~skfem.assembly.
     :start-at: asm(laplace, basis)
     :end-at: asm(load, basis)
 
+Solving and plotting
+####################
+
 We are left with solving the assembled linear system.
 We eliminate the boundary degrees-of-freedom using
 :func:`~skfem.utils.condense` and call :func:`~skfem.utils.solve`.
@@ -66,15 +75,15 @@ We eliminate the boundary degrees-of-freedom using
     :start-at: solve
     :end-at: solve	       
 
-The solution can now be visualised using :meth:`~skfem.mesh.MeshTri.plot`. 
+The solution can now be visualised using :meth:`~skfem.visuals.matplotlib.plot`. 
 
 .. literalinclude:: ex01.py
     :start-at: main
-    :end-at: savefig
+    :end-at: solution.png
 
 .. figure:: ex01_solution.png
 
-    The visualised solution of example 1.
+    The solution of Poisson equation.
 
 The complete source code reads as follows:
 
