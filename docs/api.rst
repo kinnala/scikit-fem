@@ -11,6 +11,10 @@ skfem.mesh
 
 .. automodule:: skfem.mesh
 
+.. autoclass:: skfem.mesh.Mesh
+
+.. automethod:: skfem.mesh.Mesh.load
+
 .. automethod:: skfem.mesh.Mesh.save
 
 MeshTri
@@ -22,8 +26,6 @@ Constructors
 ^^^^^^^^^^^^
 
 .. automethod:: skfem.mesh.MeshTri.__init__
-
-.. automethod:: skfem.mesh.MeshTri.load
 
 .. automethod:: skfem.mesh.MeshTri.init_symmetric
 
@@ -46,8 +48,6 @@ Constructors
 
 .. automethod:: skfem.mesh.MeshQuad.__init__
 
-.. automethod:: skfem.mesh.MeshQuad.load
-
 .. automethod:: skfem.mesh.MeshQuad.init_refdom
 
 .. automethod:: skfem.mesh.MeshQuad.init_tensor
@@ -62,8 +62,6 @@ Constructors
 ^^^^^^^^^^^^
 
 .. automethod:: skfem.mesh.MeshTet.__init__
-
-.. automethod:: skfem.mesh.MeshTet.load
 
 
 MeshHex
@@ -166,6 +164,8 @@ Defining a global basis
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: skfem.assembly.Basis
+
+.. automethod:: skfem.assembly.Basis.get_dofs
 
 .. autoclass:: skfem.assembly.InteriorBasis
 

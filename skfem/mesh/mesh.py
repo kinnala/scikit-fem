@@ -13,15 +13,7 @@ DimTuple = Union[Tuple[float],
 
 
 class Mesh():
-    """A finite element mesh.
-
-    This is an abstract superclass. See the following implementations:
-
-    - :class:`~skfem.mesh.MeshTri`, triangular mesh
-    - :class:`~skfem.mesh.MeshTet`, tetrahedral mesh
-    - :class:`~skfem.mesh.MeshQuad`, quadrilateral mesh
-    - :class:`~skfem.mesh.MeshHex`, hexahedral mesh
-    - :class:`~skfem.mesh.MeshLine`, one-dimensional mesh
+    """A finite element mesh (abstract superclass).
 
     Attributes
     ----------
@@ -285,7 +277,7 @@ class Mesh():
 
     @classmethod
     def load(cls: Type[MeshType], filename: str) -> MeshType:
-        """Import a mesh from file using `meshio
+        """Import a mesh from a file using `meshio
         <https://github.com/nschloe/meshio>`_.
 
         Parameters

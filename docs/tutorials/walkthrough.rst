@@ -3,8 +3,9 @@
 Basic features
 --------------
 
-This is a walkthrough of the basic features of scikit-fem that are needed in
+This is an overview of the basic features of scikit-fem that are needed in
 most finite element computations.
+For a more practical approach, see :ref:`poisson` instead.
 
 Creating meshes
 ###############
@@ -15,8 +16,7 @@ locations (:attr:`skfem.mesh.Mesh.p`) and :math:`n`-tuples defining the elements
 (:attr:`skfem.mesh.Mesh.t`).
 
 The default constructors of :class:`~skfem.mesh.Mesh`
-classes create simple meshes of unit intervals :math:`\Omega = [0,1]^d`
-where :math:`d` is the dimension of the domain.
+classes create simple meshes of unit cubes :math:`\Omega = [0,1]^d`.
 
 .. code-block:: python
 
@@ -136,8 +136,16 @@ See :ref:`learning` for more use cases and instructions.
 Setting essential boundary conditions
 #####################################
 
+.. note::
+
+   Using the assembled matrices requires basic understanding of
+   the finite element method. In particular, to understand
+   how the boundary conditions are set, you should be familiar
+   with the concepts of Dirichlet and Neumann boundary conditions
+   and how they are reflected in the finite element matrices.
+
 The simplest way of obtaining degrees-of-freedom corresponding to a specific
-boundary is through :meth:`skfem.assembly.InteriorBasis.get_dofs`.
+boundary is through :meth:`skfem.assembly.Basis.get_dofs`.
 
 .. code-block:: python
 
@@ -149,10 +157,10 @@ boundary is through :meth:`skfem.assembly.InteriorBasis.get_dofs`.
 The result value is :class:`skfem.assembly.Dofs` object (a named tuple)
 containing the degree-of-freedom numbers corresponding to :math:`x=0`.  In
 particular, the result tells us that when assembling matrices and vectors using
-``basis`` object, the rows 0, 2 and 4 correspond to the degrees-of-freedom at
-the vertices of the elements on the boundary :math:`x=0`, and the rows 9 and 11
-correspond to the degrees-of-freedom at the facets of the elements on the
-boundary :math:`x=0`.
+:class:`~skfem.assembly.Basis` object, the rows 0, 2 and 4 correspond to the
+degrees-of-freedom at the vertices of the elements on the boundary :math:`x=0`,
+and the rows 9 and 11 correspond to the degrees-of-freedom at the facets of the
+elements on the boundary :math:`x=0`.
 
 .. code-block:: python
 
@@ -216,7 +224,7 @@ By default, :func:`skfem.utils.solve` uses :func:`scipy.sparse.linalg.spsolve`.
 Postprocessing the results
 ##########################
 
-We can now visualize the solution ``x`` from the previous section using
+We can now visualize the solution from the previous section using
 matplotlib:
 
 .. code-block:: python
