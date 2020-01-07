@@ -1,3 +1,4 @@
+import warnings
 from typing import List, Optional, NamedTuple, Any
 
 import numpy as np
@@ -28,6 +29,19 @@ class Basis():
             self.mapping = mapping
 
         self._build_dofnum(mesh, elem)
+
+        # human readable names
+        self.dofnames = elem.dofnames
+
+        # global degree-of-freedom location
+        if hasattr(elem, 'doflocs'):
+            doflocs = self.mapping.F(elem.doflocs.T)
+            self.doflocs = np.zeros((doflocs.shape[0], self.N))
+            for itr in range(doflocs.shape[0]):
+                for jtr in range(self.element_dofs.shape[0]):
+                    self.doflocs[itr, self.element_dofs[jtr]] =\
+                        doflocs[itr, :, jtr]
+
         self.mesh = mesh
         self.elem = elem
 
@@ -104,17 +118,8 @@ class Basis():
         # interior dofs
         self.element_dofs = np.vstack((self.element_dofs, self.interior_dofs))
 
-        # number-of-dofs and human readable names
+        # total dofs
         self.N = np.max(self.element_dofs) + 1
-        self.dofnames = element.dofnames
-
-        if hasattr(element, 'doflocs'):
-            doflocs = self.mapping.F(element.doflocs.T)
-            self.doflocs = np.zeros((doflocs.shape[0], self.N))
-            for itr in range(doflocs.shape[0]):
-                for jtr in range(self.element_dofs.shape[0]):
-                    self.doflocs[itr, self.element_dofs[jtr]] =\
-                        doflocs[itr, :, jtr]
 
     def complement_dofs(self, *D):
         if type(D[0]) is dict:

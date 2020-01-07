@@ -1,41 +1,36 @@
-"""
-Author: kinnala
-
-Solve a linearized contact problem between two linear elastic
-bodies using the Nitsche's method.
-"""
-
 from skfem import *
 from skfem.models.elasticity import linear_elasticity
+from skfem.visuals.matplotlib import *
 import numpy as np
 
+# create meshes
 m = MeshTri()
 m.refine(3)
 M = MeshLine(np.linspace(0, 1, 6))
 M = M*M
-M = M._splitquads()
 M.translate((1.0, 0.0))
 
-map = MappingAffine(m)
-Map = MappingAffine(M)
 e1 = ElementTriP1()
 e = ElementVectorH1(e1)
 
-ib = InteriorBasis(m, e, map, 2)
-Ib = InteriorBasis(M, e, Map, 2)
+E1 = ElementQuad1()
+E = ElementVectorH1(E1)
 
-def rule(x, y):
-    return (x==1.0)
+ib = InteriorBasis(m, e)
+Ib = InteriorBasis(M, E)
+
+def rule(x):
+    return (x[0]==1.0)
 
 def param(x, y):
     return y
 
-mortar = InterfaceMesh1D(m, M, rule, param)
+mortar = MeshMortar(m, M, rule, param)
 
-mb = {}
-mortar_map = MappingAffine(mortar)
-mb[0] = FacetBasis(mortar, e, mortar_map, 2, side=0)
-mb[1] = FacetBasis(mortar, e, mortar_map, 2, side=1)
+mb = [
+    MortarBasis(mortar, e, intorder=2, side=0),
+    MortarBasis(mortar, E, intorder=2, side=1)
+]
 
 E1 = 1000.0
 E2 = 1000.0
@@ -52,13 +47,13 @@ Lambda2 = E2*nu2/((1.0 + nu2)*(1.0 - 2.0*nu2))
 Mu = Mu1
 Lambda = Lambda1
 
-weakform1 = linear_elasticity(Lambda=Lambda1, Mu=Mu1)
-weakform2 = linear_elasticity(Lambda=Lambda2, Mu=Mu2)
+weakform1 = linear_elasticity(Lambda=Lambda1, Mu=Mu)
+weakform2 = linear_elasticity(Lambda=Lambda2, Mu=Mu)
 
 alpha = 1
 K1 = asm(weakform1, ib)
 K2 = asm(weakform2, Ib)
-L = 0
+L = [[None,None],[None,None]]
 for i in range(2):
     for j in range(2):
         @bilinear_form
@@ -88,7 +83,7 @@ for i in range(2):
             h = w.h
             return 1.0/(alpha*h)*ju*jv - mu*jv - mv*ju
 
-        L = asm(bilin_penalty, mb[i], mb[j]) + L
+        L[i][j] = asm(bilin_penalty, mb[i], mb[j])
 
 @linear_form
 def load(v, dv, w):
@@ -98,13 +93,13 @@ f1 = asm(load, ib)
 f2 = np.zeros(K2.shape[0])
 
 import scipy.sparse
-K = (scipy.sparse.bmat([[K1, None],[None, K2]]) + L).tocsr()
+K = (scipy.sparse.bmat([[K1 + L[0][0], L[1][0]],[L[0][1], K2 + L[1][1]]])).tocsr()
 
 i1 = np.arange(K1.shape[0])
 i2 = np.arange(K2.shape[0]) + K1.shape[0]
 
-D1 = ib.get_dofs(lambda x, y: x==0.0).all()
-D2 = Ib.get_dofs(lambda x, y: x==2.0).all()
+D1 = ib.get_dofs(lambda x: x[0]==0.0).all()
+D2 = Ib.get_dofs(lambda x: x[0]==2.0).all()
 
 x = np.zeros(K.shape[0])
 
@@ -114,7 +109,7 @@ x = np.zeros(K.shape[0])
 D = np.concatenate((D1, D2 + ib.N))
 I = np.setdiff1d(np.arange(K.shape[0]), D)
 
-x[I] = solve(*condense(K, f, I=I))
+x = solve(*condense(K, f, I=I))
 
 sf = 1
 

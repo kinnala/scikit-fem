@@ -1,5 +1,3 @@
-from typing import Optional
-
 import numpy as np
 from numpy import ndarray
 
@@ -11,49 +9,69 @@ from .interior_basis import InteriorBasis
 class MortarBasis(Basis):
     """Global basis functions evaluated at integration points on the mortar
     boundary. """
+
     def __init__(self,
                  mesh,
                  elem,
-                 mapping,
-                 intorder: Optional[int] = None,
+                 intorder: int = None,
                  side: int = 0):
-        super(MortarBasis, self).__init__(mesh, elem, mapping, intorder)
+        """Initialize a basis for assembling mortar matrices.
 
-        self.ib1 = InteriorBasis(mesh.mesh1, elem)
-        self.ib2 = InteriorBasis(mesh.mesh2, elem)
+        Parameters
+        ----------
+        mesh
+            An object of type :class:`~skfem.mesh.MeshMortar`.
+        elem
+            An object of type :class:`~skfem.element.Element`.
+        intorder
+            Required integration order, i.e. the degree of polynomials that are
+            integrated exactly by the used quadrature.
+        side
+            The numbers 0 and 1 refer to the different sides of the mortar
+            interface. Side 0 corresponds to the indices mesh.f2t[0, :].
+
+        """
+        if intorder is None:
+            raise ValueError("Please specify 'intorder' for MortarBasis "
+                             "and use consistent orders for both sides.")
+
+        # build mapping for the mortar mesh
+        super(MortarBasis, self).__init__(mesh, elem, None, intorder)
+
+        # build dofnum and mappings for the target mesh
+        self._build_dofnum(mesh.target_mesh[side], elem)
+        target_mapping = mesh.target_mesh[side].mapping()
 
         self.X, self.W = get_quadrature(self.brefdom, self.intorder)
 
-        self.find = np.nonzero(self.mesh.f2t[1, :] != -1)[0]
+        self.find = np.arange(self.mesh.facets.shape[1])
         self.tind = self.mesh.f2t[side, self.find]
 
         # boundary refdom to global facet
         x = self.mapping.G(self.X, find=self.find)
         # global facet to refdom facet
-        Y = self.mapping.invF(x, tind=self.tind)
+        Y = target_mapping.invF(x, tind=self.tind)
 
-        self.normals = np.repeat(mesh.normals[:, :, None], len(self.W), axis=2)
+        # normals are defined in the mortar mesh
+        self.normals = np.repeat(mesh.normals[:, :, None],
+                                 len(self.W),
+                                 axis=2)
 
-        self.nelems = len(self.find)
-
-        self.basis = [self.elem.gbasis(self.mapping, Y, j, self.tind)
+        self.basis = [self.elem.gbasis(target_mapping, Y, j, self.tind)
                       for j in range(self.Nbfun)]
 
+        self.nelems = len(self.find)
         self.dx = np.abs(self.mapping.detDG(self.X, find=self.find)) *\
             np.tile(self.W, (self.nelems, 1))
 
-        if side == 0:
-            self.element_dofs = self.ib1.element_dofs[:, self.tind]
-        elif side == 1:
-            self.element_dofs = self.ib2.element_dofs[:, self.tind - mesh.mesh1.t.shape[1]] + self.ib1.N
+        self.element_dofs = self.element_dofs[:, self.tind]
 
-        self.N = self.ib1.N + self.ib2.N
 
     def default_parameters(self):
         """Return default parameters for `~skfem.assembly.asm`."""
-        return {'x':self.global_coordinates(),
-                'h':self.mesh_parameters(),
-                'n':self.normals}
+        return {'x': self.global_coordinates(),
+                'h': self.mesh_parameters(),
+                'n': self.normals}
     
     def global_coordinates(self) -> ndarray:
         return self.mapping.G(self.X, find=self.find)
