@@ -74,8 +74,8 @@ def from_meshio(m, force_mesh_type=None):
             return None
 
         # find subdomains
-        if meshio_type in m.cell_data and 'gmsh:physical' in m.cell_data[meshio_type]:
-            elements_tag = m.cell_data[meshio_type]['gmsh:physical']
+        if 'gmsh:physical' in m.cell_data and meshio_type in m.cell_data['gmsh:physical']:
+            elements_tag = m.cell_data['gmsh:physical'][meshio_type]
 
             subdomains = {}
             tags = np.unique(elements_tag)
@@ -85,9 +85,9 @@ def from_meshio(m, force_mesh_type=None):
                 subdomains[find_tagname(tag)] = t_set
 
         # find tagged boundaries
-        if bnd_type in m.cell_data and 'gmsh:physical' in m.cell_data[bnd_type]:
+        if 'gmsh:physical' in m.cell_data and bnd_type in m.cell_data['gmsh:physical']:
             facets = m.cells[bnd_type]
-            facets_tag = m.cell_data[bnd_type]['gmsh:physical']
+            facets_tag = m.cell_data['gmsh:physical'][bnd_type]
             bndfacets = mtmp.boundary_facets()
 
             # put meshio facets to dict
