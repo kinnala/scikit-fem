@@ -299,17 +299,18 @@ class MeshHex(Mesh3D):
     def save(self,
              filename: str,
              point_data: Optional[Dict[str, ndarray]] = None,
-             cell_data: Optional[Dict[str, ndarray]] = None):
+             hex_data: Optional[Dict[str, ndarray]] = None):
         """Export the mesh and fields using meshio. (Hexahedron version.)
 
         Parameters
         ----------
         filename
-            The filename for vtk-file.
+            The output filename, with suffix determining format;
+            e.g. .msh, .vtk, .xdmf
         point_data
-            ndarray for one output or dict for multiple
-        cell_data
-            ndarray for one output or dict for multiple
+            Data related to the vertices of the mesh.
+        hex_data
+            Data related to the elements of the mesh.
 
         """
         import meshio
@@ -322,10 +323,14 @@ class MeshHex(Mesh3D):
                 raise ValueError("point_data should be "
                                  "a dictionary of ndarrays.")
 
-        if cell_data is not None:
-            if not isinstance(point_data, dict):
-                raise ValueError("cell_data should be "
+        if hex_data is not None:
+            if not isinstance(hex_data, dict):
+                raise ValueError("hex_data should be "
                                  "a dictionary of ndarrays.")
+            cell_data = {k: {'hexahedron': v}
+                         for k, v in hex_data.items()}
+        else:
+            cell_data = None
 
         cells = {'hexahedron': t.T}
         mesh = meshio.Mesh(self.p.T, cells, point_data, cell_data)
