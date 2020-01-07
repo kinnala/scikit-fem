@@ -26,7 +26,7 @@ class MeshMortar(Mesh):
         self.facets = np.array([ixorig[:-1], ixorig[1:]])
         self.t2f = -1 + 0 * self.t
 
-        self.target_mesh = [None,None]
+        self.target_mesh = 2 * [None]
         self.target_mesh[0] = mesh1
         self.target_mesh[1] = mesh2
 
@@ -37,21 +37,9 @@ class MeshMortar(Mesh):
 
         self.normals = np.array([-tangent_y/tangent_lengths, tangent_x/tangent_lengths])
 
-        if debug_plot:
-            ax = mesh1.draw()
-            mesh2.draw(ax=ax)
-            xs = np.array([self.p[0, self.facets[0, :]], self.p[0, self.facets[1, :]]])
-            midx = np.sum(xs, axis=0)/2.0
-            ys = np.array([self.p[1, self.facets[0, :]], self.p[1, self.facets[1, :]]])
-            midy = np.sum(ys, axis=0)/2.0
-            xs = 0.9*(xs - midx) + midx
-            ys = 0.9*(ys - midy) + midy
-            ax.plot(xs, ys, 'x-')
-
         # mappings from facets to the original triangles
         # TODO vectorize
-        self.f2t = self.facets*0-1
-        self.f2f = self.facets*0-1
+        self.f2t = self.facets * 0 - 1
         for itr in range(self.facets.shape[1]):
             mx = .5*(self.p[0, self.facets[0, itr]] + self.p[0, self.facets[1, itr]])
             my = .5*(self.p[1, self.facets[0, itr]] + self.p[1, self.facets[1, itr]])
@@ -65,33 +53,21 @@ class MeshMortar(Mesh):
                 y2 = mesh1.p[1, fix2]
                 if rule((x1, y1)) > 0 or rule((x2, y2)) > 0:
                     if val > param(x1, y1) and val < param(x2, y2):
-                        # OK
-                        self.f2f[0, itr] = jtr
                         self.f2t[0, itr] = mesh1.f2t[0, jtr]
                         break
-                    elif val < param(x1, y1) and val > param(x2, y2): # ye olde
-                        # OK
-                        self.f2f[0, itr] = jtr
+                    elif val < param(x1, y1) and val > param(x2, y2):
                         self.f2t[0, itr] = mesh1.f2t[0, jtr]
                         break
                     elif val >= param(x1, y1) and val < param(x2, y2):
-                        # OK
-                        self.f2f[0, itr] = jtr
                         self.f2t[0, itr] = mesh1.f2t[0, jtr]
                         break
                     elif val > param(x1, y1) and val <= param(x2, y2):
-                        # OK
-                        self.f2f[0, itr] = jtr
                         self.f2t[0, itr] = mesh1.f2t[0, jtr]
                         break
                     elif val <= param(x1, y1) and val > param(x2, y2):
-                        # OK
-                        self.f2f[0, itr] = jtr
                         self.f2t[0, itr] = mesh1.f2t[0, jtr]
                         break
                     elif val < param(x1, y1) and val >= param(x2, y2):
-                        # OK
-                        self.f2f[0, itr] = jtr
                         self.f2t[0, itr] = mesh1.f2t[0, jtr]
                         break
             for jtr in mesh2.boundary_facets():
@@ -103,37 +79,25 @@ class MeshMortar(Mesh):
                 y2 = mesh2.p[1, fix2]
                 if rule((x1, y1)) > 0 or rule((x2, y2)) > 0:
                     if val > param(x1, y1) and val < param(x2, y2):
-                        # OK
-                        self.f2f[1, itr] = jtr
                         self.f2t[1, itr] = mesh2.f2t[0, jtr]
                         break
                     elif val < param(x1, y1) and val > param(x2, y2):
-                        # OK
-                        self.f2f[1, itr] = jtr
                         self.f2t[1, itr] = mesh2.f2t[0, jtr]
                         break
                     elif val >= param(x1, y1) and val < param(x2, y2):
-                        # OK
-                        self.f2f[1, itr] = jtr
                         self.f2t[1, itr] = mesh2.f2t[0, jtr]
                         break
                     elif val > param(x1, y1) and val <= param(x2, y2):
-                        # OK
-                        self.f2f[1, itr] = jtr
                         self.f2t[1, itr] = mesh2.f2t[0, jtr]
                         break
                     elif val <= param(x1, y1) and val > param(x2, y2):
-                        # OK
-                        self.f2f[1, itr] = jtr
                         self.f2t[1, itr] = mesh2.f2t[0, jtr]
                         break
                     elif val < param(x1, y1) and val >= param(x2, y2):
-                        # OK
-                        self.f2f[1, itr] = jtr
                         self.f2t[1, itr] = mesh2.f2t[0, jtr]
                         break
 
-        if (self.f2t>-1).all():
+        if (self.f2t > -1).all():
             self.f2t[0, :]
             return
         else:
