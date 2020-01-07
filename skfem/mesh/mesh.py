@@ -244,7 +244,7 @@ class Mesh():
     def save(self,
              filename: str,
              point_data: Optional[Dict[str, ndarray]] = None,
-             cell_data: Optional[Dict[str, ndarray]] = None) -> None:
+             mesh_cell_data: Optional[Dict[str, ndarray]] = None) -> None:
         """Export the mesh and fields using meshio.
 
         Parameters
@@ -254,7 +254,7 @@ class Mesh():
             e.g. .msh, .vtk, .xdmf
         point_data
             Data related to the vertices of the mesh.
-        cell_data
+        mesh_cell_data
             Data related to the elements of the mesh.
 
         """
@@ -265,11 +265,14 @@ class Mesh():
                 raise ValueError("point_data should be "
                                  "a dictionary of ndarrays.")
 
-        if cell_data is not None:
-            if not isinstance(cell_data, dict):
-                raise ValueError("cell_data should be "
+        if mesh_cell_data is not None:
+            if not isinstance(mesh_cell_data, dict):
+                raise ValueError("mesh_cell_data should be "
                                  "a dictionary of ndarrays.")
-            cell_data = {self.meshio_type: cell_data}
+            cell_data = {k: {self.meshio_type: v}
+                         for k, v in mesh_cell_data.items()}
+        else:
+            cell_data = None
 
         cells = {self.meshio_type: self.t.T}
         mesh = meshio.Mesh(self.p.T, cells, point_data, cell_data)
