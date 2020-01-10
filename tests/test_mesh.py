@@ -129,5 +129,47 @@ class SerializeUnserializeCycle(unittest.TestCase):
                 self.assertTrue((m.subdomains[k] == M.subdomains[k]).all())
 
 
+class TestMortarMeshTriQuad(unittest.TestCase):
+
+    def create_mesh1(self):
+        m1 = MeshTri()
+        m1.refine(3)
+        m1.translate((0.0, -0.5))
+        return m1
+
+    def create_mesh2(self):
+        m2 = MeshQuad()
+        m2.refine(2)
+        m2.translate((1.0, -0.5))
+        return m2
+
+    def create_meshes(self):
+        m1 = self.create_mesh1()
+        m2 = self.create_mesh2()
+        mortar = MeshMortar.init_1D(m1, m2,
+                                    m1.facets_satisfying(lambda x: x[0]==1.0),
+                                    m2.facets_satisfying(lambda x: x[0]==1.0),
+                                    np.array([0.0, 1.0]))
+        return m1, m2, mortar
+
+    def runTest(self):
+        m1, m2, mortar = self.create_meshes()
+
+        # check that f2t indices make sense
+        self.assertTrue((mortar.f2t[0, :] >= 0).all())
+        self.assertTrue((mortar.f2t[0, :] <= np.max(m1.t)).all())
+        self.assertTrue((mortar.f2t[1, :] >= 0).all())
+        self.assertTrue((mortar.f2t[1, :] <= np.max(m2.t)).all())
+
+
+class TestMortarMeshTriTri(TestMortarMeshTriQuad):
+
+    def create_mesh2(self):
+        m2 = MeshTri()
+        m2.refine(4)
+        m2.translate((1.0, -0.5))
+        return m2
+
+
 if __name__ == '__main__':
     unittest.main()

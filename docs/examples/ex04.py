@@ -25,7 +25,10 @@ def rule(x):
 def param(x, y):
     return y
 
-mortar = MeshMortar(m, M, rule, param)
+mortar = MeshMortar.init_1D(m, M,
+                            m.facets_satisfying(lambda x: x[0]==1.0),
+                            M.facets_satisfying(lambda x: x[0]==1.0),
+                            np.array([0.0, 1.0]))
 
 mb = [
     MortarBasis(mortar, e, intorder=2, side=0),
