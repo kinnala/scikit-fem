@@ -9,25 +9,20 @@ m.refine(3)
 M = MeshLine(np.linspace(0, 1, 6))
 M = M*M
 M.translate((1.0, 0.0))
+M = M._splitquads()
 
 e1 = ElementTriP1()
 e = ElementVectorH1(e1)
 
-E1 = ElementQuad1()
+E1 = ElementTriP1()
 E = ElementVectorH1(E1)
 
 ib = InteriorBasis(m, e)
 Ib = InteriorBasis(M, E)
 
-def rule(x):
-    return (x[0]==1.0)
-
-def param(x, y):
-    return y
-
 mortar = MeshMortar.init_1D(m, M,
-                            m.facets_satisfying(lambda x: x[0]==1.0),
-                            M.facets_satisfying(lambda x: x[0]==1.0),
+                            m.facets_satisfying(lambda x: x[0] == 1.0),
+                            M.facets_satisfying(lambda x: x[0] == 1.0),
                             np.array([0.0, 1.0]))
 
 mb = [

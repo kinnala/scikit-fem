@@ -1,6 +1,7 @@
 import numpy as np
 
 from .mesh import Mesh
+from .mesh_line import MeshLine
 from ..mapping import MappingAffine
 
 
@@ -9,7 +10,7 @@ class MeshMortar(Mesh):
 
     name = "Mortar"
 
-    def __init__(self, mesh1, mesh2, p, facets, f2t, normals):
+    def __init__(self, m_super, m1, m2, mesh1, mesh2, normals, ix1,ix2,I1,I2):
         """Create an interface mesh for mortar methods.
 
         Parameters
@@ -22,20 +23,22 @@ class MeshMortar(Mesh):
         normals
 
         """
-        self.p = p
-        self.facets = facets
-        self.f2t = f2t
+        self.p = m_super.p
+        self.t = m_super.t
         self.normals = normals
+        self.supermesh = m_super
+        self.helper_mesh = 2 * [None]
+        self.helper_mesh[0] = m1
+        self.helper_mesh[1] = m2
         self.target_mesh = 2 * [None]
         self.target_mesh[0] = mesh1
         self.target_mesh[1] = mesh2
-
-        # for quadrature rules
-        self.brefdom = mesh1.brefdom
-
-        # dummy values so that initialising Mapping doesn't crash
-        self.t = mesh1.t[:, :1]
-        self.t2f = -1 + 0 * self.t
+        self.ix={}
+        self.ix[0]=ix1
+        self.ix[1]=ix2
+        self.I ={}
+        self.I[0]=I1
+        self.I[1]=I2
 
 
     @classmethod
@@ -71,47 +74,65 @@ class MeshMortar(Mesh):
             y = proj(p)
             return np.linalg.norm(y, axis=0) * np.dot(tangent, y)
 
+        param_p1 = param(p1)
+        param_p2 = param(p2)
+
         # find unique facets by combining nodes from both sides
-        _, ix = np.unique(np.concatenate((param(p1), param(p2))), return_index=True)
+        _, ix = np.unique(np.concatenate((param_p1, param_p2)), return_index=True)
         ixorig = np.concatenate((p1_ix, p2_ix + mesh1.p.shape[1]))[ix]
-        p = np.hstack((mesh1.p, mesh2.p)) # TODO has duplicate nodes
-        facets = np.array([ixorig[:-1], ixorig[1:]])
+        p = np.array([np.hstack((param(mesh1.p), param(mesh2.p)))])
+        t = np.array([ixorig[:-1], ixorig[1:]])
 
-        # construct normals
+        # supermesh
+        p = p[:, np.concatenate((t[0], np.array([t[1, -1]])))]
+        t = np.array([np.arange(p.shape[1] - 1), np.arange(1, p.shape[1])])
+        m_super = MeshLine(p, t)
+
+        # helper meshes
+        m1 = MeshLine(np.sort(param_p1), np.array([np.arange(p1.shape[1] - 1),
+                                                   np.arange(1, p1.shape[1])]))
+        m2 = MeshLine(np.sort(param_p2), np.array([np.arange(p2.shape[1] - 1),
+                                                   np.arange(1, p2.shape[1])]))
+
+        # construct normals by rotating 'tangent'
         normal = np.array([tangent[1], -tangent[0]])
-        normals = normal[:, None].repeat(facets.shape[1], axis=1)
+        normals = normal[:, None].repeat(t.shape[1], axis=1)
 
-        # mappings from facets to the original triangles
-        f2t = facets * 0 - 1
-        for itr in range(facets.shape[1]):
-            mp = .5 * (p[:, facets[0, itr]] + p[:, facets[1, itr]])
-            val = param(mp)
-            for jtr in boundary1:
-                x1 = mesh1.p[:, mesh1.facets[0, jtr]]
-                x2 = mesh1.p[:, mesh1.facets[1, jtr]]
-                if (val > param(x1) and val < param(x2) or 
-                    val < param(x1) and val > param(x2) or 
-                    val >= param(x1) and val < param(x2) or 
-                    val > param(x1) and val <= param(x2) or 
-                    val <= param(x1) and val > param(x2) or 
-                    val < param(x1) and val >= param(x2)):
-                    f2t[0, itr] = mesh1.f2t[0, jtr]
-                    break
-            for jtr in boundary2:
-                x1 = mesh2.p[:, mesh2.facets[0, jtr]]
-                x2 = mesh2.p[:, mesh2.facets[1, jtr]]
-                if (val > param(x1) and val < param(x2) or 
-                    val < param(x1) and val > param(x2) or 
-                    val >= param(x1) and val < param(x2) or 
-                    val > param(x1) and val <= param(x2) or 
-                    val <= param(x1) and val > param(x2) or 
-                    val < param(x1) and val >= param(x2)):
-                    f2t[1, itr] = mesh2.f2t[0, jtr]
-                    break
-        if not (f2t > -1).all():
-            raise Exception("All mesh facets corresponding to mortar facets not found! {}".format(f2t))
+        # initialize mappings for orienting
+        map_super = m_super.mapping()
+        map_m1 = m1.mapping()
+        map_m2 = m2.mapping()
+        map_mesh1 = mesh1.mapping()
+        map_mesh2 = mesh2.mapping()
 
-        return cls(mesh1, mesh2, p, facets, f2t, normals)
+        # orient helper meshes
+        mps = map_super.F(np.array([[0.5]]))
+        ix1 = np.digitize(mps[0,:,0], m1.p[0]) - 1
+        ix2 = np.digitize(mps[0,:,0], m2.p[0]) - 1
 
-    def mapping(self):
-        return MappingAffine(self)
+        # for each element, map two points to global coordinates, reparametrize
+        # the points, and flip corresponding helper mesh element indices if
+        # sorting is wrong
+        f1mps = .5 * (mesh1.p[:, mesh1.facets[0, boundary1]] +
+                      mesh1.p[:, mesh1.facets[1, boundary1]])
+        sort_boundary1 = np.argsort(param(f1mps))
+        z1 = map_mesh1.G(map_m1.invF(map_super.F(np.array([[0.25, 0.75]])), tind=ix1),
+                         find=boundary1[sort_boundary1][ix1])
+        ix1_flip = np.unique(ix1[param(z1[:,:,1]) < param(z1[:,:,0])])
+        m1.t[:, ix1_flip] = np.flipud(m1.t[:, ix1_flip])
+
+        f2mps = .5 * (mesh2.p[:, mesh2.facets[0, boundary2]] +
+                      mesh2.p[:, mesh2.facets[1, boundary2]])
+        sort_boundary2 = np.argsort(param(f2mps))
+        z2 = map_mesh2.G(map_m2.invF(map_super.F(np.array([[0.25, 0.75]])), tind=ix2),
+                         find=boundary2[sort_boundary2][ix2])
+        ix2_flip = np.unique(ix2[param(z2[:,:,1]) < param(z2[:,:,0])])
+        m2.t[:, ix2_flip] = np.flipud(m2.t[:, ix2_flip])
+
+        return cls(m_super,
+                   m1, m2,
+                   mesh1, mesh2,
+                   normals,
+                   ix1, ix2,
+                   boundary1[sort_boundary1][ix1],
+                   boundary2[sort_boundary2][ix2])

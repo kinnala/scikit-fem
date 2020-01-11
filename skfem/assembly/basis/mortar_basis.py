@@ -36,21 +36,37 @@ class MortarBasis(Basis):
                              "and use consistent orders for both sides.")
 
         # build mapping for the mortar mesh
-        super(MortarBasis, self).__init__(mesh, elem, None, intorder)
+        #super(MortarBasis, self).__init__(mesh, elem, None, intorder)
+
+        self.mesh = mesh.target_mesh[side]
+        #self.brefdom = mesh.brefdom
+        # self.refdom = mesh.brefdom
+        # mesh.refdom = mesh.brefdom
+        #self.intorder = 3
+        #self.mapping = mesh.mapping()
+        self.elem = elem
 
         # build dofnum and mappings for the target mesh
         self._build_dofnum(mesh.target_mesh[side], elem)
+        integ_mapping = mesh.supermesh.mapping()
         target_mapping = mesh.target_mesh[side].mapping()
+        helper_mapping = mesh.helper_mesh[side].mapping()
+        self.Nbfun = self.element_dofs.shape[0]
 
-        self.X, self.W = get_quadrature(self.brefdom, self.intorder)
+        self.X, self.W = get_quadrature('line', 3)
 
-        self.find = np.arange(self.mesh.facets.shape[1])
-        self.tind = self.mesh.f2t[side, self.find]
+        # self.find = np.arange(self.mesh.facets.shape[1])
+        self.find = mesh.I[side]
+        self.tind = mesh.target_mesh[side].f2t[0, mesh.I[side]]
+        self.mapping = target_mapping
 
         # boundary refdom to global facet
-        x = self.mapping.G(self.X, find=self.find)
+        x = integ_mapping.F(self.X)
+        x = helper_mapping.invF(x, tind=mesh.ix[side])
+        x = target_mapping.G(x, find=mesh.I[side])
+        
         # global facet to refdom facet
-        Y = target_mapping.invF(x, tind=self.tind)
+        Y = target_mapping.invF(x, tind=mesh.target_mesh[side].f2t[0, mesh.I[side]])
 
         # normals are defined in the mortar mesh
         self.normals = np.repeat(mesh.normals[:, :, None],
