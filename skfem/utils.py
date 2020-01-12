@@ -153,7 +153,8 @@ def build_pc_diag(A: spmatrix) -> spmatrix:
 
 
 def solver_iter_krylov(krylov: Optional[LinearSolver] = spl.cg,
-                       verbose: Optional[bool] = False) -> LinearSolver:
+                       verbose: Optional[bool] = False,
+                       **kwargs) -> LinearSolver:
     """Krylov-subspace iterative linear solver.
 
     Parameters
@@ -163,6 +164,11 @@ def solver_iter_krylov(krylov: Optional[LinearSolver] = spl.cg,
         :func:`scipy.sparse.linalg.cg`
     verbose
         If True, print the norm of the iterate.
+
+    Any remaining keyword arguments are passed on to the solver, in
+    particular tol and atol, the tolerances, maxiter, and M, the
+    preconditioner.  If the last is omitted, a diagonal preconditioner
+    is supplied using :func:`skfem.utils.build_pc_diag`.
 
     Returns
     -------
@@ -174,7 +180,8 @@ def solver_iter_krylov(krylov: Optional[LinearSolver] = spl.cg,
         if verbose:
             print(np.linalg.norm(x))
 
-    def solver(A, b, **kwargs):
+    def solver(A, b, **solve_time_kwargs):
+        kwargs.update(solve_time_kwargs)
         if 'M' not in kwargs:
             kwargs['M'] = build_pc_diag(A)
         sol, info = krylov(A, b, **{'callback': callback, **kwargs})
