@@ -165,7 +165,7 @@ class MappingAffine(Mapping):
         else:
             detDG = self.detB[find]
 
-        return np.tile(detDG, (X.shape[1], 1)).T
+        return np.tile(detDG, (X.shape[-1], 1)).T
 
     def normals(self, X, tind, find, t2f):
         if self.dim == 1:
