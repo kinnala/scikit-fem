@@ -4,15 +4,19 @@ from skfem.visuals.matplotlib import *
 import numpy as np
 
 # create meshes
-m = MeshTri()
-m.refine(3)
+m = MeshTri.init_symmetric()
+#m = MeshTri()
+m.refine(4)
 M = MeshLine(np.linspace(0, 1, 6))
 M = M*M
+#M = MeshTri.init_symmetric()
+#M = MeshTri()
+M.refine(1)
 M.translate((1.0, 0.0))
 M = M._splitquads()
 
-m.refine(3)
-M.refine(3)
+#m.refine(3)
+#M.refine(3)
 
 e1 = ElementTriP1()
 e = ElementVectorH1(e1)
@@ -29,8 +33,8 @@ mortar = MeshMortar.init_1D(m, M,
                             np.array([0.0, 1.0]))
 
 mb = [
-    MortarBasis(mortar, e, intorder=2, side=0),
-    MortarBasis(mortar, E, intorder=2, side=1)
+    MortarBasis(m, e, mapping = mortar[0], intorder=2),
+    MortarBasis(M, E, mapping = mortar[1], intorder=2)
 ]
 
 E1 = 1000.0
@@ -39,19 +43,20 @@ E2 = 1000.0
 nu1 = 0.3
 nu2 = 0.3
 
-Mu1 = E1/(2.0*(1.0 + nu1))
-Mu2 = E2/(2.0*(1.0 + nu2))
+Mu1 = E1 / (2. * (1. + nu1))
+Mu2 = E2 / (2. * (1. + nu2))
 
-Lambda1 = E1*nu1/((1.0 + nu1)*(1.0 - 2.0*nu1))
-Lambda2 = E2*nu2/((1.0 + nu2)*(1.0 - 2.0*nu2))
+Lambda1 = E1 * nu1 / ((1. + nu1) * (1. - 2. * nu1))
+Lambda2 = E2 * nu2 / ((1. + nu2) * (1. - 2. * nu2))
 
 Mu = Mu1
 Lambda = Lambda1
 
-weakform1 = linear_elasticity(Lambda=Lambda1, Mu=Mu)
-weakform2 = linear_elasticity(Lambda=Lambda2, Mu=Mu)
+weakform1 = linear_elasticity(Lambda=Lambda, Mu=Mu)
+weakform2 = linear_elasticity(Lambda=Lambda, Mu=Mu)
 
-alpha = 0.001
+
+alpha = 1
 K1 = asm(weakform1, ib)
 K2 = asm(weakform2, Ib)
 L = [[None,None],[None,None]]
@@ -60,8 +65,8 @@ for i in range(2):
         @bilinear_form
         def bilin_penalty(u, du, v, dv, w):
             n = w.n
-            ju = (-1.0)**i*(u[0]*n[0] + u[1]*n[1])
-            jv = (-1.0)**j*(v[0]*n[0] + v[1]*n[1])
+            ju = (-1.) ** i * (u[0] * n[0] + u[1] * n[1])
+            jv = (-1.) ** j * (v[0] * n[0] + v[1] * n[1])
 
             def tr(T):
                 return T[0, 0] + T[1, 1]
@@ -82,13 +87,15 @@ for i in range(2):
                       n[1]*C(Eps(dv))[1, 0]*n[0] +\
                       n[1]*C(Eps(dv))[1, 1]*n[1])
             h = w.h
-            return 1.0/(alpha*h)*ju*jv - 0*mu*jv - 0*mv*ju
+            return 1.0/(alpha*h)*ju*jv - mu*jv - mv*ju
 
         L[i][j] = asm(bilin_penalty, mb[i], mb[j])
 
+import pdb; pdb.set_trace()
+
 @linear_form
 def load(v, dv, w):
-    return 500*v[0]
+    return 50*v[1]
 
 f1 = asm(load, ib)
 f2 = np.zeros(K2.shape[0])

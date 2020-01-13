@@ -1,8 +1,24 @@
+"""Support for wildcard import."""
+
+
+def mark_unstable(fun):
+    def call(*args, **kwargs):
+        import warnings
+        warnings.warn("You are using an unstable feature '{}' that might "
+                      "change in the near future. This is not yet part "
+                      "of the publicly documented API and hence is not "
+                      "governed by the usual assurance of semantic "
+                      "versioning.".format(fun.__module__))
+        return fun(*args, **kwargs)
+    return call
+
+
 from skfem.mesh import *
 from skfem.assembly import *
 from skfem.mapping import *
 from skfem.element import *
 from skfem.utils import *
+
 
 __all__ = ['Mesh',
            'Mesh2D',
@@ -58,4 +74,4 @@ __all__ = ['Mesh',
            'ElementTriRT0',
            'ElementVectorH1',
            'ElementLineP1',
-           'ElementLineP2',]
+           'ElementLineP2']
