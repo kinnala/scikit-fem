@@ -24,8 +24,7 @@ B = asm(divergence, basis['u'], basis['p'])
 f = asm(body_force, basis['u'])
 D = basis['u'].get_dofs().all()
 Aint = condense(A, D=D, expand=False)
-solver = solver_iter_pcg()
-preconditioner = build_pc_ilu(Aint)
+solver = solver_iter_pcg(M=build_pc_ilu(Aint))
 I = basis['u'].complement_dofs(D)
 
 
@@ -35,8 +34,7 @@ def flow(pressure: np.ndarray) -> np.ndarray:
     velocity[I] = solve(Aint,
                         condense(csr_matrix(A.shape),
                                  f + B.T @ pressure, I=I)[1],
-                        solver=solver,
-                        M=preconditioner)
+                        solver=solver)
     return velocity
 
 

@@ -55,7 +55,7 @@ except ImportError:
     print('Skipping pyamgcl')
 
 for pc in preconditioners:
-    x[I] = solve(Aint, bint, solver=solver_iter_pcg(verbose=verbose), M=pc)
+    x[I] = solve(Aint, bint, solver=solver_iter_pcg(verbose=verbose, M=pc))
 
 
 if verbose:

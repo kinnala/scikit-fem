@@ -109,7 +109,8 @@ def rcm(A: spmatrix,
 
 def solver_eigen_scipy(sigma: float,
                        n: Optional[int] = 3,
-                       mode: Optional[str] = 'normal') -> EigenSolver:
+                       mode: Optional[str] = 'normal',
+                       **kwargs) -> EigenSolver:
     """Solve generalized eigenproblem using SciPy (ARPACK).
 
     Parameters
@@ -126,14 +127,16 @@ def solver_eigen_scipy(sigma: float,
         A solver function that can be passed to :func:`solve`.
 
     """
-    def solver(K, M, **kwargs):
+    def solver(K, M, **solve_time_kwargs):
+        kwargs.update(solve_time_kwargs)
         from scipy.sparse.linalg import eigsh
         return eigsh(K, M=M, **{'sigma': sigma, 'k': n, 'mode': mode, **kwargs})
     return solver
 
 
-def solver_direct_scipy() -> LinearSolver:
-    def solver(A, b, **kwargs):
+def solver_direct_scipy(**kwargs) -> LinearSolver:
+    def solver(A, b, **solve_time_kwargs):
+        kwargs.update(solve_time_kwargs)
         return spl.spsolve(A, b, **kwargs)
     return solver
 
@@ -164,6 +167,11 @@ def solver_iter_krylov(krylov: Optional[LinearSolver] = spl.cg,
     verbose
         If True, print the norm of the iterate.
 
+    Any remaining keyword arguments are passed on to the solver, in
+    particular tol and atol, the tolerances, maxiter, and M, the
+    preconditioner.  If the last is omitted, a diagonal preconditioner
+    is supplied using :func:`skfem.utils.build_pc_diag`.
+
     Returns
     -------
     LinearSolver
@@ -174,7 +182,8 @@ def solver_iter_krylov(krylov: Optional[LinearSolver] = spl.cg,
         if verbose:
             print(np.linalg.norm(x))
 
-    def solver(A, b, **kwargs):
+    def solver(A, b, **solve_time_kwargs):
+        kwargs.update(solve_time_kwargs)
         if 'M' not in kwargs:
             kwargs['M'] = build_pc_diag(A)
         sol, info = krylov(A, b, **{'callback': callback, **kwargs})
