@@ -5,10 +5,8 @@ def mark_unstable(fun):
     def call(*args, **kwargs):
         import warnings
         warnings.warn("You are using an unstable feature '{}' that might "
-                      "change in the near future. This is not yet part "
-                      "of the publicly documented API and hence is not "
-                      "governed by the usual assurance of semantic "
-                      "versioning.".format(fun.__module__))
+                      "change in the near future. It is not part of the "
+                      "publicly documented API.".format(fun.__module__))
         return fun(*args, **kwargs)
     return call
 
