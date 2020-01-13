@@ -51,9 +51,8 @@ K = LinearOperator((basis['p'].N,) * 2,
                    dtype=pressure.dtype)
 
 pressure = solve(K, -dilatation0,
-                 solver=solver_iter_krylov(
-                     minres,
-                     M=build_pc_diag(asm(mass, basis['p']))))
+                 solver=solver_iter_krylov(minres),
+                 M=build_pc_diag(asm(mass, basis['p'])))
 
 velocity = flow(pressure)
 

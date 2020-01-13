@@ -156,8 +156,7 @@ def build_pc_diag(A: spmatrix) -> spmatrix:
 
 
 def solver_iter_krylov(krylov: Optional[LinearSolver] = spl.cg,
-                       verbose: Optional[bool] = False,
-                       **kwargs) -> LinearSolver:
+                       verbose: Optional[bool] = False) -> LinearSolver:
     """Krylov-subspace iterative linear solver.
 
     Parameters
