@@ -29,13 +29,9 @@ class MortarBasis(Basis):
         intorder
             Integration order, i.e. the degree of polynomials that are
             integrated exactly by the used quadrature. Please use equivalent
-            integration orders for the both sides of the mortar boundary.
+            integration orders on both sides of the mortar boundary.
 
         """
-        if intorder is None:
-            raise ValueError("Please specify 'intorder' for MortarBasis "
-                             "and use consistent orders for both sides.")
-
         super(MortarBasis, self).__init__(mesh, elem, mapping, intorder)
 
         self.X, self.W = get_quadrature(self.brefdom, self.intorder)
@@ -77,4 +73,5 @@ class MortarBasis(Basis):
         if self.mesh.dim() == 1:
             return np.array([0.0])
         else:
-            return np.abs(self.mapping.detDG(self.X, self.find)) ** (1.0 / (self.mesh.dim() - 1))
+            return (np.abs(self.mapping.detDG(self.X, find=self.find))
+                    ** (1.0 / (self.mesh.dim() - 1)))
