@@ -11,6 +11,9 @@ M = M*M
 M.translate((1.0, 0.0))
 M = M._splitquads()
 
+m.refine(3)
+M.refine(3)
+
 e1 = ElementTriP1()
 e = ElementVectorH1(e1)
 
@@ -48,7 +51,7 @@ Lambda = Lambda1
 weakform1 = linear_elasticity(Lambda=Lambda1, Mu=Mu)
 weakform2 = linear_elasticity(Lambda=Lambda2, Mu=Mu)
 
-alpha = 1
+alpha = 0.001
 K1 = asm(weakform1, ib)
 K2 = asm(weakform2, Ib)
 L = [[None,None],[None,None]]
@@ -79,13 +82,13 @@ for i in range(2):
                       n[1]*C(Eps(dv))[1, 0]*n[0] +\
                       n[1]*C(Eps(dv))[1, 1]*n[1])
             h = w.h
-            return 1.0/(alpha*h)*ju*jv - mu*jv - mv*ju
+            return 1.0/(alpha*h)*ju*jv - 0*mu*jv - 0*mv*ju
 
         L[i][j] = asm(bilin_penalty, mb[i], mb[j])
 
 @linear_form
 def load(v, dv, w):
-    return -50*v[1]
+    return 500*v[0]
 
 f1 = asm(load, ib)
 f2 = np.zeros(K2.shape[0])

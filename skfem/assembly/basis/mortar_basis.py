@@ -62,11 +62,11 @@ class MortarBasis(Basis):
 
         # boundary refdom to global facet
         x = integ_mapping.F(self.X)
-        x = helper_mapping.invF(x, tind=mesh.ix[side])
-        x = target_mapping.G(x, find=mesh.I[side])
-        
+        X = helper_mapping.invF(x, tind=mesh.ix[side])
+        x = target_mapping.G(X, find=self.find)
+
         # global facet to refdom facet
-        Y = target_mapping.invF(x, tind=mesh.target_mesh[side].f2t[0, mesh.I[side]])
+        Y = target_mapping.invF(x, tind=self.tind)
 
         # normals are defined in the mortar mesh
         self.normals = np.repeat(mesh.normals[:, :, None],
@@ -77,7 +77,7 @@ class MortarBasis(Basis):
                       for j in range(self.Nbfun)]
 
         self.nelems = len(self.find)
-        self.dx = np.abs(self.mapping.detDG(self.X, find=self.find)) *\
+        self.dx = np.abs(self.mapping.detDG(X, find=self.find)) *\
             np.tile(self.W, (self.nelems, 1))
 
         self.element_dofs = self.element_dofs[:, self.tind]
