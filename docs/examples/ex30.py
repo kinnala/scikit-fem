@@ -24,7 +24,7 @@ B = asm(divergence, basis['u'], basis['p'])
 f = asm(body_force, basis['u'])
 D = basis['u'].get_dofs().all()
 Aint = condense(A, D=D, expand=False)
-solver = solver_iter_krylov(cg, M=build_pc_ilu(Aint))
+solver = solver_iter_pcg(M=build_pc_ilu(Aint))
 I = basis['u'].complement_dofs(D)
 
 
@@ -51,9 +51,8 @@ K = LinearOperator((basis['p'].N,) * 2,
                    dtype=pressure.dtype)
 
 pressure = solve(K, -dilatation0,
-                 solver=solver_iter_krylov(
-                     minres,
-                     M=build_pc_diag(asm(mass, basis['p']))))
+                 solver=solver_iter_krylov(minres),
+                 M=build_pc_diag(asm(mass, basis['p'])))
 
 velocity = flow(pressure)
 

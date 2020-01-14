@@ -26,6 +26,153 @@ CondensedSystem = Union[spmatrix,
                         Tuple[spmatrix, spmatrix, ndarray, ndarray]]
 
 
+# preconditioners, e.g. for :func:`skfem.utils.solver_iter_krylov`
+
+
+def build_pc_ilu(A: spmatrix,
+                 drop_tol: Optional[float] = 1e-4,
+                 fill_factor: Optional[float] = 20) -> spl.LinearOperator:
+    """Incomplete LU preconditioner."""
+    P = spl.spilu(A.tocsc(), drop_tol=drop_tol, fill_factor=fill_factor)
+    M = spl.LinearOperator(A.shape, matvec=P.solve)
+    return M
+
+
+def build_pc_diag(A: spmatrix) -> spmatrix:
+    """Diagonal preconditioner."""
+    return sp.spdiags(1.0/A.diagonal(), 0, A.shape[0], A.shape[0])
+
+
+# solvers for :func:`skfem.utils.solve`
+
+
+def solver_eigen_scipy(sigma: float,
+                       n: Optional[int] = 3,
+                       mode: Optional[str] = 'normal',
+                       **kwargs) -> EigenSolver:
+    """Solve generalized eigenproblem using SciPy (ARPACK).
+
+    Parameters
+    ----------
+    sigma
+        The parameter for spectral shift, choose a value near the
+        expected eigenvalues.
+    n
+        The number of eigenpairs to solve.
+
+    Returns
+    -------
+    EigenSolver
+        A solver function that can be passed to :func:`solve`.
+
+    """
+    def solver(K, M, **solve_time_kwargs):
+        kwargs.update(solve_time_kwargs)
+        from scipy.sparse.linalg import eigsh
+        return eigsh(K, M=M, **{'sigma': sigma, 'k': n, 'mode': mode, **kwargs})
+    return solver
+
+
+def solver_direct_scipy(**kwargs) -> LinearSolver:
+    def solver(A, b, **solve_time_kwargs):
+        kwargs.update(solve_time_kwargs)
+        return spl.spsolve(A, b, **kwargs)
+    return solver
+
+
+def solver_iter_krylov(krylov: Optional[LinearSolver] = spl.cg,
+                       verbose: Optional[bool] = False,
+                       **kwargs) -> LinearSolver:
+    """Krylov-subspace iterative linear solver.
+
+    Parameters
+    ----------
+    krylov
+        A Krylov iterative linear solver, like, and by default,
+        :func:`scipy.sparse.linalg.cg`
+    verbose
+        If True, print the norm of the iterate.
+
+    Any remaining keyword arguments are passed on to the solver, in particular
+    tol and atol, the tolerances, maxiter, and M, the preconditioner.  If the
+    last is omitted, a diagonal preconditioner is supplied using
+    :func:`skfem.utils.build_pc_diag`.
+
+    Returns
+    -------
+    LinearSolver
+        A solver function that can be passed to :func:`solve`.
+
+    """
+    def callback(x):
+        if verbose:
+            print(np.linalg.norm(x))
+
+    def solver(A, b, **solve_time_kwargs):
+        kwargs.update(solve_time_kwargs)
+        if 'M' not in kwargs:
+            kwargs['M'] = build_pc_diag(A)
+        sol, info = krylov(A, b, **{'callback': callback, **kwargs})
+        if info > 0:
+            warnings.warn("Convergence not achieved!")
+        elif info == 0 and verbose:
+            print(f"{krylov.__name__} converged to "
+                  + f"tol={kwargs.get('tol', 'default')} and "
+                  + f"atol={kwargs.get('atol', 'default')}")
+        return sol
+
+    return solver
+
+
+def solver_iter_pcg(**kwargs) -> LinearSolver:
+    """Conjugate gradient solver, specialized from solver_iter_krylov"""
+    return solver_iter_krylov(**kwargs)
+
+
+# solve and condense
+
+
+def solve(A: spmatrix,
+          b: Union[ndarray, spmatrix],
+          x: Optional[ndarray] = None,
+          I: Optional[ndarray] = None,
+          solver: Optional[Union[LinearSolver, EigenSolver]] = None,
+          **kwargs) -> ndarray:
+    """Solve a linear system or a generalized eigenvalue problem.
+
+    Parameters
+    ----------
+    A
+        The system matrix
+    b
+        The right hand side vector or the mass matrix of a generalized
+        eigenvalue problem.
+    solver
+        Choose one of the following solvers:
+
+            - :func:`skfem.utils.solver_direct_scipy` (default)
+            - :func:`skfem.utils.solver_eigen_scipy` (default)
+            - :func:`skfem.utils.solver_iter_pcg`
+            - :func:`skfem.utils.solver_iter_krylov`
+
+    The remaining keyword arguments are passed to the solver.
+
+    """
+    if solver is None:
+        if isinstance(b, spmatrix):
+            solver = solver_eigen_scipy(10.0, **kwargs)
+            return solver(A, b)
+        elif isinstance(b, ndarray):
+            solver = solver_direct_scipy(**kwargs)
+
+    if x is not None and I is not None:
+        y = x.copy()
+        y[I] = solver(A, b, **kwargs)
+        return y
+    else:
+        return solver(A, b, **kwargs)
+
+
 def condense(A: spmatrix,
              b: Optional[Union[ndarray, spmatrix]] = None,
              x: Optional[ndarray] = None,
@@ -101,151 +248,18 @@ def condense(A: spmatrix,
     return ret_value if len(ret_value) > 1 else ret_value[0]
 
 
+# additional utilities
+
+
 def rcm(A: spmatrix,
         b: ndarray) -> Tuple[spmatrix, ndarray, ndarray]:
+    """Reverse Cuthill-McKee ordering."""
     p = spg.reverse_cuthill_mckee(A, symmetric_mode=False)
     return A[p].T[p].T, b[p], p
 
 
-def solver_eigen_scipy(sigma: float,
-                       n: Optional[int] = 3,
-                       mode: Optional[str] = 'normal') -> EigenSolver:
-    """Solve generalized eigenproblem using SciPy (ARPACK).
-
-    Parameters
-    ----------
-    sigma
-        The parameter for spectral shift, choose a value near the
-        expected eigenvalues.
-    n
-        The number of eigenpairs to solve.
-
-    Returns
-    -------
-    EigenSolver
-        A solver function that can be passed to :func:`solve`.
-
-    """
-    def solver(K, M):
-        from scipy.sparse.linalg import eigsh
-        return eigsh(K, k=n, M=M, sigma=sigma, mode=mode)
-    return solver
-
-
-def solver_direct_scipy() -> LinearSolver:
-    def solver(A, b):
-        return spl.spsolve(A, b)
-    return solver
-
-
-def solver_direct_umfpack() -> LinearSolver:
-    """SciPy interface to umfpack."""
-    def solver(A, b):
-        return spl.spsolve(A, b, use_umfpack=True)
-    return solver
-
-
-def build_pc_ilu(A: spmatrix,
-                 drop_tol: Optional[float] = 1e-4,
-                 fill_factor: Optional[float] = 20) -> spl.LinearOperator:
-    """Incomplete LU preconditioner."""
-    P = spl.spilu(A.tocsc(), drop_tol=drop_tol, fill_factor=fill_factor)
-    M = spl.LinearOperator(A.shape, matvec=P.solve)
-    return M
-
-
-def build_pc_diag(A: spmatrix) -> spmatrix:
-    """Diagonal preconditioner."""
-    return sp.spdiags(1.0/A.diagonal(), 0, A.shape[0], A.shape[0])
-
-
-def solver_iter_krylov(krylov: Optional[LinearSolver] = spl.cg,
-                       verbose: Optional[bool] = False,
-                       **kwargs) -> LinearSolver:
-    """Krylov-subspace iterative linear solver.
-
-    Parameters
-    ----------
-    krylov
-        A Krylov iterative linear solver, like, and by default,
-        :func:`scipy.sparse.linalg.cg`
-    verbose
-        If True, print the norm of the iterate.
-
-    Any remaining keyword arguments are passed on to the solver, in
-    particular x0, the starting guess, and M, the preconditioner.  If
-    the latter is omitted, a diagonal preconditioner is supplied using
-    :func:`skfem.utils.build_pc_diag`.
-
-    Returns
-    -------
-    LinearSolver
-        A solver function that can be passed to :func:`solve`.
-
-    """
-    def callback(x):
-        if verbose:
-            print(np.linalg.norm(x))
-
-    def solver(A, b):
-        if 'M' not in kwargs:
-            kwargs['M'] = build_pc_diag(A)
-        sol, info = krylov(A, b, **{'callback': callback, **kwargs})
-        if info > 0:
-            warnings.warn("Convergence not achieved!")
-        elif info == 0 and verbose:
-            print(f"{krylov.__name__} converged to "
-                  + f"tol={kwargs.get('tol', 'default')} and "
-                  + f"atol={kwargs.get('atol', 'default')}")
-        return sol
-
-    return solver
-
-
-def solver_iter_pcg(**kwargs) -> LinearSolver:
-    """Conjugate gradient solver, specialized from solver_iter_krylov"""
-    return solver_iter_krylov(spl.cg, **kwargs)
-
-
-def solve(A: spmatrix,
-          b: Union[ndarray, spmatrix],
-          x: Optional[ndarray] = None,
-          I: Optional[ndarray] = None,
-          solver: Optional[Union[LinearSolver, EigenSolver]] = None) -> ndarray:
-    """Solve a linear system or a generalized eigenvalue problem.
-
-    Parameters
-    ----------
-    A
-        The system matrix
-    b
-        The right hand side vector or the mass matrix of a generalized
-        eigenvalue problem.
-    solver
-        Choose one of the following solvers:
-
-            - :func:`skfem.utils.solver_direct_scipy` (default)
-            - :func:`skfem.utils.solver_eigen_scipy` (default)
-            - :func:`skfem.utils.solver_direct_umfpack`
-            - :func:`skfem.utils.solver_iter_pcg`
-
-    """
-    if solver is None:
-        if isinstance(b, spmatrix):
-            solver = solver_eigen_scipy(10.0)
-            return solver(A, b)
-        elif isinstance(b, ndarray):
-            solver = solver_direct_scipy()
-
-    if x is not None and I is not None:
-        y = x.copy()
-        y[I] = solver(A, b)
-        return y
-    else:
-        return solver(A, b)
-
-
 def adaptive_theta(est, theta=0.5, max=None):
+    """For choosing which elements to refine in an adaptive strategy."""
     if max is None:
         return np.nonzero(theta*np.max(est) < est)[0]
     else:
