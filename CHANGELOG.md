@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Additional keyword arguments to skfem.utils.solve get passed on to solvers.
+
 ## [0.4.0] - 2020-01-03
 
 ### Changed
