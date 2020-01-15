@@ -193,6 +193,12 @@ class Basis():
             Mesh.facets_satisfying for each entry to get facets and then find
             dofs for those.
 
+        Returns
+        -------
+        Dofs
+            A subset of degrees-of-freedom as :class:`skfem.assembly.dofs.Dofs`.
+
+
         """
         if facets is None:
             facets = self.mesh.boundary_facets()
