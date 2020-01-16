@@ -45,14 +45,14 @@ Ib = InteriorBasis(M, E, intorder=4)
 fb = FacetBasis(m, e)
 Fb = FacetBasis(M, E)
 
-mortar = MeshMortar.init_1D(m, M,
-                            m.boundaries['contact'],
-                            M.facets_satisfying(lambda x: x[0] == 1.0),
-                            np.array([0.0, 1.0]))
+mappings = MortarPair.init_2D(m, M,
+                              m.boundaries['contact'],
+                              M.facets_satisfying(lambda x: x[0] == 1.0),
+                              np.array([0.0, 1.0]))
 
 mb = [
-    MortarBasis(m, e, mapping = mortar[0], intorder=4),
-    MortarBasis(M, E, mapping = mortar[1], intorder=4)
+    MortarBasis(m, e, mapping = mappings[0], intorder=4),
+    MortarBasis(M, E, mapping = mappings[1], intorder=4)
 ]
 
 E1 = 1000.0

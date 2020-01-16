@@ -8,3 +8,4 @@ so normally the user is not required to initialize these classes.
 from .mapping import Mapping
 from .mapping_affine import MappingAffine
 from .mapping_isoparametric import MappingIsoparametric
+from .mortar_pair import MortarPair

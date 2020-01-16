@@ -1,49 +1,26 @@
+from typing import NamedTuple
+
 import numpy as np
+from numpy import ndarray
 
-from .mesh import Mesh
-from .mesh_line import MeshLine
-from ..mapping import MappingAffine
+from ..mesh.mesh2d import Mesh2D
+from .mapping import Mapping
 
 
-class MeshMortar(Mesh):
-    """An interface mesh for mortar methods."""
+class MortarPair(NamedTuple):
+    """A pair of mappings for mortar methods."""
 
-    name = "Mortar"
-
-    def __init__(self, m_super, m1, m2, mesh1, mesh2, normals, ix1,ix2,I1,I2):
-        """Create an interface mesh for mortar methods.
-
-        Parameters
-        ----------
-        mesh1
-        mesh2
-        p
-        facets
-        f2t
-        normals
-
-        """
-        self.p = m_super.p
-        self.t = m_super.t
-        self.normals = normals
-        self.supermesh = m_super
-        self.helper_mesh = 2 * [None]
-        self.helper_mesh[0] = m1
-        self.helper_mesh[1] = m2
-        self.target_mesh = 2 * [None]
-        self.target_mesh[0] = mesh1
-        self.target_mesh[1] = mesh2
-        self.ix={}
-        self.ix[0]=ix1
-        self.ix[1]=ix2
-        self.I ={}
-        self.I[0]=I1
-        self.I[1]=I2
-
+    mapping1: Mapping = None
+    mapping2: Mapping = None
 
     @classmethod
-    def init_1D(cls, mesh1, mesh2, boundary1, boundary2, tangent):
-        """Create a mortar mesh between two 2D meshes via projection.
+    def init_2D(cls,
+                mesh1: Mesh2D,
+                mesh2: Mesh2D,
+                boundary1: ndarray,
+                boundary2: ndarray,
+                tangent: ndarray):
+        """Create mortar mappings for two 2D meshes via projection.
 
         Parameters
         ----------
@@ -57,9 +34,11 @@ class MeshMortar(Mesh):
             A tangent vector defining the direction of the projection.
 
         """
+        from ..mesh import MeshLine
+
         tangent /= np.linalg.norm(tangent)
 
-        # find nodes on the two boundaries
+        # find unique nodes on the two boundaries
         p1_ix = np.unique(mesh1.facets[:, boundary1].flatten())
         p2_ix = np.unique(mesh2.facets[:, boundary2].flatten())
         p1 = mesh1.p[:, p1_ix]
@@ -74,21 +53,20 @@ class MeshMortar(Mesh):
             y = proj(p)
             return np.linalg.norm(y, axis=0) * np.sign(np.dot(tangent, y))
 
+        # find unique supermesh facets by combining nodes from both sides
         param_p1 = param(p1)
         param_p2 = param(p2)
-
-        # find unique facets by combining nodes from both sides
         _, ix = np.unique(np.concatenate((param_p1, param_p2)), return_index=True)
         ixorig = np.concatenate((p1_ix, p2_ix + mesh1.p.shape[1]))[ix]
         p = np.array([np.hstack((param(mesh1.p), param(mesh2.p)))])
         t = np.array([ixorig[:-1], ixorig[1:]])
 
-        # supermesh
+        # create 1-dimensional supermesh
         p = p[:, np.concatenate((t[0], np.array([t[1, -1]])))]
         t = np.array([np.arange(p.shape[1] - 1), np.arange(1, p.shape[1])])
         m_super = MeshLine(p, t)
 
-        # helper meshes
+        # helper meshes for creating the mappings
         m1 = MeshLine(np.sort(param_p1), np.array([np.arange(p1.shape[1] - 1),
                                                    np.arange(1, p1.shape[1])]))
         m2 = MeshLine(np.sort(param_p2), np.array([np.arange(p2.shape[1] - 1),
@@ -98,14 +76,14 @@ class MeshMortar(Mesh):
         normal = np.array([tangent[1], -tangent[0]])
         normals = normal[:, None].repeat(t.shape[1], axis=1)
 
-        # initialize mappings for orienting
+        # initialize mappings (for orienting)
         map_super = m_super.mapping()
         map_m1 = m1.mapping()
         map_m2 = m2.mapping()
         map_mesh1 = mesh1.mapping()
         map_mesh2 = mesh2.mapping()
 
-        # orient helper meshes
+        # matching of elements in the supermesh and the helper meshes
         mps = map_super.F(np.array([[0.5]]))
         ix1 = np.digitize(mps[0, :, 0], m1.p[0]) - 1
         ix2 = np.digitize(mps[0, :, 0], m2.p[0]) - 1
@@ -129,25 +107,28 @@ class MeshMortar(Mesh):
         ix2_flip = np.unique(ix2[param(z2[:, :, 1]) < param(z2[:, :, 0])])
         m2.t[:, ix2_flip] = np.flipud(m2.t[:, ix2_flip])
 
-
-        map_m1 = m1.mapping()
-        map_m2 = m2.mapping()
-
+        # create new mapping objects with G replaced by the supermesh mapping
         nmap_mesh1 = mesh1.mapping()
         nmap_mesh2 = mesh2.mapping()
-
+        map_m1 = m1.mapping()
+        map_m2 = m2.mapping()
         nmap_mesh1.G = lambda X: map_mesh1.G(map_m1.invF(map_super.F(X), tind=ix1),
                                              find=boundary1[sort_boundary1][ix1])
         nmap_mesh2.G = lambda X: map_mesh2.G(map_m2.invF(map_super.F(X), tind=ix2),
                                              find=boundary2[sort_boundary2][ix2])
+
+        # these are used by :class:`skfem.assembly.basis.MortarBasis`
         nmap_mesh1.find = boundary1[sort_boundary1][ix1]
         nmap_mesh2.find = boundary2[sort_boundary2][ix2]
         nmap_mesh1.normals = normals
         nmap_mesh2.normals = normals
 
+        # method for calculating the lengths of the segments ('detDG')
         segments1 = nmap_mesh1.G(np.array([[0.0, 1.0]]))
         segments2 = nmap_mesh2.G(np.array([[0.0, 1.0]]))
-        nmap_mesh1.detDG = lambda *_,**__: np.sqrt(np.diff(segments1[0], axis=1)**2 + np.diff(segments1[1], axis=1)**2)
-        nmap_mesh2.detDG = lambda *_,**__: np.sqrt(np.diff(segments2[0], axis=1)**2 + np.diff(segments2[1], axis=1)**2)
+        nmap_mesh1.detDG = lambda *_,**__: np.sqrt(np.diff(segments1[0], axis=1)**2 +
+                                                   np.diff(segments1[1], axis=1)**2)
+        nmap_mesh2.detDG = lambda *_,**__: np.sqrt(np.diff(segments2[0], axis=1)**2 +
+                                                   np.diff(segments2[1], axis=1)**2)
 
-        return nmap_mesh1, nmap_mesh2
+        return cls(mapping1=nmap_mesh1, mapping2=nmap_mesh2)
