@@ -17,4 +17,3 @@ from .mesh import Mesh, MeshType
 from .mesh_line import MeshLine
 from .mesh2d import Mesh2D, MeshTri, MeshQuad
 from .mesh3d import Mesh3D, MeshTet, MeshHex
-from .mesh_mortar import MeshMortar
