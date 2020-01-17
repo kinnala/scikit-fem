@@ -4,21 +4,28 @@ import numpy as np
 from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
 from skfem.importers import from_meshio
+import meshio
 
 
 # create meshes
-geom = Geometry()
-points = []
-lines = []
-points.append(geom.add_point([0., 0., 0.], .1))
-points.append(geom.add_point([0., 1., 0.], .1))
-points.append(geom.add_point([0.,-1., 0.], .1))
-lines.append(geom.add_circle_arc(points[2], points[0], points[1]))
-geom.add_physical(lines[-1], 'contact')
-lines.append(geom.add_line(points[1], points[2]))
-geom.add_physical(lines[-1], 'dirichlet')
-geom.add_physical(geom.add_plane_surface(geom.add_line_loop(lines)), 'domain')
-m = from_meshio(generate_mesh(geom, dim=2))
+try:
+    m = MeshTri.load("docs/examples/ex04_mesh.off")
+    m.boundaries = {'contact': m.facets_satisfying(lambda x: x[0] > 0.,
+                                                   boundaries_only=True)}
+except meshio.ReadError:
+    geom = Geometry()
+    points = []
+    lines = []
+    points.append(geom.add_point([0., 0., 0.], .1))
+    points.append(geom.add_point([0., 1., 0.], .1))
+    points.append(geom.add_point([0.,-1., 0.], .1))
+    lines.append(geom.add_circle_arc(points[2], points[0], points[1]))
+    geom.add_physical(lines[-1], 'contact')
+    lines.append(geom.add_line(points[1], points[2]))
+    geom.add_physical(lines[-1], 'dirichlet')
+    geom.add_physical(geom.add_plane_surface(geom.add_line_loop(lines)), 'domain')
+    m = from_meshio(generate_mesh(geom, dim=2))
+    m.save("docs/examples/ex04_mesh.off")
 
 M = MeshLine(np.linspace(0, 1, 6)) * MeshLine(np.linspace(-1, 1, 10))
 M.translate((1.0, 0.0))
