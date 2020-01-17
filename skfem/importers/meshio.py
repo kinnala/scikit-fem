@@ -8,6 +8,7 @@ import numpy as np
 
 import skfem
 
+
 MESH_TYPE_MAPPING = OrderedDict([
     ('tetra', skfem.MeshTet),
     ('hexahedron', skfem.MeshHex),

@@ -4,15 +4,14 @@ import numpy as np
 from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
 from skfem.importers import from_meshio
+from skfem.importers.json import from_file, to_file
 import meshio
 
 
 # create meshes
 try:
-    m = MeshTri.load("docs/examples/ex04_mesh.off")
-    m.boundaries = {'contact': m.facets_satisfying(lambda x: x[0] > 0.,
-                                                   boundaries_only=True)}
-except meshio.ReadError:
+    m = from_file("docs/examples/ex04_mesh.json")
+except FileNotFoundError:
     geom = Geometry()
     points = []
     lines = []
@@ -25,7 +24,7 @@ except meshio.ReadError:
     geom.add_physical(lines[-1], 'dirichlet')
     geom.add_physical(geom.add_plane_surface(geom.add_line_loop(lines)), 'domain')
     m = from_meshio(generate_mesh(geom, dim=2))
-    m.save("docs/examples/ex04_mesh.off")
+    to_file(m, "docs/examples/ex04_mesh.json")
 
 M = MeshLine(np.linspace(0, 1, 6)) * MeshLine(np.linspace(-1, 1, 10))
 M.translate((1.0, 0.0))

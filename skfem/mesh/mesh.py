@@ -371,7 +371,7 @@ class Mesh():
     def from_dict(cls: Type[MeshType], d) -> MeshType:
         """Initialize a mesh from a dictionary."""
         if 'p' not in d or 't' not in d:
-            raise ValueError("Dictionary must contain keys 'p' and 't'")
+            raise ValueError("Dictionary must contain keys 'p' and 't'.")
         else:
             d['p'] = np.array(d['p']).T
             d['t'] = np.array(d['t']).T
