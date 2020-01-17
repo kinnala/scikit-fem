@@ -40,8 +40,6 @@ E = ElementVectorH1(E1)
 
 ib = InteriorBasis(m, e, intorder=4)
 Ib = InteriorBasis(M, E, intorder=4)
-fb = FacetBasis(m, e)
-Fb = FacetBasis(M, E)
 
 mappings = MortarPair.init_2D(m, M,
                               m.boundaries['contact'],
@@ -50,9 +48,8 @@ mappings = MortarPair.init_2D(m, M,
 
 mb = [
     MortarBasis(m, e, mapping = mappings[0], intorder=4),
-    MortarBasis(M, E, mapping = mappings[1], intorder=4)
+    MortarBasis(M, E, mapping = mappings[1], intorder=4),
 ]
-
 
 # define bilinear forms
 E1 = 1000.0
@@ -76,7 +73,6 @@ weakform2 = linear_elasticity(Lambda=Lambda, Mu=Mu)
 
 alpha = 1000
 limit = 0.3
-
 
 # assemble the stiffness matrices
 K1 = asm(weakform1, ib)
