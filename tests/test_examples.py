@@ -1,4 +1,5 @@
 """These tests run the examples and check that their output stays constant."""
+
 import unittest
 
 import numpy as np
@@ -26,6 +27,15 @@ class TestEx03(unittest.TestCase):
     def runTest(self):
         import docs.examples.ex03 as ex03
         self.assertAlmostEqual(ex03.L[0], 0.00418289)
+
+
+class TestEx04(unittest.TestCase):
+    """Run examples/ex04.py"""
+
+    def runTest(self):
+        import docs.examples.ex04 as ex04
+        self.assertAlmostEqual(np.max(ex04.vonmises1), 64.57919892367978)
+        self.assertAlmostEqual(np.max(ex04.vonmises2), 67.91419753783893)
 
 
 class TestEx05(unittest.TestCase):

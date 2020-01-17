@@ -63,6 +63,9 @@ class MortarPair(NamedTuple):
 
         # create 1-dimensional supermesh
         p = p[:, np.concatenate((t[0], np.array([t[1, -1]])))]
+        range_max = np.min([np.max(param_p1), np.max(param_p2)])
+        range_min = np.max([np.min(param_p1), np.min(param_p2)])
+        p = np.array([p[0, (p[0] <= range_max) * (p[0] >= range_min)]])
         t = np.array([np.arange(p.shape[1] - 1), np.arange(1, p.shape[1])])
         m_super = MeshLine(p, t)
 
