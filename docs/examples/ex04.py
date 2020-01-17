@@ -3,8 +3,8 @@ from skfem.models.elasticity import linear_elasticity
 import numpy as np
 from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
-from skfem.importers import from_meshio
-from skfem.importers.json import from_file, to_file
+from skfem.io import from_meshio
+from skfem.io.json import from_file, to_file
 import meshio
 
 
@@ -191,15 +191,15 @@ for itr in range(2):
 s[2, 2] = nu1 * (s[0, 0] + s[1, 1])
 S[2, 2] = nu2 * (S[0, 0] + S[1, 1])
 
-vonmises1 = np.sqrt(.5*((s[0, 0] - s[1, 1])**2 +\
-                        (s[1, 1] - s[2, 2])**2 +\
-                        (s[2, 2] - s[0, 0])**2 +\
-                        6.0*s[0, 1]**2))
+vonmises1 = np.sqrt(.5 * ((s[0, 0] - s[1, 1]) ** 2 +
+                          (s[1, 1] - s[2, 2]) ** 2 +
+                          (s[2, 2] - s[0, 0]) ** 2 +
+                          6. * s[0, 1]**2))
 
-vonmises2 = np.sqrt(.5*((S[0, 0] - S[1, 1])**2 +\
-                        (S[1, 1] - S[2, 2])**2 +\
-                        (S[2, 2] - S[0, 0])**2 +\
-                        6.0*S[0, 1]**2))
+vonmises2 = np.sqrt(.5 * ((S[0, 0] - S[1, 1]) ** 2 +
+                          (S[1, 1] - S[2, 2]) ** 2 +
+                          (S[2, 2] - S[0, 0]) ** 2 +
+                          6. * S[0, 1]**2))
 
 
 if __name__ == "__main__":
