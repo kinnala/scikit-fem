@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Additional keyword arguments to skfem.utils.solve get passed on to solvers.
+- Add MortarBasis and MortarPair for mortaring in 2D.
 
 ### Changed
 - Renamed skfem.importers to skfem.io.

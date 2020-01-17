@@ -1,16 +1,5 @@
 """Support for wildcard import."""
 
-
-def mark_unstable(fun):
-    def call(*args, **kwargs):
-        import warnings
-        warnings.warn("You are using an unstable feature '{}' that might "
-                      "change in the near future. It is not part of the "
-                      "publicly documented API.".format(fun.__module__))
-        return fun(*args, **kwargs)
-    return call
-
-
 from skfem.mesh import *
 from skfem.assembly import *
 from skfem.mapping import *

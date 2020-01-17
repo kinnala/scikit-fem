@@ -1,7 +1,6 @@
 import numpy as np
 from numpy import ndarray
 
-from skfem import mark_unstable
 from ...quadrature import get_quadrature
 from .basis import Basis
 from .interior_basis import InteriorBasis
@@ -10,7 +9,6 @@ from .interior_basis import InteriorBasis
 class MortarBasis(Basis):
     """Global basis functions at integration points on the mortar boundary."""
 
-    @mark_unstable
     def __init__(self,
                  mesh,
                  elem,
