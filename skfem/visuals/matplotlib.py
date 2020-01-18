@@ -18,7 +18,7 @@ def draw(m, **kwargs) -> Axes:
     raise NotImplementedError("Type {} not supported.".format(type(m)))
 
 
-@draw.register
+@draw.register(MeshTet)
 def _(m: MeshTet, **kwargs) -> Axes:
     """Visualize a tetrahedral mesh by drawing the boundary facets."""
     bnd_facets = m.boundary_facets()
@@ -31,7 +31,7 @@ def _(m: MeshTet, **kwargs) -> Axes:
     return ax
 
 
-@draw.register
+@draw.register(Mesh2D)
 def _(m: Mesh2D, **kwargs) -> Axes:
     """Visualise a two-dimensional mesh by drawing the edges.
 
@@ -111,7 +111,7 @@ def plot(m, u, **kwargs) -> Axes:
     raise NotImplementedError("Type {} not supported.".format(type(m)))
 
 
-@plot.register
+@plot.register(MeshLine)
 def _(m: MeshLine, z: ndarray, **kwargs):
     """Plot a function defined at the nodes of the 1D mesh."""
     if "ax" not in kwargs:
@@ -139,7 +139,7 @@ def _(m: MeshLine, z: ndarray, **kwargs):
     return ax
 
 
-@plot.register
+@plot.register(MeshTri)
 def _(m: MeshTri, z: ndarray, **kwargs) -> Axes:
     """Visualise piecewise-linear function on a triangular mesh.
 
@@ -192,7 +192,7 @@ def _(m: MeshTri, z: ndarray, **kwargs) -> Axes:
     return ax
 
 
-@plot.register
+@plot.register(MeshQuad)
 def _(m: MeshQuad, z, **kwargs):
     """Visualise nodal functions on quadrilateral meshes.
 
@@ -208,7 +208,7 @@ def _(m: MeshQuad, z, **kwargs):
     return plot(m, z, **kwargs)
 
 
-@plot.register
+@plot.register(InteriorBasis)
 def _(basis: InteriorBasis, z: ndarray, **kwargs) -> Axes:
     """Plot on a refined mesh via :meth:`InteriorBasis.refinterp`."""
     Nrefs = kwargs["Nrefs"] if "Nrefs" in kwargs else 1
@@ -221,7 +221,7 @@ def plot3(m, z: ndarray, **kwargs) -> Axes:
     raise NotImplementedError("Type {} not supported.".format(type(m)))
 
 
-@plot3.register
+@plot3.register(MeshTri)
 def _(m: MeshTri, z: ndarray, **kwargs) -> Axes:
     """Visualise piecewise-linear function, 3D plot.
 
@@ -252,7 +252,7 @@ def _(m: MeshTri, z: ndarray, **kwargs) -> Axes:
     return ax
 
 
-@plot3.register
+@plot3.register(InteriorBasis)
 def _(basis: InteriorBasis, z: ndarray, **kwargs) -> Axes:
     """Plot on a refined mesh via :meth:`InteriorBasis.refinterp`."""
     Nrefs = kwargs["Nrefs"] if "Nrefs" in kwargs else 1
