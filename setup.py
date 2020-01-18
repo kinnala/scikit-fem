@@ -23,7 +23,7 @@ setup(
     packages = find_packages(exclude=['tests']),
     install_requires = ['numpy', 'scipy', 'meshio'],
     extras_require = {
-        'full': ['matplotlib', 'pygmsh', 'gmsh-sdk'],
+        'full': ['matplotlib'],
     },
     test_suite='tests',
 )
