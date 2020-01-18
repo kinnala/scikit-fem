@@ -8,7 +8,17 @@ from .mapping import Mapping
 
 
 class MortarPair(NamedTuple):
-    """A pair of mappings for mortar methods."""
+    """A pair of mappings for mortar methods.
+
+    In mortar methods, we are interested in interface conditions on non-matching
+    meshes. We need to generate matching quadrature points on both sides of the
+    interface.
+
+    The pair of mappings in MortarPair is defined so that when we map any local
+    point in the reference element using both of the mappings, we get matching
+    global points on the facets of the original non-matching meshes.
+
+    """
 
     mapping1: Mapping = None
     mapping2: Mapping = None
@@ -25,11 +35,13 @@ class MortarPair(NamedTuple):
         Parameters
         ----------
         mesh1
+            An object of the type :class:`~skfem.mesh.mesh_2d.Mesh2D`.
         mesh2
+            An object of the type :class:`~skfem.mesh.mesh_2d.Mesh2D`.
         boundary1
-            A subset of facets from mesh1.
+            A subset of facets to use from mesh1.
         boundary2
-            A subset of facets from mesh2.
+            A subset of facets to use from mesh2.
         tangent
             A tangent vector defining the direction of the projection.
 
