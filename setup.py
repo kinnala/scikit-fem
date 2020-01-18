@@ -5,12 +5,12 @@ from os import path
 here = path.abspath(path.dirname(__file__))
 
 setup(
-    name='scikit-fem',
-    version='0.4.0',
-    description='Simple finite element assemblers',
-    long_description='Easy to use finite element assemblers and related tools. See Github page for more information and examples.',
-    url='https://github.com/kinnala/scikit-fem',
-    author='Tom Gustafsson',
+    name = 'scikit-fem',
+    version = '0.4.1',
+    description = 'Simple finite element assemblers',
+    long_description = 'Easy to use finite element assemblers and related tools. See Github page for more information and examples.',
+    url = 'https://github.com/kinnala/scikit-fem',
+    author = 'Tom Gustafsson',
     # https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         'Development Status :: 3 - Alpha',
@@ -20,7 +20,10 @@ setup(
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Mathematics',
     ],
-    packages=find_packages(exclude=['tests']),
-    install_requires=['numpy', 'scipy', 'meshio'],
+    packages = find_packages(exclude=['tests']),
+    install_requires = ['numpy', 'scipy', 'meshio'],
+    extras_require = {
+        'full': ['matplotlib'],
+    },
     test_suite='tests',
 )

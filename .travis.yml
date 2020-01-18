@@ -1,13 +1,11 @@
 language: python
 python:
   - "3.6"
+  - "3.7"
 install:
   - sudo apt-get update
   - sudo apt-get install gmsh
   - sudo apt-get install libsuitesparse-dev
-  - wget http://gmsh.info/bin/Linux/gmsh-4.3.0-Linux64.tgz
-  - tar zvxf gmsh-4.3.0-Linux64.tgz
-  - sudo cp gmsh-4.3.0-Linux64/bin/gmsh /usr/bin
   - wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
@@ -19,6 +17,7 @@ install:
   - source activate scikit-fem
   - pip install meshio
   - pip install dmsh
+  - pip install gmsh-sdk
   - pip install pygmsh
   - pip install scikit-sparse
   - pip install pacopy
