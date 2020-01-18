@@ -1,6 +1,6 @@
 import warnings
 
-warnings.warn("DeprecationWarning: skfem.importers is removed "
-              "in the next release. Use skfem.io instead.")
+warnings.warn("skfem.importers is removed in the next release. "
+              "Use skfem.io instead.", DeprecationWarning)
 
 from ..io.meshio import *
