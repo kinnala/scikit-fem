@@ -23,7 +23,8 @@ class MortarBasis(Basis):
         elem
             An object of type :class:`~skfem.element.Element`.
         mapping
-            Mortar mapping.
+            Mapping to the relevant facets of the mesh, see
+            e.g. :class:`~skfem.mapping.MortarPair`.
         intorder
             Integration order, i.e. the degree of polynomials that are
             integrated exactly by the used quadrature. Please use equivalent
