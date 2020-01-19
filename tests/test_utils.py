@@ -1,4 +1,3 @@
-"""Unit tests for utils package."""
 import unittest
 
 import numpy as np

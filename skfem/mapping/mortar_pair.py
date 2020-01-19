@@ -10,13 +10,21 @@ from .mapping import Mapping
 class MortarPair(NamedTuple):
     """A pair of mappings for mortar methods.
 
-    In mortar methods, we are interested in interface conditions on non-matching
-    meshes. We need to generate matching quadrature points on both sides of the
-    interface.
+    In mortar methods, we are enforcing interface conditions on non-matching
+    meshes. To this end, we must generate matching quadrature points on both
+    sides of the interface.
 
-    The pair of mappings in MortarPair is defined so that when we map any local
+    :class:`~skfem.mapping.MortarPair` is a pair of
+    :class:`~skfem.mapping.Mapping` objects defined so that mapping any local
     point in the reference element using both of the mappings, we get matching
-    global points on the facets of the original non-matching meshes.
+    global points on the original non-matching meshes.
+
+    Attributes
+    ----------
+    mapping1
+        Mapping to the facets of the first mesh.
+    mapping2
+        Mapping to the facets of the second mesh.
 
     """
 
@@ -29,7 +37,7 @@ class MortarPair(NamedTuple):
                 mesh2: Mesh2D,
                 boundary1: ndarray,
                 boundary2: ndarray,
-                tangent: ndarray):
+                tangent: ndarray = None):
         """Create mortar mappings for two 2D meshes via projection.
 
         Parameters
@@ -44,9 +52,14 @@ class MortarPair(NamedTuple):
             A subset of facets to use from mesh2.
         tangent
             A tangent vector defining the direction of the projection.
+            If not given, use first facet of boundary1 as the vector.
 
         """
         from ..mesh import MeshLine
+
+        if tangent is None:
+            tangent = (mesh1.p[:, mesh1.facets[0, boundary1[0]]] -
+                       mesh1.p[:, mesh1.facets[1, boundary1[0]]])
 
         tangent /= np.linalg.norm(tangent)
 
@@ -73,7 +86,8 @@ class MortarPair(NamedTuple):
         p = np.array([np.hstack((param(mesh1.p), param(mesh2.p)))])
         t = np.array([ixorig[:-1], ixorig[1:]])
 
-        # create 1-dimensional supermesh
+        # create 1-dimensional supermesh from the intersections of the projected
+        # facet elements
         p = p[:, np.concatenate((t[0], np.array([t[1, -1]])))]
         range_max = np.min([np.max(param_p1), np.max(param_p2)])
         range_min = np.max([np.min(param_p1), np.min(param_p2)])
@@ -123,27 +137,27 @@ class MortarPair(NamedTuple):
         m2.t[:, ix2_flip] = np.flipud(m2.t[:, ix2_flip])
 
         # create new mapping objects with G replaced by the supermesh mapping
-        nmap_mesh1 = mesh1.mapping()
-        nmap_mesh2 = mesh2.mapping()
+        new_map1 = mesh1.mapping()
+        new_map2 = mesh2.mapping()
         map_m1 = m1.mapping()
         map_m2 = m2.mapping()
-        nmap_mesh1.G = lambda X: map_mesh1.G(map_m1.invF(map_super.F(X), tind=ix1),
+        new_map1.G = lambda X: map_mesh1.G(map_m1.invF(map_super.F(X), tind=ix1),
                                              find=boundary1[sort_boundary1][ix1])
-        nmap_mesh2.G = lambda X: map_mesh2.G(map_m2.invF(map_super.F(X), tind=ix2),
+        new_map2.G = lambda X: map_mesh2.G(map_m2.invF(map_super.F(X), tind=ix2),
                                              find=boundary2[sort_boundary2][ix2])
 
         # these are used by :class:`skfem.assembly.basis.MortarBasis`
-        nmap_mesh1.find = boundary1[sort_boundary1][ix1]
-        nmap_mesh2.find = boundary2[sort_boundary2][ix2]
-        nmap_mesh1.normals = normals
-        nmap_mesh2.normals = normals
+        new_map1.find = boundary1[sort_boundary1][ix1]
+        new_map2.find = boundary2[sort_boundary2][ix2]
+        new_map1.normals = normals
+        new_map2.normals = normals
 
         # method for calculating the lengths of the segments ('detDG')
-        segments1 = nmap_mesh1.G(np.array([[0.0, 1.0]]))
-        segments2 = nmap_mesh2.G(np.array([[0.0, 1.0]]))
-        nmap_mesh1.detDG = lambda *_,**__: np.sqrt(np.diff(segments1[0], axis=1)**2 +
+        segments1 = new_map1.G(np.array([[0.0, 1.0]]))
+        segments2 = new_map2.G(np.array([[0.0, 1.0]]))
+        new_map1.detDG = lambda *_,**__: np.sqrt(np.diff(segments1[0], axis=1)**2 +
                                                    np.diff(segments1[1], axis=1)**2)
-        nmap_mesh2.detDG = lambda *_,**__: np.sqrt(np.diff(segments2[0], axis=1)**2 +
+        new_map2.detDG = lambda *_,**__: np.sqrt(np.diff(segments2[0], axis=1)**2 +
                                                    np.diff(segments2[1], axis=1)**2)
 
-        return cls(mapping1=nmap_mesh1, mapping2=nmap_mesh2)
+        return cls(mapping1=new_map1, mapping2=new_map2)

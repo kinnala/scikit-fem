@@ -1,4 +1,3 @@
-"""Unit tests for assembly operations."""
 import unittest
 
 import numpy as np

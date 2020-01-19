@@ -24,7 +24,7 @@ class MortarBasis(Basis):
             An object of type :class:`~skfem.element.Element`.
         mapping
             Mapping to the relevant facets of the mesh, see
-            e.g. :class:`~skfem.mapping.MortarPair`.
+            :class:`~skfem.mapping.MortarPair`.
         intorder
             Integration order, i.e. the degree of polynomials that are
             integrated exactly by the used quadrature. Please use equivalent
@@ -64,7 +64,7 @@ class MortarBasis(Basis):
         return {'x': self.global_coordinates(),
                 'h': self.mesh_parameters(),
                 'n': self.normals}
-    
+
     def global_coordinates(self) -> ndarray:
         return self.mapping.G(self.X)
 
