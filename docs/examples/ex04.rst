@@ -27,8 +27,8 @@ contact problem: find :math:`\boldsymbol{u}_i : \Omega_i \rightarrow
         \boldsymbol{\sigma}_{i,t}(\boldsymbol{u}_i) &= \boldsymbol{0} && \text{on $\Gamma$,} \\
        \sigma_{1,n}(\boldsymbol{u}_1(\boldsymbol{\gamma}(\boldsymbol{x})) - \sigma_{2,n}(\boldsymbol{u}_2)&=0 && \text{on $\Gamma$,} \\
         [[u_n]] - g   &\geq 0 && \text{on $\Gamma$,} \\
-   \sigma_{i,n}(\boldsymbol{u}_i)&\leq 0 && \text{on $\Gamma$,} \\
-          ([[u_n]] - g)  \sigma_{i,n}(\boldsymbol{u}_i) &= 0 && \text{on $\Gamma$,}
+   \sigma_{2,n}(\boldsymbol{u}_2)&\leq 0 && \text{on $\Gamma$,} \\
+          ([[u_n]] - g)  \sigma_{2,n}(\boldsymbol{u}_2) &= 0 && \text{on $\Gamma$,}
    \end{aligned}
 
 
@@ -42,8 +42,9 @@ where
 * :math:`g((x,y)) = 1 - \sqrt{1 - y^2}`,
 * :math:`\boldsymbol{\gamma} : \Gamma \rightarrow \{ (x, y) \in \partial
   \Omega_1 : x > 0 \}`, :math:`\boldsymbol{\gamma}((x,y)) = (g(x-1)+1, y)`,
+* :math:`[[u_n]] = \boldsymbol{u}_1(\boldsymbol{\gamma}(\boldsymbol{x})) \cdot \boldsymbol{n} - \boldsymbol{u}_2(\boldsymbol{x}) \cdot \boldsymbol{n}`,
 
-and the directions for evaluating :math:`\sigma_{1,n}` and
+and the directions for evaluating :math:`[[u_n]]`, :math:`\sigma_{1,n}` and
 :math:`\boldsymbol{\sigma}_{1,t}` are defined as :math:`\boldsymbol{n}=(1,0)`
 and :math:`\boldsymbol{t}=(0,1)`.
 This is a nonlinear problem since we do not know a priori which subset
