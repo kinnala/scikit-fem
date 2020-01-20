@@ -1,17 +1,16 @@
 from skfem import *
 from skfem.models.elasticity import linear_elasticity
 import numpy as np
-from pygmsh import generate_mesh
-from pygmsh.built_in import Geometry
 from skfem.io import from_meshio
 from skfem.io.json import from_file, to_file
-import meshio
 
 
 # create meshes
 try:
     m = from_file("docs/examples/ex04_mesh.json")
 except FileNotFoundError:
+    from pygmsh import generate_mesh
+    from pygmsh.built_in import Geometry
     geom = Geometry()
     points = []
     lines = []
@@ -109,7 +108,8 @@ for i in range(2):
                        n[1] * C(Eps(dv))[1, 0] * n[0] +
                        n[1] * C(Eps(dv))[1, 1] * n[1])
             h = w.h
-            return (1. / (alpha * h) * ju * jv - mu * jv - mv * ju) *(np.abs(w.x[1]) <= limit)
+            return ((1. / (alpha * h) * ju * jv - mu * jv - mv * ju)
+                    * (np.abs(w.x[1]) <= limit))
 
         K[j][i] += asm(bilin_penalty, mb[i], mb[j])
 
@@ -124,7 +124,8 @@ for i in range(2):
         h = w.h
         def gap(x):
             return (1. - np.sqrt(1. - x[1] ** 2))
-        return (1. / (alpha * h) * gap(w.x) * jv - gap(w.x) * mv) * (np.abs(w.x[1]) <= limit)
+        return ((1. / (alpha * h) * gap(w.x) * jv - gap(w.x) * mv)
+                * (np.abs(w.x[1]) <= limit))
 
     f[i] = asm(lin_penalty, mb[i])
 
@@ -181,8 +182,10 @@ for itr in range(2):
         ib_dg = InteriorBasis(m, e_dg, intorder=4)
         Ib_dg = InteriorBasis(M, E_dg, intorder=4)
 
-        s[itr, jtr] = solve(asm(mass, ib_dg), asm(proj_cauchy, ib, ib_dg) @ x[i1])
-        S[itr, jtr] = solve(asm(mass, Ib_dg), asm(proj_cauchy, Ib, Ib_dg) @ x[i2])
+        s[itr, jtr] = solve(asm(mass, ib_dg),
+                            asm(proj_cauchy, ib, ib_dg) @ x[i1])
+        S[itr, jtr] = solve(asm(mass, Ib_dg),
+                            asm(proj_cauchy, Ib, Ib_dg) @ x[i2])
 
 s[2, 2] = nu1 * (s[0, 0] + s[1, 1])
 S[2, 2] = nu2 * (S[0, 0] + S[1, 1])
@@ -207,4 +210,4 @@ if __name__ == "__main__":
     draw(m, ax=ax)
     plot(Ib_dg, vonmises2, ax=ax, Nrefs=3, shading='gouraud')
     draw(M, ax=ax)
-    savefig(splitext(argv[0])[0] + '_vonmises.png')
+    savefig(splitext(argv[0])[0] + '_solution.png')

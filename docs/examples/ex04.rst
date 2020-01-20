@@ -1,0 +1,69 @@
+.. _mortaring:
+
+Contact problem
+---------------
+
+.. note::
+
+   This example requires the external package `pygmsh
+   <https://pypi.org/project/pygmsh/>`_.
+
+Mortar methods allow setting interface conditions on non-matching meshes.
+They are useful also when solving variational inequalities such as
+`elastic contact problems <https://arxiv.org/abs/1902.09312>`_.
+
+This example solves the first contact iteration for the following prototype
+contact problem: find :math:`\boldsymbol{u}_i : \Omega_i \rightarrow
+\mathbb{R}^2`, :math:`i = 1,2`, such that
+
+
+.. math::
+
+   \begin{aligned}
+        \boldsymbol{\mathrm{div}}\,\boldsymbol{\sigma}_i(\boldsymbol{u}_i)&=\boldsymbol{0} \quad && \text{in $\Omega_i$,} \\
+        \boldsymbol{u}_1&=(0.1, 0) \quad && \text{on $\Gamma_{D,1}$,} \\
+        \boldsymbol{u}_2&=\boldsymbol{0} \quad && \text{on $\Gamma_{D,2}$,} \\
+        \boldsymbol{\sigma}_2(\boldsymbol{u}_2) \boldsymbol{n}_2 &=\boldsymbol{0} \quad && \text{on $\Gamma_{N,2}$,} \\
+        \boldsymbol{\sigma}_{i,t}(\boldsymbol{u}_i) &= \boldsymbol{0} && \text{on $\Gamma$,} \\
+       \sigma_{1,n}(\boldsymbol{u}_1(\boldsymbol{\gamma}(\boldsymbol{x})) - \sigma_{2,n}(\boldsymbol{u}_2)&=0 && \text{on $\Gamma$,} \\
+        [[u_n]] - g   &\geq 0 && \text{on $\Gamma$,} \\
+   \sigma_{i,n}(\boldsymbol{u}_i)&\leq 0 && \text{on $\Gamma$,} \\
+          ([[u_n]] - g)  \sigma_{i,n}(\boldsymbol{u}_i) &= 0 && \text{on $\Gamma$,}
+   \end{aligned}
+
+
+where
+
+* :math:`\Omega_1 = \{ (x, y) : x^2 + y^2 < 1 \} \setminus \{ (x, y) : x < 0\}`,
+* :math:`\Omega_2 = (1, 2) \times (-1, 1)`,
+* :math:`\Gamma_{D,1} = \{ (x, y) \in \Omega_1 : x=0 \}`,
+* :math:`\Gamma_{D,2} = \{ (x, y) \in \Omega_2 : x=2 \}`,
+* :math:`\Gamma = \{ (x, y) \in \Omega_2 : x=1 \}`,
+* :math:`g((x,y)) = 1 - \sqrt{1 - y^2}`,
+* :math:`\boldsymbol{\gamma} : \Gamma \rightarrow \{ (x, y) \in \partial
+  \Omega_1 : x > 0 \}`, :math:`\boldsymbol{\gamma}((x,y)) = (g(x-1)+1, y)`,
+
+and the directions for evaluating :math:`\sigma_{1,n}` and
+:math:`\boldsymbol{\sigma}_{1,t}` are defined as :math:`\boldsymbol{n}=(1,0)`
+and :math:`\boldsymbol{t}=(0,1)`.
+This is a nonlinear problem since we do not know a priori which subset
+:math:`\Gamma_C \subset \Gamma` satisfies :math:`([[u_n]] - g)|_{\Gamma_C} = 0`.
+
+.. note::
+
+   The example solves a simplified prototype problem.
+   Instead of iterating for the true contact boundary,
+   we solve a single contact iteration (a linear problem) with the initial
+   guess :math:`\{ (x, y) \in \Gamma : |y| < 0.1 \}`.
+   Solving a real contact problem involves repeatedly solving and guessing a new
+   candidate boundary :math:`\Gamma_C` until convergence.
+   Extending this example should be straightforward.
+
+.. figure:: ex04_solution.png
+
+   The von Mises stress in a displaced geometry.
+
+The complete source code reads as follows:
+
+.. literalinclude:: ex04.py
+    :linenos:

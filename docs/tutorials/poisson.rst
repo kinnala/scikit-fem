@@ -39,7 +39,7 @@ times:
 After creating the mesh, we evaluate the finite element basis at the global
 quadrature points.
 
-.. literalinclude:: ex01.py
+.. literalinclude:: ../examples/ex01.py
     :start-at: ElementTriP1
     :end-at: InteriorBasis	       
 
@@ -54,13 +54,13 @@ The bilinear and linear forms are defined using the decorators
 :func:`~skfem.assembly.linear_form`. It is important to have the order of the
 form arguments correct.
 
-.. literalinclude:: ex01.py
+.. literalinclude:: ../examples/ex01.py
     :start-at: bilinear_form
-    :end-at: 1.0*v
+    :end-at: 1. * v
 
 All assembly operations are performed using the function :func:`~skfem.assembly.asm`.
 
-.. literalinclude:: ex01.py
+.. literalinclude:: ../examples/ex01.py
     :start-at: asm(laplace, basis)
     :end-at: asm(load, basis)
 
@@ -71,21 +71,21 @@ We are left with solving the assembled linear system.
 We eliminate the boundary degrees-of-freedom using
 :func:`~skfem.utils.condense` and call :func:`~skfem.utils.solve`.
 
-.. literalinclude:: ex01.py
+.. literalinclude:: ../examples/ex01.py
     :start-at: solve
     :end-at: solve	       
 
 The solution can now be visualised using :meth:`~skfem.visuals.matplotlib.plot`. 
 
-.. literalinclude:: ex01.py
+.. literalinclude:: ../examples/ex01.py
     :start-at: main
     :end-at: solution.png
 
-.. figure:: ex01_solution.png
+.. figure:: ../examples/ex01_solution.png
 
     The solution of Poisson equation.
 
 The complete source code reads as follows:
 
-.. literalinclude:: ex01.py
+.. literalinclude:: ../examples/ex01.py
     :linenos:

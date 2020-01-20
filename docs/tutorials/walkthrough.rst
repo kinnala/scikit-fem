@@ -1,7 +1,7 @@
 .. _basic-features:
 
-Basic features
---------------
+Overview of basic features
+--------------------------
 
 This is an overview of the basic features of scikit-fem that are needed in
 most finite element computations.
@@ -136,7 +136,7 @@ See :ref:`learning` for more use cases and instructions.
 Setting essential boundary conditions
 #####################################
 
-.. note::
+.. warning::
 
    Using the assembled matrices requires basic understanding of
    the finite element method. In particular, to understand
