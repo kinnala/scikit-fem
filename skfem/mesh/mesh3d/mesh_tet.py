@@ -264,18 +264,14 @@ class MeshTet(Mesh3D):
     def _build_mappings(self):
         """Build element-to-facet, element-to-edges, etc. mappings."""
         # define edges: in the order (0,1) (1,2) (0,2) (0,3) (1,3) (2,3)
-        self.edges = np.sort(np.vstack((self.t[0, :], self.t[1, :])), axis=0)
-        e = np.array([1, 2,
-                      0, 2,
-                      0, 3,
-                      1, 3,
-                      2, 3])
-        for i in range(5):
-            self.edges = np.hstack((
-                self.edges,
-                np.sort(np.vstack((self.t[e[2*i], :],
-                                   self.t[e[2*i+1], :])), axis=0)
-            ))
+        self.edges = np.sort(np.hstack((
+            np.vstack((self.t[0], self.t[1])),
+            np.vstack((self.t[1], self.t[2])),
+            np.vstack((self.t[0], self.t[2])),
+            np.vstack((self.t[0], self.t[3])),
+            np.vstack((self.t[1], self.t[3])),
+            np.vstack((self.t[2], self.t[3]))
+        )), axis=0)
 
         # unique edges
         self.edges, ixa, ixb = np.unique(self.edges,
@@ -288,19 +284,12 @@ class MeshTet(Mesh3D):
 
         # define facets
         if self.enable_facets:
-            self.facets = np.sort(np.vstack((self.t[0, :],
-                                             self.t[1, :],
-                                             self.t[2, :])), axis=0)
-            f = np.array([0, 1, 3,
-                          0, 2, 3,
-                          1, 2, 3])
-            for i in range(3):
-                self.facets = np.hstack((
-                    self.facets,
-                    np.sort(np.vstack((self.t[f[2*i], :],
-                                       self.t[f[2*i+1], :],
-                                       self.t[f[2*i+2]])), axis=0)
-                ))
+            self.facets = np.sort(np.hstack((
+                np.vstack((self.t[0], self.t[1], self.t[2])),
+                np.vstack((self.t[0], self.t[1], self.t[3])),
+                np.vstack((self.t[0], self.t[2], self.t[3])),
+                np.vstack((self.t[1], self.t[2], self.t[3])),
+            )), axis=0)
 
             # unique facets
             self.facets, ixa, ixb = np.unique(self.facets,
