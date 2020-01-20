@@ -265,12 +265,12 @@ class MeshTet(Mesh3D):
         """Build element-to-facet, element-to-edges, etc. mappings."""
         # define edges: in the order (0,1) (1,2) (0,2) (0,3) (1,3) (2,3)
         self.edges = np.sort(np.hstack((
-            np.vstack((self.t[0], self.t[1])),
-            np.vstack((self.t[1], self.t[2])),
-            np.vstack((self.t[0], self.t[2])),
-            np.vstack((self.t[0], self.t[3])),
-            np.vstack((self.t[1], self.t[3])),
-            np.vstack((self.t[2], self.t[3]))
+            self.t[[0, 1]],
+            self.t[[1, 2]],
+            self.t[[0, 2]],
+            self.t[[0, 3]],
+            self.t[[1, 3]],
+            self.t[[2, 3]]
         )), axis=0)
 
         # unique edges
@@ -285,10 +285,10 @@ class MeshTet(Mesh3D):
         # define facets
         if self.enable_facets:
             self.facets = np.sort(np.hstack((
-                np.vstack((self.t[0], self.t[1], self.t[2])),
-                np.vstack((self.t[0], self.t[1], self.t[3])),
-                np.vstack((self.t[0], self.t[2], self.t[3])),
-                np.vstack((self.t[1], self.t[2], self.t[3])),
+                self.t[[0, 1, 2]],
+                self.t[[0, 1, 3]],
+                self.t[[0, 2, 3]],
+                self.t[[1, 2, 3]]
             )), axis=0)
 
             # unique facets
@@ -301,8 +301,8 @@ class MeshTet(Mesh3D):
             self.t2f = ixb.reshape((4, self.t.shape[1]))
 
             # build facet-to-tetra mapping: 2 (tets) x Nfacets
-            e_tmp = np.hstack((self.t2f[0, :], self.t2f[1, :],
-                               self.t2f[2, :], self.t2f[3, :]))
+            e_tmp = np.hstack((self.t2f[0], self.t2f[1],
+                               self.t2f[2], self.t2f[3]))
             t_tmp = np.tile(np.arange(self.t.shape[1]), (1, 4))[0]
 
             e_first, ix_first = np.unique(e_tmp, return_index=True)
