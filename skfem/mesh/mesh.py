@@ -289,7 +289,7 @@ class Mesh():
             The filename of the mesh.
 
         """
-        from skfem.importers.meshio import from_file
+        from skfem.io.meshio import from_file
         return from_file(filename)
 
     def boundary_nodes(self) -> ndarray:
