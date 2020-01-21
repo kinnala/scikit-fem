@@ -34,7 +34,7 @@ class LinearForm(Form):
             cols[ixs] = np.zeros(nt)
             data[ixs] = np.sum(self.form(*v.basis[i], w) * dx, axis=1)
 
-        return coo_matrix((data.flatten('C'), (rows, cols)),
+        return coo_matrix((data, (rows, cols)),
                           shape=(v.N, 1)).toarray().T[0]
 
 
