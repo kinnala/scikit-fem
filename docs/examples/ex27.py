@@ -1,7 +1,7 @@
 from skfem import *
 from skfem.models.poisson import vector_laplace, laplace
 from skfem.models.general import divergence, rot
-from skfem.importers.meshio import from_meshio
+from skfem.io import from_meshio
 
 from functools import partial
 from itertools import cycle, islice

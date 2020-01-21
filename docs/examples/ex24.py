@@ -10,7 +10,7 @@ from pygmsh.built_in import Geometry
 from skfem import *
 from skfem.models.poisson import vector_laplace, mass, laplace
 from skfem.models.general import divergence, rot
-from skfem.importers.meshio import from_meshio
+from skfem.io import from_meshio
 
 
 def make_geom(length: float = 35.,
