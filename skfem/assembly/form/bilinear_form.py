@@ -12,56 +12,50 @@ from ..basis import Basis
 class BilinearForm(Form):
 
     def assemble(self,
-                 ubasis: Basis,
-                 vbasis: Optional[Basis] = None,
-                 w: Optional[Any] = (None, None, None),
-                 nthreads: Optional[int] = 1) -> csr_matrix:
-        """return sparse CSR matrix discretizing form
+                 u: Basis,
+                 v: Optional[Basis] = None,
+                 w: Optional[Any] = (None, None, None)) -> csr_matrix:
+        """Return sparse CSR matrix discretizing form
 
-        :param w: A tuple of ndarrays. In the form definition:
+        Parameters
+        ----------
+        w
+            A tuple of ndarrays. In the form definition:
 
-          * :code:`w[0]` is accessible as :code:`w.w`,
+              * :code:`w[0]` is accessible as :code:`w.w`,
+              * :code:`w[1]` is accessible as :code:`w.dw`, and
+              * :code:`w[2]` is accessible as :code:`w.ddw`.
 
-          * :code:`w[1]` is accessible as :code:`w.dw`, and
-
-          * :code:`w[2]` is accessible as :code:`w.ddw`.
-
-        The output of :meth:`~skfem.assembly.Basis.interpolate`
-        can be passed directly to this parameter.
+            The output of :meth:`~skfem.assembly.Basis.interpolate`
+            can be passed directly to this parameter.
 
         """
-
-        import threading
-        from itertools import product
-
-        if vbasis is None:
-            vbasis = ubasis
+        if v is None:
+            v = u
         else:
-            assert ubasis.intorder == vbasis.intorder, "Quadrature mismatch"
+            assert u.intorder == v.intorder, "Quadrature mismatch"
 
-        nt = ubasis.nelems
-        dx = ubasis.dx
-        w = self.parameters(w, ubasis)
+        nt = u.nelems
+        dx = u.dx
+        w = self.parameters(w, u)
 
         # initialize COO data structures
-        data = np.zeros((vbasis.Nbfun, ubasis.Nbfun, nt))
-        rows = np.zeros(ubasis.Nbfun * vbasis.Nbfun * nt)
-        cols = np.zeros(ubasis.Nbfun * vbasis.Nbfun * nt)
+        sz = u.Nbfun * v.Nbfun * nt
+        data = np.zeros(sz)
+        rows = np.zeros(sz)
+        cols = np.zeros(sz)
 
         # create sparse matrix indexing
-        for j in range(ubasis.Nbfun):
-            for i in range(vbasis.Nbfun):
+        for j in range(u.Nbfun):
+            for i in range(v.Nbfun):
                 # find correct location in data, rows, cols
-                ixs = slice(nt * (vbasis.Nbfun * j + i),
-                            nt * (vbasis.Nbfun * j + i + 1))
-                rows[ixs] = vbasis.element_dofs[i]
-                cols[ixs] = ubasis.element_dofs[j]
-                data[ixs] = np.sum(self.form(*ubasis[j], *vbasis[i], w) * dx,
-                                   axis=1)
+                ixs = slice(nt * (v.Nbfun * j + i),
+                            nt * (v.Nbfun * j + i + 1))
+                rows[ixs] = v.element_dofs[i]
+                cols[ixs] = u.element_dofs[j]
+                data[ixs] = np.sum(self.form(*u.basis[j], *v.basis[i], w) * dx, axis=1)
 
-        K = coo_matrix((np.transpose(data, (1, 0, 2)).flatten('C'),
-                        (rows, cols)),
-                       shape=(vbasis.N, ubasis.N))
+        K = coo_matrix((data, (rows, cols)), shape=(v.N, u.N))
         K.eliminate_zeros()
         return K.tocsr()
 
