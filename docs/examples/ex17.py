@@ -7,7 +7,7 @@ from pygmsh.built_in import Geometry
 
 from skfem import *
 from skfem.models.poisson import mass
-from skfem.importers.meshio import from_meshio
+from skfem.io import from_meshio
 
 radii = [2., 3.]
 joule_heating = 5.
