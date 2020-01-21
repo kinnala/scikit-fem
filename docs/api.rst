@@ -169,6 +169,8 @@ Defining a global basis
 
 .. autoclass:: skfem.assembly.InteriorBasis
 
+.. automethod:: skfem.assembly.InteriorBasis.refinterp
+
 .. autoclass:: skfem.assembly.FacetBasis
 
 Assembling matrices

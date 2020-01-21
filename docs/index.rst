@@ -19,5 +19,5 @@ questions, do not hesitate to drop in and say hello at our `Gitter chat
 
     gettingstarted
     tutorial
-    learning
+    examples
     api

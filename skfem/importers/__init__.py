@@ -1,1 +1,3 @@
-from .meshio import from_meshio
+import warnings
+
+from ..io import *

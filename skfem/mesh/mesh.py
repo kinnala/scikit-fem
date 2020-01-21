@@ -312,7 +312,9 @@ class Mesh():
         raise NotImplementedError("element_finder not implemented "
                                   "for the given Mesh type.")
 
-    def nodes_satisfying(self, test: Callable[[ndarray], bool]) -> ndarray:
+    def nodes_satisfying(self,
+                         test: Callable[[ndarray], bool],
+                         boundaries_only: bool = False) -> ndarray:
         """Return nodes that satisfy some condition.
 
         Parameters
@@ -320,11 +322,18 @@ class Mesh():
         test
             A function which returns True for the set of nodes that are to be
             included in the return set.
+        boundaries_only
+            If True, include only boundary facets.
 
         """
-        return np.nonzero(test(self.p))[0]
+        nodes = np.nonzero(test(self.p))[0]
+        if boundaries_only:
+            nodes = np.intersect1d(nodes, self.boundary_nodes())
+        return nodes
 
-    def facets_satisfying(self, test: Callable[[ndarray], bool]) -> ndarray:
+    def facets_satisfying(self,
+                          test: Callable[[ndarray], bool],
+                          boundaries_only: bool = False) -> ndarray:
         """Return facets whose midpoints satisfy some condition.
 
         Parameters
@@ -332,11 +341,16 @@ class Mesh():
         test
             A function which returns True for the facet midpoints that are to
             be included in the return set.
+        boundaries_only
+            If True, include only boundary facets.
 
         """
         midp = [np.sum(self.p[itr, self.facets], axis=0) / self.facets.shape[0]
                 for itr in range(self.p.shape[0])]
-        return np.nonzero(test(np.array(midp)))[0]
+        facets = np.nonzero(test(np.array(midp)))[0]
+        if boundaries_only:
+            facets = np.intersect1d(facets, self.boundary_facets())
+        return facets
 
     def elements_satisfying(self,
                             test: Callable[[ndarray], bool]) -> ndarray:
@@ -357,7 +371,7 @@ class Mesh():
     def from_dict(cls: Type[MeshType], d) -> MeshType:
         """Initialize a mesh from a dictionary."""
         if 'p' not in d or 't' not in d:
-            raise ValueError("Dictionary must contain keys 'p' and 't'")
+            raise ValueError("Dictionary must contain keys 'p' and 't'.")
         else:
             d['p'] = np.array(d['p']).T
             d['t'] = np.array(d['t']).T

@@ -7,6 +7,14 @@ class ElementHex1(ElementH1):
     dim = 3
     maxdeg = 3
     dofnames = ['u']
+    doflocs = np.array([[-1., -1., -1.],
+                        [-1., -1.,  1.],
+                        [-1.,  1., -1.],
+                        [ 1., -1., -1.],
+                        [-1.,  1.,  1.],
+                        [ 1., -1.,  1.],
+                        [ 1.,  1., -1.],
+                        [ 1.,  1.,  1.]])
 
     def lbasis(self, X, i):
         x, y, z = X
