@@ -1,5 +1,5 @@
 from skfem import *
-from skfem.importers.meshio import from_meshio
+from skfem.io import from_meshio
 
 import numpy as np
 

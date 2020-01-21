@@ -1,6 +1,6 @@
 from skfem import *
 from skfem.models.poisson import laplace, unit_load
-from skfem.importers import from_meshio
+from skfem.io import from_meshio
 
 import numpy as np
 

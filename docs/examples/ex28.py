@@ -1,5 +1,5 @@
 from skfem import *
-from skfem.importers import from_meshio
+from skfem.io import from_meshio
 from skfem.models.poisson import unit_load
 
 from matplotlib.pyplot import subplots
