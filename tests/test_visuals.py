@@ -1,6 +1,5 @@
 import unittest
 
-
 from skfem.mesh import *
 from skfem.visuals.matplotlib import *
 

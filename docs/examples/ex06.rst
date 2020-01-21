@@ -15,6 +15,14 @@ interpolates any solution vector. The resulting mesh is non-conforming,
 i.e. the connectivity between neighboring elements is lost, and hence it can
 be used only for visualisation purposes.
 
+.. note::
+
+   As of 0.4.0, this functionality is included in :func:`~skfem.visuals.matplotlib.plot`,
+   i.e. inputting :class:`~skfem.assembly.InteriorBasis` instead of :class:`~skfem.mesh.Mesh`
+   uses :meth:`~skfem.assembly.InteriorBasis.refinterp` automatically.
+   The steps in this example are still useful when, e.g., exporting to different
+   formats for visualization purposes.
+
 As an example, we solve the Poisson equation in a unit square with zero boundary
 conditions and biquadratic basis on quadrilateral elements. The quadrilateral
 elements are defined using an isoparametric local-to-global mapping.

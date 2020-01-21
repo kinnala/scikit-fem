@@ -152,7 +152,12 @@ class MappingAffine(Mapping):
         else:
             B, c = self.B[:, :, find], self.c[:, find]
 
-        return (np.einsum('ijk,jl', B, X).T + c.T).T
+        if len(X.shape) == 2:
+            return (np.einsum('ijk,jl', B, X).T + c.T).T
+        elif len(X.shape) == 3:
+            return (np.einsum('ijk,jkl->ikl', B, X).T + c.T).T
+        else:
+            raise Exception("Wrong dimension of input.")
 
     def detDG(self, X, find=None):
         if find is None:
@@ -160,7 +165,7 @@ class MappingAffine(Mapping):
         else:
             detDG = self.detB[find]
 
-        return np.tile(detDG, (X.shape[1], 1)).T
+        return np.tile(detDG, (X.shape[-1], 1)).T
 
     def normals(self, X, tind, find, t2f):
         if self.dim == 1:
