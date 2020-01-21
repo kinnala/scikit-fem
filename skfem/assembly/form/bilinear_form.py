@@ -48,6 +48,8 @@ class BilinearForm(Form):
 
         if vbasis is None:
             vbasis = ubasis
+        else:
+            assert ubasis.intorder == vbasis.intorder, "Quadrature mismatch"
 
         nt = ubasis.nelems
         dx = ubasis.dx
