@@ -75,38 +75,39 @@ def from_meshio(m, force_mesh_type=None):
             return None
 
         # find subdomains
-        if meshio_type in m.cell_data and 'gmsh:physical' in m.cell_data[meshio_type]:
-            elements_tag = m.cell_data[meshio_type]['gmsh:physical']
+        if 'gmsh:physical' in m.cell_data:
+            if meshio_type in m.cell_data['gmsh:physical']:
+                elements_tag = m.cell_data['gmsh:physical'][meshio_type]
 
-            subdomains = {}
-            tags = np.unique(elements_tag)
+                subdomains = {}
+                tags = np.unique(elements_tag)
 
-            for tag in tags:
-                t_set = np.nonzero(tag == elements_tag)[0]
-                subdomains[find_tagname(tag)] = t_set
+                for tag in tags:
+                    t_set = np.nonzero(tag == elements_tag)[0]
+                    subdomains[find_tagname(tag)] = t_set
 
-        # find tagged boundaries
-        if bnd_type in m.cell_data and 'gmsh:physical' in m.cell_data[bnd_type]:
-            facets = m.cells[bnd_type]
-            facets_tag = m.cell_data[bnd_type]['gmsh:physical']
-            bndfacets = mtmp.boundary_facets()
+            # find tagged boundaries
+            if bnd_type in m.cell_data['gmsh:physical']:
+                facets = m.cells[bnd_type]
+                facets_tag = m.cell_data['gmsh:physical'][bnd_type]
+                bndfacets = mtmp.boundary_facets()
 
-            # put meshio facets to dict
-            dic = {tuple(np.sort(facets[i])): facets_tag[i]
-                   for i in range(facets.shape[0])}
+                # put meshio facets to dict
+                dic = {tuple(np.sort(facets[i])): facets_tag[i]
+                       for i in range(facets.shape[0])}
 
-            # get index of corresponding Mesh.facets for each meshio
-            # facet found in the dict
-            index = np.array([[dic[tuple(np.sort(mtmp.facets[:, i]))], i]
-                              for i in bndfacets
-                              if tuple(np.sort(mtmp.facets[:, i])) in dic])
+                # get index of corresponding Mesh.facets for each meshio
+                # facet found in the dict
+                index = np.array([[dic[tuple(np.sort(mtmp.facets[:, i]))], i]
+                                  for i in bndfacets
+                                  if tuple(np.sort(mtmp.facets[:, i])) in dic])
 
-            # read meshio tag numbers and names
-            tags = index[:, 0]
-            boundaries = {}
-            for tag in np.unique(tags):
-                tagindex = np.nonzero(tags == tag)[0]
-                boundaries[find_tagname(tag)] = index[tagindex, 1]
+                # read meshio tag numbers and names
+                tags = index[:, 0]
+                boundaries = {}
+                for tag in np.unique(tags):
+                    tagindex = np.nonzero(tags == tag)[0]
+                    boundaries[find_tagname(tag)] = index[tagindex, 1]
 
         mtmp.boundaries = boundaries
         mtmp.subdomains = subdomains
