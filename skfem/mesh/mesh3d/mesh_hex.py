@@ -103,35 +103,35 @@ class MeshHex(Mesh3D):
         npz = len(z)
         X, Y, Z = np.meshgrid(np.sort(x), np.sort(y), np.sort(z))   
         p = np.vstack((X.flatten('F'), Y.flatten('F'), Z.flatten('F')))
-        ix = np.arange(npx*npy*npz)
-        ne = (npx-1)*(npy-1)*(npz-1)
+        ix = np.arange(npx * npy * npz)
+        ne = (npx - 1) * (npy - 1) * (npz - 1)
         t = np.zeros((8, ne))
         ix = ix.reshape(npy, npx, npz, order='F').copy()
-        t[0, :] = (ix[0:(npy-1), 0:(npx-1), 0:(npz-1)]
+        t[0, :] = (ix[0:(npy - 1), 0:(npx - 1), 0:(npz - 1)]
                    .reshape(ne, 1, order='F')
                    .copy()
                    .flatten())
-        t[1, :] = (ix[1:npy, 0:(npx-1), 0:(npz-1)]
+        t[1, :] = (ix[1:npy, 0:(npx - 1), 0:(npz - 1)]
                    .reshape(ne, 1, order='F')
                    .copy()
                    .flatten())
-        t[2, :] = (ix[0:(npy-1), 1:npx, 0:(npz-1)]
+        t[2, :] = (ix[0:(npy - 1), 1:npx, 0:(npz - 1)]
                    .reshape(ne, 1, order='F')
                    .copy()
                    .flatten())
-        t[3, :] = (ix[0:(npy-1), 0:(npx-1), 1:npz]
+        t[3, :] = (ix[0:(npy - 1), 0:(npx - 1), 1:npz]
                    .reshape(ne, 1, order='F')
                    .copy()
                    .flatten())
-        t[4, :] = (ix[1:npy, 1:npx, 0:(npz-1)]
+        t[4, :] = (ix[1:npy, 1:npx, 0:(npz - 1)]
                    .reshape(ne, 1, order='F')
                    .copy()
                    .flatten())
-        t[5, :] = (ix[1:npy, 0:(npx-1), 1:npz]
+        t[5, :] = (ix[1:npy, 0:(npx - 1), 1:npz]
                    .reshape(ne, 1, order='F')
                    .copy()
                    .flatten())
-        t[6, :] = (ix[0:(npy-1), 1:npx, 1:npz]
+        t[6, :] = (ix[0:(npy - 1), 1:npx, 1:npz]
                    .reshape(ne, 1, order='F')
                    .copy()
                    .flatten())
@@ -144,18 +144,18 @@ class MeshHex(Mesh3D):
     def _build_mappings(self):
         """Build element-to-facet, element-to-edges, etc. mappings."""
         self.edges = np.sort(np.hstack((
-            self.t[[0, 1], :],
-            self.t[[0, 2], :],
-            self.t[[0, 3], :],
-            self.t[[1, 4], :],
-            self.t[[1, 5], :],
-            self.t[[2, 4], :],
-            self.t[[2, 6], :],
-            self.t[[3, 5], :],
-            self.t[[3, 6], :],
-            self.t[[4, 7], :],
-            self.t[[5, 7], :],
-            self.t[[6, 7], :],
+            self.t[[0, 1]],
+            self.t[[0, 2]],
+            self.t[[0, 3]],
+            self.t[[1, 4]],
+            self.t[[1, 5]],
+            self.t[[2, 4]],
+            self.t[[2, 6]],
+            self.t[[3, 5]],
+            self.t[[3, 6]],
+            self.t[[4, 7]],
+            self.t[[5, 7]],
+            self.t[[6, 7]],
         )), axis=0)
 
         # unique edges
@@ -169,12 +169,12 @@ class MeshHex(Mesh3D):
 
         # define facets
         self.facets = np.hstack((
-            self.t[[0, 1, 4, 2], :],
-            self.t[[0, 2, 6, 3], :],
-            self.t[[0, 3, 5, 1], :],
-            self.t[[2, 4, 7, 6], :],
-            self.t[[1, 5, 7, 4], :],
-            self.t[[3, 6, 7, 5], :],
+            self.t[[0, 1, 4, 2]],
+            self.t[[0, 2, 6, 3]],
+            self.t[[0, 3, 5, 1]],
+            self.t[[2, 4, 7, 6]],
+            self.t[[1, 5, 7, 4]],
+            self.t[[3, 6, 7, 5]],
         ))
 
         sorted_facets = np.sort(self.facets, axis=0)
@@ -189,9 +189,9 @@ class MeshHex(Mesh3D):
         self.t2f = ixb.reshape((6, self.t.shape[1]))
 
         # build facet-to-hexa mapping: 2 (hexes) x Nfacets
-        e_tmp = np.hstack((self.t2f[0, :], self.t2f[1, :],
-                           self.t2f[2, :], self.t2f[3, :],
-                           self.t2f[4, :], self.t2f[5, :]))
+        e_tmp = np.hstack((self.t2f[0], self.t2f[1],
+                           self.t2f[2], self.t2f[3],
+                           self.t2f[4], self.t2f[5]))
         t_tmp = np.tile(np.arange(self.t.shape[1]), (1, 6))[0]
 
         e_first, ix_first = np.unique(e_tmp, return_index=True)
@@ -226,70 +226,70 @@ class MeshHex(Mesh3D):
         newp3 = 0.125 * np.sum(p[:, t], axis=1)
         newp = np.hstack((p, newp1, newp2, newp3))
         # build new hex indexing (this requires some serious meditation)
-        newt = np.vstack((t[0, :],
-                          t2e[0, :],
-                          t2e[1, :],
-                          t2e[2, :],
-                          t2f[0, :],
-                          t2f[2, :],
-                          t2f[1, :],
+        newt = np.vstack((t[0],
+                          t2e[0],
+                          t2e[1],
+                          t2e[2],
+                          t2f[0],
+                          t2f[2],
+                          t2f[1],
                           mid))
-        newt = np.hstack((newt, np.vstack((t2e[0, :],
-                                           t[1, :],
-                                           t2f[0, :],
-                                           t2f[2, :],
-                                           t2e[3, :],
-                                           t2e[4, :],
+        newt = np.hstack((newt, np.vstack((t2e[0],
+                                           t[1],
+                                           t2f[0],
+                                           t2f[2],
+                                           t2e[3],
+                                           t2e[4],
                                            mid,
-                                           t2f[4, :]))))
-        newt = np.hstack((newt, np.vstack((t2e[1, :],
-                                           t2f[0, :],
-                                           t[2, :],
-                                           t2f[1, :],
-                                           t2e[5, :],
+                                           t2f[4]))))
+        newt = np.hstack((newt, np.vstack((t2e[1],
+                                           t2f[0],
+                                           t[2],
+                                           t2f[1],
+                                           t2e[5],
                                            mid,
-                                           t2e[6, :],
-                                           t2f[3, :]))))
-        newt = np.hstack((newt, np.vstack((t2e[2, :],
-                                           t2f[2, :],
-                                           t2f[1, :],
-                                           t[3, :],
+                                           t2e[6],
+                                           t2f[3]))))
+        newt = np.hstack((newt, np.vstack((t2e[2],
+                                           t2f[2],
+                                           t2f[1],
+                                           t[3],
                                            mid,
-                                           t2e[7, :],
-                                           t2e[8, :],
-                                           t2f[5, :]))))
-        newt = np.hstack((newt, np.vstack((t2f[0, :],
-                                           t2e[3, :],
-                                           t2e[5, :],
+                                           t2e[7],
+                                           t2e[8],
+                                           t2f[5]))))
+        newt = np.hstack((newt, np.vstack((t2f[0],
+                                           t2e[3],
+                                           t2e[5],
                                            mid,
-                                           t[4, :],
-                                           t2f[4, :],
-                                           t2f[3, :],
-                                           t2e[9, :]))))
-        newt = np.hstack((newt, np.vstack((t2f[2, :],
-                                           t2e[4, :],
+                                           t[4],
+                                           t2f[4],
+                                           t2f[3],
+                                           t2e[9]))))
+        newt = np.hstack((newt, np.vstack((t2f[2],
+                                           t2e[4],
                                            mid,
-                                           t2e[7, :],
-                                           t2f[4, :],
-                                           t[5, :],
-                                           t2f[5, :],
-                                           t2e[10, :],))))
-        newt = np.hstack((newt, np.vstack((t2f[1, :],
+                                           t2e[7],
+                                           t2f[4],
+                                           t[5],
+                                           t2f[5],
+                                           t2e[10],))))
+        newt = np.hstack((newt, np.vstack((t2f[1],
                                            mid,
-                                           t2e[6, :],
-                                           t2e[8, :],
-                                           t2f[3, :],
-                                           t2f[5, :],
-                                           t[6, :],
-                                           t2e[11, :]))))
+                                           t2e[6],
+                                           t2e[8],
+                                           t2f[3],
+                                           t2f[5],
+                                           t[6],
+                                           t2e[11]))))
         newt = np.hstack((newt, np.vstack((mid,
-                                           t2f[4, :],
-                                           t2f[3, :],
-                                           t2f[5, :],
-                                           t2e[9, :],
-                                           t2e[10, :],
-                                           t2e[11, :],
-                                           t[7, :]))))
+                                           t2f[4],
+                                           t2f[3],
+                                           t2f[5],
+                                           t2e[9],
+                                           t2e[10],
+                                           t2e[11],
+                                           t[7]))))
         # update fields
         self.p = newp
         self.t = newt

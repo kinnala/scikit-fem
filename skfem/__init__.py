@@ -1,8 +1,11 @@
+"""Support for wildcard import."""
+
 from skfem.mesh import *
 from skfem.assembly import *
 from skfem.mapping import *
 from skfem.element import *
 from skfem.utils import *
+
 
 __all__ = ['Mesh',
            'Mesh2D',
@@ -17,8 +20,10 @@ __all__ = ['Mesh',
            'InteriorBasis',
            'MortarBasis',
            'asm',
+           'Mapping',
            'MappingAffine',
            'MappingIsoparametric',
+           'MortarPair',
            'adaptive_theta',
            'bilinear_form',
            'build_pc_ilu',
@@ -31,7 +36,6 @@ __all__ = ['Mesh',
            'rcm',
            'solve',
            'solver_direct_scipy',
-           'solver_direct_umfpack',
            'solver_iter_pcg',
            'solver_iter_krylov',
            'Element',
@@ -45,6 +49,7 @@ __all__ = ['Mesh',
            'ElementQuad0',
            'ElementQuad1',
            'ElementQuad2',
+           'ElementQuadDG',
            'ElementTetN0',
            'ElementTetP0',
            'ElementTetP1',
@@ -57,4 +62,4 @@ __all__ = ['Mesh',
            'ElementTriRT0',
            'ElementVectorH1',
            'ElementLineP1',
-           'ElementLineP2',]
+           'ElementLineP2']

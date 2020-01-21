@@ -15,13 +15,14 @@ Poisson equation
    examples/ex14.rst
    examples/ex12.rst
    examples/ex13.rst
-   examples/ex15.rst
    examples/ex26.rst
    examples/ex09.rst
    examples/ex07.rst
    examples/ex05.rst
    examples/ex10.rst
    examples/ex22.rst
+   examples/ex15.rst
+   examples/ex06.rst
 
 Heat transfer
 #############
@@ -51,11 +52,12 @@ Structural mechanics
 
 .. toctree::
 
-   examples/ex03.rst
-   examples/ex11.rst
-   examples/ex08.rst
    examples/ex02.rst
    examples/ex21.rst
+   examples/ex04.rst
+   examples/ex11.rst
+   examples/ex03.rst
+   examples/ex08.rst
    
 Others
 ######
@@ -64,4 +66,3 @@ Others
    
    examples/ex23.rst
    examples/ex16.rst
-   examples/ex06.rst

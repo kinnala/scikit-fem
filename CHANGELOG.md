@@ -6,6 +6,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Renamed skfem.importers to skfem.io.
+
+### Added
+- MortarBasis and MortarPair that support mortar methods in 2D.
+- Serialization of meshes to json-files via skfem.io.json.
+- ElementQuadDG for transforming H1 elements to DG elements.
+
+## [0.4.1] - 2020-01-19
+
+### Added
+- Additional keyword arguments to skfem.utils.solve get passed on to solvers.
+
+### Fixed
+- Made skfem.visuals.matplotlib Python 3.6 compatible.
+
 ## [0.4.0] - 2020-01-03
 
 ### Changed

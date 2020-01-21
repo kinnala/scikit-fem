@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*- 
-"""Check the convergence rates of the elements."""
-
 import unittest
 
 import numpy as np

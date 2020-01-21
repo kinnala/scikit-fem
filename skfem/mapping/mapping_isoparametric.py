@@ -81,7 +81,7 @@ class MappingIsoparametric(Mapping):
                     out += p[i, facets[itr, :]][:, None] * phi
                 return out
             else:
-                out = np.zeros((len(find), X.shape[1]))
+                out = np.zeros((len(find), X.shape[-1]))
                 for itr in range(facets.shape[0]):
                     phi, _ = bndelem.lbasis(X, itr)
                     out += p[i, facets[itr, find]][:, None] * phi
@@ -95,7 +95,7 @@ class MappingIsoparametric(Mapping):
                     out += p[i, facets[itr, :]][:, None] * dphi[j]
                 return out
             else:
-                out = np.zeros((len(find), X.shape[1]))
+                out = np.zeros((len(find), X.shape[-1]))
                 for itr in range(facets.shape[0]):
                     _, dphi = bndelem.lbasis(X, itr)
                     out += p[i, facets[itr, find]][:, None] * dphi[j]

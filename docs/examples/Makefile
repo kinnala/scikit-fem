@@ -1,5 +1,6 @@
 all: ex01_solution.png \
      ex02_solution.png \
+     ex04_solution.png \
      ex05_solution.png \
      ex06_solution.png \
      ex17_solution.png \
