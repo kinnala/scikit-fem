@@ -114,7 +114,7 @@ class InteriorBasis(Basis):
         return self.mapping.F(self.X, tind=self.tind)
 
     def mesh_parameters(self) -> ndarray:
-        return np.abs(self.mapping.detDF(self.X, self.tind)) ** (1.0 / self.mesh.dim())
+        return np.abs(self.mapping.detDF(self.X, self.tind)) ** (1. / self.mesh.dim())
 
     def refinterp(self,
                   interp: ndarray,
@@ -131,16 +131,13 @@ class InteriorBasis(Basis):
 
         # interpolate some previous discrete function at the vertices
         # of the refined mesh
-        w = 0.0*x[0]
+        w = self.interpolate(interp).f
 
-        for j in range(self.Nbfun):
-            basis = self.elem.gbasis(self.mapping, X, j)
-            w += interp[self.element_dofs[j, :]][:, None]*basis[0]
-
+        # create connectivity for the new mesh
         nt = self.nelems
         t = np.tile(m.t, (1, nt))
         dt = np.max(t)
-        t += (dt + 1) * (np.tile(np.arange(nt), (m.t.shape[0]*m.t.shape[1], 1))
+        t += (dt + 1) * (np.tile(np.arange(nt), (m.t.shape[0] * m.t.shape[1], 1))
                          .flatten('F')
                          .reshape((-1, m.t.shape[0])).T)
 

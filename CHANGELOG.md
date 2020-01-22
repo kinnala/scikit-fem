@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Renamed skfem.importers to skfem.io.
+- Basis.interpolate and Element.gbasis return now DiscreteField objects instead
+  of plain tuples of ndarrays.
 
 ### Added
 - MortarBasis and MortarPair that support mortar methods in 2D.

@@ -102,10 +102,10 @@ class FacetBasis(Basis):
         # facets where the basis is evaluated
         if facets is None:
             if side is None:
-                self.find = np.nonzero(self.mesh.f2t[1, :] == -1)[0]
+                self.find = np.nonzero(self.mesh.f2t[1] == -1)[0]
                 self.tind = self.mesh.f2t[0, self.find]
             elif side == 0 or side == 1:
-                self.find = np.nonzero(self.mesh.f2t[1, :] != -1)[0]
+                self.find = np.nonzero(self.mesh.f2t[1] != -1)[0]
                 self.tind = self.mesh.f2t[side, self.find]
             else:
                 raise Exception("Parameter 'side' must be either 0 or 1. "
@@ -136,8 +136,8 @@ class FacetBasis(Basis):
         self.basis = [self.elem.gbasis(self.mapping, Y, j, self.tind)
                       for j in range(self.Nbfun)]
 
-        self.dx = np.abs(self.mapping.detDG(self.X, find=self.find)) *\
-            np.tile(self.W, (self.nelems, 1))
+        self.dx = (np.abs(self.mapping.detDG(self.X, find=self.find))
+                   * np.tile(self.W, (self.nelems, 1)))
 
         self.element_dofs = self.element_dofs[:, self.tind]
 
@@ -152,7 +152,7 @@ class FacetBasis(Basis):
 
     def mesh_parameters(self) -> ndarray:
         if self.mesh.dim() == 1:
-            return np.array([0.0])
+            return np.array([0.])
         else:
             return (np.abs(self.mapping.detDG(self.X, self.find)) **
-                    (1.0 / (self.mesh.dim() - 1)))
+                    (1. / (self.mesh.dim() - 1.)))

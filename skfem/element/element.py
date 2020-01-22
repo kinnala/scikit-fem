@@ -1,11 +1,19 @@
-from typing import Optional, Tuple, Union, List
+from typing import Optional, Tuple, Union,\
+    List, NamedTuple
 
 from numpy import ndarray
 
-OrderTuple = Union[Tuple[int, int],
-                   Tuple[int, int, int]]
-OrderOutput = Union[Tuple[ndarray, ndarray],
-                    Tuple[ndarray, ndarray, ndarray]]
+
+class DiscreteField(NamedTuple):
+    """A function defined at the global quadrature points."""
+
+    f: Optional[ndarray] = None
+    df: Optional[ndarray] = None
+    ddf: Optional[ndarray] = None
+
+    @property
+    def order(self):
+        pass
 
 
 class Element():
@@ -25,8 +33,6 @@ class Element():
         The spatial dimension.
     maxdeg
         Polynomial degree of the basis. Used to calculate quadrature rules.
-    order
-        A tuple representing the tensorial order of u, du, (and ddu).
     dofnames
         A list of strings that indicate DOF types. Different possibilities:
         - 'u' indicates that it is the point value
@@ -44,14 +50,12 @@ class Element():
     edge_dofs: int = 0
     dim: int = -1
     maxdeg: int = -1
-    # 0 - scalar, 1 - vector, 2 - tensor, etc
-    order: OrderTuple = (-1, -1)
     dofnames: List[str] = []
 
     def orient(self, mapping, i, tind=None):
         """Orient basis functions. By default all = 1."""
         if tind is None:
-            return 1 + 0 * mapping.mesh.t[0, :]
+            return 1 + 0 * mapping.mesh.t[0]
         else:
             return 1 + 0 * tind
 
@@ -59,7 +63,7 @@ class Element():
                mapping,
                X: ndarray,
                i: int,
-               tind: Optional[ndarray] = None) -> OrderOutput:
+               tind: Optional[ndarray] = None) -> DiscreteField:
         """Evaluate the global basis functions, given local points X.
 
         The global points - at which the global basis is evaluated at - are
@@ -82,10 +86,8 @@ class Element():
 
         Returns
         -------
-        (u, du) or (u, du, ddu)
-            The number of return arguments depends on the length of self.order.
-            The shape of k'th return argument depends on the value of
-            self.order[k].
+        DiscreteField
+            The global basis function evaluted at the quadrature points.
 
         """
         raise NotImplementedError("Element must implement gbasis.")

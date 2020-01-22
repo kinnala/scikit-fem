@@ -2,7 +2,6 @@ from typing import Any, Callable, Optional
 
 import numpy as np
 from numpy import ndarray
-from scipy.sparse import coo_matrix, csr_matrix
 
 from .form import Form
 from .form_parameters import FormParameters
@@ -14,7 +13,7 @@ class BilinearForm(Form):
     def assemble(self,
                  u: Basis,
                  v: Optional[Basis] = None,
-                 w: Optional[Any] = (None, None, None)) -> csr_matrix:
+                 w: Optional[Any] = (None, None, None)) -> Any:
         """Return sparse CSR matrix discretizing form
 
         Parameters
@@ -45,20 +44,29 @@ class BilinearForm(Form):
         rows = np.zeros(sz)
         cols = np.zeros(sz)
 
-        # create sparse matrix indexing
+        # loop over the indices of local stiffness matrix
         for j in range(u.Nbfun):
             for i in range(v.Nbfun):
-                # find correct location in data, rows, cols
                 ixs = slice(nt * (v.Nbfun * j + i),
                             nt * (v.Nbfun * j + i + 1))
                 rows[ixs] = v.element_dofs[i]
                 cols[ixs] = u.element_dofs[j]
-                data[ixs] = np.sum(self.form(*u.basis[j], *v.basis[i], w) * dx, axis=1)
+                data[ixs] = self._eval_local_matrices(u.basis[j], v.basis[i], w, dx)
 
-        K = coo_matrix((data, (rows, cols)), shape=(v.N, u.N))
-        K.eliminate_zeros()
-        return K.tocsr()
+        # TODO: allow user to change, e.g. cuda or petsc
+        return self._assemble_scipy_matrix(data, rows, cols, (v.N, u.N))
 
 
 def bilinear_form(form: Callable) -> BilinearForm:
+
+    # for backwards compatibility
+    def eval_form(self, u, v, w, dx):
+        if u.ddf is not None:
+            return np.sum(self.form(u=u.f, du=u.df, ddu=u.ddf,
+                                    v=v.f, dv=v.df, ddv=v.ddf, w=w) * dx, axis=1)
+        else:
+            return np.sum(self.form(u=u.f, du=u.df, v=v.f, dv=v.df, w=w) * dx, axis=1)
+
+    BilinearForm._eval_local_matrices = eval_form
+
     return BilinearForm(form)

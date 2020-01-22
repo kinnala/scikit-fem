@@ -63,7 +63,7 @@ class ConvergenceQ1(unittest.TestCase):
                         msg='observed H1 rate: {}'.format(rateH1))
 
     def compute_error(self, m, basis, U):
-        uh, duh = basis.interpolate(U)
+        uh, duh, *_ = basis.interpolate(U)
         dx = basis.dx
         x = basis.global_coordinates()
 
@@ -312,7 +312,7 @@ class TetP2Test(unittest.TestCase):
         self.assertLess(pfit[0], self.limits[1])
 
     def compute_error(self, m, basis, U):
-        uh, duh = basis.interpolate(U)
+        uh, duh, *_ = basis.interpolate(U)
         dx = basis.dx
         x = basis.global_coordinates()
 

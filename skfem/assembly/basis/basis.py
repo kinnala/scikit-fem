@@ -5,6 +5,7 @@ import numpy as np
 from numpy import ndarray
 
 from skfem.assembly.dofs import Dofs
+from skfem.element.element import DiscreteField
 
 
 class Basis():
@@ -96,7 +97,7 @@ class Basis():
         for itr in range(mesh.t.shape[0]):
             self.element_dofs = np.vstack((
                 self.element_dofs,
-                self.nodal_dofs[:, mesh.t[itr, :]]
+                self.nodal_dofs[:, mesh.t[itr]]
             ))
 
         # edge dofs
@@ -104,7 +105,7 @@ class Basis():
             for itr in range(mesh.t2e.shape[0]):
                 self.element_dofs = np.vstack((
                     self.element_dofs,
-                    self.edge_dofs[:, mesh.t2e[itr, :]]
+                    self.edge_dofs[:, mesh.t2e[itr]]
                 ))
 
         # facet dofs
@@ -112,7 +113,7 @@ class Basis():
             for itr in range(mesh.t2f.shape[0]):
                 self.element_dofs = np.vstack((
                     self.element_dofs,
-                    self.facet_dofs[:, mesh.t2f[itr, :]]
+                    self.facet_dofs[:, mesh.t2f[itr]]
                 ))
 
         # interior dofs
@@ -228,39 +229,33 @@ class Basis():
 
         Returns
         -------
-        ndarray
-            Interpolated solution vector.
-        ndarray
-            Interpolated derivatives of the solution vector.
+        DiscreteField
+            The solution vector interpolated at quadrature points.
 
         """
-        nqp = len(self.W)
-        dim = self.mesh.dim()
+        if w.shape[0] != self.N:
+            raise ValueError("Input array has wrong size.")
 
-        if self.elem.order[0] == 0:
-            W = np.zeros((self.nelems, nqp))
-        elif self.elem.order[0] == 1:
-            W = np.zeros((dim, self.nelems, nqp))
+        u, du, *_ = self.basis[0]
+
+        if u is not None:
+            W = 0. * u.copy()
+            # linear combination of basis functions
+            for i in range(self.Nbfun):
+                W += w[self.element_dofs[i]][:, None] * self.basis[i].f
         else:
-            raise Exception("Interpolation not implemented "
-                            "for this Element.order.")
+            W = None
 
-        for j in range(self.Nbfun):
-            jdofs = self.element_dofs[j, :]
-            W += w[jdofs][:, None] * self.basis[j][0]
-
-        if self.elem.order[1] == 1:
-            dW = np.zeros((dim, self.nelems, nqp))
-        elif self.elem.order[1] == 2:
-            dW = np.zeros((dim, dim, self.nelems, nqp))
+        if du is not None:
+            dW = 0. * du.copy()
+            for i in range(self.Nbfun):
+                for j in range(self.basis[i].df.shape[0]):
+                    dW[j, :, :] += (w[self.element_dofs[i]][:, None]
+                                    * self.basis[i].df[j])
         else:
-            raise Exception("Interpolation not implemented "
-                            "for this Element.order.")
-        for j in range(self.Nbfun):
-            jdofs = self.element_dofs[j, :]
-            for a in range(dim):
-                dW[a, :, :] += w[jdofs][:, None] * self.basis[j][1][a]
-        return W, dW
+            dW = None
+
+        return DiscreteField(f=W, df=dW)
 
     def zero_w(self) -> ndarray:
         """Return a zero array with correct dimensions

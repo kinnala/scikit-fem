@@ -2,7 +2,6 @@ from typing import Any, Callable, Optional
 
 import numpy as np
 from numpy import ndarray
-from scipy.sparse import coo_matrix
 
 from .form import Form
 from .form_parameters import FormParameters
@@ -23,20 +22,35 @@ class LinearForm(Form):
         dx = v.dx
         w = self.parameters(w, v)
 
-        data = np.zeros(v.Nbfun * nt)
-        rows = np.zeros(v.Nbfun * nt)
-        cols = np.zeros(v.Nbfun * nt)
+        # initialize COO data structures
+        sz = v.Nbfun * nt
+        data = np.zeros(sz)
+        rows = np.zeros(sz)
+        cols = np.zeros(sz)
 
         for i in range(v.Nbfun):
-            # find correct location in data,rows,cols
             ixs = slice(nt * i, nt * (i + 1))
             rows[ixs] = v.element_dofs[i]
             cols[ixs] = np.zeros(nt)
-            data[ixs] = np.sum(self.form(*v.basis[i], w) * dx, axis=1)
+            data[ixs] = self._eval_local_vectors(v.basis[i], w, dx)
 
-        return coo_matrix((data, (rows, cols)),
-                          shape=(v.N, 1)).toarray().T[0]
+        return self._assemble_numpy_vector(data, rows, cols, (v.N, 1))
 
 
 def linear_form(form: Callable) -> LinearForm:
+
+    # for backwards compatibility
+    def eval_form(self, v, w, dx):
+        if v.ddf is not None:
+            return np.sum(self.form(v=v.f,
+                                    dv=v.df,
+                                    ddv=v.ddf,
+                                    w=w) * dx, axis=1)
+        else:
+            return np.sum(self.form(v=v.f,
+                                    dv=v.df,
+                                    w=w) * dx, axis=1)
+
+    LinearForm._eval_local_vectors = eval_form
+
     return LinearForm(form)
