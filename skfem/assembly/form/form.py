@@ -6,10 +6,6 @@ from .form_parameters import FormParameters
 from ..basis import Basis
 
 
-BasisTuple = Union[Tuple[ndarray, ndarray],
-                   Tuple[ndarray, ndarray, ndarray]]
-
-
 class Form:
 
     def __init__(self, form: Callable):

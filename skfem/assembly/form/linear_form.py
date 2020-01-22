@@ -4,7 +4,7 @@ import numpy as np
 from numpy import ndarray
 from scipy.sparse import coo_matrix
 
-from .form import Form, BasisTuple
+from .form import Form
 from .form_parameters import FormParameters
 from ..basis import Basis
 
@@ -30,7 +30,7 @@ class LinearForm(Form):
         for i in range(v.Nbfun):
             # find correct location in data,rows,cols
             ixs = slice(nt * i, nt * (i + 1))
-            rows[ixs] = v.element_dofs[i, :]
+            rows[ixs] = v.element_dofs[i]
             cols[ixs] = np.zeros(nt)
             data[ixs] = np.sum(self.form(*v.basis[i], w) * dx, axis=1)
 

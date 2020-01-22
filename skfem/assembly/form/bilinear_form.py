@@ -4,7 +4,7 @@ import numpy as np
 from numpy import ndarray
 from scipy.sparse import coo_matrix, csr_matrix
 
-from .form import Form, BasisTuple
+from .form import Form
 from .form_parameters import FormParameters
 from ..basis import Basis
 
