@@ -11,9 +11,12 @@ class DiscreteField(NamedTuple):
     df: Optional[ndarray] = None
     ddf: Optional[ndarray] = None
 
-    @property
-    def order(self):
-        pass
+    def __mul__(self, other):
+        if isinstance(other, DiscreteField):
+            return self.f * other.f
+        return self.f * other
+
+    __rmul__ = __mul__
 
 
 class Element():

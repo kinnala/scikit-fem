@@ -100,8 +100,8 @@ class InteriorBasis(Basis):
             self.nelems = len(elements)
             self.tind = elements
 
-        self.dx = np.abs(self.mapping.detDF(self.X, tind=elements)) *\
-            np.tile(self.W, (self.nelems, 1))
+        self.dx = (np.abs(self.mapping.detDF(self.X, tind=elements))
+                   * np.tile(self.W, (self.nelems, 1)))
 
         self.element_dofs = self.element_dofs[:, self.tind]
 

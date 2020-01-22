@@ -56,6 +56,9 @@ class BilinearForm(Form):
         # TODO: allow user to change, e.g. cuda or petsc
         return self._assemble_scipy_matrix(data, rows, cols, (v.N, u.N))
 
+    def _eval_local_matrices(self, *args):
+        return np.sum(self.form(*args), axis=1)
+
 
 def bilinear_form(form: Callable) -> BilinearForm:
 
