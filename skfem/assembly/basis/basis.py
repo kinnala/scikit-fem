@@ -209,18 +209,18 @@ class Basis():
         if w.shape[0] != self.N:
             raise ValueError("Input array has wrong size.")
 
-        u, du, *_ = self.basis[0]
+        reference = self.basis[0]
 
-        if u is not None:
-            W = 0. * u.copy()
+        if reference.f is not None:
+            W = 0. * reference.f.copy()
             # linear combination of basis functions
             for i in range(self.Nbfun):
                 W += w[self.element_dofs[i]][:, None] * self.basis[i].f
         else:
             W = None
 
-        if du is not None:
-            dW = 0. * du.copy()
+        if reference.df is not None:
+            dW = 0. * reference.df.copy()
             for i in range(self.Nbfun):
                 for j in range(self.basis[i].df.shape[0]):
                     dW[j, :, :] += (w[self.element_dofs[i]][:, None]
