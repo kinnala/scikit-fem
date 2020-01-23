@@ -21,6 +21,11 @@ class TestNodality(unittest.TestCase):
 
 class TestQuad2Nodality(TestNodality):
     elem = ElementQuad2()
+    N = 9
+
+
+class TestQuadS2Nodality(TestNodality):
+    elem = ElementQuadS2()
     N = 8
 
 
