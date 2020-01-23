@@ -123,6 +123,22 @@ class BasisInterpolator(unittest.TestCase):
                                            np.sin(3. * m.p[1, :])])) - 1.) < 1e-10)
 
 
+class BasisInterpolatorTriP2(BasisInterpolator):
+    case = (MeshQuad, ElementQuad1)
+
+
+class BasisInterpolatorQuad1(BasisInterpolator):
+    case = (MeshQuad, ElementQuad1)
+
+
+class BasisInterpolatorQuad2(BasisInterpolator):
+    case = (MeshQuad, ElementQuad2)
+
+
+class BasisInterpolatorQuadS2(BasisInterpolator):
+    case = (MeshQuad, ElementQuadS2)
+
+
 class BasisInterpolatorMorley(BasisInterpolator):
     case = (MeshTri, ElementTriMorley)
 
