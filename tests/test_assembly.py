@@ -6,10 +6,12 @@ from skfem import *
 
 
 class IntegrateOneOverBoundaryQ1(unittest.TestCase):
+    elem = ElementQuad1()
+    
     def createBasis(self):
         m = MeshQuad()
         m.refine(6)
-        self.fbasis = FacetBasis(m, ElementQuad1())
+        self.fbasis = FacetBasis(m, self.elem)
         self.boundary_area = 4.0000
 
     def runTest(self):
@@ -31,6 +33,10 @@ class IntegrateOneOverBoundaryQ1(unittest.TestCase):
 
         self.assertAlmostEqual(ones @ g, self.boundary_area, places=4)
         self.assertAlmostEqual(ones @ (B @ ones), self.boundary_area, places=4)
+
+
+class IntegrateOneOverBoundaryS2(IntegrateOneOverBoundaryQ1):
+    elem = ElementQuadS2()
 
 
 class IntegrateOneOverBoundaryHex1(IntegrateOneOverBoundaryQ1):
@@ -115,6 +121,22 @@ class BasisInterpolator(unittest.TestCase):
 
         self.assertTrue(np.sum(f(np.array([np.sin(m.p[0, :]),
                                            np.sin(3. * m.p[1, :])])) - 1.) < 1e-10)
+
+
+class BasisInterpolatorTriP2(BasisInterpolator):
+    case = (MeshQuad, ElementQuad1)
+
+
+class BasisInterpolatorQuad1(BasisInterpolator):
+    case = (MeshQuad, ElementQuad1)
+
+
+class BasisInterpolatorQuad2(BasisInterpolator):
+    case = (MeshQuad, ElementQuad2)
+
+
+class BasisInterpolatorQuadS2(BasisInterpolator):
+    case = (MeshQuad, ElementQuadS2)
 
 
 class BasisInterpolatorMorley(BasisInterpolator):

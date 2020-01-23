@@ -153,6 +153,12 @@ class ConvergenceQ2(ConvergenceQ1):
         self.mesh.refine(2)
 
 
+class ConvergenceQuadS2(ConvergenceQ2):
+    rateH1 = 2.                 # no Q2 superconvergence here
+    def create_basis(self, m):
+        e = ElementQuadS2()
+        return InteriorBasis(m, e)
+    
 class ConvergenceTriP1(ConvergenceQ1):
     def create_basis(self, m):
         e = ElementTriP1()
