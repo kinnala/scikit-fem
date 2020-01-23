@@ -35,10 +35,6 @@ class IntegrateOneOverBoundaryQ1(unittest.TestCase):
         self.assertAlmostEqual(ones @ (B @ ones), self.boundary_area, places=4)
 
 
-class IntegrateOneOverBoundaryQ2(IntegrateOneOverBoundaryQ1):
-    elem = ElementQuad2()
-
-
 class IntegrateOneOverBoundaryS2(IntegrateOneOverBoundaryQ1):
     elem = ElementQuadS2()
 
