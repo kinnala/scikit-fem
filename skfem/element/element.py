@@ -11,6 +11,9 @@ class DiscreteField(NamedTuple):
     df: Optional[ndarray] = None
     ddf: Optional[ndarray] = None
 
+    def __array__(self):
+        return self.f
+
     def __mul__(self, other):
         if isinstance(other, DiscreteField):
             return self.f * other.f

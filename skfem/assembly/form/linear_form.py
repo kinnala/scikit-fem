@@ -36,19 +36,19 @@ class LinearForm(Form):
 
         return self._assemble_numpy_vector(data, rows, cols, (v.N, 1))
 
+    def _eval_local_vectors(self, v, w, dx):
+        return np.sum(self.form(v, w) * dx, axis=1)
+
 
 def linear_form(form: Callable) -> LinearForm:
 
     # for backwards compatibility
     def eval_form(self, v, w, dx):
         if v.ddf is not None:
-            return np.sum(self.form(v=v.f,
-                                    dv=v.df,
-                                    ddv=v.ddf,
+            return np.sum(self.form(v=v.f, dv=v.df, ddv=v.ddf,
                                     w=w) * dx, axis=1)
         else:
-            return np.sum(self.form(v=v.f,
-                                    dv=v.df,
+            return np.sum(self.form(v=v.f, dv=v.df,
                                     w=w) * dx, axis=1)
 
     LinearForm._eval_local_vectors = eval_form

@@ -31,8 +31,9 @@ class BilinearForm(Form):
         """
         if v is None:
             v = u
-        else:
-            assert u.intorder == v.intorder, "Quadrature mismatch"
+        elif u.intorder != v.intorder:
+            raise ValueError("Quadrature mismatch: trial and test functions "
+                             "should have same number of integration points.")
 
         nt = u.nelems
         dx = u.dx
@@ -56,8 +57,8 @@ class BilinearForm(Form):
         # TODO: allow user to change, e.g. cuda or petsc
         return self._assemble_scipy_matrix(data, rows, cols, (v.N, u.N))
 
-    def _eval_local_matrices(self, *args):
-        return np.sum(self.form(*args), axis=1)
+    def _eval_local_matrices(self, u, v, w, dx):
+        return np.sum(self.form(u, v, w) * dx, axis=1)
 
 
 def bilinear_form(form: Callable) -> BilinearForm:
@@ -66,9 +67,12 @@ def bilinear_form(form: Callable) -> BilinearForm:
     def eval_form(self, u, v, w, dx):
         if u.ddf is not None:
             return np.sum(self.form(u=u.f, du=u.df, ddu=u.ddf,
-                                    v=v.f, dv=v.df, ddv=v.ddf, w=w) * dx, axis=1)
+                                    v=v.f, dv=v.df, ddv=v.ddf,
+                                    w=w) * dx, axis=1)
         else:
-            return np.sum(self.form(u=u.f, du=u.df, v=v.f, dv=v.df, w=w) * dx, axis=1)
+            return np.sum(self.form(u=u.f, du=u.df,
+                                    v=v.f, dv=v.df,
+                                    w=w) * dx, axis=1)
 
     BilinearForm._eval_local_matrices = eval_form
 
