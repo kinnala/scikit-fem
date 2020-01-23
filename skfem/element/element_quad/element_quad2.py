@@ -7,7 +7,7 @@ class ElementQuad2(ElementH1):
     facet_dofs = 1
     interior_dofs = 1
     dim = 2
-    maxdeg = 3
+    maxdeg = 4
     dofnames = ['u', 'u', 'u']
     doflocs = np.array([[-1., -1.],
                         [ 1., -1.],
