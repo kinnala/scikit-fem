@@ -3,6 +3,7 @@ from typing import Optional
 import numpy as np
 from numpy import ndarray
 
+from skfem.element import DiscreteField
 from skfem.quadrature import get_quadrature
 from .basis import Basis
 
@@ -131,6 +132,8 @@ class FacetBasis(Basis):
                                                 self.find,
                                                 self.mesh.t2f)
 
+        self.normals = DiscreteField(self.normals)
+
         self.nelems = len(self.find)
 
         self.basis = [self.elem.gbasis(self.mapping, Y, j, self.tind)
@@ -148,11 +151,9 @@ class FacetBasis(Basis):
                 'n': self.normals}
 
     def global_coordinates(self) -> ndarray:
-        return self.mapping.G(self.X, find=self.find)
+        return DiscreteField(self.mapping.G(self.X, find=self.find))
 
     def mesh_parameters(self) -> ndarray:
-        if self.mesh.dim() == 1:
-            return np.array([0.])
-        else:
-            return (np.abs(self.mapping.detDG(self.X, self.find)) **
-                    (1. / (self.mesh.dim() - 1.)))
+        return DiscreteField((np.abs(self.mapping.detDG(self.X, self.find))
+                              ** (1. / (self.mesh.dim() - 1.)))\
+                             if self.mesh.dim() != 1 else np.array([0.]))

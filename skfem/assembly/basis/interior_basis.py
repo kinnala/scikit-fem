@@ -3,7 +3,7 @@ from typing import Optional, Callable, Tuple
 import numpy as np
 from numpy import ndarray
 
-from skfem.element import Element
+from skfem.element import Element, DiscreteField
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh
 from skfem.quadrature import get_quadrature
@@ -110,11 +110,12 @@ class InteriorBasis(Basis):
         return {'x': self.global_coordinates(),
                 'h': self.mesh_parameters()}
 
-    def global_coordinates(self) -> ndarray:
-        return self.mapping.F(self.X, tind=self.tind)
+    def global_coordinates(self) -> DiscreteField:
+        return DiscreteField(self.mapping.F(self.X, tind=self.tind))
 
-    def mesh_parameters(self) -> ndarray:
-        return np.abs(self.mapping.detDF(self.X, self.tind)) ** (1. / self.mesh.dim())
+    def mesh_parameters(self) -> DiscreteField:
+        return DiscreteField(np.abs(self.mapping.detDF(self.X, self.tind))
+                             ** (1. / self.mesh.dim()))
 
     def refinterp(self,
                   interp: ndarray,

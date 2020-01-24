@@ -10,21 +10,29 @@ from ..basis import Basis
 
 class Functional(Form):
 
-    def kernel(self,
-               w: FormParameters,
-               dx: ndarray) -> ndarray:
+    def _kernel(self,
+                w: FormParameters,
+                dx: ndarray) -> ndarray:
         return np.sum(self.form(w) * dx, axis=1)
 
     def elemental(self,
-                  vbasis: Basis,
-                  w: Optional[Any] = (None, None, None)) -> ndarray:
-        return self.kernel(self.parameters(w, vbasis), vbasis.dx)
+                  v: Basis,
+                  w: Optional[Any] = {}) -> ndarray:
+        return self._kernel(self.parameters(w, v), v.dx)
 
     def assemble(self,
-                 vbasis: Basis,
-                 w: Optional[Any] = (None, None, None)) -> float:
-        return sum(self.elemental(vbasis, w))
+                 v: Basis,
+                 w: Optional[Any] = {}) -> float:
+        return sum(self.elemental(v, w))
 
 
 def functional(form: Callable) -> Functional:
+
+    # for backwards compatibility
+    def kernel(self, w, dx):
+        W = {k: w[k].f for k in w}
+        return np.sum(self.form(w=FormParameters(**W)) * dx, axis=1)
+
+    Functional._kernel = kernel
+
     return Functional(form)
