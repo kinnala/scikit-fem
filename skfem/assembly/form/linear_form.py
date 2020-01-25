@@ -20,7 +20,7 @@ class LinearForm(Form):
 
         nt = v.nelems
         dx = v.dx
-        w = {**self.dictify(w), **v.default_parameters()}
+        w = {**v.default_parameters(), **self.dictify(w)}
 
         # initialize COO data structures
         sz = v.Nbfun * nt

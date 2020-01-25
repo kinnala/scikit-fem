@@ -23,7 +23,7 @@ class BilinearForm(Form):
 
         nt = u.nelems
         dx = u.dx
-        w = {**self.dictify(w), **u.default_parameters()}
+        w = {**u.default_parameters(), **self.dictify(w)}
 
         # initialize COO data structures
         sz = u.Nbfun * v.Nbfun * nt

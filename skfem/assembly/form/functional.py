@@ -18,7 +18,7 @@ class Functional(Form):
     def elemental(self,
                   v: Basis,
                   w: Dict[str, DiscreteField] = {}) -> ndarray:
-        w = {**self.dictify(w), **v.default_parameters()}
+        w = {**v.default_parameters(), **self.dictify(w)}
         return self._kernel(w, v.dx)
 
     def assemble(self,
