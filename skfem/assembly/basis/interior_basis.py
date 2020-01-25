@@ -132,7 +132,10 @@ class InteriorBasis(Basis):
 
         # interpolate some previous discrete function at the vertices
         # of the refined mesh
-        w = self.interpolate(interp).f
+        w = 0. * x[0]
+        for j in range(self.Nbfun):
+            basis = self.elem.gbasis(self.mapping, X, j)
+            w += interp[self.element_dofs[j]][:, None] * basis[0]
 
         # create connectivity for the new mesh
         nt = self.nelems

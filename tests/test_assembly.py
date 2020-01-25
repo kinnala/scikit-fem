@@ -228,5 +228,18 @@ class EvaluateFunctional(unittest.TestCase):
                          m.t.shape[1])
 
 
+class TestRefinterp(unittest.TestCase):
+
+    def runTest(self):
+        m = MeshQuad()
+        m.refine(2)
+        e = ElementQuad1()
+        basis = InteriorBasis(m, e)
+
+        M, X = basis.refinterp(m.p[0], 3)
+
+        self.assertEqual(M.p.shape[1], len(X))
+
+
 if __name__ == '__main__':
     unittest.main()
