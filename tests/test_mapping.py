@@ -14,15 +14,15 @@ class TestIsoparamNormals(unittest.TestCase):
         m.refine()
         e = self.elem()
         fb = FacetBasis(m, e)
-        x = fb.global_coordinates()
+        x = fb.global_coordinates().f
         eps = 1e-6
         for itr in range(m.p.shape[0]):
             case = (x[itr] < eps) * (x[itr] > -eps)
             for jtr in range(m.p.shape[0]):
                 if itr == jtr:
-                    self.assertTrue((fb.normals[jtr][case] == -1).all())
+                    self.assertTrue((fb.normals.f[jtr][case] == -1).all())
                 else:
-                    self.assertTrue((np.abs(fb.normals[jtr][case]) < 1e-14).all())
+                    self.assertTrue((np.abs(fb.normals.f[jtr][case]) < 1e-14).all())
 
 
 class TestIsoparamNormalsQuad(TestIsoparamNormals):

@@ -24,16 +24,23 @@ class Form:
         raise NotImplementedError
 
     @staticmethod
-    def parameters(w, u):
-        if isinstance(w, DiscreteField):
-            w = {'w': w}
-        elif isinstance(w, ndarray):
-            w = {'w': DiscreteField(w)}
-        elif isinstance(w, list):
-            w = {'w': DiscreteField(np.array([z.f for z in w]))}
-        elif isinstance(w, tuple):
-            w = {'w': DiscreteField(*w)}
-        return {**w, **u.default_parameters()}
+    def dictify(w):
+        """Support old input formats for 'w'."""
+        if not isinstance(w, dict):
+            if isinstance(w, DiscreteField):
+                w = {'w': w}
+            elif isinstance(w, ndarray):
+                w = {'w': DiscreteField(w)}
+            elif isinstance(w, list):
+                w = {'w': DiscreteField(np.array([z.f for z in w]),
+                                        np.array([z.df for z in w]))}
+            elif isinstance(w, tuple):
+                w = {'w': DiscreteField(*w)}
+            else:
+                raise ValueError("The given type '{}' for the list of extra "
+                                 "form parameters w cannot be converted to "
+                                 "Dict[str, DiscreteField].".format(type(w)))
+        return w
 
     @staticmethod
     def _assemble_scipy_matrix(data, rows, cols, shape=None):

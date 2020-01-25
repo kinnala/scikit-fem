@@ -4,7 +4,6 @@ import numpy as np
 from numpy import ndarray
 
 from .form import Form
-from .form_parameters import FormParameters
 from ..basis import Basis
 from ...element import DiscreteField
 
@@ -21,7 +20,7 @@ class LinearForm(Form):
 
         nt = v.nelems
         dx = v.dx
-        w = self.parameters(w, v)
+        w = {**self.dictify(w), **v.default_parameters()}
 
         # initialize COO data structures
         sz = v.Nbfun * nt
@@ -43,8 +42,13 @@ class LinearForm(Form):
 
 def linear_form(form: Callable) -> LinearForm:
 
+    # for backwards compatibility
+    from .form_parameters import FormParameters
+
     def eval_form(self, v, w, dx):
         W = {k: w[k].f for k in w}
+        if 'w' in w:
+            W['dw'] = w['w'].df
         if v.ddf is not None:
             return np.sum(self.form(v=v.f, dv=v.df, ddv=v.ddf,
                                     w=FormParameters(**W)) * dx, axis=1)

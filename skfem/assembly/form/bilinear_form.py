@@ -4,7 +4,6 @@ import numpy as np
 from numpy import ndarray
 
 from .form import Form
-from .form_parameters import FormParameters
 from ..basis import Basis
 from ...element import DiscreteField
 
@@ -24,7 +23,7 @@ class BilinearForm(Form):
 
         nt = u.nelems
         dx = u.dx
-        w = self.parameters(w, u)
+        w = {**self.dictify(w), **u.default_parameters()}
 
         # initialize COO data structures
         sz = u.Nbfun * v.Nbfun * nt
@@ -51,8 +50,12 @@ class BilinearForm(Form):
 def bilinear_form(form: Callable) -> BilinearForm:
 
     # for backwards compatibility
+    from .form_parameters import FormParameters
+
     def kernel(self, u, v, w, dx):
         W = {k: w[k].f for k in w}
+        if 'w' in w:
+            W['dw'] = w['w'].df
         if u.ddf is not None:
             return np.sum(self.form(u=u.f, du=u.df, ddu=u.ddf,
                                     v=v.f, dv=v.df, ddv=v.ddf,
