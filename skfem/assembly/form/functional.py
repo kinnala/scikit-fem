@@ -32,12 +32,12 @@ def functional(form: Callable) -> Functional:
     # for backwards compatibility
     from .form_parameters import FormParameters
 
-    def kernel(self, w, dx):
-        W = {k: w[k].f for k in w}
-        if 'w' in w:
-            W['dw'] = w['w'].df
-        return np.sum(self.form(w=FormParameters(**W)) * dx, axis=1)
+    class ClassicFunctional(Functional):
 
-    Functional._kernel = kernel
+        def _kernel(self, w, dx):
+            W = {k: w[k].f for k in w}
+            if 'w' in w:
+                W['dw'] = w['w'].df
+            return np.sum(self.form(w=FormParameters(**W)) * dx, axis=1)
 
-    return Functional(form)
+    return ClassicFunctional(form)

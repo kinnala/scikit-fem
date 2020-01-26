@@ -45,17 +45,17 @@ def linear_form(form: Callable) -> LinearForm:
     # for backwards compatibility
     from .form_parameters import FormParameters
 
-    def eval_form(self, v, w, dx):
-        W = {k: w[k].f for k in w}
-        if 'w' in w:
-            W['dw'] = w['w'].df
-        if v.ddf is not None:
-            return np.sum(self.form(v=v.f, dv=v.df, ddv=v.ddf,
-                                    w=FormParameters(**W)) * dx, axis=1)
-        else:
-            return np.sum(self.form(v=v.f, dv=v.df,
-                                    w=FormParameters(**W)) * dx, axis=1)
+    class ClassicLinearForm(LinearForm):
 
-    LinearForm._kernel = eval_form
+        def _kernel(self, v, w, dx):
+            W = {k: w[k].f for k in w}
+            if 'w' in w:
+                W['dw'] = w['w'].df
+            if v.ddf is not None:
+                return np.sum(self.form(v=v.f, dv=v.df, ddv=v.ddf,
+                                        w=FormParameters(**W)) * dx, axis=1)
+            else:
+                return np.sum(self.form(v=v.f, dv=v.df,
+                                        w=FormParameters(**W)) * dx, axis=1)
 
-    return LinearForm(form)
+    return ClassicLinearForm(form)

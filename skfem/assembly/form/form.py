@@ -17,7 +17,7 @@ class Form:
     def __call__(self, *args):
         return self.assemble(self.kernel(*args))
 
-    def kernel(self):
+    def _kernel(self):
         raise NotImplementedError
 
     def assemble(self):

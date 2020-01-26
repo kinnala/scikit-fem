@@ -52,19 +52,19 @@ def bilinear_form(form: Callable) -> BilinearForm:
     # for backwards compatibility
     from .form_parameters import FormParameters
 
-    def kernel(self, u, v, w, dx):
-        W = {k: w[k].f for k in w}
-        if 'w' in w:
-            W['dw'] = w['w'].df
-        if u.ddf is not None:
-            return np.sum(self.form(u=u.f, du=u.df, ddu=u.ddf,
-                                    v=v.f, dv=v.df, ddv=v.ddf,
-                                    w=FormParameters(**W)) * dx, axis=1)
-        else:
-            return np.sum(self.form(u=u.f, du=u.df,
-                                    v=v.f, dv=v.df,
-                                    w=FormParameters(**W)) * dx, axis=1)
+    class ClassicBilinearForm(BilinearForm):
 
-    BilinearForm._kernel = kernel
+        def _kernel(self, u, v, w, dx):
+            W = {k: w[k].f for k in w}
+            if 'w' in w:
+                W['dw'] = w['w'].df
+            if u.ddf is not None:
+                return np.sum(self.form(u=u.f, du=u.df, ddu=u.ddf,
+                                        v=v.f, dv=v.df, ddv=v.ddf,
+                                        w=FormParameters(**W)) * dx, axis=1)
+            else:
+                return np.sum(self.form(u=u.f, du=u.df,
+                                        v=v.f, dv=v.df,
+                                        w=FormParameters(**W)) * dx, axis=1)
 
-    return BilinearForm(form)
+    return ClassicBilinearForm(form)
