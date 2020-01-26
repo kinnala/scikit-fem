@@ -1,5 +1,8 @@
 from skfem import *
-from skfem.models.elasticity import linear_elasticity
+from skfem.models.elasticity import linear_elasticity,\
+    lame_parameters, linear_stress
+from skfem.models.helpers import dot, ddot,\
+    prod, sym_grad
 import numpy as np
 from skfem.io import from_meshio
 from skfem.io.json import from_file, to_file
@@ -51,24 +54,12 @@ mb = [
 ]
 
 # define bilinear forms
-E1 = 1000.0
-E2 = 1000.0
+E = 1000.0
+nu = 0.3
+Lambda, Mu = lame_parameters(E, nu)
 
-nu1 = 0.3
-nu2 = 0.3
-
-Mu1 = E1 / (2. * (1. + nu1))
-Mu2 = E2 / (2. * (1. + nu2))
-
-Lambda1 = E1 * nu1 / ((1. + nu1) * (1. - 2. * nu1))
-Lambda2 = E2 * nu2 / ((1. + nu2) * (1. - 2. * nu2))
-
-Mu = Mu1
-Lambda = Lambda1
-
-weakform1 = linear_elasticity(Lambda=Lambda, Mu=Mu)
-weakform2 = linear_elasticity(Lambda=Lambda, Mu=Mu)
-
+weakform1 = linear_elasticity(Lambda, Mu)
+weakform2 = linear_elasticity(Lambda, Mu)
 
 alpha = 1000
 limit = 0.3
@@ -79,59 +70,41 @@ K2 = asm(weakform2, Ib)
 K = [[K1, 0.], [0., K2]]
 f = [None] * 2
 
-def tr(T):
-    return T[0, 0] + T[1, 1]
+C = linear_stress(Lambda, Mu)
 
-def C(T):
-    return np.array([[2. * Mu * T[0, 0] + Lambda * tr(T), 2. * Mu * T[0, 1]],
-                     [2. * Mu * T[1, 0], 2. * Mu * T[1, 1] + Lambda * tr(T)]])
-
-def Eps(dw):
-    return np.array([[dw[0][0], .5 * (dw[0][1] + dw[1][0])],
-                     [.5 * (dw[1][0] + dw[0][1]), dw[1][1]]])
-
+def gap(x):
+    """Initial gap between the bodies."""
+    return (1. - np.sqrt(1. - x[1] ** 2))
 
 # assemble the mortar matrices
 for i in range(2):
     for j in range(2):
-        @bilinear_form
-        def bilin_penalty(u, du, v, dv, w):
-            n = w.n
-            ju = (-1.) ** i * (u[0] * n[0] + u[1] * n[1])
-            jv = (-1.) ** j * (v[0] * n[0] + v[1] * n[1])
-            mu = .5 * (n[0] * C(Eps(du))[0, 0] * n[0] +
-                       n[0] * C(Eps(du))[0, 1] * n[1] +
-                       n[1] * C(Eps(du))[1, 0] * n[0] +
-                       n[1] * C(Eps(du))[1, 1] * n[1])
-            mv = .5 * (n[0] * C(Eps(dv))[0, 0] * n[0] +
-                       n[0] * C(Eps(dv))[0, 1] * n[1] +
-                       n[1] * C(Eps(dv))[1, 0] * n[0] +
-                       n[1] * C(Eps(dv))[1, 1] * n[1])
-            h = w.h
-            return ((1. / (alpha * h) * ju * jv - mu * jv - mv * ju)
-                    * (np.abs(w.x[1]) <= limit))
 
-        K[j][i] += asm(bilin_penalty, mb[i], mb[j])
+        @BilinearForm
+        def bilin_mortar(u, v, w):
+            n = w['n']
+            ju = (-1.) ** i * dot(u, n)
+            jv = (-1.) ** j * dot(v, n)
+            nxn = prod(n, n)
+            mu = .5 * ddot(nxn, C(sym_grad(u)))
+            mv = .5 * ddot(nxn, C(sym_grad(v)))
+            return ((1. / (alpha * w['h']) * ju * jv - mu * jv - mv * ju)
+                    * (np.abs(w['x'].f[1]) <= limit))
 
-    @linear_form
-    def lin_penalty(v, dv, w):
-        n = w.n
-        jv = (-1.) ** i * (v[0] * n[0] + v[1] * n[1])
-        mv = .5 * (n[0] * C(Eps(dv))[0, 0] * n[0] +
-                   n[0] * C(Eps(dv))[0, 1] * n[1] +
-                   n[1] * C(Eps(dv))[1, 0] * n[0] +
-                   n[1] * C(Eps(dv))[1, 1] * n[1])
-        h = w.h
-        def gap(x):
-            return (1. - np.sqrt(1. - x[1] ** 2))
-        return ((1. / (alpha * h) * gap(w.x) * jv - gap(w.x) * mv)
-                * (np.abs(w.x[1]) <= limit))
+        K[j][i] += asm(bilin_mortar, mb[i], mb[j])
 
-    f[i] = asm(lin_penalty, mb[i])
+    @LinearForm
+    def lin_mortar(v, w):
+        n = w['n']
+        jv = (-1.) ** j * dot(v, n)
+        mv = .5 * ddot(prod(n, n), C(sym_grad(v)))
+        return ((1. / (alpha * w['h']) * gap(w['x'].f) * jv - gap(w['x'].f) * mv)
+                * (np.abs(w['x'].f[1]) <= limit))
+
+    f[i] = asm(lin_mortar, mb[i])
 
 import scipy.sparse
 K = (scipy.sparse.bmat(K)).tocsr()
-
 
 # set boundary conditions and solve
 i1 = np.arange(K1.shape[0])
@@ -171,12 +144,12 @@ E_dg = ElementQuadDG(ElementQuad1())
 
 for itr in range(2):
     for jtr in range(2):
-        @bilinear_form
-        def proj_cauchy(u, du, v, dv, w):
-            return C(Eps(du))[itr, jtr] * v
+        @BilinearForm
+        def proj_cauchy(u, v, w):
+            return C(sym_grad(u))[itr, jtr] * v
 
-        @bilinear_form
-        def mass(u, du, v, dv, w):
+        @BilinearForm
+        def mass(u, v, w):
             return u * v
 
         ib_dg = InteriorBasis(m, e_dg, intorder=4)
@@ -187,8 +160,8 @@ for itr in range(2):
         S[itr, jtr] = solve(asm(mass, Ib_dg),
                             asm(proj_cauchy, Ib, Ib_dg) @ x[i2])
 
-s[2, 2] = nu1 * (s[0, 0] + s[1, 1])
-S[2, 2] = nu2 * (S[0, 0] + S[1, 1])
+s[2, 2] = nu * (s[0, 0] + s[1, 1])
+S[2, 2] = nu * (S[0, 0] + S[1, 1])
 
 vonmises1 = np.sqrt(.5 * ((s[0, 0] - s[1, 1]) ** 2 +
                           (s[1, 1] - s[2, 2]) ** 2 +
