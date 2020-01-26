@@ -3,7 +3,7 @@ from typing import Any, Callable, Optional, Dict
 from numpy import ndarray
 import numpy as np
 
-from .form import Form
+from .form import Form, FormDict
 from ..basis import Basis
 from ...element import DiscreteField
 
@@ -18,7 +18,7 @@ class Functional(Form):
     def elemental(self,
                   v: Basis,
                   w: Dict[str, DiscreteField] = {}) -> ndarray:
-        w = {**v.default_parameters(), **self.dictify(w)}
+        w = FormDict({**v.default_parameters(), **self.dictify(w)})
         return self._kernel(w, v.dx)
 
     def assemble(self,

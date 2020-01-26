@@ -9,6 +9,12 @@ from ..basis import Basis
 from ...element import DiscreteField
 
 
+class FormDict(dict):
+
+    def __getattr__(self, attr):
+        return self[attr].f
+
+
 class Form:
 
     def __init__(self, form: Callable):

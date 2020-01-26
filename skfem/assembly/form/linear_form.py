@@ -3,7 +3,7 @@ from typing import Any, Callable, Optional, Dict
 import numpy as np
 from numpy import ndarray
 
-from .form import Form
+from .form import Form, FormDict
 from ..basis import Basis
 from ...element import DiscreteField
 
@@ -20,7 +20,7 @@ class LinearForm(Form):
 
         nt = v.nelems
         dx = v.dx
-        w = {**v.default_parameters(), **self.dictify(w)}
+        w = FormDict({**v.default_parameters(), **self.dictify(w)})
 
         # initialize COO data structures
         sz = v.Nbfun * nt

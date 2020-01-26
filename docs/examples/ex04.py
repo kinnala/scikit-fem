@@ -60,6 +60,7 @@ Lambda, Mu = lame_parameters(E, nu)
 
 weakform1 = linear_elasticity(Lambda, Mu)
 weakform2 = linear_elasticity(Lambda, Mu)
+C = linear_stress(Lambda, Mu)
 
 alpha = 1000
 limit = 0.3
@@ -70,7 +71,6 @@ K2 = asm(weakform2, Ib)
 K = [[K1, 0.], [0., K2]]
 f = [None] * 2
 
-C = linear_stress(Lambda, Mu)
 
 def gap(x):
     """Initial gap between the bodies."""
@@ -82,24 +82,22 @@ for i in range(2):
 
         @BilinearForm
         def bilin_mortar(u, v, w):
-            n = w['n']
-            ju = (-1.) ** i * dot(u, n)
-            jv = (-1.) ** j * dot(v, n)
-            nxn = prod(n, n)
+            ju = (-1.) ** i * dot(u, w.n)
+            jv = (-1.) ** j * dot(v, w.n)
+            nxn = prod(w.n, w.n)
             mu = .5 * ddot(nxn, C(sym_grad(u)))
             mv = .5 * ddot(nxn, C(sym_grad(v)))
-            return ((1. / (alpha * w['h']) * ju * jv - mu * jv - mv * ju)
-                    * (np.abs(w['x'].f[1]) <= limit))
+            return ((1. / (alpha * w.h) * ju * jv - mu * jv - mv * ju)
+                    * (np.abs(w.x[1]) <= limit))
 
         K[j][i] += asm(bilin_mortar, mb[i], mb[j])
 
     @LinearForm
     def lin_mortar(v, w):
-        n = w['n']
-        jv = (-1.) ** j * dot(v, n)
-        mv = .5 * ddot(prod(n, n), C(sym_grad(v)))
-        return ((1. / (alpha * w['h']) * gap(w['x'].f) * jv - gap(w['x'].f) * mv)
-                * (np.abs(w['x'].f[1]) <= limit))
+        jv = (-1.) ** j * dot(v, w.n)
+        mv = .5 * ddot(prod(w.n, w.n), C(sym_grad(v)))
+        return ((1. / (alpha * w.h) * gap(w.x) * jv - gap(w.x) * mv)
+                * (np.abs(w.x[1]) <= limit))
 
     f[i] = asm(lin_mortar, mb[i])
 
@@ -144,6 +142,7 @@ E_dg = ElementQuadDG(ElementQuad1())
 
 for itr in range(2):
     for jtr in range(2):
+
         @BilinearForm
         def proj_cauchy(u, v, w):
             return C(sym_grad(u))[itr, jtr] * v

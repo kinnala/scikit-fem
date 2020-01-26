@@ -3,7 +3,7 @@ from typing import Any, Callable, Optional, Dict
 import numpy as np
 from numpy import ndarray
 
-from .form import Form
+from .form import Form, FormDict
 from ..basis import Basis
 from ...element import DiscreteField
 
@@ -23,7 +23,7 @@ class BilinearForm(Form):
 
         nt = u.nelems
         dx = u.dx
-        w = {**u.default_parameters(), **self.dictify(w)}
+        w = FormDict({**u.default_parameters(), **self.dictify(w)})
 
         # initialize COO data structures
         sz = u.Nbfun * v.Nbfun * nt
