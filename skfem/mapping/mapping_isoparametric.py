@@ -127,7 +127,7 @@ class MappingIsoparametric(Mapping):
                  self.bndJ(1, 0, X, find) * self.bndJ(0, 1, X, find)) ** 2
             )
         else:
-            raise NotImplementedError("!")
+            raise NotImplementedError
 
     def invF(self, x, tind=None, newton_max_iters = 50, newton_tol = 1e-8):
         """Newton iteration for evaluating inverse isoparametric mapping."""
