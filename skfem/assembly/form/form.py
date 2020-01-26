@@ -31,7 +31,7 @@ class Form:
 
     @staticmethod
     def dictify(w):
-        """Support old input formats for 'w'."""
+        """Support classic-style input formats for 'w'."""
         if not isinstance(w, dict):
             if isinstance(w, DiscreteField):
                 w = {'w': w}
