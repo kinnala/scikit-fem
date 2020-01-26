@@ -12,45 +12,11 @@ class FacetBasis(Basis):
     """Global basis functions evaluated at integration points on the element
     boundaries.
 
-    Attributes
-    ----------
-    phi : ndarray
-        Global basis functions at global quadrature points.
-    dphi : ndarray
-        Global basis function derivatives at global quadrature points.
-    X : ndarray
-        Local quadrature points (Ndim x Nqp).
-    W : ndarray
-        Local quadrature weights (Nqp).
-    nf : int
-        Number of facets.
-    dx : ndarray
-        Used in computing global integrals elementwise (Nelems x Nqp).
-        For example, np.sum(u**2*dx, axis=1) where u is also
-        a numpy array of size Nelems x Nqp.
-    find : ndarray
-        A list of facet indices.
-    tind : ndarray
-        A list of triangle indices.
-    normals : ndarray
-    mapping : skfem.mapping.Mapping
-    elem : skfem.element.Element
-    Nbfun : int
-        The number of basis functions.
-    intorder : int
-        The integration order.
-    dim : int
-        The problem dimension.
-    nt : int
-        Number of triangles.
-    mesh : skfem.mesh.Mesh
-    refdom : string
-    brefdom : string
-
     Examples
     --------
-    FacetBasis object is a combination of Mesh, Element,
-    and Mapping:
+    :class:`~skfem.assembly.FacetBasis` object is a combination of
+    :class:`~skfem.mesh.Mesh`, :class:`~skfem.element.Element`, and
+    :class:`~skfem.mapping.Mapping`:
 
     >>> from skfem import *
     >>> from skfem.models.poisson import mass

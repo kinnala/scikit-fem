@@ -11,37 +11,7 @@ from .basis import Basis
 
 
 class InteriorBasis(Basis):
-    """Global basis functions evaluated at integration points inside the
-    elements.
-
-    Attributes
-    ----------
-    phi : ndarray
-        Global basis functions at global quadrature points.
-    dphi : ndarray
-        Global basis function derivatives at global quadrature points.
-    X : ndarray
-        Local quadrature points (Ndim x Nqp).
-    W : ndarray
-        Local quadrature weights (Nqp).
-    nelems : int
-    dx : ndarray
-        Can be used in computing global integrals elementwise (Nelems
-        x Nqp).  For example, np.sum(u**2*dx, axis=1) where u is also
-        a numpy array of size Nelems x Nqp.
-    mapping : skfem.mapping.Mapping
-    elem : skfem.element.Element
-    Nbfun : int
-        Number of basis functions.
-    intorder : int
-        Integration order.
-    dim : int
-        Dimension of the problem.
-    nt : int
-        Number of triangles.
-    mesh : skfem.mesh.Mesh
-    refdom : string
-    brefdom : string
+    """Global basis functions evaluated at global quadrature points.
 
     Examples
     --------
