@@ -18,13 +18,13 @@ def lame_parameters(E, nu):
     Returns
     -------
     float
-        The first Lamé parameter
+        The first Lamé parameter (lambda)
     float
-        The second Lamé parameter
+        The second Lamé parameter (mu)
 
     """
-    return (E / (2. * (1. + nu)),
-            E * nu / ((1. + nu) * (1. - 2. * nu)))
+    return (E * nu / ((1. + nu) * (1. - 2. * nu)),
+            E / (2. * (1. + nu)))
 
 
 def linear_stress(Lambda=1., Mu=1.):
