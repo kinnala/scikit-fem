@@ -20,9 +20,10 @@ from scipy.sparse import csr_matrix
 
 from .basis import Basis, InteriorBasis, FacetBasis, MortarBasis
 from .dofs import Dofs
-from .form import Form, bilinear_form, linear_form, functional
+from .form import Form, BilinearForm, LinearForm,\
+    bilinear_form, linear_form, functional
 
 
-def asm(kernel: Form,
+def asm(form: Form,
         *args, **kwargs) -> Union[ndarray, csr_matrix]:
-    return kernel.assemble(*args, **kwargs)
+    return form.assemble(*args, **kwargs)

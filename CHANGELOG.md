@@ -8,9 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Renamed skfem.importers to skfem.io.
+- Basis.interpolate returns DiscreteField objects instead ndarray tuples.
+- Basis.interpolate works now for all Element's.
 
 ### Added
-- MortarBasis and MortarPair that support mortar methods in 2D.
+- MortarBasis and MortarPair for supporting mortar methods in 2D.
 - Serialization of meshes to json-files via skfem.io.json.
 - ElementQuadDG for transforming H1 elements to DG elements.
 

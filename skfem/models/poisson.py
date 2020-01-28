@@ -1,24 +1,24 @@
 """Poisson equation."""
 
-from skfem.assembly import bilinear_form, linear_form
+from skfem.assembly import BilinearForm, LinearForm
+from .helpers import grad, dot, ddot
 
 
-@bilinear_form
-def laplace(u, du, v, dv, w):
-    return sum(du * dv)
+@BilinearForm
+def laplace(u, v, w):
+    return dot(grad(u), grad(v))
 
 
-@bilinear_form
-def vector_laplace(u, du, v, dv, w):
-    from .helpers import ddot
-    return ddot(du, dv)
+@BilinearForm
+def vector_laplace(u, v, w):
+    return ddot(grad(u), grad(v))
 
 
-@bilinear_form
-def mass(u, du, v, dv, w):
+@BilinearForm
+def mass(u, v, w):
     return u * v
 
 
-@linear_form
-def unit_load(v, dv, w):
+@LinearForm
+def unit_load(v, w):
     return v

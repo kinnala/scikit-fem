@@ -319,7 +319,7 @@ class MeshTet(Mesh3D):
 
     def refine(self, N=None):
         """Refine the mesh, tetrahedral optimization.
-        
+
         Parameters
         ----------
         N : (optional) int

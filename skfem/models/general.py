@@ -1,12 +1,12 @@
 """Bilinear and linear forms too general to put into a specific model."""
 
-from skfem.assembly import bilinear_form, linear_form
+from skfem.assembly import BilinearForm, linear_form
+from .helpers import div
 
 
-@bilinear_form
-def divergence(u, du, v, dv, w):
-    from .helpers import div
-    return div(du) * v
+@BilinearForm
+def divergence(u, v, w):
+    return div(u) * v
 
 
 @linear_form

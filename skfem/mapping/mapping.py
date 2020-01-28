@@ -24,7 +24,7 @@ class Mapping():
             Global points (Ndim x Nelems x Nqp)
 
         """
-        raise NotImplementedError("!")
+        raise NotImplementedError
 
     def invF(self,
              x: ndarray,
@@ -44,7 +44,7 @@ class Mapping():
             The corresponding local points (Ndim x Nelems x Nqp).
 
         """
-        raise NotImplementedError("!")
+        raise NotImplementedError
 
     def G(self,
           X: ndarray,
@@ -64,7 +64,7 @@ class Mapping():
             Global points (Ndim x Nelems x Nqp).
 
         """
-        raise NotImplementedError("!")
+        raise NotImplementedError
 
     def detDG(self,
               X: ndarray,
@@ -84,7 +84,7 @@ class Mapping():
             Jacobian determinants at global points (Ndim x Nelems x Nqp).
 
         """
-        raise NotImplementedError("!")
+        raise NotImplementedError
 
     def normals(self,
                 X: ndarray,
@@ -92,22 +92,22 @@ class Mapping():
                 find: ndarray,
                 t2f: ndarray) -> ndarray:
         """Calculate normal vectors on element boundaries."""
-        raise NotImplementedError("!")
+        raise NotImplementedError
 
     def DF(self,
            X: ndarray,
            tind: Optional[ndarray] = None):
         """The jacobian of F."""
-        raise NotImplementedError("!")
+        raise NotImplementedError
 
     def invDF(self,
               X: ndarray,
               tind: Optional[ndarray] = None):
         """The inverse of the jacobian of F."""
-        raise NotImplementedError("!")
+        raise NotImplementedError
 
     def detDF(self,
               X: ndarray,
               tind: Optional[ndarray] = None):
         """The determinant of the jacobian of F."""
-        raise NotImplementedError("!")
+        raise NotImplementedError

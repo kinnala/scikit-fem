@@ -1,11 +1,10 @@
 import numpy as np
-from .element import Element
+from .element import Element, DiscreteField
 
 
 class ElementH2(Element):
     """Elements defined implicitly through global degrees-of-freedom."""
 
-    order = (0, 1, 2)
     V = None  # For caching inverse Vandermonde matrix
 
     def gbasis(self, mapping, X, i, tind=None):
@@ -28,23 +27,23 @@ class ElementH2(Element):
 
         # loop over new basis
         for itr in range(N):
-            u += V[:, itr, i][:, None]\
-                 * self._pbasis[itr](x[0], x[1])
-            du[0] += V[:, itr, i][:, None]\
-                     * self._pbasisdx[itr](x[0], x[1])
-            du[1] += V[:, itr, i][:,None]\
-                     * self._pbasisdy[itr](x[0], x[1])
-            ddu[0, 0] += V[:, itr, i][:, None]\
-                         * self._pbasisdxx[itr](x[0], x[1])
-            ddu[0, 1] += V[:, itr, i][:, None]\
-                         * self._pbasisdxy[itr](x[0], x[1])
-            ddu[1, 1] += V[:, itr, i][:, None]\
-                         * self._pbasisdyy[itr](x[0], x[1])
+            u += (V[:, itr, i][:, None]
+                  * self._pbasis[itr](x[0], x[1]))
+            du[0] += (V[:, itr, i][:, None]
+                      * self._pbasisdx[itr](x[0], x[1]))
+            du[1] += (V[:, itr, i][:,None]
+                      * self._pbasisdy[itr](x[0], x[1]))
+            ddu[0, 0] += (V[:, itr, i][:, None]
+                          * self._pbasisdxx[itr](x[0], x[1]))
+            ddu[0, 1] += (V[:, itr, i][:, None]
+                          * self._pbasisdxy[itr](x[0], x[1]))
+            ddu[1, 1] += (V[:, itr, i][:, None]
+                          * self._pbasisdyy[itr](x[0], x[1]))
 
         # dxy = dyx
         ddu[1, 0] = ddu[0, 1]
 
-        return u, du, ddu
+        return DiscreteField(f=u, df=du, ddf=ddu)
 
     def _pbasis_create_xy(self, i, j, dx=0, dy=0):
         cx = 1
@@ -111,9 +110,9 @@ class ElementH2(Element):
                 v[itr] = mesh.p[:, mesh.t[itr, tind]]
 
             # edge midpoints
-            e[0] = 0.5 * (v[0] + v[1])
-            e[1] = 0.5 * (v[1] + v[2])
-            e[2] = 0.5 * (v[0] + v[2])
+            e[0] = .5 * (v[0] + v[1])
+            e[1] = .5 * (v[1] + v[2])
+            e[2] = .5 * (v[0] + v[2])
 
             # normal vectors
             n[0] = v[0] - v[1]

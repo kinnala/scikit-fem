@@ -63,7 +63,7 @@ class ConvergenceQ1(unittest.TestCase):
                         msg='observed H1 rate: {}'.format(rateH1))
 
     def compute_error(self, m, basis, U):
-        uh, duh = basis.interpolate(U)
+        uh, duh, *_ = basis.interpolate(U)
         dx = basis.dx
         x = basis.global_coordinates()
 
@@ -80,7 +80,7 @@ class ConvergenceQ1(unittest.TestCase):
             else:
                 raise Exception("The dimension not supported")
 
-        L2 = np.sqrt(np.sum(np.sum((uh - u(x)) ** 2 * dx, axis=1)))
+        L2 = np.sqrt(np.sum(np.sum((uh - u(x.f)) ** 2 * dx, axis=1)))
 
         def ux(y):
             if y.shape[0] == 1:
@@ -95,7 +95,7 @@ class ConvergenceQ1(unittest.TestCase):
             else:
                 raise Exception("The dimension not supported")
 
-        if x.shape[0] >= 2:
+        if m.dim() >= 2:
             def uy(y):
                 if y.shape[0] == 2:
                     return np.pi * (np.sin(np.pi * y[0]) *
@@ -107,19 +107,19 @@ class ConvergenceQ1(unittest.TestCase):
                 else:
                     raise Exception("The dimension not supported")
 
-        if x.shape[0] == 3:
+        if m.dim() == 3:
             def uz(y):
                 return np.pi * np.sin(np.pi * y[0]) * np.sin(np.pi * y[1]) * np.cos(np.pi * y[2])
 
-        if x.shape[0] == 3:
-            H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x)) ** 2 +
-                                        (duh[1] - uy(x)) ** 2 +
-                                        (duh[2] - uz(x)) ** 2) * dx, axis=1)))
-        elif x.shape[0] == 2:
-            H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x)) ** 2 +
-                                        (duh[1] - uy(x)) ** 2) * dx, axis=1)))
+        if m.dim() == 3:
+            H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x.f)) ** 2 +
+                                        (duh[1] - uy(x.f)) ** 2 +
+                                        (duh[2] - uz(x.f)) ** 2) * dx, axis=1)))
+        elif m.dim() == 2:
+            H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x.f)) ** 2 +
+                                        (duh[1] - uy(x.f)) ** 2) * dx, axis=1)))
         else:
-            H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x)) ** 2) * dx, axis=1)))
+            H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x.f)) ** 2) * dx, axis=1)))
 
         return L2, H1
 
@@ -318,9 +318,9 @@ class TetP2Test(unittest.TestCase):
         self.assertLess(pfit[0], self.limits[1])
 
     def compute_error(self, m, basis, U):
-        uh, duh = basis.interpolate(U)
+        uh, duh, *_ = basis.interpolate(U)
         dx = basis.dx
-        x = basis.global_coordinates()
+        x = basis.global_coordinates().f
 
         def u(x):
             return 1 + x[0] - x[0] ** 2 * x[1] ** 2 + x[0] * x[1] * x[2] ** 3

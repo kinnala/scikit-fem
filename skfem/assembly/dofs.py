@@ -13,12 +13,18 @@ class Dofs(NamedTuple):
     interior: Dict[str, ndarray] = {}
 
     def all(self, key: Optional[str] = None):
-        """Return an array consisting of all dofs.
+        """Return an array consisting of all degrees-of-freedom.
 
         Parameters
         ----------
         key
-            Optionally, return all dofs corresponding to a specific key.
+            Optionally, return all degrees-of-freedom corresponding to a
+            specific 'key'.
+
+        Returns
+        -------
+        ndarray
+            A list of degree-of-freedom indices.
 
         """
 

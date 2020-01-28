@@ -1,16 +1,49 @@
 """Helper functions for defining forms."""
 
+from typing import Union
 import numpy as np
+from numpy import ndarray
+from skfem.element import DiscreteField
 
 
-def div(dw):
-    """Divergence of vector."""
-    return np.einsum('ii...', dw)
+FieldOrArray = Union[DiscreteField, ndarray]
 
 
-def ddot(A, B):
+def grad(u: DiscreteField):
+    """Gradient."""
+    return u[1]
+
+
+def sym_grad(u: DiscreteField):
+    """Symmetric gradient."""
+    du = grad(u)
+    return .5 * (du + transpose(du))
+
+
+def div(u: DiscreteField):
+    """Divergence."""
+    return np.einsum('ii...', grad(u))
+
+
+def dot(u: FieldOrArray, v: FieldOrArray):
+    """Dot product."""
+    u = u.f if isinstance(u, DiscreteField) else u
+    v = v.f if isinstance(v, DiscreteField) else v
+    return np.einsum('i...,i...', u, v)
+
+
+def ddot(u: FieldOrArray, v: FieldOrArray):
     """Double dot product."""
-    return np.einsum('ij...,ij...', A, B)
+    u = u.f if isinstance(u, DiscreteField) else u
+    v = v.f if isinstance(v, DiscreteField) else v
+    return np.einsum('ij...,ij...', u, v)
+
+
+def prod(u: FieldOrArray, v: FieldOrArray):
+    """Tensor product."""
+    u = u.f if isinstance(u, DiscreteField) else u
+    v = v.f if isinstance(v, DiscreteField) else v
+    return np.einsum('i...,j...->ij...', u, v)
 
 
 def trace(T):
