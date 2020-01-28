@@ -6,7 +6,7 @@ import numpy as np
 from pathlib import Path
 
 m = MeshTet.load(Path(__file__).with_name("beams.msh"))
-e1 = ElementTetP1()
+e1 = ElementTetP2()
 e = ElementVectorH1(e1)
 
 ib = InteriorBasis(m, e)
