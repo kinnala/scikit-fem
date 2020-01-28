@@ -19,17 +19,13 @@ def bilinf(u, du, ddu, v, dv, ddv, w):
             np.array([[T[0, 0] + nu / (1. - nu) * trT, T[0, 1]],
                       [T[1, 0], T[1, 1] + nu / (1. - nu) * trT]])
 
-    def Eps(ddw):
-        return np.array([[ddw[0][0], ddw[0][1]],
-                         [ddw[1][0], ddw[1][1]]])
-
     def ddot(T1, T2):
         return (T1[0, 0] * T2[0, 0] +
                 T1[0, 1] * T2[0, 1] +
                 T1[1, 0] * T2[1, 0] +
                 T1[1, 1] * T2[1, 1])
 
-    return d**3 / 12.0 * ddot(C(Eps(ddu)), Eps(ddv))
+    return d**3 / 12.0 * ddot(C(ddu), ddv)
 
 @linear_form
 def linf(v, dv, ddv, w):
