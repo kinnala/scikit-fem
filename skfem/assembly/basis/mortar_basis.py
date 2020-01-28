@@ -2,11 +2,12 @@ import numpy as np
 from numpy import ndarray
 
 from ...quadrature import get_quadrature
-from .basis import Basis
+from .facet_basis import FacetBasis
 from .interior_basis import InteriorBasis
+from ...element import DiscreteField
 
 
-class MortarBasis(Basis):
+class MortarBasis(FacetBasis):
     """Global basis functions at integration points on the mortar boundary."""
 
     def __init__(self,
@@ -31,7 +32,7 @@ class MortarBasis(Basis):
             integration orders on both sides of the mortar boundary.
 
         """
-        super(MortarBasis, self).__init__(mesh, elem, mapping, intorder)
+        super(FacetBasis, self).__init__(mesh, elem, mapping, intorder)
 
         self.X, self.W = get_quadrature(self.brefdom, self.intorder)
 
@@ -49,6 +50,7 @@ class MortarBasis(Basis):
         self.normals = np.repeat(self.mapping.normals[:, :, None],
                                  len(self.W),
                                  axis=2)
+        self.normals = DiscreteField(self.normals)
 
         self.basis = [self.elem.gbasis(self.mapping, Y, j, self.tind)
                       for j in range(self.Nbfun)]
@@ -58,19 +60,3 @@ class MortarBasis(Basis):
             np.tile(self.W, (self.nelems, 1))
 
         self.element_dofs = self.element_dofs[:, self.tind]
-
-    def default_parameters(self):
-        """Return default parameters for `~skfem.assembly.asm`."""
-        return {'x': self.global_coordinates(),
-                'h': self.mesh_parameters(),
-                'n': self.normals}
-
-    def global_coordinates(self) -> ndarray:
-        return self.mapping.G(self.X)
-
-    def mesh_parameters(self) -> ndarray:
-        if self.mesh.dim() == 1:
-            return np.array([0.0])
-        else:
-            return (np.abs(self.mapping.detDG(self.X, find=self.find))
-                    ** (1.0 / (self.mesh.dim() - 1)))

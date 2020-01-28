@@ -209,5 +209,37 @@ class NormalVectorTestHex(NormalVectorTestTri):
     intorder = 3
 
 
+class EvaluateFunctional(unittest.TestCase):
+
+    def runTest(self):
+        m = MeshQuad()
+        m.refine(3)
+        e = ElementQuad1()
+        basis = InteriorBasis(m, e)
+
+        @functional
+        def x_squared(w):
+            return w.x[0] ** 2
+
+        y = asm(x_squared, basis)
+
+        self.assertAlmostEqual(y, 1. / 3.)
+        self.assertEqual(len(x_squared.elemental(basis)),
+                         m.t.shape[1])
+
+
+class TestRefinterp(unittest.TestCase):
+
+    def runTest(self):
+        m = MeshQuad()
+        m.refine(2)
+        e = ElementQuad1()
+        basis = InteriorBasis(m, e)
+
+        M, X = basis.refinterp(m.p[0], 3)
+
+        self.assertEqual(M.p.shape[1], len(X))
+
+
 if __name__ == '__main__':
     unittest.main()

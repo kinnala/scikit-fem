@@ -5,6 +5,7 @@ import numpy as np
 from numpy import ndarray
 
 from skfem.assembly.dofs import Dofs
+from skfem.element.element import DiscreteField
 
 
 class Basis():
@@ -13,9 +14,9 @@ class Basis():
 
     Please see the following implementations:
 
-    - :class:`~skfem.assembly.InteriorBasis`, for basis functions inside elements
-    - :class:`~skfem.assembly.FacetBasis`, for basis functions on element
-      boundaries
+    - :class:`~skfem.assembly.InteriorBasis`, basis functions inside elements
+    - :class:`~skfem.assembly.FacetBasis`, basis functions on element boundaries
+    - :class:`~skfem.assembly.MortarBasis`, basis functions on mortar interfaces
 
     """
 
@@ -74,6 +75,8 @@ class Basis():
                 (element.edge_dofs, mesh.edges.shape[1]),
                 order='F') + offset
             offset = offset + element.edge_dofs * mesh.edges.shape[1]
+        else:
+            self.edge_dofs = np.empty((0,0))
 
         # facet dofs
         self.facet_dofs = np.reshape(
@@ -96,7 +99,7 @@ class Basis():
         for itr in range(mesh.t.shape[0]):
             self.element_dofs = np.vstack((
                 self.element_dofs,
-                self.nodal_dofs[:, mesh.t[itr, :]]
+                self.nodal_dofs[:, mesh.t[itr]]
             ))
 
         # edge dofs
@@ -104,7 +107,7 @@ class Basis():
             for itr in range(mesh.t2e.shape[0]):
                 self.element_dofs = np.vstack((
                     self.element_dofs,
-                    self.edge_dofs[:, mesh.t2e[itr, :]]
+                    self.edge_dofs[:, mesh.t2e[itr]]
                 ))
 
         # facet dofs
@@ -112,7 +115,7 @@ class Basis():
             for itr in range(mesh.t2f.shape[0]):
                 self.element_dofs = np.vstack((
                     self.element_dofs,
-                    self.facet_dofs[:, mesh.t2f[itr, :]]
+                    self.facet_dofs[:, mesh.t2f[itr]]
                 ))
 
         # interior dofs
@@ -127,58 +130,29 @@ class Basis():
             D = tuple(D[0][key].all() for key in D[0])
         return np.setdiff1d(np.arange(self.N), np.concatenate(D))
 
-    def _expand_facets(self, facets):
-        """Transform a set of facets into facets, edges and points."""
-        p = np.unique(self.mesh.facets[:, facets].flatten())
-
-        class IndexSet(NamedTuple):
-            p: ndarray = None
-            t: ndarray = None
-            edges: ndarray = None
-            facets: ndarray = None
-
+    def _get_dofs(self, facets):
+        """Return :class:`skfem.assembly.Dofs` corresponding to a set of facets."""
+        nodal_ix = np.unique(self.mesh.facets[:, facets].flatten())
+        facet_ix = facets
         if self.mesh.dim() == 3:
-            edges = np.intersect1d(
+            edge_ix = np.intersect1d(
                 self.mesh.boundary_edges(),
                 np.unique(self.mesh.t2e[:, self.mesh.f2t[0, facets]].flatten()))
-            return IndexSet(p=p, edges=edges, facets=facets)
         else:
-            return IndexSet(p=p, facets=facets)
+            edge_ix = []
 
-    def _get_dofs(self, facets):
-        """Return global DOF numbers corresponding to a set of facets."""
-        ix = self._expand_facets(facets)
+        n_nodal = self.nodal_dofs.shape[0]
+        n_facet = self.facet_dofs.shape[0]
+        n_edge = self.edge_dofs.shape[0]
 
-        nodal_dofs = {}
-        facet_dofs = {}
-        edge_dofs = {}
-        interior_dofs = {}
-
-        offset = 0
-
-        if ix.p is not None:
-            for i in range(self.nodal_dofs.shape[0]):
-                nodal_dofs[self.dofnames[i]] = self.nodal_dofs[i, ix.p]
-            offset += self.nodal_dofs.shape[0]
-
-        if ix.facets is not None:
-            for i in range(self.facet_dofs.shape[0]):
-                facet_dofs[self.dofnames[i + offset]] =\
-                    self.facet_dofs[i, ix.facets]
-            offset += self.facet_dofs.shape[0]
-
-        if ix.edges is not None:
-            for i in range(self.edge_dofs.shape[0]):
-                edge_dofs[self.dofnames[i + offset]] =\
-                    self.edge_dofs[i, ix.edges]
-            offset += self.edge_dofs.shape[0]
-
-        if ix.t is not None:
-            for i in range(self.interior_dofs.shape[0]):
-                interior_dofs[self.dofnames[i + offset]] =\
-                    self.interior_dofs[i, ix.t]
-
-        return Dofs(nodal_dofs, facet_dofs, edge_dofs, interior_dofs)
+        return Dofs(
+            nodal = {self.dofnames[i]: self.nodal_dofs[i, nodal_ix]
+                     for i in range(n_nodal)},
+            facet = {self.dofnames[i + n_nodal]: self.facet_dofs[i, facet_ix]
+                     for i in range(n_facet)},
+            edge = {self.dofnames[i + n_nodal + n_facet]: self.edge_dofs[i, edge_ix]
+                     for i in range(n_edge)},
+        )
 
     def get_dofs(self, facets: Optional[Any] = None):
         """Return global DOF numbers corresponding to facets (e.g. boundaries).
@@ -228,39 +202,39 @@ class Basis():
 
         Returns
         -------
-        ndarray
-            Interpolated solution vector.
-        ndarray
-            Interpolated derivatives of the solution vector.
+        DiscreteField
+            The solution vector interpolated at quadrature points.
 
         """
-        nqp = len(self.W)
-        dim = self.mesh.dim()
+        if w.shape[0] != self.N:
+            raise ValueError("Input array has wrong size.")
 
-        if self.elem.order[0] == 0:
-            W = np.zeros((self.nelems, nqp))
-        elif self.elem.order[0] == 1:
-            W = np.zeros((dim, self.nelems, nqp))
-        else:
-            raise Exception("Interpolation not implemented "
-                            "for this Element.order.")
+        ref = self.basis[0]
+        field = []
 
-        for j in range(self.Nbfun):
-            jdofs = self.element_dofs[j, :]
-            W += w[jdofs][:, None] * self.basis[j][0]
+        def linear_combination(n):
+            out = 0. * ref[n].copy()
+            for i in range(self.Nbfun):
+                values = w[self.element_dofs[i]][:, None]
+                if len(ref[n].shape) == 2:
+                    out += values * self.basis[i][n]
+                elif len(ref[n].shape) == 3:
+                    for j in range(out.shape[0]):
+                        out[j, :, :] += values * self.basis[i][n][j]
+                elif len(ref[n].shape) == 4:
+                    for j in range(out.shape[0]):
+                        for k in range(out.shape[1]):
+                            out[j, k, :, :] += \
+                                values * self.basis[i][n][j, k]
+            return out
 
-        if self.elem.order[1] == 1:
-            dW = np.zeros((dim, self.nelems, nqp))
-        elif self.elem.order[1] == 2:
-            dW = np.zeros((dim, dim, self.nelems, nqp))
-        else:
-            raise Exception("Interpolation not implemented "
-                            "for this Element.order.")
-        for j in range(self.Nbfun):
-            jdofs = self.element_dofs[j, :]
-            for a in range(dim):
-                dW[a, :, :] += w[jdofs][:, None] * self.basis[j][1][a]
-        return W, dW
+        for n in range(len(ref)):
+            if ref[n] is not None:
+                field.append(linear_combination(n))
+            else:
+                field.append(None)
+
+        return DiscreteField(*field)
 
     def zero_w(self) -> ndarray:
         """Return a zero array with correct dimensions

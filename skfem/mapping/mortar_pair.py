@@ -141,10 +141,10 @@ class MortarPair(NamedTuple):
         new_map2 = mesh2.mapping()
         map_m1 = m1.mapping()
         map_m2 = m2.mapping()
-        new_map1.G = lambda X: map_mesh1.G(map_m1.invF(map_super.F(X), tind=ix1),
-                                             find=boundary1[sort_boundary1][ix1])
-        new_map2.G = lambda X: map_mesh2.G(map_m2.invF(map_super.F(X), tind=ix2),
-                                             find=boundary2[sort_boundary2][ix2])
+        new_map1.G = lambda X, **_: map_mesh1.G(map_m1.invF(map_super.F(X), tind=ix1),
+                                                find=boundary1[sort_boundary1][ix1])
+        new_map2.G = lambda X, **_: map_mesh2.G(map_m2.invF(map_super.F(X), tind=ix2),
+                                                find=boundary2[sort_boundary2][ix2])
 
         # these are used by :class:`skfem.assembly.basis.MortarBasis`
         new_map1.find = boundary1[sort_boundary1][ix1]
@@ -155,9 +155,9 @@ class MortarPair(NamedTuple):
         # method for calculating the lengths of the segments ('detDG')
         segments1 = new_map1.G(np.array([[0.0, 1.0]]))
         segments2 = new_map2.G(np.array([[0.0, 1.0]]))
-        new_map1.detDG = lambda *_,**__: np.sqrt(np.diff(segments1[0], axis=1)**2 +
-                                                   np.diff(segments1[1], axis=1)**2)
-        new_map2.detDG = lambda *_,**__: np.sqrt(np.diff(segments2[0], axis=1)**2 +
-                                                   np.diff(segments2[1], axis=1)**2)
+        new_map1.detDG = lambda *_, **__: np.sqrt(np.diff(segments1[0], axis=1)**2 +
+                                                  np.diff(segments1[1], axis=1)**2)
+        new_map2.detDG = lambda *_, **__: np.sqrt(np.diff(segments2[0], axis=1)**2 +
+                                                  np.diff(segments2[1], axis=1)**2)
 
         return cls(mapping1=new_map1, mapping2=new_map2)

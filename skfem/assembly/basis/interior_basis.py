@@ -3,7 +3,7 @@ from typing import Optional, Callable, Tuple
 import numpy as np
 from numpy import ndarray
 
-from skfem.element import Element
+from skfem.element import Element, DiscreteField
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh
 from skfem.quadrature import get_quadrature
@@ -11,37 +11,7 @@ from .basis import Basis
 
 
 class InteriorBasis(Basis):
-    """Global basis functions evaluated at integration points inside the
-    elements.
-
-    Attributes
-    ----------
-    phi : ndarray
-        Global basis functions at global quadrature points.
-    dphi : ndarray
-        Global basis function derivatives at global quadrature points.
-    X : ndarray
-        Local quadrature points (Ndim x Nqp).
-    W : ndarray
-        Local quadrature weights (Nqp).
-    nelems : int
-    dx : ndarray
-        Can be used in computing global integrals elementwise (Nelems
-        x Nqp).  For example, np.sum(u**2*dx, axis=1) where u is also
-        a numpy array of size Nelems x Nqp.
-    mapping : skfem.mapping.Mapping
-    elem : skfem.element.Element
-    Nbfun : int
-        Number of basis functions.
-    intorder : int
-        Integration order.
-    dim : int
-        Dimension of the problem.
-    nt : int
-        Number of triangles.
-    mesh : skfem.mesh.Mesh
-    refdom : string
-    brefdom : string
+    """Global basis functions evaluated at global quadrature points.
 
     Examples
     --------
@@ -100,8 +70,8 @@ class InteriorBasis(Basis):
             self.nelems = len(elements)
             self.tind = elements
 
-        self.dx = np.abs(self.mapping.detDF(self.X, tind=elements)) *\
-            np.tile(self.W, (self.nelems, 1))
+        self.dx = (np.abs(self.mapping.detDF(self.X, tind=elements))
+                   * np.tile(self.W, (self.nelems, 1)))
 
         self.element_dofs = self.element_dofs[:, self.tind]
 
@@ -110,11 +80,12 @@ class InteriorBasis(Basis):
         return {'x': self.global_coordinates(),
                 'h': self.mesh_parameters()}
 
-    def global_coordinates(self) -> ndarray:
-        return self.mapping.F(self.X, tind=self.tind)
+    def global_coordinates(self) -> DiscreteField:
+        return DiscreteField(self.mapping.F(self.X, tind=self.tind))
 
-    def mesh_parameters(self) -> ndarray:
-        return np.abs(self.mapping.detDF(self.X, self.tind)) ** (1.0 / self.mesh.dim())
+    def mesh_parameters(self) -> DiscreteField:
+        return DiscreteField(np.abs(self.mapping.detDF(self.X, self.tind))
+                             ** (1. / self.mesh.dim()))
 
     def refinterp(self,
                   interp: ndarray,
@@ -131,16 +102,16 @@ class InteriorBasis(Basis):
 
         # interpolate some previous discrete function at the vertices
         # of the refined mesh
-        w = 0.0*x[0]
-
+        w = 0. * x[0]
         for j in range(self.Nbfun):
             basis = self.elem.gbasis(self.mapping, X, j)
-            w += interp[self.element_dofs[j, :]][:, None]*basis[0]
+            w += interp[self.element_dofs[j]][:, None] * basis[0]
 
+        # create connectivity for the new mesh
         nt = self.nelems
         t = np.tile(m.t, (1, nt))
         dt = np.max(t)
-        t += (dt + 1) * (np.tile(np.arange(nt), (m.t.shape[0]*m.t.shape[1], 1))
+        t += (dt + 1) * (np.tile(np.arange(nt), (m.t.shape[0] * m.t.shape[1], 1))
                          .flatten('F')
                          .reshape((-1, m.t.shape[0])).T)
 

@@ -1,30 +1,43 @@
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Dict
 
 from numpy import ndarray
 import numpy as np
 
-from .form import Form
-from .form_parameters import FormParameters
+from .form import Form, FormDict
 from ..basis import Basis
+from ...element import DiscreteField
 
 
 class Functional(Form):
 
-    def kernel(self,
-               w: FormParameters,
-               dx: ndarray) -> ndarray:
+    def _kernel(self,
+                w: Dict[str, DiscreteField],
+                dx: ndarray) -> ndarray:
         return np.sum(self.form(w) * dx, axis=1)
 
     def elemental(self,
-                  vbasis: Basis,
-                  w: Optional[Any] = (None, None, None)) -> ndarray:
-        return self.kernel(self.parameters(w, vbasis), vbasis.dx)
+                  v: Basis,
+                  w: Dict[str, DiscreteField] = {}) -> ndarray:
+        w = FormDict({**v.default_parameters(), **self.dictify(w)})
+        return self._kernel(w, v.dx)
 
     def assemble(self,
-                 vbasis: Basis,
-                 w: Optional[Any] = (None, None, None)) -> float:
-        return sum(self.elemental(vbasis, w))
+                 v: Basis,
+                 w: Dict[str, DiscreteField] = {}) -> float:
+        return sum(self.elemental(v, w))
 
 
 def functional(form: Callable) -> Functional:
-    return Functional(form)
+
+    # for backwards compatibility
+    from .form_parameters import FormParameters
+
+    class ClassicFunctional(Functional):
+
+        def _kernel(self, w, dx):
+            W = {k: w[k].f for k in w}
+            if 'w' in w:
+                W['dw'] = w['w'].df
+            return np.sum(self.form(w=FormParameters(**W)) * dx, axis=1)
+
+    return ClassicFunctional(form)

@@ -30,3 +30,4 @@ class ElementTriArgyris(ElementH2):
             return du[0](*e[1]) * n[1, 0] + du[1](*e[1]) * n[1, 1]
         elif i == 20:
             return du[0](*e[2]) * n[2, 0] + du[1](*e[2]) * n[2, 1]
+        self._index_error()

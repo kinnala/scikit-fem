@@ -38,13 +38,11 @@ def linf(v, dv, ddv, w):
 K = asm(bilinf, ib)
 f = asm(linf, ib)
 
-boundary = {
+dofs = ib.get_dofs({
     'left':  m.facets_satisfying(lambda x: x[0] == 0),
     'right': m.facets_satisfying(lambda x: x[0] == 1),
     'top':   m.facets_satisfying(lambda x: x[1] == 1),
-}
-
-dofs = ib.get_dofs(boundary)
+})
 
 D = np.concatenate((
     dofs['left'].nodal['u'],
@@ -53,12 +51,12 @@ D = np.concatenate((
     dofs['top'].nodal['u'],
 ))
 
-x = solve(*condense(K, f, D=D, expand=True))
+x = solve(*condense(K, f, D=D))
 
 if __name__ == "__main__":
     from os.path import splitext
     from sys import argv
     from skfem.visuals.matplotlib import *
     ax = draw(m)
-    plot(ib, x, ax=ax, shading='gouraud', colorbar=True, Nref=3)
+    plot(ib, x, ax=ax, shading='gouraud', colorbar=True, Nrefs=2)
     savefig(splitext(argv[0])[0] + '_solution.png')
