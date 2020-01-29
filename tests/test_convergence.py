@@ -13,8 +13,8 @@ class ConvergenceQ1(unittest.TestCase):
 
     def runTest(self):
 
-        @linear_form
-        def load(v, dv, w):
+        @LinearForm
+        def load(v, w):
             x = w.x
             if x.shape[0] == 1:
                 return (np.sin(np.pi * x[0]) * (np.pi ** 2) * v)
@@ -61,6 +61,8 @@ class ConvergenceQ1(unittest.TestCase):
         self.assertLess(np.abs(rateH1 - self.rateH1),
                         self.eps,
                         msg='observed H1 rate: {}'.format(rateH1))
+        self.assertLess(H1s[-1], 0.3)
+        self.assertLess(L2s[-1], 0.008)
 
     def compute_error(self, m, basis, U):
         uh, duh, *_ = basis.interpolate(U)
@@ -109,7 +111,9 @@ class ConvergenceQ1(unittest.TestCase):
 
         if m.dim() == 3:
             def uz(y):
-                return np.pi * np.sin(np.pi * y[0]) * np.sin(np.pi * y[1]) * np.cos(np.pi * y[2])
+                return np.pi * (np.sin(np.pi * y[0]) *
+                                np.sin(np.pi * y[1]) *
+                                np.cos(np.pi * y[2]))
 
         if m.dim() == 3:
             H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x.f)) ** 2 +
@@ -155,11 +159,14 @@ class ConvergenceQ2(ConvergenceQ1):
 
 class ConvergenceQuadS2(ConvergenceQ2):
     rateH1 = 2.                 # no Q2 superconvergence here
+
     def create_basis(self, m):
         e = ElementQuadS2()
         return InteriorBasis(m, e)
-    
+
+
 class ConvergenceTriP1(ConvergenceQ1):
+
     def create_basis(self, m):
         e = ElementTriP1()
         map = MappingAffine(m)
@@ -226,6 +233,7 @@ class ConvergenceTetP2(ConvergenceTetP1):
 
 
 class ConvergenceLineP1(ConvergenceQ1):
+
     def create_basis(self, m):
         e = ElementLineP1()
         return InteriorBasis(m, e)
@@ -248,7 +256,7 @@ class ConvergenceLineP2(ConvergenceQ1):
         self.mesh.refine(3)
 
 
-class TetP2Test(unittest.TestCase):
+class FacetConvergenceTetP2(unittest.TestCase):
     """Test second order tetrahedral element and facet
     assembly."""
     case = (MeshTet, ElementTetP2)
@@ -256,19 +264,21 @@ class TetP2Test(unittest.TestCase):
     preref = 1
 
     def runTest(self):
-        @bilinear_form
-        def dudv(u, du, v, dv, w):
+
+        @BilinearForm
+        def dudv(u, v, w):
+            du, dv = u[1], v[1]
             return sum(du * dv)
 
-        @bilinear_form
-        def uv(u, du, v, dv, w):
+        @BilinearForm
+        def uv(u, v, w):
             return u * v
 
         def F(x, y, z):
             return 2 * x ** 2 + 2 * y ** 2 - 6 * x * y * z
 
-        @linear_form
-        def fv(v, dv, w):
+        @LinearForm
+        def fv(v, w):
             return F(*w.x) * v
 
         def G(x, y, z):
@@ -284,8 +294,8 @@ class TetP2Test(unittest.TestCase):
                     circa(z, 1) * (1 + x + 4 * x * y - x ** 2 * y ** 2) +
                     circa(z, 0) * (1 + x - x ** 2 * y ** 2))
 
-        @linear_form
-        def gv(v, dv, w):
+        @LinearForm
+        def gv(v, w):
             return G(*w.x) * v
 
         hs = np.array([])
@@ -316,6 +326,8 @@ class TetP2Test(unittest.TestCase):
                           np.log10(np.sqrt(L2err ** 2 + H1err ** 2)), 1)
         self.assertGreater(pfit[0], self.limits[0])
         self.assertLess(pfit[0], self.limits[1])
+        self.assertLess(H1err[-1], 0.08)
+        self.assertLess(L2err[-1], 0.005)
 
     def compute_error(self, m, basis, U):
         uh, duh, *_ = basis.interpolate(U)
@@ -349,8 +361,14 @@ class TetP2Test(unittest.TestCase):
         return L2, H1
 
 
-class TestHexFacet(TetP2Test):
+class FacetConvergenceHex1(FacetConvergenceTetP2):
     case = (MeshHex, ElementHex1)
+    limits = (0.9, 1.1)
+    preref = 2
+
+
+class FacetConvergenceTetP1(FacetConvergenceTetP2):
+    case = (MeshTet, ElementTetP1)
     limits = (0.9, 1.1)
     preref = 2
 

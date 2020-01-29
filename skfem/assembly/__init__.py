@@ -20,7 +20,7 @@ from scipy.sparse import csr_matrix
 
 from .basis import Basis, InteriorBasis, FacetBasis, MortarBasis
 from .dofs import Dofs
-from .form import Form, BilinearForm, LinearForm,\
+from .form import Form, BilinearForm, LinearForm, Functional,\
     bilinear_form, linear_form, functional
 
 

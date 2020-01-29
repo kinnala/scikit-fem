@@ -13,12 +13,19 @@ def grad(u: DiscreteField):
     """Gradient."""
     return u[1]
 
+d = grad
+
 
 def sym_grad(u: DiscreteField):
     """Symmetric gradient."""
-    du = grad(u)
-    return .5 * (du + transpose(du))
+    return .5 * (u[1] + transpose(u[1]))
 
+
+def hess(u: DiscreteField):
+    """Hessian."""
+    return u[2]
+
+dd = hess
 
 def div(u: DiscreteField):
     """Divergence."""
