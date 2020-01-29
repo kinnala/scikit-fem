@@ -5,6 +5,7 @@ from skfem.assembly import *
 from skfem.mapping import *
 from skfem.element import *
 from skfem.utils import *
+from skfem.version import __version__
 
 
 __all__ = ['Mesh',
