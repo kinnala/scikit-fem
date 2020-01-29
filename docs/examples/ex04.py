@@ -82,19 +82,19 @@ for i in range(2):
 
         @BilinearForm
         def bilin_mortar(u, v, w):
-            ju = (-1.) ** i * dot(u, w.n)
-            jv = (-1.) ** j * dot(v, w.n)
+            ju = (-1.) ** j * dot(u, w.n)
+            jv = (-1.) ** i * dot(v, w.n)
             nxn = prod(w.n, w.n)
             mu = .5 * ddot(nxn, C(sym_grad(u)))
             mv = .5 * ddot(nxn, C(sym_grad(v)))
             return ((1. / (alpha * w.h) * ju * jv - mu * jv - mv * ju)
                     * (np.abs(w.x[1]) <= limit))
 
-        K[j][i] += asm(bilin_mortar, mb[i], mb[j])
+        K[i][j] += asm(bilin_mortar, mb[j], mb[i])
 
     @LinearForm
     def lin_mortar(v, w):
-        jv = (-1.) ** j * dot(v, w.n)
+        jv = (-1.) ** i * dot(v, w.n)
         mv = .5 * ddot(prod(w.n, w.n), C(sym_grad(v)))
         return ((1. / (alpha * w.h) * gap(w.x) * jv - gap(w.x) * mv)
                 * (np.abs(w.x[1]) <= limit))
