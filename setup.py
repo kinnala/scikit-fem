@@ -3,14 +3,15 @@ from codecs import open
 from os import path
 
 here = path.abspath(path.dirname(__file__))
+exec(open(path.join(here, 'skfem/version.py')).read())
 
 setup(
-    name = 'scikit-fem',
-    version = '0.4.1',
-    description = 'Simple finite element assemblers',
-    long_description = 'Easy to use finite element assemblers and related tools. See Github page for more information and examples.',
-    url = 'https://github.com/kinnala/scikit-fem',
-    author = 'Tom Gustafsson',
+    name='scikit-fem',
+    version=__version__,
+    description='Simple finite element assemblers',
+    long_description='Easy to use finite element assemblers and related tools. See Github page for more information and examples.',
+    url='https://github.com/kinnala/scikit-fem',
+    author='Tom Gustafsson',
     # https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         'Development Status :: 3 - Alpha',
@@ -20,9 +21,9 @@ setup(
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Mathematics',
     ],
-    packages = find_packages(exclude=['tests']),
-    install_requires = ['numpy', 'scipy', 'meshio'],
-    extras_require = {
+    packages=find_packages(exclude=['tests']),
+    install_requires=['numpy', 'scipy', 'meshio'],
+    extras_require={
         'full': ['matplotlib'],
     },
     test_suite='tests',
