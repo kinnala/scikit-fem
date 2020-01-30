@@ -4,7 +4,7 @@ from skfem.models.general import divergence, rot
 
 import numpy as np
 from scipy.sparse import csr_matrix
-from scipy.sparse.linalg import cg, LinearOperator, minres
+from scipy.sparse.linalg import LinearOperator, minres
 
 mesh = MeshQuad.init_tensor(*(np.linspace(-.5, .5, 2**6),)*2)
 
