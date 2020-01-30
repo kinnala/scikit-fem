@@ -75,7 +75,7 @@ if __name__ == '__main__':
     from skfem.visuals.matplotlib import plot, draw
 
     print(psi0)
-    
+
     name = splitext(argv[0])[0]
     plot(mesh, pressure, colorbar=True).get_figure().savefig(
         f'{name}_pressure.png')
