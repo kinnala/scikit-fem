@@ -10,6 +10,8 @@ class ConvergenceRaviartThomas(unittest.TestCase):
     rateL2 = 1.0
     rateHdiv = 1.0
     eps = 0.1
+    Hdivbound = 0.04
+    L2bound = 0.01
 
     def runTest(self):
 
@@ -76,8 +78,8 @@ class ConvergenceRaviartThomas(unittest.TestCase):
         self.assertLess(np.abs(rateHdiv - self.rateHdiv),
                         self.eps,
                         msg='observed Hdiv rate: {}'.format(rateHdiv))
-        self.assertLess(Hdivs[-1], 0.04)
-        self.assertLess(L2s[-1], 0.01)
+        self.assertLess(Hdivs[-1], self.Hdivbound)
+        self.assertLess(L2s[-1], self.L2bound)
 
     def compute_L2(self, m, basis, U):
         uh, *_ = basis.interpolate(U)
@@ -107,11 +109,19 @@ class ConvergenceRaviartThomas(unittest.TestCase):
             elif y.shape[0] == 2:
                 return (np.pi * np.cos(np.pi * y[0]) * np.sin(np.pi * y[1]) +
                         np.pi * np.sin(np.pi * y[0]) * np.cos(np.pi * y[1]))
-            raise Exception("!")
+            return np.pi * (np.cos(np.pi * y[0]) *
+                            np.sin(np.pi * y[1]) *
+                            np.sin(np.pi * y[2]) +
+                            np.sin(np.pi * y[0]) *
+                            np.cos(np.pi * y[1]) *
+                            np.sin(np.pi * y[2]) +
+                            np.sin(np.pi * y[0]) *
+                            np.sin(np.pi * y[1]) *
+                            np.cos(np.pi * y[2]))
 
-        return np.sqrt(np.sum(np.sum(((uh[0] + uh[1] - divu(x.f)) ** 2) * dx, axis=1)))
+        divuh = sum(uh)
 
-        return np.sqrt(np.sum(np.sum((uh - u(x.f)) ** 2 * dx, axis=1)))
+        return np.sqrt(np.sum(np.sum(((divuh - divu(x.f)) ** 2) * dx, axis=1)))
 
     def create_basis(self, m):
         e = ElementTriRT0()
@@ -122,3 +132,21 @@ class ConvergenceRaviartThomas(unittest.TestCase):
     def setUp(self):
         self.mesh = MeshTri()
         self.mesh.refine(4)
+
+
+class ConvergenceRaviartThomas3D(ConvergenceRaviartThomas):
+    rateL2 = .5
+    rateHdiv = 1.0
+    eps = 0.1
+    Hdivbound = 0.3
+    L2bound = 0.05
+
+    def create_basis(self, m):
+        e = ElementTetRT0()
+        e0 = ElementTetP0()
+        return (InteriorBasis(m, e, intorder=2),
+                InteriorBasis(m, e0, intorder=2))
+
+    def setUp(self):
+        self.mesh = MeshTet()
+        self.mesh.refine(1)
