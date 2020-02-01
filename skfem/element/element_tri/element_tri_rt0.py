@@ -15,14 +15,14 @@ class ElementTriRT0(ElementHdiv):
         x, y = X
 
         if i == 0:
-            phi = np.array([x, y - 1])
-            dphi = 2 + 0 * x
+            phi = np.array([x, y - 1.])
+            dphi = 2. + 0. * x
         elif i == 1:
             phi = np.array([x, y])
-            dphi = 2 + 0 * x
+            dphi = 2. + 0. * x
         elif i == 2:
-            phi = np.array([x - 1, y])
-            dphi = 2 + 0 * x
+            phi = np.array([x - 1., y])
+            dphi = 2. + 0. * x
         else:
             self._index_error()
 

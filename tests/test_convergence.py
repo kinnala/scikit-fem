@@ -183,8 +183,14 @@ class ConvergenceTriP2(ConvergenceTriP1):
 
     def create_basis(self, m):
         e = ElementTriP2()
-        map = MappingAffine(m)
-        return InteriorBasis(m, e, map, 2)
+        return InteriorBasis(m, e)
+
+
+class ConvergenceTriMini(ConvergenceTriP1):
+
+    def create_basis(self, m):
+        e = ElementTriMini()
+        return InteriorBasis(m, e)
 
 
 class ConvergenceHex1(ConvergenceQ1):

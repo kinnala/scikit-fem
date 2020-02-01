@@ -10,4 +10,4 @@ class ElementTriP0(ElementH1):
     doflocs = np.array([[.5, .5]])
 
     def lbasis(self, X, i):
-        return 1 + 0 * X[0], 0 * X
+        return 1. + 0. * X[0], 0. * X
