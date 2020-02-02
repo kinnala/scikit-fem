@@ -209,23 +209,23 @@ class Basis():
         if w.shape[0] != self.N:
             raise ValueError("Input array has wrong size.")
 
-        ref = self.basis[0]
+        ref = self.basis[0][0]
         field = []
 
-        def linear_combination(n):
+        def linear_combination(n): # TODO make work with composite elements
             out = 0. * ref[n].copy()
             for i in range(self.Nbfun):
                 values = w[self.element_dofs[i]][:, None]
                 if len(ref[n].shape) == 2:
-                    out += values * self.basis[i][n]
+                    out += values * self.basis[i][0][n]
                 elif len(ref[n].shape) == 3:
                     for j in range(out.shape[0]):
-                        out[j, :, :] += values * self.basis[i][n][j]
+                        out[j, :, :] += values * self.basis[i][0][n][j]
                 elif len(ref[n].shape) == 4:
                     for j in range(out.shape[0]):
                         for k in range(out.shape[1]):
                             out[j, k, :, :] += \
-                                values * self.basis[i][n][j, k]
+                                values * self.basis[i][0][n][j, k]
             return out
 
         for n in range(len(ref)):

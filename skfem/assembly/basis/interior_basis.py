@@ -137,7 +137,7 @@ class InteriorBasis(Basis):
             pts = self.mapping.invF(x[:, :, np.newaxis], tind=tris)
             w = np.zeros(x.shape[1])
             for k in range(self.Nbfun):
-                phi = self.elem.gbasis(self.mapping, pts, k, tind=tris)
+                phi = self.elem.gbasis(self.mapping, pts, k, tind=tris)[0]
                 w += y[self.element_dofs[k, tris]] * phi[0].flatten()
             return w
 

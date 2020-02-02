@@ -37,7 +37,7 @@ class LinearForm(Form):
         return self._assemble_numpy_vector(data, rows, cols, (v.N, 1))
 
     def _kernel(self, v, w, dx):
-        return np.sum(self.form(v, w) * dx, axis=1)
+        return np.sum(self.form(*v, w) * dx, axis=1)
 
 
 def linear_form(form: Callable) -> LinearForm:
@@ -48,6 +48,7 @@ def linear_form(form: Callable) -> LinearForm:
     class ClassicLinearForm(LinearForm):
 
         def _kernel(self, v, w, dx):
+            v = v[0]
             W = {k: w[k].f for k in w}
             if 'w' in w:
                 W['dw'] = w['w'].df

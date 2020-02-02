@@ -43,7 +43,7 @@ class ElementH2(Element):
         # dxy = dyx
         ddu[1, 0] = ddu[0, 1]
 
-        return DiscreteField(f=u, df=du, ddf=ddu)
+        return (DiscreteField(f=u, df=du, ddf=ddu),)
 
     def _pbasis_create_xy(self, i, j, dx=0, dy=0):
         cx = 1

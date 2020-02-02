@@ -1,6 +1,7 @@
 from typing import Optional, Tuple, Union,\
     List, NamedTuple
 
+import numpy as np
 from numpy import ndarray
 
 
@@ -18,6 +19,16 @@ class DiscreteField(NamedTuple):
         if isinstance(other, DiscreteField):
             return self.f * other.f
         return self.f * other
+
+    def split(self):
+        """Split all components based on their first dimension."""
+        return [DiscreteField(*[f[i] for f in self if f is not None])
+                for i in range(self.f.shape[0])]
+
+    def zeros_like(self):
+        return DiscreteField(*[0. * field.copy()
+                               for field in self
+                               if field is not None])
 
     __rmul__ = __mul__
 
@@ -101,3 +112,56 @@ class Element():
     @classmethod
     def _index_error(cls):
         raise ValueError("Index larger than the number of basis functions.")
+
+    def _bfun_counts(self, mapping):
+        return (self.nodal_dofs * mapping.mesh.t.shape[0],
+                self.edge_dofs * mapping.mesh.t2e.shape[0]\
+                if hasattr(mapping.mesh, 'edges') else 0,
+                self.facet_dofs * mapping.mesh.t2f.shape[0]\
+                if hasattr(mapping.mesh, 'facets') else 0,
+                self.interior_dofs)
+
+    def __mul__(self, other):
+
+        class ElementComposite(Element):
+
+            def _deduce_bfun(self, mapping, i):
+                e1 = self.elems[0]._bfun_counts(mapping)
+                e2 = self.elems[1]._bfun_counts(mapping)
+                if i < e1[0]:
+                    return 0, i
+                elif i < e1[0] + e2[0]:
+                    return 1, i - e1[0]
+                elif i < e1[0] + e2[0] + e1[1]:
+                    return 0, i - e2[0]
+                elif i < e1[0] + e2[0] + e1[1] + e2[1]:
+                    return 1, i - e1[0] - e1[1]
+                elif i < e1[0] + e2[0] + e1[1] + e2[1] + e1[2]:
+                    return 0, i - e2[0] - e2[1]
+                elif i < e1[0] + e2[0] + e1[1] + e2[1] + e1[2] + e2[2]:
+                    return 1, i - e1[0] - e1[1] - e1[2]
+                elif i < e1[0] + e2[0] + e1[1] + e2[1] + e1[2] + e2[2] + e1[3]:
+                    return 0, i - e2[0] - e2[1] - e2[2]
+                return 1, i - e1[0] - e1[1] - e1[2] - e1[3]
+
+            def gbasis(self, mapping, X, i, **kwargs):
+                n, ind = self._deduce_bfun(mapping, i)
+                field = self.elems[n].gbasis(mapping, X, ind, **kwargs)[0]
+                if n == 0:
+                    Z = self.elems[1].gbasis(mapping, X, 0, **kwargs)[0].zeros_like()
+                    return (field, Z)
+                elif n == 1:
+                    Z = self.elems[0].gbasis(mapping, X, 0, **kwargs)[0].zeros_like()
+                    return (Z, field)
+
+        e = ElementComposite()
+        e.elems = [self, other]
+
+        e.nodal_dofs = self.nodal_dofs + other.nodal_dofs
+        e.edge_dofs = self.edge_dofs + other.edge_dofs
+        e.facet_dofs = self.facet_dofs + other.facet_dofs
+        e.interior_dofs = self.interior_dofs + other.interior_dofs
+
+        e.maxdeg = self.nodal_dofs + other.maxdeg
+
+        return e

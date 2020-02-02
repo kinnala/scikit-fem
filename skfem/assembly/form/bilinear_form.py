@@ -44,7 +44,7 @@ class BilinearForm(Form):
         return self._assemble_scipy_matrix(data, rows, cols, (v.N, u.N))
 
     def _kernel(self, u, v, w, dx):
-        return np.sum(self.form(u, v, w) * dx, axis=1)
+        return np.sum(self.form(*u, *v, w) * dx, axis=1)
 
 
 def bilinear_form(form: Callable) -> BilinearForm:
@@ -55,6 +55,8 @@ def bilinear_form(form: Callable) -> BilinearForm:
     class ClassicBilinearForm(BilinearForm):
 
         def _kernel(self, u, v, w, dx):
+            u = u[0]
+            v = v[0]
             W = {k: w[k].f for k in w}
             if 'w' in w:
                 W['dw'] = w['w'].df
