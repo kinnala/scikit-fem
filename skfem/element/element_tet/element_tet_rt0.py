@@ -9,20 +9,20 @@ class ElementTetRT0(ElementHdiv):
     dofnames = ['u^n']
 
     def lbasis(self, X, i):
-        x, y, z = X[0, :], X[1, :], X[2, :]
+        x, y, z = X
 
         if i == 0:
-            phi = np.array([x, y, z-1])
-            dphi = 3 + 0*x
+            phi = np.array([x, y, z - 1.])
+            dphi = 3. + 0. * x
         elif i == 1:
-            phi = np.array([x, y-1, z])
-            dphi = 3 + 0*x
+            phi = np.array([x, y - 1., z])
+            dphi = 3. + 0. * x
         elif i == 2:
-            phi = np.array([x-1, y, z])
-            dphi = 3 + 0*x
+            phi = np.array([x - 1., y, z])
+            dphi = 3. + 0. * x
         elif i == 3:
             phi = np.array([x, y, z])
-            dphi = 3 + 0*x
+            dphi = 3. + 0. * x
         else:
             self._index_error()
 
