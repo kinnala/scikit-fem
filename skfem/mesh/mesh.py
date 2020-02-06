@@ -244,7 +244,8 @@ class Mesh():
     def save(self,
              filename: str,
              point_data: Optional[Dict[str, ndarray]] = None,
-             cell_data: Optional[Dict[str, ndarray]] = None) -> None:
+             cell_data: Optional[Dict[str, ndarray]] = None,
+             **kwargs) -> None:
         """Export the mesh and fields using meshio.
 
         Parameters
@@ -273,7 +274,7 @@ class Mesh():
 
         cells = {self.meshio_type: self.t.T}
         mesh = meshio.Mesh(self.p.T, cells, point_data, cell_data)
-        meshio.write(filename, mesh)
+        meshio.write(filename, mesh, **kwargs)
 
     @classmethod
     def load(cls: Type[MeshType], filename: str) -> MeshType:
