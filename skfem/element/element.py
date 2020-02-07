@@ -126,12 +126,12 @@ class Element():
         4-tuple of basis function counts.
 
         """
-        return (self.nodal_dofs * mapping.mesh.t.shape[0],
-                self.edge_dofs * mapping.mesh.t2e.shape[0]\
-                if hasattr(mapping.mesh, 'edges') else 0,
-                self.facet_dofs * mapping.mesh.t2f.shape[0]\
-                if hasattr(mapping.mesh, 'facets') else 0,
-                self.interior_dofs)
+        return np.array([self.nodal_dofs * mapping.mesh.t.shape[0],
+                         self.edge_dofs * mapping.mesh.t2e.shape[0]\
+                         if hasattr(mapping.mesh, 'edges') else 0,
+                         self.facet_dofs * mapping.mesh.t2f.shape[0]\
+                         if hasattr(mapping.mesh, 'facets') else 0,
+                         self.interior_dofs])
 
     def __mul__(self, other):
 

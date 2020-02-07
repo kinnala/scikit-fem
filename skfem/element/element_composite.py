@@ -1,3 +1,5 @@
+import numpy as np
+
 from .element import Element
 
 
@@ -10,25 +12,39 @@ class ElementComposite(Element):
         self.facet_dofs = sum([e.facet_dofs for e in self.elems])
         self.interior_dofs = sum([e.interior_dofs for e in self.elems])
         self.maxdeg = sum([e.maxdeg for e in self.elems])
+        self.dofnames = [i + "^" + str(j + 1)
+                         for j in range(len(self.elems))
+                         for i in self.elems[j].dofnames]
 
     def _deduce_bfun(self, mapping, i):
-        e1 = self.elems[0]._bfun_counts(mapping)
-        e2 = self.elems[1]._bfun_counts(mapping)
-        if i < e1[0]:
-            return 0, i
-        elif i < e1[0] + e2[0]:
-            return 1, i - e1[0]
-        elif i < e1[0] + e2[0] + e1[1]:
-            return 0, i - e2[0]
-        elif i < e1[0] + e2[0] + e1[1] + e2[1]:
-            return 1, i - e1[0] - e1[1]
-        elif i < e1[0] + e2[0] + e1[1] + e2[1] + e1[2]:
-            return 0, i - e2[0] - e2[1]
-        elif i < e1[0] + e2[0] + e1[1] + e2[1] + e1[2] + e2[2]:
-            return 1, i - e1[0] - e1[1] - e1[2]
-        elif i < e1[0] + e2[0] + e1[1] + e2[1] + e1[2] + e2[2] + e1[3]:
-            return 0, i - e2[0] - e2[1] - e2[2]
-        return 1, i - e1[0] - e1[1] - e1[2] - e1[3]
+        counts = sum([e._bfun_counts(mapping) for e in self.elems])
+        ns = []
+        if counts[0] > 0:
+            tmp = sum([[j] * self.elems[j].nodal_dofs
+                       for j in range(len(self.elems))], [])
+            ns += sum([tmp for j in range(int(counts[0] / len(tmp)))], [])
+        if counts[1] > 0:
+            tmp = sum([[j] * self.elems[j].edge_dofs
+                   for j in range(len(self.elems))], [])
+            ns += sum([tmp for j in range(int(counts[1] / len(tmp)))], [])
+        if counts[2] > 0:
+            tmp = sum([[j] * self.elems[j].facet_dofs
+                   for j in range(len(self.elems))], [])
+            ns += sum([tmp for j in range(int(counts[2] / len(tmp)))], [])
+        if counts[3] > 0:
+            tmp = sum([[j] * self.elems[j].interior_dofs
+                   for j in range(len(self.elems))], [])
+            ns += sum([tmp for j in range(int(counts[3] / len(tmp)))], [])
+
+        mask = np.array(ns)
+        inds = mask.copy()
+        for j in range(len(self.elems)):
+            maskj = mask == j
+            total = np.sum(maskj)
+            seq = np.arange(total, dtype=np.int)
+            inds[maskj] = seq
+
+        return ns[i], inds[i]
 
     def gbasis(self, mapping, X, i, **kwargs):
         n, ind = self._deduce_bfun(mapping, i)
