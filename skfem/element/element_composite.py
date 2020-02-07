@@ -3,6 +3,14 @@ from .element import Element
 
 class ElementComposite(Element):
 
+    def __init__(self, *elems):
+        self.elems = elems
+        self.nodal_dofs = sum([e.nodal_dofs for e in self.elems])
+        self.edge_dofs = sum([e.edge_dofs for e in self.elems])
+        self.facet_dofs = sum([e.facet_dofs for e in self.elems])
+        self.interior_dofs = sum([e.interior_dofs for e in self.elems])
+        self.maxdeg = sum([e.maxdeg for e in self.elems])
+
     def _deduce_bfun(self, mapping, i):
         e1 = self.elems[0]._bfun_counts(mapping)
         e2 = self.elems[1]._bfun_counts(mapping)

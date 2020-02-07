@@ -141,14 +141,4 @@ class Element():
            isinstance(other, ElementComposite):
             raise NotImplementedError("Cannot combine two ElementComposite objects.")
 
-        e = ElementComposite()
-        e.elems = [self, other]
-
-        e.nodal_dofs = self.nodal_dofs + other.nodal_dofs
-        e.edge_dofs = self.edge_dofs + other.edge_dofs
-        e.facet_dofs = self.facet_dofs + other.facet_dofs
-        e.interior_dofs = self.interior_dofs + other.interior_dofs
-
-        e.maxdeg = self.nodal_dofs + other.maxdeg
-
-        return e
+        return ElementComposite(self, other)
