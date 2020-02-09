@@ -4,6 +4,12 @@ from .element import Element
 
 
 class ElementComposite(Element):
+    """Combine multiple elements.
+
+    Allows having different basis functions for different components of a
+    vectorial solution.
+
+    """
 
     def __init__(self, *elems):
         self.elems = elems

@@ -21,4 +21,4 @@ class ElementH1(Element):
             ),)
 
     def lbasis(self, X, i):
-        raise Exception("ElementH1 lbasis method not found.")
+        raise Exception("ElementH1.lbasis method not found.")

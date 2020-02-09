@@ -401,6 +401,10 @@ class Mesh():
             'subdomains': subdomains,
         }
 
+    def copy(self):
+        from copy import deepcopy
+        return deepcopy(self)
+
     @staticmethod
     def strip_extra_coordinates(p: ndarray) -> ndarray:
         return p
