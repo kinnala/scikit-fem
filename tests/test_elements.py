@@ -1,6 +1,9 @@
 import unittest
 
-from skfem.element import *
+import numpy as np
+from numpy.testing import assert_array_equal
+
+from skfem import *
 
 
 class TestNodality(unittest.TestCase):
@@ -62,6 +65,46 @@ class TestLineP1Nodality(TestNodality):
 class TestLineP2Nodality(TestNodality):
     elem = ElementLineP2()
     N = 3
+
+
+class TestComposite(unittest.TestCase):
+
+    def runTest(self):
+        from skfem.element.element_composite import ElementComposite
+
+        self.check_equivalence(
+            ElementComposite(ElementTriP1(),
+                             ElementTriP1()),
+            ElementVectorH1(ElementTriP1())
+        )
+
+    def check_equivalence(self, ec, ev):
+        X = np.array([[0.125, 0.1111], [0.0555, 0.6]])
+        m = MeshTri.init_refdom()
+        mapping = MappingAffine(m)
+
+        for k in range(6):
+            for i in [0, 1]:
+                # accessing i'th component looks slightly different
+                assert_array_equal(
+                    ev.gbasis(mapping, X, k)[0].f[i],
+                    ec.gbasis(mapping, X, k)[i].f
+                )
+                for j in [0, 1]:
+                    assert_array_equal(
+                        ev.gbasis(mapping, X, k)[0].df[i][j],
+                        ec.gbasis(mapping, X, k)[i].df[j]
+                    )
+
+
+class TestCompositeMul(TestComposite):
+
+    def runTest(self):
+
+        self.check_equivalence(
+            ElementTriP1() * ElementTriP1(),
+            ElementVectorH1(ElementTriP1())
+        )
 
 
 if __name__ == '__main__':
