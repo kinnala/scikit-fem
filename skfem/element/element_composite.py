@@ -54,10 +54,11 @@ class ElementComposite(Element):
 
     def gbasis(self, mapping, X, i, **kwargs):
         n, ind = self._deduce_bfun(mapping, i)
-        field = self.elems[n].gbasis(mapping, X, ind, **kwargs)[0]
-        if n == 0:
-            Z = self.elems[1].gbasis(mapping, X, 0, **kwargs)[0].zeros_like()
-            return (field, Z)
-        elif n == 1:
-            Z = self.elems[0].gbasis(mapping, X, 0, **kwargs)[0].zeros_like()
-            return (Z, field)
+        output = []
+        for k, e in enumerate(self.elems):
+            if n == k:
+                output.append(e.gbasis(mapping, X, ind, **kwargs)[0])
+            else:
+                output.append(e.gbasis(mapping, X, 0, **kwargs)[0]
+                              .zeros_like())
+        return tuple(output)

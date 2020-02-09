@@ -137,8 +137,7 @@ class Element():
 
         from .element_composite import ElementComposite
 
-        if isinstance(self, ElementComposite) or\
-           isinstance(other, ElementComposite):
-            raise NotImplementedError("Cannot combine two ElementComposite objects.")
+        a = self.elems if isinstance(self, ElementComposite) else [self]
+        b = other.elems if isinstance(other, ElementComposite) else [other]
 
-        return ElementComposite(self, other)
+        return ElementComposite(*a, *b)
