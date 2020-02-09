@@ -38,6 +38,6 @@ class ElementTriP2(ElementH1):
             phi = 4*y - 4*x*y - 4*y**2
             dphi = np.array([-4*y, 4 - 4*x - 8*y])
         else:
-            raise Exception("!")
+            self._index_error()
 
         return phi, dphi
