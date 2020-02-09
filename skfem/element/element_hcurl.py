@@ -12,7 +12,7 @@ class ElementHcurl(Element):
             raise NotImplementedError("TODO: fix tind support in ElementHcurl")
         t1 = [0, 1, 0, 0, 1, 2][i]
         t2 = [1, 2, 2, 3, 3, 3][i]
-        return 1. - 2. * (mapping.mesh.t[t1] > mapping.mesh.t[t2])
+        return 1 - 2 * (mapping.mesh.t[t1] > mapping.mesh.t[t2])
 
     def gbasis(self, mapping, X, i, tind=None):
         phi, dphi = self.lbasis(X, i)
