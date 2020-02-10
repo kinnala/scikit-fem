@@ -6,6 +6,7 @@ from numpy import ndarray
 
 from skfem.assembly.dofs import Dofs
 from skfem.element.element import DiscreteField
+from skfem.element.element_composite import ElementComposite
 
 
 class Basis():
@@ -235,6 +236,34 @@ class Basis():
                 field.append(None)
 
         return DiscreteField(*field)
+
+    def split(self):
+        """Return indices to different solution components."""
+        if isinstance(self.elem, ElementComposite):
+            off1 = 0
+            off2 = 0
+            off3 = 0
+            off4 = 0
+            output = [None] * len(self.elem.elems)
+            for k in range(len(self.elem.elems)):
+                #output[k] = np.concatenate((
+                e = self.elem.elems[k]
+                n1 = e.nodal_dofs
+                n2 = e.edge_dofs
+                n3 = e.facet_dofs
+                n4 = e.interior_dofs
+                output[k] = np.concatenate((
+                    self.nodal_dofs[off1:(off1 + n1)].flatten(),
+                    self.edge_dofs[off2:(off2 + n2)].flatten(),
+                    self.facet_dofs[off3:(off3 + n3)].flatten(),
+                    self.interior_dofs[off4:(off4 + n4)].flatten(),
+                )).astype(np.int)
+                off1 += n1
+                off2 += n2
+                off3 += n3
+                off4 += n4
+            return tuple(output)
+        raise ValueError("Basis.elem has only single component!")
 
     def zero_w(self) -> ndarray:
         """Return a zero array with correct dimensions
