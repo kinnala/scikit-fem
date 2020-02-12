@@ -203,39 +203,50 @@ class Basis():
 
         Returns
         -------
-        DiscreteField
+        Dict[str, DiscreteField]
             The solution vector interpolated at quadrature points.
+            If Basis consist of a single component, the dictionary has
+            a single key 'w'. Otherwise, the keys are 'w^1', 'w^2', ...
 
         """
         if w.shape[0] != self.N:
             raise ValueError("Input array has wrong size.")
 
-        ref = self.basis[0][0]
-        field = []
+        refs = self.basis[0]
 
-        def linear_combination(n): # TODO make work with composite elements
-            out = 0. * ref[n].copy()
-            for i in range(self.Nbfun):
-                values = w[self.element_dofs[i]][:, None]
-                if len(ref[n].shape) == 2:
-                    out += values * self.basis[i][0][n]
-                elif len(ref[n].shape) == 3:
-                    for j in range(out.shape[0]):
-                        out[j, :, :] += values * self.basis[i][0][n][j]
-                elif len(ref[n].shape) == 4:
-                    for j in range(out.shape[0]):
-                        for k in range(out.shape[1]):
-                            out[j, k, :, :] += \
-                                values * self.basis[i][0][n][j, k]
-            return out
+        dfs = {}
 
-        for n in range(len(ref)):
-            if ref[n] is not None:
-                field.append(linear_combination(n))
-            else:
-                field.append(None)
+        for l in range(len(refs)):
+            ref = refs[l]
+            fs = []
 
-        return DiscreteField(*field)
+            def linear_combination(n):
+                """Global discrete function at quadrature points."""
+                out = 0. * ref[n].copy()
+                for i in range(self.Nbfun):
+                    values = w[self.element_dofs[i]][:, None]
+                    if len(ref[n].shape) == 2:
+                        out += values * self.basis[i][0][n]
+                    elif len(ref[n].shape) == 3:
+                        for j in range(out.shape[0]):
+                            out[j, :, :] += values * self.basis[i][0][n][j]
+                    elif len(ref[n].shape) == 4:
+                        for j in range(out.shape[0]):
+                            for k in range(out.shape[1]):
+                                out[j, k, :, :] += \
+                                    values * self.basis[i][0][n][j, k]
+                return out
+
+            for n in range(len(ref)):
+                if ref[n] is not None:
+                    fs.append(linear_combination(n))
+                else:
+                    fs.append(None)
+
+            dfs['w' if len(refs) == 1 else 'w^' + str(l)] =\
+                DiscreteField(*fs)
+
+        return dfs
 
     def split(self):
         """Return indices to different solution components."""
