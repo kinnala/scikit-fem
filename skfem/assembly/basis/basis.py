@@ -140,7 +140,7 @@ class Basis:
     def _get_dofs(self,
                   facets: ndarray,
                   skip: List[str] = []):
-        """Return :class:`skfem.assembly.Dofs` corresponding to a set of facets."""
+        """Return :class:`skfem.assembly.Dofs` corresponding to facets."""
         nodal_ix = np.unique(self.mesh.facets[:, facets].flatten())
         facet_ix = facets
         edge_ix = np.intersect1d(
@@ -153,12 +153,18 @@ class Basis:
         n_edge = self.edge_dofs.shape[0]
 
         return Dofs(
-            nodal = {self.dofnames[i]: self.nodal_dofs[i, nodal_ix]
-                     for i in range(n_nodal) if self.dofnames[i] not in skip},
-            facet = {self.dofnames[i + n_nodal]: self.facet_dofs[i, facet_ix]
-                     for i in range(n_facet) if self.dofnames[i] not in skip},
-            edge = {self.dofnames[i + n_nodal + n_facet]: self.edge_dofs[i, edge_ix]
-                     for i in range(n_edge) if self.dofnames[i] not in skip},
+            nodal = {
+                self.dofnames[i]: self.nodal_dofs[i, nodal_ix]
+                for i in range(n_nodal) if self.dofnames[i] not in skip
+            },
+            facet = {
+                self.dofnames[i + n_nodal]: self.facet_dofs[i, facet_ix]
+                for i in range(n_facet) if self.dofnames[i] not in skip
+            },
+            edge = {
+                self.dofnames[i + n_nodal + n_facet]: self.edge_dofs[i, edge_ix]
+                for i in range(n_edge) if self.dofnames[i] not in skip
+            },
         )
 
     def boundary_dofs(self,
@@ -193,10 +199,11 @@ class Basis:
         ----------
         facets
             A list of facet indices. If None, find facets by
-            Mesh.boundary_facets().  If callable, call Mesh.facets_satisfying to get
-            facets. If array, find the corresponding dofs. If dict of arrays, find
-            dofs for each entry. If dict of callables, call Mesh.facets_satisfying
-            for each entry to get facets and then find dofs for those.
+            Mesh.boundary_facets().  If callable, call Mesh.facets_satisfying to
+            get facets. If array, find the corresponding dofs. If dict of
+            arrays, find dofs for each entry. If dict of callables, call
+            Mesh.facets_satisfying for each entry to get facets and then find
+            dofs for those.
 
         Returns
         -------
@@ -292,7 +299,7 @@ class Basis:
                     self.nodal_dofs[off[0]:(off[0] + e.nodal_dofs)].flatten(),
                     self.edge_dofs[off[1]:(off[1] + e.edge_dofs)].flatten(),
                     self.facet_dofs[off[2]:(off[2] + e.facet_dofs)].flatten(),
-                    self.interior_dofs[off[3]:(off[3] + e.interior_dofs)].flatten(),
+                    self.interior_dofs[off[3]:(off[3] + e.interior_dofs)].flatten()
                 )).astype(np.int)
                 off += np.array([e.nodal_dofs,
                                  e.edge_dofs,
