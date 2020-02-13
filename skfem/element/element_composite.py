@@ -18,9 +18,23 @@ class ElementComposite(Element):
         self.facet_dofs = sum([e.facet_dofs for e in self.elems])
         self.interior_dofs = sum([e.interior_dofs for e in self.elems])
         self.maxdeg = sum([e.maxdeg for e in self.elems])
-        self.dofnames = [i + "^" + str(j + 1)
-                         for j in range(len(self.elems))
-                         for i in self.elems[j].dofnames]
+
+        dofnames = []
+        for i, e in enumerate(self.elems):  # nodal
+            for j in range(e.nodal_dofs):
+                dofnames.append(e.dofnames[j] + "^" + str(i + 1))
+        for i, e in enumerate(self.elems):  # edge
+            for j in range(e.nodal_dofs, e.nodal_dofs + e.edge_dofs):
+                dofnames.append(e.dofnames[j] + "^" + str(i + 1))
+        for i, e in enumerate(self.elems):  # facet
+            for j in range(e.nodal_dofs + e.edge_dofs,
+                           e.nodal_dofs + e.edge_dofs + e.facet_dofs):
+                dofnames.append(e.dofnames[j] + "^" + str(i + 1))
+        for i, e in enumerate(self.elems):  # interior
+            for j in range(e.nodal_dofs + e.edge_dofs + e.facet_dofs,
+                           e.nodal_dofs + e.edge_dofs + e.facet_dofs + e.interior_dofs):
+                dofnames.append(e.dofnames[j] + "^" + str(i + 1))
+        self.dofnames = dofnames
 
     def _deduce_bfun(self, mapping, i):
         counts = sum([e._bfun_counts(mapping) for e in self.elems])
