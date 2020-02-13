@@ -1,6 +1,7 @@
 import warnings
 from typing import List, Optional, NamedTuple,\
-    Any, Tuple, Dict
+    Any, Tuple, Dict,\
+    TypeVar
 
 import numpy as np
 from numpy import ndarray
@@ -8,6 +9,10 @@ from numpy import ndarray
 from skfem.assembly.dofs import Dofs
 from skfem.element.element import DiscreteField
 from skfem.element.element_composite import ElementComposite
+from skfem.element.element_vector_h1 import ElementVectorH1
+
+
+BasisType = TypeVar('BasisType', bound='Basis')
 
 
 class Basis:
@@ -132,7 +137,9 @@ class Basis:
             D = tuple(D[0][key].all() for key in D[0])
         return np.setdiff1d(np.arange(self.N), np.concatenate(D))
 
-    def _get_dofs(self, facets):
+    def _get_dofs(self,
+                  facets: ndarray,
+                  skip: List[str] = []):
         """Return :class:`skfem.assembly.Dofs` corresponding to a set of facets."""
         nodal_ix = np.unique(self.mesh.facets[:, facets].flatten())
         facet_ix = facets
@@ -147,14 +154,16 @@ class Basis:
 
         return Dofs(
             nodal = {self.dofnames[i]: self.nodal_dofs[i, nodal_ix]
-                     for i in range(n_nodal)},
+                     for i in range(n_nodal) if self.dofnames[i] not in skip},
             facet = {self.dofnames[i + n_nodal]: self.facet_dofs[i, facet_ix]
-                     for i in range(n_facet)},
+                     for i in range(n_facet) if self.dofnames[i] not in skip},
             edge = {self.dofnames[i + n_nodal + n_facet]: self.edge_dofs[i, edge_ix]
-                     for i in range(n_edge)},
+                     for i in range(n_edge) if self.dofnames[i] not in skip},
         )
 
-    def boundary_dofs(self, facets: Dict[str, ndarray] = None) -> Dict[str, Dofs]:
+    def boundary_dofs(self,
+                      facets: Dict[str, ndarray] = None,
+                      skip: List[str] = []) -> Dict[str, Dofs]:
         """Return global DOF numbers corresponding to boundary DOF's.
 
         Parameters
@@ -175,7 +184,7 @@ class Basis:
             else:
                 facets = self.mesh.boundaries
 
-        return {k: self._get_dofs(facets[k]) for k in facets}
+        return {k: self._get_dofs(facets[k], skip=skip) for k in facets}
 
     def get_dofs(self, facets: Optional[Any] = None):
         """Return global DOF numbers corresponding to facets (e.g. boundaries).
@@ -236,8 +245,7 @@ class Basis:
             raise ValueError("Input array has wrong size.")
 
         refs = self.basis[0]
-
-        dfs = {}
+        dfs: Dict[str, DiscreteField] = {}
 
         for l in range(len(refs)):
             ref = refs[l]
@@ -268,13 +276,13 @@ class Basis:
                     fs.append(None)
 
             # give names for the interpolated fields
-            dfs['w' if len(refs) == 1 else 'w^' + str(l)] =\
-                DiscreteField(*fs)
+            key = 'w' if len(refs) == 1 else 'w^' + str(l)
+            dfs[key] = DiscreteField(*fs)
 
         return dfs
 
-    def split(self) -> Tuple[ndarray, ...]:
-        """Return indices to different solution components."""
+    def split_indices(self) -> List[ndarray]:
+        """Return indices for the solution components."""
         if isinstance(self.elem, ElementComposite):
             off = np.zeros(4, dtype=np.int)
             output = [None] * len(self.elem.elems)
@@ -286,14 +294,24 @@ class Basis:
                     self.facet_dofs[off[2]:(off[2] + e.facet_dofs)].flatten(),
                     self.interior_dofs[off[3]:(off[3] + e.interior_dofs)].flatten(),
                 )).astype(np.int)
-                off += np.array([
-                    e.nodal_dofs,
-                    e.edge_dofs,
-                    e.facet_dofs,
-                    e.interior_dofs,
-                ])
-            return tuple(output)
+                off += np.array([e.nodal_dofs,
+                                 e.edge_dofs,
+                                 e.facet_dofs,
+                                 e.interior_dofs])
+            return output
         raise ValueError("Basis.elem has only a single component!")
+
+    def split_bases(self) -> List[BasisType]:
+        """Return Basis objects for the solution components."""
+        if isinstance(self.elem, ElementComposite):
+            return [type(self)(self.mesh, e, self.mapping, self.intorder)
+                    for e in self.elem.elems]
+        raise ValueError("Basis.elem has only a single component!")
+
+    def split(self, x: ndarray) -> List[Tuple[ndarray, BasisType]]:
+        """Split solution vector into components."""
+        xs = [x[ix] for ix in self.split_indices()]
+        return list(zip(xs, self.split_bases()))
 
     def zero_w(self) -> ndarray:
         """Return a zero array with correct dimensions for
