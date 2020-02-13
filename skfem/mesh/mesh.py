@@ -12,7 +12,7 @@ DimTuple = Union[Tuple[float],
                  Tuple[float, float, float]]
 
 
-class Mesh():
+class Mesh:
     """A finite element mesh (abstract superclass).
 
     Attributes
@@ -314,7 +314,7 @@ class Mesh():
                                   "for the given Mesh type.")
 
     def nodes_satisfying(self,
-                         test: Callable[[ndarray], bool],
+                         test: Callable[[ndarray], ndarray],
                          boundaries_only: bool = False) -> ndarray:
         """Return nodes that satisfy some condition.
 
@@ -333,7 +333,7 @@ class Mesh():
         return nodes
 
     def facets_satisfying(self,
-                          test: Callable[[ndarray], bool],
+                          test: Callable[[ndarray], ndarray],
                           boundaries_only: bool = False) -> ndarray:
         """Return facets whose midpoints satisfy some condition.
 
@@ -354,7 +354,7 @@ class Mesh():
         return facets
 
     def elements_satisfying(self,
-                            test: Callable[[ndarray], bool]) -> ndarray:
+                            test: Callable[[ndarray], ndarray]) -> ndarray:
         """Return elements whose midpoints satisfy some condition.
 
         Parameters
@@ -400,6 +400,23 @@ class Mesh():
             'boundaries': boundaries,
             'subdomains': subdomains,
         }
+
+    def define_boundary(self, name: str, test: Callable[[ndarray], ndarray]):
+        """Define a named boundary via function handle.
+
+        Parameters
+        ----------
+        name
+            Name of the boundary.
+        test
+            A function which returns True for facet midpoints belonging to the
+            boundary.
+
+        """
+        if self.boundaries is None:
+            self.boundaries = {}
+        self.boundaries[name] =\
+            self.facets_satisfying(test, boundaries_only=True)
 
     def copy(self):
         from copy import deepcopy
