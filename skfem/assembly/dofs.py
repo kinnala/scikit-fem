@@ -1,3 +1,4 @@
+import warnings
 from typing import NamedTuple, Optional, Dict
 
 import numpy as np
@@ -51,8 +52,15 @@ class Dofs(NamedTuple):
             else:
                 interior = np.array([])
 
-        return np.concatenate((
+        output = np.concatenate((
             nodal.flatten(),
             facet.flatten(),
             edge.flatten(),
-            interior.flatten())).astype(np.int)
+            interior.flatten()
+        )).astype(np.int)
+
+        if len(output) == 0:
+            warnings.warn("Given DOF name not found in Basis. "
+                          "Returning an empty set of DOF's.")
+
+        return output
