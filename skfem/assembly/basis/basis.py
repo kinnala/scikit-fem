@@ -254,6 +254,7 @@ class Basis:
         refs = self.basis[0]
         dfs: Dict[str, DiscreteField] = {}
 
+        # loop over solution components
         for l in range(len(refs)):
             ref = refs[l]
             fs = []
@@ -264,15 +265,15 @@ class Basis:
                 for i in range(self.Nbfun):
                     values = w[self.element_dofs[i]][:, None]
                     if len(ref[n].shape) == 2:  # values
-                        out += values * self.basis[i][0][n]
+                        out += values * self.basis[i][l][n]
                     elif len(ref[n].shape) == 3:  # derivatives
                         for j in range(out.shape[0]):
-                            out[j, :, :] += values * self.basis[i][0][n][j]
+                            out[j, :, :] += values * self.basis[i][l][n][j]
                     elif len(ref[n].shape) == 4:  # second derivatives
                         for j in range(out.shape[0]):
                             for k in range(out.shape[1]):
                                 out[j, k, :, :] += \
-                                    values * self.basis[i][0][n][j, k]
+                                    values * self.basis[i][l][n][j, k]
                 return out
 
             # interpolate n'th derivatives
@@ -283,7 +284,7 @@ class Basis:
                     fs.append(None)
 
             # give names for the interpolated fields
-            key = 'w' if len(refs) == 1 else 'w^' + str(l)
+            key = 'w' if len(refs) == 1 else 'w^' + str(l + 1)
             dfs[key] = DiscreteField(*fs)
 
         return dfs
