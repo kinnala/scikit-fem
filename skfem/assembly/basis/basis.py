@@ -1,5 +1,6 @@
 import warnings
-from typing import List, Optional, NamedTuple, Any
+from typing import List, Optional, NamedTuple,\
+    Any, Tuple, Dict
 
 import numpy as np
 from numpy import ndarray
@@ -9,7 +10,7 @@ from skfem.element.element import DiscreteField
 from skfem.element.element_composite import ElementComposite
 
 
-class Basis():
+class Basis:
     """The finite element basis is evaluated at global quadrature points
     and cached inside this object.
 
@@ -135,12 +136,10 @@ class Basis():
         """Return :class:`skfem.assembly.Dofs` corresponding to a set of facets."""
         nodal_ix = np.unique(self.mesh.facets[:, facets].flatten())
         facet_ix = facets
-        if self.mesh.dim() == 3:
-            edge_ix = np.intersect1d(
-                self.mesh.boundary_edges(),
-                np.unique(self.mesh.t2e[:, self.mesh.f2t[0, facets]].flatten()))
-        else:
-            edge_ix = []
+        edge_ix = np.intersect1d(
+            self.mesh.boundary_edges(),
+            np.unique(self.mesh.t2e[:, self.mesh.f2t[0, facets]].flatten())
+        ) if self.mesh.dim() == 3 else []
 
         n_nodal = self.nodal_dofs.shape[0]
         n_facet = self.facet_dofs.shape[0]
@@ -155,6 +154,29 @@ class Basis():
                      for i in range(n_edge)},
         )
 
+    def boundary_dofs(self, facets: Dict[str, ndarray] = None) -> Dict[str, Dofs]:
+        """Return global DOF numbers corresponding to boundary DOF's.
+
+        Parameters
+        ----------
+        facets
+            A dictionary of facet indices. If None, use self.mesh.boundaries
+            if set or use {'all': self.mesh.boundary_facets()}.
+
+        Returns
+        -------
+        Dict[str, Dofs]
+            A dictionary of :class:`skfem.assembly.dofs.Dofs` objects.
+
+        """
+        if facets is None:
+            if self.mesh.boundaries is None:
+                facets = {'all': self.mesh.boundary_facets()}
+            else:
+                facets = self.mesh.boundaries
+
+        return {k: self._get_dofs(facets[k]) for k in facets}
+
     def get_dofs(self, facets: Optional[Any] = None):
         """Return global DOF numbers corresponding to facets (e.g. boundaries).
 
@@ -162,19 +184,20 @@ class Basis():
         ----------
         facets
             A list of facet indices. If None, find facets by
-            Mesh.boundary_facets().  If callable, call Mesh.facets_satisfying to
-            get facets. If array, find the corresponding dofs. If dict of
-            arrays, find dofs for each entry. If dict of callables, call
-            Mesh.facets_satisfying for each entry to get facets and then find
-            dofs for those.
+            Mesh.boundary_facets().  If callable, call Mesh.facets_satisfying to get
+            facets. If array, find the corresponding dofs. If dict of arrays, find
+            dofs for each entry. If dict of callables, call Mesh.facets_satisfying
+            for each entry to get facets and then find dofs for those.
 
         Returns
         -------
         Dofs
             A subset of degrees-of-freedom as :class:`skfem.assembly.dofs.Dofs`.
 
-
         """
+        warnings.warn(("Removed in the next major release. "
+                       "Use Basis.boundary_dofs instead."), DeprecationWarning)
+
         if facets is None:
             facets = self.mesh.boundary_facets()
         elif callable(facets):
@@ -193,7 +216,7 @@ class Basis():
         parameters for 'w'."""
         raise NotImplementedError("Default parameters not implemented.")
 
-    def interpolate(self, w: ndarray) -> Any:
+    def interpolate(self, w: ndarray) -> Dict[str, DiscreteField]:
         """Interpolate a solution vector to quadrature points.
 
         Parameters
@@ -225,58 +248,58 @@ class Basis():
                 out = 0. * ref[n].copy()
                 for i in range(self.Nbfun):
                     values = w[self.element_dofs[i]][:, None]
-                    if len(ref[n].shape) == 2:
+                    if len(ref[n].shape) == 2:  # values
                         out += values * self.basis[i][0][n]
-                    elif len(ref[n].shape) == 3:
+                    elif len(ref[n].shape) == 3:  # derivatives
                         for j in range(out.shape[0]):
                             out[j, :, :] += values * self.basis[i][0][n][j]
-                    elif len(ref[n].shape) == 4:
+                    elif len(ref[n].shape) == 4:  # second derivatives
                         for j in range(out.shape[0]):
                             for k in range(out.shape[1]):
                                 out[j, k, :, :] += \
                                     values * self.basis[i][0][n][j, k]
                 return out
 
+            # interpolate n'th derivatives
             for n in range(len(ref)):
                 if ref[n] is not None:
                     fs.append(linear_combination(n))
                 else:
                     fs.append(None)
 
+            # give names for the interpolated fields
             dfs['w' if len(refs) == 1 else 'w^' + str(l)] =\
                 DiscreteField(*fs)
 
         return dfs
 
-    def split(self):
+    def split(self) -> Tuple[ndarray, ...]:
         """Return indices to different solution components."""
         if isinstance(self.elem, ElementComposite):
-            off1 = 0
-            off2 = 0
-            off3 = 0
-            off4 = 0
+            off = np.zeros(4, dtype=np.int)
             output = [None] * len(self.elem.elems)
             for k in range(len(self.elem.elems)):
-                #output[k] = np.concatenate((
                 e = self.elem.elems[k]
-                n1 = e.nodal_dofs
-                n2 = e.edge_dofs
-                n3 = e.facet_dofs
-                n4 = e.interior_dofs
                 output[k] = np.concatenate((
-                    self.nodal_dofs[off1:(off1 + n1)].flatten(),
-                    self.edge_dofs[off2:(off2 + n2)].flatten(),
-                    self.facet_dofs[off3:(off3 + n3)].flatten(),
-                    self.interior_dofs[off4:(off4 + n4)].flatten(),
+                    self.nodal_dofs[off[0]:(off[0] + e.nodal_dofs)].flatten(),
+                    self.edge_dofs[off[1]:(off[1] + e.edge_dofs)].flatten(),
+                    self.facet_dofs[off[2]:(off[2] + e.facet_dofs)].flatten(),
+                    self.interior_dofs[off[3]:(off[3] + e.interior_dofs)].flatten(),
                 )).astype(np.int)
-                off1 += n1
-                off2 += n2
-                off3 += n3
-                off4 += n4
+                off += np.array([
+                    e.nodal_dofs,
+                    e.edge_dofs,
+                    e.facet_dofs,
+                    e.interior_dofs,
+                ])
             return tuple(output)
-        raise ValueError("Basis.elem has only single component!")
+        raise ValueError("Basis.elem has only a single component!")
 
     def zero_w(self) -> ndarray:
-        """Return a zero array with correct dimensions
-        for :func:`~skfem.assembly.asm`."""
+        """Return a zero array with correct dimensions for
+        :func:`~skfem.assembly.asm`."""
         return np.zeros((self.nelems, len(self.W)))
+
+    def zeros(self) -> ndarray:
+        """Return a zero array with same dimensions as the solution."""
+        return np.zeros(self.N)
