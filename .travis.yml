@@ -4,8 +4,7 @@ python:
   - "3.7"
 install:
   - sudo apt-get update
-  - sudo apt-get install gmsh
-  - sudo apt-get install libsuitesparse-dev
+  - sudo apt-get install gmsh libsuitesparse-dev
   - wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
@@ -15,12 +14,7 @@ install:
   - conda info -a
   - conda create -q -n scikit-fem python=$TRAVIS_PYTHON_VERSION nomkl numpy scipy matplotlib ipython pip
   - source activate scikit-fem
-  - pip install meshio
-  - pip install dmsh
-  - pip install gmsh-sdk
-  - pip install pygmsh
-  - pip install scikit-sparse
-  - pip install pacopy
+  - pip install meshio dmsh scikit-sparse pacopy
 script:
   - python -m unittest discover 
 deploy:
