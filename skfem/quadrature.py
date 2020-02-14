@@ -25,13 +25,13 @@ def get_quadrature(refdom: str, norder: int) -> Tuple[np.ndarray, np.ndarray]:
         | tri   | (0,0) (0,1)     | 19             |
         |       | (1,0)           |                |
         +-------+-----------------+----------------+
-        | quad  | (-1,-1) (1,-1)  | infty          |
-        |       | (1,1) (-1,1)    |                |
+        | quad  | (0,0) (1,0)     | infty          |
+        |       | (1,1) (0,1)     |                |
         +-------+-----------------+----------------+
         | tet   | (0,0,0) (0,0,1) | 4              |
         |       | (0,1,0) (1,0,0) |                |
         +-------+-----------------+----------------+
-        | hex   | (-1,-1,-1),     | infty          |
+        | hex   | (0,0,0),        | infty          |
         |       | (1,1,1), etc.   |                |
         +-------+-----------------+----------------+
 
@@ -49,18 +49,18 @@ def get_quadrature(refdom: str, norder: int) -> Tuple[np.ndarray, np.ndarray]:
         return get_quadrature_tri(norder)
     elif refdom is "tet":
         return get_quadrature_tet(norder)
-    elif refdom is "line":  # [0,1]
+    elif refdom is "line":
         return get_quadrature_line(norder)
     elif refdom is "point":
         return get_quadrature_point(norder)
-    elif refdom is "quad":  # (-1,-1) (1,-1) (1,1) (-1,1)
+    elif refdom is "quad":
         X, W = get_quadrature_line(norder)
         # generate tensor product rule from 1D rule
         A, B = np.meshgrid(X, X)
-        Y = 2.0 * np.vstack((A.flatten(order='F'),
-                             B.flatten(order='F'))) - 1.0
+        Y = np.vstack((A.flatten(order='F'),
+                       B.flatten(order='F')))
         # transform weights
-        A, B = np.meshgrid(2 * W, 2 * W)
+        A, B = np.meshgrid(W, W)
         Z = A * B
         W = Z.flatten(order='F')
         return Y, W
@@ -68,11 +68,11 @@ def get_quadrature(refdom: str, norder: int) -> Tuple[np.ndarray, np.ndarray]:
         X, W = get_quadrature_line(norder)
         # generate tensor product rule from 1D rule
         A, B, C = np.meshgrid(X, X, X)
-        Y = 2.0 * np.vstack((A.flatten(order='F'),
-                             B.flatten(order='F'),
-                             C.flatten(order='F'))) - 1.0
+        Y = np.vstack((A.flatten(order='F'),
+                       B.flatten(order='F'),
+                       C.flatten(order='F')))
         # transform weights
-        A, B, C = np.meshgrid(2 * W, 2 * W, 2 * W)
+        A, B, C = np.meshgrid(W, W, W)
         Z = A * B * C
         W = Z.flatten(order='F')
         return Y, W
