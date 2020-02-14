@@ -20,9 +20,9 @@ class ElementComposite(Element):
         self.interior_dofs = sum([e.interior_dofs for e in self.elems])
         self.maxdeg = sum([e.maxdeg for e in self.elems])
 
-        for e in elems:
-            assert (e.mesh_type is elems[0].mesh_type,
-                    "Element components are incompatible.")
+        for e in self.elems:
+            if e.mesh_type is not self.elems[0].mesh_type:
+                raise ValueError("Elements are incompatible.")
 
         dofnames = []
         for i, e in enumerate(self.elems):  # nodal
@@ -41,6 +41,12 @@ class ElementComposite(Element):
                             + e.facet_dofs + e.interior_dofs)):
                 dofnames.append(e.dofnames[j] + "^" + str(i + 1))
         self.dofnames = dofnames
+
+        doflocs = []
+        for i in range(np.sum(np.array([e._bfun_counts() for e in self.elems]))):
+            n, ind = self._deduce_bfun(i)
+            doflocs.append(self.elems[n].doflocs[ind])
+        self.doflocs = np.array(doflocs)
 
         self.mesh_type = elems[0].mesh_type
 
