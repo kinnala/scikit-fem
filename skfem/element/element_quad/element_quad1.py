@@ -7,10 +7,10 @@ class ElementQuad1(ElementH1):
     dim = 2
     maxdeg = 2
     dofnames = ['u']
-    doflocs = np.array([[-1., -1.],
-                        [ 1., -1.],
-                        [ 1., 1.],
-                        [-1., 1.]])
+    doflocs = np.array([[0., 0.],
+                        [1., 0.],
+                        [1., 1.],
+                        [0., 1.]])
 
     def lbasis(self, X, i):
         x, y = X

@@ -7,6 +7,7 @@ class ElementQuadS2(ElementQuad2):
     doflocs = ElementQuad2.doflocs[:-1]
 
     def lbasis(self, X, i):
+        X = 2. * X - 1.
         x, y = X
 
         if i == 0:
@@ -43,5 +44,5 @@ class ElementQuadS2(ElementQuad2):
                              (x - 1) * y])
         else:
             self._index_error()
-            
+
         return phi, dphi
