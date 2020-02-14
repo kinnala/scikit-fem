@@ -1,5 +1,6 @@
 import numpy as np
-from .element import Element, DiscreteField
+from .element import Element
+from .discrete_field import DiscreteField
 
 
 class ElementVectorH1(Element):
@@ -19,6 +20,7 @@ class ElementVectorH1(Element):
                          for i in elem.dofnames
                          for j in range(self.dim)]
         self.maxdeg = elem.maxdeg
+        self.mesh_type = elem.mesh_type
 
         if hasattr(elem, 'doflocs'):
             self.doflocs = np.array([

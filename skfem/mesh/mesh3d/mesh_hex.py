@@ -3,8 +3,6 @@ from typing import Dict, Optional, Type
 import numpy as np
 from numpy import ndarray
 
-from skfem.element import ElementHex1, ElementQuad1
-from skfem.mapping import MappingIsoparametric
 from .mesh3d import Mesh3D
 from ..mesh import MeshType
 
@@ -35,11 +33,16 @@ class MeshHex(Mesh3D):
         Each column contains twelve column indices of MeshHex.edges.
 
     """
-
     refdom: str = "hex"
     brefdom: str = "quad"
     meshio_type: str = "hexahedron"
     name: str = "Hexahedral"
+
+    t = np.zeros((8, 0), dtype=np.int64)
+    t2f = np.zeros((6, 0), dtype=np.int64)
+    facets = np.zeros((4, 0), dtype=np.int64)
+    edges = np.zeros((2, 0), dtype=np.int64)
+    t2e = np.zeros((12, 0), dtype=np.int64)
 
     def __init__(self,
                  p: Optional[ndarray] = None,
@@ -332,4 +335,6 @@ class MeshHex(Mesh3D):
         meshio.write(filename, mesh)
 
     def mapping(self):
+        from skfem.mapping import MappingIsoparametric
+        from skfem.element import ElementHex1, ElementQuad1
         return MappingIsoparametric(self, ElementHex1(), ElementQuad1())

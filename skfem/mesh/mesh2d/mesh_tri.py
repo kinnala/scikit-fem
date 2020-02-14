@@ -71,6 +71,9 @@ class MeshTri(Mesh2D):
     meshio_type: str = "triangle"
     name: str = "Triangular"
 
+    t = np.zeros((3, 0), dtype=np.int64)
+    t2f = np.zeros((4, 0), dtype=np.int64)
+
     def __init__(self,
                  p: Optional[ndarray] = None,
                  t: Optional[ndarray] = None,

@@ -46,18 +46,18 @@ class Mesh:
     meshio_type: str = "none"
     name: str = "Abstract"
 
-    p: ndarray = np.array([])
-    t: ndarray = np.array([])
+    p = np.array([], dtype=np.float64)
+    t = np.array([], dtype=np.int64)
 
-    subdomains: Optional[Dict[str, ndarray]] = None
-    boundaries: Optional[Dict[str, ndarray]] = None
+    subdomains: Dict[str, ndarray] = None
+    boundaries: Dict[str, ndarray] = None
 
     def __init__(self):
         """Check that p and t are C_CONTIGUOUS as this leads
         to better performance."""
         if self.p is not None:
             if not isinstance(self.p, ndarray):
-                self.p = np.array(self.p, dtype=np.float_)
+                self.p = np.array(self.p, dtype=np.float64)
             if self.p.flags['F_CONTIGUOUS']:
                 if self.p.shape[1] > 1000:
                     warnings.warn("Mesh.__init__(): Transforming "
@@ -65,7 +65,7 @@ class Mesh:
                 self.p = np.ascontiguousarray(self.p)
         if self.t is not None:
             if not isinstance(self.t, ndarray):
-                self.t = np.array(self.t, dtype=np.intp)
+                self.t = np.array(self.t, dtype=np.int64)
             if self.t.flags['F_CONTIGUOUS']:
                 if self.t.shape[1] > 1000:
                     warnings.warn("Mesh.__init__(): Transforming "
@@ -75,11 +75,11 @@ class Mesh:
         if self.boundaries is not None:
             for k, v in self.boundaries.items():
                 if not isinstance(v, ndarray):
-                    self.boundaries[k] = np.array(v, dtype=np.intp)
+                    self.boundaries[k] = np.array(v, dtype=np.int64)
         if self.subdomains is not None:
             for k, v in self.subdomains.items():
                 if not isinstance(v, ndarray):
-                    self.subdomains[k] = np.array(v, dtype=np.intp)
+                    self.subdomains[k] = np.array(v, dtype=np.int64)
 
     def __str__(self):
         return self.__repr__()
@@ -89,6 +89,7 @@ class Mesh:
                 "with " + str(self.p.shape[1]) + " vertices "
                 "and " + str(self.t.shape[1]) + " elements.")
 
+    @classmethod
     def dim(self):
         """Return the spatial dimension of the mesh."""
         return int(self.p.shape[0])

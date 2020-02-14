@@ -1,6 +1,8 @@
 import numpy as np
-from .element import Element, DiscreteField
 from numpy import ndarray
+
+from .element import Element
+from .discrete_field import DiscreteField
 
 
 class ElementH1(Element):

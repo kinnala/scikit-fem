@@ -1,4 +1,5 @@
 from ..element_h2 import ElementH2
+from ...mesh.mesh2d import MeshTri
 
 
 class ElementTriArgyris(ElementH2):
@@ -7,6 +8,7 @@ class ElementTriArgyris(ElementH2):
     dim = 2
     maxdeg = 5
     dofnames = ['u', 'u_x', 'u_y', 'u_xx', 'u_xy', 'u_yy', 'u_n']
+    mesh_type = MeshTri
 
     def gdof(self, u, du, ddu, v, e, n, i):
         if i < 18:

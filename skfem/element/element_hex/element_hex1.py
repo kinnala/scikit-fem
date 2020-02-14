@@ -1,5 +1,7 @@
 import numpy as np
+
 from ..element_h1 import ElementH1
+from ...mesh.mesh3d import MeshHex
 
 
 class ElementHex1(ElementH1):
@@ -15,6 +17,7 @@ class ElementHex1(ElementH1):
                         [ 1., -1.,  1.],
                         [ 1.,  1., -1.],
                         [ 1.,  1.,  1.]])
+    mesh_type = MeshHex
 
     def lbasis(self, X, i):
         x, y, z = X

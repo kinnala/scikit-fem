@@ -1,5 +1,6 @@
 import numpy as np
-from .element import Element, DiscreteField
+from .element import Element
+from .discrete_field import DiscreteField
 
 
 class ElementHcurl(Element):

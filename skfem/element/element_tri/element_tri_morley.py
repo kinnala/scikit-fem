@@ -1,4 +1,5 @@
 from ..element_h2 import ElementH2
+from ...mesh.mesh2d import MeshTri
 
 
 class ElementTriMorley(ElementH2):
@@ -7,6 +8,7 @@ class ElementTriMorley(ElementH2):
     dim = 2
     maxdeg = 2
     dofnames = ['u', 'u_n']
+    mesh_type = MeshTri
 
     def gdof(self, u, du, ddu, v, e, n, i):
         if i == 0:

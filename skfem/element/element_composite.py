@@ -1,4 +1,5 @@
 import numpy as np
+from numpy import ndarray
 
 from .element import Element
 
@@ -19,6 +20,10 @@ class ElementComposite(Element):
         self.interior_dofs = sum([e.interior_dofs for e in self.elems])
         self.maxdeg = sum([e.maxdeg for e in self.elems])
 
+        for e in elems:
+            assert (e.mesh_type is elems[0].mesh_type,
+                    "Element components are incompatible.")
+
         dofnames = []
         for i, e in enumerate(self.elems):  # nodal
             for j in range(e.nodal_dofs):
@@ -32,12 +37,16 @@ class ElementComposite(Element):
                 dofnames.append(e.dofnames[j] + "^" + str(i + 1))
         for i, e in enumerate(self.elems):  # interior
             for j in range(e.nodal_dofs + e.edge_dofs + e.facet_dofs,
-                           e.nodal_dofs + e.edge_dofs + e.facet_dofs + e.interior_dofs):
+                           (e.nodal_dofs + e.edge_dofs
+                            + e.facet_dofs + e.interior_dofs)):
                 dofnames.append(e.dofnames[j] + "^" + str(i + 1))
         self.dofnames = dofnames
 
-    def _deduce_bfun(self, mapping, i):
-        counts = sum([e._bfun_counts(mapping) for e in self.elems])
+        self.mesh_type = elems[0].mesh_type
+
+    def _deduce_bfun(self, i: int):
+        """Deduce component and basis function for i'th index."""
+        counts = sum([e._bfun_counts() for e in self.elems])
         ns = []
         if counts[0] > 0:
             tmp = sum([[j] * self.elems[j].nodal_dofs
@@ -66,8 +75,8 @@ class ElementComposite(Element):
 
         return ns[i], inds[i]
 
-    def gbasis(self, mapping, X, i, **kwargs):
-        n, ind = self._deduce_bfun(mapping, i)
+    def gbasis(self, mapping, X: ndarray, i: int, **kwargs):
+        n, ind = self._deduce_bfun(i)
         output = []
         for k, e in enumerate(self.elems):
             if n == k:

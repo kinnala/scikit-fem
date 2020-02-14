@@ -1,5 +1,7 @@
 import numpy as np
+
 from ..element_h1 import ElementH1
+from ...mesh.mesh2d import MeshQuad
 
 
 class ElementQuad2(ElementH1):
@@ -18,6 +20,7 @@ class ElementQuad2(ElementH1):
                         [.0, 1.],
                         [-1., .0],
                         [.0, .0]])
+    mesh_type = MeshQuad
 
     def lbasis(self, X, i):
         x, y = X

@@ -12,7 +12,8 @@ constructors of :class:`~skfem.assembly.InteriorBasis` and
 
 """
 
-from .element import Element, DiscreteField
+from .discrete_field import DiscreteField
+from .element import Element
 from .element_h1 import ElementH1
 from .element_vector_h1 import ElementVectorH1
 from .element_hdiv import ElementHdiv
