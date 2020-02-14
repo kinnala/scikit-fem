@@ -83,6 +83,19 @@ class MeshQuad(Mesh2D):
                     y: ndarray) -> MeshType:
         """Initialise a tensor product mesh.
 
+        The mesh topology is as follows::
+
+                   x
+            *-------------*
+            |   |  |      |
+            |---+--+------|
+            |   |  |      |
+            |   |  |      | y
+            |   |  |      |
+            |---+--+------|
+            |   |  |      |
+            *-------------*
+
         Parameters
         ----------
         x : numpy array (1d)
