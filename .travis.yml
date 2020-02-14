@@ -14,7 +14,7 @@ install:
   - conda info -a
   - conda create -q -n scikit-fem python=$TRAVIS_PYTHON_VERSION nomkl numpy scipy matplotlib ipython pip
   - source activate scikit-fem
-  - pip install meshio dmsh scikit-sparse pacopy
+  - pip install meshio dmsh scikit-sparse pacopy pygmsh
 script:
   - python -m unittest discover 
 deploy:
