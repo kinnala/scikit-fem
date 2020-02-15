@@ -2212,9 +2212,8 @@ def get_quadrature_tri(norder: int) -> Tuple[np.ndarray, np.ndarray]:
             ),
         }[norder]
     except:
-        raise NotImplementedError(
-            "The requested order of quadrature" " is not implemented!"
-        )
+        raise NotImplementedError("The requested order of quadrature"
+                                  "is not implemented!")
 
 
 def get_quadrature_line(norder: int) -> Tuple[np.ndarray, np.ndarray]:
