@@ -1,5 +1,7 @@
 import numpy as np
+
 from ..element_h1 import ElementH1
+from ...mesh.mesh3d import MeshTet
 
 
 class ElementTetP2(ElementH1):
@@ -18,6 +20,7 @@ class ElementTetP2(ElementH1):
                         [0., .0, .5],
                         [.5, .0, .5],
                         [.0, .5, .5]])
+    mesh_type = MeshTet
 
     def lbasis(self, X, i):
         x, y, z = X

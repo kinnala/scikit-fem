@@ -1,5 +1,7 @@
 import numpy as np
+
 from ..element_hdiv import ElementHdiv
+from ...mesh.mesh3d import MeshTet
 
 
 class ElementTetRT0(ElementHdiv):
@@ -7,6 +9,7 @@ class ElementTetRT0(ElementHdiv):
     dim = 3
     maxdeg = 1
     dofnames = ['u^n']
+    mesh_type = MeshTet
 
     def lbasis(self, X, i):
         x, y, z = X

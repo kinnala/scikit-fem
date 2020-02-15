@@ -16,6 +16,11 @@ class MeshLine(Mesh):
     meshio_type: str = "line"
     name: str = "One-dimensional"
 
+    p = np.zeros((1, 0), dtype=np.float64)
+    t = np.zeros((2, 0), dtype=np.int64)
+    t2f = np.zeros((1, 0), dtype=np.int64)
+    f2t = np.zeros((2, 0), dtype=np.int64)
+
     def __init__(self,
                  p: Optional[ndarray] = None,
                  t: Optional[ndarray] = None,

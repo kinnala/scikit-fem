@@ -241,5 +241,31 @@ class TestRefinterp(unittest.TestCase):
         self.assertEqual(M.p.shape[1], len(X))
 
 
+class TestCompositeAssembly(unittest.TestCase):
+
+    def runTest(self):
+
+        m = MeshHex()
+        # check that these assemble to the same matrix
+        ec = ElementHex1() * ElementHex1() * ElementHex1()
+        ev = ElementVectorH1(ElementHex1())
+        basisc = InteriorBasis(m, ec)
+        basisv = InteriorBasis(m, ev)
+
+        @BilinearForm
+        def bilinf_ev(u, v, w):
+            from skfem.helpers import dot
+            return dot(u, v)
+
+        @BilinearForm
+        def bilinf_ec(ux, uy, uz, vx, vy, vz, w):
+            return ux * vx + uy * vy + uz * vz
+
+        Kv = asm(bilinf_ev, basisv)
+        Kc = asm(bilinf_ec, basisc)
+
+        self.assertAlmostEqual(np.sum(np.sum((Kv - Kc).todense())), 0.)
+
+
 if __name__ == '__main__':
     unittest.main()

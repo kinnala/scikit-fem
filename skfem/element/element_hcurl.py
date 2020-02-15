@@ -1,5 +1,6 @@
 import numpy as np
-from .element import Element, DiscreteField
+from .element import Element
+from .discrete_field import DiscreteField
 
 
 class ElementHcurl(Element):
@@ -20,10 +21,11 @@ class ElementHcurl(Element):
         invDF = mapping.invDF(X, tind)
         detDF = mapping.detDF(X, tind)
         orient = self.orient(mapping, i, tind)
-        return DiscreteField(
+        return (DiscreteField(
             f  = np.einsum('ijkl,il,k->jkl', invDF, phi, orient),
-            df = np.einsum('ijkl,jl,kl->ikl', DF, dphi, 1/detDF*orient[:, None])
-        )
+            df = np.einsum('ijkl,jl,kl->ikl', DF, dphi,
+                           1. / detDF * orient[:, None])
+        ),)
 
     def lbasis(self, X, i):
-        raise Exception("ElementHcurl lbasis method not found.")
+        raise Exception("ElementHcurl.lbasis method not found.")

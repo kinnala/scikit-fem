@@ -71,6 +71,9 @@ class MeshTri(Mesh2D):
     meshio_type: str = "triangle"
     name: str = "Triangular"
 
+    t = np.zeros((3, 0), dtype=np.int64)
+    t2f = np.zeros((3, 0), dtype=np.int64)
+
     def __init__(self,
                  p: Optional[ndarray] = None,
                  t: Optional[ndarray] = None,
@@ -78,7 +81,7 @@ class MeshTri(Mesh2D):
                  subdomains: Optional[Dict[str, ndarray]] = None,
                  validate: Optional[bool] = True,
                  sort_t: Optional[bool] = True):
-        """Initialise a triangular mesh.
+        r"""Initialise a triangular mesh.
 
         If no arguments are given, initialises a mesh with the following
         topology::
@@ -168,7 +171,7 @@ class MeshTri(Mesh2D):
 
     @classmethod
     def init_symmetric(cls):
-        """Initialise a symmetric mesh of the unit square.
+        r"""Initialise a symmetric mesh of the unit square.
         
         The mesh topology is as follows::
 
@@ -193,7 +196,7 @@ class MeshTri(Mesh2D):
 
     @classmethod
     def init_sqsymmetric(cls: Type[MeshType]) -> MeshType:
-        """Initialise a symmetric mesh of the unit square.
+        r"""Initialise a symmetric mesh of the unit square.
         
         The mesh topology is as follows::
 
@@ -222,7 +225,7 @@ class MeshTri(Mesh2D):
 
     @classmethod
     def init_refdom(cls: Type[MeshType]) -> MeshType:
-        """Initialise a mesh that includes only the reference triangle.
+        r"""Initialise a mesh that includes only the reference triangle.
         
         The mesh topology is as follows::
 
@@ -244,7 +247,7 @@ class MeshTri(Mesh2D):
 
     @classmethod
     def init_lshaped(cls: Type[MeshType]) -> MeshType:
-        """Initialise a mesh for the L-shaped domain.
+        r"""Initialise a mesh for the L-shaped domain.
         
         The mesh topology is as follows::
 
@@ -279,9 +282,9 @@ class MeshTri(Mesh2D):
 
         # define facets: in the order (0,1) (1,2) (0,2)
         self.facets = np.sort(np.hstack((
-            self.t[[0, 1], :],
-            self.t[[1, 2], :],
-            self.t[[0, 2], :],
+            self.t[[0, 1]],
+            self.t[[1, 2]],
+            self.t[[0, 2]],
         )), axis=0)
 
         # get unique facets and build triangle-to-facet

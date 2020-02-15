@@ -2,7 +2,8 @@
 SciPy linear solvers."""
 
 import warnings
-from typing import Optional, Union, Tuple, Callable
+from typing import Optional, Union, Tuple,\
+    Callable, Dict
 
 import numpy as np
 import scipy.sparse as sp
@@ -15,15 +16,19 @@ from skfem.assembly import asm, bilinear_form, linear_form, Dofs
 from skfem.assembly.basis import Basis
 from skfem.element import ElementVectorH1
 
+
+# custom types for describing input and output values
+
+
 LinearSolver = Callable[[spmatrix, ndarray], ndarray]
 EigenSolver = Callable[[spmatrix, spmatrix], Tuple[ndarray, ndarray]]
-# complex type for describing the return value of :func:`skfem.utils.condense`
 CondensedSystem = Union[spmatrix,
                         Tuple[spmatrix, ndarray],
                         Tuple[spmatrix, spmatrix],
                         Tuple[spmatrix, ndarray, ndarray],
                         Tuple[spmatrix, ndarray, ndarray, ndarray],
                         Tuple[spmatrix, spmatrix, ndarray, ndarray]]
+DofsCollection = Union[ndarray, Dofs, Dict[str, Dofs]]
 
 
 # preconditioners, e.g. for :func:`skfem.utils.solver_iter_krylov`
@@ -173,11 +178,24 @@ def solve(A: spmatrix,
         return solver(A, b, **kwargs)
 
 
+def _flatten_dofs(S: DofsCollection) -> ndarray:
+    if S is None:
+        return None
+    else:
+        if isinstance(S, ndarray):
+            return S
+        elif isinstance(S, Dofs):
+            return S.all()
+        elif isinstance(S, dict):
+            return np.unique(np.concatenate([S[key].all() for key in S]))
+        raise ValueError("The set of DOF numbers cannot be flattened to an array.")
+
+
 def condense(A: spmatrix,
-             b: Optional[Union[ndarray, spmatrix]] = None,
-             x: Optional[ndarray] = None,
-             I: Optional[Union[ndarray, Dofs]] = None,
-             D: Optional[Union[ndarray, Dofs]] = None,
+             b: Union[ndarray, spmatrix] = None,
+             x: ndarray = None,
+             I: DofsCollection = None,
+             D: DofsCollection = None,
              expand: bool = True) -> CondensedSystem:
     """Eliminate DOF's from a linear system.
 
@@ -193,12 +211,9 @@ def condense(A: spmatrix,
     x
         The values of the condensed DOF's. If not given, assumed to be zero.
     I
-        The set of DOF numbers to keep. If :class:`skfem.assembly.Dofs` object
-        is given, then it's flattened via :meth:`skfem.assembly.Dofs.all`.
+        The set of DOF numbers to keep.
     D
-        The set of DOF numbers to dismiss.  If :class:`skfem.assembly.Dofs`
-        object is given, then it's flattened via
-        :meth:`skfem.assembly.Dofs.all`.
+        The set of DOF numbers to dismiss.
     expand
         If True, return x and I: :func:`skfem.utils.solve` will then expand the
         solution vector automatically. By default, the solution vector is not
@@ -210,11 +225,8 @@ def condense(A: spmatrix,
         The condensed system.
 
     """
-    if isinstance(D, Dofs):
-        D = D.all()
-
-    if isinstance(I, Dofs):
-        I = I.all()
+    D = _flatten_dofs(D)
+    I = _flatten_dofs(I)
 
     if x is None:
         x = np.zeros(A.shape[0])

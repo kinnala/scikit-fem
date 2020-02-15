@@ -18,6 +18,11 @@ def draw(m, **kwargs) -> Axes:
     raise NotImplementedError("Type {} not supported.".format(type(m)))
 
 
+@draw.register(InteriorBasis)
+def _(ib: InteriorBasis, **kwargs) -> Axes:
+    return draw(ib.mesh, **kwargs)
+
+
 @draw.register(MeshTet)
 def _(m: MeshTet, **kwargs) -> Axes:
     """Visualize a tetrahedral mesh by drawing the boundary facets."""

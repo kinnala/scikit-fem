@@ -3,8 +3,6 @@ from typing import Optional, Type, Dict
 import numpy as np
 from numpy import ndarray
 
-from skfem.element import ElementQuad1, ElementLineP1
-from skfem.mapping import MappingIsoparametric
 from .mesh2d import Mesh2D, MeshType
 from .mesh_tri import MeshTri
 
@@ -40,11 +38,13 @@ class MeshQuad(Mesh2D):
     (2, 50)
 
     """
-
     refdom: str = "quad"
     brefdom: str = "line"
     meshio_type: str = "quad"
     name: str = "Quadrilateral"
+
+    t = np.zeros((4, 0), dtype=np.int64)
+    t2f = np.zeros((4, 0), dtype=np.int64)
 
     def __init__(self,
                  p: Optional[ndarray] = None,
@@ -82,6 +82,19 @@ class MeshQuad(Mesh2D):
                     x: ndarray,
                     y: ndarray) -> MeshType:
         """Initialise a tensor product mesh.
+
+        The mesh topology is as follows::
+
+                   x
+            *-------------*
+            |   |  |      |
+            |---+--+------|
+            |   |  |      |
+            |   |  |      | y
+            |   |  |      |
+            |---+--+------|
+            |   |  |      |
+            *-------------*
 
         Parameters
         ----------
@@ -257,6 +270,8 @@ class MeshQuad(Mesh2D):
                        validate=False)
 
     def mapping(self):
+        from skfem.mapping import MappingIsoparametric
+        from skfem.element import ElementQuad1, ElementLineP1
         return MappingIsoparametric(self, ElementQuad1(), ElementLineP1())
 
     def element_finder(self):

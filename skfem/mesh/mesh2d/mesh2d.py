@@ -13,24 +13,24 @@ class Mesh2D(Mesh):
     - :class:`~skfem.mesh.MeshQuad`, quadrilateral mesh
 
     """
-
-    facets: ndarray = np.array([])
-    f2t: ndarray = np.array([])
-    t2f: ndarray = np.array([])
+    p = np.zeros((2, 0), dtype=np.float64)
+    facets = np.zeros((2, 0), dtype=np.int64)
+    f2t = np.zeros((2, 0), dtype=np.int64)
+    t2f = np.array([], dtype=np.int64)
 
     def mirror(self, a: float, b: float, c: float) -> MeshType:
         """Mirror a mesh by the line :math:`ax + by + c = 0`.  Returns a new
         :class:`~skfem.mesh.Mesh` object."""
-        tmp = -2.0*(a*self.p[0, :] + b*self.p[1, :] + c) / (a**2 + b**2)
-        newx = a*tmp + self.p[0, :]
-        newy = b*tmp + self.p[1, :]
+        tmp = -2. * (a * self.p[0] + b * self.p[1] + c) / (a ** 2 + b ** 2)
+        newx = a * tmp + self.p[0]
+        newy = b * tmp + self.p[1]
         newpoints = np.vstack((newx, newy))
         points = np.hstack((self.p, newpoints))
         tris = np.hstack((self.t, self.t + self.p.shape[1]))
 
         # remove duplicates
         tmp = np.ascontiguousarray(points.T)
-        tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)]*tmp.shape[1]),
+        tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]),
                                   return_index=True,
                                   return_inverse=True)
         points = points[:, ixa]

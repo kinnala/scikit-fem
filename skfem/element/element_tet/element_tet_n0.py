@@ -1,5 +1,6 @@
 import numpy as np
 from ..element_hcurl import ElementHcurl
+from ...mesh.mesh3d import MeshTet
 
 
 class ElementTetN0(ElementHcurl):
@@ -7,6 +8,7 @@ class ElementTetN0(ElementHcurl):
     dim = 3
     maxdeg = 1
     dofnames = ['u^t']
+    mesh_type = MeshTet
 
     def lbasis(self, X, i):
         x, y, z = X[0, :], X[1, :], X[2, :]
