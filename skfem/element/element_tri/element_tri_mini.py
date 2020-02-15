@@ -1,5 +1,7 @@
 import numpy as np
+
 from ..element_h1 import ElementH1
+from ...mesh.mesh2d import MeshTri
 
 
 class ElementTriMini(ElementH1):
@@ -12,6 +14,7 @@ class ElementTriMini(ElementH1):
                         [1., 0.],
                         [0., 1.],
                         [1./3., 1./3.]])
+    mesh_type = MeshTri
 
     def lbasis(self, X, i):
         x, y = X

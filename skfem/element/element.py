@@ -1,25 +1,11 @@
 from typing import Optional, Tuple, Union,\
     List, NamedTuple
 
+import numpy as np
 from numpy import ndarray
 
-
-class DiscreteField(NamedTuple):
-    """A function defined at the global quadrature points."""
-
-    f: Optional[ndarray] = None
-    df: Optional[ndarray] = None
-    ddf: Optional[ndarray] = None
-
-    def __array__(self):
-        return self.f
-
-    def __mul__(self, other):
-        if isinstance(other, DiscreteField):
-            return self.f * other.f
-        return self.f * other
-
-    __rmul__ = __mul__
+from ..mesh import Mesh
+from .discrete_field import DiscreteField
 
 
 class Element():
@@ -48,6 +34,8 @@ class Element():
         - 'u_x' indicates the derivative wrt x
         - 'u_n' indicates the normal derivative
         - ...
+    mesh_type
+        Mesh type for calculating number of edges, etc.
 
     """
     nodal_dofs: int = 0 
@@ -57,6 +45,7 @@ class Element():
     dim: int = -1
     maxdeg: int = -1
     dofnames: List[str] = []
+    mesh_type: Mesh = None
 
     def orient(self, mapping, i, tind=None):
         """Orient basis functions. By default all = 1."""
@@ -101,3 +90,27 @@ class Element():
     @classmethod
     def _index_error(cls):
         raise ValueError("Index larger than the number of basis functions.")
+
+    def _bfun_counts(self):
+        """Count number of nodal/edge/facet/interior basis functions.
+
+        Returns
+        -------
+        4-tuple of basis function counts.
+
+        """
+        return np.array([self.nodal_dofs * self.mesh_type.t.shape[0],
+                         self.edge_dofs * self.mesh_type.t2e.shape[0]\
+                         if hasattr(self.mesh_type, 'edges') else 0,
+                         self.facet_dofs * self.mesh_type.t2f.shape[0]\
+                         if hasattr(self.mesh_type, 'facets') else 0,
+                         self.interior_dofs])
+
+    def __mul__(self, other):
+
+        from .element_composite import ElementComposite
+
+        a = self.elems if isinstance(self, ElementComposite) else [self]
+        b = other.elems if isinstance(other, ElementComposite) else [other]
+
+        return ElementComposite(*a, *b)

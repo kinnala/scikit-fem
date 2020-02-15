@@ -2,10 +2,13 @@ language: python
 python:
   - "3.6"
   - "3.7"
+  - "3.8"
 install:
   - sudo apt-get update
-  - sudo apt-get install gmsh
-  - sudo apt-get install libsuitesparse-dev
+  - sudo apt-get install gmsh libsuitesparse-dev
+  - wget http://gmsh.info/bin/Linux/gmsh-4.5.2-Linux64.tgz
+  - tar zvxf gmsh-4.5.2-Linux64.tgz
+  - sudo cp gmsh-4.5.2-Linux64/bin/gmsh /usr/bin
   - wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
@@ -15,12 +18,7 @@ install:
   - conda info -a
   - conda create -q -n scikit-fem python=$TRAVIS_PYTHON_VERSION nomkl numpy scipy matplotlib ipython pip
   - source activate scikit-fem
-  - pip install meshio
-  - pip install dmsh
-  - pip install gmsh-sdk
-  - pip install pygmsh
-  - pip install scikit-sparse
-  - pip install pacopy
+  - pip install meshio dmsh scikit-sparse pacopy pygmsh
 script:
   - python -m unittest discover 
 deploy:

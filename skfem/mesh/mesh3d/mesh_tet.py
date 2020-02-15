@@ -41,6 +41,12 @@ class MeshTet(Mesh3D):
     meshio_type: str = "tetra"
     name: str = "Tetrahedral"
 
+    t = np.zeros((4, 0), dtype=np.int64)
+    t2f = np.zeros((4, 0), dtype=np.int64)
+    facets = np.zeros((3, 0), dtype=np.int64)
+    edges = np.zeros((2, 0), dtype=np.int64)
+    t2e = np.zeros((6, 0), dtype=np.int64)
+
     def __init__(self,
                  p: Optional[ndarray] = None,
                  t: Optional[ndarray] = None,

@@ -3,8 +3,6 @@ from typing import Optional, Type, Dict
 import numpy as np
 from numpy import ndarray
 
-from skfem.element import ElementQuad1, ElementLineP1
-from skfem.mapping import MappingIsoparametric
 from .mesh2d import Mesh2D, MeshType
 from .mesh_tri import MeshTri
 
@@ -40,11 +38,13 @@ class MeshQuad(Mesh2D):
     (2, 50)
 
     """
-
     refdom: str = "quad"
     brefdom: str = "line"
     meshio_type: str = "quad"
     name: str = "Quadrilateral"
+
+    t = np.zeros((4, 0), dtype=np.int64)
+    t2f = np.zeros((4, 0), dtype=np.int64)
 
     def __init__(self,
                  p: Optional[ndarray] = None,
@@ -82,6 +82,19 @@ class MeshQuad(Mesh2D):
                     x: ndarray,
                     y: ndarray) -> MeshType:
         """Initialise a tensor product mesh.
+
+        The mesh topology is as follows::
+
+                   x
+            *-------------*
+            |   |  |      |
+            |---+--+------|
+            |   |  |      |
+            |   |  |      | y
+            |   |  |      |
+            |---+--+------|
+            |   |  |      |
+            *-------------*
 
         Parameters
         ----------
@@ -229,7 +242,7 @@ class MeshQuad(Mesh2D):
 
     def _splitquads(self, x=None):
         """Split each quad into two triangles and return MeshTri."""
-        t = self.t[[0, 1, 3], :]
+        t = self.t[[0, 1, 3]]
         t = np.hstack((t, self.t[[1, 2, 3]]))
 
         if x is not None:
@@ -247,9 +260,9 @@ class MeshQuad(Mesh2D):
         """Split quads into four triangles."""
         t = np.vstack((self.t, np.arange(self.t.shape[1]) + self.p.shape[1]))
         newt = t[[0, 1, 4], :]
-        newt = np.hstack((newt, t[[1, 2, 4], :]))
-        newt = np.hstack((newt, t[[2, 3, 4], :]))
-        newt = np.hstack((newt, t[[3, 0, 4], :]))
+        newt = np.hstack((newt, t[[1, 2, 4]]))
+        newt = np.hstack((newt, t[[2, 3, 4]]))
+        newt = np.hstack((newt, t[[3, 0, 4]]))
         mx = np.sum(self.p[0, self.t], axis=0) / self.t.shape[0]
         my = np.sum(self.p[1, self.t], axis=0) / self.t.shape[0]
         return MeshTri(np.hstack((self.p, np.vstack((mx, my)))),
@@ -257,6 +270,8 @@ class MeshQuad(Mesh2D):
                        validate=False)
 
     def mapping(self):
+        from skfem.mapping import MappingIsoparametric
+        from skfem.element import ElementQuad1, ElementLineP1
         return MappingIsoparametric(self, ElementQuad1(), ElementLineP1())
 
     def element_finder(self):

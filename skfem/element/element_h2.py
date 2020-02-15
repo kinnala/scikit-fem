@@ -1,5 +1,6 @@
 import numpy as np
-from .element import Element, DiscreteField
+from .element import Element
+from .discrete_field import DiscreteField
 
 
 class ElementH2(Element):
@@ -43,7 +44,7 @@ class ElementH2(Element):
         # dxy = dyx
         ddu[1, 0] = ddu[0, 1]
 
-        return DiscreteField(f=u, df=du, ddf=ddu)
+        return (DiscreteField(f=u, df=du, ddf=ddu),)
 
     def _pbasis_create_xy(self, i, j, dx=0, dy=0):
         cx = 1

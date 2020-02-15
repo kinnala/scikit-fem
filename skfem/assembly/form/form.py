@@ -31,15 +31,15 @@ class Form:
 
     @staticmethod
     def dictify(w):
-        """Support classic-style input formats for 'w'."""
+        """Support some legacy input formats for 'w'."""
         if not isinstance(w, dict):
             if isinstance(w, DiscreteField):
                 w = {'w': w}
             elif isinstance(w, ndarray):
                 w = {'w': DiscreteField(w)}
             elif isinstance(w, list):
-                w = {'w': DiscreteField(np.array([z.f for z in w]),
-                                        np.array([z.df for z in w]))}
+                w = {'w': DiscreteField(np.array([z['w'].f for z in w]),
+                                        np.array([z['w'].df for z in w]))}
             elif isinstance(w, tuple):
                 w = {'w': DiscreteField(*w)}
             else:

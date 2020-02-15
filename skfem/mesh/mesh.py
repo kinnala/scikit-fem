@@ -12,7 +12,7 @@ DimTuple = Union[Tuple[float],
                  Tuple[float, float, float]]
 
 
-class Mesh():
+class Mesh:
     """A finite element mesh (abstract superclass).
 
     Attributes
@@ -46,18 +46,18 @@ class Mesh():
     meshio_type: str = "none"
     name: str = "Abstract"
 
-    p: ndarray = np.array([])
-    t: ndarray = np.array([])
+    p = np.array([], dtype=np.float64)
+    t = np.array([], dtype=np.int64)
 
-    subdomains: Optional[Dict[str, ndarray]] = None
-    boundaries: Optional[Dict[str, ndarray]] = None
+    subdomains: Dict[str, ndarray] = None
+    boundaries: Dict[str, ndarray] = None
 
     def __init__(self):
         """Check that p and t are C_CONTIGUOUS as this leads
         to better performance."""
         if self.p is not None:
             if not isinstance(self.p, ndarray):
-                self.p = np.array(self.p, dtype=np.float_)
+                self.p = np.array(self.p, dtype=np.float64)
             if self.p.flags['F_CONTIGUOUS']:
                 if self.p.shape[1] > 1000:
                     warnings.warn("Mesh.__init__(): Transforming "
@@ -65,7 +65,7 @@ class Mesh():
                 self.p = np.ascontiguousarray(self.p)
         if self.t is not None:
             if not isinstance(self.t, ndarray):
-                self.t = np.array(self.t, dtype=np.intp)
+                self.t = np.array(self.t, dtype=np.int64)
             if self.t.flags['F_CONTIGUOUS']:
                 if self.t.shape[1] > 1000:
                     warnings.warn("Mesh.__init__(): Transforming "
@@ -75,11 +75,11 @@ class Mesh():
         if self.boundaries is not None:
             for k, v in self.boundaries.items():
                 if not isinstance(v, ndarray):
-                    self.boundaries[k] = np.array(v, dtype=np.intp)
+                    self.boundaries[k] = np.array(v, dtype=np.int64)
         if self.subdomains is not None:
             for k, v in self.subdomains.items():
                 if not isinstance(v, ndarray):
-                    self.subdomains[k] = np.array(v, dtype=np.intp)
+                    self.subdomains[k] = np.array(v, dtype=np.int64)
 
     def __str__(self):
         return self.__repr__()
@@ -89,6 +89,7 @@ class Mesh():
                 "with " + str(self.p.shape[1]) + " vertices "
                 "and " + str(self.t.shape[1]) + " elements.")
 
+    @classmethod
     def dim(self):
         """Return the spatial dimension of the mesh."""
         return int(self.p.shape[0])
@@ -314,7 +315,7 @@ class Mesh():
                                   "for the given Mesh type.")
 
     def nodes_satisfying(self,
-                         test: Callable[[ndarray], bool],
+                         test: Callable[[ndarray], ndarray],
                          boundaries_only: bool = False) -> ndarray:
         """Return nodes that satisfy some condition.
 
@@ -333,7 +334,7 @@ class Mesh():
         return nodes
 
     def facets_satisfying(self,
-                          test: Callable[[ndarray], bool],
+                          test: Callable[[ndarray], ndarray],
                           boundaries_only: bool = False) -> ndarray:
         """Return facets whose midpoints satisfy some condition.
 
@@ -354,7 +355,7 @@ class Mesh():
         return facets
 
     def elements_satisfying(self,
-                            test: Callable[[ndarray], bool]) -> ndarray:
+                            test: Callable[[ndarray], ndarray]) -> ndarray:
         """Return elements whose midpoints satisfy some condition.
 
         Parameters
@@ -400,6 +401,27 @@ class Mesh():
             'boundaries': boundaries,
             'subdomains': subdomains,
         }
+
+    def define_boundary(self, name: str, test: Callable[[ndarray], ndarray]):
+        """Define a named boundary via function handle.
+
+        Parameters
+        ----------
+        name
+            Name of the boundary.
+        test
+            A function which returns True for facet midpoints belonging to the
+            boundary.
+
+        """
+        if self.boundaries is None:
+            self.boundaries = {}
+        self.boundaries[name] =\
+            self.facets_satisfying(test, boundaries_only=True)
+
+    def copy(self):
+        from copy import deepcopy
+        return deepcopy(self)
 
     @staticmethod
     def strip_extra_coordinates(p: ndarray) -> ndarray:

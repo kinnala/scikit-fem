@@ -1,5 +1,6 @@
 import numpy as np
-from .element import Element, DiscreteField
+from .element import Element
+from .discrete_field import DiscreteField
 
 
 class ElementVectorH1(Element):
@@ -19,6 +20,7 @@ class ElementVectorH1(Element):
                          for i in elem.dofnames
                          for j in range(self.dim)]
         self.maxdeg = elem.maxdeg
+        self.mesh_type = elem.mesh_type
 
         if hasattr(elem, 'doflocs'):
             self.doflocs = np.array([
@@ -29,19 +31,11 @@ class ElementVectorH1(Element):
     def gbasis(self, mapping, X, i, tind=None):
         ind = int(np.floor(float(i) / float(self.dim)))
         n = i - self.dim * ind
-        gbasis = self.elem.gbasis(mapping, X, ind, tind)
-        u = np.zeros((self.dim,) + gbasis.f.shape)
-        du = np.zeros((self.dim,) + gbasis.df.shape)
-        u[n] = gbasis.f
-        du[n] = gbasis.df
-        return DiscreteField(f=u, df=du)
-
-    def lbasis(self, X, i):
-        ind = int(np.floor(float(i) / float(self.dim)))
-        n = i - self.dim * ind
-        phi, dphi = self.elem.lbasis(X, ind)
-        u = np.zeros((self.dim,) + phi.shape)
-        du = np.zeros((self.dim,) + dphi.shape)
-        u[n] = phi
-        du[n] = dphi
-        return u, du
+        fields = []
+        for field in self.elem.gbasis(mapping, X, ind, tind)[0]:
+            if field is None:
+                continue
+            tmp = np.zeros((self.dim,) + field.shape)
+            tmp[n] = field
+            fields.append(tmp)
+        return (DiscreteField(*fields),)

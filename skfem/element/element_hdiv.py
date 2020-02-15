@@ -1,5 +1,6 @@
 import numpy as np
-from .element import Element, DiscreteField
+from .element import Element
+from .discrete_field import DiscreteField
 
 
 class ElementHdiv(Element):
@@ -16,11 +17,11 @@ class ElementHdiv(Element):
         DF = mapping.DF(X, tind)
         detDF = mapping.detDF(X, tind)
         orient = self.orient(mapping, i, tind)
-        return DiscreteField(
+        return (DiscreteField(
             f  = np.einsum('ijkl,jl,kl->ikl', DF, phi,
                            1. / np.abs(detDF) * orient[:, None]),
             df = dphi / (np.abs(detDF) * orient[:, None])
-        )
+        ),)
 
     def lbasis(self, X, i):
-        raise Exception("ElementHdiv lbasis method not found.")
+        raise Exception("ElementHdiv.lbasis method not found.")
