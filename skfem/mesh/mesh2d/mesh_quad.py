@@ -132,18 +132,18 @@ class MeshQuad(Mesh2D):
         
         The mesh topology is as follows::
 
-             (-1,1) *-------------* (1,1)
-                    |             |
-                    |             |
-                    |             |
-                    |             | 
-                    |             | 
-                    |             |
-                    |             |  
-            (-1,-1) *-------------* (1,-1)
+             (0,1) *-------------* (1,1)
+                   |             |
+                   |             |
+                   |             |
+                   |             |
+                   |             |
+                   |             |
+                   |             |
+             (0,0) *-------------* (1,0)
 
         """
-        p = np.array([[-1., -1.], [1., -1.], [1., 1.], [-1., 1.]]).T
+        p = np.array([[0., 0.], [1., 0.], [1., 1.], [0., 1.]]).T
         t = np.array([[0, 1, 2, 3]]).T
         return cls(p, t)
 
@@ -153,10 +153,10 @@ class MeshQuad(Mesh2D):
 
         # define facets: in the order (0,1) (1,2) (2,3) (0,3)
         self.facets = np.sort(np.hstack((
-            self.t[[0, 1], :],
-            self.t[[1, 2], :],
-            self.t[[2, 3], :],
-            self.t[[0, 3], :],
+            self.t[[0, 1]],
+            self.t[[1, 2]],
+            self.t[[2, 3]],
+            self.t[[0, 3]],
         )), axis=0)
 
         # get unique facets and build quad-to-facet mapping: 4 (edges) x Nquads
@@ -167,10 +167,10 @@ class MeshQuad(Mesh2D):
         self.t2f = ixb.reshape((4, self.t.shape[1]))
 
         # build facet-to-quadrilateral mapping: 2 (quads) x Nedges
-        e_tmp = np.hstack((self.t2f[0, :],
-                           self.t2f[1, :],
-                           self.t2f[2, :],
-                           self.t2f[3, :]))
+        e_tmp = np.hstack((self.t2f[0],
+                           self.t2f[1],
+                           self.t2f[2],
+                           self.t2f[3]))
         t_tmp = np.tile(np.arange(self.t.shape[1]), (1, 4))[0]
 
         e_first, ix_first = np.unique(e_tmp, return_index=True)
@@ -199,44 +199,44 @@ class MeshQuad(Mesh2D):
         mid = range(self.t.shape[1]) + np.max(t2f) + 1
         
         # new vertices are the midpoints of edges ...
-        newp1 = 0.5*np.vstack((p[0, e[0, :]] + p[0, e[1, :]],
-                               p[1, e[0, :]] + p[1, e[1, :]]))
+        newp1 = 0.5*np.vstack((p[0, e[0]] + p[0, e[1]],
+                               p[1, e[0]] + p[1, e[1]]))
 
         # ... and element middle points
-        newp2 = 0.25*np.vstack((p[0, t[0, :]] + p[0, t[1, :]] +
-                                p[0, t[2, :]] + p[0, t[3, :]],
-                                p[1, t[0, :]] + p[1, t[1, :]] +
-                                p[1, t[2, :]] + p[1, t[3, :]]))
+        newp2 = 0.25*np.vstack((p[0, t[0]] + p[0, t[1]] +
+                                p[0, t[2]] + p[0, t[3]],
+                                p[1, t[0]] + p[1, t[1]] +
+                                p[1, t[2]] + p[1, t[3]]))
         self.p = np.hstack((p, newp1, newp2))
 
         # build new quadrilateral definitions
         self.t = np.hstack((
-            np.vstack((t[0, :], t2f[0, :], mid, t2f[3, :])),
-            np.vstack((t2f[0, :], t[1, :], t2f[1, :], mid)),
-            np.vstack((mid, t2f[1, :], t[2, :], t2f[2, :])),
-            np.vstack((t2f[3, :], mid, t2f[2, :], t[3, :])),
+            np.vstack((t[0], t2f[0], mid, t2f[3])),
+            np.vstack((t2f[0], t[1], t2f[1], mid)),
+            np.vstack((mid, t2f[1], t[2], t2f[2])),
+            np.vstack((t2f[3], mid, t2f[2], t[3])),
             ))
 
         # build mapping between old and new facets
         new_facets = np.zeros((2, e.shape[1]), dtype=np.int64)
         ix0 = np.arange(t.shape[1], dtype=np.int64)
         ix1 = ix0 + t.shape[1]
-        ix2 = ix0 + 2*t.shape[1]
-        ix3 = ix0 + 3*t.shape[1]
+        ix2 = ix0 + 2 * t.shape[1]
+        ix3 = ix0 + 3 * t.shape[1]
 
         self._build_mappings()
 
-        new_facets[0, t2f[0, :] - sz] = self.t2f[0, ix0]
-        new_facets[1, t2f[0, :] - sz] = self.t2f[0, ix1]
+        new_facets[0, t2f[0] - sz] = self.t2f[0, ix0]
+        new_facets[1, t2f[0] - sz] = self.t2f[0, ix1]
 
-        new_facets[0, t2f[1, :] - sz] = self.t2f[1, ix1]
-        new_facets[1, t2f[1, :] - sz] = self.t2f[1, ix2]
+        new_facets[0, t2f[1] - sz] = self.t2f[1, ix1]
+        new_facets[1, t2f[1] - sz] = self.t2f[1, ix2]
 
-        new_facets[0, t2f[2, :] - sz] = self.t2f[2, ix2]
-        new_facets[1, t2f[2, :] - sz] = self.t2f[2, ix3]
+        new_facets[0, t2f[2] - sz] = self.t2f[2, ix2]
+        new_facets[1, t2f[2] - sz] = self.t2f[2, ix3]
 
-        new_facets[0, t2f[3, :] - sz] = self.t2f[3, ix3]
-        new_facets[1, t2f[3, :] - sz] = self.t2f[3, ix0]
+        new_facets[0, t2f[3] - sz] = self.t2f[3, ix3]
+        new_facets[1, t2f[3] - sz] = self.t2f[3, ix0]
 
         self._fix_boundaries(new_facets)
 

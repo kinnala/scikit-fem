@@ -129,9 +129,9 @@ class MappingIsoparametric(Mapping):
         else:
             raise NotImplementedError
 
-    def invF(self, x, tind=None, newton_max_iters = 50, newton_tol = 1e-8):
+    def invF(self, x, tind=None, newton_max_iters=50, newton_tol=1e-8):
         """Newton iteration for evaluating inverse isoparametric mapping."""
-        X = np.zeros(x.shape)
+        X = np.zeros(x.shape) + .5
         for _ in range(newton_max_iters):
             F = self.F(X, tind)
             invDF = self.invDF(X, tind)
@@ -193,20 +193,20 @@ class MappingIsoparametric(Mapping):
 
     def normals(self, X, tind, find, t2f):
         if self.dim == 1:
-            Nref = np.array([[-1.0],
-                             [ 1.0]])
+            Nref = np.array([[-1.],
+                             [ 1.]])
         elif self.dim == 2:
-            Nref = np.array([[0.0, -1.0],
-                             [1.0, 0.0],
-                             [0.0, 1.0],
-                             [-1.0, 0.0]])
+            Nref = np.array([[ 0., -1.],
+                             [ 1.,  0.],
+                             [ 0.,  1.],
+                             [-1.,  0.]])
         elif self.dim == 3:
-            Nref = np.array([[1.0, 0.0, 0.0],
-                             [0.0, 0.0, 1.0],
-                             [0.0, 1.0, 0.0],
-                             [0.0, -1.0, 0.0],
-                             [0.0, 0.0, -1.0],
-                             [-1.0, 0.0, 0.0]])
+            Nref = np.array([[ 1.,  0.,  0.],
+                             [ 0.,  0.,  1.],
+                             [ 0.,  1.,  0.],
+                             [ 0., -1.,  0.],
+                             [ 0.,  0., -1.],
+                             [-1.,  0.,  0.]])
         else:
             raise Exception("Not implemented for the given dimension.")
 
@@ -220,4 +220,4 @@ class MappingIsoparametric(Mapping):
 
         n = np.einsum('ijkl,ik->jkl', invDF, N)
         nlength = np.sqrt(np.sum(n ** 2, axis=0))
-        return np.einsum('ijk,jk->ijk', n, 1.0 / nlength)
+        return np.einsum('ijk,jk->ijk', n, 1. / nlength)
