@@ -68,4 +68,5 @@ __all__ = ['Mesh',
            'ElementTriRT0',
            'ElementVectorH1',
            'ElementLineP1',
-           'ElementLineP2']
+           'ElementLineP2',
+           'ElementLinePp']
