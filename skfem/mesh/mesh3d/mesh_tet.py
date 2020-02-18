@@ -3,7 +3,6 @@ from typing import Type, Optional, Dict
 import numpy as np
 from numpy import ndarray
 
-from skfem.mapping import MappingAffine
 from .mesh3d import Mesh3D
 from ..mesh import MeshType
 
@@ -446,4 +445,5 @@ class MeshTet(Mesh3D):
         return np.max(np.max(edgelenmat, axis=0)/np.min(edgelenmat, axis=0))
 
     def mapping(self):
+        from skfem.mapping import MappingAffine
         return MappingAffine(self)
