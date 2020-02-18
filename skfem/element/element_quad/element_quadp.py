@@ -30,27 +30,33 @@ class ElementQuadP(ElementLinePp):
 
         if i < 4:
             order = [(0, 0), (1, 0), (1, 1), (0, 1)]
-            return (self.Px[order[i][0]] * self.Py[order[i][1]],
-                    self.dPx[order[i][0]] * self.dPy[order[i][1]])
+            Px, Py = self.Px[order[i][0]], self.Py[order[i][1]]
+            dPx, dPy = self.dPx[order[i][0]], self.dPy[order[i][1]]
+
         elif i < 4 + 4 * self.facet_dofs:
             ind = ((i - 4) % self.facet_dofs) + 2
             n = (i - 4) // self.facet_dofs
             if n == 0:
-                return (self.Px[ind] * self.Py[0],
-                        self.dPx[ind] * self.dPy[0])
+                Px, Py = self.Px[ind], self.Py[0]
+                dPx, dPy = self.dPx[ind], self.dPy[0]
             elif n == 1:
-                return (self.Px[1] * self.Py[ind],
-                        self.dPx[1] * self.dPy[ind])
+                Px, Py = self.Px[1], self.Py[ind]
+                dPx, dPy = self.dPx[1], self.dPy[ind]
             elif n == 2:
-                return (self.Px[ind] * self.Py[1],
-                        self.dPx[ind] * self.dPy[1])
+                Px, Py = self.Px[ind], self.Py[1]
+                dPx, dPy = self.dPx[ind], self.dPy[1]
             elif n == 3:
-                return (self.Px[0] * self.Py[ind],
-                        self.dPx[0] * self.dPy[ind])
+                Px, Py = self.Px[0], self.Py[ind]
+                dPx, dPy = self.dPx[0], self.dPy[ind]
+
         else:
             # go through rest of the dofs in arbitrary order
             j = i - 4 - 4 * self.facet_dofs
             ix = (j // (self.p - 1)) + 2
             iy = (j % (self.p - 1)) + 2
-            return (self.Px[ix] * self.Py[iy],
-                    self.dPx[ix] * self.dPy[iy])            
+            Px, Py = self.Px[ix], self.Py[iy]
+            dPx, dPy = self.dPx[ix], self.dPy[iy]
+
+        return (Px * Py,
+                np.array([dPx[0] * Py,
+                          dPy[0] * Px]))
