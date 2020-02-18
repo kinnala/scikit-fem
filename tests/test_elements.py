@@ -11,15 +11,14 @@ class TestNodality(unittest.TestCase):
     N = 6
 
     def runTest(self):
+        Ih = np.zeros((self.N, self.N))
         for itr in range(self.N):
-            self.assertAlmostEqual(
-                self.elem.lbasis(
-                    self.elem.doflocs[itr, None].T, itr)[0], 1.0)
             for jtr in range(self.N):
-                if jtr is not jtr:
-                    self.assertAlmostEqual(
-                        self.elem.lbasis(
-                            self.elem.doflocs[itr, None].T, jtr)[0], 0.0)
+                Ih[itr, jtr] = self.elem.lbasis(
+                    self.elem.doflocs[itr, None].T,
+                    jtr
+                )[0][0]
+        self.assertTrue(np.sum(Ih - np.eye(self.N)) < 1e-17)
 
 
 class TestQuad2Nodality(TestNodality):
