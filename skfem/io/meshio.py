@@ -97,9 +97,10 @@ def from_meshio(m, force_mesh_type=None):
 
             # get index of corresponding Mesh.facets for each meshio
             # facet found in the dict
-            index = np.array([[dic[tuple(np.sort(mtmp.facets[:, i]))], i]
-                              for i in bndfacets
-                              if tuple(np.sort(mtmp.facets[:, i])) in dic])
+            index = np.array([[dic[f], i] for i, f in
+                              enumerate(tuple(np.sort(facet))
+                                        for facet in mtmp.facets.T)
+                              if f in dic])
 
             # read meshio tag numbers and names
             tags = index[:, 0]
