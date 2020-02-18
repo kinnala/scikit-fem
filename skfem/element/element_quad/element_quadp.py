@@ -57,6 +57,4 @@ class ElementQuadP(ElementLinePp):
             Px, Py = self.Px[ix], self.Py[iy]
             dPx, dPy = self.dPx[ix], self.dPy[iy]
 
-        return (Px * Py,
-                np.array([dPx[0] * Py,
-                          dPy[0] * Px]))
+        return Px * Py, np.array([dPx[0] * Py, dPy[0] * Px])

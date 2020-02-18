@@ -25,7 +25,7 @@ class ConvergenceLinePp(unittest.TestCase):
             return np.sin(np.pi * x[0]) * (np.pi ** 2) * v
 
         m = self.mesh
-        Nitrs = 10
+        Nitrs = 8
         L2s = np.zeros(Nitrs)
         H1s = np.zeros(Nitrs)
 
@@ -42,8 +42,8 @@ class ConvergenceLinePp(unittest.TestCase):
             # calculate error
             L2s[itr], H1s[itr] = self.compute_error(m, ib, x)
 
-        self.assertLess(H1s[-1], 1e-14)
-        self.assertLess(L2s[-1], 1e-14)
+        self.assertLess(H1s[-1], 1e-13)
+        self.assertLess(L2s[-1], 1e-13)
 
     def compute_error(self, m, basis, U):
         uh, duh, *_ = basis.interpolate(U)['w']
@@ -68,12 +68,13 @@ class ConvergenceQuadP(unittest.TestCase):
 
     def setUp(self):
         self.mesh = MeshQuad()
-        #self.mesh.refine(2)
-        #self.mesh.p[:, self.mesh.interior_nodes()] += 0.05 * self.mesh.p[:, self.mesh.interior_nodes()]
+        self.mesh.refine(1)
+        self.mesh.p[:, self.mesh.interior_nodes()] +=\
+            0.05 * self.mesh.p[:, self.mesh.interior_nodes()]
 
     def create_basis(self, m, p):
         e = ElementQuadP(p)
-        return InteriorBasis(m, e)
+        return InteriorBasis(m, e, intorder=p*p)
 
     def runTest(self):
 
@@ -84,7 +85,7 @@ class ConvergenceQuadP(unittest.TestCase):
                     np.sin(np.pi * x[1]) * (2.0 * np.pi ** 2) * v)
 
         m = self.mesh
-        Nitrs = 5
+        Nitrs = 9
         L2s = np.zeros(Nitrs)
         H1s = np.zeros(Nitrs)
 
@@ -101,8 +102,8 @@ class ConvergenceQuadP(unittest.TestCase):
             # calculate error
             L2s[itr], H1s[itr] = self.compute_error(m, ib, x)
 
-        self.assertLess(H1s[-1], 1e-14)
-        self.assertLess(L2s[-1], 1e-14)
+        self.assertLess(H1s[-1], 1e-10)
+        self.assertLess(L2s[-1], 1e-11)
 
     def compute_error(self, m, basis, U):
         uh, duh, *_ = basis.interpolate(U)['w']
@@ -114,7 +115,6 @@ class ConvergenceQuadP(unittest.TestCase):
                     np.sin(np.pi * y[1]))
 
         L2 = np.sqrt(np.sum(np.sum((uh - u(x.f)) ** 2 * dx, axis=1)))
-        import pdb; pdb.set_trace()
 
         def ux(y):
             return np.pi * (np.cos(np.pi * y[0]) *
