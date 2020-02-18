@@ -152,20 +152,36 @@ class Basis:
         n_facet = self.facet_dofs.shape[0]
         n_edge = self.edge_dofs.shape[0]
 
-        return Dofs(
-            nodal = {
-                self.dofnames[i]: self.nodal_dofs[i, nodal_ix]
-                for i in range(n_nodal) if self.dofnames[i] not in skip
-            },
-            facet = {
-                self.dofnames[i + n_nodal]: self.facet_dofs[i, facet_ix]
-                for i in range(n_facet) if self.dofnames[i] not in skip
-            },
-            edge = {
-                self.dofnames[i + n_nodal + n_facet]: self.edge_dofs[i, edge_ix]
-                for i in range(n_edge) if self.dofnames[i] not in skip
-            },
-        )
+        # group dofs based on 'dofnames' on different topological entities
+        nodals = {self.dofnames[i]: np.zeros((0, len(nodal_ix)), dtype=np.int64)
+                  for i in range(n_nodal) if self.dofnames[i] not in skip}
+        for i in range(n_nodal):
+            if self.dofnames[i] not in skip:
+                nodals[self.dofnames[i]] =\
+                    np.vstack((nodals[self.dofnames[i]],
+                               self.nodal_dofs[i, nodal_ix]))
+
+        facets = {self.dofnames[i + n_nodal]: np.zeros((0, len(facet_ix)), dtype=np.int64)
+                  for i in range(n_facet) if self.dofnames[i + n_nodal] not in skip}
+        for i in range(n_facet):
+            if self.dofnames[i + n_nodal] not in skip:
+                facets[self.dofnames[i + n_nodal]] =\
+                    np.vstack((facets[self.dofnames[i + n_nodal]],
+                               self.facet_dofs[i, facet_ix]))
+
+        edges = {
+            self.dofnames[i + n_nodal + n_facet]: np.zeros((0, len(edge_ix)), dtype=np.int64)
+            for i in range(n_edge) if self.dofnames[i + n_nodal + n_facet] not in skip
+        }
+        for i in range(n_edge):
+            if self.dofnames[i + n_nodal + n_facet] not in skip:
+                edges[self.dofnames[i + n_nodal + n_facet]] =\
+                    np.vstack((edges[self.dofnames[i + n_nodal + n_facet]],
+                               self.edge_dofs[i, edge_ix]))
+
+        return Dofs(nodal={k: nodals[k].flatten() for k in nodals},
+                    facet={k: facets[k].flatten() for k in facets},
+                    edge={k: edges[k].flatten() for k in edges})
 
     def boundary_dofs(self,
                       facets: Dict[str, ndarray] = None,
