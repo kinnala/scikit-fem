@@ -34,9 +34,14 @@ def from_meshio(m, force_mesh_type=None):
     if force_mesh_type is None:
         for k, v in MESH_TYPE_MAPPING.items():
             # find first if match
-            if k in m.cells:
-                meshio_type, mesh_type = (k, MESH_TYPE_MAPPING[k])
-                break
+            try:
+                if k not in m.cells_dict: # meshio >=4.0.0
+                    continue
+            except KeyError: # meshio <4.0.0
+                if k not in m.cells:
+                    continue
+            meshio_type, mesh_type = k, v
+            break
     else:
         meshio_type, mesh_type = (force_mesh_type,
                                   MESH_TYPE_MAPPING[force_mesh_type])
