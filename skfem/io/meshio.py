@@ -31,17 +31,15 @@ def from_meshio(m, force_mesh_type=None):
 
     """
 
+    # Is this is meshio >= 4 and Gmsh MSH >=4.1?
+    cells = m.cells_dict if hasattr(m, 'cells_dict') else m.cells
+
     if force_mesh_type is None:
         for k, v in MESH_TYPE_MAPPING.items():
             # find first if match
-            try:
-                if k not in m.cells_dict: # meshio >=4.0.0
-                    continue
-            except KeyError: # meshio <4.0.0
-                if k not in m.cells:
-                    continue
-            meshio_type, mesh_type = k, v
-            break
+            if k in cells:
+                meshio_type, mesh_type = k, v
+                break
     else:
         meshio_type, mesh_type = (force_mesh_type,
                                   MESH_TYPE_MAPPING[force_mesh_type])
@@ -55,8 +53,8 @@ def from_meshio(m, force_mesh_type=None):
 
     # create p and t
     p = np.ascontiguousarray(strip_extra_coordinates(m.points).T)
-    t = np.ascontiguousarray(m.cells[meshio_type].T)
-
+    t = np.ascontiguousarray(cells[meshio_type].T)
+    
     mtmp = mesh_type(p,
                      (t[[0, 4, 3, 1, 7, 5, 2, 6]]
                       if meshio_type == 'hexahedron'
