@@ -78,15 +78,20 @@ def from_meshio(m, force_mesh_type=None):
             return None
 
         # find subdomains
-        if meshio_type in m.cell_data and 'gmsh:physical' in m.cell_data[meshio_type]:
-            elements_tag = m.cell_data[meshio_type]['gmsh:physical']
+        try:
+            subdomains = {k: v[meshio_type]
+                          for k, v in m.cell_sets_dict.items()
+                          if meshio_type in v}
+        except KeyError:        # no cell_sets_dict in meshio<4
+            if meshio_type in m.cell_data and 'gmsh:physical' in m.cell_data[meshio_type]:
+                elements_tag = m.cell_data[meshio_type]['gmsh:physical']
 
-            subdomains = {}
-            tags = np.unique(elements_tag)
+                subdomains = {}
+                tags = np.unique(elements_tag)
 
-            for tag in tags:
-                t_set = np.nonzero(tag == elements_tag)[0]
-                subdomains[find_tagname(tag)] = t_set
+                for tag in tags:
+                    t_set = np.nonzero(tag == elements_tag)[0]
+                    subdomains[find_tagname(tag)] = t_set
 
         # find tagged boundaries
         if bnd_type in m.cell_data and 'gmsh:physical' in m.cell_data[bnd_type]:
