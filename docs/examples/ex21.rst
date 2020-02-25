@@ -93,7 +93,7 @@ eigenvalue problems if another sparse matrix is given as an argument instead of 
 
 .. literalinclude:: ex21.py
     :start-at: asm(mass, ib)			    
-    :end-at: complement_dofs
+    :end-at: solve
 
 Finally, we displace the mesh before drawing
 

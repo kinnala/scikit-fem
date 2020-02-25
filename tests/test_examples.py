@@ -210,5 +210,12 @@ class TestEx30(TestCase):
         self.assertAlmostEqual(psi0, 0.162/128, delta=1e-6)
 
 
+class TestEx31(TestCase):
+
+    def runTest(self):
+        from docs.examples.ex31 import L
+        self.assertAlmostEqual(L[0], 22.597202568397734, delta=1e-6)
+
+
 if __name__ == '__main__':
     main()

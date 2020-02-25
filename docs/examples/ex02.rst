@@ -109,12 +109,7 @@ is now two calls to :func:`~skfem.assembly.asm`:
     :end-at: asm(linf, ib)
 
 Next we demonstrate setting different boundary conditions on different parts of
-the boundary.  An easy way is to create facet index sets for each boundary:
-
-.. literalinclude:: ex02.py
-    :start-at: boundary
-    :lines: 1-5
-
+the boundary.  An easy way is to create facet index sets for each boundary.
 The corresponding degree-of-freedom numbers (i.e. rows and columns
 of the stiffness matrix) can be found using
 :meth:`~skfem.assembly.Basis.get_dofs`.

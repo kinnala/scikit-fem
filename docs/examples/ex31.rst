@@ -1,0 +1,25 @@
+.. _highordermesh:
+
+Curved elements
+---------------
+
+.. note::
+
+   This example is a stub. You could help us to improve it; see :ref:`contribute`.
+
+This example solves the eigenvalue problem
+
+.. math::
+
+   -\Delta u = \lambda u \quad \text{in $\Omega$},
+
+with the boundary condition :math:`u|_{\partial \Omega} = 0` using isoparametric
+mapping via biquadratic basis and finite element approximation using fifth-order
+quadrilaterals.
+
+.. figure:: ex31_eigenmode.png
+
+    The sixth eigenmode.
+
+.. literalinclude:: ex31.py
+   :linenos:
