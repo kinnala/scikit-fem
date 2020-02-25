@@ -16,7 +16,13 @@ class ElementQuadP(ElementLinePp):
         self.interior_dofs = (p + 1) ** 2 - 4 * self.facet_dofs - 4
         self.maxdeg = p ** 2
         self.dofnames = (1 + self.facet_dofs + self.interior_dofs) * ['u']
-        #self.doflocs = np.array([[0., 1.] + [.5] * (p - 1)]).T
+        flocs = np.linspace(0, 1, self.facet_dofs + 2)[1:-1] if self.facet_dofs > 0 else []
+        self.doflocs = np.array([[0., 0.], [1., 0.], [1., 1.], [0., 1.]] +\
+                                [[x, 0.] for x in flocs] +\
+                                [[1., y] for y in flocs] +\
+                                [[-x + 1., 1.] for x in flocs] +\
+                                [[0., y] for y in flocs] +\
+                                [[.5, .5] for i in range(self.interior_dofs)])
         self.Px, self.Py = np.zeros((0, 0)), np.zeros((0, 0))
         self.dPx, self.dPy = np.zeros((0, 0, 1)), np.zeros((0, 0, 1))
         self.p = p

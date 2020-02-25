@@ -278,6 +278,16 @@ class Mesh:
         meshio.write(filename, mesh, **kwargs)
 
     @classmethod
+    def from_basis(cls: Type[MeshType], basis):
+        """Initialize a high-order mesh from :class:`skfem.assembly.Basis`."""
+        if not isinstance(basis.mesh, cls):
+            raise ValueError("Mesh and Basis must be compatible.")
+        mesh = basis.mesh.copy()
+        mesh.p = basis.doflocs
+        mesh.t = basis.element_dofs
+        return mesh
+
+    @classmethod
     def load(cls: Type[MeshType], filename: str) -> MeshType:
         """Import a mesh from a file using `meshio
         <https://github.com/nschloe/meshio>`_.
