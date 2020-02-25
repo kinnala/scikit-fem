@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New-style form constructors `BilinearForm`, `LinearForm`, and `Functional`
 - `MortarBasis` and `MortarPair` for supporting mortar methods in 2D
 - `skfem.io.json` for serialization of meshes to json-files
+- `ElementLinePp`, p-th order one-dimensional elements
+- `ElementQuadP`, p-th order quadrilateral elements
 - `ElementQuadDG` for transforming H1 elements to DG elements
 - `ElementTriMini`, MINI-element for Stokes problems
 - `ElementComposite` for using many elements in one bilinear form
