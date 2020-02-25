@@ -22,7 +22,7 @@ setup(
         'Topic :: Scientific/Engineering :: Mathematics',
     ],
     packages=find_packages(exclude=['tests']),
-    install_requires=['numpy', 'scipy', 'meshio'],
+    install_requires=['numpy', 'scipy', 'meshio>=4.0.4'],
     extras_require={
         'full': ['matplotlib'],
     },
