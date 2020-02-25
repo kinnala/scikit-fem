@@ -31,11 +31,13 @@ def from_meshio(m, force_mesh_type=None):
 
     """
 
+    cells = m.cells_dict
+
     if force_mesh_type is None:
         for k, v in MESH_TYPE_MAPPING.items():
             # find first if match
-            if k in m.cells:
-                meshio_type, mesh_type = (k, MESH_TYPE_MAPPING[k])
+            if k in cells:
+                meshio_type, mesh_type = k, v
                 break
     else:
         meshio_type, mesh_type = (force_mesh_type,
@@ -50,7 +52,7 @@ def from_meshio(m, force_mesh_type=None):
 
     # create p and t
     p = np.ascontiguousarray(strip_extra_coordinates(m.points).T)
-    t = np.ascontiguousarray(m.cells[meshio_type].T)
+    t = np.ascontiguousarray(cells[meshio_type].T)
 
     mtmp = mesh_type(p,
                      (t[[0, 4, 3, 1, 7, 5, 2, 6]]
@@ -74,10 +76,21 @@ def from_meshio(m, force_mesh_type=None):
                     return key
             return None
 
-        # find subdomains
-        if meshio_type in m.cell_data and 'gmsh:physical' in m.cell_data[meshio_type]:
-            elements_tag = m.cell_data[meshio_type]['gmsh:physical']
-
+        bndfacets = mtmp.boundary_facets()
+        if m.cell_sets:         # MSH 4.1
+            subdomains = {k: v[meshio_type]
+                          for k, v in m.cell_sets_dict.items()
+                          if meshio_type in v}
+            facets = {k: [tuple(f) for f in
+                          np.sort(m.cells_dict[bnd_type][v[bnd_type]])]
+                      for k, v in m.cell_sets_dict.items()
+                      if bnd_type in v}
+            boundaries = {k: np.array([i for i, f in
+                                       enumerate(map(tuple, mtmp.facets.T))
+                                       if f in v and i in bndfacets])
+                          for k, v in facets.items()}
+        else: # MSH 2.2?
+            elements_tag = m.cell_data_dict['gmsh:physical'][meshio_type]
             subdomains = {}
             tags = np.unique(elements_tag)
 
@@ -85,11 +98,10 @@ def from_meshio(m, force_mesh_type=None):
                 t_set = np.nonzero(tag == elements_tag)[0]
                 subdomains[find_tagname(tag)] = t_set
 
-        # find tagged boundaries
-        if bnd_type in m.cell_data and 'gmsh:physical' in m.cell_data[bnd_type]:
-            facets = m.cells[bnd_type]
-            facets_tag = m.cell_data[bnd_type]['gmsh:physical']
-            bndfacets = mtmp.boundary_facets()
+            # find tagged boundaries
+            if bnd_type in m.cell_data_dict['gmsh:physical']:
+                facets = m.cells_dict[bnd_type]
+                facets_tag = m.cell_data_dict['gmsh:physical'][bnd_type]
 
             # put meshio facets to dict
             dic = {tuple(np.sort(facets[i])): facets_tag[i]
