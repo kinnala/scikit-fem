@@ -53,7 +53,7 @@ def from_meshio(m, force_mesh_type=None):
     # create p and t
     p = np.ascontiguousarray(strip_extra_coordinates(m.points).T)
     t = np.ascontiguousarray(cells[meshio_type].T)
-    
+
     mtmp = mesh_type(p,
                      (t[[0, 4, 3, 1, 7, 5, 2, 6]]
                       if meshio_type == 'hexahedron'
@@ -93,7 +93,7 @@ def from_meshio(m, force_mesh_type=None):
             elements_tag = m.cell_data_dict['gmsh:physical'][meshio_type]
             subdomains = {}
             tags = np.unique(elements_tag)
-            
+
             for tag in tags:
                 t_set = np.nonzero(tag == elements_tag)[0]
                 subdomains[find_tagname(tag)] = t_set
