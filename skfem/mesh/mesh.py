@@ -416,8 +416,7 @@ class Mesh:
         """
         if self.boundaries is None:
             self.boundaries = {}
-        self.boundaries[name] =\
-            self.facets_satisfying(test, boundaries_only=True)
+        self.boundaries[name] = self.facets_satisfying(test)
 
     def copy(self):
         from copy import deepcopy
