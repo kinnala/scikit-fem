@@ -17,6 +17,14 @@ class MeshTests(unittest.TestCase):
         M = m.remove_elements(np.array([0]))
         self.assertEqual(M.t.shape[1], 7)
 
+        # Mesh.define_boundary
+        m.define_boundary('foo', lambda x: x[0] == 0.)
+        self.assertEqual(m.boundaries['foo'].size, 2)
+
+        # Mesh.define_boundary (internal)
+        m.define_boundary('bar', lambda x: x[0] == 1./2)
+        self.assertEqual(m.boundaries['bar'].size, 2)
+
         # Mesh.scale, Mesh.translate
         m = MeshHex()
         m.scale(0.5)
