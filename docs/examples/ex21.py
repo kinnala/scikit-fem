@@ -30,15 +30,10 @@ D = np.concatenate((
         dofs['fixed'].nodal['u^3'],
 ))
 
-I = ib.complement_dofs(D)
-
-L, x = solve(*condense(K, M, I=I))
-
-y = np.zeros(K.shape[0])
-y[I] = x[:, 0]
+L, x = solve(*condense(K, M, D=D))
 
 if __name__ == "__main__":
     from skfem.visuals.matplotlib import draw, show
     sf = 2.0
-    draw(MeshTet(np.array(m.p + sf * y[ib.nodal_dofs]), m.t))
+    draw(MeshTet(np.array(m.p + sf * x[ib.nodal_dofs, 0]), m.t))
     show()
