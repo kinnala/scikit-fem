@@ -16,9 +16,12 @@ class TestCompositeSplitting(TestCase):
 
         m.define_boundary('up', lambda x: x[1] == 1.)
         m.define_boundary('rest', lambda x: x[1] != 1.)
-
+        
         basis = InteriorBasis(m, e)
-
+        self.assertEqual(
+            basis.get_dofs({'foo': lambda x: x[0] == .5})['foo'].all().size,
+            (2 + 1) * 17 + 2 * 16)
+        
         @BilinearForm
         def bilinf(u, p, v, q, w):
             from skfem.helpers import grad, ddot, div
