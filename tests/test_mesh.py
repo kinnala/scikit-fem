@@ -22,7 +22,7 @@ class MeshTests(unittest.TestCase):
         self.assertEqual(m.boundaries['foo'].size, 2)
 
         # Mesh.define_boundary (internal)
-        m.define_boundary('bar', lambda x: x[0] == 1./2)
+        m.define_boundary('bar', lambda x: x[0] == 1./2, boundaries_only=False)
         self.assertEqual(m.boundaries['bar'].size, 2)
 
         # Mesh.scale, Mesh.translate
