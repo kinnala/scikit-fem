@@ -6,11 +6,12 @@ from skfem.models.helpers import dot, ddot,\
 import numpy as np
 from skfem.io import from_meshio
 from skfem.io.json import from_file, to_file
-
+from pathlib import Path
 
 # create meshes
+mesh_file = Path(__file__).with_name("ex04_mesh.json")
 try:
-    m = from_file("docs/examples/ex04_mesh.json")
+    m = from_file(mesh_file)
 except FileNotFoundError:
     from pygmsh import generate_mesh
     from pygmsh.built_in import Geometry
@@ -26,7 +27,7 @@ except FileNotFoundError:
     geom.add_physical(lines[-1], 'dirichlet')
     geom.add_physical(geom.add_plane_surface(geom.add_line_loop(lines)), 'domain')
     m = from_meshio(generate_mesh(geom, dim=2))
-    to_file(m, "docs/examples/ex04_mesh.json")
+    to_file(m, mesh_file)
 
 M = MeshLine(np.linspace(0, 1, 6)) * MeshLine(np.linspace(-1, 1, 10))
 M.translate((1.0, 0.0))
