@@ -20,7 +20,7 @@ class TestCompositeSplitting(TestCase):
 
         m.define_boundary('up', lambda x: x[1] == 1.)
         m.define_boundary('rest', lambda x: x[1] != 1.)
-        
+
         basis = InteriorBasis(m, e)
         self.assertEqual(
             basis.get_dofs(m.boundaries['centreline']).all().size,
