@@ -86,14 +86,18 @@ class RefinePreserveSubsets(unittest.TestCase):
         for mtype in (MeshTri, MeshQuad):
             m = mtype()
             m.refine(2)
-            handle = lambda x: x[0] == 0.0
-            m.boundaries = {'test': m.facets_satisfying(handle)}
+            boundaries = [('external', lambda x: x[0] == 0.0 or x[0] == 1.0),
+                          ('internal', lambda x: x[0] == 0.5)]
+            for name, handle in boundaries:
+                m.define_boundary(name, handle, boundaries_only=False)
             m.refine()
-            self.assertTrue((np.sort(m.boundaries['test'])
-                             == np.sort(m.facets_satisfying(handle))).all())
+            for name, handle in boundaries:
+                self.assertTrue((np.sort(m.boundaries[name])
+                                 == np.sort(m.facets_satisfying(handle))).all())
             m.refine(2)
-            self.assertTrue((np.sort(m.boundaries['test'])
-                             == np.sort(m.facets_satisfying(handle))).all())
+            for name, handle in boundaries:
+                self.assertTrue((np.sort(m.boundaries[name])
+                                 == np.sort(m.facets_satisfying(handle))).all())
 
 
 class SaveLoadCycle(unittest.TestCase):
