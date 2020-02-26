@@ -3,7 +3,6 @@ from typing import Optional, Type, Dict
 import numpy as np
 from numpy import ndarray
 
-from skfem.mapping import MappingAffine
 from .mesh2d import Mesh2D, MeshType
 
 
@@ -442,6 +441,7 @@ class MeshTri(Mesh2D):
         self._build_mappings()
 
     def mapping(self):
+        from skfem.mapping import MappingAffine
         return MappingAffine(self)
 
     def element_finder(self):

@@ -51,19 +51,8 @@ def build_pc_diag(A: spmatrix) -> spmatrix:
 # solvers for :func:`skfem.utils.solve`
 
 
-def solver_eigen_scipy(sigma: float,
-                       n: Optional[int] = 3,
-                       mode: Optional[str] = 'normal',
-                       **kwargs) -> EigenSolver:
+def solver_eigen_scipy(**kwargs) -> EigenSolver:
     """Solve generalized eigenproblem using SciPy (ARPACK).
-
-    Parameters
-    ----------
-    sigma
-        The parameter for spectral shift, choose a value near the
-        expected eigenvalues.
-    n
-        The number of eigenpairs to solve.
 
     Returns
     -------
@@ -71,10 +60,16 @@ def solver_eigen_scipy(sigma: float,
         A solver function that can be passed to :func:`solve`.
 
     """
+    params = {
+        'sigma': 10,
+        'k': 5,
+        'mode': 'normal',
+    }
+    params.update(kwargs)
     def solver(K, M, **solve_time_kwargs):
-        kwargs.update(solve_time_kwargs)
+        params.update(solve_time_kwargs)
         from scipy.sparse.linalg import eigsh
-        return eigsh(K, M=M, **{'sigma': sigma, 'k': n, 'mode': mode, **kwargs})
+        return eigsh(K, M=M, **params)
     return solver
 
 
@@ -165,15 +160,20 @@ def solve(A: spmatrix,
     """
     if solver is None:
         if isinstance(b, spmatrix):
-            solver = solver_eigen_scipy(10.0, **kwargs)
-            return solver(A, b)
+            solver = solver_eigen_scipy(**kwargs)
         elif isinstance(b, ndarray):
             solver = solver_direct_scipy(**kwargs)
 
     if x is not None and I is not None:
-        y = x.copy()
-        y[I] = solver(A, b, **kwargs)
-        return y
+        if isinstance(b, spmatrix):
+            L, X = solver(A, b, **kwargs)
+            y = np.tile(x.copy()[:, None], (1, X.shape[1]))
+            y[I] = X
+            return L, y
+        else:
+            y = x.copy()
+            y[I] = solver(A, b, **kwargs)
+            return y
     else:
         return solver(A, b, **kwargs)
 
@@ -304,11 +304,11 @@ def derivative(x: ndarray,
 
     @bilinear_form
     def deriv(u, du, v, dv, w):
-        return du[i]*v
+        return du[i] * v
 
     @bilinear_form
     def mass(u, du, v, dv, w):
-        return u*v
+        return u * v
 
     A = asm(deriv, basis1, basis0)
     M = asm(mass, basis0)

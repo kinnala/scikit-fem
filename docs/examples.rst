@@ -23,6 +23,7 @@ Poisson equation
    examples/ex22.rst
    examples/ex15.rst
    examples/ex06.rst
+   examples/ex31.rst
 
 Heat transfer
 #############

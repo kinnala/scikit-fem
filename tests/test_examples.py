@@ -140,11 +140,11 @@ class TestEx20(TestCase):
 class TestEx21(TestCase):
     def runTest(self):
         import docs.examples.ex21 as ex
-        y = ex.y
+        x = ex.x
         K = ex.K
         L = ex.L[0]
         self.assertAlmostEqual(L, 40085.40062937357, 4)
-        self.assertAlmostEqual(L, y.T @ K @ y, 4)
+        self.assertAlmostEqual(L, x[:, 0].T @ K @ x[:, 0], 4)
 
 
 class TestEx22(TestCase):
@@ -208,6 +208,13 @@ class TestEx30(TestCase):
     def runTest(self):
         from docs.examples.ex30 import psi0
         self.assertAlmostEqual(psi0, 0.162/128, delta=1e-6)
+
+
+class TestEx31(TestCase):
+
+    def runTest(self):
+        from docs.examples.ex31 import L
+        self.assertAlmostEqual(L[0], 22.597202568397734, delta=1e-6)
 
 
 if __name__ == '__main__':

@@ -3,8 +3,6 @@ from typing import Type, Optional, Dict
 import numpy as np
 from numpy import ndarray
 
-from skfem.mapping import MappingAffine
-from .mesh2d.mesh_quad import MeshQuad
 from ..mesh import Mesh, MeshType
 
 
@@ -135,12 +133,14 @@ class MeshLine(Mesh):
 
     def __mul__(self, other):
         """Tensor product mesh."""
-        return MeshQuad.init_tensor(self.p[0, :], other.p[0, :])
+        from .mesh2d.mesh_quad import MeshQuad
+        return MeshQuad.init_tensor(self.p[0], other.p[0])
 
     def param(self):
         return np.max(np.abs(self.p[0, self.t[1, :]] - self.p[0, self.t[0, :]]))
 
     def mapping(self):
+        from skfem.mapping import MappingAffine
         return MappingAffine(self)
 
     @staticmethod

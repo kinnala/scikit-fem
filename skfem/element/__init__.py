@@ -23,8 +23,8 @@ from .element_tri import ElementTriP1, ElementTriP2, ElementTriDG,\
     ElementTriP0, ElementTriRT0, ElementTriMorley,\
     ElementTriArgyris, ElementTriMini
 from .element_quad import ElementQuad0, ElementQuad1, ElementQuad2,\
-    ElementQuadS2, ElementQuadDG
+    ElementQuadS2, ElementQuadDG, ElementQuadP
 from .element_tet import ElementTetP0, ElementTetP1, ElementTetP2,\
     ElementTetRT0, ElementTetN0
 from .element_hex import ElementHex1
-from .element_line import ElementLineP1, ElementLineP2
+from .element_line import ElementLineP1, ElementLineP2, ElementLinePp

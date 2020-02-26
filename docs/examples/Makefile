@@ -12,7 +12,8 @@ all: ex01_solution.png \
      ex27-150.0-psi.png ex27-450.0-psi.png ex27-750.0-psi.png \
      ex28.png ex28-inlet-outlet.png \
      ex29.png \
-     ex30_stream-lines.png
+     ex30_stream-lines.png \
+     ex31_eigenmode.png
 %.png: %.py
 	python $<
 %_solution.png: %.py
