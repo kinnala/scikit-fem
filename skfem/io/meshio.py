@@ -76,7 +76,6 @@ def from_meshio(m, force_mesh_type=None):
                     return key
             return None
 
-        bndfacets = mtmp.boundary_facets()
         if m.cell_sets:         # MSH 4.1
             subdomains = {k: v[meshio_type]
                           for k, v in m.cell_sets_dict.items()
@@ -87,7 +86,7 @@ def from_meshio(m, force_mesh_type=None):
                       if bnd_type in v}
             boundaries = {k: np.array([i for i, f in
                                        enumerate(map(tuple, mtmp.facets.T))
-                                       if f in v and i in bndfacets])
+                                       if f in v])
                           for k, v in facets.items()}
         else: # MSH 2.2?
             elements_tag = m.cell_data_dict['gmsh:physical'][meshio_type]
@@ -110,7 +109,7 @@ def from_meshio(m, force_mesh_type=None):
             # get index of corresponding Mesh.facets for each meshio
             # facet found in the dict
             index = np.array([[dic[tuple(np.sort(mtmp.facets[:, i]))], i]
-                              for i in bndfacets
+                              for i in mtmp.boundary_facets()
                               if tuple(np.sort(mtmp.facets[:, i])) in dic])
 
             # read meshio tag numbers and names

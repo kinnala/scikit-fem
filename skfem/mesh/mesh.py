@@ -412,7 +412,8 @@ class Mesh:
             'subdomains': subdomains,
         }
 
-    def define_boundary(self, name: str, test: Callable[[ndarray], ndarray]):
+    def define_boundary(self, name: str, test: Callable[[ndarray], ndarray],
+                        boundaries_only: bool = True):
         """Define a named boundary via function handle.
 
         Parameters
@@ -422,12 +423,13 @@ class Mesh:
         test
             A function which returns True for facet midpoints belonging to the
             boundary.
-
+        boundaries_only
+            If True, include only facets on the boundary of the mesh.
+            
         """
         if self.boundaries is None:
             self.boundaries = {}
-        self.boundaries[name] =\
-            self.facets_satisfying(test, boundaries_only=True)
+        self.boundaries[name] = self.facets_satisfying(test, boundaries_only)
 
     def copy(self):
         from copy import deepcopy
