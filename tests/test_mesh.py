@@ -17,6 +17,14 @@ class MeshTests(unittest.TestCase):
         M = m.remove_elements(np.array([0]))
         self.assertEqual(M.t.shape[1], 7)
 
+        # Mesh.define_boundary
+        m.define_boundary('foo', lambda x: x[0] == 0.)
+        self.assertEqual(m.boundaries['foo'].size, 2)
+
+        # Mesh.define_boundary (internal)
+        m.define_boundary('bar', lambda x: x[0] == 1./2, boundaries_only=False)
+        self.assertEqual(m.boundaries['bar'].size, 2)
+
         # Mesh.scale, Mesh.translate
         m = MeshHex()
         m.scale(0.5)
@@ -75,17 +83,21 @@ class RefinePreserveSubsets(unittest.TestCase):
     """Check that uniform refinement preserves named boundaries."""
 
     def runTest(self):
-        for mtype in (MeshTri, MeshQuad):
+        for mtype in (MeshLine, MeshTri, MeshQuad):
             m = mtype()
             m.refine(2)
-            handle = lambda x: x[0] == 0.0
-            m.boundaries = {'test': m.facets_satisfying(handle)}
+            boundaries = [('external', lambda x: x[0] * (1. - x[0]) == 0.0),
+                          ('internal', lambda x: x[0] == 0.5)]
+            for name, handle in boundaries:
+                m.define_boundary(name, handle, boundaries_only=False)
             m.refine()
-            self.assertTrue((np.sort(m.boundaries['test'])
-                             == np.sort(m.facets_satisfying(handle))).all())
+            for name, handle in boundaries:
+                self.assertTrue((np.sort(m.boundaries[name])
+                                 == np.sort(m.facets_satisfying(handle))).all())
             m.refine(2)
-            self.assertTrue((np.sort(m.boundaries['test'])
-                             == np.sort(m.facets_satisfying(handle))).all())
+            for name, handle in boundaries:
+                self.assertTrue((np.sort(m.boundaries[name])
+                                 == np.sort(m.facets_satisfying(handle))).all())
 
 
 class SaveLoadCycle(unittest.TestCase):
