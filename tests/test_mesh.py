@@ -83,10 +83,10 @@ class RefinePreserveSubsets(unittest.TestCase):
     """Check that uniform refinement preserves named boundaries."""
 
     def runTest(self):
-        for mtype in (MeshTri, MeshQuad):
+        for mtype in (MeshLine, MeshTri, MeshQuad):
             m = mtype()
             m.refine(2)
-            boundaries = [('external', lambda x: x[0] == 0.0 or x[0] == 1.0),
+            boundaries = [('external', lambda x: x[0] * (1. - x[0]) == 0.0),
                           ('internal', lambda x: x[0] == 0.5)]
             for name, handle in boundaries:
                 m.define_boundary(name, handle, boundaries_only=False)
