@@ -18,9 +18,13 @@ class TestCompositeSplitting(TestCase):
         m.define_boundary('rest', lambda x: x[1] != 1.)
         
         basis = InteriorBasis(m, e)
+        centreline = {'foo': m.facets_satisfying(lambda x: x[0] == .5)}
         self.assertEqual(
-            basis.get_dofs({'foo': lambda x: x[0] == .5})['foo'].all().size,
-            (2 + 1) * 17 + 2 * 16)
+            basis.get_dofs(centreline)['foo'].all().size,
+            (2 + 1) * (2**4 + 1) + 2 * 2**4)
+        self.assertEqual(basis.boundary_dofs(centreline)['foo'].all().size,
+                         (2 + 1) * (2**4 + 1) + 2 * 2**4)
+
         
         @BilinearForm
         def bilinf(u, p, v, q, w):
