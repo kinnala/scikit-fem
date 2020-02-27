@@ -1,4 +1,4 @@
-import unittest
+from unittest import TestCase, main
 
 import numpy as np
 from numpy.testing import assert_array_equal
@@ -6,7 +6,7 @@ from numpy.testing import assert_array_equal
 from skfem import *
 
 
-class TestNodality(unittest.TestCase):
+class TestNodality(TestCase):
     elem = ElementTriP2()
     N = 6
 
@@ -66,7 +66,7 @@ class TestLineP2Nodality(TestNodality):
     N = 3
 
 
-class TestComposite(unittest.TestCase):
+class TestComposite(TestCase):
 
     def runTest(self):
         from skfem.element.element_composite import ElementComposite
@@ -106,5 +106,25 @@ class TestCompositeMul(TestComposite):
         )
 
 
+class TestCompatibilityWarning(TestCase):
+
+    meshes = [
+        MeshTet,
+        MeshQuad,
+        MeshHex,
+        MeshLine,
+    ]
+    elem = ElementTriP1
+
+    def runTest(self):
+
+        for m in self.meshes:
+
+            def init_incompatible():
+                return InteriorBasis(m(), self.elem())
+
+            self.assertRaises(ValueError, init_incompatible)
+
+
 if __name__ == '__main__':
-    unittest.main()
+    main()

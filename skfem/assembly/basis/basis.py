@@ -38,6 +38,9 @@ class Basis:
 
         self._build_dofnum(mesh, elem)
 
+        if not isinstance(mesh, elem.mesh_type):
+            raise ValueError("Incompatible Mesh and Element.")
+
         # human readable names
         self.dofnames = elem.dofnames
 
