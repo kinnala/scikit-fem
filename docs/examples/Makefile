@@ -18,6 +18,8 @@ all: ex01_solution.png \
 	python $<
 %_solution.png: %.py
 	python $<
+%_eigenmode.png: %.py
+	python $<
 %.gif: %.py
 	python $< --gif
 %_stream-lines.png: %.py
