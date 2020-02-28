@@ -38,6 +38,9 @@ class Basis:
 
         self._build_dofnum(mesh, elem)
 
+        if not isinstance(mesh, elem.mesh_type):
+            raise ValueError("Incompatible Mesh and Element.")
+
         # human readable names
         self.dofnames = elem.dofnames
 
@@ -45,6 +48,8 @@ class Basis:
         if hasattr(elem, 'doflocs'):
             doflocs = self.mapping.F(elem.doflocs.T)
             self.doflocs = np.zeros((doflocs.shape[0], self.N))
+
+            # match mapped dofs and global dof numbering
             for itr in range(doflocs.shape[0]):
                 for jtr in range(self.element_dofs.shape[0]):
                     self.doflocs[itr, self.element_dofs[jtr]] =\

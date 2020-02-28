@@ -13,7 +13,7 @@ class ElementTriMini(ElementH1):
     doflocs = np.array([[0., 0.],
                         [1., 0.],
                         [0., 1.],
-                        [1./3., 1./3.]])
+                        [np.nan, np.nan]])
     mesh_type = MeshTri
 
     def lbasis(self, X, i):

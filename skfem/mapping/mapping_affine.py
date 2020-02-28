@@ -16,10 +16,10 @@ class MappingAffine(Mapping):
             self.b = np.empty((dim, nt))
 
             for i in range(dim):
-                self.b[i] = mesh.p[i, mesh.t[0, :]]
+                self.b[i] = mesh.p[i, mesh.t[0]]
                 for j in range(dim):
-                    self.A[i, j] = (mesh.p[i, mesh.t[j + 1, :]] -
-                                    mesh.p[i, mesh.t[0, :]])
+                    self.A[i, j] = (mesh.p[i, mesh.t[j + 1]] -
+                                    mesh.p[i, mesh.t[0]])
 
             # determinants
             if dim == 1:
