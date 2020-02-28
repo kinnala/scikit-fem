@@ -54,6 +54,27 @@ class TestNodality(TestCase):
                                err_msg = "{}".format(type(e)))
 
 
+
+class TestNodalityTriRT0(TestCase):
+
+    elem = ElementTriRT0()
+
+    def runTest(self):
+        e = self.elem
+        N = e.doflocs.shape[0]
+        Ih = np.zeros((N, N))
+        normals = np.array([[0., -1.],
+                            [1 / np.sqrt(2), 1 / np.sqrt(2)],
+                            [-1., 0.]]).T
+        for itr in range(N):
+            # calculate integral of normal component over edge
+            Ih[itr] = np.sum(e.lbasis(e.doflocs.T, itr)[0] * normals, axis=0) *\
+                np.array([1., np.sqrt(2), 1.])
+
+        assert_array_equal(Ih, np.eye(N),
+                       err_msg = "{}".format(type(e)))
+
+
 class TestComposite(TestCase):
 
     def runTest(self):
