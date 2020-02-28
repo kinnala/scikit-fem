@@ -37,9 +37,14 @@ class TestNodality(TestCase):
             for itr in range(N):
                 Ih[itr] = e.lbasis(e.doflocs.T, itr)[0]
 
-            # remove nan-rows: test nodality only on non-nan doflocs
-            # some elements, such as ElementTriMini might have a combination
+            # Remove nan-rows: test nodality only on non-nan doflocs.
+            #
+            # Some elements, such as ElementTriMini might have a combination
             # of nodal dofs and non-nodal dofs.
+            #
+            # Nodal dof is defined so that there exists a point where the
+            # corresponding basis function is one, and other basis functions are
+            # zero. Non-nodal dof does not satisfy this property.
             ix = np.isnan(np.sum(Ih, axis=1))
             Nnan = np.sum(ix)
             ixs = np.nonzero(~ix)[0]
