@@ -1,6 +1,6 @@
 import unittest
 from skfem import *
-from skfem.models.helpers import *
+from skfem.helpers import *
 
 
 class ConvergenceMorley(unittest.TestCase):

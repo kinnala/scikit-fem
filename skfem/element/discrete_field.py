@@ -6,9 +6,29 @@ from numpy import ndarray
 class DiscreteField(NamedTuple):
     """A function defined at the global quadrature points."""
 
-    f: Optional[ndarray] = None
-    df: Optional[ndarray] = None
-    ddf: Optional[ndarray] = None
+    value: Optional[ndarray] = None
+    grad: Optional[ndarray] = None
+    div: Optional[ndarray] = None
+    curl: Optional[ndarray] = None
+    ggrad: Optional[ndarray] = None
+
+    @property
+    def f(self):
+        return self.value
+
+    @property
+    def df(self):
+        if self.grad is not None:
+            return self.grad
+        elif self.div is not None:
+            return self.div
+        elif self.curl is not None:
+            return self.curl
+        return None
+
+    @property
+    def ddf(self):
+        return self.ggrad
 
     def __array__(self):
         return self.f

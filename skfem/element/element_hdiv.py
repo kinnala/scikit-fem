@@ -18,9 +18,9 @@ class ElementHdiv(Element):
         detDF = mapping.detDF(X, tind)
         orient = self.orient(mapping, i, tind)
         return (DiscreteField(
-            f  = np.einsum('ijkl,jl,kl->ikl', DF, phi,
-                           1. / np.abs(detDF) * orient[:, None]),
-            df = dphi / (np.abs(detDF) * orient[:, None])
+            value = np.einsum('ijkl,jl,kl->ikl', DF, phi,
+                              1. / np.abs(detDF) * orient[:, None]),
+            div = dphi / (np.abs(detDF) * orient[:, None])
         ),)
 
     def lbasis(self, X, i):
