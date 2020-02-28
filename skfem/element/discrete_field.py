@@ -1,5 +1,6 @@
 from typing import NamedTuple, Optional
 
+import numpy as np
 from numpy import ndarray
 
 
@@ -44,8 +45,11 @@ class DiscreteField(NamedTuple):
                 for i in range(self.f.shape[0])]
 
     def zeros_like(self):
-        return DiscreteField(*[0. * field.copy()
-                               for field in self
-                               if field is not None])
+        def zero_or_none(x):
+            if x is None:
+                return None
+            return np.zeros_like(x)
+        return DiscreteField(*[zero_or_none(field)
+                               for field in self])
 
     __rmul__ = __mul__
