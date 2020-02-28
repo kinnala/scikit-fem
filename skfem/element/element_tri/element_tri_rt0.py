@@ -9,9 +9,9 @@ class ElementTriRT0(ElementHdiv):
     dim = 2
     maxdeg = 1
     dofnames = ['u^n']
-    doflocs = np.array([[.5, 0.],
+    doflocs = np.array([[.5, .0],
                         [.5, .5],
-                        [0., .5]])
+                        [.0, .5]])
     mesh_type = MeshTri
 
     def lbasis(self, X, i):

@@ -48,6 +48,8 @@ class Basis:
         if hasattr(elem, 'doflocs'):
             doflocs = self.mapping.F(elem.doflocs.T)
             self.doflocs = np.zeros((doflocs.shape[0], self.N))
+
+            # match mapped dofs and global dof numbering
             for itr in range(doflocs.shape[0]):
                 for jtr in range(self.element_dofs.shape[0]):
                     self.doflocs[itr, self.element_dofs[jtr]] =\

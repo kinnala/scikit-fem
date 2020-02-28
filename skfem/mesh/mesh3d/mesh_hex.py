@@ -85,6 +85,11 @@ class MeshHex(Mesh3D):
         self._build_mappings()
 
     @classmethod
+    def init_refdom(cls: Type[MeshType]):
+        """Initialise a mesh of the reference domain."""
+        return cls()
+
+    @classmethod
     def init_tensor(cls: Type[MeshType],
                     x: ndarray,
                     y: ndarray,
