@@ -167,32 +167,34 @@ class Basis:
                 nodals[self.dofnames[i]] =\
                     np.vstack((nodals[self.dofnames[i]],
                                self.nodal_dofs[i, nodal_ix]))
+        off = n_nodal
 
         facets = {
-            self.dofnames[i + n_nodal]: np.zeros((0, len(facet_ix)),
-                                                 dtype=np.int64)
-            for i in range(n_facet) if self.dofnames[i + n_nodal] not in skip
+            self.dofnames[i + off]: np.zeros((0, len(facet_ix)), dtype=np.int64)
+            for i in range(n_facet) if self.dofnames[i + off] not in skip
         }
         for i in range(n_facet):
-            if self.dofnames[i + n_nodal] not in skip:
-                facets[self.dofnames[i + n_nodal]] =\
-                    np.vstack((facets[self.dofnames[i + n_nodal]],
+            if self.dofnames[i + off] not in skip:
+                facets[self.dofnames[i + off]] =\
+                    np.vstack((facets[self.dofnames[i + off]],
                                self.facet_dofs[i, facet_ix]))
+        off += n_facet
 
         edges = {
-            self.dofnames[i + n_nodal + n_facet]: np.zeros((0, len(edge_ix)),
-                                                           dtype=np.int64)
-            for i in range(n_edge) if self.dofnames[i + n_nodal + n_facet] not in skip
+            self.dofnames[i + off]: np.zeros((0, len(edge_ix)), dtype=np.int64)
+            for i in range(n_edge) if self.dofnames[i + off] not in skip
         }
         for i in range(n_edge):
-            if self.dofnames[i + n_nodal + n_facet] not in skip:
-                edges[self.dofnames[i + n_nodal + n_facet]] =\
-                    np.vstack((edges[self.dofnames[i + n_nodal + n_facet]],
+            if self.dofnames[i + off] not in skip:
+                edges[self.dofnames[i + off]] =\
+                    np.vstack((edges[self.dofnames[i + off]],
                                self.edge_dofs[i, edge_ix]))
 
-        return Dofs(nodal={k: nodals[k].flatten() for k in nodals},
-                    facet={k: facets[k].flatten() for k in facets},
-                    edge={k: edges[k].flatten() for k in edges})
+        return Dofs(
+            nodal={k: nodals[k].flatten() for k in nodals},
+            facet={k: facets[k].flatten() for k in facets},
+            edge={k: edges[k].flatten() for k in edges}
+        )
 
     def boundary_dofs(self,
                       facets: Dict[str, ndarray] = None,
@@ -203,8 +205,7 @@ class Basis:
         ----------
         facets
             A dictionary of facet indices. If None, use self.mesh.boundaries
-            if set or use {'all': self.mesh.boundary_facets()}. Facets not
-            on the boundary will be removed.
+            if set or use {'all': self.mesh.boundary_facets()}.
         skip
             List of dofnames to skip.
 
