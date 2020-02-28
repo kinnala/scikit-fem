@@ -7,63 +7,46 @@ from skfem import *
 
 
 class TestNodality(TestCase):
-    elem = ElementTriP2()
-    N = 6
+    """Test for Element.doflocs."""
+
+    elems = [
+        ElementLineP1(),
+        ElementLineP2(),
+        ElementLinePp(1),
+        ElementLinePp(3),
+        ElementTriP0(),
+        ElementTriP1(),
+        ElementTriP2(),
+        ElementTriMini(),
+        ElementQuad0(),
+        ElementQuad1(),
+        ElementQuad2(),
+        ElementQuadS2(),
+        ElementQuadP(1),
+        ElementQuadP(3),
+        ElementTetP0(),
+        ElementTetP1(),
+        ElementTetP2(),
+        ElementHex1(),
+    ]
 
     def runTest(self):
-        Ih = np.zeros((self.N, self.N))
-        for itr in range(self.N):
-            for jtr in range(self.N):
-                Ih[itr, jtr] = self.elem.lbasis(
-                    self.elem.doflocs[itr, None].T,
-                    jtr
-                )[0][0]
-        self.assertTrue(np.sum(Ih - np.eye(self.N)) < 1e-17)
+        for e in self.elems:
+            N = e.doflocs.shape[0]
+            Ih = np.zeros((N, N))
+            for itr in range(N):
+                Ih[itr] = e.lbasis(e.doflocs.T, itr)[0]
 
+            # remove nan-rows: test nodality only on non-nan doflocs
+            # some elements, such as ElementTriMini might have a combination
+            # of nodal dofs and non-nodal dofs.
+            ix = np.isnan(np.sum(Ih, axis=1))
+            Nnan = np.sum(ix)
+            ixs = np.nonzero(~ix)[0]
+            Ih = Ih[ixs].T[ixs].T
 
-class TestQuad2Nodality(TestNodality):
-    elem = ElementQuad2()
-    N = 9
-
-
-class TestQuadS2Nodality(TestNodality):
-    elem = ElementQuadS2()
-    N = 8
-
-
-class TestTriP1Nodality(TestNodality):
-    elem = ElementTriP1()
-    N = 3
-
-
-class TestTetP1Nodality(TestNodality):
-    elem = ElementTetP1()
-    N = 4
-
-
-class TestTetP2Nodality(TestNodality):
-    elem = ElementTetP2()
-    N = 10
-
-
-class TestTetP0Nodality(TestNodality):
-    elem = ElementTetP0()
-    N = 1
-
-
-class TestTri0Nodality(TestNodality):
-    elem = ElementTriP2()
-    N = 1
-
-
-class TestLineP1Nodality(TestNodality):
-    elem = ElementLineP1()
-    N = 2
-
-
-class TestLineP2Nodality(TestNodality):
-    elem = ElementLineP2()
-    N = 3
+            assert_array_equal(Ih, np.eye(N - Nnan),
+                               err_msg = "{}".format(type(e)))
 
 
 class TestComposite(TestCase):
