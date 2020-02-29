@@ -243,8 +243,8 @@ class Basis:
 
         """
         warnings.warn(("Basis.get_dofs is removed in the next "
-                       "major release. Use Basis.find_dofs or "
-                       "Basis.boundary_dofs instead."), DeprecationWarning)
+                       "major release. Use Basis.boundary_dofs instead."),
+                      DeprecationWarning)
 
         if facets is None:
             facets = self.mesh.boundary_facets()
