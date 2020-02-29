@@ -188,7 +188,7 @@ def _flatten_dofs(S: DofsCollection) -> ndarray:
             return S.all()
         elif isinstance(S, dict):
             return np.unique(np.concatenate([S[key].all() for key in S]))
-        raise ValueError("The set of DOF numbers cannot be flattened to an array.")
+        raise NotImplementedError("Unable to flatten the given set of DOF's.")
 
 
 def condense(A: spmatrix,
@@ -296,7 +296,7 @@ def project(fun,
     diff
         Differentiate with respect to the given dimension.
     I
-        Limit projection to a subset.
+        Index set for limiting the projection to a subset.
 
     Returns
     -------
