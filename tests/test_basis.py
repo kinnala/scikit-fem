@@ -25,7 +25,7 @@ class TestCompositeSplitting(TestCase):
         self.assertEqual(
             basis.get_dofs(m.boundaries['centreline']).all().size,
             (2 + 1) * (2**(1 + 3) + 1) + 2 * 2**(1 + 3))
-        self.assertEqual(basis.boundary_dofs()['centreline'].all().size,
+        self.assertEqual(basis.find_dofs()['centreline'].all().size,
                          (2 + 1) * (2**(1 + 3) + 1) + 2 * 2**(1 + 3))
 
         
@@ -37,7 +37,7 @@ class TestCompositeSplitting(TestCase):
 
         S = asm(bilinf, basis)
 
-        D = basis.boundary_dofs(skip=['u^2'])
+        D = basis.find_dofs(skip=['u^2'])
         x = basis.zeros()
         x[D['up'].all('u^1^1')] = .1
 

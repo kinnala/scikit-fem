@@ -29,7 +29,7 @@ basis = InteriorBasis(m, e, mapping)
 A = asm(laplace, basis)
 M = asm(mass, basis)
 
-L, x = solve(*condense(A, M, D=basis.boundary_dofs()), k=8)
+L, x = solve(*condense(A, M, D=basis.find_dofs()), k=8)
 
 
 if __name__ == '__main__':

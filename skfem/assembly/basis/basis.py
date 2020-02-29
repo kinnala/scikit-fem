@@ -196,16 +196,16 @@ class Basis:
             edge={k: edges[k].flatten() for k in edges}
         )
 
-    def boundary_dofs(self,
-                      facets: Dict[str, ndarray] = None,
-                      skip: List[str] = []) -> Dict[str, Dofs]:
-        """Return global DOF numbers corresponding to boundary DOF's.
+    def find_dofs(self,
+                  facets: Dict[str, ndarray] = None,
+                  skip: List[str] = []) -> Dict[str, Dofs]:
+        """Return global DOF numbers corresponding to facets.
 
         Parameters
         ----------
         facets
             A dictionary of facet indices. If None, use self.mesh.boundaries
-            if set or use {'all': self.mesh.boundary_facets()}.
+            if set or otherwise use {'all': self.mesh.boundary_facets()}.
         skip
             List of dofnames to skip.
 
@@ -242,8 +242,8 @@ class Basis:
             A subset of degrees-of-freedom as :class:`skfem.assembly.dofs.Dofs`.
 
         """
-        warnings.warn(("Basis.get_dofs is removed in the next "
-                       "major release. Use Basis.boundary_dofs instead."),
+        warnings.warn(("Basis.get_dofs is removed in the next major"
+                       " release. Use Basis.find_dofs instead."),
                       DeprecationWarning)
 
         if facets is None:

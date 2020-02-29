@@ -335,5 +335,6 @@ def project(fun,
     return solve(M, f)
 
 
+# for backwards compatibility
 L2_projection = lambda a, b, c=None: project(a, basis_to=b, I=c)
 derivative = lambda a, b, c, d=0: project(a, basis_from=b, basis_to=c, diff=d)
