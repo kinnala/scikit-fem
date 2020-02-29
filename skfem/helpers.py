@@ -20,14 +20,14 @@ def div(u: DiscreteField):
         return u.div
     elif u.grad is not None:
         return np.einsum('ii...', u.grad)
-    raise ValueError("!")
+    raise NotImplementedError
 
 
 def curl(u: DiscreteField):
     """Curl."""
     if u.curl is not None:
         return u.curl
-    raise ValueError("!")
+    raise NotImplementedError
 
 
 def d(u: DiscreteField):
@@ -38,7 +38,7 @@ def d(u: DiscreteField):
         return u.div
     elif u.curl is not None:
         return u.curl
-    raise ValueError("!")
+    raise NotImplementedError
 
 
 def sym_grad(u: DiscreteField):

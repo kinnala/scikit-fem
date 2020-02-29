@@ -17,9 +17,11 @@ def dudv(u, v, w):
     return dot(curl(u), curl(v)) + dot(u, v)
 
 def f(x, y, z):
-    return np.array([x*y*(1-y**2)*(1-z**2)+2*x*y*(1-z**2),
-                     y**2*(1-x**2)*(1-z**2)+(1-y**2)*(2-x**2-z**2),
-                     y*z*(1-x**2)*(1-y**2)+2*y*z*(1-x**2)])
+    return np.array([
+        x * y * (1 - y**2) * (1 - z**2) + 2 * x * y * (1 - z**2),
+        y**2 * (1 - x**2) * (1 - z**2) + (1 - y**2) * (2 - x**2 - z**2),
+        y * z * (1 - x**2) * (1 - y**2) + 2 * y * z * (1 - x**2),
+    ])
 
 @LinearForm
 def fv(v, w):
