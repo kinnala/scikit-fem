@@ -15,10 +15,12 @@ class DiscreteField(NamedTuple):
 
     @property
     def f(self):
+        """For backwards compatibility; used by old style form decorators."""
         return self.value
 
     @property
     def df(self):
+        """For backwards compatibility; used by old style form decorators."""
         if self.grad is not None:
             return self.grad
         elif self.div is not None:
@@ -29,6 +31,7 @@ class DiscreteField(NamedTuple):
 
     @property
     def ddf(self):
+        """For backwards compatibility; used by old style form decorators."""
         return self.ggrad
 
     def __array__(self):
@@ -45,11 +48,13 @@ class DiscreteField(NamedTuple):
                 for i in range(self.f.shape[0])]
 
     def zeros_like(self):
+        """Return zero :class:`~skfem.element.DiscreteField` with same size."""
+
         def zero_or_none(x):
             if x is None:
                 return None
             return np.zeros_like(x)
-        return DiscreteField(*[zero_or_none(field)
-                               for field in self])
+
+        return DiscreteField(*[zero_or_none(field) for field in self])
 
     __rmul__ = __mul__

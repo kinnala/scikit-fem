@@ -33,6 +33,7 @@ class Form:
     def dictify(w):
         """Support some legacy input formats for 'w'."""
         if not isinstance(w, dict):
+            # TODO: deprecate
             if isinstance(w, DiscreteField):
                 w = {'w': w}
             elif isinstance(w, ndarray):
