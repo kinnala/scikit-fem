@@ -161,7 +161,7 @@ class MeshQuad(Mesh2D):
 
         # get unique facets and build quad-to-facet mapping: 4 (edges) x Nquads
         tmp = np.ascontiguousarray(self.facets.T)
-        tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)]*tmp.shape[1]),
+        tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]),
                                   return_index=True, return_inverse=True)
         self.facets = self.facets[:, ixa]
         self.t2f = ixb.reshape((4, self.t.shape[1]))

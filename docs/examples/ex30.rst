@@ -10,7 +10,7 @@ Direct solvers for the Stokes equation do not scale; iterative solvers are requi
 A classical iterative procedure for the Stokes equation is the Uzawa conjugate gradient method in which an auxiliary operator is formed which maps a guessed pressure field :math:`p` to the divergence
 
 .. math::
-   \Theta (p) = \nabla\cdot\boldsymbol \{u (p)\}
+   \Theta (p) = \nabla\cdot \{\boldsymbol{u} (p)\}
    
 of the velocity field which satisfies the momentum equation with that pressure [GLOWINSKI-PIRONNEAU]_
 [BRAESS]_.

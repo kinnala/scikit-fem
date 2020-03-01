@@ -1,4 +1,6 @@
 import numpy as np
+
+from ...mesh import MeshLine
 from ..element_h1 import ElementH1
 
 
@@ -10,20 +12,21 @@ class ElementLineP2(ElementH1):
     dofnames = ['u', 'u']
     doflocs = np.array([[0.],
                         [1.],
-                        [0.5]])
+                        [.5]])
+    mesh_type = MeshLine
 
     def lbasis(self, X, i):
         x = X[0, :]
 
         if i == 0:
-            phi = 1 - 3*x + 2*x**2
-            dphi = np.array([-3 + 4*x])
+            phi = 1 - 3 * x + 2 * x ** 2
+            dphi = np.array([-3 + 4 * x])
         elif i == 1:
-            phi = -x + 2*x**2
-            dphi = np.array([-1 + 4*x])
+            phi = -x + 2 * x ** 2
+            dphi = np.array([-1 + 4 * x])
         elif i == 2:
-            phi = 4*x - 4*x**2
-            dphi = np.array([4 - 8*x])
+            phi = 4 * x - 4 * x ** 2
+            dphi = np.array([4 - 8 * x])
         else:
             self._index_error()
 

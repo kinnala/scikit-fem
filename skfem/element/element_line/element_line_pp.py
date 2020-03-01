@@ -21,7 +21,7 @@ class ElementLinePp(ElementH1):
         self.interior_dofs = p - 1
         self.maxdeg = p
         self.dofnames = ['u'] + (p - 1) * ['u']
-        self.doflocs = np.array([[0., 1.] + [.5] * (p - 1)]).T
+        self.doflocs = np.array([[0., 1.] + [np.nan] * (p - 1)]).T
         self.P = np.zeros((0, 0))
         self.dP = np.zeros((0, 0, 1))
         self.p = p

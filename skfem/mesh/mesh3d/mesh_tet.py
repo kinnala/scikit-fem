@@ -79,6 +79,16 @@ class MeshTet(Mesh3D):
         self._build_mappings()
 
     @classmethod
+    def init_refdom(cls: Type[MeshType]):
+        """Initialise a mesh of the reference domain."""
+        p = np.array([[0., 0., 0.],
+                      [1., 0., 0.],
+                      [0., 1., 0.],
+                      [0., 0., 1.]]).T
+        t = np.array([[0, 1, 2, 3]]).T
+        return cls(p, t)
+
+    @classmethod
     def init_tensor(cls: Type[MeshType],
                     x: ndarray,
                     y: ndarray,
@@ -378,22 +388,22 @@ class MeshTet(Mesh3D):
         sz = p.shape[1]
         t2e = self.t2e + sz
         # new vertices are the midpoints of edges
-        newp = 0.5*np.vstack((p[0, e[0, :]] + p[0, e[1, :]],
-                              p[1, e[0, :]] + p[1, e[1, :]],
-                              p[2, e[0, :]] + p[2, e[1, :]]))
+        newp = 0.5*np.vstack((p[0, e[0]] + p[0, e[1]],
+                              p[1, e[0]] + p[1, e[1]],
+                              p[2, e[0]] + p[2, e[1]]))
         newp = np.hstack((p, newp))
         # new tets
-        newt = np.vstack((t[0, :], t2e[0, :], t2e[2, :], t2e[3, :]))
-        newt = np.hstack((newt, np.vstack((t[1, :], t2e[0, :], t2e[1, :], t2e[4, :]))))
-        newt = np.hstack((newt, np.vstack((t[2, :], t2e[1, :], t2e[2, :], t2e[5, :]))))
-        newt = np.hstack((newt, np.vstack((t[3, :], t2e[3, :], t2e[4, :], t2e[5, :]))))
+        newt = np.vstack((t[0], t2e[0], t2e[2], t2e[3]))
+        newt = np.hstack((newt, np.vstack((t[1], t2e[0], t2e[1], t2e[4]))))
+        newt = np.hstack((newt, np.vstack((t[2], t2e[1], t2e[2], t2e[5]))))
+        newt = np.hstack((newt, np.vstack((t[3], t2e[3], t2e[4], t2e[5]))))
         # compute middle pyramid diagonal lengths and choose shortest
-        d1 = ((newp[0, t2e[2, :]] - newp[0, t2e[4, :]])**2 +
-              (newp[1, t2e[2, :]] - newp[1, t2e[4, :]])**2)
-        d2 = ((newp[0, t2e[1, :]] - newp[0, t2e[3, :]])**2 +
-              (newp[1, t2e[1, :]] - newp[1, t2e[3, :]])**2)
-        d3 = ((newp[0, t2e[0, :]] - newp[0, t2e[5, :]])**2 +
-              (newp[1, t2e[0, :]] - newp[1, t2e[5, :]])**2)
+        d1 = ((newp[0, t2e[2]] - newp[0, t2e[4]])**2 +
+              (newp[1, t2e[2]] - newp[1, t2e[4]])**2)
+        d2 = ((newp[0, t2e[1]] - newp[0, t2e[3]])**2 +
+              (newp[1, t2e[1]] - newp[1, t2e[3]])**2)
+        d3 = ((newp[0, t2e[0]] - newp[0, t2e[5]])**2 +
+              (newp[1, t2e[0]] - newp[1, t2e[5]])**2)
         I1 = d1 < d2
         I2 = d1 < d3
         I3 = d2 < d3
@@ -438,11 +448,11 @@ class MeshTet(Mesh3D):
     def shapereg(self):
         """Return the largest shape-regularity constant."""
         def edgelen(n):
-            return np.sqrt(np.sum((self.p[:, self.edges[0, self.t2e[n, :]]] -
-                                   self.p[:, self.edges[1, self.t2e[n, :]]])**2,
+            return np.sqrt(np.sum((self.p[:, self.edges[0, self.t2e[n]]] -
+                                   self.p[:, self.edges[1, self.t2e[n]]])**2,
                                   axis=0))
         edgelenmat = np.vstack(tuple(edgelen(i) for i in range(6)))
-        return np.max(np.max(edgelenmat, axis=0)/np.min(edgelenmat, axis=0))
+        return np.max(np.max(edgelenmat, axis=0) / np.min(edgelenmat, axis=0))
 
     def mapping(self):
         from skfem.mapping import MappingAffine
