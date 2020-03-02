@@ -32,6 +32,7 @@ def functional(form: Callable) -> Functional:
     # for backwards compatibility
     from .form_parameters import FormParameters
 
+    # TODO: deprecate
     class ClassicFunctional(Functional):
 
         def _kernel(self, w, dx):

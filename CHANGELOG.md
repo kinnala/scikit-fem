@@ -16,13 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ElementTriMini`, MINI-element for Stokes problems
 - `ElementComposite` for using many elements in one bilinear form
 - `ElementQuadS2`, quadratic Serendipity element
-- `Basis.boundary_dofs` for finding degree-of-freedom indices
+- `Basis.find_dofs` for finding degree-of-freedom indices
 - `Mesh.define_boundary` for defining named boundaries
 - `Mesh.from_basis` for defining high-order meshes
 - `Basis.split` for splitting multicomponent solutions
 
 ### Deprecated
-- `Basis.get_dofs` in favor of `Basis.boundary_dofs`
+- `Basis.get_dofs` in favor of `Basis.find_dofs`
 
 ### Changed
 - Renamed `skfem.importers` to `skfem.io`

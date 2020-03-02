@@ -52,6 +52,7 @@ def bilinear_form(form: Callable) -> BilinearForm:
     # for backwards compatibility
     from .form_parameters import FormParameters
 
+    # TODO: deprecate
     class ClassicBilinearForm(BilinearForm):
 
         def _kernel(self, u, v, w, dx):
