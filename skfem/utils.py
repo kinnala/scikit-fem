@@ -188,7 +188,7 @@ def _flatten_dofs(S: DofsCollection) -> ndarray:
             return S.all()
         elif isinstance(S, dict):
             return np.unique(np.concatenate([S[key].all() for key in S]))
-        raise ValueError("The set of DOF numbers cannot be flattened to an array.")
+        raise NotImplementedError("Unable to flatten the given set of DOF's.")
 
 
 def condense(A: spmatrix,
@@ -278,57 +278,25 @@ def adaptive_theta(est, theta=0.5, max=None):
         return np.nonzero(theta*max < est)[0]
 
 
-def derivative(x: ndarray,
-               basis1: Basis,
-               basis0: Basis,
-               i: Optional[int] = 0) -> ndarray:
-    """Calculate the i'th partial derivative through projection.
-
-    Parameters
-    ----------
-    x
-        The solution vector.
-    basis1
-        The basis corresponding to the solution x (e.g. P_1).
-    basis0
-        The basis corresponding to the derivative field (e.g. P_0).
-    i
-        Return i'th partial derivative.
-
-    Returns
-    -------
-    ndarray
-        A new solution vector corresponding to the derivative.
-
-    """
-
-    @bilinear_form
-    def deriv(u, du, v, dv, w):
-        return du[i] * v
-
-    @bilinear_form
-    def mass(u, du, v, dv, w):
-        return u * v
-
-    A = asm(deriv, basis1, basis0)
-    M = asm(mass, basis0)
-
-    return solve(M, A @ x)
-
-
-def L2_projection(fun,
-                  basis: Basis,
-                  ix: Optional[ndarray] = None) -> ndarray:
-    """Initialize a solution vector with L2 projection.
+def project(fun,
+            basis_from: Basis = None,
+            basis_to: Basis = None,
+            diff: int = None,
+            I: ndarray = None) -> ndarray:
+    """Projection from one basis to another.
 
     Parameters
     ----------
     fun
-        The function to project.
-    basis
-        The finite element basis
-    ix
-        Do the projection only on a subset of DOF's.
+        A solution vector or a function handle.
+    basis_from
+        The finite element basis to project from.
+    basis_to
+        The finite element basis to project to.
+    diff
+        Differentiate with respect to the given dimension.
+    I
+        Index set for limiting the projection to a subset.
 
     Returns
     -------
@@ -337,20 +305,36 @@ def L2_projection(fun,
 
     """
 
-    if ix is None:
-        ix = np.arange(basis.N)
-
     @bilinear_form
     def mass(u, du, v, dv, w):
         p = u * v
-        return sum(p) if isinstance(basis.elem, ElementVectorH1) else p
+        return sum(p) if isinstance(basis_to.elem, ElementVectorH1) else p
 
     @linear_form
     def funv(v, dv, w):
         p = fun(*w.x) * v
-        return sum(p) if isinstance(basis.elem, ElementVectorH1) else p
+        return sum(p) if isinstance(basis_to.elem, ElementVectorH1) else p
 
-    M = asm(mass, basis)
-    f = asm(funv, basis)
+    @bilinear_form
+    def deriv(u, du, v, dv, w):
+        return du[i] * v
 
-    return solve(*condense(M, f, I=ix, expand=False))
+    M = asm(mass, basis_to)
+
+    if not isinstance(fun, ndarray):
+        f = asm(funv, basis_to)
+    else:
+        if diff is not None:
+            f = asm(deriv, basis_from, basis_to) @ fun
+        else:
+            f = asm(mass, basis_from, basis_to) @ fun
+
+    if I is not None:
+        return solve(*condense(M, f, I=I, expand=False))
+
+    return solve(M, f)
+
+
+# for backwards compatibility
+L2_projection = lambda a, b, c=None: project(a, basis_to=b, I=c)
+derivative = lambda a, b, c, d=0: project(a, basis_from=b, basis_to=c, diff=d)
