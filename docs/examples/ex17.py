@@ -6,7 +6,7 @@ from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
 
 from skfem import *
-from skfem.models.poisson import mass
+from skfem.models.poisson import mass, unit_load
 from skfem.io import from_meshio
 
 radii = [2., 3.]
@@ -56,15 +56,8 @@ L = asm(conduction, basis, w=conductivity)
 facet_basis = FacetBasis(mesh, element, facets=mesh.boundaries['convection'])
 H = heat_transfer_coefficient * asm(convection, facet_basis)
 
-
-@linear_form
-def generation(v, dv, w):
-    return w.w * v
-
-
-heated = basis.zero_w()
-heated[mesh.subdomains['wire']] = 1.
-f = joule_heating * asm(generation, basis, w=heated)
+wire_basis = InteriorBasis(mesh, basis.elem, elements=mesh.subdomains['wire'])
+f = joule_heating * asm(unit_load, wire_basis)
 
 temperature = solve(L + H, f)
 
