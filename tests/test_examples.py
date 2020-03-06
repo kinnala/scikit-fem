@@ -221,7 +221,7 @@ class TestEx33(TestCase):
 
     def runTest(self):
         from docs.examples.ex33 import x
-        self.assertAlmostEqual(np.max(x), 0.09448022449856112, delta=1e-8)
+        self.assertAlmostEqual(np.max(x), 0.1240571191753624, delta=1e-8)
 
 
 if __name__ == '__main__':
