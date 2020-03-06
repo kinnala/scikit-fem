@@ -71,7 +71,11 @@ class FacetBasis(Basis):
             if side is None:
                 self.find = np.nonzero(self.mesh.f2t[1] == -1)[0]
                 self.tind = self.mesh.f2t[0, self.find]
-            elif side == 0 or side == 1:
+            elif hasattr(self.mapping, 'helper_to_orig') and side in [0, 1]:
+                self.mapping.side = side # side effect
+                self.find = self.mapping.helper_to_orig[side]
+                self.tind = self.mesh.f2t[0, self.find]
+            elif side in [0, 1]:
                 self.find = np.nonzero(self.mesh.f2t[1] != -1)[0]
                 self.tind = self.mesh.f2t[side, self.find]
             else:
@@ -86,19 +90,14 @@ class FacetBasis(Basis):
         # global facet to refdom facet
         Y = self.mapping.invF(x, tind=self.tind)
 
-        if hasattr(mesh, 'normals'):
-            self.normals = np.repeat(mesh.normals[:, :, None],
-                                     len(self.W),
-                                     axis=2)
-        else:
-            # construct normal vectors from side=0 always
-            Y0 = self.mapping.invF(x, tind=self.mesh.f2t[0, self.find])
-            self.normals = self.mapping.normals(Y0,
-                                                self.mesh.f2t[0, self.find],
-                                                self.find,
-                                                self.mesh.t2f)
-
-        self.normals = DiscreteField(self.normals)
+        # construct normal vectors from side=0 always
+        Y0 = self.mapping.invF(x, tind=self.mesh.f2t[0, self.find])
+        self.normals = DiscreteField(
+            value = self.mapping.normals(Y0,
+                                         self.mesh.f2t[0, self.find],
+                                         self.find,
+                                         self.mesh.t2f)
+        )
 
         self.nelems = len(self.find)
 

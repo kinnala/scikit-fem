@@ -92,12 +92,13 @@ class TestMortarPair(unittest.TestCase):
 
     def runTest(self):
         m1, m2 = self.init_meshes()
-        mp = MortarPair.init_2D(m1, m2,
-                                m1.facets_satisfying(lambda x: x[0] == 1.),
-                                m2.facets_satisfying(lambda x: x[0] == 1.))
+        mp = MappingMortar.init_2D(m1, m2,
+                                   m1.facets_satisfying(lambda x: x[0] == 1.),
+                                   m2.facets_satisfying(lambda x: x[0] == 1.),
+                                   np.array([0., 1.]))
         test_points = np.array([np.linspace(0., 1., 7)])
-        self.assertTrue((mp.mapping1.G(test_points) -
-                         mp.mapping1.G(test_points) < 1e-10).all())
+        self.assertTrue((mp.G(test_points) -
+                         mp.G(test_points) < 1e-10).all())
 
 
 class TestMortarPairTriQuad(TestMortarPair):

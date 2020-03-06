@@ -44,14 +44,14 @@ E = ElementVectorH1(E1)
 ib = InteriorBasis(m, e, intorder=4)
 Ib = InteriorBasis(M, E, intorder=4)
 
-mappings = MortarPair.init_2D(m, M,
-                              m.boundaries['contact'],
-                              M.facets_satisfying(lambda x: x[0] == 1.0),
-                              np.array([0.0, 1.0]))
+mapping = MappingMortar.init_2D(m, M,
+                                m.boundaries['contact'],
+                                M.facets_satisfying(lambda x: x[0] == 1.0),
+                                np.array([0.0, 1.0]))
 
 mb = [
-    MortarBasis(m, e, mapping = mappings[0], intorder=4),
-    MortarBasis(M, E, mapping = mappings[1], intorder=4),
+    FacetBasis(m, e, mapping=mapping, intorder=4, side=0),
+    FacetBasis(M, E, mapping=mapping, intorder=4, side=1),
 ]
 
 # define bilinear forms
