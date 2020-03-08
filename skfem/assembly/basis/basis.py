@@ -1,7 +1,6 @@
 import warnings
 from typing import List, Optional, NamedTuple,\
-    Any, Tuple, Dict,\
-    TypeVar
+    Any, Tuple, Dict, TypeVar
 
 import numpy as np
 from numpy import ndarray
@@ -23,7 +22,6 @@ class Basis:
 
     - :class:`~skfem.assembly.InteriorBasis`, basis functions inside elements
     - :class:`~skfem.assembly.FacetBasis`, basis functions on element boundaries
-    - :class:`~skfem.assembly.MortarBasis`, basis functions on mortar interfaces
 
     """
 
@@ -45,7 +43,8 @@ class Basis:
         self.dofnames = elem.dofnames
 
         # global degree-of-freedom location
-        if hasattr(elem, 'doflocs'):
+        # disabled for MappingMortar by checking mapping.maps
+        if hasattr(elem, 'doflocs') and not hasattr(mapping, 'maps'):
             doflocs = self.mapping.F(elem.doflocs.T)
             self.doflocs = np.zeros((doflocs.shape[0], self.N))
 

@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - New-style form constructors `BilinearForm`, `LinearForm`, and `Functional`
-- `MortarBasis` and `MortarPair` for supporting mortar methods in 2D
+- `MortarMapping` for supporting mortar methods in 2D
 - `skfem.io.json` for serialization of meshes to/from json-files
 - `ElementLinePp`, p-th order one-dimensional elements
 - `ElementQuadP`, p-th order quadrilateral elements
