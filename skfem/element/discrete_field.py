@@ -1,4 +1,4 @@
-from typing import NamedTuple, Optional
+from typing import NamedTuple, Optional, List
 
 import numpy as np
 from numpy import ndarray
@@ -11,7 +11,8 @@ class DiscreteField(NamedTuple):
     grad: Optional[ndarray] = None
     div: Optional[ndarray] = None
     curl: Optional[ndarray] = None
-    ggrad: Optional[ndarray] = None
+    hess: Optional[ndarray] = None
+    hod: Optional[ndarray] = None
 
     @property
     def f(self):
@@ -32,7 +33,7 @@ class DiscreteField(NamedTuple):
     @property
     def ddf(self):
         """For backwards compatibility; used by old style form decorators."""
-        return self.ggrad
+        return self.hess
 
     def __array__(self):
         return self.f

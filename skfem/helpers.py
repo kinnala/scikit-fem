@@ -46,7 +46,9 @@ def sym_grad(u: DiscreteField):
     return .5 * (u.grad + transpose(u.grad))
 
 
-dd = lambda u: u.ggrad
+dd = lambda u: u.hess
+ddd = lambda u: u.hod[0]
+dddd = lambda u: u.hod[1]
 
 
 def dot(u: FieldOrArray, v: FieldOrArray):
