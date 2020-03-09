@@ -61,9 +61,16 @@ def ddot(u: FieldOrArray, v: FieldOrArray):
     return np.einsum('ij...,ij...', u, v)
 
 
-def prod(u: FieldOrArray, v: FieldOrArray):
+def dddot(u: FieldOrArray, v: FieldOrArray):
+    """Triple dot product."""
+    return np.einsum('ijk...,ijk...', u, v)
+
+
+def prod(u: FieldOrArray, v: FieldOrArray, w: FieldOrArray = None):
     """Tensor product."""
-    return np.einsum('i...,j...->ij...', u, v)
+    if w is None:
+        return np.einsum('i...,j...->ij...', u, v)
+    return np.einsum('i...,j...,k...->ijk...', u, v, w)
 
 
 def trace(T):
