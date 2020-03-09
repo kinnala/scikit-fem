@@ -125,38 +125,29 @@ class ElementGlobal(Element):
 
         N = len(self._pbasis[()])
         V = np.zeros((len(tind), N, N))
-
-        if mesh.t.shape[0] == 3:
-            # vertices, edges, tangents, normals
-            v = np.empty((3, 2, len(tind)))
-            e = np.empty((3, 2, len(tind)))
-            n = np.empty((3, 2, len(tind)))
-
-            # vertices
+        w = {
+            'v': np.array([mesh.p[:, mesh.t[itr, tind]]\
+                           for itr in range(mesh.t.shape[0])]),
+        }
+        if mesh.p.shape[0] >= 2:
+            w['e'] = np.array([
+                .5 * (w['v'][itr] + w['v'][(itr + 1) % mesh.t.shape[0]])
+                for itr in range(mesh.t.shape[0])
+            ])
+            w['n'] = np.array([
+                w['v'][itr] - w['v'][(itr + 1) % mesh.t.shape[0]]
+                for itr in range(mesh.t.shape[0])
+            ])
+            w['n'][2] = -w['n'][2]  # direction swapped due to mesh numbering
             for itr in range(3):
-                v[itr] = mesh.p[:, mesh.t[itr, tind]]
-
-            # edge midpoints
-            e[0] = .5 * (v[0] + v[1])
-            e[1] = .5 * (v[1] + v[2])
-            e[2] = .5 * (v[0] + v[2])
-
-            # normal vectors
-            n[0] = v[0] - v[1]
-            n[1] = v[1] - v[2]
-            n[2] = v[0] - v[2]
-
-            for itr in range(3):
-                n[itr] = np.array([n[itr, 1, :], -n[itr, 0, :]])
-                n[itr] /= np.linalg.norm(n[itr], axis=0)
-        else:
-            raise NotImplementedError("The used mesh type not supported "
-                                      "in ElementH2.")
+                w['n'][itr] = np.array([w['n'][itr, 1, :],
+                                        -w['n'][itr, 0, :]])
+                w['n'][itr] /= np.linalg.norm(w['n'][itr], axis=0)
 
         # evaluate dofs, gdof implemented in subclasses
         for itr in range(N):
             for jtr in range(N):
-                U = {k: self._pbasis[k][itr] for k in self._pbasis}
-                V[:, jtr, itr] = self.gdof(U, v, e, n, jtr)
+                F = {k: self._pbasis[k][itr] for k in self._pbasis}
+                V[:, jtr, itr] = self.gdof(F, w, jtr)
 
         return V

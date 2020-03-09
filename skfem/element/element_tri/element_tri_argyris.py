@@ -33,26 +33,29 @@ class ElementTriArgyris(ElementGlobal):
                         [0., .5]])
     mesh_type = MeshTri
 
-    def gdof(self, U, v, e, n, i):
+    def gdof(self, F, w, i):
         if i < 18:
             j = i % 6
             k = int(i / 6)
             if j == 0:
-                return U[()](*v[k])
+                return F[()](*w['v'][k])
             elif j == 1:
-                return U[(0,)](*v[k])
+                return F[(0,)](*w['v'][k])
             elif j == 2:
-                return U[(1,)](*v[k])
+                return F[(1,)](*w['v'][k])
             elif j == 3:
-                return U[(0, 0)](*v[k])
+                return F[(0, 0)](*w['v'][k])
             elif j == 4:
-                return U[(0, 1)](*v[k])
+                return F[(0, 1)](*w['v'][k])
             elif j == 5:
-                return U[(1, 1)](*v[k])
+                return F[(1, 1)](*w['v'][k])
         elif i == 18:
-            return U[(0,)](*e[0]) * n[0, 0] + U[(1,)](*e[0]) * n[0, 1]
+            return (F[(0,)](*w['e'][0]) * w['n'][0, 0] +
+                    F[(1,)](*w['e'][0]) * w['n'][0, 1])
         elif i == 19:
-            return U[(0,)](*e[1]) * n[1, 0] + U[(1,)](*e[1]) * n[1, 1]
+            return (F[(0,)](*w['e'][1]) * w['n'][1, 0] +
+                    F[(1,)](*w['e'][1]) * w['n'][1, 1])
         elif i == 20:
-            return U[(0,)](*e[2]) * n[2, 0] + U[(1,)](*e[2]) * n[2, 1]
+            return (F[(0,)](*w['e'][2]) * w['n'][2, 0] +
+                    F[(1,)](*w['e'][2]) * w['n'][2, 1])
         self._index_error()

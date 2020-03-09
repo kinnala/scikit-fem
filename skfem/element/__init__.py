@@ -18,7 +18,6 @@ from .element_h1 import ElementH1
 from .element_vector_h1 import ElementVectorH1
 from .element_hdiv import ElementHdiv
 from .element_hcurl import ElementHcurl
-from .element_h2 import ElementH2
 from .element_tri import ElementTriP1, ElementTriP2, ElementTriDG,\
     ElementTriP0, ElementTriRT0, ElementTriMorley,\
     ElementTriArgyris, ElementTriMini

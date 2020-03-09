@@ -18,17 +18,20 @@ class ElementTriMorley(ElementGlobal):
                         [0., .5]])
     mesh_type = MeshTri
 
-    def gdof(self, U, v, e, n, i):
+    def gdof(self, F, w, i):
         if i == 0:
-            return U[()](*v[0])
+            return F[()](*w['v'][0])
         elif i == 1:
-            return U[()](*v[1])
+            return F[()](*w['v'][1])
         elif i == 2:
-            return U[()](*v[2])
+            return F[()](*w['v'][2])
         elif i == 3:
-            return U[(0,)](*e[0]) * n[0, 0] + U[(1,)](*e[0]) * n[0, 1]
+            return (F[(0,)](*w['e'][0]) * w['n'][0, 0]
+                    + F[(1,)](*w['e'][0]) * w['n'][0, 1])
         elif i == 4:
-            return U[(0,)](*e[1]) * n[1, 0] + U[(1,)](*e[1]) * n[1, 1]
+            return (F[(0,)](*w['e'][1]) * w['n'][1, 0]
+                    + F[(1,)](*w['e'][1]) * w['n'][1, 1])
         elif i == 5:
-            return U[(0,)](*e[2]) * n[2, 0] + U[(1,)](*e[2]) * n[2, 1]
+            return (F[(0,)](*w['e'][2]) * w['n'][2, 0]
+                    + F[(1,)](*w['e'][2]) * w['n'][2, 1])
         self._index_error()
