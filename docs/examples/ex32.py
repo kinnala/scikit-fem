@@ -1,7 +1,7 @@
 from skfem import *
 from skfem.io.meshio import from_meshio
-from skfem.models.poisson import vector_laplace, mass, laplace
-from skfem.models.general import divergence, rot
+from skfem.models.poisson import vector_laplace, mass
+from skfem.models.general import divergence
 
 import numpy as np
 from scipy.sparse import bmat
