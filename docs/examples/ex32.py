@@ -13,7 +13,7 @@ from pygmsh import generate_mesh
 from pygmsh.opencascade import Geometry
 
 geom = Geometry()
-geom.add_ellipsoid([0.]*3, [1., .6, .4], .05)
+geom.add_ellipsoid([0.]*3, [.5, .3, .2], .1)
 mesh = from_meshio(generate_mesh(geom))
 
 element = {'u': ElementVectorH1(ElementTetP2()),
