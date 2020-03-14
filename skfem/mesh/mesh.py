@@ -244,8 +244,8 @@ class Mesh:
 
     def save(self,
              filename: str,
-             point_data: Optional[Dict[str, ndarray]] = None,
-             cell_data: Optional[Dict[str, ndarray]] = None,
+             point_data: Dict[str, ndarray] = None,
+             cell_data: Dict[str, ndarray] = None,
              **kwargs) -> None:
         """Export the mesh and fields using meshio.
 
@@ -260,22 +260,8 @@ class Mesh:
             Data related to the elements of the mesh.
 
         """
-        import meshio
-
-        if point_data is not None:
-            if not isinstance(point_data, dict):
-                raise ValueError("point_data should be "
-                                 "a dictionary of ndarrays.")
-
-        if cell_data is not None:
-            if not isinstance(cell_data, dict):
-                raise ValueError("cell_data should be "
-                                 "a dictionary of ndarrays.")
-            cell_data = {self.meshio_type: cell_data}
-
-        cells = {self.meshio_type: self.t.T}
-        mesh = meshio.Mesh(self.p.T, cells, point_data, cell_data)
-        meshio.write(filename, mesh, **kwargs)
+        from skfem.io.meshio import to_file
+        return to_file(self, filename, point_data, cell_data, **kwargs)
 
     @classmethod
     def from_basis(cls: Type[MeshType], basis):

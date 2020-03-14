@@ -17,6 +17,8 @@ MESH_TYPE_MAPPING = OrderedDict([
     ('line', skfem.MeshLine),
 ])
 
+TYPE_MESH_MAPPING = {v: k for k, v in MESH_TYPE_MAPPING.items()}
+
 
 def from_meshio(m, force_mesh_type=None):
     """Convert meshio mesh into :class:`skfem.mesh.Mesh`.
@@ -130,3 +132,23 @@ def from_meshio(m, force_mesh_type=None):
 
 def from_file(filename):
     return from_meshio(meshio.read(filename))
+
+
+def to_file(mesh, filename, point_data=None, cell_data=None, **kwargs):
+
+    meshio_type = TYPE_MESH_MAPPING[type(mesh)]
+
+    if point_data is not None:
+        if not isinstance(point_data, dict):
+            raise ValueError("point_data should be "
+                             "a dictionary of ndarrays.")
+
+    if cell_data is not None:
+        if not isinstance(cell_data, dict):
+            raise ValueError("cell_data should be "
+                             "a dictionary of ndarrays.")
+        cell_data = {meshio_type: cell_data}
+
+    cells = {meshio_type: mesh.t.T}
+    mesh = meshio.Mesh(mesh.p.T, cells, point_data, cell_data)
+    meshio.write(filename, mesh, **kwargs)
