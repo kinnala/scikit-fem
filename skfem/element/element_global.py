@@ -111,13 +111,29 @@ class ElementGlobal(Element):
             for diff in diffs:
                 desc = ''.join([str(d) for d in diff])
                 dx = sum([1 for d in diff if d==0])
-                dy = sum([1 for d in diff if d==1])
-                self._pbasis[diff] = [
-                    self._pbasis_create(i=i, j=j, dx=dx, dy=dy)
-                    for i in range(maxdeg + 1)
-                    for j in range(maxdeg + 1)
-                    if i + j <= maxdeg
-                ]
+                dy = sum([1 for d in diff if d==1]) if dim == 2 else None
+                dz = sum([1 for d in diff if d==2]) if dim == 3 else None
+                if dim == 1:
+                    self._pbasis[diff] = [
+                        self._pbasis_create(i=i, dx=dx)
+                        for i in range(maxdeg + 1)
+                        if i <= maxdeg
+                    ]
+                elif dim == 2:
+                    self._pbasis[diff] = [
+                        self._pbasis_create(i=i, j=j, dx=dx, dy=dy)
+                        for i in range(maxdeg + 1)
+                        for j in range(maxdeg + 1)
+                        if i + j <= maxdeg
+                    ]
+                elif dim == 3:
+                    self._pbasis[diff] = [
+                        self._pbasis_create(i=i, j=j, k=k, dx=dx, dy=dy, dz=dz)
+                        for i in range(maxdeg + 1)
+                        for j in range(maxdeg + 1)
+                        for k in range(maxdeg + 1)
+                        if i + j + k <= maxdeg
+                    ]
 
     def _eval_dofs(self, mesh, tind=None):
         if tind is None:
