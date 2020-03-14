@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ElementLinePp`, p-th order one-dimensional elements
 - `ElementQuadP`, p-th order quadrilateral elements
 - `ElementQuadDG` for transforming quadrilateral H1 elements to DG elements
+- `ElementQuadBFS`, Bogner-Fox-Schmit element for biharmonic problems
 - `ElementTriMini`, MINI-element for Stokes problems
 - `ElementComposite` for using multiple elements in one bilinear form
 - `ElementQuadS2`, quadratic Serendipity element
