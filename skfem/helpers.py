@@ -46,7 +46,9 @@ def sym_grad(u: DiscreteField):
     return .5 * (u.grad + transpose(u.grad))
 
 
-dd = lambda u: u.ggrad
+dd = lambda u: u.hess
+ddd = lambda u: u.hod[0]
+dddd = lambda u: u.hod[1]
 
 
 def dot(u: FieldOrArray, v: FieldOrArray):
@@ -59,9 +61,16 @@ def ddot(u: FieldOrArray, v: FieldOrArray):
     return np.einsum('ij...,ij...', u, v)
 
 
-def prod(u: FieldOrArray, v: FieldOrArray):
+def dddot(u: FieldOrArray, v: FieldOrArray):
+    """Triple dot product."""
+    return np.einsum('ijk...,ijk...', u, v)
+
+
+def prod(u: FieldOrArray, v: FieldOrArray, w: FieldOrArray = None):
     """Tensor product."""
-    return np.einsum('i...,j...->ij...', u, v)
+    if w is None:
+        return np.einsum('i...,j...->ij...', u, v)
+    return np.einsum('i...,j...,k...->ijk...', u, v, w)
 
 
 def trace(T):

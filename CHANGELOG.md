@@ -8,18 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - New-style form constructors `BilinearForm`, `LinearForm`, and `Functional`
-- `MortarMapping` for supporting mortar methods in 2D
 - `skfem.io.json` for serialization of meshes to/from json-files
 - `ElementLinePp`, p-th order one-dimensional elements
 - `ElementQuadP`, p-th order quadrilateral elements
-- `ElementQuadDG` for transforming H1 elements to DG elements
+- `ElementQuadDG` for transforming quadrilateral H1 elements to DG elements
+- `ElementQuadBFS`, Bogner-Fox-Schmit element for biharmonic problems
 - `ElementTriMini`, MINI-element for Stokes problems
-- `ElementComposite` for using many elements in one bilinear form
+- `ElementComposite` for using multiple elements in one bilinear form
 - `ElementQuadS2`, quadratic Serendipity element
-- `Basis.find_dofs` for finding degree-of-freedom indices
+- `ElementLineHermite`, cubic Hermite element for Euler-Bernoulli beams
 - `Mesh.define_boundary` for defining named boundaries
 - `Mesh.from_basis` for defining high-order meshes
+- `Basis.find_dofs` for finding degree-of-freedom indices
 - `Basis.split` for splitting multicomponent solutions
+- `MortarMapping` for supporting mortar methods in 2D
 
 ### Deprecated
 - `Basis.get_dofs` in favor of `Basis.find_dofs`
@@ -27,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Renamed `skfem.importers` to `skfem.io`
 - Renamed `skfem.models.helpers` to `skfem.helpers`
-- `skfem.utils.solve` will now expand the solutions of eigenvalue problems
+- `skfem.utils.solve` will now expand also the solutions of eigenvalue problems
 - `Basis.interpolate` returns `DiscreteField` objects instead ndarray tuples
 - `Basis.interpolate` works now for vectorial elements
 

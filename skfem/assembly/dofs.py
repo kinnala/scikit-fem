@@ -1,5 +1,6 @@
 import warnings
-from typing import NamedTuple, Optional, Dict
+from typing import NamedTuple, Optional, Dict,\
+    Union, List
 
 import numpy as np
 from numpy import ndarray
@@ -13,7 +14,7 @@ class Dofs(NamedTuple):
     edge: Dict[str, ndarray] = {}
     interior: Dict[str, ndarray] = {}
 
-    def all(self, key: Optional[str] = None):
+    def all(self, key: Union[List[str], str] = None):
         """Return an array consisting of all degrees-of-freedom.
 
         Parameters
@@ -28,6 +29,8 @@ class Dofs(NamedTuple):
             A list of degree-of-freedom indices.
 
         """
+        if isinstance(key, list):
+            return np.concatenate(tuple([self.all(k) for k in key]))
 
         if key is None:
             nodal = np.array([self.nodal[k] for k in self.nodal])
