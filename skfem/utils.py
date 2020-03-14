@@ -317,7 +317,7 @@ def project(fun,
 
     @bilinear_form
     def deriv(u, du, v, dv, w):
-        return du[i] * v
+        return du[diff] * v
 
     M = asm(mass, basis_to)
 
