@@ -61,4 +61,5 @@ __all__ = [
     'ElementLineP1',
     'ElementLineP2',
     'ElementLinePp',
+    'ElementLineHermite',
 ]
