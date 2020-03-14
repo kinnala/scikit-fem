@@ -11,6 +11,7 @@ class ElementGlobal(Element):
 
     V = None  # For caching inverse Vandermonde matrix
     derivatives = 2  # By default, include first and second derivatives
+    tensorial_basis = False
 
     def gbasis(self, mapping, X, i, tind=None):
         if tind is None:
@@ -18,7 +19,10 @@ class ElementGlobal(Element):
 
         if self.V is None:
             # initialize power basis
-            self._pbasis_init(self.maxdeg, self.dim, self.derivatives)
+            self._pbasis_init(self.maxdeg,
+                              self.dim,
+                              self.derivatives,
+                              self.tensorial_basis)
             # construct Vandermonde matrix and invert it
             self.V = np.linalg.inv(self._eval_dofs(mapping.mesh))
 
@@ -92,7 +96,7 @@ class ElementGlobal(Element):
                                  np.max([j - dy, 0]),
                                  np.max([k - dz, 0]),)))
 
-    def _pbasis_init(self, maxdeg, dim, Ndiff):
+    def _pbasis_init(self, maxdeg, dim, Ndiff, is_tensorial = False):
         """Define power bases.
 
         Parameters
@@ -105,6 +109,8 @@ class ElementGlobal(Element):
             Number of derivatives to include.
 
         """
+        if is_tensorial:
+            maxdeg = int(maxdeg / 2)
         self._pbasis = {}
         for k in range(Ndiff + 1):
             diffs = list(itertools.product(*((list(range(dim)),) * k)))
@@ -124,7 +130,7 @@ class ElementGlobal(Element):
                         self._pbasis_create(i=i, j=j, dx=dx, dy=dy)
                         for i in range(maxdeg + 1)
                         for j in range(maxdeg + 1)
-                        if i + j <= maxdeg
+                        if is_tensorial or i + j <= maxdeg
                     ]
                 elif dim == 3:
                     self._pbasis[diff] = [
@@ -132,7 +138,7 @@ class ElementGlobal(Element):
                         for i in range(maxdeg + 1)
                         for j in range(maxdeg + 1)
                         for k in range(maxdeg + 1)
-                        if i + j + k <= maxdeg
+                        if is_tensorial or i + j + k <= maxdeg
                     ]
 
     def _eval_dofs(self, mesh, tind=None):

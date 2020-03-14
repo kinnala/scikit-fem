@@ -47,6 +47,7 @@ __all__ = [
     'ElementQuadS2',
     'ElementQuadDG',
     'ElementQuadP',
+    'ElementQuadBFS',
     'ElementTetN0',
     'ElementTetP0',
     'ElementTetP1',
