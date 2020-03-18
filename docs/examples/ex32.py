@@ -5,9 +5,12 @@ from skfem.models.general import divergence
 
 import numpy as np
 from scipy.sparse import bmat
-from scipy.sparse.linalg import LinearOperator, minres
+from scipy.sparse.linalg import LinearOperator, aslinearoperator, minres
 
-from pyamg import smoothed_aggregation_solver
+try:
+    from pyamgcl import amgcl
+except ImportError:
+    from pyamgcl import amg as amgcl
 
 from pygmsh import generate_mesh
 from pygmsh.opencascade import Geometry
@@ -40,9 +43,9 @@ f = np.concatenate([asm(body_force, basis['u']),
 D = basis['u'].find_dofs()
 Kint, fint, u, I = condense(K, f, D=D)
 Aint = Kint[:-(basis['p'].N), :-(basis['p'].N)]
-Aml = smoothed_aggregation_solver(Aint)
+Aml = amgcl(Aint)
 
-Apc = Aml.aspreconditioner()
+Apc = aslinearoperator(Aml)
 diagQ = Q.diagonal()
 
 
