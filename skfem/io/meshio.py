@@ -17,6 +17,8 @@ MESH_TYPE_MAPPING = OrderedDict([
     ('line', skfem.MeshLine),
 ])
 
+TYPE_MESH_MAPPING = {v: k for k, v in MESH_TYPE_MAPPING.items()}
+
 
 def from_meshio(m, force_mesh_type=None):
     """Convert meshio mesh into :class:`skfem.mesh.Mesh`.
@@ -130,3 +132,12 @@ def from_meshio(m, force_mesh_type=None):
 
 def from_file(filename):
     return from_meshio(meshio.read(filename))
+
+
+def to_meshio(mesh, point_data=None):
+    cells = {TYPE_MESH_MAPPING[type(mesh)]: mesh.t.T}
+    return meshio.Mesh(mesh.p.T, cells, point_data)
+
+
+def to_file(mesh, filename, point_data=None, **kwargs):
+    meshio.write(filename, to_meshio(mesh, point_data), **kwargs)
