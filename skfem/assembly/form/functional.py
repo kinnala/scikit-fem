@@ -24,7 +24,7 @@ class Functional(Form):
     def assemble(self,
                  v: Basis,
                  w: Dict[str, DiscreteField] = {}) -> float:
-        return sum(self.elemental(v, w))
+        return np.sum(self.elemental(v, w))
 
 
 def functional(form: Callable) -> Functional:
