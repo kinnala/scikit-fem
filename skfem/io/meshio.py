@@ -134,21 +134,10 @@ def from_file(filename):
     return from_meshio(meshio.read(filename))
 
 
-def to_file(mesh, filename, point_data=None, cell_data=None, **kwargs):
+def to_meshio(mesh, point_data=None):
+    cells = {TYPE_MESH_MAPPING[type(mesh)]: mesh.t.T}
+    return meshio.Mesh(mesh.p.T, cells, point_data)
 
-    meshio_type = TYPE_MESH_MAPPING[type(mesh)]
 
-    if point_data is not None:
-        if not isinstance(point_data, dict):
-            raise ValueError("point_data should be "
-                             "a dictionary of ndarrays.")
-
-    if cell_data is not None:
-        if not isinstance(cell_data, dict):
-            raise ValueError("cell_data should be "
-                             "a dictionary of ndarrays.")
-        cell_data = {meshio_type: cell_data}
-
-    cells = {meshio_type: mesh.t.T}
-    mesh = meshio.Mesh(mesh.p.T, cells, point_data, cell_data)
-    meshio.write(filename, mesh, **kwargs)
+def to_file(mesh, filename, point_data=None, **kwargs):
+    meshio.write(filename, to_meshio(mesh, point_data), **kwargs)

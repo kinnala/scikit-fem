@@ -245,7 +245,6 @@ class Mesh:
     def save(self,
              filename: str,
              point_data: Dict[str, ndarray] = None,
-             cell_data: Dict[str, ndarray] = None,
              **kwargs) -> None:
         """Export the mesh and fields using meshio.
 
@@ -256,12 +255,10 @@ class Mesh:
             e.g. .msh, .vtk, .xdmf
         point_data
             Data related to the vertices of the mesh.
-        cell_data
-            Data related to the elements of the mesh.
 
         """
         from skfem.io.meshio import to_file
-        return to_file(self, filename, point_data, cell_data, **kwargs)
+        return to_file(self, filename, point_data, **kwargs)
 
     @classmethod
     def from_basis(cls: Type[MeshType], basis):
