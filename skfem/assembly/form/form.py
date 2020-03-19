@@ -12,7 +12,7 @@ from ...element import DiscreteField
 class FormDict(dict):
 
     def __getattr__(self, attr):
-        return self[attr].f
+        return self[attr].value
 
 
 class Form:

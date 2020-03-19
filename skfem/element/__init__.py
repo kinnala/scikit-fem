@@ -18,13 +18,14 @@ from .element_h1 import ElementH1
 from .element_vector_h1 import ElementVectorH1
 from .element_hdiv import ElementHdiv
 from .element_hcurl import ElementHcurl
-from .element_h2 import ElementH2
 from .element_tri import ElementTriP1, ElementTriP2, ElementTriDG,\
     ElementTriP0, ElementTriRT0, ElementTriMorley,\
     ElementTriArgyris, ElementTriMini
 from .element_quad import ElementQuad0, ElementQuad1, ElementQuad2,\
-    ElementQuadS2, ElementQuadDG, ElementQuadP
+    ElementQuadS2, ElementQuadDG, ElementQuadP,\
+    ElementQuadBFS
 from .element_tet import ElementTetP0, ElementTetP1, ElementTetP2,\
     ElementTetRT0, ElementTetN0
 from .element_hex import ElementHex1
-from .element_line import ElementLineP1, ElementLineP2, ElementLinePp
+from .element_line import ElementLineP1, ElementLineP2, ElementLinePp,\
+    ElementLineHermite
