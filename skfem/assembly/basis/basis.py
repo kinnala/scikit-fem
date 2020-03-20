@@ -286,36 +286,61 @@ class Basis:
         dfs: Dict[str, DiscreteField] = {}
 
         # loop over solution components
-        for l in range(len(refs)):
-            ref = refs[l]
+        for c in range(len(refs)):
+            ref = refs[c]
             fs = []
 
-            def linear_combination(n):
+            def linear_combination(n, refn):
                 """Global discrete function at quadrature points."""
-                out = 0. * ref[n].copy()
+                out = 0. * refn.copy()
                 for i in range(self.Nbfun):
                     values = w[self.element_dofs[i]][:, None]
-                    if len(ref[n].shape) == 2:  # values
-                        out += values * self.basis[i][l][n]
-                    elif len(ref[n].shape) == 3:  # derivatives
+                    if len(refn.shape) == 2:  # values
+                        out += values * self.basis[i][c][n]
+                    elif len(refn.shape) == 3:  # derivatives
                         for j in range(out.shape[0]):
-                            out[j, :, :] += values * self.basis[i][l][n][j]
-                    elif len(ref[n].shape) == 4:  # second derivatives
+                            out[j, :, :] += values * self.basis[i][c][n][j]
+                    elif len(refn.shape) == 4:  # second derivatives
                         for j in range(out.shape[0]):
                             for k in range(out.shape[1]):
                                 out[j, k, :, :] += \
-                                    values * self.basis[i][l][n][j, k]
+                                    values * self.basis[i][c][n][j, k]
+                    elif len(refn.shape) == 5:  # third derivatives
+                        #import pdb; pdb.set_trace()
+                        for j in range(out.shape[0]):
+                            for k in range(out.shape[1]):
+                                for l in range(out.shape[2]):
+                                    out[j, k, l, :, :] += \
+                                        values * self.basis[i][c][-1][n][j, k, l]
+                    elif len(refn.shape) == 6:  # fourth derivatives
+                        for j in range(out.shape[0]):
+                            for k in range(out.shape[1]):
+                                for l in range(out.shape[2]):
+                                    for m in range(out.shape[3]):
+                                        out[j, k, l, m, :, :] += \
+                                            values *\
+                                            self.basis[i][c][-1][n][j, k, l, m]
+                    else:
+                        raise ValueError("The requested order of "
+                                         "derivatives not supported.")
                 return out
 
-            # interpolate n'th derivatives
-            for n in range(len(ref)):
+            # interpolate first and second derivatives
+            for n in range(len(ref) - 1):
                 if ref[n] is not None:
-                    fs.append(linear_combination(n))
+                    fs.append(linear_combination(n, ref[n]))
                 else:
                     fs.append(None)
 
+            # interpolate high-order derivatives
+            fs.append([])
+
+            if ref[-1] is not None:
+                for n in range(len(ref[-1])):
+                    fs[-1].append(linear_combination(n, ref[-1][n]))
+
             # give names for the interpolated fields
-            key = 'w' if len(refs) == 1 else 'w^' + str(l + 1)
+            key = 'w' if len(refs) == 1 else 'w^' + str(c + 1)
             dfs[key] = DiscreteField(*fs)
 
         return dfs
