@@ -115,15 +115,13 @@ class BackwardFacingStep:
         return from_meshio(generate_mesh(geom, dim=2))
 
     def inlet_dofs(self):
-        inlet_dofs_ = self.basis['inlet'].get_dofs(
-            self.mesh.boundaries['inlet'])
-        return np.concatenate([inlet_dofs_.nodal[f'u^{1}'],
-                               inlet_dofs_.facet[f'u^{1}']])
+        return self.basis['inlet'].get_dofs(
+            self.mesh.boundaries['inlet']).all()
 
     @staticmethod
     def parabolic(x, y):
         """return the plane Poiseuille parabolic inlet profile"""
-        return ((4 * y * (1. - y), np.zeros_like(y)))
+        return 4 * y * (1. - y), np.zeros_like(y)
 
     def make_vector(self):
         """prepopulate solution vector with Dirichlet conditions"""
