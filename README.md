@@ -9,6 +9,13 @@
 
 Easy to use finite element assemblers and the related tools.
 
+> We have recently released 1.0.0 which includes a plenty of new features and
+> deprecates older features (see changelog below). Unfortunately, our
+> documentation is still in a fluid state and, although the goal is to maintain
+> backwards-compatibility in 95% of the cases, some examples may be broken or
+> emit warnings. We hope to fix everything as soon as possible. Thanks for your
+> patience!
+
 ## Features
 
 This library fills an important gap in the spectrum of finite element codes.
@@ -29,14 +36,16 @@ import numpy as np
 mesh = MeshTet.init_tensor(*((np.linspace(0, 1, 60),) * 3))
 basis = InteriorBasis(mesh, ElementTetP1())
 
-@bilinear_form
-def laplace(u, du, v, dv, w):
-    return sum(du * dv)
+@BilinearForm
+def laplace(u, v, w):
+    from skfem.helpers import d, dot
+    return dot(d(u), d(v))
 
 A = asm(laplace, basis)
 ```
 
-More examples can be found in the [documentation](https://kinnala.github.io/scikit-fem-docs/learning.html).
+More examples can be found in the
+[documentation](https://kinnala.github.io/scikit-fem-docs/learning.html).
 
 ## Installation
 
@@ -44,21 +53,24 @@ The most recent release can be installed simply by `pip install scikit-fem`.
 
 For more cutting edge features, you can clone this repository.
 
-## Getting started
-
-The latest user documentation corresponding to the master branch can be found [online](https://kinnala.github.io/scikit-fem-docs).
-
 ## Acknowledgements
 
 This project was started while working under a grant from the [Finnish Cultural Foundation](https://skr.fi/). The approach used in the finite element assembly has been inspired by the [work of A. Hannukainen and M. Juntunen](https://au.mathworks.com/matlabcentral/fileexchange/36108-hjfem_lite).
+
+A list of people who have directly contributed to the project:
+
+- Tom Gustafsson (Author)
+- [Geordie McBain](https://github.com/gdmcbain)
+
+*By contributing code to scikit-fem, you are agreeing to release it under BSD-3-Clause, see LICENSE.md.*
 
 ## In literature
 
 The library has been used in the preparation of the following scientific works:
 
+- Gustafsson, T., Stenberg, R., & Videman, J. (2020). On Nitsche's method for elastic contact problems. SIAM Journal on Scientific Computing, 42(2). [arXiv:1902.09312](https://arxiv.org/abs/1902.09312).
 - Gustafsson, T., Stenberg, R., & Videman, J. (2019). Nitsche's Master-Slave Method for Elastic Contact Problems. [arXiv:1912.08279](https://arxiv.org/abs/1912.08279).
 - McBain, G. D., Mallinson, S. G., Brown, B. R., Gustafsson, T. (2019). Three ways to compute multiport inertance. The ANZIAM Journal, 60, C140–C155.  [Open access](https://doi.org/10.21914/anziamj.v60i0.14058).
-- Gustafsson, T., Stenberg, R., & Videman, J. (2019). On Nitsche's method for elastic contact problems. arXiv preprint [arXiv:1902.09312](https://arxiv.org/abs/1902.09312).
 - Gustafsson, T., Stenberg, R., & Videman, J. (2019). Error analysis of Nitsche's mortar method. Numerische Mathematik, 142(4), 973–994. [Open access](https://link.springer.com/article/10.1007/s00211-019-01039-5).
 - Gustafsson, T., Stenberg, R., & Videman, J. (2019). Nitsche's method for unilateral contact problems. Port. Math. 75, 189–204. arXiv preprint [arXiv:1805.04283](https://arxiv.org/abs/1805.04283).
 - Gustafsson, T., Stenberg, R. & Videman, J. (2018). A posteriori estimates for conforming Kirchhoff plate elements. SIAM Journal on Scientific Computing, 40(3), A1386–A1407. arXiv preprint [arXiv:1707.08396](https://arxiv.org/abs/1707.08396).
@@ -69,9 +81,56 @@ The library has been used in the preparation of the following scientific works:
 
 In case you want to cite the library, you can use the DOI provided by [Zenodo](https://zenodo.org/badge/latestdoi/115345426).
 
-## Contributors
+## Changelog
 
-- Tom Gustafsson (Author)
-- [Geordie McBain](https://github.com/gdmcbain)
+All notable changes to this project will be documented in this section.
 
-*By contributing code to scikit-fem, you are agreeing to release it under BSD-3-Clause, see LICENSE.md.*
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+### [Unreleased]
+
+### [1.0.0] - 2020-04-04
+
+#### Added
+- New-style form constructors `BilinearForm`, `LinearForm`, and `Functional`
+- `skfem.io.json` for serialization of meshes to/from json-files
+- `ElementLinePp`, p-th order one-dimensional elements
+- `ElementQuadP`, p-th order quadrilateral elements
+- `ElementQuadDG` for transforming quadrilateral H1 elements to DG elements
+- `ElementQuadBFS`, Bogner-Fox-Schmit element for biharmonic problems
+- `ElementTriMini`, MINI-element for Stokes problems
+- `ElementComposite` for using multiple elements in one bilinear form
+- `ElementQuadS2`, quadratic Serendipity element
+- `ElementLineHermite`, cubic Hermite element for Euler-Bernoulli beams
+- `Mesh.define_boundary` for defining named boundaries
+- `Mesh.from_basis` for defining high-order meshes
+- `Basis.find_dofs` for finding degree-of-freedom indices
+- `Basis.split` for splitting multicomponent solutions
+- `MortarMapping` for supporting mortar methods in 2D
+
+#### Deprecated
+- `Basis.get_dofs` in favor of `Basis.find_dofs`
+- Old-style form constructors `bilinear_form`, `linear_form`, and `functional`.
+
+#### Changed
+- Renamed `skfem.importers` to `skfem.io`
+- Renamed `skfem.models.helpers` to `skfem.helpers`
+- `skfem.utils.solve` will now expand also the solutions of eigenvalue problems
+- `Basis.interpolate` returns `DiscreteField` objects instead ndarray tuples
+- `Basis.interpolate` works now for vectorial elements
+
+### [0.4.1] - 2020-01-19
+
+#### Added
+- Additional keyword arguments to `skfem.utils.solve` get passed on to linear solvers
+
+#### Fixed
+- Made `skfem.visuals.matplotlib` Python 3.6 compatible
+
+### [0.4.0] - 2020-01-03
+
+#### Changed
+- Renamed `GlobalBasis` to `Basis`
+- Moved all `Mesh.plot` and `Mesh.draw` methods to `skfem.visuals` module
+- Made matplotlib an optional dependency
