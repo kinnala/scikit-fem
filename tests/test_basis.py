@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 import numpy as np
+from numpy.testing import assert_allclose
 
 from skfem import *
 
@@ -55,3 +56,19 @@ class TestCompositeSplitting(TestCase):
         self.assertTrue('w^2' in y)
 
         self.assertTrue((basis.doflocs[:, D['up'].all()][1] == 1.).all())
+
+
+class TestFacetExpansion(TestCase):
+
+    def runTest(self):
+
+        m = MeshTet()
+
+        basis = InteriorBasis(m, ElementTetP2())
+
+        arr1 = basis.find_dofs({
+            'kek':m.facets_satisfying(lambda x: x[0] == 0)
+        })['kek'].edge['u']
+        arr2 = basis.edge_dofs[:, m.edges_satisfying(lambda x: x[0] == 0)]
+
+        assert_allclose(arr1, arr2.flatten())
