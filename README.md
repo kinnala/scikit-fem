@@ -9,12 +9,10 @@
 
 Easy to use finite element assemblers and the related tools.
 
-> We have recently released 1.0.0 which includes a plenty of new features and
+> We have recently released 1.0.0 which includes many new features and
 > deprecates older features (see changelog below). Unfortunately, our
-> documentation is still in a fluid state and, although the goal is to maintain
-> backwards-compatibility in 95% of the cases, some examples may be broken or
-> emit warnings. We hope to fix everything as soon as possible. Thanks for your
-> patience!
+> documentation is still in a fluid state and some examples may be broken or
+> emit warnings. Thanks for your patience!
 
 ## Features
 
