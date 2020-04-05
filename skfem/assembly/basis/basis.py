@@ -145,12 +145,24 @@ class Basis:
                   facets: ndarray,
                   skip: List[str] = []):
         """Return :class:`skfem.assembly.Dofs` corresponding to facets."""
-        nodal_ix = np.unique(self.mesh.facets[:, facets].flatten())
+        m = self.mesh
+        nodal_ix = np.unique(m.facets[:, facets].flatten())
         facet_ix = facets
-        edge_ix = np.intersect1d(
-            self.mesh.boundary_edges(),
-            np.unique(self.mesh.t2e[:, self.mesh.f2t[0, facets]].flatten())
-        ) if self.mesh.dim() == 3 else []
+
+        if m.dim() == 3:
+            edge_candidates = m.t2e[:, m.f2t[0, facets]].flatten()
+            # subset of edges that share all points with the given facets
+            subset_ix = np.nonzero(
+                np.prod(np.isin(m.edges[:, edge_candidates],
+                                m.facets[:, facets].flatten()),
+                        axis=0)
+            )[0]
+            edge_ix = np.intersect1d(
+                m.boundary_edges(),
+                edge_candidates[subset_ix]
+            )
+        else:
+            edge_ix = []
 
         n_nodal = self.nodal_dofs.shape[0]
         n_facet = self.facet_dofs.shape[0]
