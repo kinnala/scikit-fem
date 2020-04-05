@@ -97,14 +97,14 @@ Assembling finite element matrices
 ##################################
 
 Forms are defined using the decorators
-:func:`~skfem.assembly.bilinear_form` and :func:`~skfem.assembly.linear_form`.
+:class:`~skfem.assembly.BilinearForm` and :class:`~skfem.assembly.LinearForm`.
 For example, the mass matrix is assembled as follows:
 
 .. code-block:: python
 
-   In [6]: from skfem import bilinear_form, asm
-   In [7]: @bilinear_form
-      ...: def mass(u, du, v, dv, w):
+   In [6]: from skfem import BilinearForm, LinearForm, asm
+   In [7]: @BilinearForm
+      ...: def mass(u, v, w):
       ...:     return u * v
       ...:
    In [8]: asm(mass, basis)
@@ -114,22 +114,40 @@ For example, the mass matrix is assembled as follows:
 
 .. note::
 
-   Below :func:`~skfem.assembly.bilinear_form`, ``u`` refers to the solution and
-   ``du`` refers to its derivatives, ``v`` and ``dv`` refer to the test function
-   values and derivatives, and ``w`` contains any additional variables such as the
-   global coordinates (``w.x``) and the local mesh parameters (``w.h``).
+   In the decorated function, ``u`` refers to the solution, ``v`` refers to the
+   test function, and ``w`` contains additional fields such as the global
+   coordinates (``w.x``) and the local mesh parameters (``w.h``).
+
+The discrete laplacian can be defined as follows:
+
+.. code-block:: python
+
+   In [9]: @BilinearForm
+      ...: def laplacian(u, v, w):
+      ...:     from skfem.helpers import d, dot
+      ...:     return dot(d(u), d(v))
+      ...:
+
+
+.. note::
+   In reality,
+   ``u`` and ``v`` are tuples that store the values of the basis functions (and
+   the values of the derivatives) at quadrature points. In order to access the
+   derivatives, you can write ``u[1]`` (values are ``u[0]``, first derivatives
+   are ``u[1]``, and so on.) or, equivalently, use helper functions from
+   the module ``skfem.helpers`` as above.
 
 A load vector corresponding to the linear form :math:`F(v)=\int_\Omega x^2 v
 \,\mathrm{d}x` is assembled similarly:
 
 .. code-block:: python
 
-   In [9]: @linear_form
-      ...: def F(v, dv, w):
+   In [10]: @LinearForm
+      ...: def F(v, w):
       ...:     return w.x[0] ** 2 * v
       ...:
-   In [10]: asm(F, basis)
-   Out[11]: array([-1.35633681e-06,  9.22309028e-05, -5.42534722e-06,  ...])
+   In [11]: asm(F, basis)
+   Out[12]: array([-1.35633681e-06,  9.22309028e-05, -5.42534722e-06,  ...])
 
 See :ref:`learning` for more use cases and instructions.
 
@@ -151,16 +169,17 @@ boundary is through :meth:`skfem.assembly.Basis.get_dofs`.
 
    In [1]: from skfem import MeshTri, ElementTriP2, InteriorBasis
    In [2]: basis = InteriorBasis(MeshTri.init_lshaped(), ElementTriP2())
-   In [3]: basis.get_dofs(lambda x: x[0]==0.0)
+   In [3]: basis.get_dofs(lambda x: x[0] == 0.0)
    Out[3]: Dofs(nodal={'u': array([0, 2, 4])}, facet={'u': array([ 9, 11])}, edge={}, interior={})
 
 The result value is :class:`skfem.assembly.Dofs` object (a named tuple)
-containing the degree-of-freedom numbers corresponding to :math:`x=0`.  In
-particular, the result tells us that when assembling matrices and vectors using
-:class:`~skfem.assembly.Basis` object, the rows 0, 2 and 4 correspond to the
-degrees-of-freedom at the vertices of the elements on the boundary :math:`x=0`,
-and the rows 9 and 11 correspond to the degrees-of-freedom at the facets of the
-elements on the boundary :math:`x=0`.
+containing the degree-of-freedom numbers corresponding to :math:`x=0`.
+
+In particular, the result tells us that when assembling matrices and vectors
+using :class:`~skfem.assembly.Basis` object, the rows 0, 2 and 4 correspond to
+the degrees-of-freedom at the vertices of the elements on the boundary
+:math:`x=0`, and the rows 9 and 11 correspond to the degrees-of-freedom at the
+facets of the elements on the boundary :math:`x=0`.
 
 .. code-block:: python
 
