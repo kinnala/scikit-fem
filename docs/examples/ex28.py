@@ -79,8 +79,7 @@ def conduction(u, v, w):
 
 @BilinearForm
 def advection(u, v, w):
-    y = w['x'].value[1]
-    velocity_x = 1 - (y / halfheight)**2  # plane Poiseuille
+    velocity_x = 1 - (w.x[1] / halfheight)**2  # plane Poiseuille
     return v * velocity_x * grad(u)[0]
 
 
@@ -109,6 +108,7 @@ def exact(x: np.ndarray, y: np.ndarray) -> np.ndarray:
                     - (5 - y**2) * (1 - y**2) / 16 - y / 2,
                     1 / 2 - (1 + y) / kratio) + longitudinal_gradient * x
 
+
 temperature = np.zeros(basis['heat'].N)
 inlet_dofs = basis['heat'].complement_dofs(I)
 temperature[inlet_dofs] = exact(*mesh.p[:, inlet_dofs])
@@ -135,7 +135,7 @@ if __name__ == '__main__':
 
     fig, ax = subplots()
     ax.set_title('transverse temperature profiles')
-    
+
     y = {label: mesh.p[1, d] for label, d in dofs.items()}
     ii = {label: np.argsort(yy) for label, yy in y.items()}
 

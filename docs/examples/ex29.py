@@ -16,12 +16,12 @@ U = Polynomial([1, 0, -1])      # base-flow profile
 
 @BilinearForm
 def base_velocity(u, v, w):
-    return v * U(w['x'].value[0]) * u
+    return v * U(w.x[0]) * u
 
 
 @BilinearForm
 def base_shear(u, v, w):
-    return v * U.deriv()(w['x'].value[0]) * u
+    return v * U.deriv()(w.x[0]) * u
 
 
 mesh = MeshLine(np.linspace(0, 1, 2**6))
