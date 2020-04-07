@@ -38,8 +38,8 @@ def acceleration(v, w):
     return np.einsum('j...,ij...,i...', u, grad(u), v)
 
 
-@bilinear_form
-def acceleration_jacobian(u, du, v, dv, w):
+@BilinearForm
+def acceleration_jacobian(u, v, w):
     """Compute (v, w . grad u + u . grad w) for given velocity w
 
     passed in via w after having been interpolated onto its quadrature
@@ -52,8 +52,8 @@ def acceleration_jacobian(u, du, v, dv, w):
        (w_j du_{i,j} + u_j dw_{i,j}) v_i
 
     """
-    return sum((np.einsum('j...,ij...->i...', w.w, du)
-                + np.einsum('j...,ij...->i...', u, w.dw)) * v)
+    return dot(np.einsum('j...,ij...->i...', w['w'], grad(u))
+               + np.einsum('j...,ij...->i...', u, grad(w['w'])), v)
 
 
 class BackwardFacingStep:
