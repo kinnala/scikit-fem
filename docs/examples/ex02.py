@@ -9,25 +9,17 @@ e = ElementTriMorley()
 ib = InteriorBasis(m, e)
 
 
-@bilinear_form
-def bilinf(u, du, ddu, v, dv, ddv, w):
+@BilinearForm
+def bilinf(u, v, w):
+    from skfem.helpers import dd, ddot, trace, eye
     d = 0.1
     E = 200e9
     nu = 0.3
 
     def C(T):
-        trT = T[0, 0] + T[1, 1]
-        return E / (1. + nu) * \
-            np.array([[T[0, 0] + nu / (1. - nu) * trT, T[0, 1]],
-                      [T[1, 0], T[1, 1] + nu / (1. - nu) * trT]])
+        return E / (1 + nu) * (T + nu / (1 - nu) * eye(trace(T), 2))
 
-    def ddot(T1, T2):
-        return (T1[0, 0] * T2[0, 0] +
-                T1[0, 1] * T2[0, 1] +
-                T1[1, 0] * T2[1, 0] +
-                T1[1, 1] * T2[1, 1])
-
-    return d**3 / 12.0 * ddot(C(ddu), ddv)
+    return d**3 / 12.0 * ddot(C(dd(u)), dd(v))
 
 
 K = asm(bilinf, ib)
