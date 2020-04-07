@@ -1,4 +1,5 @@
 from skfem import *
+from skfem.helpers import grad, dot
 from skfem.io import from_meshio
 from skfem.models.poisson import unit_load
 
@@ -71,16 +72,16 @@ basis = {
        for label in ['heated', 'fluid-outlet', 'solid-outlet']}}
 
 
-@bilinear_form
-def conduction(u, du, v, dv, w):
-    return w.w * sum(du * dv)
+@BilinearForm
+def conduction(u, v, w):
+    return dot(w['w'] * grad(u), grad(v))
 
 
-@bilinear_form
-def advection(u, du, v, dv, w):
-    _, y = w.x
+@BilinearForm
+def advection(u, v, w):
+    y = w['x'].value[1]
     velocity_x = 1 - (y / halfheight)**2  # plane Poiseuille
-    return v * velocity_x * du[0]
+    return v * velocity_x * grad(u)[0]
 
 
 conductivity = basis['heat'].zero_w() + 1
