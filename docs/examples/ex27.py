@@ -1,4 +1,5 @@
 from skfem import *
+from skfem.helpers import grad, dot
 from skfem.models.poisson import vector_laplace, laplace
 from skfem.models.general import divergence, rot
 from skfem.io import from_meshio
@@ -19,8 +20,8 @@ from pygmsh.built_in import Geometry
 from pacopy import natural
 
 
-@linear_form
-def acceleration(v, dv, w):
+@LinearForm
+def acceleration(v, w):
     """Compute the vector (v, u . grad u) for given velocity u
 
     passed in via w after having been interpolated onto its quadrature
@@ -33,9 +34,8 @@ def acceleration(v, dv, w):
         u_j u_{i,j} v_i.
 
     """
-    u, du = w.w, w.dw
-    return sum(np.einsum('j...,ij...->i...', u, du) * v)
-
+    u = w['w']
+    return np.einsum('j...,ij...,i...', u, grad(u), v )
 
 @bilinear_form
 def acceleration_jacobian(u, du, v, dv, w):
