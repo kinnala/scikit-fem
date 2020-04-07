@@ -35,7 +35,8 @@ def acceleration(v, w):
 
     """
     u = w['w']
-    return np.einsum('j...,ij...,i...', u, grad(u), v )
+    return np.einsum('j...,ij...,i...', u, grad(u), v)
+
 
 @bilinear_form
 def acceleration_jacobian(u, du, v, dv, w):
