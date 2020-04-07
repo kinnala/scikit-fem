@@ -1,4 +1,5 @@
 from skfem import *
+from skfem.models.poisson import laplace
 
 m = MeshTri()
 m.refine(5)
@@ -7,10 +8,6 @@ e = ElementTriP1()
 
 ib = InteriorBasis(m, e)
 fb = FacetBasis(m, e)
-
-@bilinear_form
-def bilinf(u, du, v, dv, w):
-    return du[0]*dv[0] + du[1]*dv[1]
 
 @bilinear_form
 def facetbilinf(u, du, v, dv, w):
@@ -24,7 +21,7 @@ def facetlinf(v, dv, w):
     x = w.x
     return -(dv[0]*n[0] + dv[1]*n[1])*(x[0] == 1.0)
 
-A = asm(bilinf, ib)
+A = asm(laplace, ib)
 B = asm(facetbilinf, fb)
 
 b = asm(facetlinf, fb)
