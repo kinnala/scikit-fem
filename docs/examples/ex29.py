@@ -14,20 +14,14 @@ from scipy.sparse.linalg import eigs
 U = Polynomial([1, 0, -1])      # base-flow profile
 
 
-# @bilinear_form
-# def divergence(u, du, v, dv, w):
-#     """Can't use models.general.divergence in one dimension"""
-#     return v * du[0]
+@BilinearForm
+def base_velocity(u, v, w):
+    return v * U(w['x'].value[0]) * u
 
 
-@bilinear_form
-def base_velocity(u, du, v, dv, w):
-    return v * U(w.x[0]) * u
-
-
-@bilinear_form
-def base_shear(u, du, v, dv, w):
-    return v * U.deriv()(w.x[0]) * u
+@BilinearForm
+def base_shear(u, v, w):
+    return v * U.deriv()(w['x'].value[0]) * u
 
 
 mesh = MeshLine(np.linspace(0, 1, 2**6))
