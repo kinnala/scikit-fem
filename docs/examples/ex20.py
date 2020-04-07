@@ -39,7 +39,7 @@ from matplotlib.tri import Triangulation
 
 # Evaluate the stream-function at the origin.
 psi0, = ib.interpolator(psi)(np.zeros((2, 1)))
-    
+
 if __name__ == "__main__":
     from os.path import splitext
     from sys import argv

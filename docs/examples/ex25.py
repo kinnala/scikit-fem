@@ -16,11 +16,19 @@ mesh = MeshQuad.init_tensor(
 basis = InteriorBasis(mesh, ElementQuad2())
 
 
-@bilinear_form
-def advection(u, du, v, dv, w):
+# @bilinear_form
+# def advection(u, du, v, dv, w):
+#     _, y = w.x
+#     velocity_0 = 6 * y * (height - y)  # parabolic plane Poiseuille
+#     return v * velocity_0 * du[0]
+
+
+@BilinearForm
+def advection(u, v, w):
+    from skfem.helpers import grad
     _, y = w.x
     velocity_0 = 6 * y * (height - y)  # parabolic plane Poiseuille
-    return v * velocity_0 * du[0]
+    return v * velocity_0 * grad(u)[0]
 
 
 dofs = basis.get_dofs({'inlet': lambda x: x[0] == 0.,

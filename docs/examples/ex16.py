@@ -12,9 +12,11 @@ m = MeshLine(x)
 e = ElementLineP1()
 basis = InteriorBasis(m, e)
 
+
 @BilinearForm
 def stiffness(u, v, w):
     return (1 - w.x[0]**2) * dot(d(u), d(v))
+
 
 L = asm(stiffness, basis)
 M = asm(mass, basis)

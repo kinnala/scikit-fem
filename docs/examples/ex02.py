@@ -8,6 +8,7 @@ m.refine(3)
 e = ElementTriMorley()
 ib = InteriorBasis(m, e)
 
+
 @bilinear_form
 def bilinf(u, du, ddu, v, dv, ddv, w):
     d = 0.1
@@ -27,6 +28,7 @@ def bilinf(u, du, ddu, v, dv, ddv, w):
                 T1[1, 1] * T2[1, 1])
 
     return d**3 / 12.0 * ddot(C(ddu), ddv)
+
 
 K = asm(bilinf, ib)
 f = 1e6 * asm(unit_load, ib)
