@@ -16,6 +16,6 @@ if __name__ == "__main__":
     from os.path import splitext
     from sys import argv
     from skfem.visuals.matplotlib import plot, savefig
-    
+   
     plot(m, x, shading='gouraud', colorbar=True)
     savefig(splitext(argv[0])[0] + '_solution.png')
