@@ -1,5 +1,6 @@
 from skfem import *
 from skfem.io import from_meshio
+from skfem.models.poisson import unit_load
 
 import numpy as np
 
@@ -18,29 +19,14 @@ mapping = MappingAffine(mesh)
 ib = InteriorBasis(mesh, element, mapping, 2)
 
 
-@bilinear_form
-def biharmonic(u, du, ddu, v, dv, ddv, w):
+@BilinearForm
+def biharmonic(u, v, w):
+    from skfem.helpers import ddot, dd
 
-    def shear(ddw):
-        return np.array([[ddw[0][0], ddw[0][1]],
-                         [ddw[1][0], ddw[1][1]]])
-
-    def ddot(T1, T2):
-        return T1[0, 0]*T2[0, 0] +\
-               T1[0, 1]*T2[0, 1] +\
-               T1[1, 0]*T2[1, 0] +\
-               T1[1, 1]*T2[1, 1]
-
-    return ddot(shear(ddu), shear(ddv))
-
-
-@linear_form
-def unit_rotation(v, dv, ddv, w):
-    return v
-
+    return ddot(dd(u), dd(v))
 
 stokes = asm(biharmonic, ib)
-rotf = asm(unit_rotation, ib)
+rotf = asm(unit_load, ib)
 
 dofs = ib.get_dofs(mesh.boundaries['perimeter'])
 

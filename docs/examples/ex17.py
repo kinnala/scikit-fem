@@ -6,6 +6,7 @@ from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
 
 from skfem import *
+from skfem.helpers import dot, grad
 from skfem.models.poisson import mass, unit_load
 from skfem.io import from_meshio
 
@@ -37,9 +38,9 @@ def make_mesh(a: float,         # radius of wire
 mesh = make_mesh(*radii)
 
 
-@bilinear_form
-def conduction(u, du, v, dv, w):
-    return w.w * sum(du * dv)
+@BilinearForm
+def conduction(u, v, w):
+    return dot(w.w * grad(u), grad(v))
 
 
 convection = mass

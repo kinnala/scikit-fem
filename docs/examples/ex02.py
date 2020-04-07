@@ -1,4 +1,5 @@
 from skfem import *
+from skfem.models.poisson import unit_load
 import numpy as np
 
 m = MeshTri.init_symmetric()
@@ -27,12 +28,8 @@ def bilinf(u, du, ddu, v, dv, ddv, w):
 
     return d**3 / 12.0 * ddot(C(ddu), ddv)
 
-@linear_form
-def linf(v, dv, ddv, w):
-    return 1e6 * v
-
 K = asm(bilinf, ib)
-f = asm(linf, ib)
+f = 1e6 * asm(unit_load, ib)
 
 dofs = ib.get_dofs({
     'left':  m.facets_satisfying(lambda x: x[0] == 0),
