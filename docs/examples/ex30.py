@@ -14,9 +14,9 @@ basis = {variable: InteriorBasis(mesh, e, intorder=3)
          for variable, e in element.items()}
 
 
-@linear_form
-def body_force(v, dv, w):
-    return w.x[0] * v[1]
+@LinearForm
+def body_force(v, w):
+    return w.x[0] * v.value[1]
 
 
 A = asm(vector_laplace, basis['u'])
