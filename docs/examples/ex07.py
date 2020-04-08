@@ -1,4 +1,5 @@
 from skfem import *
+from skfem.helpers import grad, dot
 from skfem.models.poisson import laplace, unit_load
 
 m = MeshTri.init_sqsymmetric()
@@ -13,13 +14,11 @@ fb[0] = FacetBasis(m, e, side=0)
 fb[1] = FacetBasis(m, e, side=1)
 bb = FacetBasis(m, e)
 
-@bilinear_form
-def bilin_bnd(u, du, v, dv, w):
+@BilinearForm
+def bilin_bnd(u, v, w):
     h = w.h
     n = w.n
-    dudn = du[0]*n[0] + du[1]*n[1]
-    dvdn = dv[0]*n[0] + dv[1]*n[1]
-    return 1.0/(alpha*h)*u*v - dudn*v - u*dvdn
+    return (u * v) / alpha / h - dot(grad(u), n) * v - u * dot(grad(v), n)
 
 A = asm(laplace, ib)
 b = asm(unit_load, ib)
@@ -28,15 +27,14 @@ C = asm(bilin_bnd, bb)
 B = 0
 for i in range(2):
     for j in range(2):
-        @bilinear_form
-        def bilin_int(u, du, v, dv, w):
+        @BilinearForm
+        def bilin_int(u, v, w):
             ju = (-1.0)**i*u
             jv = (-1.0)**j*v
             n = w.n
-            mu = 0.5*(du[0]*n[0] + du[1]*n[1])
-            mv = 0.5*(dv[0]*n[0] + dv[1]*n[1])
             h = w.h
-            return 1.0/(alpha*h)*ju*jv - mu*jv - mv*ju
+            return (ju * jv) / alpha / h - (dot(grad(u), n) * jv +
+                                            dot(grad(v), n) * ju) / 2
 
         B = asm(bilin_int, fb[i], fb[j]) + B
 

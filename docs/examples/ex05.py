@@ -1,4 +1,5 @@
 from skfem import *
+from skfem.helpers import dot, grad
 from skfem.models.poisson import laplace
 
 m = MeshTri()
@@ -10,19 +11,17 @@ ib = InteriorBasis(m, e)
 fb = FacetBasis(m, e)
 
 
-@bilinear_form
-def facetbilinf(u, du, v, dv, w):
+@BilinearForm
+def facetbilinf(u, v, w):
     n = w.n
     x = w.x
-    return -(du[0]*n[0] + du[1]*n[1])*v*(x[0] == 1.0)
+    return -dot(grad(u), n) * v * (x[0] == 1.0)
 
-
-@linear_form
-def facetlinf(v, dv, w):
+@LinearForm
+def facetlinf(v, w):
     n = w.n
     x = w.x
-    return -(dv[0]*n[0] + dv[1]*n[1])*(x[0] == 1.0)
-
+    return -dot(grad(v), n) * (x[0] == 1.0)
 
 A = asm(laplace, ib)
 B = asm(facetbilinf, fb)
