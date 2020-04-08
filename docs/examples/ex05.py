@@ -17,11 +17,13 @@ def facetbilinf(u, v, w):
     x = w.x
     return -dot(grad(u), n) * v * (x[0] == 1.0)
 
+
 @LinearForm
 def facetlinf(v, w):
     n = w.n
     x = w.x
     return -dot(grad(v), n) * (x[0] == 1.0)
+
 
 A = asm(laplace, ib)
 B = asm(facetbilinf, fb)
