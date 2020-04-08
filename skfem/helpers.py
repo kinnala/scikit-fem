@@ -19,7 +19,10 @@ def div(u: DiscreteField):
     if u.div is not None:
         return u.div
     elif u.grad is not None:
-        return np.einsum('ii...', u.grad)
+        try:
+            return np.einsum('ii...', u.grad)
+        except ValueError:  # one-dimensional u?
+            return u.grad[0]
     raise NotImplementedError
 
 

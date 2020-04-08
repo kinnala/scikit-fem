@@ -1,4 +1,5 @@
 from skfem import *
+from skfem.helpers import dot
 from skfem.models.elasticity import linear_elasticity
 from scipy.sparse.linalg import eigsh
 import numpy as np
@@ -17,9 +18,9 @@ gb = InteriorBasis(m, e, mapping, 2)
 
 K = asm(linear_elasticity(1.0, 1.0), gb)
 
-@bilinear_form
-def mass(u, du, v, dv, w):
-    return u[0] * v[0] + u[1] * v[1]
+@BilinearForm
+def mass(u, v, w):
+    return dot(u, v)
 
 M = asm(mass, gb)
 

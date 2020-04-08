@@ -4,6 +4,7 @@ from scipy.sparse.linalg import eigsh
 from scipy.special import legendre
 
 from skfem import *
+from skfem.helpers import d, dot
 from skfem.models.poisson import mass
 
 x = np.linspace(-1, 1)
@@ -11,9 +12,11 @@ m = MeshLine(x)
 e = ElementLineP1()
 basis = InteriorBasis(m, e)
 
-@bilinear_form
-def stiffness(u, du, v, dv, w):
-    return (1 - w.x[0]**2) * du[0] * dv[0]
+
+@BilinearForm
+def stiffness(u, v, w):
+    return (1 - w.x[0]**2) * dot(d(u), d(v))
+
 
 L = asm(stiffness, basis)
 M = asm(mass, basis)
