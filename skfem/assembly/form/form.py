@@ -1,3 +1,4 @@
+import warnings
 from typing import Any, Callable, Optional, Tuple, Union
 
 import numpy as np
@@ -10,6 +11,7 @@ from ...element import DiscreteField
 
 
 class FormDict(dict):
+    """Passed to forms as 'w'."""
 
     def __getattr__(self, attr):
         return self[attr].value
@@ -33,7 +35,17 @@ class Form:
     def dictify(w):
         """Support some legacy input formats for 'w'."""
         if not isinstance(w, dict):
-            # TODO: deprecate
+
+            warnings.warn(("Previous versions of the library "
+                           "supported multiple formats "
+                           "for the prespecified field w. "
+                           "In future, we support only "
+                           "Dict[str, DiscreteField] which "
+                           "can contain also multiple fields. "
+                           "In most cases, you should be able to "
+                           "simply replace w with {'w': w} to suppress "
+                           "this warning. "), DeprecationWarning)
+
             if isinstance(w, DiscreteField):
                 w = {'w': w}
             elif isinstance(w, ndarray):
