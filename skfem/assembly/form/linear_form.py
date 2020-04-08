@@ -45,7 +45,11 @@ def linear_form(form: Callable) -> LinearForm:
     # for backwards compatibility
     from .form_parameters import FormParameters
 
-    # TODO: deprecate
+    import warnings
+    warnings.warn("The old style @linear_form wrapper is deprecated. "
+                  "Consider using the new style forms, defined via "
+                  "@LinearForm.", DeprecationWarning)
+
     class ClassicLinearForm(LinearForm):
 
         def _kernel(self, v, w, dx):
