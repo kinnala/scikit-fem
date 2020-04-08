@@ -33,23 +33,27 @@ def laplace(u, v, w):
     return dot(grad(u), grad(v))
 ```
 
-Next, we define a tetrahedral mesh over 1 million elements and assemble the
-corresponding stiffness matrix with about 1.5 million rows and columns:
+Meshes can be initialized manually, loaded from external files using
+[meshio](https://github.com/nschloe/meshio), or created with the help of special
+constructors:
 
 ```python
+import numpy as np
+
+mesh = MeshLine(np.array([0.0, 0.5, 1.0]))
+mesh = MeshTri.load("docs/examples/square.msh")
 mesh = MeshTet.init_tensor(*((np.linspace(0, 1, 60),) * 3))
+```
+
+We support [many common and less common finite elements](https://github.com/kinnala/scikit-fem/tree/master/skfem/element).  Below we use the good old quadratic tetrahedron:
+
+```python
 basis = InteriorBasis(mesh, ElementTetP2())
 A = laplace.assemble(basis)  # type: scipy.sparse.csr_matrix
 ```
 
-We support a [variety of popular finite
- elements](https://github.com/kinnala/scikit-fem/tree/master/skfem/element). It's
- also easy to load meshes from external formats with the help of
- [meshio](https://github.com/nschloe/meshio):
-
-```python
-mesh = MeshTri.load("docs/examples/square.msh")
-```
+The matrix `A` has 1.5 million rows/columns.  Still, the assembly finished in
+only a few seconds on my laptop!
 
 More examples can be found in the
 [source code distribution](https://github.com/kinnala/scikit-fem/tree/master/docs/examples).
