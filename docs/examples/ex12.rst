@@ -16,7 +16,7 @@ forms over the solution. For the boundary value problem of :ref:`poisson`, the i
 of the solution (normalized by the area) is the 'Boussinesq k-factor'; for
 the square it's roughly 0.03514, for the circle 1/Pi/8 = 0.03979. Linear forms
 are easily evaluated in skfem using the 1-D arrays assembled using the
-@linear_form decorator. In :ref:`poisson`, the linear form required for simple
+@LinearForm decorator. In :ref:`poisson`, the linear form required for simple
 integration happens to be the same one used on the right-hand side of the
 differential equation, so it's already to hand.
 

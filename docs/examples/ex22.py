@@ -9,8 +9,8 @@ e = ElementTriP1()
 def load_func(x, y):
     return 1.0
 
-@linear_form
-def load(v, dv, w):
+@LinearForm
+def load(v, w):
     x, y = w.x
     return load_func(x, y) * v
 

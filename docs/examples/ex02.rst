@@ -91,15 +91,15 @@ The rather complicated bilinear form :math:`(\boldsymbol{M}(u),
 \boldsymbol{K}(v))` can be written in several parts:
 
 .. literalinclude:: ex02.py
-    :start-at: bilinear_form
+    :start-at: BilinearForm
     :end-at: return d**3
 
 As loading, we shall consider a distributed force of :math:`1\,\text{MPa}`,
 i.e. :math:`f=10^6\,\text{Pa}`.
 
 .. literalinclude:: ex02.py
-    :start-at: @linear_form
-    :end-at: return 1e6
+    :start-at: unit_load
+    :lines: 1
 
 Assembling the stiffness matrix and the load vector
 is now two calls to :func:`~skfem.assembly.asm`:

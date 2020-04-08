@@ -36,8 +36,8 @@ basis = InteriorBasis(mesh, ElementTetP1())
 
 @BilinearForm
 def laplace(u, v, w):
-    from skfem.helpers import d, dot
-    return dot(d(u), d(v))
+    from skfem.helpers import dot, grad
+    return dot(grad(u), grad(v))
 
 A = asm(laplace, basis)
 ```
