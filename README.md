@@ -15,11 +15,6 @@ is the transformation of bilinear forms into sparse matrices and linear forms
 into vectors.  The library supports triangular, quadrilateral, tetrahedral and
 hexahedral meshes as well as one-dimensional problems.
 
-> We have recently released 1.0.0 which includes many new features and
-> deprecates older features (see changelog below). Unfortunately, our
-> documentation is still in a fluid state and some examples may be broken or
-> emit warnings. Thanks for your patience!
-
 ## Features
 
 This library fills an important gap in the spectrum of finite element codes.
@@ -30,26 +25,46 @@ code has a reasonably *good performance*.
 
 ## Examples
 
-In the following snippet, we create a tetrahedral mesh with over 1 million
-elements and assemble a discrete Laplace operator, all in just a few seconds.
+In the following snippet, we create a tetrahedral mesh with about 1 million
+elements:
 
 ```python
-from skfem import *
 import numpy as np
+from skfem import *
 
 mesh = MeshTet.init_tensor(*((np.linspace(0, 1, 60),) * 3))
-basis = InteriorBasis(mesh, ElementTetP1())
+```
+
+A [variety](https://github.com/kinnala/scikit-fem/tree/master/skfem/element) of
+popular finite elements are supported.  Below we use quadratic basis functions
+and define the bilinear form using an intuitive syntax.
+
+```python
+basis = InteriorBasis(mesh, ElementTetP2())
 
 @BilinearForm
 def laplace(u, v, w):
     from skfem.helpers import dot, grad
     return dot(grad(u), grad(v))
-
-A = asm(laplace, basis)
 ```
 
-More examples can be found in the
-[documentation](https://kinnala.github.io/scikit-fem-docs/learning.html).
+Assembling the stiffness matrix with about 1.5 million rows and columns takes
+only a few seconds:
+
+
+```python
+A = asm(laplace, basis)  # type: scipy.sparse.csr_matrix
+```
+
+It's also easy to load meshes from external formats with the help of
+[meshio](https://github.com/nschloe/meshio).
+
+```python
+mesh = MeshTri.load("docs/examples/square.msh")
+```
+
+More examples are included in the
+[source code distribution](https://github.com/kinnala/scikit-fem/tree/master/docs/examples).
 
 ## Installation
 
