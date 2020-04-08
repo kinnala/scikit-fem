@@ -2,15 +2,12 @@
 
 [![PyPI version](https://badge.fury.io/py/scikit-fem.svg)](https://badge.fury.io/py/scikit-fem)
 [![Build Status](https://travis-ci.com/kinnala/scikit-fem.svg?branch=master)](https://travis-ci.com/kinnala/scikit-fem)
-[![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://kinnala.github.io/scikit-fem-docs)
-[![Join the chat at https://gitter.im/scikit-fem/Lobby](https://badges.gitter.im/scikit-fem/Lobby.svg)](https://gitter.im/scikit-fem/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![DOI](https://zenodo.org/badge/115345426.svg)](https://zenodo.org/badge/latestdoi/115345426)
 
 
-[scikit-fem](https://github.com/kinnala/scikit-fem) is a lightweight Python 3.6+
-library for performing
-[finite element assembly](https://en.wikipedia.org/wiki/Finite_element_method). Its main purpose
+`scikit-fem` is a lightweight Python 3.6+ library for performing [finite element
+assembly](https://en.wikipedia.org/wiki/Finite_element_method). Its main purpose
 is the transformation of bilinear forms into sparse matrices and linear forms
 into vectors.  The library supports triangular, quadrilateral, tetrahedral and
 hexahedral meshes as well as one-dimensional problems.
@@ -25,22 +22,10 @@ code has a reasonably *good performance*.
 
 ## Examples
 
-In the following snippet, we create a tetrahedral mesh with about 1 million
-elements:
+Forms are defined using an intuitive syntax:
 
 ```python
-import numpy as np
 from skfem import *
-
-mesh = MeshTet.init_tensor(*((np.linspace(0, 1, 60),) * 3))
-```
-
-A [variety](https://github.com/kinnala/scikit-fem/tree/master/skfem/element) of
-popular finite elements are supported.  Below we use quadratic basis functions
-and define the bilinear form using an intuitive syntax.
-
-```python
-basis = InteriorBasis(mesh, ElementTetP2())
 
 @BilinearForm
 def laplace(u, v, w):
@@ -48,22 +33,25 @@ def laplace(u, v, w):
     return dot(grad(u), grad(v))
 ```
 
-Assembling the stiffness matrix with about 1.5 million rows and columns takes
-only a few seconds:
-
+Next, we define a tetrahedral mesh over 1 million elements and assemble the
+corresponding stiffness matrix with about 1.5 million rows and columns:
 
 ```python
-A = asm(laplace, basis)  # type: scipy.sparse.csr_matrix
+mesh = MeshTet.init_tensor(*((np.linspace(0, 1, 60),) * 3))
+basis = InteriorBasis(mesh, ElementTetP2())
+A = laplace.assemble(basis)  # type: scipy.sparse.csr_matrix
 ```
 
-It's also easy to load meshes from external formats with the help of
-[meshio](https://github.com/nschloe/meshio).
+We support a [variety of popular finite
+ elements](https://github.com/kinnala/scikit-fem/tree/master/skfem/element). It's
+ also easy to load meshes from external formats with the help of
+ [meshio](https://github.com/nschloe/meshio):
 
 ```python
 mesh = MeshTri.load("docs/examples/square.msh")
 ```
 
-More examples are included in the
+More examples can be found in the
 [source code distribution](https://github.com/kinnala/scikit-fem/tree/master/docs/examples).
 
 ## Installation
@@ -91,8 +79,6 @@ for first timers include:
 - Improving the [tests](https://github.com/kinnala/scikit-fem/tree/master/tests).
 - Finding typos in the documentation.
 
-Contributions should be done by first submitting a new issue at Github.
-
 *By contributing code to scikit-fem, you are agreeing to release it under BSD-3-Clause, see LICENSE.md.*
 
 ## In literature
@@ -113,8 +99,6 @@ The library has been used in the preparation of the following scientific works:
 In case you want to cite the library, you can use the DOI provided by [Zenodo](https://zenodo.org/badge/latestdoi/115345426).
 
 ## Changelog
-
-All notable changes to this project will be documented in this section.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
