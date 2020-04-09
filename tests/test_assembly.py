@@ -17,14 +17,14 @@ class IntegrateOneOverBoundaryQ1(unittest.TestCase):
     def runTest(self):
         self.createBasis()
 
-        @bilinear_form
-        def uv(u, du, v, dv, w):
+        @BilinearForm
+        def uv(u, v, w):
             return u * v
 
         B = asm(uv, self.fbasis)
 
-        @linear_form
-        def gv(v, dv, w):
+        @LinearForm
+        def gv(v, w):
             return 1.0 * v
 
         g = asm(gv, self.fbasis)
@@ -48,6 +48,7 @@ class IntegrateOneOverBoundaryHex1(IntegrateOneOverBoundaryQ1):
 
 
 class IntegrateFuncOverBoundary(unittest.TestCase):
+
     def runTest(self):
         cases = [(MeshHex, ElementHex1),
                  (MeshTet, ElementTetP1),
@@ -58,8 +59,8 @@ class IntegrateFuncOverBoundary(unittest.TestCase):
             m.refine(3)
             fb = FacetBasis(m, etype())
 
-            @bilinear_form
-            def uv(u, du, v, dv, w):
+            @BilinearForm
+            def uv(u, v, w):
                 x, y, z = w.x
                 return x ** 2 * y ** 2 * z ** 2 * u * v
 
@@ -80,8 +81,8 @@ class IntegrateFuncOverBoundaryPart(unittest.TestCase):
         bnd = m.facets_satisfying(lambda x: x[0] == 1.0)
         fb = FacetBasis(m, etype(), facets=bnd)
 
-        @bilinear_form
-        def uv(u, du, v, dv, w):
+        @BilinearForm
+        def uv(u, v, w):
             x, y, z = w.x
             return x ** 2 * y ** 2 * z ** 2 * u * v
 
@@ -265,6 +266,26 @@ class TestCompositeAssembly(unittest.TestCase):
         Kc = asm(bilinf_ec, basisc)
 
         self.assertAlmostEqual(np.sum(np.sum((Kv - Kc).todense())), 0.)
+
+
+class TestFieldInterpolation(unittest.TestCase):
+
+    def runTest(self):
+
+        m = MeshTri()
+        e = ElementTriP1()
+        basis = InteriorBasis(m, e)
+
+        @Functional
+        def feqx(w):
+            from skfem.helpers import grad
+            f = w['func']  # f(x) = x
+            return grad(f)[0]  # f'(x) = 1
+
+        func = basis.interpolate(m.p[0])
+
+        # integrate f'(x) = 1 over [0, 1]^2
+        self.assertAlmostEqual(feqx.assemble(basis, func=func), 1.)
 
 
 if __name__ == '__main__':
