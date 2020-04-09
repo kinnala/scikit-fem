@@ -288,5 +288,26 @@ class TestFieldInterpolation(unittest.TestCase):
         self.assertAlmostEqual(feqx.assemble(basis, func=func), 1.)
 
 
+class TestFieldInterpolation(unittest.TestCase):
+
+    def runTest(self):
+
+        m = MeshTri()
+        e = ElementTriP1()
+        basis = InteriorBasis(m, e)
+
+        @Functional
+        def feqx(w):
+            from skfem.helpers import grad
+            f = w['func']  # f(x, y) = x
+            g = w['gunc']  # g(x, y) = y
+            return grad(f)[0] + grad(g)[1]
+
+        func = basis.interpolate(m.p[0])
+        gunc = basis.interpolate(m.p[1])
+
+        self.assertAlmostEqual(feqx.assemble(basis, func=func, gunc=gunc), 2.)
+
+
 if __name__ == '__main__':
     unittest.main()
