@@ -13,14 +13,14 @@ class LinearForm(Form):
     def assemble(self,
                  u: Basis,
                  v: Optional[Basis] = None,
-                 w: Dict[str, DiscreteField] = {}) -> ndarray:
+                 **kwargs) -> ndarray:
 
         assert v is None
         v = u
 
         nt = v.nelems
         dx = v.dx
-        w = FormDict({**v.default_parameters(), **self.dictify(w)})
+        w = FormDict({**v.default_parameters(), **self.dictify(kwargs)})
 
         # initialize COO data structures
         sz = v.Nbfun * nt
