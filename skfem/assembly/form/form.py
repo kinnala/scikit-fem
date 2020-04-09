@@ -32,21 +32,20 @@ class Form:
     @staticmethod
     def dictify(w):
         """Support some legacy input formats for 'w'."""
-        if not isinstance(w, dict):
-            # TODO: deprecate
-            if isinstance(w, DiscreteField):
-                w = {'w': w}
-            elif isinstance(w, ndarray):
-                w = {'w': DiscreteField(w)}
-            elif isinstance(w, list):
-                w = {'w': DiscreteField(np.array([z['w'].f for z in w]),
-                                        np.array([z['w'].df for z in w]))}
-            elif isinstance(w, tuple):
-                w = {'w': DiscreteField(*w)}
+        for k in w:
+            if isinstance(w[k], DiscreteField):
+                continue
+            elif isinstance(w[k], ndarray):
+                w[k] = DiscreteField(w[k])
+            elif isinstance(w[k], list):
+                w[k] = DiscreteField(np.array([z.f for z in w[k]]),
+                                     np.array([z.df for z in w[k]]))
+            elif isinstance(w[k], tuple):
+                w[k] = DiscreteField(*w[k])
             else:
                 raise ValueError("The given type '{}' for the list of extra "
                                  "form parameters w cannot be converted to "
-                                 "Dict[str, DiscreteField].".format(type(w)))
+                                 "DiscreteField.".format(type(w)))
         return w
 
     @staticmethod

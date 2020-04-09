@@ -65,7 +65,7 @@ class ConvergenceQ1(unittest.TestCase):
         self.assertLess(L2s[-1], 0.008)
 
     def compute_error(self, m, basis, U):
-        uh, duh, *_ = basis.interpolate(U)['w']
+        uh, duh, *_ = basis.interpolate(U)
         dx = basis.dx
         x = basis.global_coordinates()
 
@@ -336,7 +336,7 @@ class FacetConvergenceTetP2(unittest.TestCase):
         self.assertLess(L2err[-1], 0.005)
 
     def compute_error(self, m, basis, U):
-        uh, duh, *_ = basis.interpolate(U)['w']
+        uh, duh, *_ = basis.interpolate(U)
         dx = basis.dx
         x = basis.global_coordinates().f
 

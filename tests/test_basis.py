@@ -51,9 +51,9 @@ class TestCompositeSplitting(TestCase):
 
         self.assertTrue(np.sum(p - x[basis.nodal_dofs[2]]) < 1e-8)
 
-        y = basis.interpolate(x)
-        self.assertTrue('w^1' in y)
-        self.assertTrue('w^2' in y)
+        U, P = basis.interpolate(x)
+        self.assertTrue(isinstance(U.value, np.ndarray))
+        self.assertTrue(isinstance(P.value, np.ndarray))
 
         self.assertTrue((basis.doflocs[:, D['up'].all()][1] == 1.).all())
 
