@@ -13,7 +13,7 @@ class BilinearForm(Form):
     def assemble(self,
                  u: Basis,
                  v: Optional[Basis] = None,
-                 w: Dict[str, DiscreteField] = {}) -> Any:
+                 **kwargs) -> Any:
 
         if v is None:
             v = u
@@ -23,7 +23,7 @@ class BilinearForm(Form):
 
         nt = u.nelems
         dx = u.dx
-        w = FormDict({**u.default_parameters(), **self.dictify(w)})
+        w = FormDict({**u.default_parameters(), **self.dictify(kwargs)})
 
         # initialize COO data structures
         sz = u.Nbfun * v.Nbfun * nt

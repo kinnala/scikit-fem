@@ -285,17 +285,18 @@ class Basis:
 
         Returns
         -------
-        Dict[str, DiscreteField]
+        DiscreteField or (DiscreteField, ...)
             The solution vector interpolated at quadrature points.
-            If Basis consist of a single component, the dictionary has
-            a single key 'w'. Otherwise, the keys are 'w^1', 'w^2', ...
+            If Basis consist of a single component, returns only
+            one DiscreteField. If Basis consists of multiple components,
+            returns a tuple.
 
         """
         if w.shape[0] != self.N:
             raise ValueError("Input array has wrong size.")
 
         refs = self.basis[0]
-        dfs: Dict[str, DiscreteField] = {}
+        dfs: List[DiscreteField] = []
 
         # loop over solution components
         for c in range(len(refs)):
@@ -351,11 +352,11 @@ class Basis:
                 for n in range(len(ref[-1])):
                     fs[-1].append(linear_combination(n, ref[-1][n]))
 
-            # give names for the interpolated fields
-            key = 'w' if len(refs) == 1 else 'w^' + str(c + 1)
-            dfs[key] = DiscreteField(*fs)
+            dfs.append(DiscreteField(*fs))
 
-        return dfs
+        if len(dfs) > 1:
+            return tuple(dfs)
+        return dfs[0]
 
     def split_indices(self) -> List[ndarray]:
         """Return indices for the solution components."""
