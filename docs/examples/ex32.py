@@ -1,3 +1,5 @@
+from typing import NamedTuple, Optional
+
 from skfem import *
 from skfem.io.meshio import from_meshio
 from skfem.models.poisson import vector_laplace, mass
@@ -28,9 +30,39 @@ except ImportError:
     def build_pc_amg(A: spmatrix, **kwargs) -> LinearOperator:
         return smoothed_aggregation_solver(A, **kwargs).aspreconditioner()
 
-geom = Geometry()
-geom.add_ellipsoid([0.]*3, [.5, .3, .2], .1)
-mesh = from_meshio(generate_mesh(geom))
+
+class Ellipsoid(NamedTuple):
+
+    a: float
+    b: float
+    c: float
+
+    @property
+    def semiaxes(self) -> np.ndarray:
+        return np.array([self.a, self.b, self.c])
+
+    def geom(self, lcar: float = .1) -> Geometry:
+        geom = Geometry()
+        geom.add_ellipsoid([0.]*3, self.semiaxes, lcar)
+        return geom
+
+    def mesh(self, geom: Optional[Geometry] = None, **kwargs) -> MeshTet:
+        return from_meshio(generate_mesh(geom or self.geom(**kwargs)))
+
+    def pressure(self, x, y, z) -> np.ndarray:
+        a, b, c = self.semiaxes
+        return (a**2 * (3 * a**2 + b**2) * x * y 
+                / (3 * a**4 + 2 * a**2 * b**2 + 3 * b**4))
+
+    def pressure_error(self):
+
+        def form(v, w):
+            return v * (w.w - self.pressure(*w.x))
+
+        return LinearForm(form)
+
+ellipsoid = Ellipsoid(.5, .3, .2)
+mesh = ellipsoid.mesh()
 
 element = {'u': ElementVectorH1(ElementTetP2()),
            'p': ElementTetP1()}
@@ -74,10 +106,18 @@ velocity, pressure = np.split(
     [basis['u'].N])
 
 
+
+
+l2error_p = asm(ellipsoid.pressure_error(), basis['p'],
+                w=basis['p'].interpolate(pressure))
+
+
 if __name__ == '__main__':
 
     from pathlib import Path
 
+    print('L2 error in pressure:', np.sqrt(l2error_p.T @ Q @ l2error_p))
+    
     mesh.save(Path(__file__).with_suffix('.vtk'),
               {'velocity': velocity[basis['u'].nodal_dofs].T,
                'pressure': pressure})
