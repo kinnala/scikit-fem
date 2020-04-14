@@ -21,7 +21,7 @@ try:
         try:
             from pyamgcl import amgcl  # v. 1.3.99+
         except ImportError:
-            from pyamgl import amg as ambcl
+            from pyamgl import amg as amgcl
         return aslinearoperator(amgcl(A, **kwargs))
 
 except ImportError:
@@ -41,7 +41,7 @@ class Ellipsoid(NamedTuple):
     def semiaxes(self) -> np.ndarray:
         return np.array([self.a, self.b, self.c])
 
-    def geom(self, lcar: float = .1) -> Geometry:
+    def geom(self, lcar: float) -> Geometry:
         geom = Geometry()
         geom.add_ellipsoid([0.]*3, self.semiaxes, lcar)
         return geom
@@ -61,8 +61,9 @@ class Ellipsoid(NamedTuple):
 
         return LinearForm(form)
 
+
 ellipsoid = Ellipsoid(.5, .3, .2)
-mesh = ellipsoid.mesh()
+mesh = ellipsoid.mesh(lcar=.1)
 
 element = {'u': ElementVectorH1(ElementTetP2()),
            'p': ElementTetP1()}
@@ -105,19 +106,16 @@ velocity, pressure = np.split(
           solver=solver_iter_krylov(minres, verbose=True, M=M)),
     [basis['u'].N])
 
-
-
-
-l2error_p = asm(ellipsoid.pressure_error(), basis['p'],
+error_p = asm(ellipsoid.pressure_error(), basis['p'],
                 w=basis['p'].interpolate(pressure))
-
+l2error_p = np.sqrt(error_p.T @ Q @ error_p)
 
 if __name__ == '__main__':
 
     from pathlib import Path
 
-    print('L2 error in pressure:', np.sqrt(l2error_p.T @ Q @ l2error_p))
-    
+    print('L2 error in pressure:', l2error_p)
+
     mesh.save(Path(__file__).with_suffix('.vtk'),
               {'velocity': velocity[basis['u'].nodal_dofs].T,
                'pressure': pressure})
