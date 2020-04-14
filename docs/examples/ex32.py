@@ -50,6 +50,14 @@ class Ellipsoid(NamedTuple):
         return from_meshio(generate_mesh(geom or self.geom(**kwargs)))
 
     def pressure(self, x, y, z) -> np.ndarray:
+        """exact pressure at zero Grashof number
+
+        * McBain, G. D. (2016). `Creeping convection in a horizontally heated ellipsoid
+        <http://people.eng.unimelb.edu.au/imarusic/proceedings/20/548/%20Paper.pdf>`_.
+        *Proceedings of the Twentieth Australasian Fluid Mechanics Conference*, eq. 8
+
+        """
+
         a, b, c = self.semiaxes
         return (a**2 * (3 * a**2 + b**2) * x * y
                 / (3 * a**4 + 2 * a**2 * b**2 + 3 * b**4))
