@@ -51,7 +51,7 @@ class Ellipsoid(NamedTuple):
 
     def pressure(self, x, y, z) -> np.ndarray:
         a, b, c = self.semiaxes
-        return (a**2 * (3 * a**2 + b**2) * x * y 
+        return (a**2 * (3 * a**2 + b**2) * x * y
                 / (3 * a**4 + 2 * a**2 * b**2 + 3 * b**4))
 
     def pressure_error(self):
@@ -107,7 +107,7 @@ velocity, pressure = np.split(
     [basis['u'].N])
 
 error_p = asm(ellipsoid.pressure_error(), basis['p'],
-                w=basis['p'].interpolate(pressure))
+              w=basis['p'].interpolate(pressure))
 l2error_p = np.sqrt(error_p.T @ Q @ error_p)
 
 if __name__ == '__main__':
