@@ -4,16 +4,29 @@ from skfem.models.poisson import vector_laplace, mass
 from skfem.models.general import divergence
 
 import numpy as np
-from scipy.sparse import bmat
-from scipy.sparse.linalg import LinearOperator, aslinearoperator, minres
-
-try:
-    from pyamgcl import amgcl
-except ImportError:
-    from pyamgcl import amg as amgcl
+from scipy.sparse import bmat, spmatrix
+from scipy.sparse.linalg import LinearOperator, minres
 
 from pygmsh import generate_mesh
 from pygmsh.opencascade import Geometry
+
+try:
+    import pyamgcl
+    from scipy.sparse.linalg import aslinearoperator
+
+    def build_pc_amg(A: spmatrix, **kwargs) -> LinearOperator:
+        """AMG preconditioner"""
+        try:
+            from pyamgcl import amgcl  # v. 1.3.99+
+        except ImportError:
+            from pyamgl import amg as ambcl
+        return aslinearoperator(amgcl(A, **kwargs))
+
+except ImportError:
+    from pyamg import smoothed_aggregation_solver
+
+    def build_pc_amg(A: spmatrix, **kwargs) -> LinearOperator:
+        return smoothed_aggregation_solver(A, **kwargs).aspreconditioner()
 
 geom = Geometry()
 geom.add_ellipsoid([0.]*3, [.5, .3, .2], .1)
@@ -43,9 +56,8 @@ f = np.concatenate([asm(body_force, basis['u']),
 D = basis['u'].find_dofs()
 Kint, fint, u, I = condense(K, f, D=D)
 Aint = Kint[:-(basis['p'].N), :-(basis['p'].N)]
-Aml = amgcl(Aint)
 
-Apc = aslinearoperator(Aml)
+Apc = build_pc_amg(Aint)
 diagQ = Q.diagonal()
 
 
