@@ -1,4 +1,5 @@
 from skfem import *
+from skfem.helpers import grad, dot
 from skfem.io import from_meshio
 from skfem.models.poisson import unit_load
 
@@ -71,16 +72,15 @@ basis = {
        for label in ['heated', 'fluid-outlet', 'solid-outlet']}}
 
 
-@bilinear_form
-def conduction(u, du, v, dv, w):
-    return w.w * sum(du * dv)
+@BilinearForm
+def conduction(u, v, w):
+    return dot(w['w'] * grad(u), grad(v))
 
 
-@bilinear_form
-def advection(u, du, v, dv, w):
-    _, y = w.x
-    velocity_x = 1 - (y / halfheight)**2  # plane Poiseuille
-    return v * velocity_x * du[0]
+@BilinearForm
+def advection(u, v, w):
+    velocity_x = 1 - (w.x[1] / halfheight)**2  # plane Poiseuille
+    return v * velocity_x * grad(u)[0]
 
 
 conductivity = basis['heat'].zero_w() + 1
@@ -108,6 +108,7 @@ def exact(x: np.ndarray, y: np.ndarray) -> np.ndarray:
                     - (5 - y**2) * (1 - y**2) / 16 - y / 2,
                     1 / 2 - (1 + y) / kratio) + longitudinal_gradient * x
 
+
 temperature = np.zeros(basis['heat'].N)
 inlet_dofs = basis['heat'].complement_dofs(I)
 temperature[inlet_dofs] = exact(*mesh.p[:, inlet_dofs])
@@ -134,7 +135,7 @@ if __name__ == '__main__':
 
     fig, ax = subplots()
     ax.set_title('transverse temperature profiles')
-    
+
     y = {label: mesh.p[1, d] for label, d in dofs.items()}
     ii = {label: np.argsort(yy) for label, yy in y.items()}
 

@@ -68,14 +68,12 @@ K = bmat([[A, -B.T],
 uvp = np.zeros(K.shape[0])
 
 inlet_basis = FacetBasis(mesh, element['u'], facets=mesh.boundaries['inlet'])
-inlet_dofs_ = inlet_basis.get_dofs(mesh.boundaries['inlet'])
-inlet_dofs = np.concatenate([inlet_dofs_.nodal[f'u^{1}'],
-                             inlet_dofs_.facet[f'u^{1}']])
+inlet_dofs = inlet_basis.get_dofs(mesh.boundaries['inlet']).all()
 
 
 def parabolic(x, y):
     """return the plane Poiseuille parabolic inlet profile"""
-    return ((4 * y * (1. - y), np.zeros_like(y)))
+    return 4 * y * (1. - y), np.zeros_like(y)
 
 
 uvp[inlet_dofs] = L2_projection(parabolic, inlet_basis, inlet_dofs)

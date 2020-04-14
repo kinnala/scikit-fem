@@ -97,14 +97,14 @@ Assembling finite element matrices
 ##################################
 
 Forms are defined using the decorators
-:func:`~skfem.assembly.bilinear_form` and :func:`~skfem.assembly.linear_form`.
+:func:`~skfem.assembly.BilinearForm` and :func:`~skfem.assembly.LinearForm`.
 For example, the mass matrix is assembled as follows:
 
 .. code-block:: python
 
-   In [6]: from skfem import bilinear_form, asm
-   In [7]: @bilinear_form
-      ...: def mass(u, du, v, dv, w):
+   In [6]: from skfem import BilinearForm, asm
+   In [7]: @BilinearForm
+      ...: def mass(u, v, w):
       ...:     return u * v
       ...:
    In [8]: asm(mass, basis)
@@ -114,9 +114,9 @@ For example, the mass matrix is assembled as follows:
 
 .. note::
 
-   Below :func:`~skfem.assembly.bilinear_form`, ``u`` refers to the solution and
-   ``du`` refers to its derivatives, ``v`` and ``dv`` refer to the test function
-   values and derivatives, and ``w`` contains any additional variables such as the
+   Below :func:`~skfem.assembly.BilinearForm`, ``u`` refers to the solution and
+   ``grad(u)`` refers to its gradient, ``v`` and ``grad(v)`` refer to the test function
+   values and gradient, and ``w`` contains any additional variables such as the
    global coordinates (``w.x``) and the local mesh parameters (``w.h``).
 
 A load vector corresponding to the linear form :math:`F(v)=\int_\Omega x^2 v
@@ -124,8 +124,8 @@ A load vector corresponding to the linear form :math:`F(v)=\int_\Omega x^2 v
 
 .. code-block:: python
 
-   In [9]: @linear_form
-      ...: def F(v, dv, w):
+   In [9]: @LinearForm
+      ...: def F(v, w):
       ...:     return w.x[0] ** 2 * v
       ...:
    In [10]: asm(F, basis)

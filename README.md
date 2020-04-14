@@ -29,9 +29,10 @@ import numpy as np
 mesh = MeshTet.init_tensor(*((np.linspace(0, 1, 60),) * 3))
 basis = InteriorBasis(mesh, ElementTetP1())
 
-@bilinear_form
-def laplace(u, du, v, dv, w):
-    return sum(du * dv)
+@BilinearForm
+def laplace(u, v, w):
+    from skfem.helpers import dot, grad
+    return dot(grad(u), grad(v))
 
 A = asm(laplace, basis)
 ```

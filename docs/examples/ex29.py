@@ -1,4 +1,5 @@
 from skfem import *
+from skfem.models.general import divergence
 from skfem.models.poisson import laplace, mass
 
 from pathlib import Path
@@ -13,19 +14,13 @@ from scipy.sparse.linalg import eigs
 U = Polynomial([1, 0, -1])      # base-flow profile
 
 
-@bilinear_form
-def divergence(u, du, v, dv, w):
-    """Can't use models.general.divergence in one dimension"""
-    return v * du[0]
-
-
-@bilinear_form
-def base_velocity(u, du, v, dv, w):
+@BilinearForm
+def base_velocity(u, v, w):
     return v * U(w.x[0]) * u
 
 
-@bilinear_form
-def base_shear(u, du, v, dv, w):
+@BilinearForm
+def base_shear(u, v, w):
     return v * U.deriv()(w.x[0]) * u
 
 

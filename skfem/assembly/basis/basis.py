@@ -145,12 +145,24 @@ class Basis:
                   facets: ndarray,
                   skip: List[str] = []):
         """Return :class:`skfem.assembly.Dofs` corresponding to facets."""
-        nodal_ix = np.unique(self.mesh.facets[:, facets].flatten())
+        m = self.mesh
+        nodal_ix = np.unique(m.facets[:, facets].flatten())
         facet_ix = facets
-        edge_ix = np.intersect1d(
-            self.mesh.boundary_edges(),
-            np.unique(self.mesh.t2e[:, self.mesh.f2t[0, facets]].flatten())
-        ) if self.mesh.dim() == 3 else []
+
+        if m.dim() == 3:
+            edge_candidates = m.t2e[:, m.f2t[0, facets]].flatten()
+            # subset of edges that share all points with the given facets
+            subset_ix = np.nonzero(
+                np.prod(np.isin(m.edges[:, edge_candidates],
+                                m.facets[:, facets].flatten()),
+                        axis=0)
+            )[0]
+            edge_ix = np.intersect1d(
+                m.boundary_edges(),
+                edge_candidates[subset_ix]
+            )
+        else:
+            edge_ix = []
 
         n_nodal = self.nodal_dofs.shape[0]
         n_facet = self.facet_dofs.shape[0]
@@ -273,17 +285,18 @@ class Basis:
 
         Returns
         -------
-        Dict[str, DiscreteField]
+        DiscreteField or (DiscreteField, ...)
             The solution vector interpolated at quadrature points.
-            If Basis consist of a single component, the dictionary has
-            a single key 'w'. Otherwise, the keys are 'w^1', 'w^2', ...
+            If Basis consist of a single component, returns only
+            one DiscreteField. If Basis consists of multiple components,
+            returns a tuple.
 
         """
         if w.shape[0] != self.N:
             raise ValueError("Input array has wrong size.")
 
         refs = self.basis[0]
-        dfs: Dict[str, DiscreteField] = {}
+        dfs: List[DiscreteField] = []
 
         # loop over solution components
         for c in range(len(refs)):
@@ -339,11 +352,11 @@ class Basis:
                 for n in range(len(ref[-1])):
                     fs[-1].append(linear_combination(n, ref[-1][n]))
 
-            # give names for the interpolated fields
-            key = 'w' if len(refs) == 1 else 'w^' + str(c + 1)
-            dfs[key] = DiscreteField(*fs)
+            dfs.append(DiscreteField(*fs))
 
-        return dfs
+        if len(dfs) > 1:
+            return tuple(dfs)
+        return dfs[0]
 
     def split_indices(self) -> List[ndarray]:
         """Return indices for the solution components."""

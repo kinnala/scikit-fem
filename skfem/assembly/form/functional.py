@@ -17,14 +17,14 @@ class Functional(Form):
 
     def elemental(self,
                   v: Basis,
-                  w: Dict[str, DiscreteField] = {}) -> ndarray:
-        w = FormDict({**v.default_parameters(), **self.dictify(w)})
+                  **kwargs) -> ndarray:
+        w = FormDict({**v.default_parameters(), **self.dictify(kwargs)})
         return self._kernel(w, v.dx)
 
     def assemble(self,
                  v: Basis,
-                 w: Dict[str, DiscreteField] = {}) -> float:
-        return np.sum(self.elemental(v, w))
+                 **kwargs) -> float:
+        return np.sum(self.elemental(v, **kwargs))
 
 
 def functional(form: Callable) -> Functional:

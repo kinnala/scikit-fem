@@ -50,13 +50,17 @@ Assembly
 ########
 
 The bilinear and linear forms are defined using the decorators
-:func:`~skfem.assembly.bilinear_form` and
-:func:`~skfem.assembly.linear_form`. It is important to have the order of the
+:func:`~skfem.assembly.BilinearForm` and
+:func:`~skfem.assembly.LinearForm`. It is important to have the order of the
 form arguments correct.
 
-.. literalinclude:: ../examples/ex01.py
-    :start-at: bilinear_form
-    :end-at: 1. * v
+.. literalinclude:: ../../skfem/models/poisson.py
+    :start-at: BilinearForm
+    :end-at: return
+
+.. literalinclude:: ../../skfem/models/poisson.py
+    :start-at: LinearForm
+    :end-at: return
 
 All assembly operations are performed using the function :func:`~skfem.assembly.asm`.
 
