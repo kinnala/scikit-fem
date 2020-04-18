@@ -217,6 +217,13 @@ class TestEx31(TestCase):
         self.assertAlmostEqual(L[0], 22.597202568397734, delta=1e-6)
 
 
+class TestEx32(TestCase):
+
+    def runTest(self):
+        from docs.examples.ex32 import l2error_p
+        self.assertLess(l2error_p, 3e-7)
+
+
 class TestEx33(TestCase):
 
     def runTest(self):

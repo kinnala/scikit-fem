@@ -12,8 +12,7 @@ A classical iterative procedure for the Stokes equation is the Uzawa conjugate g
 .. math::
    \Theta (p) = \nabla\cdot \{\boldsymbol{u} (p)\}
    
-of the velocity field which satisfies the momentum equation with that pressure [GLOWINSKI-PIRONNEAU]_
-[BRAESS]_.
+of the velocity field which satisfies the momentum equation with that pressure [GLOWINSKI-PIRONNEAU]_ [BRAESS]_.
 
 .. math::
     \nu\Delta\boldsymbol{u} = -\rho^{-1}\nabla p + \boldsymbol{f}
