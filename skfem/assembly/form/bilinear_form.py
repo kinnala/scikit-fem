@@ -17,7 +17,7 @@ class BilinearForm(Form):
 
         if v is None:
             v = u
-        elif u.intorder != v.intorder:
+        elif u.X.shape[1] != v.X.shape[1]:
             raise ValueError("Quadrature mismatch: trial and test functions "
                              "should have same number of integration points.")
 

@@ -35,11 +35,12 @@ class InteriorBasis(Basis):
     def __init__(self,
                  mesh: Mesh,
                  elem: Element,
-                 mapping: Optional[Mapping] = None,
-                 intorder: Optional[int] = None,
-                 elements: Optional[ndarray] = None):
-        """Combine :class:`~skfem.mesh.Mesh` and :class:`~skfem.element.Element` into a
-        set of precomputed global basis functions.
+                 mapping: Mapping = None,
+                 intorder: int = None,
+                 elements: ndarray = None,
+                 quadrature: Tuple[ndarray, ndarray] = None):
+        """Combine :class:`~skfem.mesh.Mesh` and :class:`~skfem.element.Element`
+        into a set of precomputed global basis functions.
 
         Parameters
         ----------
@@ -51,14 +52,23 @@ class InteriorBasis(Basis):
             An object of type :class:`~skfem.mapping.Mapping`.
         intorder
             Optional integration order, i.e. the degree of polynomials that are
-            integrated exactly by the used quadrature.
+            integrated exactly by the used quadrature. Not used if 'quadrature'
+            is specified.
         elements
             Optional subset of element indices.
+        quadrature
+            Optional tuple of quadrature points and weights.
 
         """
-        super(InteriorBasis, self).__init__(mesh, elem, mapping, intorder)
+        super(InteriorBasis, self).__init__(mesh, elem, mapping)
 
-        self.X, self.W = get_quadrature(self.refdom, self.intorder)
+        if quadrature is not None:
+            self.X, self.W = quadrature
+        else:
+            self.X, self.W = get_quadrature(
+                self.refdom,
+                intorder if intorder is not None else 2 * self.elem.maxdeg
+            )
 
         self.basis = [self.elem.gbasis(self.mapping, self.X, j, tind=elements)
                       for j in range(self.Nbfun)]

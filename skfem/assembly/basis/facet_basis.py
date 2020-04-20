@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Tuple
 
 import numpy as np
 from numpy import ndarray
@@ -37,9 +37,10 @@ class FacetBasis(Basis):
                  mesh,
                  elem,
                  mapping = None,
-                 intorder: Optional[int] = None,
-                 side: Optional[int] = None,
-                 facets: Optional[ndarray] = None):
+                 intorder: int = None,
+                 side: int = None,
+                 facets: ndarray = None,
+                 quadrature: Tuple[ndarray, ndarray] = None):
         """Combine :class:`~skfem.mesh.Mesh` and :class:`~skfem.element.Element`
         into a set of precomputed global basis functions at element facets.
 
@@ -53,18 +54,27 @@ class FacetBasis(Basis):
             An object of type :class:`~skfem.mapping.Mapping`.
         intorder
             Optional integration order, i.e. the degree of polynomials that are
-            integrated exactly by the used quadrature.
+            integrated exactly by the used quadrature. Not used if 'quadrature'
+            is specified.
         side
             If 0 or 1, the basis functions are evaluated on the interior facets.
             The numbers 0 and 1 refer to the different sides of the facets.
             Side 0 corresponds to the indices mesh.f2t[0, :].
         facets
             Optional subset of facet indices.
+        quadrature
+            Optional tuple of quadrature points and weights.
 
         """
-        super(FacetBasis, self).__init__(mesh, elem, mapping, intorder)
+        super(FacetBasis, self).__init__(mesh, elem, mapping)
 
-        self.X, self.W = get_quadrature(self.brefdom, self.intorder)
+        if quadrature is not None:
+            self.X, self.W = quadrature
+        else:
+            self.X, self.W = get_quadrature(
+                self.brefdom,
+                intorder if intorder is not None else 2 * self.elem.maxdeg
+            )
 
         # facets where the basis is evaluated
         if facets is None:
