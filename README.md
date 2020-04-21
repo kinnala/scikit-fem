@@ -123,8 +123,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ElementQuadS2`, quadratic Serendipity element
 - `ElementLineHermite`, cubic Hermite element for Euler-Bernoulli beams
 - `Mesh.define_boundary` for defining named boundaries
-- `Mesh.from_basis` for defining high-order meshes
 - `Basis.find_dofs` for finding degree-of-freedom indices
+- `Mesh.from_basis` for defining high-order meshes
 - `Basis.split` for splitting multicomponent solutions
 - `MortarMapping` with basic support for mortar methods in 2D
 - `Basis` constructors now accept `quadrature` keyword argument for specifying
@@ -132,7 +132,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Deprecated
 - Old-style form constructors `bilinear_form`, `linear_form`, and `functional`.
-- `Basis.get_dofs` in favor of `Basis.find_dofs`
 
 #### Changed
 - `Basis.interpolate` returns `DiscreteField` objects instead of ndarray tuples

@@ -203,7 +203,7 @@ class Basis:
     def find_dofs(self,
                   facets: Dict[str, ndarray] = None,
                   skip: List[str] = []) -> Dict[str, Dofs]:
-        """Return global DOF numbers corresponding to facets.
+        """Return global DOF numbers corresponding to a dictionary of facets.
 
         Parameters
         ----------
@@ -227,8 +227,11 @@ class Basis:
 
         return {k: self._get_dofs(facets[k], skip=skip) for k in facets}
 
-    def get_dofs(self, facets: Optional[Any] = None):
-        """Return global DOF numbers corresponding to facets (e.g. boundaries).
+    def get_dofs(self, facets: Optional[Any] = None) -> Any:
+        """Find global DOF numbers.
+
+        Accepts a richer set of types than
+        :meth:`skfem.assembly.basis.Basis.find_dofs`.
 
         Parameters
         ----------
@@ -242,14 +245,10 @@ class Basis:
 
         Returns
         -------
-        Dofs
+        Dofs or Dict[str, Dofs]
             A subset of degrees-of-freedom as :class:`skfem.assembly.dofs.Dofs`.
 
         """
-        warnings.warn(("Basis.get_dofs is removed in the next major"
-                       " release. Use Basis.find_dofs instead."),
-                      DeprecationWarning)
-
         if facets is None:
             facets = self.mesh.boundary_facets()
         elif callable(facets):
