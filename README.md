@@ -12,9 +12,7 @@ is the transformation of bilinear forms into sparse matrices and linear forms
 into vectors.  The library supports triangular, quadrilateral, tetrahedral and
 hexahedral meshes as well as one-dimensional problems.
 
-## Features
-
-This library fills an important gap in the spectrum of finite element codes.
+The library fills an important gap in the spectrum of finite element codes.
 The library is *lightweight* meaning that it has *minimal dependencies*.
 It contains *no compiled code* meaning that it's *easy to install* and
 use on all platforms that support NumPy.  Despite being fully interpreted, the
@@ -45,15 +43,17 @@ mesh = MeshTri.load("docs/examples/square.msh")
 mesh = MeshTet.init_tensor(*((np.linspace(0, 1, 60),) * 3))
 ```
 
-We support [many common and less common finite elements](https://github.com/kinnala/scikit-fem/tree/master/skfem/element).  Below we use the good old quadratic tetrahedron:
+We support [many common finite
+elements](https://github.com/kinnala/scikit-fem/tree/master/skfem/element) and
+below assemble the stiffness matrix using second-order tetrahedra:
 
 ```python
 basis = InteriorBasis(mesh, ElementTetP2())
 A = laplace.assemble(basis)  # type: scipy.sparse.csr_matrix
 ```
 
-The matrix `A` has 1.5 million rows/columns.  Still, the assembly finished in
-only a few seconds on my laptop!
+The matrix `A` has 1.5 million rows/columns and took only a few seconds to
+assemble!
 
 More examples can be found in the
 [source code distribution](https://github.com/kinnala/scikit-fem/tree/master/docs/examples).
@@ -126,18 +126,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Mesh.from_basis` for defining high-order meshes
 - `Basis.find_dofs` for finding degree-of-freedom indices
 - `Basis.split` for splitting multicomponent solutions
-- `MortarMapping` for supporting mortar methods in 2D
+- `MortarMapping` with basic support for mortar methods in 2D
+- `Basis` constructors now accept `quadrature` keyword argument for specifying
+  a custom quadrature rule
 
 #### Deprecated
-- `Basis.get_dofs` in favor of `Basis.find_dofs`
 - Old-style form constructors `bilinear_form`, `linear_form`, and `functional`.
+- `Basis.get_dofs` in favor of `Basis.find_dofs`
 
 #### Changed
+- `Basis.interpolate` returns `DiscreteField` objects instead of ndarray tuples
+- `Basis.interpolate` works now properly for vectorial and high-order elements
+  by interpolating all components and higher order derivatives
+- `Form.assemble` accepts now any keyword arguments (with type `DiscreteField`)
+  that are passed over to the forms
 - Renamed `skfem.importers` to `skfem.io`
 - Renamed `skfem.models.helpers` to `skfem.helpers`
 - `skfem.utils.solve` will now expand also the solutions of eigenvalue problems
-- `Basis.interpolate` returns `DiscreteField` objects instead ndarray tuples
-- `Basis.interpolate` works now for vectorial elements
+  
 
 ### [0.4.1] - 2020-01-19
 
