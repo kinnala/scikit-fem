@@ -1,3 +1,4 @@
+import warnings
 from typing import Any, Callable, Optional, Tuple, Union
 
 import numpy as np
@@ -10,6 +11,7 @@ from ...element import DiscreteField
 
 
 class FormDict(dict):
+    """Passed to forms as 'w'."""
 
     def __getattr__(self, attr):
         return self[attr].value

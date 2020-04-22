@@ -388,9 +388,9 @@ class MeshTet(Mesh3D):
         sz = p.shape[1]
         t2e = self.t2e + sz
         # new vertices are the midpoints of edges
-        newp = 0.5*np.vstack((p[0, e[0]] + p[0, e[1]],
-                              p[1, e[0]] + p[1, e[1]],
-                              p[2, e[0]] + p[2, e[1]]))
+        newp = .5 * np.vstack((p[0, e[0]] + p[0, e[1]],
+                               p[1, e[0]] + p[1, e[1]],
+                               p[2, e[0]] + p[2, e[1]]))
         newp = np.hstack((p, newp))
         # new tets
         newt = np.vstack((t[0], t2e[0], t2e[2], t2e[3]))
@@ -398,18 +398,18 @@ class MeshTet(Mesh3D):
         newt = np.hstack((newt, np.vstack((t[2], t2e[1], t2e[2], t2e[5]))))
         newt = np.hstack((newt, np.vstack((t[3], t2e[3], t2e[4], t2e[5]))))
         # compute middle pyramid diagonal lengths and choose shortest
-        d1 = ((newp[0, t2e[2]] - newp[0, t2e[4]])**2 +
-              (newp[1, t2e[2]] - newp[1, t2e[4]])**2)
-        d2 = ((newp[0, t2e[1]] - newp[0, t2e[3]])**2 +
-              (newp[1, t2e[1]] - newp[1, t2e[3]])**2)
-        d3 = ((newp[0, t2e[0]] - newp[0, t2e[5]])**2 +
-              (newp[1, t2e[0]] - newp[1, t2e[5]])**2)
+        d1 = ((newp[0, t2e[2]] - newp[0, t2e[4]]) ** 2 +
+              (newp[1, t2e[2]] - newp[1, t2e[4]]) ** 2)
+        d2 = ((newp[0, t2e[1]] - newp[0, t2e[3]]) ** 2 +
+              (newp[1, t2e[1]] - newp[1, t2e[3]]) ** 2)
+        d3 = ((newp[0, t2e[0]] - newp[0, t2e[5]]) ** 2 +
+              (newp[1, t2e[0]] - newp[1, t2e[5]]) ** 2)
         I1 = d1 < d2
         I2 = d1 < d3
         I3 = d2 < d3
-        c1 = I1*I2
-        c2 = (~I1)*I3
-        c3 = (~I2)*(~I3)
+        c1 = I1 * I2
+        c2 = (~I1) * I3
+        c3 = (~I2) * (~I3)
         # splitting the pyramid in the middle.
         # diagonals are [2,4], [1,3] and [0,5]
         # CASE 1: diagonal [2,4]
@@ -449,7 +449,7 @@ class MeshTet(Mesh3D):
         """Return the largest shape-regularity constant."""
         def edgelen(n):
             return np.sqrt(np.sum((self.p[:, self.edges[0, self.t2e[n]]] -
-                                   self.p[:, self.edges[1, self.t2e[n]]])**2,
+                                   self.p[:, self.edges[1, self.t2e[n]]]) ** 2,
                                   axis=0))
         edgelenmat = np.vstack(tuple(edgelen(i) for i in range(6)))
         return np.max(np.max(edgelenmat, axis=0) / np.min(edgelenmat, axis=0))

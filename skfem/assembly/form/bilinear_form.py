@@ -17,7 +17,7 @@ class BilinearForm(Form):
 
         if v is None:
             v = u
-        elif u.intorder != v.intorder:
+        elif u.X.shape[1] != v.X.shape[1]:
             raise ValueError("Quadrature mismatch: trial and test functions "
                              "should have same number of integration points.")
 
@@ -52,7 +52,11 @@ def bilinear_form(form: Callable) -> BilinearForm:
     # for backwards compatibility
     from .form_parameters import FormParameters
 
-    # TODO: deprecate
+    import warnings
+    warnings.warn("The old style @bilinear_form wrapper is deprecated. "
+                  "Consider using the new style forms, defined via "
+                  "@BilinearForm.", DeprecationWarning)
+
     class ClassicBilinearForm(BilinearForm):
 
         def _kernel(self, u, v, w, dx):

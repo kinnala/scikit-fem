@@ -28,11 +28,9 @@ class Basis:
     N: int = 0
     dofnames: List[str] = []
 
-    def __init__(self, mesh, elem, mapping, intorder):
-        if mapping is None:
-            self.mapping = mesh.mapping()
-        else:
-            self.mapping = mapping
+    def __init__(self, mesh, elem, mapping):
+
+        self.mapping = mesh.mapping() if mapping is None else mapping
 
         self._build_dofnum(mesh, elem)
 
@@ -59,12 +57,7 @@ class Basis:
 
         self.Nbfun = self.element_dofs.shape[0]
 
-        if intorder is None:
-            self.intorder = 2 * self.elem.maxdeg
-        else:
-            self.intorder = intorder
-
-        self.nelems = None # subclasses should overwrite
+        self.nelems = None  # subclasses should overwrite
 
         self.refdom = mesh.refdom
         self.brefdom = mesh.brefdom
@@ -210,7 +203,7 @@ class Basis:
     def find_dofs(self,
                   facets: Dict[str, ndarray] = None,
                   skip: List[str] = []) -> Dict[str, Dofs]:
-        """Return global DOF numbers corresponding to facets.
+        """Return global DOF numbers corresponding to a dictionary of facets.
 
         Parameters
         ----------
@@ -234,8 +227,11 @@ class Basis:
 
         return {k: self._get_dofs(facets[k], skip=skip) for k in facets}
 
-    def get_dofs(self, facets: Optional[Any] = None):
-        """Return global DOF numbers corresponding to facets (e.g. boundaries).
+    def get_dofs(self, facets: Optional[Any] = None) -> Any:
+        """Find global DOF numbers.
+
+        Accepts a richer set of types than
+        :meth:`skfem.assembly.basis.Basis.find_dofs`.
 
         Parameters
         ----------
@@ -249,14 +245,10 @@ class Basis:
 
         Returns
         -------
-        Dofs
+        Dofs or Dict[str, Dofs]
             A subset of degrees-of-freedom as :class:`skfem.assembly.dofs.Dofs`.
 
         """
-        warnings.warn(("Basis.get_dofs is removed in the next major"
-                       " release. Use Basis.find_dofs instead."),
-                      DeprecationWarning)
-
         if facets is None:
             facets = self.mesh.boundary_facets()
         elif callable(facets):
@@ -381,9 +373,14 @@ class Basis:
     def split_bases(self) -> List[BasisType]:
         """Return Basis objects for the solution components."""
         if isinstance(self.elem, ElementComposite):
-            return [type(self)(self.mesh, e, self.mapping, self.intorder)
+            return [type(self)(self.mesh, e, self.mapping,
+                               quadrature=self.quadrature)
                     for e in self.elem.elems]
         raise ValueError("Basis.elem has only a single component!")
+
+    @property
+    def quadrature(self):
+        return self.X, self.W
 
     def split(self, x: ndarray) -> List[Tuple[ndarray, BasisType]]:
         """Split solution vector into components."""

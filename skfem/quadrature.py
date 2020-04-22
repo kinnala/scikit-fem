@@ -35,9 +35,9 @@ def get_quadrature(refdom: str, norder: int) -> Tuple[np.ndarray, np.ndarray]:
         |       | (1,1,1), etc.   |                |
         +-------+-----------------+----------------+
 
-        norder
-            The polynomial order upto which the requested quadrature rule is
-            accurate.
+    norder
+        The polynomial order upto which the requested quadrature rule is
+        accurate.
 
     Returns
     -------
