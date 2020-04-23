@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
-"""This module contains classes and functions related to the
-construction of finite element matrices.
+"""The basic workflow for finite element assembly is the following:
 
-The basic workflow is the following:
-
-1. Create :class:`~skfem.assembly.InteriorBasis` and/or :class:`~skfem.assembly.FacetBasis`
-   objects.
-2. Define the bilinear and linear forms using the decorators :func:`~skfem.assembly.bilinear_form`
-   and :func:`~skfem.assembly.linear_form`.
-3. Assemble finite element matrices using :func:`~skfem.assembly.asm`.
+1. Initialize :class:`~skfem.mesh.Mesh` and :class:`~skfem.mesh.Element`.
+2. Create :class:`~skfem.assembly.InteriorBasis` and/or
+   :class:`~skfem.assembly.FacetBasis` objects.
+3. Define the forms using the decorators :class:`~skfem.assembly.BilinearForm`,
+   :class:`~skfem.assembly.LinearForm`, and :class:`~skfem.assembly.Functional`.
+4. Assemble using :func:`~skfem.assembly.asm`.
 
 """
 
