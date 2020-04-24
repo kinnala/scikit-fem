@@ -39,6 +39,10 @@ Elements compatible with :class:`~skfem.mesh.MeshHex` include
 
 * :class:`~skfem.element.ElementHex1`
 
+There is no special syntax for defining elements.  You simply initialize an
+object and pass it to the constructor of :class:`~skfem.assembly.InteriorBasis`
+or :class:`~skfem.assembly.FacetBasis`.
+
 """
 
 from .discrete_field import DiscreteField
