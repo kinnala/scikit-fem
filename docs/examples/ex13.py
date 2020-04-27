@@ -31,7 +31,7 @@ elements = ElementTriP2()
 basis = InteriorBasis(mesh, elements)
 A = asm(laplace, basis)
 
-boundary_dofs = basis.get_dofs(mesh.boundaries)
+boundary_dofs = basis.find_dofs()
 interior_dofs = basis.complement_dofs(boundary_dofs)
 
 u = np.zeros(basis.N)
