@@ -13,15 +13,14 @@ from pygmsh import generate_mesh
 from pygmsh.opencascade import Geometry
 
 try:
-    import pyamgcl
+    try:
+        from pyamgcl import amgcl  # v. 1.3.99+
+    except ImportError:
+        from pyamgcl import amg as amgcl
     from scipy.sparse.linalg import aslinearoperator
 
     def build_pc_amg(A: spmatrix, **kwargs) -> LinearOperator:
         """AMG preconditioner"""
-        try:
-            from pyamgcl import amgcl  # v. 1.3.99+
-        except ImportError:
-            from pyamgl import amg as amgcl
         return aslinearoperator(amgcl(A, **kwargs))
 
 except ImportError:
