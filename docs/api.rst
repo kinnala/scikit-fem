@@ -14,9 +14,9 @@ Module: skfem.mesh
 
 .. automethod:: skfem.mesh.Mesh.save
 
-.. automethod:: skfem.mesh.Mesh.define_boundary
-
 .. automethod:: skfem.mesh.Mesh.refine
+
+.. automethod:: skfem.mesh.Mesh.define_boundary
 
 Class: MeshTri
 --------------
@@ -142,8 +142,6 @@ Module: skfem.assembly
 .. automethod:: skfem.assembly.Basis.get_dofs
 
 .. autoclass:: skfem.assembly.InteriorBasis
-
-.. automethod:: skfem.assembly.InteriorBasis.refinterp
 
 .. autoclass:: skfem.assembly.FacetBasis
 
