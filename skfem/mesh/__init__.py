@@ -9,12 +9,26 @@ using `meshio <https://github.com/nschloe/meshio>`_.  The supported types are
 - :class:`~skfem.mesh.MeshHex`, hexahedral mesh
 - :class:`~skfem.mesh.MeshLine`, one-dimensional mesh
 
-For example, initializing the default two triangle mesh for the unit square can
-be done as follows:
+For example, initializing the default mesh in the unit square can be done as
+follows:
 
 >>> from skfem.mesh import MeshTri
 >>> MeshTri()
 Triangular mesh with 4 vertices and 2 elements.
+
+Each mesh type has several constructors, e.g.,
+
+>>> MeshTri.init_lshaped()
+Triangular mesh with 8 vertices and 6 elements.
+>>> MeshTri.init_tensor([0.0, 1.0], [0.0, 1.0, 2.0])
+Triangular mesh with 6 vertices and 4 elements.
+
+A list of constructors can be found in the class docstring:
+
+>>> help(MeshTri)
+
+Importing from external formats can be done with the constructor
+:meth:`~skfem.mesh.Mesh.load`.
 
 """
 

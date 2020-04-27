@@ -1,5 +1,9 @@
 """This module defines finite elements (in a very generic sense).  The naming of
-the element classes reflects their compatibility with the supported mesh types.
+the element classes reflects their compatibility with the mesh types.
+
+>>> from skfem.element import ElementTriP1
+>>> ElementTriP1.mesh_type
+skfem.mesh.mesh2d.mesh_tri.MeshTri
 
 Elements compatible with :class:`~skfem.mesh.MeshLine` include
 
@@ -39,9 +43,9 @@ Elements compatible with :class:`~skfem.mesh.MeshHex` include
 
 * :class:`~skfem.element.ElementHex1`
 
-There is no special syntax for defining elements.  You simply initialize an
-object and pass it to the constructor of :class:`~skfem.assembly.InteriorBasis`
-or :class:`~skfem.assembly.FacetBasis`.
+In order to use an element, you simply initialize the respective object and pass
+it to the constructor of :class:`~skfem.assembly.InteriorBasis` or
+:class:`~skfem.assembly.FacetBasis`.
 
 """
 
