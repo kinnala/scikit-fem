@@ -18,10 +18,7 @@ basis = InteriorBasis(m, ElementTriP2())
 A = asm(laplace, basis)
 b = asm(unit_load, basis)
 
-D = basis.get_dofs(m.boundaries)
-I = basis.complement_dofs(D)
-
-x = solve(*condense(A, b, I=I))
+x = solve(*condense(A, b, D=basis.find_dofs()))
 
 area = sum(b)
 k = b @ x / area**2
