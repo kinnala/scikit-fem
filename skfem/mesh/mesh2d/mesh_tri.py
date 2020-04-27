@@ -31,39 +31,6 @@ class MeshTri(Mesh2D):
         An array containing the facets belonging to each triangle (3 x Nelems).
         Each column contains three indices to facets.
 
-    Examples
-    --------
-    Initialise a symmetric mesh of the unit square.
-
-    >>> m = MeshTri.init_sqsymmetric()
-    >>> m.t.shape
-    (3, 8)
-
-    Facets (edges) and mappings from triangles to facets and vice versa are
-    automatically constructed. In the following example we have 5 facets
-    (edges).
-
-    >>> m = MeshTri()
-    >>> m.facets
-    array([[0, 0, 1, 1, 2],
-           [1, 2, 2, 3, 3]])
-    >>> m.t2f
-    array([[0, 2],
-           [2, 4],
-           [1, 3]])
-    >>> m.f2t
-    array([[ 0,  0,  1,  1,  1],
-           [-1, -1,  0, -1, -1]])
-
-    The value -1 implies that the facet (the edge) is on the boundary.
-
-    Refine the triangular mesh of the unit square three times.
-
-    >>> m = MeshTri()
-    >>> m.refine(3)
-    >>> m.p.shape
-    (2, 81)
-
     """
     refdom: str = "tri"
     brefdom: str = "line"

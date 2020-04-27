@@ -1,15 +1,12 @@
-Modules
-=======
+===================================
+ A detailed description of the API
+===================================
 
-This section contains API documentation for the most important modules and
-interfaces that are necessary when using the library.  Equivalently, one can
-access the documentation through the standard Python help system, i.e. using
-:func:`help`.
+This section contains a detailed API documentation for the most commonly used
+interfaces of the library.
 
-skfem.mesh
-----------
-
-.. automodule:: skfem.mesh
+Module: skfem.mesh
+==================
 
 .. autoclass:: skfem.mesh.Mesh
 
@@ -17,13 +14,14 @@ skfem.mesh
 
 .. automethod:: skfem.mesh.Mesh.save
 
-MeshTri
-~~~~~~~
+.. automethod:: skfem.mesh.Mesh.define_boundary
+
+.. automethod:: skfem.mesh.Mesh.refine
+
+Class: MeshTri
+--------------
 
 .. autoclass:: skfem.mesh.MeshTri
-
-Constructors
-^^^^^^^^^^^^
 
 .. automethod:: skfem.mesh.MeshTri.__init__
 
@@ -38,13 +36,10 @@ Constructors
 .. automethod:: skfem.mesh.MeshTri.init_lshaped
 
 
-MeshQuad
-~~~~~~~~
+Class: MeshQuad
+---------------
 
 .. autoclass:: skfem.mesh.MeshQuad
-
-Constructors
-^^^^^^^^^^^^
 
 .. automethod:: skfem.mesh.MeshQuad.__init__
 
@@ -53,54 +48,38 @@ Constructors
 .. automethod:: skfem.mesh.MeshQuad.init_tensor
 
 
-MeshTet
-~~~~~~~
+Class: MeshTet
+--------------
 
 .. autoclass:: skfem.mesh.MeshTet
 
-Constructors
-^^^^^^^^^^^^
-
 .. automethod:: skfem.mesh.MeshTet.__init__
 
+.. automethod:: skfem.mesh.MeshTet.init_refdom
 
-MeshHex
-~~~~~~~
+.. automethod:: skfem.mesh.MeshTet.init_tensor
+
+
+Class: MeshHex
+--------------
 
 .. autoclass:: skfem.mesh.MeshHex
-
-Constructors
-^^^^^^^^^^^^
 
 .. automethod:: skfem.mesh.MeshHex.__init__
 
 .. automethod:: skfem.mesh.MeshHex.init_tensor
 
 
-MeshLine
-~~~~~~~~
+Class: MeshLine
+---------------
 
 .. autoclass:: skfem.mesh.MeshLine
 
-
-skfem.mapping
--------------
-
-.. automodule:: skfem.mapping
-
-.. autoclass:: skfem.mapping.MappingAffine
-
-.. autoclass:: skfem.mapping.MappingIsoparametric
-
-skfem.element
--------------
-
-.. automodule:: skfem.element
-
-.. automodule:: skfem.element.Element
+Module: skfem.element
+=====================
 
 Triangular elements
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 .. autoclass:: skfem.element.ElementTriP1
 
@@ -117,7 +96,7 @@ Triangular elements
 .. autoclass:: skfem.element.ElementTriRT0
 
 Quadrilateral elements
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 
 .. autoclass:: skfem.element.ElementQuad1
 
@@ -126,7 +105,7 @@ Quadrilateral elements
 .. autoclass:: skfem.element.ElementQuad0
 
 Tetrahedral elements
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 
 .. autoclass:: skfem.element.ElementTetP1
 
@@ -139,29 +118,24 @@ Tetrahedral elements
 .. autoclass:: skfem.element.ElementTetN0
 
 Hexahedral elements
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 .. autoclass:: skfem.element.ElementHex1
 
 1D elements
-~~~~~~~~~~~
+-----------
 
 .. autoclass:: skfem.element.ElementLineP1
 
 .. autoclass:: skfem.element.ElementLineP2
 
 Other
-~~~~~
+-----
 
 .. autoclass:: skfem.element.ElementVectorH1
 
-skfem.assembly
---------------
-
-.. automodule:: skfem.assembly
-
-Defining a global basis
-~~~~~~~~~~~~~~~~~~~~~~~
+Module: skfem.assembly
+======================
 
 .. autoclass:: skfem.assembly.Basis
 
@@ -173,26 +147,23 @@ Defining a global basis
 
 .. autoclass:: skfem.assembly.FacetBasis
 
-Assembling matrices
-~~~~~~~~~~~~~~~~~~~
+.. autoclass:: skfem.assembly.BilinearForm
 
-.. autofunction:: skfem.assembly.bilinear_form
+.. autoclass:: skfem.assembly.LinearForm
 
-.. autofunction:: skfem.assembly.linear_form
+.. autoclass:: skfem.assembly.Functional
 
 .. autofunction:: skfem.assembly.asm
 
-skfem.utils
------------
-
-.. automodule:: skfem.utils
+Module: skfem.utils
+===================
 
 .. autofunction:: skfem.utils.solve
 
 .. autofunction:: skfem.utils.condense
 
-skfem.visuals
--------------
+Module: skfem.visuals
+=====================
 
 .. automodule:: skfem.visuals.matplotlib
 
