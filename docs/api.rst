@@ -5,134 +5,109 @@
 This section contains a detailed API documentation for the most commonly used
 interfaces of the library.
 
-Module: skfem.mesh
-==================
+Class: Mesh
+===========
 
 .. autoclass:: skfem.mesh.Mesh
-
-.. automethod:: skfem.mesh.Mesh.load
-
-.. automethod:: skfem.mesh.Mesh.save
-
-.. automethod:: skfem.mesh.Mesh.refine
-
-.. automethod:: skfem.mesh.Mesh.define_boundary
+   :members: load, save, refine, define_boundary
 
 Class: MeshTri
 --------------
 
 .. autoclass:: skfem.mesh.MeshTri
-
-.. automethod:: skfem.mesh.MeshTri.__init__
-
-.. automethod:: skfem.mesh.MeshTri.init_symmetric
-
-.. automethod:: skfem.mesh.MeshTri.init_sqsymmetric
-
-.. automethod:: skfem.mesh.MeshTri.init_refdom
-
-.. automethod:: skfem.mesh.MeshTri.init_tensor
-
-.. automethod:: skfem.mesh.MeshTri.init_lshaped
-
+     :members: __init__, init_symmetric, init_sqsymmetric, init_refdom, init_tensor, init_lshaped
 
 Class: MeshQuad
 ---------------
 
 .. autoclass:: skfem.mesh.MeshQuad
-
-.. automethod:: skfem.mesh.MeshQuad.__init__
-
-.. automethod:: skfem.mesh.MeshQuad.init_refdom
-
-.. automethod:: skfem.mesh.MeshQuad.init_tensor
-
+   :members: __init__, init_refdom, init_tensor
 
 Class: MeshTet
 --------------
 
 .. autoclass:: skfem.mesh.MeshTet
-
-.. automethod:: skfem.mesh.MeshTet.__init__
-
-.. automethod:: skfem.mesh.MeshTet.init_refdom
-
-.. automethod:: skfem.mesh.MeshTet.init_tensor
-
+   :members: __init__, init_refdom, init_tensor
 
 Class: MeshHex
 --------------
 
 .. autoclass:: skfem.mesh.MeshHex
-
-.. automethod:: skfem.mesh.MeshHex.__init__
-
-.. automethod:: skfem.mesh.MeshHex.init_tensor
-
+   :members: __init__, init_tensor
 
 Class: MeshLine
 ---------------
 
 .. autoclass:: skfem.mesh.MeshLine
+   :members: __init__
 
-Module: skfem.element
-=====================
+Class: Element
+==============
+
+.. autoclass:: skfem.element.Element
 
 Triangular elements
 -------------------
 
-.. autoclass:: skfem.element.ElementTriP1
+.. autosummary::
 
-.. autoclass:: skfem.element.ElementTriP2
-
-.. autoclass:: skfem.element.ElementTriP0
-
-.. autoclass:: skfem.element.ElementTriArgyris
-
-.. autoclass:: skfem.element.ElementTriMorley
-
-.. autoclass:: skfem.element.ElementTriDG
-
-.. autoclass:: skfem.element.ElementTriRT0
+   skfem.element.ElementTriP1
+   skfem.element.ElementTriP2
+   skfem.element.ElementTriP0
+   skfem.element.ElementTriArgyris
+   skfem.element.ElementTriMorley
+   skfem.element.ElementTriMini
+   skfem.element.ElementTriDG
+   skfem.element.ElementTriRT0
 
 Quadrilateral elements
 ----------------------
 
-.. autoclass:: skfem.element.ElementQuad1
+.. autosummary::
 
-.. autoclass:: skfem.element.ElementQuad2
-
-.. autoclass:: skfem.element.ElementQuad0
+   skfem.element.ElementQuad1
+   skfem.element.ElementQuad2
+   skfem.element.ElementQuadS2
+   skfem.element.ElementQuad0
+   skfem.element.ElementQuadP
+   skfem.element.ElementQuadDG
+   skfem.element.ElementQuadBFS
 
 Tetrahedral elements
 --------------------
 
-.. autoclass:: skfem.element.ElementTetP1
+.. autosummary::
 
-.. autoclass:: skfem.element.ElementTetP2
-
-.. autoclass:: skfem.element.ElementTetP0
-
-.. autoclass:: skfem.element.ElementTetRT0
-
-.. autoclass:: skfem.element.ElementTetN0
+   skfem.element.ElementTetP1
+   skfem.element.ElementTetP2
+   skfem.element.ElementTetP0
+   skfem.element.ElementTetRT0
+   skfem.element.ElementTetN0
 
 Hexahedral elements
 -------------------
 
-.. autoclass:: skfem.element.ElementHex1
+.. autosummary::
+
+   skfem.element.ElementHex1
 
 1D elements
 -----------
 
-.. autoclass:: skfem.element.ElementLineP1
+.. autosummary::
 
-.. autoclass:: skfem.element.ElementLineP2
+   skfem.element.ElementLineP1
+   skfem.element.ElementLineP2
+   skfem.element.ElementLinePp
+   skfem.element.ElementLineHermite
 
 Other
 -----
 
-.. autoclass:: skfem.element.ElementVectorH1
+.. autosummary::
+
+   skfem.element.ElementVectorH1
+   skfem.element.ElementComposite
 
 Module: skfem.assembly
 ======================
