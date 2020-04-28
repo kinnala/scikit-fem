@@ -13,7 +13,7 @@ K = asm(laplace, ib)
 
 f = asm(unit_load, ib)
 
-x = solve(*condense(K, f, D=ib.get_dofs()))
+x = solve(*condense(K, f, D=ib.find_dofs()))
 
 M, X = ib.refinterp(x, 3)
 
