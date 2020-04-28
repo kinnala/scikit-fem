@@ -95,7 +95,7 @@ b = (asm(unit_load, basis['heated'])
      * (asm(unit_load, basis['fluid-outlet'])
         + kratio * asm(unit_load, basis['solid-outlet'])))
 
-D = basis['heat'].get_dofs(
+D = basis['heat'].find_dofs(
     {label: boundary for
      label, boundary in mesh.boundaries.items()
      if label.endswith('-inlet')})
@@ -115,13 +115,13 @@ temperature[inlet_dofs] = exact(*mesh.p[:, inlet_dofs])
 
 temperature = solve(*condense(A, b, temperature, I=I))
 
-dofs = {label: basis['heat'].get_dofs(facets).all()
-        for label, facets in mesh.boundaries.items()
-        if label.endswith('let')}
+dofs = basis['heat'].find_dofs(
+    {label: facets for label, facets in mesh.boundaries.items()
+    if label.endswith('let')})
 
 exit_interface_temperature = {
-    'skfem': temperature[np.intersect1d(dofs['fluid-outlet'],
-                                        dofs['solid-outlet'])[0]],
+    'skfem': temperature[np.intersect1d(dofs['fluid-outlet'].all(),
+                                        dofs['solid-outlet'].all())[0]],
     'exact': exact(length, -1.)
 }
 
@@ -136,7 +136,7 @@ if __name__ == '__main__':
     fig, ax = subplots()
     ax.set_title('transverse temperature profiles')
 
-    y = {label: mesh.p[1, d] for label, d in dofs.items()}
+    y = {label: mesh.p[1, d.nodal['u']] for label, d in dofs.items()}
     ii = {label: np.argsort(yy) for label, yy in y.items()}
 
     y['exact'] = np.linspace(min(y['solid-inlet']),
