@@ -55,9 +55,8 @@ element = {'u': ElementVectorH1(ElementTriP2()),
 basis = {variable: InteriorBasis(mesh, e, intorder=3)
          for variable, e in element.items()}
 
-D = np.setdiff1d(basis['u'].get_dofs().all(),
-                 basis['u'].get_dofs(mesh.boundaries['outlet']).all())
-
+del mesh.boundaries['outlet']
+D = np.concatenate([b.all() for b in basis['u'].find_dofs().values()])
 
 A = asm(vector_laplace, basis['u'])
 B = asm(divergence, basis['u'], basis['p'])
@@ -68,7 +67,7 @@ K = bmat([[A, -B.T],
 uvp = np.zeros(K.shape[0])
 
 inlet_basis = FacetBasis(mesh, element['u'], facets=mesh.boundaries['inlet'])
-inlet_dofs = inlet_basis.get_dofs(mesh.boundaries['inlet']).all()
+inlet_dofs = inlet_basis.find_dofs()['inlet'].all()
 
 
 def parabolic(x, y):
@@ -77,20 +76,17 @@ def parabolic(x, y):
 
 
 uvp[inlet_dofs] = L2_projection(parabolic, inlet_basis, inlet_dofs)
-I = np.setdiff1d(np.arange(K.shape[0]), D)
-uvp = solve(*condense(K, 0*uvp, uvp, I))
+uvp = solve(*condense(K, np.zeros_like(uvp), uvp, D=D))
 
 velocity, pressure = np.split(uvp, [A.shape[0]])
 
 basis['psi'] = InteriorBasis(mesh, ElementTriP2())
 A = asm(laplace, basis['psi'])
 psi = np.zeros(basis['psi'].N)
-D = basis['psi'].get_dofs(mesh.boundaries['floor']).all()
-I = basis['psi'].complement_dofs(D)
 vorticity = asm(rot, basis['psi'],
                 w=[basis['psi'].interpolate(velocity[i::2])
                    for i in range(2)])
-psi = solve(*condense(A, vorticity, I=I))
+psi = solve(*condense(A, vorticity, D=basis['psi'].find_dofs()['floor'].all()))
 
 
 if __name__ == '__main__':
