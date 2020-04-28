@@ -30,7 +30,7 @@ B = asm(facetbilinf, fb)
 
 b = asm(facetlinf, fb)
 
-D = ib.get_dofs(lambda x: (x[1] == 0.0)).all()
+D = ib.find_dofs({'plate': m.facets_satisfying(lambda x: (x[1] == 0.0))})
 I = ib.complement_dofs(D)
 
 import scipy.sparse
