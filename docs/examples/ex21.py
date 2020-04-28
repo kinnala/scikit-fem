@@ -31,7 +31,7 @@ D = np.concatenate((
         dofs['fixed'].nodal['u^3'],
 ))
 
-L, x = solve(*condense(K, M, D=D))
+L, x = solve(*condense(K, M, D=ib.find_dofs()['fixed']))
 
 if __name__ == "__main__":
     from skfem.visuals.matplotlib import draw, show
