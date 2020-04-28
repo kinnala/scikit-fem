@@ -71,9 +71,8 @@ class BackwardFacingStep:
         self.basis['inlet'] = FacetBasis(self.mesh, self.element['u'],
                                          facets=self.mesh.boundaries['inlet'])
         self.basis['psi'] = InteriorBasis(self.mesh, ElementTriP2())
-        self.D = np.setdiff1d(
-            self.basis['u'].get_dofs().all(),
-            self.basis['u'].get_dofs(self.mesh.boundaries['outlet']).all())
+        del self.mesh.boundaries['outlet']
+        self.D = np.concatenate([b.all() for b in self.basis['u'].find_dofs().values()])
 
         A = asm(vector_laplace, self.basis['u'])
         B = asm(divergence, self.basis['u'], self.basis['p'])
@@ -116,8 +115,7 @@ class BackwardFacingStep:
         return from_meshio(generate_mesh(geom, dim=2))
 
     def inlet_dofs(self):
-        return self.basis['inlet'].get_dofs(
-            self.mesh.boundaries['inlet']).all()
+        return self.basis['inlet'].find_dofs()['inlet'].all()
 
     @staticmethod
     def parabolic(x, y):
@@ -139,12 +137,10 @@ class BackwardFacingStep:
     def streamfunction(self, velocity: np.ndarray) -> np.ndarray:
         A = asm(laplace, self.basis['psi'])
         psi = np.zeros(self.basis['psi'].N)
-        D = self.basis['psi'].get_dofs(self.mesh.boundaries['floor']).all()
-        I = self.basis['psi'].complement_dofs(D)
         vorticity = asm(rot, self.basis['psi'],
                         w=[self.basis['psi'].interpolate(velocity[i::2])
                            for i in range(2)])
-        psi = solve(*condense(A, vorticity, I=I))
+        psi = solve(*condense(A, vorticity, D=self.basis['psi'].find_dofs()['floor'].all()))
         return psi
 
     def mesh_plot(self):

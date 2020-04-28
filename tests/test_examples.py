@@ -185,7 +185,7 @@ class TestEx27(TestCase):
       import docs.examples.ex27 as ex
       _, psi = ex.psi.popitem()
       self.assertAlmostEqual(min(psi), -0.027043, delta=1e-6)
-      self.assertAlmostEqual(max(psi), 0.6668969079018402)
+      self.assertAlmostEqual(max(psi), 0.6668, delta=1e-5)
 
 
 class TestEx28(TestCase):
