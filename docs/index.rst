@@ -1,5 +1,5 @@
 The documentation of scikit-fem
-===============================
+=====
 
 `scikit-fem <https://github.com/kinnala/scikit-fem>`_ is a lightweight Python 3.6+
 library for performing `finite element assembly
@@ -8,16 +8,38 @@ the transformation of bilinear forms into sparse matrices and linear forms into
 vectors.  The library supports triangular, quadrilateral, tetrahedral and
 hexahedral meshes as well as one-dimensional problems.
 
-This document contains the efforts to improve the user documentation of the
-project. Currently, the main learning resource consists of the
-examples that are continuously improved. In case you have any further
-questions, do not hesitate to drop in and say hello at our `Gitter chat
-<https://gitter.im/scikit-fem>`_.
+.. note::
 
-.. toctree::
-    :maxdepth: 2
+    Installing the library is as simple as running
 
-    gettingstarted
-    tutorial
-    examples
-    api
+    .. code-block:: bash
+
+        pip install scikit-fem
+
+    Full examples can be found `in the source code distribution <https://github.com/kinnala/scikit-fem/tree/master/docs/examples>`_.
+  
+A brief overview of the package
+=====
+
+The most important modules of the library are :mod:`skfem.mesh` and
+:mod:`skfem.element`. For finite element assembly, you also need either an
+:class:`~skfem.assembly.InteriorBasis` or a :class:`~skfem.assembly.FacetBasis`
+object, and a form defined using one of the following decorators:
+:class:`~skfem.assembly.BilinearForm`, :class:`~skfem.assembly.LinearForm`, or
+:class:`~skfem.assembly.Functional`.
+
+
+Module: skfem.mesh
+-----
+
+.. automodule:: skfem.mesh
+
+Module: skfem.element
+-----
+
+.. automodule:: skfem.element
+
+Module: skfem.assembly
+-----
+
+.. automodule:: skfem.assembly
