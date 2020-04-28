@@ -20,7 +20,7 @@ def body_force(v, w):
 
 
 A = asm(vector_laplace, basis['u'])
-B = asm(divergence, basis['u'], basis['p'])
+B = -asm(divergence, basis['u'], basis['p'])
 f = asm(body_force, basis['u'])
 D = basis['u'].find_dofs()['all'].all()
 Aint = condense(A, D=D, expand=False)
@@ -33,14 +33,14 @@ def flow(pressure: np.ndarray) -> np.ndarray:
     velocity = np.zeros(basis['u'].N)
     velocity[I] = solve(Aint,
                         condense(csr_matrix(A.shape),
-                                 f + B.T @ pressure, I=I)[1],
+                                 f - B.T @ pressure, I=I)[1],
                         solver=solver)
     return velocity
 
 
 def dilatation(pressure: np.ndarray) -> np.ndarray:
     """compute the dilatation corresponding to a guessed pressure"""
-    return B @ flow(pressure)
+    return -B @ flow(pressure)
 
 
 pressure = np.zeros(basis['p'].N)
