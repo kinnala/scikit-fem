@@ -60,7 +60,6 @@ D = np.concatenate([b.all() for b in basis['u'].find_dofs().values()])
 
 A = asm(vector_laplace, basis['u'])
 B = asm(divergence, basis['u'], basis['p'])
-C = asm(mass, basis['p'])
 
 K = bmat([[A, -B.T],
           [-B, None]], 'csr')
