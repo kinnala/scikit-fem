@@ -23,14 +23,6 @@ def mass(u, v, w):
 
 M = asm(mass, ib)
 
-dofs = ib.get_dofs(m.boundaries)
-
-D = np.concatenate((
-        dofs['fixed'].nodal['u^1'],
-        dofs['fixed'].nodal['u^2'],
-        dofs['fixed'].nodal['u^3'],
-))
-
 L, x = solve(*condense(K, M, D=ib.find_dofs()['fixed']))
 
 if __name__ == "__main__":
