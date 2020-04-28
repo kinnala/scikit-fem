@@ -24,8 +24,8 @@ def advection(u, v, w):
     return v * velocity_0 * grad(u)[0]
 
 
-dofs = basis.get_dofs({'inlet': lambda x: x[0] == 0.,
-                       'floor': lambda x: x[1] == 0.})
+dofs = basis.find_dofs({'inlet': mesh.facets_satisfying(lambda x: x[0] == 0.),
+                        'floor': mesh.facets_satisfying(lambda x: x[1] == 0.)})
 interior = basis.complement_dofs(dofs)
 
 A = asm(laplace, basis) + peclet * asm(advection, basis)
