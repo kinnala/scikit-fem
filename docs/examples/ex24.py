@@ -59,10 +59,10 @@ del mesh.boundaries['outlet']
 D = np.concatenate([b.all() for b in basis['u'].find_dofs().values()])
 
 A = asm(vector_laplace, basis['u'])
-B = asm(divergence, basis['u'], basis['p'])
+B = -asm(divergence, basis['u'], basis['p'])
 
-K = bmat([[A, -B.T],
-          [-B, None]], 'csr')
+K = bmat([[A, B.T],
+          [B, None]], 'csr')
 uvp = np.zeros(K.shape[0])
 
 inlet_basis = FacetBasis(mesh, element['u'], facets=mesh.boundaries['inlet'])
