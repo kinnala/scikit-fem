@@ -31,7 +31,7 @@ elements = ElementTriP2()
 basis = InteriorBasis(mesh, elements)
 A = asm(laplace, basis)
 
-boundary_dofs = basis.get_dofs(mesh.boundaries)
+boundary_dofs = basis.find_dofs()
 interior_dofs = basis.complement_dofs(boundary_dofs)
 
 u = np.zeros(basis.N)
@@ -46,9 +46,10 @@ conductance = {'skfem': u @ A @ u,
                'exact': 2 * np.log(2) / np.pi}
 
 
-@functional
+@Functional
 def port_flux(w):
-    return sum(w.n * w.dw)
+    from skfem.helpers import dot, grad
+    return dot(w.n, grad(w['w']))
 
 
 current = {}

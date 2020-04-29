@@ -31,7 +31,7 @@ theta = 0.5                     # Crank–Nicolson
 A = M + theta * L * dt
 B = M - (1 - theta) * L * dt
 
-boundary = basis.get_dofs().all()
+boundary = basis.find_dofs()
 interior = basis.complement_dofs(boundary)
 
 backsolve = cholesky(condense(A, D=boundary, expand=False)

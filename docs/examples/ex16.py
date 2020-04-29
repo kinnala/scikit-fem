@@ -22,7 +22,7 @@ L = asm(stiffness, basis)
 M = asm(mass, basis)
 
 ks, u = eigsh(L, M=M, sigma=0.)
-u /= u[basis.get_dofs().all()[-1], :]
+u /= u[basis.find_dofs()['all'].nodal['u'][-1], :]
 
 if __name__ == "__main__":
     fig, ax = subplots()

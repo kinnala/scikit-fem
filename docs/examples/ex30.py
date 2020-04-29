@@ -20,9 +20,9 @@ def body_force(v, w):
 
 
 A = asm(vector_laplace, basis['u'])
-B = asm(divergence, basis['u'], basis['p'])
+B = -asm(divergence, basis['u'], basis['p'])
 f = asm(body_force, basis['u'])
-D = basis['u'].get_dofs().all()
+D = basis['u'].find_dofs()['all'].all()
 Aint = condense(A, D=D, expand=False)
 solver = solver_iter_pcg(M=build_pc_ilu(Aint))
 I = basis['u'].complement_dofs(D)
@@ -33,14 +33,14 @@ def flow(pressure: np.ndarray) -> np.ndarray:
     velocity = np.zeros(basis['u'].N)
     velocity[I] = solve(Aint,
                         condense(csr_matrix(A.shape),
-                                 f + B.T @ pressure, I=I)[1],
+                                 f - B.T @ pressure, I=I)[1],
                         solver=solver)
     return velocity
 
 
 def dilatation(pressure: np.ndarray) -> np.ndarray:
     """compute the dilatation corresponding to a guessed pressure"""
-    return B @ flow(pressure)
+    return -B @ flow(pressure)
 
 
 pressure = np.zeros(basis['p'].N)
@@ -58,11 +58,10 @@ velocity = flow(pressure)
 
 basis['psi'] = InteriorBasis(mesh, ElementQuad2())
 psi = np.zeros(A.shape[0])
-D = basis['psi'].get_dofs().all()
 vorticity = asm(rot, basis['psi'],
                 w=[basis['psi'].interpolate(velocity[i::2])
                    for i in range(2)])
-psi = solve(*condense(asm(laplace, basis['psi']), vorticity, D=D))
+psi = solve(*condense(asm(laplace, basis['psi']), vorticity, D=basis['psi'].find_dofs()))
 psi0 = basis['psi'].interpolator(psi)(np.zeros((2, 1)))[0]
 
 

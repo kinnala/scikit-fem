@@ -31,20 +31,16 @@ K = bmat([[A, -B.T],
 f = np.concatenate([asm(body_force, basis['u']),
                     np.zeros(B.shape[0])])
 
-D = basis['u'].get_dofs().all()
-uvp = solve(*condense(K, f, D=D))
+uvp = solve(*condense(K, f, D=basis['u'].find_dofs()))
 
 velocity, pressure = np.split(uvp, [A.shape[0]])
 
 basis['psi'] = InteriorBasis(mesh, ElementTriP2())
 A = asm(laplace, basis['psi'])
-psi = np.zeros(A.shape[0])
-D = basis['psi'].get_dofs().all()
-interior = basis['psi'].complement_dofs(D)
 vorticity = asm(rot, basis['psi'],
                 w=[basis['psi'].interpolate(velocity[i::2])
                    for i in range(2)])
-psi = solve(*condense(A, vorticity, I=interior))
+psi = solve(*condense(A, vorticity, D=basis['psi'].find_dofs()))
 
 
 if __name__ == '__main__':

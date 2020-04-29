@@ -11,18 +11,18 @@ basis = InteriorBasis(m, e)
 
 A = asm(laplace, basis)
 
-D = basis.get_dofs().all()
-I = basis.complement_dofs(D)
-
 
 def dirichlet(x, y):
     """return a harmonic function"""
     return ((x + 1.j * y) ** 2).real
 
 
+boundary_basis = FacetBasis(m, e)
+boundary_dofs = boundary_basis.find_dofs()['all'].all()
+
 u = np.zeros(basis.N)
-u[D] = dirichlet(*basis.doflocs[:, D])
-u = solve(*condense(A, np.zeros_like(u), u, I))
+u[boundary_dofs] = L2_projection(dirichlet, boundary_basis, boundary_dofs)
+u = solve(*condense(A, np.zeros_like(u), u, D=boundary_dofs))
 
 
 if __name__ == "__main__":
