@@ -10,9 +10,7 @@ basis = InteriorBasis(m, e)
 A = asm(laplace, basis)
 b = asm(unit_load, basis)
 
-D = basis.get_dofs().all()
-
-x = solve(*condense(A, b, D=D))
+x = solve(*condense(A, b, D=basis.find_dofs()))
 
 if __name__ == "__main__":
     from skfem.visuals.matplotlib import plot, show

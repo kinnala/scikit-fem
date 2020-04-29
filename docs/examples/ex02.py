@@ -25,7 +25,7 @@ def bilinf(u, v, w):
 K = asm(bilinf, ib)
 f = 1e6 * asm(unit_load, ib)
 
-dofs = ib.get_dofs({
+dofs = ib.find_dofs({
     'left':  m.facets_satisfying(lambda x: x[0] == 0),
     'right': m.facets_satisfying(lambda x: x[0] == 1),
     'top':   m.facets_satisfying(lambda x: x[1] == 1),
