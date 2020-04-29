@@ -9,28 +9,9 @@ from .basis import Basis
 
 
 class FacetBasis(Basis):
-    """Global basis functions evaluated at integration points on the element
-    boundaries.
+    """Basis functions evaluated at quadrature points on the element boundaries.
 
-    Examples
-    --------
-    :class:`~skfem.assembly.FacetBasis` object is a combination of
-    :class:`~skfem.mesh.Mesh`, :class:`~skfem.element.Element`, and
-    :class:`~skfem.mapping.Mapping`:
-
-    >>> from skfem import *
-    >>> from skfem.models.poisson import mass
-    >>> m = MeshTri.init_symmetric()
-    >>> e = ElementTriP1()
-    >>> fb = FacetBasis(m, e, MappingAffine(m))
-
-    The object is used in the assembly of bilinear and
-    linear forms where the integral is over the boundary
-    of the domain (or elements).
-
-    >>> B = asm(mass, fb)
-    >>> B.shape
-    (5, 5)
+    Initialized and used similarly as :class:`~skfem.assembly.InteriorBasis`.
 
     """
     def __init__(self,
@@ -51,15 +32,17 @@ class FacetBasis(Basis):
         elem
             An object of type :class:`~skfem.element.Element`.
         mapping
-            An object of type :class:`~skfem.mapping.Mapping`.
+            An object of type :class:`skfem.mapping.Mapping`. If `None`, uses
+            `mesh.mapping`.
         intorder
             Optional integration order, i.e. the degree of polynomials that are
-            integrated exactly by the used quadrature. Not used if 'quadrature'
+            integrated exactly by the used quadrature. Not used if `quadrature`
             is specified.
         side
             If 0 or 1, the basis functions are evaluated on the interior facets.
             The numbers 0 and 1 refer to the different sides of the facets.
-            Side 0 corresponds to the indices mesh.f2t[0, :].
+            Side 0 corresponds to the indices `mesh.f2t[0]`. If `None`, basis
+            is evaluated only on the exterior facets.
         facets
             Optional subset of facet indices.
         quadrature

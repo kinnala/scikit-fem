@@ -11,23 +11,20 @@ from .basis import Basis
 
 
 class InteriorBasis(Basis):
-    """Global basis functions evaluated at global quadrature points.
+    """Basis functions evaluated at quadrature points inside the elements.
 
-    Examples
-    --------
     :class:`~skfem.assembly.InteriorBasis` object is a combination of
-    :class:`~skfem.mesh.Mesh`, :class:`~skfem.element.Element`, and
-    :class:`~skfem.mapping.Mapping`:
+    :class:`~skfem.mesh.Mesh` and :class:`~skfem.element.Element`:
 
     >>> from skfem import *
-    >>> from skfem.models.poisson import laplace
     >>> m = MeshTri.init_symmetric()
     >>> e = ElementTriP1()
-    >>> ib = InteriorBasis(m, e, MappingAffine(m))
+    >>> basis = InteriorBasis(m, e)
 
     The resulting objects are used in the assembly.
 
-    >>> K = asm(laplace, ib)
+    >>> from skfem.models.poisson import laplace
+    >>> K = asm(laplace, basis)
     >>> K.shape
     (5, 5)
 
@@ -49,10 +46,11 @@ class InteriorBasis(Basis):
         elem
             An object of type :class:`~skfem.element.Element`.
         mapping
-            An object of type :class:`~skfem.mapping.Mapping`.
+            An object of type :class:`skfem.mapping.Mapping`. If `None`, uses
+            `mesh.mapping`.
         intorder
             Optional integration order, i.e. the degree of polynomials that are
-            integrated exactly by the used quadrature. Not used if 'quadrature'
+            integrated exactly by the used quadrature. Not used if `quadrature`
             is specified.
         elements
             Optional subset of element indices.

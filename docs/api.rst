@@ -2,8 +2,8 @@
  A detailed description of the API
 ===================================
 
-This section contains a detailed API documentation for the most commonly used
-interfaces of the library.
+This section contains a more detailed API documentation for the most commonly
+used interfaces of the library.
 
 Class: Mesh
 ===========
@@ -41,84 +41,21 @@ Class: MeshLine
 .. autoclass:: skfem.mesh.MeshLine
    :members: __init__
 
-Class: Element
-==============
-
-.. autoclass:: skfem.element.Element
-
-Triangular elements
--------------------
-
-.. autosummary::
-
-   skfem.element.ElementTriP1
-   skfem.element.ElementTriP2
-   skfem.element.ElementTriP0
-   skfem.element.ElementTriArgyris
-   skfem.element.ElementTriMorley
-   skfem.element.ElementTriMini
-   skfem.element.ElementTriDG
-   skfem.element.ElementTriRT0
-
-Quadrilateral elements
-----------------------
-
-.. autosummary::
-
-   skfem.element.ElementQuad1
-   skfem.element.ElementQuad2
-   skfem.element.ElementQuadS2
-   skfem.element.ElementQuad0
-   skfem.element.ElementQuadP
-   skfem.element.ElementQuadDG
-   skfem.element.ElementQuadBFS
-
-Tetrahedral elements
---------------------
-
-.. autosummary::
-
-   skfem.element.ElementTetP1
-   skfem.element.ElementTetP2
-   skfem.element.ElementTetP0
-   skfem.element.ElementTetRT0
-   skfem.element.ElementTetN0
-
-Hexahedral elements
--------------------
-
-.. autosummary::
-
-   skfem.element.ElementHex1
-
-1D elements
------------
-
-.. autosummary::
-
-   skfem.element.ElementLineP1
-   skfem.element.ElementLineP2
-   skfem.element.ElementLinePp
-   skfem.element.ElementLineHermite
-
-Other
------
-
-.. autosummary::
-
-   skfem.element.ElementVectorH1
-   skfem.element.ElementComposite
-
-Module: skfem.assembly
-======================
+Class: Basis
+============
 
 .. autoclass:: skfem.assembly.Basis
-
-.. automethod:: skfem.assembly.Basis.get_dofs
+   :members: find_dofs, interpolate
 
 .. autoclass:: skfem.assembly.InteriorBasis
+   :members: __init__
 
 .. autoclass:: skfem.assembly.FacetBasis
+   :members: __init__
+
+
+Class: Form
+===========
 
 .. autoclass:: skfem.assembly.BilinearForm
 

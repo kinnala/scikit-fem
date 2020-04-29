@@ -5,44 +5,6 @@ the element classes reflects their compatibility with the mesh types.
 >>> ElementTriP1.mesh_type
 skfem.mesh.mesh2d.mesh_tri.MeshTri
 
-Elements compatible with :class:`~skfem.mesh.MeshLine` include
-
-* :class:`~skfem.element.ElementLineP1`
-* :class:`~skfem.element.ElementLineP2`
-* :class:`~skfem.element.ElementLinePp`
-* :class:`~skfem.element.ElementLineHermite`
-
-Elements compatible with :class:`~skfem.mesh.MeshTri` include
-
-* :class:`~skfem.element.ElementTriP1`
-* :class:`~skfem.element.ElementTriP2`
-* :class:`~skfem.element.ElementTriP0`
-* :class:`~skfem.element.ElementTriRT0`
-* :class:`~skfem.element.ElementTriMorley`
-* :class:`~skfem.element.ElementTriArgyris`
-* :class:`~skfem.element.ElementTriMini`
-
-Elements compatible with :class:`~skfem.mesh.MeshQuad` include
-
-* :class:`~skfem.element.ElementQuad1`
-* :class:`~skfem.element.ElementQuad2`
-* :class:`~skfem.element.ElementQuad0`
-* :class:`~skfem.element.ElementQuadP`
-* :class:`~skfem.element.ElementQuadS2`
-* :class:`~skfem.element.ElementQuadBFS`
-
-Elements compatible with :class:`~skfem.mesh.MeshTet` include
-
-* :class:`~skfem.element.ElementTetP1`
-* :class:`~skfem.element.ElementTetP2`
-* :class:`~skfem.element.ElementTetP0`
-* :class:`~skfem.element.ElementTetRT0`
-* :class:`~skfem.element.ElementTetN0`
-
-Elements compatible with :class:`~skfem.mesh.MeshHex` include
-
-* :class:`~skfem.element.ElementHex1`
-
 In order to use an element, you simply initialize the respective object and pass
 it to the constructor of :class:`~skfem.assembly.InteriorBasis` or
 :class:`~skfem.assembly.FacetBasis`.
