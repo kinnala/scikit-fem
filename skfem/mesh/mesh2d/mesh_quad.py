@@ -20,9 +20,9 @@ class MeshQuad(Mesh2D):
     Attributes
     ----------
     facets
-        Each column contains a pair of indices to p (2 x Nfacets).
+        Each column contains a pair of indices to `self.p` (2 x Nfacets).
     f2t
-        Each column contains a pair of indices to t or -1 on the
+        Each column contains a pair of indices to `self.t` or -1 on the
         second row if the facet is on the boundary (2 x Nfacets).
     t2f
         Each column contains four indices to facets (4 x Nelements).
@@ -62,8 +62,14 @@ class MeshQuad(Mesh2D):
         p
             The points of the mesh (2 x Nvertices).
         t
-            The element connectivity (4 x Nelems), i.e. indices to p.
+            The element connectivity (4 x Nelems), i.e. indices to `self.p`.
             These should be in counter-clockwise order.
+        subdomains
+            Named subsets of elements.
+        boundaries
+            Named subsets of boundary facets.
+        validate
+            If `True`, perform mesh validity checks.
 
         """
         if p is None and t is None:

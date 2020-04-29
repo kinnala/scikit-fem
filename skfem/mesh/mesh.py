@@ -30,7 +30,7 @@ class Mesh:
         a point.
     t
         The element connectivity (dim x Nelements). Each column corresponds to
-        a element and contains column indices to p.
+        a element and contains column indices to `self.p`.
     subdomains
         Named subsets of elements. Empty if not loaded from an external format.
     boundaries

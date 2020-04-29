@@ -25,8 +25,8 @@ class MeshTri(Mesh2D):
         An array containing the facet vertices (2 x Nfacets).
     f2t
         An array containing the triangles next to each facet (2 x Nfacets).
-        Each column contains two indices to t.  If the second row is zero then
-        the facet is on the boundary.
+        Each column contains two indices to `self.t`.  If the second row is
+        zero then the facet is on the boundary.
     t2f
         An array containing the facets belonging to each triangle (3 x Nelems).
         Each column contains three indices to facets.
@@ -68,11 +68,15 @@ class MeshTri(Mesh2D):
             An array containing the points of the mesh (2 x Nvertices).
         t
             An array containing the element connectivity (3 x Nelems), i.e.
-            indices to p.
+            indices to `self.p`.
+        subdomains
+            Named subsets of elements.
+        boundaries
+            Named subsets of boundary facets.
         validate
-            If true, run mesh validity checks.
+            If `True`, run mesh validity checks.
         sort_t
-            If true, sort the element connectivity matrix before building
+            If `True`, sort the element connectivity matrix before building
             mappings.
 
         """
@@ -101,7 +105,7 @@ class MeshTri(Mesh2D):
         The mesh topology is as follows::
 
             *---------------*
-            |'-.|'-.|`'---. |
+            |'-.|'-.|`'---._|
             |---+---+-------|
             |\  |\  |'.     |
             | \ | \ |  '-.  |
