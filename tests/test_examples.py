@@ -143,7 +143,7 @@ class TestEx21(TestCase):
         x = ex.x
         K = ex.K
         L = ex.L[0]
-        self.assertAlmostEqual(L, 40085.40062937357, 4)
+        self.assertAlmostEqual(L, 50194.94436851986, 4)
         self.assertAlmostEqual(L, x[:, 0].T @ K @ x[:, 0], 4)
 
 
@@ -185,7 +185,7 @@ class TestEx27(TestCase):
       import docs.examples.ex27 as ex
       _, psi = ex.psi.popitem()
       self.assertAlmostEqual(min(psi), -0.027043, delta=1e-6)
-      self.assertAlmostEqual(max(psi), 0.6668969079018402)
+      self.assertAlmostEqual(max(psi), 0.6668, delta=1e-5)
 
 
 class TestEx28(TestCase):

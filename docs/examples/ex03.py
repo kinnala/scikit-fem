@@ -24,7 +24,7 @@ def mass(u, v, w):
 
 M = asm(mass, gb)
 
-D = gb.get_dofs(lambda x: x[0]==0.0).all()
+D = gb.find_dofs({'': m.facets_satisfying(lambda x: x[0]==0.0)})
 y = np.zeros(gb.N)
 
 I = gb.complement_dofs(D)

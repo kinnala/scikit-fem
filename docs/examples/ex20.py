@@ -28,22 +28,14 @@ def biharmonic(u, v, w):
 stokes = asm(biharmonic, ib)
 rotf = asm(unit_load, ib)
 
-dofs = ib.get_dofs(mesh.boundaries['perimeter'])
-
-D = np.concatenate((dofs.nodal['u'], dofs.facet['u_n']))
-
-psi = solve(*condense(stokes, rotf, D=D))
-
-
-from matplotlib.tri import Triangulation
-
-# Evaluate the stream-function at the origin.
+psi = solve(*condense(stokes, rotf, D=ib.find_dofs()))
 psi0, = ib.interpolator(psi)(np.zeros((2, 1)))
 
 if __name__ == "__main__":
     from os.path import splitext
     from sys import argv
     from skfem.visuals.matplotlib import draw
+    from matplotlib.tri import Triangulation
 
     print('psi0 = {} (cf. exact = 1/64 = {})'.format(psi0, 1/64))
 
