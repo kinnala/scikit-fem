@@ -46,9 +46,10 @@ conductance = {'skfem': u @ A @ u,
                'exact': 2 * np.log(2) / np.pi}
 
 
-@functional
+@Functional
 def port_flux(w):
-    return sum(w.n * w.dw)
+    from skfem.helpers import dot, grad
+    return dot(w.n, grad(w['w']))
 
 
 current = {}
