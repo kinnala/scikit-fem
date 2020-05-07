@@ -1,3 +1,20 @@
+"""Spatially varying coefficient.
+
+This example demonstrates a spatially varying coefficient.
+
+Legendre's equation in self-adjoint Sturm–Liouville form is
+
+.. math::
+   
+  ((1 - x^2) u')' + k u = 0, \quad (-1 < x < 1)
+The eigenvalues are :math:`k = n (n + 1)` for :math:`n = 0, 1, 2, \dots`  The
+conventional normalization is :math:`u(1) = 1`.
+
+The x-coordinate for the spatially varying coefficient :math:`1 - x^2` is
+accessed inside the bilinear form as `w.x[0]`.
+
+"""
+
 from matplotlib.pyplot import subplots, show
 import numpy as np
 from scipy.sparse.linalg import eigsh

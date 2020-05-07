@@ -1,3 +1,60 @@
+"""Navier–Stokes equations.
+
+.. note::
+   This example requires the external packages `pygmsh <https://pypi.org/project/pygmsh/>`_ and `pacopy <https://pypi.org/project/pacopy/>`_.
+
+
+In this example, `pacopy <https://pypi.org/project/pacopy/>`_ is used to extend
+the example on creeping flow over a backward-facing step to finite Reynolds
+number; this means defining a residual for the nonlinear problem and its
+derivatives with respect to the solution and to the parameter (here Reynolds
+number).
+
+Compared to the Stokes equations, the Navier–Stokes equation has one additional
+term.  If the problem is nondimensionalized using a characteristic length (here
+the height of the step) and velocity (the average over the inlet), this term
+appears multiplied by the Reynolds number, which thus serves as a convenient
+parameter for numerical continuation.
+
+.. math::
+   -\nabla^2 \mathbf u + \nabla p - \mathrm{Re}\; \mathbf u \cdot\nabla\mathbf u = 0
+   \nabla\cdot\mathbf u = 0.
+The weak formulation can be written
+
+.. math::
+   (\nabla\mathbf v, \nabla\mathbf u) - (\nabla\cdot\mathbf v, p)
+   + (q, \nabla\cdot\mathbf u)
+     - \mathrm{Re}\; (\mathbf v, \mathbf u\cdot\nabla\mathbf u) = 0.
+In shorthand,
+
+.. math::
+   F (u; \mathrm{Re}) = S (u) - \mathrm{Re}\; N (u) = 0
+where the linear (creeping or Stokes) part is
+
+.. math::
+   S (u) = \begin{bmatrix}
+   (\nabla \mathbf v, \nabla \mathbf v) & -(\nabla\cdot \mathbf v, q) \\
+   (q_i, \nabla\cdot \mathbf v) & 0
+   \end{bmatrix}\begin{Bmatrix} \mathbf u \\ p\end{Bmatrix}
+   \equiv \mathsf S u
+and the nonlinear part is
+
+.. math::
+   N(u) = (\mathbf v, \mathbf u\cdot\nabla\mathbf u).
+   
+The Jacobian is
+
+.. math::
+   J(u; \mathrm{Re}) \equiv \frac{\partial F}{\partial u} = \mathsf S -\mathrm{Re}\; N'(u)
+which augments the matrix of the Stokes parts with the Jacobian of the nonlinear terms,
+
+.. math::
+   N' (u) =
+   (\mathbf v,
+   \mathbf u\cdot\nabla\mathbf\delta u
+   + \delta\mathbf u\cdot\nabla\mathbf u).
+
+"""
 from skfem import *
 from skfem.helpers import grad, dot
 from skfem.models.poisson import vector_laplace, laplace

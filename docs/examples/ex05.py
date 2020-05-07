@@ -1,3 +1,21 @@
+"""Integral condition.
+
+This short example demonstrates the implementation of an integral boundary
+ condition
+
+.. math::
+   
+   \int_\Gamma \nabla u \cdot \boldsymbol{n} \, \mathrm{d}s = 1
+
+on a part of the boundary of the domain :math:`\Gamma \subset \partial \Omega`
+ for the Laplace operator.  In this example, :math:`\Gamma` is the right
+ boundary of the unit square and the solution satisfies :math:`u=0` on the
+ bottom boundary and :math:`\nabla u \cdot \boldsymbol{n} = 0` on the rest of
+ the boundaries.  The constraint is introduced via a Lagrange multiplier leading
+ to a saddle point system.
+
+"""
+
 from skfem import *
 from skfem.helpers import dot, grad
 from skfem.models.poisson import laplace

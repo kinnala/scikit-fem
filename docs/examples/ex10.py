@@ -1,3 +1,9 @@
+"""Nonlinear Poisson equation.
+
+This example solves the nonlinear minimal surface problem using Newton's method.
+
+"""
+
 from skfem import *
 from skfem.helpers import grad, dot, trace
 import numpy as np

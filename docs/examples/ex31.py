@@ -1,3 +1,14 @@
+"""Curved elements.
+
+This example solves the eigenvalue problem
+
+.. math::
+   -\Delta u = \lambda u \quad \text{in $\Omega$},
+with the boundary condition :math:`u|_{\partial \Omega} = 0` using isoparametric
+mapping via biquadratic basis and finite element approximation using fifth-order
+quadrilaterals.
+
+"""
 from skfem import *
 from skfem.models.poisson import laplace, mass
 import numpy as np
