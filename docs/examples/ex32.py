@@ -69,8 +69,7 @@ try:
     from scipy.sparse.linalg import aslinearoperator
 
     def build_pc_amg(A: spmatrix, **kwargs) -> LinearOperator:
-
-"""AMG preconditioner"""
+        """AMG preconditioner"""
         return aslinearoperator(amgcl(A, **kwargs))
 
 except ImportError:
