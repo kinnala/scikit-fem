@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-"""This module contains the rest of the tools for performing the finite element
-assembly. The basic workflow of scikit-fem is the following:
+"""This module contains rest of the tools for performing the finite element
+assembly. The basic workflow of assembly is the following:
 
 1. Initialize :class:`~skfem.mesh.Mesh` and :class:`~skfem.mesh.Element`.
 
@@ -18,25 +18,25 @@ assembly. The basic workflow of scikit-fem is the following:
    :class:`~skfem.assembly.Functional`.
 
 >>> form_a = BilinearForm(lambda u, v, w: u * v)
->>> form_b = LinearForm(lambda v, w: 1. * v)
+>>> form_l = LinearForm(lambda v, w: w.x[0] ** 2 * v)
 
 4. Assemble using :func:`~skfem.assembly.asm`.
 
 >>> A = asm(form_a, basis)
->>> b = asm(form_b, basis)
+>>> b = asm(form_l, basis)
 
 The above steps assemble the matrix corresponding
 to the bilinear form
 
 .. math::
 
-    a(u,v) = \int_0^1 \int_0^1 u(x,y)\,v(x,y) \,\mathrm{d}x \,\mathrm{d}y
+    a(u,v) = \int_0^1 \int_0^1 u(x,y)v(x,y) \,\mathrm{d}x \,\mathrm{d}y
 
 and the vector corresponding to the linear form
 
 .. math::
 
-    b(v) = \int_0^1 \int_0^1 v(x,y) \,\mathrm{d}x \,\mathrm{d}y
+    l(v) = \int_0^1 \int_0^1 x^2v(x,y) \,\mathrm{d}x \,\mathrm{d}y
 
 using piecewise linear basis functions.
 
@@ -56,4 +56,9 @@ from .form import Form, BilinearForm, LinearForm, Functional,\
 
 def asm(form: Form,
         *args, **kwargs) -> Union[ndarray, csr_matrix]:
+    """Perform finite element assembly.
+
+    A shorthand for :meth:`skfem.assembly.Form.assemble`.
+
+    """
     return form.assemble(*args, **kwargs)

@@ -1,3 +1,17 @@
+"""Nédélec elements.
+
+This example solves the vector-valued problem
+
+.. math::
+   \nabla \curl \nabla \curl E + E  = f \quad \text{in $\Omega$},
+in domain :math:`\Omega = [-1, 1]^3` with the boundary condition :math:`E \times
+n|_{\partial \Omega} = 0` using the lowest order Nédélec edge element.
+
+.. note::
+
+   The loading is from https://www.dealii.org/reports/nedelec/nedelec.pdf.
+
+"""
 import numpy as np
 
 from skfem import *

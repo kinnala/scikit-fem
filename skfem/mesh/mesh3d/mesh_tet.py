@@ -19,20 +19,20 @@ class MeshTet(Mesh3D):
     Attributes
     ----------
     facets
-        Each column contains a triplet of column indices to MeshTet.p
-        (3 x Nfacets).  Order: (0, 1, 2) (0, 1, 3) (0, 2, 3) (1, 2, 3)
+        Each column contains a triplet of column indices to `self.p`
+        (3 x Nfacets).  Order: (0, 1, 2) (0, 1, 3) (0, 2, 3) (1, 2, 3).
     f2t
-        Each column contains a pair of column indices to MeshTet.t or
+        Each column contains a pair of column indices to `self.t` or
         -1 on the second row if the facet is located on the boundary
         (2 x Nfacets).
     t2f
-        Each column contains four indices to MeshTet.facets (4 x Nelements).
+        Each column contains four indices to `self.facets` (4 x Nelements).
     edges
         Each column corresponds to an edge and contains two indices to
-        MeshTet.p (2 x Nedges).
-        Order: (0, 1) (1, 2) (0, 2) (0, 3) (1, 3) (2, 3)
+        `self.p` (2 x Nedges).
+        Order: (0, 1) (1, 2) (0, 2) (0, 3) (1, 3) (2, 3).
     t2e
-        Each column contains six indices to MeshTet.edges (6 x Nelements).
+        Each column contains six indices to `self.edges` (6 x Nelements).
 
     """
     refdom: str = "tet"
@@ -52,6 +52,22 @@ class MeshTet(Mesh3D):
                  boundaries: Optional[Dict[str, ndarray]] = None,
                  subdomains: Optional[Dict[str, ndarray]] = None,
                  validate=True):
+        """Initialize a tetrahedral mesh.
+
+        Parameters
+        ----------
+        p
+            The points of the mesh (3 x Nvertices).
+        t
+            The element connectivity (6 x Nelems), i.e. indices to `self.p`.
+        subdomains
+            Named subsets of elements.
+        boundaries
+            Named subsets of boundary facets.
+        validate
+            If `True`, perform mesh validity checks.
+
+        """
         if p is None and t is None:
             p = np.array([[0., 0., 0.],
                           [0., 0., 1.],
@@ -79,7 +95,7 @@ class MeshTet(Mesh3D):
         self._build_mappings()
 
     @classmethod
-    def init_refdom(cls: Type[MeshType]):
+    def init_refdom(cls: Type[MeshType]) -> MeshType:
         """Initialise a mesh of the reference domain."""
         p = np.array([[0., 0., 0.],
                       [1., 0., 0.],
@@ -104,33 +120,34 @@ class MeshTet(Mesh3D):
         z
             The nodal coordinates in dimension z
 
-        License
-        -------
-
-        From: https://github.com/nschloe/meshzoo
-
-        Copyright (c) 2016-2018 Nico Schlömer
-
-        Permission is hereby granted, free of charge, to any person obtaining a
-        copy of this software and associated documentation files (the
-        "Software"), to deal in the Software without restriction, including
-        without limitation the rights to use, copy, modify, merge, publish,
-        distribute, sublicense, and/or sell copies of the Software, and to
-        permit persons to whom the Software is furnished to do so, subject to
-        the following conditions:
-
-        The above copyright notice and this permission notice shall be included
-        in all copies or substantial portions of the Software.
-
-        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-        OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-        MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-        NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-        LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-        OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-        WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
         """
+
+        # License
+        # -------
+
+        # From: https://github.com/nschloe/meshzoo
+
+        # Copyright (c) 2016-2018 Nico Schlömer
+
+        # Permission is hereby granted, free of charge, to any person obtaining a
+        # copy of this software and associated documentation files (the
+        # "Software"), to deal in the Software without restriction, including
+        # without limitation the rights to use, copy, modify, merge, publish,
+        # distribute, sublicense, and/or sell copies of the Software, and to
+        # permit persons to whom the Software is furnished to do so, subject to
+        # the following conditions:
+
+        # The above copyright notice and this permission notice shall be included
+        # in all copies or substantial portions of the Software.
+
+        # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+        # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+        # MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+        # NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+        # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+        # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+        # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
         # Create the vertices.
         nx, ny, nz = len(x), len(y), len(z)
         x, y, z = np.meshgrid(x, y, z, indexing='ij')

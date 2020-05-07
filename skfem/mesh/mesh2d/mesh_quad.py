@@ -20,22 +20,12 @@ class MeshQuad(Mesh2D):
     Attributes
     ----------
     facets
-        Each column contains a pair of indices to p (2 x Nfacets).
+        Each column contains a pair of indices to `self.p` (2 x Nfacets).
     f2t
-        Each column contains a pair of indices to t or -1 on the
+        Each column contains a pair of indices to `self.t` or -1 on the
         second row if the facet is on the boundary (2 x Nfacets).
     t2f
         Each column contains four indices to facets (4 x Nelements).
-    
-    Examples
-    --------
-    Initialise a tensor-product mesh.
-    
-    >>> from skfem.mesh import MeshQuad
-    >>> import numpy as np
-    >>> m = MeshQuad.init_tensor(np.linspace(0, 1, 10), np.linspace(0, 2, 5))
-    >>> m.p.shape
-    (2, 50)
 
     """
     refdom: str = "quad"
@@ -52,15 +42,34 @@ class MeshQuad(Mesh2D):
                  boundaries: Optional[Dict[str, ndarray]] = None,
                  subdomains: Optional[Dict[str, ndarray]] = None,
                  validate: Optional[bool] = True):
-        """Initialise a quadrilateral mesh.
+        """Initialize a quadrilateral mesh.
+
+        If no arguments are given, initializes a mesh with the following
+        topology::
+
+            *-------------*
+            |             |
+            |             |
+            |             |
+            |             |
+            |             |
+            |             |
+            |             |
+            O-------------*
 
         Parameters
         ----------
         p
             The points of the mesh (2 x Nvertices).
         t
-            The element connectivity (4 x Nelems), i.e. indices to p.
+            The element connectivity (4 x Nelems), i.e. indices to `self.p`.
             These should be in counter-clockwise order.
+        subdomains
+            Named subsets of elements.
+        boundaries
+            Named subsets of boundary facets.
+        validate
+            If `True`, perform mesh validity checks.
 
         """
         if p is None and t is None:
@@ -81,26 +90,23 @@ class MeshQuad(Mesh2D):
     def init_tensor(cls: Type[MeshType],
                     x: ndarray,
                     y: ndarray) -> MeshType:
-        """Initialise a tensor product mesh.
+        """Initialize a tensor product mesh.
 
         The mesh topology is as follows::
 
-                   x
             *-------------*
             |   |  |      |
             |---+--+------|
             |   |  |      |
-            |   |  |      | y
             |   |  |      |
-            |---+--+------|
             |   |  |      |
             *-------------*
 
         Parameters
         ----------
-        x : numpy array (1d)
+        x
             The nodal coordinates in dimension x
-        y : numpy array (1d)
+        y
             The nodal coordinates in dimension y
 
         """
@@ -128,24 +134,22 @@ class MeshQuad(Mesh2D):
 
     @classmethod
     def init_refdom(cls: Type[MeshType]) -> MeshType:
-        """Initialise a mesh that includes only the reference quad.
+        """Initialize a mesh that includes only the reference quad.
         
         The mesh topology is as follows::
 
-             (0,1) *-------------* (1,1)
-                   |             |
-                   |             |
-                   |             |
-                   |             |
-                   |             |
-                   |             |
-                   |             |
-             (0,0) *-------------* (1,0)
+            *-------------*
+            |             |
+            |             |
+            |             |
+            |             |
+            |             |
+            |             |
+            |             |
+            O-------------*
 
         """
-        p = np.array([[0., 0.], [1., 0.], [1., 1.], [0., 1.]]).T
-        t = np.array([[0, 1, 2, 3]]).T
-        return cls(p, t)
+        return cls()
 
     def _build_mappings(self):
         # do not sort since order defines counterclockwise order

@@ -1,6 +1,7 @@
 import warnings
 from typing import List, Optional, NamedTuple,\
-    Any, Tuple, Dict, TypeVar
+    Any, Tuple, Dict,\
+    TypeVar, Union
 
 import numpy as np
 from numpy import ndarray
@@ -15,8 +16,7 @@ BasisType = TypeVar('BasisType', bound='Basis')
 
 
 class Basis:
-    """The finite element basis is evaluated at global quadrature points
-    and cached inside this object.
+    """Finite element basis at global quadrature points.
 
     Please see the following implementations:
 
@@ -28,7 +28,7 @@ class Basis:
     N: int = 0
     dofnames: List[str] = []
 
-    def __init__(self, mesh, elem, mapping):
+    def __init__(self, mesh, elem, mapping=None):
 
         self.mapping = mesh.mapping() if mapping is None else mapping
 
@@ -205,18 +205,26 @@ class Basis:
                   skip: List[str] = []) -> Dict[str, Dofs]:
         """Return global DOF numbers corresponding to a dictionary of facets.
 
+        Facets can be queried from :class:`~skfem.mesh.Mesh` objects:
+
+        >>> m = MeshTri()
+        >>> m.refine()
+        >>> m.facets_satisfying(lambda x: x[0] == 0)
+        array([1, 5])
+
+        This corresponds to a list of facet indices that can be passed over:
+
+        >>> basis = InteriorBasis(m, ElementTriP1())
+        >>> basis.find_dofs({'left': m.facets_satisfying(lambda x: x[0] == 0)})
+        {'left': Dofs(nodal={'u': array([0, 2, 5])}, facet={}, edge={}, interior={})}
+
         Parameters
         ----------
         facets
-            A dictionary of facet indices. If None, use self.mesh.boundaries
-            if set or otherwise use {'all': self.mesh.boundary_facets()}.
+            A dictionary of facet indices. If `None`, use `self.mesh.boundaries`
+            if set or otherwise use `{'all': self.mesh.boundary_facets()}`.
         skip
             List of dofnames to skip.
-
-        Returns
-        -------
-        Dict[str, Dofs]
-            A dictionary of :class:`skfem.assembly.dofs.Dofs` objects.
 
         """
         if facets is None:
@@ -267,21 +275,17 @@ class Basis:
         parameters for 'w'."""
         raise NotImplementedError("Default parameters not implemented.")
 
-    def interpolate(self, w: ndarray) -> Dict[str, DiscreteField]:
+    def interpolate(self, w: ndarray) -> Union[DiscreteField,
+                                               Tuple[DiscreteField, ...]]:
         """Interpolate a solution vector to quadrature points.
+
+        Useful when a solution vector is needed in the forms, e.g., when
+        evaluating functionals or when solving nonlinear problems.
 
         Parameters
         ----------
         w
             A solution vector.
-
-        Returns
-        -------
-        DiscreteField or (DiscreteField, ...)
-            The solution vector interpolated at quadrature points.
-            If Basis consist of a single component, returns only
-            one DiscreteField. If Basis consists of multiple components,
-            returns a tuple.
 
         """
         if w.shape[0] != self.N:
@@ -383,7 +387,7 @@ class Basis:
         return self.X, self.W
 
     def split(self, x: ndarray) -> List[Tuple[ndarray, BasisType]]:
-        """Split solution vector into components."""
+        """Split a solution vector into components."""
         xs = [x[ix] for ix in self.split_indices()]
         return list(zip(xs, self.split_bases()))
 

@@ -3,12 +3,17 @@ python:
   - "3.6"
   - "3.7"
   - "3.8"
+cache:
+  directories:
+    - .gmsh
 install:
   - sudo apt-get update
   - sudo apt-get install gmsh libsuitesparse-dev
-  - wget http://gmsh.info/bin/Linux/gmsh-4.5.2-Linux64.tgz
+  - cd .gmsh
+  - wget -nc http://gmsh.info/bin/Linux/gmsh-4.5.2-Linux64.tgz
   - tar zvxf gmsh-4.5.2-Linux64.tgz
   - sudo cp gmsh-4.5.2-Linux64/bin/gmsh /usr/bin
+  - cd ..
   - wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"

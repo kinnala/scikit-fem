@@ -9,6 +9,12 @@ from ...element import DiscreteField
 
 
 class Functional(Form):
+    """A functional for finite element assembly.
+
+    Used similarly as :class:`~skfem.assembly.BilinearForm` with the expection
+    that forms take one parameter `w`.
+
+    """
 
     def _kernel(self,
                 w: Dict[str, DiscreteField],

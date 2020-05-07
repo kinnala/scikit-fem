@@ -1,3 +1,14 @@
+"""Euler-Bernoulli beam.
+
+This example solves the Euler-Bernoulli beam equation
+
+.. math::
+   (EI u'')'' = 1 \quad \text{in $[0,1]$},
+with the boundary conditions
+:math:`u(0)=u'(0) = 0` and using cubic Hermite elements.
+The analytical solution gives :math:`u(1)=1/8`.
+
+"""
 from skfem import *
 
 m = MeshLine()

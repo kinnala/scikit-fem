@@ -1,3 +1,48 @@
+"""Stokes equations.
+
+.. note::
+   This example requires the external package `dmsh <https://pypi.org/project/dmsh/>`_.
+
+This solves for the creeping flow problem in the primitive variables,
+i.e. velocity and pressure instead of the stream-function.  These are governed
+by the Stokes momentum
+
+.. math::
+    0 = -\rho^{-1}\nabla p + \boldsymbol{f} + \nu\Delta\boldsymbol{u}
+and continuity equations
+
+.. math::
+    \nabla\cdot\boldsymbol{u} = 0.
+This is an example of a mixed problem because it contains two
+different kinds of unknowns; pairs of elements for them have to be
+chosen carefully.  One of the simplest workable choices is the
+Taylor--Hood element: :math:`P_2` for velocity
+and :math:`P_1` for pressure.
+
+Once the velocity has been found, the stream-function :math:`\psi` can
+be calculated by solving the Poisson problem
+
+.. math::
+    -\Delta\psi = \mathrm{rot}\,\boldsymbol{u},
+where :math:`\mathrm{rot}\,\boldsymbol{u} \equiv
+\partial u_y/\partial x - \partial u_x/\partial y`.
+The boundary conditions are that the stream-function is constant
+around the impermeable perimeter; this constant can be taken as zero
+without loss of generality.  In the weak formulation
+
+.. math::
+    \left(\nabla\phi, \nabla\psi\right) = \left(\phi, \mathrm{rot}\,\boldsymbol{u}\right) \quad \forall \phi \in H^1_0(\Omega),
+the right-hand side can be converted using Green's theorem and the
+no-slip condition to not involve the derivatives of the velocity:
+
+.. math::
+     \left(\phi, \mathrm{rot}\,\boldsymbol{u}\right) = \left(\boldsymbol{rot}\,\phi, \boldsymbol{u}\right)
+where :math:`\boldsymbol{rot}` is the adjoint of :math:`\mathrm{rot}`:
+
+.. math::
+    \boldsymbol{rot}\,\phi \equiv \frac{\partial\phi}{\partial y}\hat{i} - \frac{\partial\phi}{\partial x}\hat{j}.
+
+"""
 from skfem import *
 from skfem.models.poisson import vector_laplace, mass, laplace
 from skfem.models.general import divergence, rot

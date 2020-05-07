@@ -1,3 +1,5 @@
+"""Interior penalty method."""
+
 from skfem import *
 from skfem.helpers import grad, dot
 from skfem.models.poisson import laplace, unit_load

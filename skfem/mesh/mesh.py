@@ -13,7 +13,15 @@ DimTuple = Union[Tuple[float],
 
 
 class Mesh:
-    """A finite element mesh (abstract superclass).
+    """A finite element mesh.
+
+    Typically initialized via one of the following subclasses:
+
+    - :class:`~skfem.mesh.MeshTri`, triangular mesh
+    - :class:`~skfem.mesh.MeshQuad`, quadrilateral mesh
+    - :class:`~skfem.mesh.MeshTet`, tetrahedral mesh
+    - :class:`~skfem.mesh.MeshHex`, hexahedral mesh
+    - :class:`~skfem.mesh.MeshLine`, one-dimensional mesh
 
     Attributes
     ----------
@@ -22,22 +30,12 @@ class Mesh:
         a point.
     t
         The element connectivity (dim x Nelements). Each column corresponds to
-        a element and contains four column indices to p.
-    refdom
-        A string describing the shape of the reference domain. Used to find
-        quadrature rules.
-    brefdom
-        A string describing the shape of the reference domain for element
-        boundaries. Used for finding quadrature rules.
-    meshio_type
-        A string which is used to convert between scikit-fem and meshio mesh
-        types.
-    name
-        A string which is used in pretty printing the object.
+        a element and contains column indices to `self.p`.
     subdomains
-        Named subsets of elements.
+        Named subsets of elements. Empty if not loaded from an external format.
     boundaries
-        Named subsets of boundary facets.
+        Named subsets of boundary facets. Empty if not loaded from an external
+        format or defined via :meth:`~skfem.mesh.Mesh.define_boundary`.
 
     """
 
@@ -114,10 +112,9 @@ class Mesh:
         Parameters
         ----------
         arg
-            Multiple variations:
-            - If None, refine all elements.
-            - If integer, perform multiple uniform refinements.
-            - If array of element indices, adaptively refine.
+            Multiple variations: If None, refine all elements. If integer,
+            perform multiple uniform refinements. If array of element
+            indices, perform adaptive refinement.
 
         """
         if arg is None:

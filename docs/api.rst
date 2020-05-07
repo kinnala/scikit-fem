@@ -1,203 +1,73 @@
-Modules
-=======
+===================================
+ A detailed description of the API
+===================================
 
-This section contains API documentation for the most important modules and
-interfaces that are necessary when using the library.  Equivalently, one can
-access the documentation through the standard Python help system, i.e. using
-:func:`help`.
+This section contains a more detailed API documentation for the most commonly
+used interfaces of the library.
 
-skfem.mesh
-----------
-
-.. automodule:: skfem.mesh
+Class: Mesh
+===========
 
 .. autoclass:: skfem.mesh.Mesh
+   :members: load, save, refine
 
-.. automethod:: skfem.mesh.Mesh.load
-
-.. automethod:: skfem.mesh.Mesh.save
-
-MeshTri
-~~~~~~~
-
-.. autoclass:: skfem.mesh.MeshTri
-
-Constructors
-^^^^^^^^^^^^
-
-.. automethod:: skfem.mesh.MeshTri.__init__
-
-.. automethod:: skfem.mesh.MeshTri.init_symmetric
-
-.. automethod:: skfem.mesh.MeshTri.init_sqsymmetric
-
-.. automethod:: skfem.mesh.MeshTri.init_refdom
-
-.. automethod:: skfem.mesh.MeshTri.init_tensor
-
-.. automethod:: skfem.mesh.MeshTri.init_lshaped
-
-
-MeshQuad
-~~~~~~~~
-
-.. autoclass:: skfem.mesh.MeshQuad
-
-Constructors
-^^^^^^^^^^^^
-
-.. automethod:: skfem.mesh.MeshQuad.__init__
-
-.. automethod:: skfem.mesh.MeshQuad.init_refdom
-
-.. automethod:: skfem.mesh.MeshQuad.init_tensor
-
-
-MeshTet
-~~~~~~~
-
-.. autoclass:: skfem.mesh.MeshTet
-
-Constructors
-^^^^^^^^^^^^
-
-.. automethod:: skfem.mesh.MeshTet.__init__
-
-
-MeshHex
-~~~~~~~
-
-.. autoclass:: skfem.mesh.MeshHex
-
-Constructors
-^^^^^^^^^^^^
-
-.. automethod:: skfem.mesh.MeshHex.__init__
-
-.. automethod:: skfem.mesh.MeshHex.init_tensor
-
-
-MeshLine
-~~~~~~~~
-
-.. autoclass:: skfem.mesh.MeshLine
-
-
-skfem.mapping
--------------
-
-.. automodule:: skfem.mapping
-
-.. autoclass:: skfem.mapping.MappingAffine
-
-.. autoclass:: skfem.mapping.MappingIsoparametric
-
-skfem.element
--------------
-
-.. automodule:: skfem.element
-
-.. automodule:: skfem.element.Element
-
-Triangular elements
-~~~~~~~~~~~~~~~~~~~
-
-.. autoclass:: skfem.element.ElementTriP1
-
-.. autoclass:: skfem.element.ElementTriP2
-
-.. autoclass:: skfem.element.ElementTriP0
-
-.. autoclass:: skfem.element.ElementTriArgyris
-
-.. autoclass:: skfem.element.ElementTriMorley
-
-.. autoclass:: skfem.element.ElementTriDG
-
-.. autoclass:: skfem.element.ElementTriRT0
-
-Quadrilateral elements
-~~~~~~~~~~~~~~~~~~~~~~
-
-.. autoclass:: skfem.element.ElementQuad1
-
-.. autoclass:: skfem.element.ElementQuad2
-
-.. autoclass:: skfem.element.ElementQuad0
-
-Tetrahedral elements
-~~~~~~~~~~~~~~~~~~~~
-
-.. autoclass:: skfem.element.ElementTetP1
-
-.. autoclass:: skfem.element.ElementTetP2
-
-.. autoclass:: skfem.element.ElementTetP0
-
-.. autoclass:: skfem.element.ElementTetRT0
-
-.. autoclass:: skfem.element.ElementTetN0
-
-Hexahedral elements
-~~~~~~~~~~~~~~~~~~~
-
-.. autoclass:: skfem.element.ElementHex1
-
-1D elements
-~~~~~~~~~~~
-
-.. autoclass:: skfem.element.ElementLineP1
-
-.. autoclass:: skfem.element.ElementLineP2
-
-Other
-~~~~~
-
-.. autoclass:: skfem.element.ElementVectorH1
-
-skfem.assembly
+Class: MeshTri
 --------------
 
-.. automodule:: skfem.assembly
+.. autoclass:: skfem.mesh.MeshTri
+     :members: __init__, init_symmetric, init_sqsymmetric, init_refdom, init_tensor, init_lshaped
 
-Defining a global basis
-~~~~~~~~~~~~~~~~~~~~~~~
+Class: MeshQuad
+---------------
+
+.. autoclass:: skfem.mesh.MeshQuad
+   :members: __init__, init_refdom, init_tensor
+
+Class: MeshTet
+--------------
+
+.. autoclass:: skfem.mesh.MeshTet
+   :members: __init__, init_refdom, init_tensor
+
+Class: MeshHex
+--------------
+
+.. autoclass:: skfem.mesh.MeshHex
+   :members: __init__, init_tensor
+
+Class: MeshLine
+---------------
+
+.. autoclass:: skfem.mesh.MeshLine
+   :members: __init__
+
+Class: Basis
+============
 
 .. autoclass:: skfem.assembly.Basis
-
-.. automethod:: skfem.assembly.Basis.get_dofs
+   :members: find_dofs, interpolate
 
 .. autoclass:: skfem.assembly.InteriorBasis
-
-.. automethod:: skfem.assembly.InteriorBasis.refinterp
+   :members: __init__
 
 .. autoclass:: skfem.assembly.FacetBasis
+   :members: __init__
 
-Assembling matrices
-~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: skfem.assembly.bilinear_form
+Class: Form
+===========
 
-.. autofunction:: skfem.assembly.linear_form
+.. autoclass:: skfem.assembly.BilinearForm
+
+.. autoclass:: skfem.assembly.LinearForm
+
+.. autoclass:: skfem.assembly.Functional
 
 .. autofunction:: skfem.assembly.asm
 
-skfem.utils
------------
-
-.. automodule:: skfem.utils
+Module: skfem.utils
+===================
 
 .. autofunction:: skfem.utils.solve
 
 .. autofunction:: skfem.utils.condense
-
-skfem.visuals
--------------
-
-.. automodule:: skfem.visuals.matplotlib
-
-.. autofunction:: skfem.visuals.matplotlib.draw
-
-.. autofunction:: skfem.visuals.matplotlib.plot
-
-.. autofunction:: skfem.visuals.matplotlib.plot3

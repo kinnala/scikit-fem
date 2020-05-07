@@ -9,6 +9,12 @@ from ...element import DiscreteField
 
 
 class LinearForm(Form):
+    """A linear form for finite element assembly.
+
+    Used similarly as :class:`~skfem.assembly.BilinearForm` with the expection
+    that forms take two parameters `v` and `w`.
+
+    """
 
     def assemble(self,
                  u: Basis,

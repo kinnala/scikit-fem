@@ -1,3 +1,50 @@
+r""".. warning::
+   This example requires the external packages `pygmsh <https://pypi.org/project/pygmsh/>`_ and `pacopy <https://pypi.org/project/pacopy/>`_.
+
+
+In this example, `pacopy <https://pypi.org/project/pacopy/>`_ is used to extend
+the Stokes equations over a backward-facing step to finite Reynolds
+number; this means defining a residual for the nonlinear problem and its
+derivatives with respect to the solution and to the parameter (here Reynolds
+number).
+
+Compared to the `Stokes equations
+<https://en.wikipedia.org/wiki/Stokes_flow#Incompressible_flow_of_Newtonian_fluids>`_,
+the Navier-Stokes equation has an additional term.  This term appears
+multiplied by the Reynolds number if the problem is nondimensionalized using a
+characteristic length (the height of the step) and velocity (the average over
+the inlet).  Thus, Reynold number serves as a convenient parameter for
+numerical continuation.  The nondimensionalized, time-independent Navier-Stokes
+equations read
+
+.. math::
+   \left\{
+   \begin{aligned}
+     -\Delta \boldsymbol{u} + \nabla p - \mathrm{Re}\,(\nabla\boldsymbol{u})\boldsymbol{u} &= \boldsymbol{0},\\
+     \nabla\cdot\boldsymbol{u} &= 0,
+   \end{aligned}
+   \right.
+where :math:`\boldsymbol{u}` is the velocity field, :math:`p` is the pressure
+field and :math:`\mathrm{Re} > 0` is the Reynolds number.  The weak formulation
+reads
+
+.. math::
+   \begin{aligned}
+    &\int_\Omega \nabla\boldsymbol{u} : \nabla\boldsymbol{v}\,\mathrm{d}x - \int_{\Omega} \nabla\cdot\boldsymbol{v} \,p \,\mathrm{d}x
+   \\
+    &\qquad+ \int_{\Omega} \nabla\cdot\boldsymbol{u} \,q \,\mathrm{d}x - \mathrm{Re} \int_{\Omega} (\nabla\boldsymbol{u})\boldsymbol{u} \cdot \boldsymbol{v}\,\mathrm{d}x = 0,
+   \end{aligned}
+where :math:`\Omega` is the fluid domain and :math:`(\boldsymbol{v}, q)` are
+test functions.
+The Jacobian of the last nonlinear term is
+
+.. math::
+   -\mathrm{Re} \int_\Omega ((\nabla \delta \boldsymbol{u}) \boldsymbol{u} + (\nabla \boldsymbol{u}) \delta \boldsymbol{u}) \cdot \boldsymbol{v} \,\mathrm{d}x.
+
+The full source code of the example reads as follows:
+
+.. literalinclude:: examples/ex27.py
+    :start-after: EOF"""
 from skfem import *
 from skfem.helpers import grad, dot
 from skfem.models.poisson import vector_laplace, laplace

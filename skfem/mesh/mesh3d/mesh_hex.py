@@ -18,19 +18,20 @@ class MeshHex(Mesh3D):
 
     Attributes
     ----------
-    facets : numpy array of size 4 x Nfacets
-        Each column contains four column indices to MeshHex.p.
-    f2t : numpy array of size 2 x Nfacets
-        Each column contains a pair of column indices to MeshHex.t
+    facets
+        Each column contains four column indices to `self.p` (4 x Nfacets).
+    f2t
+        Each column contains a pair of column indices to `self.t`
         or -1 on the second row if the corresponding
-        facet is located on the boundary.
-    t2f : numpy array of size 6 x Nelements
-        Each column contains four indices to MeshHex.facets.
-    edges : numpy array of size 2 x Nedges
+        facet is located on the boundary (2 x Nfacets).
+    t2f
+        Each column contains four indices to `self.facets` (6 x Nelements).
+    edges
         Each column corresponds to an edge and contains two indices to
-        MeshHex.p.
-    t2e : numpy array of size 12 x Nelements
-        Each column contains twelve column indices of MeshHex.edges.
+        `self.p` (2 x Nedges).
+    t2e
+        Each column contains twelve column indices of
+        `self.edges` (12 x Nelements).
 
     """
     refdom: str = "hex"
@@ -50,7 +51,33 @@ class MeshHex(Mesh3D):
                  boundaries: Optional[Dict[str, ndarray]] = None,
                  subdomains: Optional[Dict[str, ndarray]] = None,
                  validate=True):
-        """Initialise a hexahedral mesh."""
+        """Initialise a hexahedral mesh.
+
+        If `t` is provided, order of vertices in each element should match the
+        numbering::
+
+            2---6
+           /   /|
+          4---7 3
+          |   |/
+          1---5
+
+        where the hidden node is 0.
+
+        Parameters
+        ----------
+        p
+            The points of the mesh (3 x Nvertices).
+        t
+            The element connectivity (8 x Nelems), i.e. indices to `self.p`.
+        subdomains
+            Named subsets of elements.
+        boundaries
+            Named subsets of boundary facets.
+        validate
+            If `True`, perform mesh validity checks.
+
+        """
         if p is None and t is None:
             p = np.array([[0., 0., 0.],
                           [0., 0., 1.],

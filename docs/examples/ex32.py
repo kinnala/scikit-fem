@@ -1,3 +1,52 @@
+"""Block diagonally preconditioned Stokes solver.
+
+.. note::
+
+   This examples requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_ and an implementation of AMG (either `pyamgcl    <https://pypi.org/project/pyamgcl>`_ or `pyamg <https://pypi.org/project/pyamg/>`_).
+
+This example again solves the Stokes problem,
+
+.. math::
+    0 = -\rho^{-1}\nabla p + x\boldsymbol{j} + \nu\Delta\boldsymbol{u}
+.. math::
+    \nabla\cdot\boldsymbol{u} = 0.
+
+but this time in three dimensions, with an algorithm that scales to reasonably
+fine meshes (a million tetrahedra in a few minutes).
+
+The exact solution for this equation in an ellipsoid is known [MCBAIN]_.
+
+With Taylor-Hood elements, the discrete form of the problem is
+
+.. math::
+   \begin{matrix}
+   A & B.T \\
+   B & 0
+   \end{matrix}
+   \begin{Bmatrix}
+   u \\ package\end{Bmatrix}
+   =
+   \begin{bmatrix}
+   x\boldsymbol{j} \\ 0
+   \end{bmatrix}
+
+A simple but effective preconditioning strategy [ELMAN]_ is a block-diagonal
+approach with algebraic multigrid for the momentum block and a diagonal
+approximation to its mass matrix for the pressure.  Algebraic multigrid is
+easily accessible from scikit-fem via the external packages AMGCL or PyAMG;
+either will do here, and in either case the viscous matrix A is condensed to
+eliminate the essential boundary conditions (here zero velocity on the walls)
+and then passed to the external AMG library.
+
+Because the two parts of the preconditioner differ in form, it is easier to
+define their action by a function, wrapped up as a LinearOperator which can
+then be passed to the MINRES sparse iterative solver from SciPy.
+
+.. [ELMAN] Elman, H. C., Silvester, D. J.,, Wathen, A. J. (2014). *Finite Elements and Fast Iterative Solvers : with Applications in Incompressible Fluid Dynamics*, ch. 4 'Solution of discrete Stokes problems'.  Oxford University Press.  `doi:10.1093/acprof:oso/9780199678792.001.0001 <https://doi.org/10.1093%2facprof:oso%2f9780199678792.001.0001>`_
+
+.. [McBAIN] McBain, G. D. (2016). `Creeping convection in a horizontally heated ellipsoid <http://people.eng.unimelb.edu.au/imarusic/proceedings/20/548/%20Paper.pdf>`_. *Proceedings of the Twentieth Australasian Fluid Mechanics Conference*.
+
+"""
 from typing import NamedTuple, Optional
 
 from skfem import *
