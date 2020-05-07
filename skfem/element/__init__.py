@@ -9,6 +9,35 @@ In order to use an element, you simply initialize the respective object and pass
 it to the constructor of :class:`~skfem.assembly.InteriorBasis` or
 :class:`~skfem.assembly.FacetBasis`.
 
+The supported elements include
+
+    - :class:`~skfem.element.ElementTriArgyris`
+    - :class:`~skfem.element.ElementHex1`
+    - :class:`~skfem.element.ElementTriMorley`
+    - :class:`~skfem.element.ElementTriMini`
+    - :class:`~skfem.element.ElementQuad0`
+    - :class:`~skfem.element.ElementQuad1`
+    - :class:`~skfem.element.ElementQuad2`
+    - :class:`~skfem.element.ElementQuadS2`
+    - :class:`~skfem.element.ElementQuadDG`
+    - :class:`~skfem.element.ElementQuadP`
+    - :class:`~skfem.element.ElementQuadBFS`
+    - :class:`~skfem.element.ElementTetN0`
+    - :class:`~skfem.element.ElementTetP0`
+    - :class:`~skfem.element.ElementTetP1`
+    - :class:`~skfem.element.ElementTetP2`
+    - :class:`~skfem.element.ElementTetRT0`
+    - :class:`~skfem.element.ElementTriDG`
+    - :class:`~skfem.element.ElementTriP0`
+    - :class:`~skfem.element.ElementTriP1`
+    - :class:`~skfem.element.ElementTriP2`
+    - :class:`~skfem.element.ElementTriRT0`
+    - :class:`~skfem.element.ElementVectorH1`
+    - :class:`~skfem.element.ElementLineP1`
+    - :class:`~skfem.element.ElementLineP2`
+    - :class:`~skfem.element.ElementLinePp`
+    - :class:`~skfem.element.ElementLineHermite`
+
 """
 
 from .discrete_field import DiscreteField
