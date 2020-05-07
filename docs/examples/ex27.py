@@ -1,31 +1,37 @@
-"""Navier–Stokes equations.
-
-.. note::
+r""".. warning::
    This example requires the external packages `pygmsh <https://pypi.org/project/pygmsh/>`_ and `pacopy <https://pypi.org/project/pacopy/>`_.
 
 
 In this example, `pacopy <https://pypi.org/project/pacopy/>`_ is used to extend
-the example on creeping flow over a backward-facing step to finite Reynolds
+the Stokes equations over a backward-facing step to finite Reynolds
 number; this means defining a residual for the nonlinear problem and its
 derivatives with respect to the solution and to the parameter (here Reynolds
 number).
 
-Compared to the Stokes equations, the Navier–Stokes equation has one additional
-term.  If the problem is nondimensionalized using a characteristic length (here
-the height of the step) and velocity (the average over the inlet), this term
-appears multiplied by the Reynolds number, which thus serves as a convenient
-parameter for numerical continuation.
+Compared to the Stokes equations, the Navier-Stokes equation has an additional
+term.  This term appears multiplied by the Reynolds number if the problem is
+nondimensionalized using a characteristic length (the height of the step)
+and velocity (the average over the inlet).  Thus, Reynold number serves as a
+convenient parameter for numerical continuation.
+The nondimensionalized, time-independent Navier-Stokes equations read
 
 .. math::
-   -\nabla^2 \mathbf u + \nabla p - \mathrm{Re}\; \mathbf u \cdot\nabla\mathbf u = 0
-   \nabla\cdot\mathbf u = 0.
-The weak formulation can be written
+   \begin{aligned}
+     -\Delta \boldsymbol{u} + \nabla p - \mathrm{Re}\,(\nabla\boldsymbol{u})\boldsymbol{u} &= \boldsymbol{0},\\
+     \nabla\cdot\boldsymbol{u} &= 0,
+   \end{aligned}
+where :math:`\boldsymbol{u}` is the velocity field, :math:`p` is the pressure
+field and :math:`\mathrm{Re} > 0` is the Reynolds number.  The weak formulation
+can be written
 
 .. math::
-   (\nabla\mathbf v, \nabla\mathbf u) - (\nabla\cdot\mathbf v, p)
-   + (q, \nabla\cdot\mathbf u)
-     - \mathrm{Re}\; (\mathbf v, \mathbf u\cdot\nabla\mathbf u) = 0.
-In shorthand,
+   \begin{aligned}
+    &\int_\Omega \nabla\boldsymbol{u} : \nabla\boldsymbol{v}\,\mathrm{d}x - \int_{\Omega} \nabla\cdot\boldsymbol{v} \,p \,\mathrm{d}x
+   \\
+    &\qquad+ \int_{\Omega} \nabla\cdot\boldsymbol{u} \,q \,\mathrm{d}x - \mathrm{Re} \int_{\Omega} (\nabla\boldsymbol{u})\boldsymbol{u} \cdot \boldsymbol{v}\,\mathrm{d}x = 0,
+   \end{aligned}
+where :math:`\Omega` is the fluid domain.
+In short,
 
 .. math::
    F (u; \mathrm{Re}) = S (u) - \mathrm{Re}\; N (u) = 0
@@ -54,7 +60,10 @@ which augments the matrix of the Stokes parts with the Jacobian of the nonlinear
    \mathbf u\cdot\nabla\mathbf\delta u
    + \delta\mathbf u\cdot\nabla\mathbf u).
 
-"""
+The full source code of the example reads as follows:
+
+.. literalinclude:: examples/ex27.py
+    :start-after: EOF"""
 from skfem import *
 from skfem.helpers import grad, dot
 from skfem.models.poisson import vector_laplace, laplace

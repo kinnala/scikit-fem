@@ -1,5 +1,4 @@
-"""Krylov–Uzawa method for the Stokes equation
--------------------------------------------
+"""Krylov–Uzawa method for the Stokes equation.
 
 This example solves the Stokes equation iteratively in a square domain.
 

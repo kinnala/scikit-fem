@@ -27,3 +27,5 @@ Table of contents
    self
    overview
    api
+   example1
+   example2

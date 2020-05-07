@@ -18,4 +18,3 @@ Module: skfem.assembly
 ======================
 
 .. automodule:: skfem.assembly
-

@@ -1,4 +1,4 @@
-"""Kirchhoff plate
+r"""
 
 This example demonstrates the solution of a slightly more complicated problem
 with multiple boundary conditions and a fourth-order differential operator. We
@@ -9,7 +9,7 @@ thickness :math:`d`, the governing equation reads: find the deflection :math:`u
 : \Omega \rightarrow \mathbb{R}` that satisfies
 
 .. math::
-    \frac{Ed^3}{12(1-\nu^2)} \Delta^2 u = f, \quad \text{in $\Omega$},
+    \frac{Ed^3}{12(1-\nu^2)} \Delta^2 u = f \quad \text{in $\Omega$},
 where :math:`\Omega = (0,1)^2`, :math:`f` is a perpendicular force,
 :math:`E` and :math:`\nu` are material parameters.
 In this example, we analyse a :math:`1\,\text{m}^2` plate of steel with thickness :math:`d=0.1\,\text{m}`.
@@ -34,7 +34,8 @@ There are several boundary conditions that the problem can take.
 The *fully clamped* boundary condition reads
 
 .. math::
-    u = \frac{\partial u}{\partial n} = 0.
+    u = \frac{\partial u}{\partial \boldsymbol{n}} = 0,
+where :math:`\boldsymbol{n}` is the outward normal.
 Moreover, the *simply supported* boundary condition reads
 
 .. math::
@@ -44,25 +45,26 @@ Finally, the *free* boundary condition reads
 
 .. math::
     M_{nn}(u)=0, \quad V_{n}(u)=0,
-where :math:`V_n = \boldsymbol{V} \cdot \boldsymbol{n}` and
-:math:`\boldsymbol{V}` is the `Kirchhoff shear force <https://arxiv.org/pdf/1707.08396.pdf>`_. The exact
+where :math:`V_n` is the `Kirchhoff shear force <https://arxiv.org/pdf/1707.08396.pdf>`_. The exact
 definition is not needed here as this boundary condition is a
 natural one.
 
 The correct weak formulation for the problem is: find :math:`u \in V` such that
 
 .. math::
-    (\boldsymbol{M}(u),\boldsymbol{K}(v)) = (f, v) \quad \forall v \in V,
+    \int_\Omega \boldsymbol{M}(u) : \boldsymbol{K}(v) \,\mathrm{d}x = \int_\Omega fv \,\mathrm{d}x \quad \forall v \in V,
 where :math:`V` is now a subspace of :math:`H^2` with the essential boundary
-conditions for :math:`u` and :math:`\frac{\partial u}{\partial n}`.
+conditions for :math:`u` and :math:`\frac{\partial u}{\partial \boldsymbol{n}}`.
 
 Instead of constructing a subspace for :math:`H^2`, we discretise the problem
 using the `non-conforming Morley finite element
 <https://users.aalto.fi/~jakke74/WebFiles/Slides-Niiranen-ADMOS-09.pdf>`_ which
 is a piecewise quadratic :math:`C^0`-continuous element for biharmonic problems.
 
-"""
+The full source code of the example reads as follows:
 
+.. literalinclude:: examples/ex02.py
+    :start-after: EOF"""
 from skfem import *
 from skfem.models.poisson import unit_load
 import numpy as np
