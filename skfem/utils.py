@@ -140,6 +140,8 @@ def solve(A: spmatrix,
           **kwargs) -> ndarray:
     """Solve a linear system or a generalized eigenvalue problem.
 
+    The remaining keyword arguments are passed to the solver.
+
     Parameters
     ----------
     A
@@ -149,13 +151,10 @@ def solve(A: spmatrix,
         eigenvalue problem.
     solver
         Choose one of the following solvers:
-
-            - :func:`skfem.utils.solver_direct_scipy` (default)
-            - :func:`skfem.utils.solver_eigen_scipy` (default)
-            - :func:`skfem.utils.solver_iter_pcg`
-            - :func:`skfem.utils.solver_iter_krylov`
-
-    The remaining keyword arguments are passed to the solver.
+        :func:`skfem.utils.solver_direct_scipy` (default),
+        :func:`skfem.utils.solver_eigen_scipy` (default),
+        :func:`skfem.utils.solver_iter_pcg`,
+        :func:`skfem.utils.solver_iter_krylov`.
 
     """
     if solver is None:
@@ -197,7 +196,7 @@ def condense(A: spmatrix,
              I: DofsCollection = None,
              D: DofsCollection = None,
              expand: bool = True) -> CondensedSystem:
-    """Eliminate DOF's from a linear system.
+    """Eliminate degrees-of-freedom from a linear system.
 
     Supports also generalized eigenvalue problems.
 
@@ -209,21 +208,22 @@ def condense(A: spmatrix,
         The right hand side vector or the mass matrix for generalized
         eigenvalue problems.
     x
-        The values of the condensed DOF's. If not given, assumed to be zero.
+        The values of the condensed degrees-of-freedom. If not given, assumed
+        to be zero.
     I
-        The set of DOF numbers to keep.
+        The set of degree-of-freedom indices to keep.
     D
-        The set of DOF numbers to dismiss.
+        The set of degree-of-freedom indices to dismiss.
     expand
-        If True, return x and I: :func:`skfem.utils.solve` will then expand the
-        solution vector automatically. By default, the solution vector is not
-        expanded.
+        If `True` (default), returns also `x` and `I`. As a consequence,
+        :func:`skfem.utils.solve` will expand the solution vector
+        automatically. Otherwise, r
 
     Returns
     -------
-    spmatrix or (spmatrix, ndarray) or (spmatrix, spmatrix)
-        The condensed system.
-
+    CondensedSystem
+        The condensed linear system (and optionally information about
+        the boundary values).
     """
     D = _flatten_dofs(D)
     I = _flatten_dofs(I)

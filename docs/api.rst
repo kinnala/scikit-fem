@@ -71,14 +71,3 @@ Module: skfem.utils
 .. autofunction:: skfem.utils.solve
 
 .. autofunction:: skfem.utils.condense
-
-Module: skfem.visuals
-=====================
-
-.. automodule:: skfem.visuals.matplotlib
-
-.. autofunction:: skfem.visuals.matplotlib.draw
-
-.. autofunction:: skfem.visuals.matplotlib.plot
-
-.. autofunction:: skfem.visuals.matplotlib.plot3

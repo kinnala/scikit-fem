@@ -56,4 +56,9 @@ from .form import Form, BilinearForm, LinearForm, Functional,\
 
 def asm(form: Form,
         *args, **kwargs) -> Union[ndarray, csr_matrix]:
+    """Perform finite element assembly.
+
+    A shorthand for :meth:`skfem.assembly.Form.assemble`.
+
+    """
     return form.assemble(*args, **kwargs)
