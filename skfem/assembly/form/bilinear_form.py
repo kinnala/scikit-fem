@@ -9,6 +9,37 @@ from ...element import DiscreteField
 
 
 class BilinearForm(Form):
+    """A bilinear form for finite element assembly.
+
+    Bilinear forms take three arguments: trial function `u`, test function `v`,
+    and a dictionary of additional parameters `w`.
+
+    >>> form = BilinearForm(lambda u, v, w: u * v)
+
+    Alternatively, you can use :class:`~skfem.assembly.BilinearForm` as a
+    decorator:
+
+    >>> @BilinearForm
+    ... def form(u, v, w):
+    ...     return u * v
+
+    Inside the form definition, `u` and `v` are tuples containing the basis
+    function values at quadrature points.  They also contain the values of
+    the derivatives:
+
+    >>> @BilinearForm
+    ... def form(u, v, w):
+    ...     # u[1][0] is first derivative with respect to x, and so on
+    ...     return u[1][0] * v[1][0] + u[1][1] * v[1][1]  # laplacian
+
+    In practice, we suggest you to use helper functions:
+
+    >>> @BilinearForm
+    ... def form(u, v, w):
+    ...     from skfem.helpers import dot, grad
+    ...     return dot(grad(u), grad(v))
+
+    """
 
     def assemble(self,
                  u: Basis,

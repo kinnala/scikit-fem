@@ -205,6 +205,19 @@ class Basis:
                   skip: List[str] = []) -> Dict[str, Dofs]:
         """Return global DOF numbers corresponding to a dictionary of facets.
 
+        Facets can be queried from :class:`~skfem.mesh.Mesh` objects:
+
+        >>> m = MeshTri()
+        >>> m.refine()
+        >>> m.facets_satisfying(lambda x: x[0] == 0)
+        array([1, 5])
+
+        This corresponds to a list of facet indices that can be passed over:
+
+        >>> basis = InteriorBasis(m, ElementTriP1())
+        >>> basis.find_dofs({'left': m.facets_satisfying(lambda x: x[0] == 0)})
+        {'left': Dofs(nodal={'u': array([0, 2, 5])}, facet={}, edge={}, interior={})}
+
         Parameters
         ----------
         facets

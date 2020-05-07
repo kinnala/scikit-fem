@@ -9,7 +9,7 @@ Class: Mesh
 ===========
 
 .. autoclass:: skfem.mesh.Mesh
-   :members: load, save, refine, define_boundary
+   :members: load, save, refine
 
 Class: MeshTri
 --------------
