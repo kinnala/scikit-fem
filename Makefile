@@ -13,5 +13,5 @@ dox:
 	@eval sphinx-build -b html docs ../scikit-fem-docs
 
 doxall:
-	@eval rm -r ../scikit-fem-docs/.doctrees/
+	-rm -r ../scikit-fem-docs/.doctrees/
 	@eval sphinx-build -a -b html docs ../scikit-fem-docs
