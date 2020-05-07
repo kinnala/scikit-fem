@@ -8,21 +8,25 @@ number; this means defining a residual for the nonlinear problem and its
 derivatives with respect to the solution and to the parameter (here Reynolds
 number).
 
-Compared to the Stokes equations, the Navier-Stokes equation has an additional
-term.  This term appears multiplied by the Reynolds number if the problem is
-nondimensionalized using a characteristic length (the height of the step)
-and velocity (the average over the inlet).  Thus, Reynold number serves as a
-convenient parameter for numerical continuation.
-The nondimensionalized, time-independent Navier-Stokes equations read
+Compared to the `Stokes equations
+<https://en.wikipedia.org/wiki/Stokes_flow#Incompressible_flow_of_Newtonian_fluids>`_,
+the Navier-Stokes equation has an additional term.  This term appears
+multiplied by the Reynolds number if the problem is nondimensionalized using a
+characteristic length (the height of the step) and velocity (the average over
+the inlet).  Thus, Reynold number serves as a convenient parameter for
+numerical continuation.  The nondimensionalized, time-independent Navier-Stokes
+equations read
 
 .. math::
+   \left\{
    \begin{aligned}
      -\Delta \boldsymbol{u} + \nabla p - \mathrm{Re}\,(\nabla\boldsymbol{u})\boldsymbol{u} &= \boldsymbol{0},\\
      \nabla\cdot\boldsymbol{u} &= 0,
    \end{aligned}
+   \right.
 where :math:`\boldsymbol{u}` is the velocity field, :math:`p` is the pressure
 field and :math:`\mathrm{Re} > 0` is the Reynolds number.  The weak formulation
-can be written
+reads
 
 .. math::
    \begin{aligned}
@@ -30,35 +34,12 @@ can be written
    \\
     &\qquad+ \int_{\Omega} \nabla\cdot\boldsymbol{u} \,q \,\mathrm{d}x - \mathrm{Re} \int_{\Omega} (\nabla\boldsymbol{u})\boldsymbol{u} \cdot \boldsymbol{v}\,\mathrm{d}x = 0,
    \end{aligned}
-where :math:`\Omega` is the fluid domain.
-In short,
+where :math:`\Omega` is the fluid domain and :math:`(\boldsymbol{v}, q)` are
+test functions.
+The Jacobian of the last nonlinear term is
 
 .. math::
-   F (u; \mathrm{Re}) = S (u) - \mathrm{Re}\; N (u) = 0
-where the linear (creeping or Stokes) part is
-
-.. math::
-   S (u) = \begin{bmatrix}
-   (\nabla \mathbf v, \nabla \mathbf v) & -(\nabla\cdot \mathbf v, q) \\
-   (q_i, \nabla\cdot \mathbf v) & 0
-   \end{bmatrix}\begin{Bmatrix} \mathbf u \\ p\end{Bmatrix}
-   \equiv \mathsf S u
-and the nonlinear part is
-
-.. math::
-   N(u) = (\mathbf v, \mathbf u\cdot\nabla\mathbf u).
-   
-The Jacobian is
-
-.. math::
-   J(u; \mathrm{Re}) \equiv \frac{\partial F}{\partial u} = \mathsf S -\mathrm{Re}\; N'(u)
-which augments the matrix of the Stokes parts with the Jacobian of the nonlinear terms,
-
-.. math::
-   N' (u) =
-   (\mathbf v,
-   \mathbf u\cdot\nabla\mathbf\delta u
-   + \delta\mathbf u\cdot\nabla\mathbf u).
+   -\mathrm{Re} \int_\Omega ((\nabla \delta \boldsymbol{u}) \boldsymbol{u} + (\nabla \boldsymbol{u}) \delta \boldsymbol{u}) \cdot \boldsymbol{v} \,\mathrm{d}x.
 
 The full source code of the example reads as follows:
 
