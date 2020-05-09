@@ -22,16 +22,18 @@ bibliography: paper.bib
 
 # Summary
 
-Various models in modern physics and engineering - such as Navier-Stokes
+Various models in modern physics and engineering, such as Navier-Stokes
 equations in fluid mechanics, Maxwell's equations in electromagnetism, and
-Schrödinger equation in quantum mechanics - are based on partial differential
+Schrödinger equation in quantum mechanics, are based on partial differential
 equations (PDE's).  Finite element method (FEM) is a flexible computational
 technique for the discretisation and solution of PDE's, especially in the case
 of complex spatial domains.
 
-Conceptually FEM transforms PDE's into systems of linear equations that can be
-solved using linear solvers. ``scikit-fem`` is a lightweight Python library for
-the creation, or /assembly/, of finite element matrices.
+Conceptually FEM transforms a PDE into a system of linear equations $Ax=b$.
+``scikit-fem`` is a lightweight Python library for the creation, or *assembly*,
+of the finite element matrix $A$ and the load vector $b$.  The user defines a
+computational mesh, picks basis functions, and
+
 
 Several open source libraries implement the finite element method; cf. Fenics,
 Firedrake, SfePy, GetFEM++, and nutils.  A majority of the libraries target
