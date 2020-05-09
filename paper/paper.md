@@ -22,34 +22,28 @@ bibliography: paper.bib
 
 # Summary
 
-Various models in modern physics and engineering, such as Navier-Stokes
-equations in fluid mechanics, Maxwell's equations in electromagnetism, and
-Schrödinger equation in quantum mechanics, are based on partial differential
-equations (PDE's).  Finite element method (FEM) is a flexible computational
-technique for the discretisation and solution of PDE's, especially in the case
+Partial differential equations (PDE's) – such as Navier-Stokes equations in
+fluid mechanics, Maxwell's equations in electromagnetism, and Schrödinger
+equation in quantum mechanics – are the basic building blocks of modern physics
+and engineering.  Finite element method (FEM) is a flexible computational
+technique for the discretization and solution of PDE's, especially in the case
 of complex spatial domains.
 
-Conceptually FEM transforms a PDE into a system of linear equations $Ax=b$.
-``scikit-fem`` is a lightweight Python library for the creation, or *assembly*,
-of the finite element matrix $A$ and the load vector $b$.  The user defines a
-computational mesh, picks basis functions, and
+Conceptually FEM transforms a time-independent (or temporally discretized) PDE
+into a system of linear equations $Ax=b$.  `scikit-fem` is a lightweight Python
+library for the creation, or *assembly*, of the finite element matrices $A$ and
+vectors $b$.  The user defines a computational mesh, picks suitable basis
+functions, and provides the PDE's weak formulation.  The resulting matrices and
+vectors can be used together with sparse linear solvers compatible with the
+SciPy ecosystem.
 
+There exist several open source frameworks – written in Python or with a Python
+interface – that implement the finite element method.  In contrast to Fenics,
+Firedrake, SfePy, GetFEM++ and Netgen-NG, `scikit-fem` does not have any
+compiled code making the installation quick and straightforward.  It
+specifically targets the finite element assembly instead of being an end-to-end
+finite element solver.
 
-Several open source libraries implement the finite element method; cf. Fenics,
-Firedrake, SfePy, GetFEM++, and nutils.  A majority of the libraries target
-solving large scale problems with millions of unknowns (or more) or are
-specialised to a set of predefined PDE's. As a consequence, accessing the
-underlying finite element matrices may require additional work and many
-implementational details are abstracted from the user.
-
-``scikit-fem`` is a lightweight Python library for finite element matrix
-assembly.  The philosophy is to provide a 
-
-In other words, the user inputs a mesh of the computational domain together with
-a weak formulation of the differential operator, chooses basis functions from a
-list of supported elements, and receives the corresponding finite element
-matrix.  This philosophy and workflow allows rapid prototyping of customised
-FEM-based numerical solvers.
 
 # Citations
 
