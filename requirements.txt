@@ -1,0 +1,11 @@
+numpy
+scipy
+matplotlib
+pytest
+ipython
+sphinx
+meshio
+dmsh
+pygmsh
+pacopy
+sphinx_rtd_theme

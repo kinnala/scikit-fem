@@ -25,44 +25,11 @@ class MeshTri(Mesh2D):
         An array containing the facet vertices (2 x Nfacets).
     f2t
         An array containing the triangles next to each facet (2 x Nfacets).
-        Each column contains two indices to t.  If the second row is zero then
-        the facet is on the boundary.
+        Each column contains two indices to `self.t`.  If the second row is
+        zero then the facet is on the boundary.
     t2f
         An array containing the facets belonging to each triangle (3 x Nelems).
         Each column contains three indices to facets.
-
-    Examples
-    --------
-    Initialise a symmetric mesh of the unit square.
-
-    >>> m = MeshTri.init_sqsymmetric()
-    >>> m.t.shape
-    (3, 8)
-
-    Facets (edges) and mappings from triangles to facets and vice versa are
-    automatically constructed. In the following example we have 5 facets
-    (edges).
-
-    >>> m = MeshTri()
-    >>> m.facets
-    array([[0, 0, 1, 1, 2],
-           [1, 2, 2, 3, 3]])
-    >>> m.t2f
-    array([[0, 2],
-           [2, 4],
-           [1, 3]])
-    >>> m.f2t
-    array([[ 0,  0,  1,  1,  1],
-           [-1, -1,  0, -1, -1]])
-
-    The value -1 implies that the facet (the edge) is on the boundary.
-
-    Refine the triangular mesh of the unit square three times.
-
-    >>> m = MeshTri()
-    >>> m.refine(3)
-    >>> m.p.shape
-    (2, 81)
 
     """
     refdom: str = "tri"
@@ -80,9 +47,9 @@ class MeshTri(Mesh2D):
                  subdomains: Optional[Dict[str, ndarray]] = None,
                  validate: Optional[bool] = True,
                  sort_t: Optional[bool] = True):
-        r"""Initialise a triangular mesh.
+        r"""Initialize a triangular mesh.
 
-        If no arguments are given, initialises a mesh with the following
+        If no arguments are given, initializes a mesh with the following
         topology::
 
             *-------------*
@@ -93,7 +60,7 @@ class MeshTri(Mesh2D):
             |        \    |
             |          \  |
             |            \|
-            *-------------*
+            O-------------*
 
         Parameters
         ----------
@@ -101,11 +68,15 @@ class MeshTri(Mesh2D):
             An array containing the points of the mesh (2 x Nvertices).
         t
             An array containing the element connectivity (3 x Nelems), i.e.
-            indices to p.
+            indices to `self.p`.
+        subdomains
+            Named subsets of elements.
+        boundaries
+            Named subsets of boundary facets.
         validate
-            If true, run mesh validity checks.
+            If `True`, run mesh validity checks.
         sort_t
-            If true, sort the element connectivity matrix before building
+            If `True`, sort the element connectivity matrix before building
             mappings.
 
         """
@@ -129,7 +100,17 @@ class MeshTri(Mesh2D):
     def init_tensor(cls: Type[MeshType],
                     x: ndarray,
                     y: ndarray) -> MeshType:
-        """Initialise a tensor product mesh.
+        r"""Initialize a tensor product mesh.
+
+        The mesh topology is as follows::
+
+            *---------------*
+            |'-.|'-.|`'---._|
+            |---+---+-------|
+            |\  |\  |'.     |
+            | \ | \ |  '-.  |
+            |  \|  \|     '.|
+            *---------------*
 
         Parameters
         ----------
@@ -169,8 +150,8 @@ class MeshTri(Mesh2D):
         return cls(p, t.astype(np.int64))
 
     @classmethod
-    def init_symmetric(cls):
-        r"""Initialise a symmetric mesh of the unit square.
+    def init_symmetric(cls) -> MeshType:
+        r"""Initialize a symmetric mesh of the unit square.
         
         The mesh topology is as follows::
 
@@ -182,7 +163,7 @@ class MeshTri(Mesh2D):
             |    /  \    |
             |  /      \  |
             |/          \|
-            *------------*
+            O------------*
 
         """
         p = np.array([[0, 1, 1, 0, 0.5],
@@ -195,7 +176,7 @@ class MeshTri(Mesh2D):
 
     @classmethod
     def init_sqsymmetric(cls: Type[MeshType]) -> MeshType:
-        r"""Initialise a symmetric mesh of the unit square.
+        r"""Initialize a symmetric mesh of the unit square.
         
         The mesh topology is as follows::
 
@@ -207,7 +188,7 @@ class MeshTri(Mesh2D):
             |    / | \    |
             |  /   |   \  |
             |/     |     \|
-            *------*------*
+            O------*------*
 
         """
         p = np.array([[0, 0.5, 1,   0, 0.5,   1, 0, 0.5, 1],
@@ -224,7 +205,7 @@ class MeshTri(Mesh2D):
 
     @classmethod
     def init_refdom(cls: Type[MeshType]) -> MeshType:
-        r"""Initialise a mesh that includes only the reference triangle.
+        r"""Initialize a mesh that includes only the reference triangle.
         
         The mesh topology is as follows::
 
@@ -236,7 +217,7 @@ class MeshTri(Mesh2D):
             |        \    
             |          \  
             |            \ 
-            *-------------*
+            O-------------*
 
         """
         p = np.array([[0., 1., 0.],
@@ -246,7 +227,7 @@ class MeshTri(Mesh2D):
 
     @classmethod
     def init_lshaped(cls: Type[MeshType]) -> MeshType:
-        r"""Initialise a mesh for the L-shaped domain.
+        r"""Initialize a mesh for the L-shaped domain.
         
         The mesh topology is as follows::
 
@@ -254,14 +235,11 @@ class MeshTri(Mesh2D):
             | \     |
             |   \   |
             |     \ |
-            *-------*-------*
+            |-------O-------*
             |     / | \     |
             |   /   |   \   |
             | /     |     \ |
-            *-------*-------*
-
-        where the origin is at the L-corner and the horizontal and vertical
-        edges have unit length.
+            *---------------*
 
         """
         p = np.array([[0., 1., 0., -1.,  0., -1., -1.,  1.],

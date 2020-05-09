@@ -1,4 +1,24 @@
+"""Integral condition.
+
+This short example demonstrates the implementation of an integral boundary
+ condition
+
+.. math::
+   
+   \int_\Gamma \nabla u \cdot \boldsymbol{n} \, \mathrm{d}s = 1
+
+on a part of the boundary of the domain :math:`\Gamma \subset \partial \Omega`
+ for the Laplace operator.  In this example, :math:`\Gamma` is the right
+ boundary of the unit square and the solution satisfies :math:`u=0` on the
+ bottom boundary and :math:`\nabla u \cdot \boldsymbol{n} = 0` on the rest of
+ the boundaries.  The constraint is introduced via a Lagrange multiplier leading
+ to a saddle point system.
+
+"""
+
 from skfem import *
+from skfem.helpers import dot, grad
+from skfem.models.poisson import laplace
 
 m = MeshTri()
 m.refine(5)
@@ -8,28 +28,27 @@ e = ElementTriP1()
 ib = InteriorBasis(m, e)
 fb = FacetBasis(m, e)
 
-@bilinear_form
-def bilinf(u, du, v, dv, w):
-    return du[0]*dv[0] + du[1]*dv[1]
 
-@bilinear_form
-def facetbilinf(u, du, v, dv, w):
+@BilinearForm
+def facetbilinf(u, v, w):
     n = w.n
     x = w.x
-    return -(du[0]*n[0] + du[1]*n[1])*v*(x[0] == 1.0)
+    return -dot(grad(u), n) * v * (x[0] == 1.0)
 
-@linear_form
-def facetlinf(v, dv, w):
+
+@LinearForm
+def facetlinf(v, w):
     n = w.n
     x = w.x
-    return -(dv[0]*n[0] + dv[1]*n[1])*(x[0] == 1.0)
+    return -dot(grad(v), n) * (x[0] == 1.0)
 
-A = asm(bilinf, ib)
+
+A = asm(laplace, ib)
 B = asm(facetbilinf, fb)
 
 b = asm(facetlinf, fb)
 
-D = ib.get_dofs(lambda x: (x[1] == 0.0)).all()
+D = ib.find_dofs({'plate': m.facets_satisfying(lambda x: (x[1] == 0.0))})
 I = ib.complement_dofs(D)
 
 import scipy.sparse

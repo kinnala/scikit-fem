@@ -1,25 +1,18 @@
+"""One-dimensional Poisson."""
+
 import numpy as np
 from skfem import *
+from skfem.models.poisson import laplace, unit_load
 
 m = MeshLine(np.linspace(0, 1, 10))
 
 e = ElementLineP1()
 basis = InteriorBasis(m, e)
 
-@bilinear_form
-def laplace(u, du, v, dv, w):
-    return du[0]*dv[0]
-
-@linear_form
-def load(v, dv, w):
-    return 1.0*v
-
 A = asm(laplace, basis)
-b = asm(load, basis)
+b = asm(unit_load, basis)
 
-D = basis.get_dofs().all()
-
-x = solve(*condense(A, b, D=D))
+x = solve(*condense(A, b, D=basis.find_dofs()))
 
 if __name__ == "__main__":
     from skfem.visuals.matplotlib import plot, show

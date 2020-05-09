@@ -1,9 +1,0 @@
-Interior penalty method
------------------------
-
-.. note::
-
-   This is an undocumented example. You could help us to improve it; see :ref:`contribute`.
-
-.. literalinclude:: ex07.py
-   :linenos:

@@ -1,3 +1,47 @@
+"""Bratu–Gelfand.
+
+.. note::
+
+   This example requires the external package `pacopy <https://github.com/nschloe/pacopy>`_
+
+Here the bifurcation diagram for the Bratu–Gelfand two-point boundary value problem is reproduced by numerical continuation as implemented in pacopy, and adapted from the pacopy example `Bratu <https://github.com/nschloe/pacopy/blob/master/README.md#bratu>`_.
+
+.. math::
+    u'' + \lambda \mathrm e^u = 0, \quad 0 < x < 1,
+with :math:`u(0)=u(1)=0` and where :math:`\lambda > 0` is a parameter.
+
+For treatment by numerical continuation, we define the residual
+
+.. math::
+    F(u, \lambda) = -u'' - \lambda \mathrm e^u
+.. literalinclude:: ex23.py
+    :start-at: def f
+    :lines: 1-5	       
+
+its derivative with respect to the parameter
+
+.. math::
+   \frac{\partial F}{\partial\lambda} = -\mathrm e^u
+.. literalinclude:: ex23.py
+    :start-at: def df_dlmbda
+    :lines: 1-8	       
+
+and the Jacobian
+
+.. math::
+   J (u) = -\frac{\mathrm d^2}{\mathrm dx^2} - \lambda \mathrm e^u
+.. literalinclude:: ex23.py
+    :start-at: def jacobian_solver
+    :lines: 1-11	       
+
+The resulting bifurcation diagram, matches figure 1.1 (left) of Farrell, Birkisson, & Funke (2015).
+
+.. figure:: ex23.png
+
+
+* P. E. Farrell, Á. Birkisson, & S. W. Funke (2015). Deflation techniques for finding distinct solutions of nonlinear partial differential equations. *SIAM Journal on Scientific Computing* 37(4). pp. A2026–A2045. `doi:10.1137/140984798 <http://dx.doi.org/10.1137/140984798>`_
+
+"""
 from pathlib import Path
 
 from matplotlib.pyplot import subplots
@@ -17,7 +61,7 @@ class Bratu1d:
                                    ElementLineP1())
         self.lap = asm(laplace, self.basis)
         self.mass = asm(mass, self.basis)
-        self.D = self.basis.get_dofs().all()
+        self.D = self.basis.find_dofs()['all'].nodal['u']
 
     def inner(self, a: np.ndarray, b: np.ndarray) -> float:
         """return the inner product of two solutions"""

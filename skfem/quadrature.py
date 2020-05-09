@@ -35,9 +35,9 @@ def get_quadrature(refdom: str, norder: int) -> Tuple[np.ndarray, np.ndarray]:
         |       | (1,1,1), etc.   |                |
         +-------+-----------------+----------------+
 
-        norder
-            The polynomial order upto which the requested quadrature rule is
-            accurate.
+    norder
+        The polynomial order upto which the requested quadrature rule is
+        accurate.
 
     Returns
     -------
@@ -45,15 +45,15 @@ def get_quadrature(refdom: str, norder: int) -> Tuple[np.ndarray, np.ndarray]:
         weights (Nqp).
 
     """
-    if refdom is "tri":
+    if refdom == "tri":
         return get_quadrature_tri(norder)
-    elif refdom is "tet":
+    elif refdom == "tet":
         return get_quadrature_tet(norder)
-    elif refdom is "line":
+    elif refdom == "line":
         return get_quadrature_line(norder)
-    elif refdom is "point":
+    elif refdom == "point":
         return get_quadrature_point(norder)
-    elif refdom is "quad":
+    elif refdom == "quad":
         X, W = get_quadrature_line(norder)
         # generate tensor product rule from 1D rule
         A, B = np.meshgrid(X, X)
@@ -62,7 +62,7 @@ def get_quadrature(refdom: str, norder: int) -> Tuple[np.ndarray, np.ndarray]:
         Z = A * B
         W = Z.flatten(order="F")
         return Y, W
-    elif refdom is "hex":
+    elif refdom == "hex":
         X, W = get_quadrature_line(norder)
         # generate tensor product rule from 1D rule
         A, B, C = np.meshgrid(X, X, X)

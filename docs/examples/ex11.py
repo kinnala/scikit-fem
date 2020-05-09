@@ -1,3 +1,11 @@
+"""Linear elasticity.
+
+This example solves the linear elasticity problem using trilinear elements.  The
+weak form of the linear elasticity problem is defined in
+:func:`skfem.models.elasticity.linear_elasticity`.
+
+"""
+
 import numpy as np
 from skfem import *
 from skfem.models.elasticity import linear_elasticity, lame_parameters

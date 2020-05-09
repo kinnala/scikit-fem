@@ -9,18 +9,24 @@ from ...element import DiscreteField
 
 
 class LinearForm(Form):
+    """A linear form for finite element assembly.
+
+    Used similarly as :class:`~skfem.assembly.BilinearForm` with the expection
+    that forms take two parameters `v` and `w`.
+
+    """
 
     def assemble(self,
                  u: Basis,
                  v: Optional[Basis] = None,
-                 w: Dict[str, DiscreteField] = {}) -> ndarray:
+                 **kwargs) -> ndarray:
 
         assert v is None
         v = u
 
         nt = v.nelems
         dx = v.dx
-        w = FormDict({**v.default_parameters(), **self.dictify(w)})
+        w = FormDict({**v.default_parameters(), **self.dictify(kwargs)})
 
         # initialize COO data structures
         sz = v.Nbfun * nt
@@ -44,6 +50,11 @@ def linear_form(form: Callable) -> LinearForm:
 
     # for backwards compatibility
     from .form_parameters import FormParameters
+
+    import warnings
+    warnings.warn("The old style @linear_form wrapper is deprecated. "
+                  "Consider using the new style forms, defined via "
+                  "@LinearForm.", DeprecationWarning)
 
     class ClassicLinearForm(LinearForm):
 

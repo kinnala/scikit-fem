@@ -20,11 +20,30 @@ class MeshLine(Mesh):
     f2t = np.zeros((2, 0), dtype=np.int64)
 
     def __init__(self,
-                 p: Optional[ndarray] = None,
-                 t: Optional[ndarray] = None,
-                 boundaries: Optional[Dict[str, ndarray]] = None,
-                 subdomains: Optional[Dict[str, ndarray]] = None,
-                 validate=True):
+                 p: ndarray = None,
+                 t: ndarray = None,
+                 boundaries: Dict[str, ndarray] = None,
+                 subdomains: Dict[str, ndarray] = None,
+                 validate: bool = True):
+        """Initialize one-dimensional mesh.
+
+        If no parameters are given, initializes a mesh with the nodes 0 and 1.
+
+        Parameters
+        ----------
+        p
+            The nodes of the mesh.
+        t
+            Optional element connectivity. By default, this is constructed
+            using the assumption that `p` is sorted.
+        subdomains
+            Named subsets of elements.
+        boundaries
+            Named subsets of boundary facets.
+        validate
+            If `True`, perform mesh validity checks.
+
+        """
         if p is None and t is None:
             p = np.array([[0., 1.]], dtype=np.float_)
         if len(p.shape) == 1:

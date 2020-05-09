@@ -1,3 +1,17 @@
+"""Adaptive Poisson equation.
+
+This example solves `ex01.py` adaptively in an L-shaped domain.
+Using linear elements, the error indicators read
+
+.. math::
+   \eta_K^2 = h_K^2 \|f\|_{0,K}^2
+for each element :math:`K`, and
+
+.. math::
+   \eta_E^2 = h_E \| [[\nabla u_h \cdot n ]] \|_{0,E}^2
+for each edge :math:`E`.
+
+"""
 from skfem import *
 from skfem.models.poisson import laplace
 import numpy as np
@@ -9,8 +23,8 @@ e = ElementTriP1()
 def load_func(x, y):
     return 1.0
 
-@linear_form
-def load(v, dv, w):
+@LinearForm
+def load(v, w):
     x, y = w.x
     return load_func(x, y) * v
 

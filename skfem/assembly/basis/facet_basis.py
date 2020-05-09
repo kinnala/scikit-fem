@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Tuple
 
 import numpy as np
 from numpy import ndarray
@@ -9,37 +9,19 @@ from .basis import Basis
 
 
 class FacetBasis(Basis):
-    """Global basis functions evaluated at integration points on the element
-    boundaries.
+    """Basis functions evaluated at quadrature points on the element boundaries.
 
-    Examples
-    --------
-    :class:`~skfem.assembly.FacetBasis` object is a combination of
-    :class:`~skfem.mesh.Mesh`, :class:`~skfem.element.Element`, and
-    :class:`~skfem.mapping.Mapping`:
-
-    >>> from skfem import *
-    >>> from skfem.models.poisson import mass
-    >>> m = MeshTri.init_symmetric()
-    >>> e = ElementTriP1()
-    >>> fb = FacetBasis(m, e, MappingAffine(m))
-
-    The object is used in the assembly of bilinear and
-    linear forms where the integral is over the boundary
-    of the domain (or elements).
-
-    >>> B = asm(mass, fb)
-    >>> B.shape
-    (5, 5)
+    Initialized and used similarly as :class:`~skfem.assembly.InteriorBasis`.
 
     """
     def __init__(self,
                  mesh,
                  elem,
                  mapping = None,
-                 intorder: Optional[int] = None,
-                 side: Optional[int] = None,
-                 facets: Optional[ndarray] = None):
+                 intorder: int = None,
+                 side: int = None,
+                 facets: ndarray = None,
+                 quadrature: Tuple[ndarray, ndarray] = None):
         """Combine :class:`~skfem.mesh.Mesh` and :class:`~skfem.element.Element`
         into a set of precomputed global basis functions at element facets.
 
@@ -50,28 +32,43 @@ class FacetBasis(Basis):
         elem
             An object of type :class:`~skfem.element.Element`.
         mapping
-            An object of type :class:`~skfem.mapping.Mapping`.
+            An object of type :class:`skfem.mapping.Mapping`. If `None`, uses
+            `mesh.mapping`.
         intorder
             Optional integration order, i.e. the degree of polynomials that are
-            integrated exactly by the used quadrature.
+            integrated exactly by the used quadrature. Not used if `quadrature`
+            is specified.
         side
             If 0 or 1, the basis functions are evaluated on the interior facets.
             The numbers 0 and 1 refer to the different sides of the facets.
-            Side 0 corresponds to the indices mesh.f2t[0, :].
+            Side 0 corresponds to the indices `mesh.f2t[0]`. If `None`, basis
+            is evaluated only on the exterior facets.
         facets
             Optional subset of facet indices.
+        quadrature
+            Optional tuple of quadrature points and weights.
 
         """
-        super(FacetBasis, self).__init__(mesh, elem, mapping, intorder)
+        super(FacetBasis, self).__init__(mesh, elem, mapping)
 
-        self.X, self.W = get_quadrature(self.brefdom, self.intorder)
+        if quadrature is not None:
+            self.X, self.W = quadrature
+        else:
+            self.X, self.W = get_quadrature(
+                self.brefdom,
+                intorder if intorder is not None else 2 * self.elem.maxdeg
+            )
 
         # facets where the basis is evaluated
         if facets is None:
             if side is None:
                 self.find = np.nonzero(self.mesh.f2t[1] == -1)[0]
                 self.tind = self.mesh.f2t[0, self.find]
-            elif side == 0 or side == 1:
+            elif hasattr(self.mapping, 'helper_to_orig') and side in [0, 1]:
+                self.mapping.side = side # side effect
+                self.find = self.mapping.helper_to_orig[side]
+                self.tind = self.mesh.f2t[0, self.find]
+            elif side in [0, 1]:
                 self.find = np.nonzero(self.mesh.f2t[1] != -1)[0]
                 self.tind = self.mesh.f2t[side, self.find]
             else:
@@ -86,19 +83,14 @@ class FacetBasis(Basis):
         # global facet to refdom facet
         Y = self.mapping.invF(x, tind=self.tind)
 
-        if hasattr(mesh, 'normals'):
-            self.normals = np.repeat(mesh.normals[:, :, None],
-                                     len(self.W),
-                                     axis=2)
-        else:
-            # construct normal vectors from side=0 always
-            Y0 = self.mapping.invF(x, tind=self.mesh.f2t[0, self.find])
-            self.normals = self.mapping.normals(Y0,
-                                                self.mesh.f2t[0, self.find],
-                                                self.find,
-                                                self.mesh.t2f)
-
-        self.normals = DiscreteField(self.normals)
+        # construct normal vectors from side=0 always
+        Y0 = self.mapping.invF(x, tind=self.mesh.f2t[0, self.find])
+        self.normals = DiscreteField(
+            value = self.mapping.normals(Y0,
+                                         self.mesh.f2t[0, self.find],
+                                         self.find,
+                                         self.mesh.t2f)
+        )
 
         self.nelems = len(self.find)
 

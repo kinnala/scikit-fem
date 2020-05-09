@@ -24,8 +24,8 @@ class TestEx03(TestCase):
 class TestEx04(TestCase):
     def runTest(self):
         import docs.examples.ex04 as ex04
-        self.assertAlmostEqual(np.max(ex04.vonmises1), 64.57919892367978)
-        self.assertAlmostEqual(np.max(ex04.vonmises2), 67.91419753783893)
+        self.assertAlmostEqual(np.max(ex04.vonmises1), 64.57919816083539)
+        self.assertAlmostEqual(np.max(ex04.vonmises2), 67.91419767505899)
 
 
 class TestEx05(TestCase):
@@ -143,7 +143,7 @@ class TestEx21(TestCase):
         x = ex.x
         K = ex.K
         L = ex.L[0]
-        self.assertAlmostEqual(L, 40085.40062937357, 4)
+        self.assertAlmostEqual(L, 50194.94436851986, 4)
         self.assertAlmostEqual(L, x[:, 0].T @ K @ x[:, 0], 4)
 
 
@@ -184,8 +184,8 @@ class TestEx27(TestCase):
    def runTest(self):
       import docs.examples.ex27 as ex
       _, psi = ex.psi.popitem()
-      self.assertAlmostEqual(min(psi), -0.02704307069920056)
-      self.assertAlmostEqual(max(psi), 0.6668969079018402)
+      self.assertAlmostEqual(min(psi), -0.027043, delta=1e-6)
+      self.assertAlmostEqual(max(psi), 0.6668, delta=1e-5)
 
 
 class TestEx28(TestCase):
@@ -215,6 +215,27 @@ class TestEx31(TestCase):
     def runTest(self):
         from docs.examples.ex31 import L
         self.assertAlmostEqual(L[0], 22.597202568397734, delta=1e-6)
+
+
+class TestEx32(TestCase):
+
+    def runTest(self):
+        from docs.examples.ex32 import l2error_p
+        self.assertLess(l2error_p, 3e-7)
+
+
+class TestEx33(TestCase):
+
+    def runTest(self):
+        from docs.examples.ex33 import x
+        self.assertAlmostEqual(np.max(x), 0.1240571191753624, delta=1e-8)
+
+
+class TestEx34(TestCase):
+
+    def runTest(self):
+        from docs.examples.ex34 import err
+        self.assertAlmostEqual(err, 0., delta=1e-13)
 
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 import warnings
 from typing import List, Optional, NamedTuple,\
     Any, Tuple, Dict,\
-    TypeVar
+    TypeVar, Union
 
 import numpy as np
 from numpy import ndarray
@@ -16,25 +16,21 @@ BasisType = TypeVar('BasisType', bound='Basis')
 
 
 class Basis:
-    """The finite element basis is evaluated at global quadrature points
-    and cached inside this object.
+    """Finite element basis at global quadrature points.
 
     Please see the following implementations:
 
     - :class:`~skfem.assembly.InteriorBasis`, basis functions inside elements
     - :class:`~skfem.assembly.FacetBasis`, basis functions on element boundaries
-    - :class:`~skfem.assembly.MortarBasis`, basis functions on mortar interfaces
 
     """
 
     N: int = 0
     dofnames: List[str] = []
 
-    def __init__(self, mesh, elem, mapping, intorder):
-        if mapping is None:
-            self.mapping = mesh.mapping()
-        else:
-            self.mapping = mapping
+    def __init__(self, mesh, elem, mapping=None):
+
+        self.mapping = mesh.mapping() if mapping is None else mapping
 
         self._build_dofnum(mesh, elem)
 
@@ -45,7 +41,8 @@ class Basis:
         self.dofnames = elem.dofnames
 
         # global degree-of-freedom location
-        if hasattr(elem, 'doflocs'):
+        # disabled for MappingMortar by checking mapping.maps
+        if hasattr(elem, 'doflocs') and not hasattr(mapping, 'maps'):
             doflocs = self.mapping.F(elem.doflocs.T)
             self.doflocs = np.zeros((doflocs.shape[0], self.N))
 
@@ -60,12 +57,7 @@ class Basis:
 
         self.Nbfun = self.element_dofs.shape[0]
 
-        if intorder is None:
-            self.intorder = 2 * self.elem.maxdeg
-        else:
-            self.intorder = intorder
-
-        self.nelems = None # subclasses should overwrite
+        self.nelems = None  # subclasses should overwrite
 
         self.refdom = mesh.refdom
         self.brefdom = mesh.brefdom
@@ -146,63 +138,93 @@ class Basis:
                   facets: ndarray,
                   skip: List[str] = []):
         """Return :class:`skfem.assembly.Dofs` corresponding to facets."""
-        nodal_ix = np.unique(self.mesh.facets[:, facets].flatten())
+        m = self.mesh
+        nodal_ix = np.unique(m.facets[:, facets].flatten())
         facet_ix = facets
-        edge_ix = np.intersect1d(
-            self.mesh.boundary_edges(),
-            np.unique(self.mesh.t2e[:, self.mesh.f2t[0, facets]].flatten())
-        ) if self.mesh.dim() == 3 else []
+
+        if m.dim() == 3:
+            edge_candidates = m.t2e[:, m.f2t[0, facets]].flatten()
+            # subset of edges that share all points with the given facets
+            subset_ix = np.nonzero(
+                np.prod(np.isin(m.edges[:, edge_candidates],
+                                m.facets[:, facets].flatten()),
+                        axis=0)
+            )[0]
+            edge_ix = np.intersect1d(
+                m.boundary_edges(),
+                edge_candidates[subset_ix]
+            )
+        else:
+            edge_ix = []
 
         n_nodal = self.nodal_dofs.shape[0]
         n_facet = self.facet_dofs.shape[0]
         n_edge = self.edge_dofs.shape[0]
 
         # group dofs based on 'dofnames' on different topological entities
-        nodals = {self.dofnames[i]: np.zeros((0, len(nodal_ix)), dtype=np.int64)
-                  for i in range(n_nodal) if self.dofnames[i] not in skip}
+        nodals = {
+            self.dofnames[i]: np.zeros((0, len(nodal_ix)), dtype=np.int64)
+            for i in range(n_nodal) if self.dofnames[i] not in skip
+        }
         for i in range(n_nodal):
             if self.dofnames[i] not in skip:
                 nodals[self.dofnames[i]] =\
                     np.vstack((nodals[self.dofnames[i]],
                                self.nodal_dofs[i, nodal_ix]))
+        off = n_nodal
 
-        facets = {self.dofnames[i + n_nodal]: np.zeros((0, len(facet_ix)), dtype=np.int64)
-                  for i in range(n_facet) if self.dofnames[i + n_nodal] not in skip}
+        facets = {
+            self.dofnames[i + off]: np.zeros((0, len(facet_ix)), dtype=np.int64)
+            for i in range(n_facet) if self.dofnames[i + off] not in skip
+        }
         for i in range(n_facet):
-            if self.dofnames[i + n_nodal] not in skip:
-                facets[self.dofnames[i + n_nodal]] =\
-                    np.vstack((facets[self.dofnames[i + n_nodal]],
+            if self.dofnames[i + off] not in skip:
+                facets[self.dofnames[i + off]] =\
+                    np.vstack((facets[self.dofnames[i + off]],
                                self.facet_dofs[i, facet_ix]))
+        off += n_facet
 
         edges = {
-            self.dofnames[i + n_nodal + n_facet]: np.zeros((0, len(edge_ix)), dtype=np.int64)
-            for i in range(n_edge) if self.dofnames[i + n_nodal + n_facet] not in skip
+            self.dofnames[i + off]: np.zeros((0, len(edge_ix)), dtype=np.int64)
+            for i in range(n_edge) if self.dofnames[i + off] not in skip
         }
         for i in range(n_edge):
-            if self.dofnames[i + n_nodal + n_facet] not in skip:
-                edges[self.dofnames[i + n_nodal + n_facet]] =\
-                    np.vstack((edges[self.dofnames[i + n_nodal + n_facet]],
+            if self.dofnames[i + off] not in skip:
+                edges[self.dofnames[i + off]] =\
+                    np.vstack((edges[self.dofnames[i + off]],
                                self.edge_dofs[i, edge_ix]))
 
-        return Dofs(nodal={k: nodals[k].flatten() for k in nodals},
-                    facet={k: facets[k].flatten() for k in facets},
-                    edge={k: edges[k].flatten() for k in edges})
+        return Dofs(
+            nodal={k: nodals[k].flatten() for k in nodals},
+            facet={k: facets[k].flatten() for k in facets},
+            edge={k: edges[k].flatten() for k in edges}
+        )
 
-    def boundary_dofs(self,
-                      facets: Dict[str, ndarray] = None,
-                      skip: List[str] = []) -> Dict[str, Dofs]:
-        """Return global DOF numbers corresponding to boundary DOF's.
+    def find_dofs(self,
+                  facets: Dict[str, ndarray] = None,
+                  skip: List[str] = []) -> Dict[str, Dofs]:
+        """Return global DOF numbers corresponding to a dictionary of facets.
+
+        Facets can be queried from :class:`~skfem.mesh.Mesh` objects:
+
+        >>> m = MeshTri()
+        >>> m.refine()
+        >>> m.facets_satisfying(lambda x: x[0] == 0)
+        array([1, 5])
+
+        This corresponds to a list of facet indices that can be passed over:
+
+        >>> basis = InteriorBasis(m, ElementTriP1())
+        >>> basis.find_dofs({'left': m.facets_satisfying(lambda x: x[0] == 0)})
+        {'left': Dofs(nodal={'u': array([0, 2, 5])}, facet={}, edge={}, interior={})}
 
         Parameters
         ----------
         facets
-            A dictionary of facet indices. If None, use self.mesh.boundaries
-            if set or use {'all': self.mesh.boundary_facets()}.
-
-        Returns
-        -------
-        Dict[str, Dofs]
-            A dictionary of :class:`skfem.assembly.dofs.Dofs` objects.
+            A dictionary of facet indices. If `None`, use `self.mesh.boundaries`
+            if set or otherwise use `{'all': self.mesh.boundary_facets()}`.
+        skip
+            List of dofnames to skip.
 
         """
         if facets is None:
@@ -213,8 +235,11 @@ class Basis:
 
         return {k: self._get_dofs(facets[k], skip=skip) for k in facets}
 
-    def get_dofs(self, facets: Optional[Any] = None):
-        """Return global DOF numbers corresponding to facets (e.g. boundaries).
+    def get_dofs(self, facets: Optional[Any] = None) -> Any:
+        """Find global DOF numbers.
+
+        Accepts a richer set of types than
+        :meth:`skfem.assembly.basis.Basis.find_dofs`.
 
         Parameters
         ----------
@@ -228,13 +253,10 @@ class Basis:
 
         Returns
         -------
-        Dofs
+        Dofs or Dict[str, Dofs]
             A subset of degrees-of-freedom as :class:`skfem.assembly.dofs.Dofs`.
 
         """
-        warnings.warn(("Removed in the next major release. "
-                       "Use Basis.boundary_dofs instead."), DeprecationWarning)
-
         if facets is None:
             facets = self.mesh.boundary_facets()
         elif callable(facets):
@@ -253,62 +275,84 @@ class Basis:
         parameters for 'w'."""
         raise NotImplementedError("Default parameters not implemented.")
 
-    def interpolate(self, w: ndarray) -> Dict[str, DiscreteField]:
+    def interpolate(self, w: ndarray) -> Union[DiscreteField,
+                                               Tuple[DiscreteField, ...]]:
         """Interpolate a solution vector to quadrature points.
+
+        Useful when a solution vector is needed in the forms, e.g., when
+        evaluating functionals or when solving nonlinear problems.
 
         Parameters
         ----------
         w
             A solution vector.
 
-        Returns
-        -------
-        Dict[str, DiscreteField]
-            The solution vector interpolated at quadrature points.
-            If Basis consist of a single component, the dictionary has
-            a single key 'w'. Otherwise, the keys are 'w^1', 'w^2', ...
-
         """
         if w.shape[0] != self.N:
             raise ValueError("Input array has wrong size.")
 
         refs = self.basis[0]
-        dfs: Dict[str, DiscreteField] = {}
+        dfs: List[DiscreteField] = []
 
         # loop over solution components
-        for l in range(len(refs)):
-            ref = refs[l]
+        for c in range(len(refs)):
+            ref = refs[c]
             fs = []
 
-            def linear_combination(n):
+            def linear_combination(n, refn):
                 """Global discrete function at quadrature points."""
-                out = 0. * ref[n].copy()
+                out = 0. * refn.copy()
                 for i in range(self.Nbfun):
                     values = w[self.element_dofs[i]][:, None]
-                    if len(ref[n].shape) == 2:  # values
-                        out += values * self.basis[i][l][n]
-                    elif len(ref[n].shape) == 3:  # derivatives
+                    if len(refn.shape) == 2:  # values
+                        out += values * self.basis[i][c][n]
+                    elif len(refn.shape) == 3:  # derivatives
                         for j in range(out.shape[0]):
-                            out[j, :, :] += values * self.basis[i][l][n][j]
-                    elif len(ref[n].shape) == 4:  # second derivatives
+                            out[j, :, :] += values * self.basis[i][c][n][j]
+                    elif len(refn.shape) == 4:  # second derivatives
                         for j in range(out.shape[0]):
                             for k in range(out.shape[1]):
                                 out[j, k, :, :] += \
-                                    values * self.basis[i][l][n][j, k]
+                                    values * self.basis[i][c][n][j, k]
+                    elif len(refn.shape) == 5:  # third derivatives
+                        #import pdb; pdb.set_trace()
+                        for j in range(out.shape[0]):
+                            for k in range(out.shape[1]):
+                                for l in range(out.shape[2]):
+                                    out[j, k, l, :, :] += \
+                                        values * self.basis[i][c][-1][n][j, k, l]
+                    elif len(refn.shape) == 6:  # fourth derivatives
+                        for j in range(out.shape[0]):
+                            for k in range(out.shape[1]):
+                                for l in range(out.shape[2]):
+                                    for m in range(out.shape[3]):
+                                        out[j, k, l, m, :, :] += \
+                                            values *\
+                                            self.basis[i][c][-1][n][j, k, l, m]
+                    else:
+                        raise ValueError("The requested order of "
+                                         "derivatives not supported.")
                 return out
 
-            # interpolate n'th derivatives
-            for n in range(len(ref)):
+            # interpolate first and second derivatives
+            for n in range(len(ref) - 1):
                 if ref[n] is not None:
-                    fs.append(linear_combination(n))
+                    fs.append(linear_combination(n, ref[n]))
                 else:
                     fs.append(None)
 
-            # give names for the interpolated fields
-            key = 'w' if len(refs) == 1 else 'w^' + str(l + 1)
-            dfs[key] = DiscreteField(*fs)
+            # interpolate high-order derivatives
+            fs.append([])
 
-        return dfs
+            if ref[-1] is not None:
+                for n in range(len(ref[-1])):
+                    fs[-1].append(linear_combination(n, ref[-1][n]))
+
+            dfs.append(DiscreteField(*fs))
+
+        if len(dfs) > 1:
+            return tuple(dfs)
+        return dfs[0]
 
     def split_indices(self) -> List[ndarray]:
         """Return indices for the solution components."""
@@ -333,12 +377,17 @@ class Basis:
     def split_bases(self) -> List[BasisType]:
         """Return Basis objects for the solution components."""
         if isinstance(self.elem, ElementComposite):
-            return [type(self)(self.mesh, e, self.mapping, self.intorder)
+            return [type(self)(self.mesh, e, self.mapping,
+                               quadrature=self.quadrature)
                     for e in self.elem.elems]
         raise ValueError("Basis.elem has only a single component!")
 
+    @property
+    def quadrature(self):
+        return self.X, self.W
+
     def split(self, x: ndarray) -> List[Tuple[ndarray, BasisType]]:
-        """Split solution vector into components."""
+        """Split a solution vector into components."""
         xs = [x[ix] for ix in self.split_indices()]
         return list(zip(xs, self.split_bases()))
 

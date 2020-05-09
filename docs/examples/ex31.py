@@ -1,3 +1,14 @@
+"""Curved elements.
+
+This example solves the eigenvalue problem
+
+.. math::
+   -\Delta u = \lambda u \quad \text{in $\Omega$},
+with the boundary condition :math:`u|_{\partial \Omega} = 0` using isoparametric
+mapping via biquadratic basis and finite element approximation using fifth-order
+quadrilaterals.
+
+"""
 from skfem import *
 from skfem.models.poisson import laplace, mass
 import numpy as np
@@ -29,7 +40,7 @@ basis = InteriorBasis(m, e, mapping)
 A = asm(laplace, basis)
 M = asm(mass, basis)
 
-L, x = solve(*condense(A, M, D=basis.boundary_dofs()), k=8)
+L, x = solve(*condense(A, M, D=basis.find_dofs()), k=8)
 
 
 if __name__ == '__main__':

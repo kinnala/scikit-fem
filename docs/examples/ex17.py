@@ -1,3 +1,32 @@
+"""Insulated wire.
+
+.. note::
+   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_.
+
+This example solves the steady heat conduction
+with generation in an insulated wire. In radial
+coordinates, the governing equations read: find :math:`T`
+satisfying
+
+.. math::
+   \nabla \cdot (k_0 \nabla T) + A = 0, \quad 0<r<a,
+and
+
+.. math::
+   \nabla \cdot (k_1 \nabla T) = 0, \quad a<r<b,
+with the boundary condition
+
+.. math::
+   k_1 \frac{\partial T}{\partial r} + h T = 0, \quad \text{on $r=b$}.
+The parameter values are :math:`k_0 = 101`, :math:`k_1 = 11`, :math:`A = 5`,
+:math:`h = 7`, and the geometry is defined as :math:`a=2` and :math:`b=3`.
+
+For comparison purposes, the exact solution at the origin is
+
+.. math::
+   T(r=0) = \frac{A b^2}{4 k_0} \left( \frac{2k_0}{bh} + \frac{2 k_0}{k_1} \log \frac{b}{a} + 1\right).
+
+"""
 from typing import Optional
 
 import numpy as np
@@ -6,7 +35,8 @@ from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
 
 from skfem import *
-from skfem.models.poisson import mass
+from skfem.helpers import dot, grad
+from skfem.models.poisson import mass, unit_load
 from skfem.io import from_meshio
 
 radii = [2., 3.]
@@ -37,9 +67,9 @@ def make_mesh(a: float,         # radius of wire
 mesh = make_mesh(*radii)
 
 
-@bilinear_form
-def conduction(u, du, v, dv, w):
-    return w.w * sum(du * dv)
+@BilinearForm
+def conduction(u, v, w):
+    return dot(w.w * grad(u), grad(v))
 
 
 convection = mass
@@ -56,15 +86,8 @@ L = asm(conduction, basis, w=conductivity)
 facet_basis = FacetBasis(mesh, element, facets=mesh.boundaries['convection'])
 H = heat_transfer_coefficient * asm(convection, facet_basis)
 
-
-@linear_form
-def generation(v, dv, w):
-    return w.w * v
-
-
-heated = basis.zero_w()
-heated[mesh.subdomains['wire']] = 1.
-f = joule_heating * asm(generation, basis, w=heated)
+wire_basis = InteriorBasis(mesh, basis.elem, elements=mesh.subdomains['wire'])
+f = joule_heating * asm(unit_load, wire_basis)
 
 temperature = solve(L + H, f)
 

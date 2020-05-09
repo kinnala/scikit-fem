@@ -1,3 +1,28 @@
+"""Laplace with mixed boundary conditions.
+
+.. note::
+
+   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_.
+
+This example is another extension of `ex01.py`, still solving the Laplace
+equation but now with mixed boundary conditions, two parts isopotential (charged
+and earthed) and the rest insulated. The isopotential parts are tagged during
+the construction of the geometry in `pygmsh
+<https://pypi.org/project/pygmsh/>`_.
+
+The example is :math:`\Delta u = 0` in
+:math:`\Omega=\{(x,y):1<x^2+y^2<4,~0<\theta<\pi/2\}`, where :math:`\tan \theta =
+y/x`, with :math:`u = 0` on :math:`y = 0` and :math:`u = 1` on :math:`x =
+0`. Although these boundaries would be simple enough to identify using the
+coordinates and :meth:`skfem.assembly.Basis.find_dofs`, the present
+technique generalizes to more complicated shapes.
+
+The exact solution is :math:`u = 2 \theta / \pi`. The field strength is :math:`|\nabla u|^2 = 4 / \pi^2 (x^2 + y^2)`
+so the conductance (for unit potential difference and conductivity) is
+:math:`\|\nabla u\|^2 = 2 \ln 2 / \pi`.
+
+"""
+
 from skfem import *
 from skfem.models.poisson import laplace, mass
 from skfem.io import from_meshio
@@ -31,7 +56,7 @@ elements = ElementTriP2()
 basis = InteriorBasis(mesh, elements)
 A = asm(laplace, basis)
 
-boundary_dofs = basis.get_dofs(mesh.boundaries)
+boundary_dofs = basis.find_dofs()
 interior_dofs = basis.complement_dofs(boundary_dofs)
 
 u = np.zeros(basis.N)
@@ -46,9 +71,10 @@ conductance = {'skfem': u @ A @ u,
                'exact': 2 * np.log(2) / np.pi}
 
 
-@functional
+@Functional
 def port_flux(w):
-    return sum(w.n * w.dw)
+    from skfem.helpers import dot, grad
+    return dot(w.n, grad(w['w']))
 
 
 current = {}

@@ -1,4 +1,62 @@
+"""Conjugate heat transfer.
+
+.. note::
+   This example requires the external package
+   `pygmsh <https://pypi.org/project/pygmsh/>`_.
+
+The forced convection example can be extended to conjugate heat transfer by
+giving a finite thickness and thermal conductivity to one of the walls.
+
+The example is modified to a configuration for which there is a fully developed
+solution which can be found in closed form: given a uniform (but possibly
+different) heat flux over each of the walls, the temperature field
+asymptotically is the superposition of a uniform longitudinal gradient and a
+transverse profile; here the analysis of a pipe of circular section (Bird,
+Stewart, & Lightfoot 1960, §3–13) is modified for a planar duct (Mallinson,
+McBain, & Brown 2019).  The two-dimensional equation in the fluid :math:`-1 < y
+< 1`
+
+.. math::
+   \mathrm{Pe} \left(1 - y^2\right) \frac{\partial T}{\partial x} =
+   \nabla^2 T, \qquad (-1 < y < 1)
+has the exact solution
+
+.. math::
+   T(x, y) = \frac{3x}{4\mathrm{Pe}} - \frac{(5-y^2)(1-y^2)}{16} - \frac{y}{2}.
+Here Pe is the dimensionless Péclet number based on the centreline-velocity and channel half-height.
+
+The governing equation in the solid is :math:`\nabla \cdot k\nabla T = 0` where
+:math:`k` the ratio of the thermal conductivity to that of the fluid.  This has
+the exact solution matching that in the fluid along the interface
+:math:`y = -1` is:
+
+.. math::
+   T (x, y) = \frac{3x}{4\mathrm{Pe}} +  \frac{1}{2} - \frac{1+y}{k},
+   \qquad (y < -1)
+
+This combined fully developed solution applies throughout the entire domain if
+it is specified along the fluid and solid inlet :math:`x = 0`, if the ceiling
+is insulated :math:`\partial T/\partial y = 0` on :math:`y = 1`, if the floor
+is uniformly heated :math:`k\partial t/\partial y = 1` on :math:`y = -2`, and
+if the longitudinal gradient is applied as a uniform Neumann condition on the
+outlet, :math:`k\partial T/\partial x = 3k/4\mathrm{Pe}` on :math:`x = \ell`.
+
+In conjugate heat transfer, part of the domain is advection–conduction while the
+rest is pure conduction; the main difficulty is specifying different governing
+equations on different subdomains.  One way to do this has already been
+demonstrated: :ref:`subdomain` by only assembling the operator over a basis
+restricted to the elements belonging to a particular subdomain.
+
+* Bird, R. B., W. E. Stewart, & E. N. Lightfoot (1960). Transport Phenomena. New York: Wiley
+* Mallinson, S. G., McBain, G. D. & Brown, B. R. (2019). `Conjugate
+  heat transfer in thermal inkjet printheads
+  <https://www.researchgate.net/publication/334028691_Conjugate_Heat_Transfer_in_Thermal_Inkjet_Printheads>`_.
+  14th International Conference on Heat Transfer, Fluid Mechanics and
+  Thermodynamics, Wicklow, Ireland.
+
+"""
 from skfem import *
+from skfem.helpers import grad, dot
 from skfem.io import from_meshio
 from skfem.models.poisson import unit_load
 
@@ -71,16 +129,15 @@ basis = {
        for label in ['heated', 'fluid-outlet', 'solid-outlet']}}
 
 
-@bilinear_form
-def conduction(u, du, v, dv, w):
-    return w.w * sum(du * dv)
+@BilinearForm
+def conduction(u, v, w):
+    return dot(w['w'] * grad(u), grad(v))
 
 
-@bilinear_form
-def advection(u, du, v, dv, w):
-    _, y = w.x
-    velocity_x = 1 - (y / halfheight)**2  # plane Poiseuille
-    return v * velocity_x * du[0]
+@BilinearForm
+def advection(u, v, w):
+    velocity_x = 1 - (w.x[1] / halfheight)**2  # plane Poiseuille
+    return v * velocity_x * grad(u)[0]
 
 
 conductivity = basis['heat'].zero_w() + 1
@@ -95,7 +152,7 @@ b = (asm(unit_load, basis['heated'])
      * (asm(unit_load, basis['fluid-outlet'])
         + kratio * asm(unit_load, basis['solid-outlet'])))
 
-D = basis['heat'].get_dofs(
+D = basis['heat'].find_dofs(
     {label: boundary for
      label, boundary in mesh.boundaries.items()
      if label.endswith('-inlet')})
@@ -108,19 +165,20 @@ def exact(x: np.ndarray, y: np.ndarray) -> np.ndarray:
                     - (5 - y**2) * (1 - y**2) / 16 - y / 2,
                     1 / 2 - (1 + y) / kratio) + longitudinal_gradient * x
 
+
 temperature = np.zeros(basis['heat'].N)
 inlet_dofs = basis['heat'].complement_dofs(I)
 temperature[inlet_dofs] = exact(*mesh.p[:, inlet_dofs])
 
 temperature = solve(*condense(A, b, temperature, I=I))
 
-dofs = {label: basis['heat'].get_dofs(facets).all()
-        for label, facets in mesh.boundaries.items()
-        if label.endswith('let')}
+dofs = basis['heat'].find_dofs(
+    {label: facets for label, facets in mesh.boundaries.items()
+    if label.endswith('let')})
 
 exit_interface_temperature = {
-    'skfem': temperature[np.intersect1d(dofs['fluid-outlet'],
-                                        dofs['solid-outlet'])[0]],
+    'skfem': temperature[np.intersect1d(dofs['fluid-outlet'].all(),
+                                        dofs['solid-outlet'].all())[0]],
     'exact': exact(length, -1.)
 }
 
@@ -134,8 +192,8 @@ if __name__ == '__main__':
 
     fig, ax = subplots()
     ax.set_title('transverse temperature profiles')
-    
-    y = {label: mesh.p[1, d] for label, d in dofs.items()}
+
+    y = {label: mesh.p[1, d.nodal['u']] for label, d in dofs.items()}
     ii = {label: np.argsort(yy) for label, yy in y.items()}
 
     y['exact'] = np.linspace(min(y['solid-inlet']),

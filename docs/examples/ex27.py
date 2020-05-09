@@ -1,4 +1,52 @@
+r""".. warning::
+   This example requires the external packages `pygmsh <https://pypi.org/project/pygmsh/>`_ and `pacopy <https://pypi.org/project/pacopy/>`_.
+
+
+In this example, `pacopy <https://pypi.org/project/pacopy/>`_ is used to extend
+the Stokes equations over a backward-facing step to finite Reynolds
+number; this means defining a residual for the nonlinear problem and its
+derivatives with respect to the solution and to the parameter (here Reynolds
+number).
+
+Compared to the `Stokes equations
+<https://en.wikipedia.org/wiki/Stokes_flow#Incompressible_flow_of_Newtonian_fluids>`_,
+the Navier-Stokes equation has an additional term.  This term appears
+multiplied by the Reynolds number if the problem is nondimensionalized using a
+characteristic length (the height of the step) and velocity (the average over
+the inlet).  Thus, Reynold number serves as a convenient parameter for
+numerical continuation.  The nondimensionalized, time-independent Navier-Stokes
+equations read
+
+.. math::
+   \left\{
+   \begin{aligned}
+     -\Delta \boldsymbol{u} + \nabla p - \mathrm{Re}\,(\nabla\boldsymbol{u})\boldsymbol{u} &= \boldsymbol{0},\\
+     \nabla\cdot\boldsymbol{u} &= 0,
+   \end{aligned}
+   \right.
+where :math:`\boldsymbol{u}` is the velocity field, :math:`p` is the pressure
+field and :math:`\mathrm{Re} > 0` is the Reynolds number.  The weak formulation
+reads
+
+.. math::
+   \begin{aligned}
+    &\int_\Omega \nabla\boldsymbol{u} : \nabla\boldsymbol{v}\,\mathrm{d}x - \int_{\Omega} \nabla\cdot\boldsymbol{v} \,p \,\mathrm{d}x
+   \\
+    &\qquad+ \int_{\Omega} \nabla\cdot\boldsymbol{u} \,q \,\mathrm{d}x - \mathrm{Re} \int_{\Omega} (\nabla\boldsymbol{u})\boldsymbol{u} \cdot \boldsymbol{v}\,\mathrm{d}x = 0,
+   \end{aligned}
+where :math:`\Omega` is the fluid domain and :math:`(\boldsymbol{v}, q)` are
+test functions.
+The Jacobian of the last nonlinear term is
+
+.. math::
+   -\mathrm{Re} \int_\Omega ((\nabla \delta \boldsymbol{u}) \boldsymbol{u} + (\nabla \boldsymbol{u}) \delta \boldsymbol{u}) \cdot \boldsymbol{v} \,\mathrm{d}x.
+
+The full source code of the example reads as follows:
+
+.. literalinclude:: examples/ex27.py
+    :start-after: EOF"""
 from skfem import *
+from skfem.helpers import grad, dot
 from skfem.models.poisson import vector_laplace, laplace
 from skfem.models.general import divergence, rot
 from skfem.io import from_meshio
@@ -19,8 +67,8 @@ from pygmsh.built_in import Geometry
 from pacopy import natural
 
 
-@linear_form
-def acceleration(v, dv, w):
+@LinearForm
+def acceleration(v, w):
     """Compute the vector (v, u . grad u) for given velocity u
 
     passed in via w after having been interpolated onto its quadrature
@@ -33,12 +81,12 @@ def acceleration(v, dv, w):
         u_j u_{i,j} v_i.
 
     """
-    u, du = w.w, w.dw
-    return sum(np.einsum('j...,ij...->i...', u, du) * v)
+    u = w['w']
+    return np.einsum('j...,ij...,i...', u, grad(u), v)
 
 
-@bilinear_form
-def acceleration_jacobian(u, du, v, dv, w):
+@BilinearForm
+def acceleration_jacobian(u, v, w):
     """Compute (v, w . grad u + u . grad w) for given velocity w
 
     passed in via w after having been interpolated onto its quadrature
@@ -51,8 +99,8 @@ def acceleration_jacobian(u, du, v, dv, w):
        (w_j du_{i,j} + u_j dw_{i,j}) v_i
 
     """
-    return sum((np.einsum('j...,ij...->i...', w.w, du)
-                + np.einsum('j...,ij...->i...', u, w.dw)) * v)
+    return dot(np.einsum('j...,ij...->i...', w['w'], grad(u))
+               + np.einsum('j...,ij...->i...', u, grad(w['w'])), v)
 
 
 class BackwardFacingStep:
@@ -70,9 +118,8 @@ class BackwardFacingStep:
         self.basis['inlet'] = FacetBasis(self.mesh, self.element['u'],
                                          facets=self.mesh.boundaries['inlet'])
         self.basis['psi'] = InteriorBasis(self.mesh, ElementTriP2())
-        self.D = np.setdiff1d(
-            self.basis['u'].get_dofs().all(),
-            self.basis['u'].get_dofs(self.mesh.boundaries['outlet']).all())
+        del self.mesh.boundaries['outlet']
+        self.D = np.concatenate([b.all() for b in self.basis['u'].find_dofs().values()])
 
         A = asm(vector_laplace, self.basis['u'])
         B = asm(divergence, self.basis['u'], self.basis['p'])
@@ -115,15 +162,12 @@ class BackwardFacingStep:
         return from_meshio(generate_mesh(geom, dim=2))
 
     def inlet_dofs(self):
-        inlet_dofs_ = self.basis['inlet'].get_dofs(
-            self.mesh.boundaries['inlet'])
-        return np.concatenate([inlet_dofs_.nodal[f'u^{1}'],
-                               inlet_dofs_.facet[f'u^{1}']])
+        return self.basis['inlet'].find_dofs()['inlet'].all()
 
     @staticmethod
     def parabolic(x, y):
         """return the plane Poiseuille parabolic inlet profile"""
-        return ((4 * y * (1. - y), np.zeros_like(y)))
+        return 4 * y * (1. - y), np.zeros_like(y)
 
     def make_vector(self):
         """prepopulate solution vector with Dirichlet conditions"""
@@ -140,12 +184,10 @@ class BackwardFacingStep:
     def streamfunction(self, velocity: np.ndarray) -> np.ndarray:
         A = asm(laplace, self.basis['psi'])
         psi = np.zeros(self.basis['psi'].N)
-        D = self.basis['psi'].get_dofs(self.mesh.boundaries['floor']).all()
-        I = self.basis['psi'].complement_dofs(D)
         vorticity = asm(rot, self.basis['psi'],
                         w=[self.basis['psi'].interpolate(velocity[i::2])
                            for i in range(2)])
-        psi = solve(*condense(A, vorticity, I=I))
+        psi = solve(*condense(A, vorticity, D=self.basis['psi'].find_dofs()['floor'].all()))
         return psi
 
     def mesh_plot(self):

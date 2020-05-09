@@ -1,3 +1,31 @@
+"""Restricting a problem to a subdomain.
+
+.. note::
+   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_.
+
+The `ex17.py` example solved the steady-state heat equation with uniform
+volumetric heating in a central wire surrounded by an annular insulating layer
+of lower thermal conductivity.  Here, the problem is completely restricted to
+the wire, taking the temperature as zero throughout the annulus.
+
+Thus the problem reduces to the same Poisson equation with uniform forcing and
+homogeneous Dirichlet conditions:
+
+.. math::
+   \nabla\cdot(k\nabla T) + A  = 0, \qquad 0 < r < a
+with
+
+.. math::
+   T = 0, \qquad\text{on}\quad r = a.
+The exact solution is
+
+.. math::
+   T = \frac{s}{4k}(a^2 - r^2).
+
+The novelty here is that the temperature is defined as a finite element function
+throughout the mesh (:math:`r < b`) but only solved on a subdomain.
+
+"""
 from skfem import *
 from skfem.models.poisson import laplace, unit_load
 

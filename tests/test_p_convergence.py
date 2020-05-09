@@ -35,7 +35,7 @@ class ConvergenceLinePp(unittest.TestCase):
             A = asm(laplace, ib)
             b = asm(load, ib)
 
-            D = ib.boundary_dofs()
+            D = ib.find_dofs()
 
             x = solve(*condense(A, b, D=D))
 
@@ -46,7 +46,7 @@ class ConvergenceLinePp(unittest.TestCase):
         self.assertLess(L2s[-1], 1e-13)
 
     def compute_error(self, m, basis, U):
-        uh, duh, *_ = basis.interpolate(U)['w']
+        uh, duh, *_ = basis.interpolate(U)
         dx = basis.dx
         x = basis.global_coordinates()
 
@@ -95,7 +95,7 @@ class ConvergenceQuadP(unittest.TestCase):
             A = asm(laplace, ib)
             b = asm(load, ib)
 
-            D = ib.boundary_dofs()
+            D = ib.find_dofs()
 
             x = solve(*condense(A, b, D=D))
 
@@ -106,7 +106,7 @@ class ConvergenceQuadP(unittest.TestCase):
         self.assertLess(L2s[-1], 1e-11)
 
     def compute_error(self, m, basis, U):
-        uh, duh, *_ = basis.interpolate(U)['w']
+        uh, duh, *_ = basis.interpolate(U)
         dx = basis.dx
         x = basis.global_coordinates()
 

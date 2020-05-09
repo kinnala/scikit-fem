@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 import numpy as np
+from numpy.testing import assert_allclose
 
 from skfem import *
 
@@ -25,7 +26,7 @@ class TestCompositeSplitting(TestCase):
         self.assertEqual(
             basis.get_dofs(m.boundaries['centreline']).all().size,
             (2 + 1) * (2**(1 + 3) + 1) + 2 * 2**(1 + 3))
-        self.assertEqual(basis.boundary_dofs()['centreline'].all().size,
+        self.assertEqual(basis.find_dofs()['centreline'].all().size,
                          (2 + 1) * (2**(1 + 3) + 1) + 2 * 2**(1 + 3))
 
         
@@ -37,7 +38,7 @@ class TestCompositeSplitting(TestCase):
 
         S = asm(bilinf, basis)
 
-        D = basis.boundary_dofs(skip=['u^2'])
+        D = basis.find_dofs(skip=['u^2'])
         x = basis.zeros()
         x[D['up'].all('u^1^1')] = .1
 
@@ -50,8 +51,24 @@ class TestCompositeSplitting(TestCase):
 
         self.assertTrue(np.sum(p - x[basis.nodal_dofs[2]]) < 1e-8)
 
-        y = basis.interpolate(x)
-        self.assertTrue('w^1' in y)
-        self.assertTrue('w^2' in y)
+        U, P = basis.interpolate(x)
+        self.assertTrue(isinstance(U.value, np.ndarray))
+        self.assertTrue(isinstance(P.value, np.ndarray))
 
         self.assertTrue((basis.doflocs[:, D['up'].all()][1] == 1.).all())
+
+
+class TestFacetExpansion(TestCase):
+
+    def runTest(self):
+
+        m = MeshTet()
+
+        basis = InteriorBasis(m, ElementTetP2())
+
+        arr1 = basis.find_dofs({
+            'kek':m.facets_satisfying(lambda x: x[0] == 0)
+        })['kek'].edge['u']
+        arr2 = basis.edge_dofs[:, m.edges_satisfying(lambda x: x[0] == 0)]
+
+        assert_allclose(arr1, arr2.flatten())

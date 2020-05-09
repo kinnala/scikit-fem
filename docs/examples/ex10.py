@@ -1,20 +1,28 @@
+"""Nonlinear Poisson equation.
+
+This example solves the nonlinear minimal surface problem using Newton's method.
+
+"""
+
 from skfem import *
+from skfem.helpers import grad, dot, trace
 import numpy as np
 
 m = MeshTri()
 m.refine(5)
 
-@bilinear_form
-def jacobian(u, du, v, dv, w):
-    w, dw = w.w, w.dw
-    return 1.0/np.sqrt(1.0 + dw[0]**2 + dw[1]**2)*(du[0]*dv[0] + du[1]*dv[1])\
-           -(2.0*du[1]*dw[1] + 2.0*du[0]*dw[0])*(dw[1]*dv[1] + dw[0]*dv[0])\
-           /(2.0*(1 + dw[1]**2 + dw[0]**2)**(3./2.))
 
-@linear_form
-def rhs(v, dv, w):
-    w, dw = w.w, w.dw
-    return 1.0/np.sqrt(1.0 + dw[0]**2 + dw[1]**2)*(dw[0]*dv[0] + dw[1]*dv[1])
+@BilinearForm
+def jacobian(u, v, w):
+    return (1 / np.sqrt(1 + dot(grad(w['w']), grad(w['w']))) * dot(grad(u), grad(v))
+            -2 * dot(grad(u), grad(w['w'])) * dot(grad(w['w']), grad(v))
+            / 2 / (1 + dot(grad(w['w']), grad(w['w'])))**(3/2))
+
+
+@LinearForm
+def rhs(v, w):
+    return dot(grad(w['w']), grad(v)) / np.sqrt(1 + dot(grad(w['w']), grad(w['w'])))
+
 
 basis = InteriorBasis(m, ElementTriP1())
 

@@ -1,5 +1,6 @@
-The documentation of scikit-fem
-===============================
+=================================
+ The documentation of scikit-fem
+=================================
 
 `scikit-fem <https://github.com/kinnala/scikit-fem>`_ is a lightweight Python 3.6+
 library for performing `finite element assembly
@@ -8,16 +9,23 @@ the transformation of bilinear forms into sparse matrices and linear forms into
 vectors.  The library supports triangular, quadrilateral, tetrahedral and
 hexahedral meshes as well as one-dimensional problems.
 
-This document contains the efforts to improve the user documentation of the
-project. Currently, the main learning resource consists of the
-examples that are continuously improved. In case you have any further
-questions, do not hesitate to drop in and say hello at our `Gitter chat
-<https://gitter.im/scikit-fem>`_.
+.. note::
+
+    Installing the library is as simple as running
+
+    .. code-block:: bash
+
+        pip install scikit-fem
+
+    Full examples can be found `in the source code distribution <https://github.com/kinnala/scikit-fem/tree/master/docs/examples>`_.
+
+Table of contents
+=================
 
 .. toctree::
-    :maxdepth: 2
 
-    gettingstarted
-    tutorial
-    examples
-    api
+   self
+   overview
+   api
+   example1
+   example2

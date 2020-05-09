@@ -11,46 +11,69 @@ FieldOrArray = Union[DiscreteField, ndarray]
 
 def grad(u: DiscreteField):
     """Gradient."""
-    return u[1]
+    return u.grad
 
-d = grad
+
+def div(u: DiscreteField):
+    """Divergence."""
+    if u.div is not None:
+        return u.div
+    elif u.grad is not None:
+        try:
+            return np.einsum('ii...', u.grad)
+        except ValueError:  # one-dimensional u?
+            return u.grad[0]
+    raise NotImplementedError
+
+
+def curl(u: DiscreteField):
+    """Curl."""
+    if u.curl is not None:
+        return u.curl
+    raise NotImplementedError
+
+
+def d(u: DiscreteField):
+    """Gradient, divergence or curl."""
+    if u.grad is not None:
+        return u.grad
+    elif u.div is not None:
+        return u.div
+    elif u.curl is not None:
+        return u.curl
+    raise NotImplementedError
 
 
 def sym_grad(u: DiscreteField):
     """Symmetric gradient."""
-    return .5 * (u[1] + transpose(u[1]))
+    return .5 * (u.grad + transpose(u.grad))
 
 
-def hess(u: DiscreteField):
-    """Hessian."""
-    return u[2]
-
-dd = hess
-
-def div(u: DiscreteField):
-    """Divergence."""
-    return np.einsum('ii...', grad(u))
+dd = lambda u: u.hess
+ddd = lambda u: u.hod[0]
+dddd = lambda u: u.hod[1]
 
 
 def dot(u: FieldOrArray, v: FieldOrArray):
     """Dot product."""
-    u = u.f if isinstance(u, DiscreteField) else u
-    v = v.f if isinstance(v, DiscreteField) else v
     return np.einsum('i...,i...', u, v)
 
 
 def ddot(u: FieldOrArray, v: FieldOrArray):
     """Double dot product."""
-    u = u.f if isinstance(u, DiscreteField) else u
-    v = v.f if isinstance(v, DiscreteField) else v
     return np.einsum('ij...,ij...', u, v)
 
 
-def prod(u: FieldOrArray, v: FieldOrArray):
+def dddot(u: FieldOrArray, v: FieldOrArray):
+    """Triple dot product."""
+    return np.einsum('ijk...,ijk...', u, v)
+
+
+def prod(u: FieldOrArray, v: FieldOrArray, w: FieldOrArray = None):
     """Tensor product."""
-    u = u.f if isinstance(u, DiscreteField) else u
-    v = v.f if isinstance(v, DiscreteField) else v
-    return np.einsum('i...,j...->ij...', u, v)
+    if w is None:
+        return np.einsum('i...,j...->ij...', u, v)
+    return np.einsum('i...,j...,k...->ijk...', u, v, w)
 
 
 def trace(T):

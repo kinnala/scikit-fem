@@ -1,6 +1,6 @@
 import unittest
 from skfem import *
-from skfem.models.helpers import *
+from skfem.helpers import *
 
 
 class ConvergenceMorley(unittest.TestCase):
@@ -47,6 +47,9 @@ class ConvergenceMorley(unittest.TestCase):
             K = asm(bilinf, ib)
             f = asm(linf, ib)
 
+            # TODO fix boundary conditions
+            # u_x should be zero on top/bottom
+            # u_y should be zero on left/right
             x = solve(*condense(K, f, D=ib.get_dofs().all('u')))
 
             X = ib.interpolate(x)
@@ -78,3 +81,11 @@ class ConvergenceArgyris(ConvergenceMorley):
     preref = 0
     limits = (2.9, 3.1)
     abs_limit = 5e-7
+
+
+class ConvergenceBFS(ConvergenceMorley):
+
+    case = (MeshQuad, ElementQuadBFS)
+    preref = 1
+    limits = (3.9, 4.5)
+    abs_limit = 5e-9

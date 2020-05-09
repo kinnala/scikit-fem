@@ -9,6 +9,12 @@ from ...element import DiscreteField
 
 
 class Functional(Form):
+    """A functional for finite element assembly.
+
+    Used similarly as :class:`~skfem.assembly.BilinearForm` with the expection
+    that forms take one parameter `w`.
+
+    """
 
     def _kernel(self,
                 w: Dict[str, DiscreteField],
@@ -17,20 +23,25 @@ class Functional(Form):
 
     def elemental(self,
                   v: Basis,
-                  w: Dict[str, DiscreteField] = {}) -> ndarray:
-        w = FormDict({**v.default_parameters(), **self.dictify(w)})
+                  **kwargs) -> ndarray:
+        w = FormDict({**v.default_parameters(), **self.dictify(kwargs)})
         return self._kernel(w, v.dx)
 
     def assemble(self,
                  v: Basis,
-                 w: Dict[str, DiscreteField] = {}) -> float:
-        return sum(self.elemental(v, w))
+                 **kwargs) -> float:
+        return np.sum(self.elemental(v, **kwargs))
 
 
 def functional(form: Callable) -> Functional:
 
     # for backwards compatibility
     from .form_parameters import FormParameters
+
+    import warnings
+    warnings.warn("The old style @functional wrapper is deprecated. "
+                  "Consider using the new style forms, defined via "
+                  "@Functional.", DeprecationWarning)
 
     class ClassicFunctional(Functional):
 

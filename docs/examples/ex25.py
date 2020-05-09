@@ -1,3 +1,20 @@
+"""Forced convection.
+
+We begin the study of forced convection with the plane Graetz problem; viz. the steady distribution of temperature in a plane channel with zero inlet temperature and unit temperature on the walls and a steady laminar unidirectional parabolic plane-Poiseuille flow.
+
+The governing advection–diffusion equation is
+
+.. math::
+   \mathrm{Pe} \;u\frac{\partial T}{\partial x} = \nabla^2 T
+where the velocity profile is
+
+.. math::
+   u (y) = 6 y (1 - y), \qquad (0 < y < 1)
+The equations here have been nondimensionalized by the width of the channel and the volumetric flow-rate.  The governing parameter is the Péclet number, being the mean velocity times the width divided by the thermal diffusivity.
+
+Because the problem is symmetric about :math:`y = \frac{1}{2}`, only half is solved here, with natural boundary conditions along the centreline.
+
+"""
 from skfem import *
 from skfem.models.poisson import laplace, mass
 
@@ -16,15 +33,16 @@ mesh = MeshQuad.init_tensor(
 basis = InteriorBasis(mesh, ElementQuad2())
 
 
-@bilinear_form
-def advection(u, du, v, dv, w):
+@BilinearForm
+def advection(u, v, w):
+    from skfem.helpers import grad
     _, y = w.x
     velocity_0 = 6 * y * (height - y)  # parabolic plane Poiseuille
-    return v * velocity_0 * du[0]
+    return v * velocity_0 * grad(u)[0]
 
 
-dofs = basis.get_dofs({'inlet': lambda x: x[0] == 0.,
-                       'floor': lambda x: x[1] == 0.})
+dofs = basis.find_dofs({'inlet': mesh.facets_satisfying(lambda x: x[0] == 0.),
+                        'floor': mesh.facets_satisfying(lambda x: x[1] == 0.)})
 interior = basis.complement_dofs(dofs)
 
 A = asm(laplace, basis) + peclet * asm(advection, basis)
@@ -32,7 +50,7 @@ t = np.zeros(basis.N)
 t[dofs['floor'].all()] = 1.
 t = solve(*condense(A, np.zeros_like(t), t, I=interior))
 
-basis0 = InteriorBasis(mesh, ElementQuad0(), intorder=basis.intorder)
+basis0 = InteriorBasis(mesh, ElementQuad0(), quadrature=basis.quadrature)
 t0 = solve(asm(mass, basis0),
            asm(mass, basis, basis0) @ t)
 
