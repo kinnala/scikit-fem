@@ -32,8 +32,14 @@ class Mesh3D(Mesh):
 
     def boundary_edges(self) -> ndarray:
         """Return an array of boundary edge indices."""
-        return np.nonzero(np.isin(self.edges,
-                                  self.boundary_nodes()).all(axis=0))[0]
+        facets = self.boundary_facets()
+        boundary_edges = np.hstack((
+            self.facets[0:2, facets],
+            self.facets[1:3, facets],
+            self.facets[0:3:2, facets],
+        )).T
+        return np.nonzero((self.edges.T[:, None] == boundary_edges)\
+                          .all(-1).any(-1))[0]
 
     def interior_edges(self) -> ndarray:
         """Return an array of interior edge indices."""
