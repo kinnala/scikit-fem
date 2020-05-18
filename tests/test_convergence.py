@@ -238,6 +238,13 @@ class ConvergenceTetP2(ConvergenceTetP1):
         self.mesh.refine(1)
 
 
+class ConvergenceTetMini(ConvergenceTetP1):
+
+    def create_basis(self, m):
+        e = ElementTetMini()
+        return InteriorBasis(m, e)
+
+
 class ConvergenceLineP1(ConvergenceQ1):
 
     def create_basis(self, m):
