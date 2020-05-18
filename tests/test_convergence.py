@@ -224,9 +224,9 @@ class ConvergenceTetP1(ConvergenceQ1):
 
 
 class ConvergenceTetP2(ConvergenceTetP1):
-    rateL2 = 3.0
-    rateH1 = 2.0
-    eps = 0.165
+    rateL2 = 3.32
+    rateH1 = 2.16
+    eps = 0.01
 
     def create_basis(self, m):
         e = ElementTetP2()
