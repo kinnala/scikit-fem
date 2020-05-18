@@ -53,6 +53,7 @@ __all__ = [
     'ElementTetP1',
     'ElementTetP2',
     'ElementTetRT0',
+    'ElementTetMini',
     'ElementTriDG',
     'ElementTriP0',
     'ElementTriP1',
