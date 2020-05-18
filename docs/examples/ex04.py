@@ -1,4 +1,4 @@
-"""Contact problem.
+r"""Contact problem.
 
 Mortar methods allow setting interface conditions on non-matching meshes.
 They are useful also when solving variational inequalities such as
