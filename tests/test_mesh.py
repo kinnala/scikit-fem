@@ -146,6 +146,9 @@ class TestBoundaryEdges(unittest.TestCase):
     def runTest(self):
         m = MeshTet()
         m.refine()
+        # check that there is a correct amount of edges:
+        # 12 (cube edges) * 2 (per cube edge) + 6 (cube faces) * 8 (per cube face)
+        # = 72 edges
         self.assertTrue(len(m.boundary_edges()) == 72)
 
 
