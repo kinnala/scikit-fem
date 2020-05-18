@@ -273,7 +273,7 @@ class MeshTri(Mesh2D):
         self.t2f = ixb.reshape((3, self.t.shape[1]))
 
         # build facet-to-triangle mapping: 2 (triangles) x Nedges
-        e_tmp = np.hstack((self.t2f[0, :], self.t2f[1, :], self.t2f[2, :]))
+        e_tmp = np.hstack((self.t2f[0], self.t2f[1], self.t2f[2]))
         t_tmp = np.tile(np.arange(self.t.shape[1]), (1, 3))[0]
 
         e_first, ix_first = np.unique(e_tmp, return_index=True)
@@ -286,7 +286,7 @@ class MeshTri(Mesh2D):
         self.f2t[1, e_last] = t_tmp[ix_last]
 
         # second row to zero if repeated (i.e., on boundary)
-        self.f2t[1, np.nonzero(self.f2t[0, :] == self.f2t[1, :])[0]] = -1
+        self.f2t[1, np.nonzero(self.f2t[0] == self.f2t[1])[0]] = -1
 
     def _uniform_refine(self):
         """Perform a single mesh refine."""
@@ -298,23 +298,23 @@ class MeshTri(Mesh2D):
         t2f = self.t2f + sz
 
         # new vertices are the midpoints of edges
-        new_p = 0.5 * np.vstack((p[0, e[0, :]] + p[0, e[1, :]],
-                                 p[1, e[0, :]] + p[1, e[1, :]]))
+        new_p = 0.5 * np.vstack((p[0, e[0]] + p[0, e[1]],
+                                 p[1, e[0]] + p[1, e[1]]))
         self.p = np.hstack((p, new_p))
 
         # build new triangle definitions
         self.t = np.hstack((
-            np.vstack((t[0, :], t2f[0, :], t2f[2, :])),
-            np.vstack((t[1, :], t2f[0, :], t2f[1, :])),
-            np.vstack((t[2, :], t2f[2, :], t2f[1, :])),
-            np.vstack((t2f[0, :], t2f[1, :], t2f[2, :])),
+            np.vstack((t[0], t2f[0], t2f[2])),
+            np.vstack((t[1], t2f[0], t2f[1])),
+            np.vstack((t[2], t2f[2], t2f[1])),
+            np.vstack((t2f[0], t2f[1], t2f[2])),
         ))
 
         # mapping of indices between old and new facets
         new_facets = np.zeros((2, e.shape[1]), dtype=np.int64)
         ix0 = np.arange(t.shape[1], dtype=np.int64)
         ix1 = ix0 + t.shape[1]
-        ix2 = ix0 + 2*t.shape[1]
+        ix2 = ix0 + 2 * t.shape[1]
 
         # rebuild mappings
         self._build_mappings()
@@ -334,12 +334,12 @@ class MeshTri(Mesh2D):
 
         def sort_mesh(p, t):
             """Make (0, 2) the longest edge in t."""
-            l01 = np.sqrt(np.sum((p[:, t[0, :]] - p[:, t[1, :]])**2, axis=0))
-            l12 = np.sqrt(np.sum((p[:, t[1, :]] - p[:, t[2, :]])**2, axis=0))
-            l02 = np.sqrt(np.sum((p[:, t[0, :]] - p[:, t[2, :]])**2, axis=0))
+            l01 = np.sqrt(np.sum((p[:, t[0]] - p[:, t[1]]) ** 2, axis=0))
+            l12 = np.sqrt(np.sum((p[:, t[1]] - p[:, t[2]]) ** 2, axis=0))
+            l02 = np.sqrt(np.sum((p[:, t[0]] - p[:, t[2]]) ** 2, axis=0))
 
-            ix01 = (l01 > l02)*(l01 > l12)
-            ix12 = (l12 > l01)*(l12 > l02)
+            ix01 = (l01 > l02) * (l01 > l12)
+            ix12 = (l12 > l01) * (l12 > l02)
 
             # row swaps
             tmp = t[2, ix01]
@@ -372,11 +372,11 @@ class MeshTri(Mesh2D):
             ix[facets == 1] = np.arange(np.count_nonzero(facets)) + m.p.shape[1]
             ix = ix[m.t2f] # (0, 1) (1, 2) (0, 2)
 
-            red =   (ix[0, :] >= 0) * (ix[1, :] >= 0) * (ix[2, :] >= 0)
-            blue1 = (ix[0, :] ==-1) * (ix[1, :] >= 0) * (ix[2, :] >= 0)
-            blue2 = (ix[0, :] >= 0) * (ix[1, :] ==-1) * (ix[2, :] >= 0)
-            green = (ix[0, :] ==-1) * (ix[1, :] ==-1) * (ix[2, :] >= 0)
-            rest =  (ix[0, :] ==-1) * (ix[1, :] ==-1) * (ix[2, :] ==-1)
+            red =   (ix[0] >= 0) * (ix[1] >= 0) * (ix[2] >= 0)
+            blue1 = (ix[0] ==-1) * (ix[1] >= 0) * (ix[2] >= 0)
+            blue2 = (ix[0] >= 0) * (ix[1] ==-1) * (ix[2] >= 0)
+            green = (ix[0] ==-1) * (ix[1] ==-1) * (ix[2] >= 0)
+            rest =  (ix[0] ==-1) * (ix[1] ==-1) * (ix[2] ==-1)
 
             # new red elements
             t_red = np.hstack((
@@ -425,6 +425,6 @@ class MeshTri(Mesh2D):
     def element_finder(self):
         from matplotlib.tri import Triangulation
 
-        return Triangulation(self.p[0, :],
-                             self.p[1, :],
+        return Triangulation(self.p[0],
+                             self.p[1],
                              self.t.T).get_trifinder()
