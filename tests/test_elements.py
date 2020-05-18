@@ -27,6 +27,7 @@ class TestNodality(TestCase):
         ElementTetP0(),
         ElementTetP1(),
         ElementTetP2(),
+        ElementTetMini(),
         ElementHex1(),
     ]
 
