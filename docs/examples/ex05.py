@@ -1,4 +1,4 @@
-"""Integral condition.
+r"""Integral condition.
 
 This short example demonstrates the implementation of an integral boundary
  condition

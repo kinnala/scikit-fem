@@ -141,5 +141,18 @@ class SerializeUnserializeCycle(unittest.TestCase):
                 self.assertTrue((m.subdomains[k] == M.subdomains[k]).all())
 
 
+class TestBoundaryEdges(unittest.TestCase):
+
+    def runTest(self):
+        m = MeshTet()
+        # default mesh has all edges on the boundary
+        self.assertTrue(len(m.boundary_edges()) == m.edges.shape[1])
+        m.refine()
+        # check that there is a correct amount of boundary edges:
+        # 12 (cube edges) * 2 (per cube edge) + 6 (cube faces) * 8 (per cube face)
+        # = 72 edges
+        self.assertTrue(len(m.boundary_edges()) == 72)
+
+
 if __name__ == '__main__':
     unittest.main()

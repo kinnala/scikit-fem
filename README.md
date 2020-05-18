@@ -109,6 +109,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### [Unreleased]
 
+#### Added
+- `ElementTetMini`, MINI-element for tetrahedral mesh
+
+#### Fixed
+- `Mesh3d.boundary_edges` incorrectly returned all edges where both nodes are on
+the boundary
+
 ### [1.0.0] - 2020-04-22
 
 #### Added

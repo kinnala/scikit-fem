@@ -63,12 +63,19 @@ class TestFacetExpansion(TestCase):
     def runTest(self):
 
         m = MeshTet()
+        m.refine(2)
 
         basis = InteriorBasis(m, ElementTetP2())
 
-        arr1 = basis.find_dofs({
-            'kek':m.facets_satisfying(lambda x: x[0] == 0)
-        })['kek'].edge['u']
-        arr2 = basis.edge_dofs[:, m.edges_satisfying(lambda x: x[0] == 0)]
+        for fun in [lambda x: x[0] == 0,
+                    lambda x: x[0] == 1,
+                    lambda x: x[1] == 0,
+                    lambda x: x[1] == 1,
+                    lambda x: x[2] == 0,
+                    lambda x: x[2] == 1]:
+            arr1 = basis.find_dofs({
+                'kek': m.facets_satisfying(fun)
+            })['kek'].edge['u']
+            arr2 = basis.edge_dofs[:, m.edges_satisfying(fun)]
 
-        assert_allclose(arr1, arr2.flatten())
+            assert_allclose(arr1, arr2.flatten())
