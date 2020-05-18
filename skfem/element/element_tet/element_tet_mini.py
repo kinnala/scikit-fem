@@ -34,10 +34,10 @@ class ElementTetMini(ElementH1):
             phi = z
             dphi = np.array([0. * x, 0. * x, 1. + 0. * x])
         elif i == 4:
-            phi = 27. * x * y * z * (1. - x - y - z)
-            dphi = 27. * np.array([y * z * (1. - x - y - z) - x * y * z,
-                                   z * x * (1. - x - y - z) - x * y * z,
-                                   x * y * (1. - x - y - z) - x * y * z])
+            phi = 256. * x * y * z * (1. - x - y - z)
+            dphi = 256. * np.array([y * z * (1. - x - y - z) - x * y * z,
+                                    z * x * (1. - x - y - z) - x * y * z,
+                                    x * y * (1. - x - y - z) - x * y * z])
         else:
             self._index_error()
 
