@@ -74,13 +74,13 @@ conductance = {'skfem': u @ A @ u,
 @Functional
 def port_flux(w):
     from skfem.helpers import dot, grad
-    return dot(w.n, grad(w['w']))
+    return dot(w.n, grad(w['u']))
 
 
 current = {}
 for port, boundary in mesh.boundaries.items():
     fbasis = FacetBasis(mesh, elements, facets=boundary)
-    current[port] = asm(port_flux, fbasis, w=fbasis.interpolate(u))
+    current[port] = asm(port_flux, fbasis, u=fbasis.interpolate(u))
 
 if __name__ == '__main__':
 

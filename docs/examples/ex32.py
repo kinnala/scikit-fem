@@ -113,7 +113,7 @@ class Ellipsoid(NamedTuple):
     def pressure_error(self):
 
         def form(v, w):
-            return v * (w.w - self.pressure(*w.x))
+            return v * (w['p'] - self.pressure(*w.x))
 
         return LinearForm(form)
 
@@ -163,7 +163,7 @@ velocity, pressure = np.split(
     [basis['u'].N])
 
 error_p = asm(ellipsoid.pressure_error(), basis['p'],
-              w=basis['p'].interpolate(pressure))
+              p=basis['p'].interpolate(pressure))
 l2error_p = np.sqrt(error_p.T @ Q @ error_p)
 
 if __name__ == '__main__':

@@ -131,7 +131,7 @@ basis = {
 
 @BilinearForm
 def conduction(u, v, w):
-    return dot(w['w'] * grad(u), grad(v))
+    return dot(w['conductivity'] * grad(u), grad(v))
 
 
 @BilinearForm
@@ -145,7 +145,7 @@ conductivity[mesh.subdomains['solid']] = kratio
 
 longitudinal_gradient = 3 / 4 / peclet
 
-A = (asm(conduction, basis['heat'], w=conductivity)
+A = (asm(conduction, basis['heat'], conductivity=conductivity)
      + peclet * asm(advection, basis['fluid']))
 b = (asm(unit_load, basis['heated'])
      + longitudinal_gradient
