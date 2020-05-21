@@ -1,7 +1,9 @@
 """Bilinear and linear forms too general to put into a specific model."""
 
-from skfem.assembly import BilinearForm, linear_form
-from .helpers import div
+from skfem.assembly import BilinearForm, LinearForm
+from .helpers import div, grad
+
+import numpy as np
 
 
 @BilinearForm
@@ -9,6 +11,7 @@ def divergence(u, v, w):
     return div(u) * v
 
 
-@linear_form
-def rot(v, dv, w):
-    return dv[1] * w.w[0] - dv[0] * w.w[1]
+@LinearForm
+def rot(v, w):
+    return np.einsum('i...,ij...,j...',
+                     w.w, np.array([[0, 1], [-1, 0]]), grad(v))
