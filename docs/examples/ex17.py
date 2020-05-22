@@ -69,7 +69,7 @@ mesh = make_mesh(*radii)
 
 @BilinearForm
 def conduction(u, v, w):
-    return dot(w.w * grad(u), grad(v))
+    return dot(w['conductivity'] * grad(u), grad(v))
 
 
 convection = mass
@@ -81,7 +81,7 @@ conductivity = basis.zero_w()
 for subdomain, elements in mesh.subdomains.items():
     conductivity[elements] = thermal_conductivity[subdomain]
 
-L = asm(conduction, basis, w=conductivity)
+L = asm(conduction, basis, conductivity=conductivity)
 
 facet_basis = FacetBasis(mesh, element, facets=mesh.boundaries['convection'])
 H = heat_transfer_coefficient * asm(convection, facet_basis)

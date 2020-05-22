@@ -71,8 +71,8 @@ from pacopy import natural
 def acceleration(v, w):
     """Compute the vector (v, u . grad u) for given velocity u
 
-    passed in via w after having been interpolated onto its quadrature
-    points.
+    passed in via `wind` after having been interpolated onto its
+    quadrature points.
 
     In Cartesian tensorial indicial notation, the integrand is
 
@@ -81,8 +81,7 @@ def acceleration(v, w):
         u_j u_{i,j} v_i.
 
     """
-    u = w['w']
-    return np.einsum('j...,ij...,i...', u, grad(u), v)
+    return np.einsum('j...,ij...,i...', w['wind'], grad(w['wind']), v)
 
 
 @BilinearForm
@@ -99,8 +98,8 @@ def acceleration_jacobian(u, v, w):
        (w_j du_{i,j} + u_j dw_{i,j}) v_i
 
     """
-    return dot(np.einsum('j...,ij...->i...', w['w'], grad(u))
-               + np.einsum('j...,ij...->i...', u, grad(w['w'])), v)
+    return dot(np.einsum('j...,ij...->i...', w['wind'], grad(u))
+               + np.einsum('j...,ij...->i...', u, grad(w['wind'])), v)
 
 
 class BackwardFacingStep:
@@ -236,7 +235,7 @@ class BackwardFacingStep:
 
     def N(self, uvp: np.ndarray) -> np.ndarray:
         u = self.basis['u'].interpolate(self.split(uvp)[0])
-        return np.hstack([asm(acceleration, self.basis['u'], w=u),
+        return np.hstack([asm(acceleration, self.basis['u'], wind=u),
                           np.zeros(self.basis['p'].N)])
 
     def f(self, uvp: np.ndarray, reynolds: float) -> np.ndarray:
@@ -259,7 +258,7 @@ class BackwardFacingStep:
         duvp = solve(*condense(
             self.S +
             reynolds
-            * block_diag([asm(acceleration_jacobian, self.basis['u'], w=u),
+            * block_diag([asm(acceleration_jacobian, self.basis['u'], wind=u),
                           csr_matrix((self.basis['p'].N,)*2)]),
             rhs, self.make_vector() - uvp, I=self.I))
         return duvp
