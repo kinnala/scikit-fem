@@ -36,113 +36,52 @@ class ElementHexS2(ElementH1):
     def lbasis(self, X, i):
         x, y, z = 2 * X - 1
 
-        if i == 0:
+        if i < 8:
+            s = [
+                (1, 1, 1),
+                (1, 1, -1),
+                (1, -1, 1),
+                (-1, 1, 1),
+                (1, -1, -1),
+                (-1, 1, -1),
+                (-1, -1, 1),
+                (-1, -1, -1),
+            ][i]
+            x *= s[0]
+            y *= s[1]
+            z *= s[2]
             phi = (1 + x) * (1 + y) * (1 + z) * (x + y + z - 2) / 8
-            dphi = np.array([(1 + y) * (1 + z) * (x + y + z - 2) / 8\
-                             + (1 + x) * (1 + y) * (1 + z) / 8,
-                             (1 + x) * (1 + z) * (x + y + z - 2) / 8\
-                             + (1 + x) * (1 + y) * (1 + z) / 8,
-                             (1 + x) * (1 + y) * (x + y + z - 2) / 8\
-                             + (1 + x) * (1 + y) * (1 + z) / 8])
-        elif i == 1:
-            phi = (1 + x) * (1 + y) * (1 - z) * (x + y - z - 2) / 8
-            dphi = np.array([(1 + y) * (1 - z) * (x + y - z - 2) / 8\
-                             + (1 + x) * (1 + y) * (1 - z) / 8,
-                             (1 + x) * (1 - z) * (x + y - z - 2) / 8\
-                             + (1 + x) * (1 + y) * (1 - z) / 8,
-                             - (1 + x) * (1 + y) * (x + y - z - 2) / 8\
-                             - (1 + x) * (1 + y) * (1 - z) / 8])
-        elif i == 2:
-            phi = (1 + x) * (1 - y) * (1 + z) * (x - y + z - 2) / 8
-            dphi = np.array([(1 - y) * z,
-                             -x * z,
-                             x * (1 - y)])
-        elif i == 3:
-            phi = (1 - x) * (1 + y) * (1 + z) * (- x + y + z - 2) / 8
-            dphi = np.array([-y * z,
-                             (1 - x) * z,
-                             (1 - x) * y])
-        elif i == 4:
-            phi = (1 + x) * (1 - y) * (1 - z) * (x - y - z - 2) / 8
-            dphi = np.array([(1 - y) * (1 - z),
-                             -x * (1 - z),
-                             -x * (1 - y)])
-        elif i == 5:
-            phi = (1 - x) * (1 + y) * (1 - z) * (- x + y - z - 2) / 8
-            dphi = np.array([-y * (1 - z),
-                             (1 - x) * (1 - z),
-                             -(1 - x) * y])
-        elif i == 6:
-            phi = (1 - x) * (1 - y) * (1 + z) * (- x - y + z - 2) / 8
-            dphi = np.array([-(1 - y) * z,
-                             -(1 - x) * z,
-                             (1 - x) * (1 - y)])
-        elif i == 7:
-            phi = (1 - x) * (1 - y) * (1 - z) * (- x - y - z - 2) / 8
-            dphi = np.array([-(1 - y) * (1 - z),
-                             -(1 - x) * (1 - z),
-                             -(1 - x) * (1 - y)])
-        # phi ok
-        elif i == 8:
-            phi = (1 + x) * (1 + y) * (1 - z ** 2) / 4
-            dphi = np.array([-(1 - y) * (1 - z),
-                             -(1 - x) * (1 - z),
-                             -(1 - x) * (1 - y)])
-        elif i == 9:
-            phi = (1 + x) * (1 - y ** 2) * (1 + z) / 4
-            dphi = np.array([-(1 - y) * (1 - z),
-                             -(1 - x) * (1 - z),
-                             -(1 - x) * (1 - y)])
-        elif i == 10:
-            phi = (1 - x ** 2) * (1 + y) * (1 + z) / 4 # ok
-            dphi = np.array([-(1 - y) * (1 - z),
-                             -(1 - x) * (1 - z),
-                             -(1 - x) * (1 - y)])
-        elif i == 11:
-            phi = (1 + x) * (1 - y ** 2) * (1 - z) / 4 # ok
-            dphi = np.array([-(1 - y) * (1 - z),
-                             -(1 - x) * (1 - z),
-                             -(1 - x) * (1 - y)])
-        elif i == 12:
-            phi = (1 - x ** 2) * (1 + y) * (1 - z) / 4 # ok
-            dphi = np.array([-(1 - y) * (1 - z),
-                             -(1 - x) * (1 - z),
-                             -(1 - x) * (1 - y)])
-        elif i == 13:
-            phi = (1 + x) * (1 - y) * (1 - z ** 2) / 4 # ok
-            dphi = np.array([-(1 - y) * (1 - z),
-                             -(1 - x) * (1 - z),
-                             -(1 - x) * (1 - y)])
-        elif i == 14:
-            phi = (1 - x ** 2) * (1 - y) * (1 + z) / 4 # ok
-            dphi = np.array([-(1 - y) * (1 - z),
-                             -(1 - x) * (1 - z),
-                             -(1 - x) * (1 - y)])
-        elif i == 15:
-            phi = (1 - x) * (1 + y) * (1 - z ** 2) / 4 # ok
-            dphi = np.array([-(1 - y) * (1 - z),
-                             -(1 - x) * (1 - z),
-                             -(1 - x) * (1 - y)])
-        elif i == 16:
-            phi = (1 - x) * (1 - y ** 2) * (1 + z) / 4 # ok
-            dphi = np.array([-(1 - y) * (1 - z),
-                             -(1 - x) * (1 - z),
-                             -(1 - x) * (1 - y)])
-        elif i == 17:
-            phi = (1 - x ** 2) * (1 - y) * (1 - z) / 4
-            dphi = np.array([-(1 - y) * (1 - z),
-                             -(1 - x) * (1 - z),
-                             -(1 - x) * (1 - y)])
-        elif i == 18:
-            phi = (1 - x) * (1 - y ** 2) * (1 - z) / 4
-            dphi = np.array([-(1 - y) * (1 - z),
-                             -(1 - x) * (1 - z),
-                             -(1 - x) * (1 - y)])
-        elif i == 19:
-            phi = (1 - x) * (1 - y) * (1 - z ** 2) / 4
-            dphi = np.array([-(1 - y) * (1 - z),
-                             -(1 - x) * (1 - z),
-                             -(1 - x) * (1 - y)])
+            dphi = np.array([s[0] * (1 + y) * (1 + z) * (x + y + z - 2) / 8\
+                             + s[0] * (1 + x) * (1 + y) * (1 + z) / 8,
+                             s[1] * (1 + x) * (1 + z) * (x + y + z - 2) / 8\
+                             + s[1] * (1 + x) * (1 + y) * (1 + z) / 8,
+                             s[2] * (1 + x) * (1 + y) * (x + y + z - 2) / 8\
+                             + s[2] * (1 + x) * (1 + y) * (1 + z) / 8])
+        elif i < 20:
+            s = [
+                (1, 1, -z),
+                (1, -y, 1),
+                (-x, 1, 1),
+                (1, -y, -1),
+                (-x, 1, -1),
+                (1, -1, -z),
+                (-x, -1, 1),
+                (-1, 1, -z),
+                (-1, -y, 1),
+                (-x, -1, -1),
+                (-1, -y, -1),
+                (-1, -1, -z),
+            ][i - 8]
+            x *= s[0]
+            y *= s[1]
+            z *= s[2]
+            phi = (1 + x) * (1 + y) * (1 + z) / 4
+            dx = 2.0 * s[0] if isinstance(s[0], np.ndarray) else s[0]
+            dy = 2.0 * s[1] if isinstance(s[1], np.ndarray) else s[1]
+            dz = 2.0 * s[2] if isinstance(s[2], np.ndarray) else s[2]
+            dphi = np.array([dx * (1 + y) * (1 + z) / 4,
+                             dy * (1 + x) * (1 + z) / 4,
+                             dz * (1 + x) * (1 + y) / 4,])
         else:
             self._index_error()
 
