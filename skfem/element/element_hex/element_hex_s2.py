@@ -85,4 +85,4 @@ class ElementHexS2(ElementH1):
         else:
             self._index_error()
 
-        return phi, dphi
+        return phi, 2 * dphi
