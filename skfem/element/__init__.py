@@ -54,7 +54,7 @@ from .element_quad import ElementQuad0, ElementQuad1, ElementQuad2,\
     ElementQuadBFS
 from .element_tet import ElementTetP0, ElementTetP1, ElementTetP2,\
     ElementTetRT0, ElementTetN0, ElementTetMini
-from .element_hex import ElementHex1
+from .element_hex import ElementHex1, ElementHexS2
 from .element_line import ElementLineP1, ElementLineP2, ElementLinePp,\
     ElementLineHermite
 from .element_composite import ElementComposite

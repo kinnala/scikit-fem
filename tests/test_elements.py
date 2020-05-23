@@ -29,6 +29,7 @@ class TestNodality(TestCase):
         ElementTetP2(),
         ElementTetMini(),
         ElementHex1(),
+        ElementHexS2(),
     ]
 
     def runTest(self):

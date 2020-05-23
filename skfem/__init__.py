@@ -39,6 +39,7 @@ __all__ = [
     'solver_iter_krylov',
     'ElementTriArgyris',
     'ElementHex1',
+    'ElementHexS2',
     'ElementTriMorley',
     'ElementTriMini',
     'ElementQuad0',
