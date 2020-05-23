@@ -160,14 +160,14 @@ class TestDerivatives(TestCase):
         for elem in self.elems:
             eps = 1e-6
             if elem.dim == 1:
-                y = np.array([[0.3, 0.3 + eps]])
+                y = np.array([[.3, .3 + eps]])
             elif elem.dim == 2:
-                y = np.array([[0.3, 0.3 + eps, 0, 0],
-                              [0, 0, 0.3, 0.3 + eps]])
+                y = np.array([[.3, .3 + eps, .3, .3],
+                              [.3, .3, .3, .3 + eps]])
             elif elem.dim == 3:
-                y = np.array([[.3, .3 + eps, 0, 0, 0, 0],
-                              [0, 0, .3, .3 + eps, 0, 0],
-                              [0, 0, 0, 0, .3, .3 + eps]])
+                y = np.array([[.3, .3 + eps, .3, .3, .3, .3],
+                              [.3, .3, .3, .3 + eps, .3, .3],
+                              [.3, .3, .3, .3, .3, .3 + eps]])
             i = 0
             while True:
                 try:

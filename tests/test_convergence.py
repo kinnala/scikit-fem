@@ -35,6 +35,8 @@ class ConvergenceQ1(unittest.TestCase):
         hs = np.zeros(Nitrs)
 
         for itr in range(Nitrs):
+            if itr>0:
+                m.refine()
             ib = self.create_basis(m)
 
             A = asm(laplace, ib)
@@ -49,8 +51,6 @@ class ConvergenceQ1(unittest.TestCase):
             # calculate error
             L2s[itr], H1s[itr] = self.compute_error(m, ib, x)
             hs[itr] = m.param()
-
-            m.refine()
 
         rateL2 = np.polyfit(np.log(hs), np.log(L2s), 1)[0]
         rateH1 = np.polyfit(np.log(hs), np.log(H1s), 1)[0]
