@@ -188,5 +188,45 @@ class TestDerivatives(TestCase):
                 i += 1
 
 
+class TestPartitionofUnity(TestCase):
+    """Test that elements form a partition of unity."""
+
+    elems = [
+        ElementLineP1(),
+        ElementLineP2(),
+        ElementTriP1(),
+        ElementTriP2(),
+        ElementQuad1(),
+        ElementQuad2(),
+        ElementQuadS2(),
+        ElementTetP1(),
+        ElementTetP2(),
+        ElementHex1(),
+        ElementHexS2(),
+    ]
+
+    def runTest(self):
+        for elem in self.elems:
+            eps = 1e-6
+            if elem.dim == 1:
+                y = np.array([[.15]])
+            elif elem.dim == 2:
+                y = np.array([[.15],
+                              [.15]])
+            elif elem.dim == 3:
+                y = np.array([[.15],
+                              [.15],
+                              [.15]])
+            i = 0
+            out = 0.
+            while True:
+                try:
+                    out += elem.lbasis(y, i)[0][0]
+                except ValueError:
+                    self.assertAlmostEqual(out, 1, msg='failed for {}'.format(elem))
+                    break
+                i += 1
+
+
 if __name__ == '__main__':
     main()
