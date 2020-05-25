@@ -217,15 +217,10 @@ class TestPartitionofUnity(TestCase):
                 y = np.array([[.15],
                               [.15],
                               [.15]])
-            i = 0
             out = 0.
-            while True:
-                try:
-                    out += elem.lbasis(y, i)[0][0]
-                except ValueError:
-                    self.assertAlmostEqual(out, 1, msg='failed for {}'.format(elem))
-                    break
-                i += 1
+            for i in range(elem.doflocs.shape[0]):
+                out += elem.lbasis(y, i)[0][0]
+            self.assertAlmostEqual(out, 1, msg='failed for {}'.format(elem))
 
 
 if __name__ == '__main__':
