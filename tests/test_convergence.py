@@ -43,10 +43,7 @@ class ConvergenceQ1(unittest.TestCase):
             b = asm(load, ib)
 
             D = ib.get_dofs().all()
-            x = np.zeros(ib.N)
-            I = ib.complement_dofs(D)
-
-            x = solve(*condense(A, b, I=I))
+            x = solve(*condense(A, b, D=D))
 
             # calculate error
             L2s[itr], H1s[itr] = self.compute_error(m, ib, x)
@@ -55,12 +52,12 @@ class ConvergenceQ1(unittest.TestCase):
         rateL2 = np.polyfit(np.log(hs), np.log(L2s), 1)[0]
         rateH1 = np.polyfit(np.log(hs), np.log(H1s), 1)[0]
 
-        self.assertLess(np.abs(rateH1 - self.rateH1),
-                        self.eps,
-                        msg='observed H1 rate: {}'.format(rateH1))
         self.assertLess(np.abs(rateL2 - self.rateL2),
                         self.eps,
                         msg='observed L2 rate: {}'.format(rateL2))
+        self.assertLess(np.abs(rateH1 - self.rateH1),
+                        self.eps,
+                        msg='observed H1 rate: {}'.format(rateH1))
         self.assertLess(H1s[-1], 0.3)
         self.assertLess(L2s[-1], 0.008)
 
@@ -129,8 +126,7 @@ class ConvergenceQ1(unittest.TestCase):
 
     def create_basis(self, m):
         e = ElementQuad1()
-        map = MappingIsoparametric(m, e)
-        return InteriorBasis(m, e, map, 2)
+        return InteriorBasis(m, e)
 
     def setUp(self):
         self.mesh = MeshQuad()
@@ -138,19 +134,12 @@ class ConvergenceQ1(unittest.TestCase):
 
 
 class ConvergenceQ2(ConvergenceQ1):
-    """It seems that superconvergence occurs here. Possibly due to the
-    symmetricity of the loading and the presence of higher order symmetric
-    basis functions?
-
-    """
     rateL2 = 3.0
-    rateH1 = 3.0
+    rateH1 = 2.0
 
     def create_basis(self, m):
         e = ElementQuad2()
-        emap = ElementQuad1()
-        map = MappingIsoparametric(m, emap)
-        return InteriorBasis(m, e, map, 3)
+        return InteriorBasis(m, e)
 
     def setUp(self):
         self.mesh = MeshQuad()
@@ -158,7 +147,6 @@ class ConvergenceQ2(ConvergenceQ1):
 
 
 class ConvergenceQuadS2(ConvergenceQ2):
-    rateH1 = 2.                 # no Q2 superconvergence here
 
     def create_basis(self, m):
         e = ElementQuadS2()
@@ -169,8 +157,7 @@ class ConvergenceTriP1(ConvergenceQ1):
 
     def create_basis(self, m):
         e = ElementTriP1()
-        map = MappingAffine(m)
-        return InteriorBasis(m, e, map, 2)
+        return InteriorBasis(m, e)
 
     def setUp(self):
         self.mesh = MeshTri.init_sqsymmetric()
@@ -200,8 +187,7 @@ class ConvergenceHex1(ConvergenceQ1):
 
     def create_basis(self, m):
         e = ElementHex1()
-        map = MappingIsoparametric(m, e)
-        return InteriorBasis(m, e, map, 3)
+        return InteriorBasis(m, e)
 
     def setUp(self):
         self.mesh = MeshHex()
@@ -229,8 +215,7 @@ class ConvergenceTetP1(ConvergenceQ1):
 
     def create_basis(self, m):
         e = ElementTetP1()
-        map = MappingAffine(m)
-        return InteriorBasis(m, e, map, 2)
+        return InteriorBasis(m, e)
 
     def setUp(self):
         self.mesh = MeshTet()
@@ -393,6 +378,12 @@ class FacetConvergenceHex1(FacetConvergenceTetP2):
     case = (MeshHex, ElementHex1)
     limits = (0.9, 1.1)
     preref = 2
+
+
+class FacetConvergenceHexS2(FacetConvergenceTetP2):
+    case = (MeshHex, ElementHexS2)
+    limits = (1.9, 2.2)
+    preref = 1
 
 
 class FacetConvergenceTetP1(FacetConvergenceTetP2):
