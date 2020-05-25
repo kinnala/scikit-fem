@@ -154,5 +154,19 @@ class TestBoundaryEdges(unittest.TestCase):
         self.assertTrue(len(m.boundary_edges()) == 72)
 
 
+class TestMeshAddition(unittest.TestCase):
+
+    def runTest(self):
+        m = MeshTri()
+        M = MeshTri()
+        M.translate((1.0, 0.0))
+        M.define_boundary('top', lambda x: x[1] == 1.0)
+        mesh = m + M
+        self.assertTrue(mesh.p.shape[1] == 6)
+        self.assertTrue(mesh.t.shape[1] == 4)
+        self.assertTrue(mesh.subdomains is None)
+        self.assertTrue('top' in mesh.boundaries)
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -109,6 +109,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
+#### Added
+- Compatible `Mesh` objects can be now merged using `+` operator
+
 ### [1.1.0] - 2020-05-18
 
 #### Added
