@@ -59,13 +59,15 @@ class TestCompositeSplitting(TestCase):
 
 
 class TestFacetExpansion(TestCase):
+    mesh_type = MeshTet
+    elem_type = ElementTetP2
 
     def runTest(self):
 
-        m = MeshTet()
+        m = self.mesh_type()
         m.refine(2)
 
-        basis = InteriorBasis(m, ElementTetP2())
+        basis = InteriorBasis(m, self.elem_type())
 
         for fun in [lambda x: x[0] == 0,
                     lambda x: x[0] == 1,
@@ -79,3 +81,8 @@ class TestFacetExpansion(TestCase):
             arr2 = basis.edge_dofs[:, m.edges_satisfying(fun)]
 
             assert_allclose(arr1, arr2.flatten())
+
+
+class TestFacetExpansionHexS2(TestFacetExpansion):
+    mesh_type = MeshHex
+    elem_type = ElementHexS2
