@@ -223,8 +223,8 @@ class ConvergenceTetP1(ConvergenceQ1):
 
 
 class ConvergenceTetP2(ConvergenceTetP1):
-    rateL2 = 3.32
-    rateH1 = 2.16
+    rateL2 = 3.23
+    rateH1 = 1.94
     eps = 0.01
 
     def create_basis(self, m):
@@ -240,8 +240,7 @@ class ConvergenceTetMini(ConvergenceTetP1):
 
     def create_basis(self, m):
         e = ElementTetMini()
-        map = MappingAffine(m)
-        return InteriorBasis(m, e, map, 4)
+        return InteriorBasis(m, e)
 
 
 class ConvergenceLineP1(ConvergenceQ1):
