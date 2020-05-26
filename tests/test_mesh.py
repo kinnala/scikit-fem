@@ -146,12 +146,25 @@ class TestBoundaryEdges(unittest.TestCase):
     def runTest(self):
         m = MeshTet()
         # default mesh has all edges on the boundary
-        self.assertTrue(len(m.boundary_edges()) == m.edges.shape[1])
+        self.assertEqual(len(m.boundary_edges()), m.edges.shape[1])
         m.refine()
         # check that there is a correct amount of boundary edges:
         # 12 (cube edges) * 2 (per cube edge) + 6 (cube faces) * 8 (per cube face)
         # = 72 edges
         self.assertTrue(len(m.boundary_edges()) == 72)
+
+
+class TestBoundaryEdges2(unittest.TestCase):
+
+    def runTest(self):
+        m = MeshHex()
+        # default mesh has all edges on the boundary
+        self.assertTrue(len(m.boundary_edges()) == m.edges.shape[1])
+        m.refine()
+        # check that there is a correct amount of boundary edges:
+        # 12 (cube edges) * 2 (per cube edge) + 6 (cube faces) * 4 (per cube face)
+        # = 48 edges
+        self.assertEqual(len(m.boundary_edges()), 48)
 
 
 class TestMeshAddition(unittest.TestCase):
