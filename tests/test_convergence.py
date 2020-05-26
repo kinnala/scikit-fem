@@ -195,9 +195,9 @@ class ConvergenceHex1(ConvergenceQ1):
 
 
 class ConvergenceHexS2(ConvergenceQ1):
-    rateL2 = 3.0
-    rateH1 = 2.0
-    eps = 0.11
+    rateL2 = 3.05
+    rateH1 = 2.21
+    eps = 0.02
 
     def create_basis(self, m):
         e = ElementHexS2()
@@ -229,8 +229,7 @@ class ConvergenceTetP2(ConvergenceTetP1):
 
     def create_basis(self, m):
         e = ElementTetP2()
-        map = MappingAffine(m)
-        return InteriorBasis(m, e, map, 3)
+        return InteriorBasis(m, e)
 
     def setUp(self):
         self.mesh = MeshTet()
