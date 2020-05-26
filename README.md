@@ -111,6 +111,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Added
 - Compatible `Mesh` objects can be now merged using `+` operator
+- `ElementHexS2`, a 20-node quadratic hexahedral serendipity element
+
+#### Fixed
+- `Mesh3D.boundary_edges` for hexahedral meshes
 
 ### [1.1.0] - 2020-05-18
 
@@ -118,7 +122,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ElementTetMini`, MINI-element for tetrahedral mesh
 
 #### Fixed
-- `Mesh3d.boundary_edges` incorrectly returned all edges where both nodes are on
+- `Mesh3D.boundary_edges` incorrectly returned all edges where both nodes are on
 the boundary
 
 ### [1.0.0] - 2020-04-22
