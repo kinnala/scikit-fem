@@ -240,7 +240,7 @@ class ConvergenceTetMini(ConvergenceTetP1):
 
     def create_basis(self, m):
         e = ElementTetMini()
-        return InteriorBasis(m, e)
+        return InteriorBasis(m, e, intorder=3)
 
 
 class ConvergenceLineP1(ConvergenceQ1):
