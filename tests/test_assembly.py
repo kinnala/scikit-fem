@@ -40,10 +40,20 @@ class IntegrateOneOverBoundaryS2(IntegrateOneOverBoundaryQ1):
 
 
 class IntegrateOneOverBoundaryHex1(IntegrateOneOverBoundaryQ1):
+
     def createBasis(self):
         m = MeshHex()
         m.refine(3)
         self.fbasis = FacetBasis(m, ElementHex1())
+        self.boundary_area = 6.000
+
+
+class IntegrateOneOverBoundaryHex1(IntegrateOneOverBoundaryQ1):
+
+    def createBasis(self):
+        m = MeshHex()
+        m.refine(3)
+        self.fbasis = FacetBasis(m, ElementHexS2())
         self.boundary_area = 6.000
 
 
@@ -90,6 +100,10 @@ class IntegrateFuncOverBoundaryPart(unittest.TestCase):
         ones = np.ones(B.shape[0])
 
         self.assertAlmostEqual(ones @ (B @ ones), 0.11111111, places=5)
+
+
+class IntegrateFuncOverBoundaryPartHexS2(IntegrateFuncOverBoundaryPart):
+    case = (MeshHex, ElementHexS2)
 
 
 class IntegrateFuncOverBoundaryPartTetP1(IntegrateFuncOverBoundaryPart):
@@ -208,6 +222,12 @@ class NormalVectorTestQuad(NormalVectorTestTri):
 class NormalVectorTestHex(NormalVectorTestTri):
     case = (MeshHex(), ElementHex1())
     intorder = 3
+
+
+class NormalVectorTestHexS2(NormalVectorTestTri):
+    case = (MeshHex(), ElementHexS2())
+    intorder = 3
+    test_integrate_volume = False
 
 
 class EvaluateFunctional(unittest.TestCase):
