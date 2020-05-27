@@ -8,7 +8,7 @@ class ElementHexS2(ElementH1):
     nodal_dofs = 1
     edge_dofs = 1
     dim = 3
-    maxdeg = 3
+    maxdeg = 4
     dofnames = ['u', 'u']
     doflocs = np.array([[1., 1., 1.],
                         [1., 1., 0.],
