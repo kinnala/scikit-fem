@@ -415,6 +415,27 @@ class Mesh:
         from copy import deepcopy
         return deepcopy(self)
 
+    def __add__(self, other):
+        """Join two meshes."""
+        if not isinstance(other, type(self)):
+            raise TypeError("Can only join meshes with same type.")
+        p = np.hstack((self.p, other.p))
+        t = np.hstack((self.t, other.t + self.p.shape[1]))
+        tmp = np.ascontiguousarray(p.T)
+        tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]),
+                                  return_index=True, return_inverse=True)
+        p = p[:, ixa]
+        t = ixb[t]
+        boundaries = {
+            **(self.boundaries if self.boundaries is not None else {}),
+            **(other.boundaries if other.boundaries is not None else {}),
+        } if self.boundaries is not None or other.boundaries is not None else None
+        subdomains = {
+            **(self.subdomains if self.subdomains is not None else {}),
+            **(other.subdomains if other.subdomains is not None else {}),
+        } if self.subdomains is not None or other.subdomains is not None else None
+        return type(self)(p, t, boundaries, subdomains)
+
     @staticmethod
     def strip_extra_coordinates(p: ndarray) -> ndarray:
         return p

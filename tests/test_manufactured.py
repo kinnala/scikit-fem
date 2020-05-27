@@ -133,7 +133,18 @@ class TestExactHexElement(unittest.TestCase):
             x = self.set_bc(X, ib)
             Xh = x.copy()
             x = solve(*condense(A, 0 * x, x=x, I=I))
-            self.assertLessEqual(np.sum(x - Xh), 1e-11)
+            self.assertLessEqual(np.sum(x - Xh), 1e-10)
+
+
+class TestExactHexS2(TestExactHexElement):
+    elem = ElementHexS2
+
+    funs = [
+        lambda x: 1 + 0 * x[0],
+    ]
+
+    def set_bc(self, fun, basis):
+        return fun(basis.doflocs)
 
 
 class TestExactQuadElement(TestExactHexElement):
@@ -150,7 +161,7 @@ class TestExactTetElement(TestExactHexElement):
     elem = ElementTetP1
     funs = [
         lambda x: 1 + 0 * x[0],
-        lambda x: 1 + x[0] + x[1],
+        lambda x: 1 + x[0] + x[1] + x[2],
     ]
 
 

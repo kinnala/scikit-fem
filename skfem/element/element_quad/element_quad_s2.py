@@ -1,11 +1,24 @@
 import numpy as np
 
-from .element_quad2 import ElementQuad2
+from ..element_h1 import ElementH1
+from ...mesh.mesh2d import MeshQuad
 
 
-class ElementQuadS2(ElementQuad2):
-    interior_dofs = 0
-    doflocs = ElementQuad2.doflocs[:-1]
+class ElementQuadS2(ElementH1):
+    nodal_dofs = 1
+    facet_dofs = 1
+    dim = 2
+    maxdeg = 3
+    dofnames = ["u", "u"]
+    doflocs = np.array([[0.0, 0.0],
+                        [1.0, 0.0],
+                        [1.0, 1.0],
+                        [0.0, 1.0],
+                        [0.5, 0.0],
+                        [1.0, 0.5],
+                        [0.5, 1.0],
+                        [0.0, 0.5]])
+    mesh_type = MeshQuad
 
     def lbasis(self, X, i):
         X = 2. * X - 1.

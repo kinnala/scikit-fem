@@ -29,6 +29,7 @@ class TestNodality(TestCase):
         ElementTetP2(),
         ElementTetMini(),
         ElementHex1(),
+        ElementHexS2(),
     ]
 
     def runTest(self):
@@ -134,6 +135,93 @@ class TestCompatibilityWarning(TestCase):
                 return InteriorBasis(m(), self.elem())
 
             self.assertRaises(ValueError, init_incompatible)
+
+
+class TestDerivatives(TestCase):
+    """Test values of derivatives."""
+
+    elems = [
+        ElementLineP1(),
+        ElementLineP2(),
+        ElementTriP1(),
+        ElementTriP2(),
+        ElementTriMini(),
+        ElementQuad1(),
+        ElementQuad2(),
+        ElementQuadS2(),
+        ElementTetP1(),
+        ElementTetP2(),
+        ElementTetMini(),
+        ElementHex1(),
+        ElementHexS2(),
+    ]
+
+    def runTest(self):
+        for elem in self.elems:
+            eps = 1e-6
+            for base in [0., .3, .6, .9]:
+                if elem.dim == 1:
+                    y = np.array([[base, base + eps]])
+                elif elem.dim == 2:
+                    y = np.array([[base, base + eps, base, base],
+                                  [base, base, base, base + eps]])
+                elif elem.dim == 3:
+                    y = np.array([[base, base + eps, base, base, base, base],
+                                  [base, base, base, base + eps, base, base],
+                                  [base, base, base, base, base, base + eps]])
+                i = 0
+                while True:
+                    try:
+                        out = elem.lbasis(y, i)
+                    except ValueError:
+                        break
+                    diff = (out[0][1] - out[0][0]) / eps
+                    self.assertAlmostEqual(diff, out[1][0][0], delta=1e-3,
+                                           msg='x-derivative for {}th bfun failed for {}'.format(i, elem))
+                    if elem.dim > 1:
+                        diff = (out[0][3] - out[0][2]) / eps
+                        self.assertAlmostEqual(diff, out[1][1][3], delta=1e-3,
+                                               msg='y-derivative for {}th bfun failed for {}'.format(i, elem))
+                    if elem.dim == 3:
+                        diff = (out[0][5] - out[0][4]) / eps
+                        self.assertAlmostEqual(diff, out[1][2][4], delta=1e-3,
+                                               msg='z-derivative for {}th bfun failed for {}'.format(i, elem))
+                    i += 1
+
+
+class TestPartitionofUnity(TestCase):
+    """Test that elements form a partition of unity."""
+
+    elems = [
+        ElementLineP1(),
+        ElementLineP2(),
+        ElementTriP1(),
+        ElementTriP2(),
+        ElementQuad1(),
+        ElementQuad2(),
+        ElementQuadS2(),
+        ElementTetP1(),
+        ElementTetP2(),
+        ElementHex1(),
+        ElementHexS2(),
+    ]
+
+    def runTest(self):
+        for elem in self.elems:
+            eps = 1e-6
+            if elem.dim == 1:
+                y = np.array([[.15]])
+            elif elem.dim == 2:
+                y = np.array([[.15],
+                              [.15]])
+            elif elem.dim == 3:
+                y = np.array([[.15],
+                              [.15],
+                              [.15]])
+            out = 0.
+            for i in range(elem.doflocs.shape[0]):
+                out += elem.lbasis(y, i)[0][0]
+            self.assertAlmostEqual(out, 1, msg='failed for {}'.format(elem))
 
 
 if __name__ == '__main__':
