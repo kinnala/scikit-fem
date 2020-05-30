@@ -29,13 +29,20 @@ and engineering.  Finite element method (FEM) is a flexible computational
 technique for the discretization and solution of PDE's, especially in the case
 of complex spatial domains.
 
-Conceptually FEM transforms a time-independent (or temporally discretized) PDE
+Conceptually, FEM transforms a time-independent (or temporally discretized) PDE
 into a system of linear equations $Ax=b$.  `scikit-fem` is a lightweight Python
 library for the creation, or *assembly*, of the finite element matrices $A$ and
-vectors $b$.  The user defines a computational mesh, picks suitable basis
-functions, and provides the PDE's weak formulation.  The resulting matrices and
-vectors can be used together with sparse linear solvers compatible with the
-SciPy ecosystem.
+vectors $b$.  The user loads a computational mesh, picks suitable basis
+functions from the library's collection, and provides the PDE's weak
+formulation.  This results in matrices and vectors that can be used together
+with any sparse linear solvers in the SciPy ecosystem.
+
+# Workflow and features
+
+In `scikit-fem`, the finite element mesh can be either loaded from external
+formats, defined via two NumPy arrays or created using
+
+# Prior art
 
 There exist several open source frameworks – written in Python or with a Python
 interface – that implement the finite element method.  In contrast to Fenics,
