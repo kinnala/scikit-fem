@@ -58,3 +58,40 @@ from .element_hex import ElementHex1, ElementHexS2
 from .element_line import ElementLineP1, ElementLineP2, ElementLinePp,\
     ElementLineHermite
 from .element_composite import ElementComposite
+
+
+__all__ = [
+    "DiscreteField",
+    "Element",
+    "ElementH1",
+    "ElementVectorH1",
+    "ElementHdiv",
+    "ElementHcurl",
+    "ElementTriP1",
+    "ElementTriP2",
+    "ElementTriDG",
+    "ElementTriP0",
+    "ElementTriRT0",
+    "ElementTriMorley",
+    "ElementTriArgyris",
+    "ElementTriMini",
+    "ElementQuad0",
+    "ElementQuad1",
+    "ElementQuad2",
+    "ElementQuadS2",
+    "ElementQuadDG",
+    "ElementQuadP",
+    "ElementQuadBFS",
+    "ElementTetP0",
+    "ElementTetP1",
+    "ElementTetP2",
+    "ElementTetRT0",
+    "ElementTetN0",
+    "ElementTetMini",
+    "ElementHex1",
+    "ElementHexS2",
+    "ElementLineP1",
+    "ElementLineP2",
+    "ElementLinePp",
+    "ElementLineHermite",
+    "ElementComposite"]

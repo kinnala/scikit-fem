@@ -1,12 +1,9 @@
-import warnings
-from typing import Any, Callable, Optional, Tuple, Union
+from typing import Callable
 
 import numpy as np
 from numpy import ndarray
 from scipy.sparse import coo_matrix
 
-from .form_parameters import FormParameters
-from ..basis import Basis
 from ...element import DiscreteField
 
 

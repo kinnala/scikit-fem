@@ -1,11 +1,9 @@
-from typing import Any, Callable, Optional, Dict
+from typing import Callable, Optional, Any
 
 import numpy as np
-from numpy import ndarray
 
 from .form import Form, FormDict
 from ..basis import Basis
-from ...element import DiscreteField
 
 
 class BilinearForm(Form):

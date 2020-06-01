@@ -1,8 +1,7 @@
 """Weak forms for elasticity."""
 
 from skfem.assembly import BilinearForm
-from .helpers import ddot, trace, sym_grad,\
-    transpose, eye, grad
+from .helpers import ddot, trace, sym_grad, eye
 
 
 def lame_parameters(E, nu):

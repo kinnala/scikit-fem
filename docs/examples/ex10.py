@@ -5,7 +5,7 @@ This example solves the nonlinear minimal surface problem using Newton's method.
 """
 
 from skfem import *
-from skfem.helpers import grad, dot, trace
+from skfem.helpers import grad, dot
 import numpy as np
 
 m = MeshTri()

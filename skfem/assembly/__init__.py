@@ -65,6 +65,7 @@ def asm(form: Form,
 
 
 __all__ = [
+    "asm",
     "Basis",
     "InteriorBasis",
     "FacetBasis",

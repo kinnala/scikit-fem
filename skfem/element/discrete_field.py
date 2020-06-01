@@ -1,4 +1,4 @@
-from typing import NamedTuple, Optional, List
+from typing import NamedTuple, Optional
 
 import numpy as np
 from numpy import ndarray
