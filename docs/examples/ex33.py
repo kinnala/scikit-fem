@@ -27,7 +27,7 @@ basis = InteriorBasis(m, e)
 
 @BilinearForm
 def dudv(E, v, w):
-    from skfem.helpers import curl, grad, dot
+    from skfem.helpers import curl, dot
     return dot(curl(E), curl(v)) + dot(E, v)
 
 def f(x, y, z):

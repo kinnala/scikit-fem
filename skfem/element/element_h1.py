@@ -1,5 +1,4 @@
 import numpy as np
-from numpy import ndarray
 
 from .element import Element
 from .discrete_field import DiscreteField

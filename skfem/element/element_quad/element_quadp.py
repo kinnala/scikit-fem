@@ -1,6 +1,5 @@
 import numpy as np
 
-from ..element_h1 import ElementH1
 from ...mesh.mesh2d import MeshQuad
 from ..element_line import ElementLinePp
 

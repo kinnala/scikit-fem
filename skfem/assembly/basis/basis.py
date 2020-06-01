@@ -1,7 +1,4 @@
-import warnings
-from typing import List, Optional, NamedTuple,\
-    Any, Tuple, Dict,\
-    TypeVar, Union
+from typing import List, Any, Tuple, Dict, TypeVar, Union
 
 import numpy as np
 from numpy import ndarray
@@ -9,7 +6,6 @@ from numpy import ndarray
 from skfem.assembly.dofs import Dofs
 from skfem.element.discrete_field import DiscreteField
 from skfem.element.element_composite import ElementComposite
-from skfem.element.element_vector_h1 import ElementVectorH1
 
 
 BasisType = TypeVar('BasisType', bound='Basis')

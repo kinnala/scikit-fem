@@ -3,7 +3,6 @@ import unittest
 import numpy as np
 
 from skfem import *
-from skfem.models.poisson import laplace
 
 
 class ConvergenceRaviartThomas(unittest.TestCase):

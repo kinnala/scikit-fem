@@ -23,7 +23,7 @@ from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
 
 from skfem import *
-from skfem.models.poisson import vector_laplace, mass, laplace
+from skfem.models.poisson import vector_laplace, laplace
 from skfem.models.general import divergence, rot
 from skfem.io import from_meshio
 

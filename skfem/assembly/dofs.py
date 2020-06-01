@@ -1,6 +1,5 @@
 import warnings
-from typing import NamedTuple, Optional, Dict,\
-    Union, List
+from typing import NamedTuple, Dict, Union, List
 
 import numpy as np
 from numpy import ndarray
