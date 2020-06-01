@@ -47,7 +47,7 @@ class MeshLine(Mesh):
         if p is None and t is None:
             p = np.array([[0., 1.]], dtype=np.float_)
         if len(p.shape) == 1:
-            p = np.array([p]) 
+            p = np.array([p])
         self.p = p
         self.boundaries = boundaries
         self.subdomains = subdomains
