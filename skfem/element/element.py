@@ -37,7 +37,7 @@ class Element():
         Mesh type for calculating number of edges, etc.
 
     """
-    nodal_dofs: int = 0 
+    nodal_dofs: int = 0
     facet_dofs: int = 0
     interior_dofs: int = 0
     edge_dofs: int = 0
@@ -99,9 +99,9 @@ class Element():
 
         """
         return np.array([self.nodal_dofs * self.mesh_type.t.shape[0],
-                         self.edge_dofs * self.mesh_type.t2e.shape[0]\
+                         self.edge_dofs * self.mesh_type.t2e.shape[0]
                          if hasattr(self.mesh_type, 'edges') else 0,
-                         self.facet_dofs * self.mesh_type.t2f.shape[0]\
+                         self.facet_dofs * self.mesh_type.t2f.shape[0]
                          if hasattr(self.mesh_type, 'facets') else 0,
                          self.interior_dofs])
 

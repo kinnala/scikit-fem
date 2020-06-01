@@ -22,9 +22,9 @@ class ElementHcurl(Element):
         detDF = mapping.detDF(X, tind)
         orient = self.orient(mapping, i, tind)
         return (DiscreteField(
-            value = np.einsum('ijkl,il,k->jkl', invDF, phi, orient),
-            curl = np.einsum('ijkl,jl,kl->ikl', DF, dphi,
-                             1. / detDF * orient[:, None])
+            value=np.einsum('ijkl,il,k->jkl', invDF, phi, orient),
+            curl=np.einsum('ijkl,jl,kl->ikl', DF, dphi,
+                           1. / detDF * orient[:, None])
         ),)
 
     def lbasis(self, X, i):

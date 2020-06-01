@@ -13,7 +13,7 @@ class ElementTetMini(ElementH1):
     doflocs = np.array([[0., 0., 0.],
                         [1., 0., 0.],
                         [0., 1., 0.],
-                        [0., 0., 1.], 
+                        [0., 0., 1.],
                         [np.nan] * dim])
 
     mesh_type = MeshTet

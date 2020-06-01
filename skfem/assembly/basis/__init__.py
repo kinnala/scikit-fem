@@ -1,3 +1,3 @@
-from .basis import Basis
-from .interior_basis import InteriorBasis
-from .facet_basis import FacetBasis
+from .basis import Basis  # noqa
+from .interior_basis import InteriorBasis  # noqa
+from .facet_basis import FacetBasis  # noqa

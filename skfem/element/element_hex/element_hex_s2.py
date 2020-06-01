@@ -50,11 +50,11 @@ class ElementHexS2(ElementH1):
             y *= s[1]
             z *= s[2]
             phi = (1 + x) * (1 + y) * (1 + z) * (x + y + z - 2) / 8
-            dphi = np.array([s[0] * (1 + y) * (1 + z) * (x + y + z - 2)\
+            dphi = np.array([s[0] * (1 + y) * (1 + z) * (x + y + z - 2)
                              + s[0] * (1 + x) * (1 + y) * (1 + z),
-                             s[1] * (1 + x) * (1 + z) * (x + y + z - 2)\
+                             s[1] * (1 + x) * (1 + z) * (x + y + z - 2)
                              + s[1] * (1 + x) * (1 + y) * (1 + z),
-                             s[2] * (1 + x) * (1 + y) * (x + y + z - 2)\
+                             s[2] * (1 + x) * (1 + y) * (x + y + z - 2)
                              + s[2] * (1 + x) * (1 + y) * (1 + z)]) / 8
         elif i < 20:
             s = [
