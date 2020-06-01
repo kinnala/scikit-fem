@@ -405,7 +405,7 @@ class Mesh:
             boundary.
         boundaries_only
             If True, include only facets on the boundary of the mesh.
-            
+
         """
         if self.boundaries is None:
             self.boundaries = {}
@@ -429,11 +429,13 @@ class Mesh:
         boundaries = {
             **(self.boundaries if self.boundaries is not None else {}),
             **(other.boundaries if other.boundaries is not None else {}),
-        } if self.boundaries is not None or other.boundaries is not None else None
+        } if self.boundaries is not None or other.boundaries is not None\
+            else None
         subdomains = {
             **(self.subdomains if self.subdomains is not None else {}),
             **(other.subdomains if other.subdomains is not None else {}),
-        } if self.subdomains is not None or other.subdomains is not None else None
+        } if self.subdomains is not None or other.subdomains is not None\
+            else None
         return type(self)(p, t, boundaries, subdomains)
 
     @staticmethod

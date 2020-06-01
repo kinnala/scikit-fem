@@ -29,7 +29,8 @@ def from_meshio(m, force_mesh_type=None):
         The mesh object from meshio.
     force_mesh_type
         An optional string forcing the mesh type if automatic detection
-        fails. See skfem.importers.meshio.MESH_TYPE_MAPPING for possible values.
+        fails. See skfem.importers.meshio.MESH_TYPE_MAPPING for possible
+        values.
 
     """
 
@@ -78,7 +79,7 @@ def from_meshio(m, force_mesh_type=None):
                     return key
             return None
 
-        if m.cell_sets:         # MSH 4.1
+        if m.cell_sets:  # MSH 4.1
             subdomains = {k: v[meshio_type]
                           for k, v in m.cell_sets_dict.items()
                           if meshio_type in v}
@@ -90,7 +91,7 @@ def from_meshio(m, force_mesh_type=None):
                                        enumerate(map(tuple, mtmp.facets.T))
                                        if f in v])
                           for k, v in facets.items()}
-        else: # MSH 2.2?
+        else:  # MSH 2.2?
             elements_tag = m.cell_data_dict['gmsh:physical'][meshio_type]
             subdomains = {}
             tags = np.unique(elements_tag)
@@ -124,7 +125,7 @@ def from_meshio(m, force_mesh_type=None):
         mtmp.boundaries = boundaries
         mtmp.subdomains = subdomains
 
-    except Exception as e:
+    except Exception:
         warnings.warn("Unable to load tagged boundaries/subdomains.")
 
     return mtmp

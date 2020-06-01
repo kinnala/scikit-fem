@@ -1,0 +1,9 @@
+[flake8]
+ignore = W504,W503,E226,E126,E123,E121,E24,E704,E741
+exclude =
+    docs
+    .git
+    .github
+    paper
+    tests
+    setup.py

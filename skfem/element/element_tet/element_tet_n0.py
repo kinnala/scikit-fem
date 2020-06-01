@@ -13,7 +13,7 @@ class ElementTetN0(ElementHcurl):
                         [0., .5, 0.],
                         [0., 0., .5],
                         [.5, 0., .5],
-                        [0., .5, .5],])
+                        [0., .5, .5]])
     mesh_type = MeshTet
 
     def lbasis(self, X, i):

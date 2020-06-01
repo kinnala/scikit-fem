@@ -43,7 +43,8 @@ class ElementComposite(Element):
         self.dofnames = dofnames
 
         doflocs = []
-        for i in range(np.sum(np.array([e._bfun_counts() for e in self.elems]))):
+        for i in range(np.sum(np.array([e._bfun_counts()
+                                        for e in self.elems]))):
             n, ind = self._deduce_bfun(i)
             doflocs.append(self.elems[n].doflocs[ind])
         self.doflocs = np.array(doflocs)
@@ -60,15 +61,15 @@ class ElementComposite(Element):
             ns += sum([tmp for j in range(int(counts[0] / len(tmp)))], [])
         if counts[1] > 0:
             tmp = sum([[j] * self.elems[j].edge_dofs
-                   for j in range(len(self.elems))], [])
+                       for j in range(len(self.elems))], [])
             ns += sum([tmp for j in range(int(counts[1] / len(tmp)))], [])
         if counts[2] > 0:
             tmp = sum([[j] * self.elems[j].facet_dofs
-                   for j in range(len(self.elems))], [])
+                       for j in range(len(self.elems))], [])
             ns += sum([tmp for j in range(int(counts[2] / len(tmp)))], [])
         if counts[3] > 0:
             tmp = sum([[j] * self.elems[j].interior_dofs
-                   for j in range(len(self.elems))], [])
+                       for j in range(len(self.elems))], [])
             ns += sum([tmp for j in range(int(counts[3] / len(tmp)))], [])
 
         mask = np.array(ns)

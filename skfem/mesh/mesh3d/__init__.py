@@ -1,3 +1,3 @@
-from .mesh3d import Mesh3D
-from .mesh_tet import MeshTet
-from .mesh_hex import MeshHex
+from .mesh3d import Mesh3D  # noqa
+from .mesh_tet import MeshTet  # noqa
+from .mesh_hex import MeshHex  # noqa

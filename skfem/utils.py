@@ -66,10 +66,12 @@ def solver_eigen_scipy(**kwargs) -> EigenSolver:
         'mode': 'normal',
     }
     params.update(kwargs)
+
     def solver(K, M, **solve_time_kwargs):
         params.update(solve_time_kwargs)
         from scipy.sparse.linalg import eigsh
         return eigsh(K, M=M, **params)
+
     return solver
 
 
@@ -336,5 +338,9 @@ def project(fun,
 
 
 # for backwards compatibility
-L2_projection = lambda a, b, c=None: project(a, basis_to=b, I=c)
-derivative = lambda a, b, c, d=0: project(a, basis_from=b, basis_to=c, diff=d)
+def L2_projection(a, b, c=None):
+    return project(a, basis_to=b, I=c)
+
+
+def derivative(a, b, c, d=0):
+    return project(a, basis_from=b, basis_to=c, diff=d)

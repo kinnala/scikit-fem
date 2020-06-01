@@ -42,10 +42,10 @@ class MappingAffine(Mapping):
             if dim == 1:
                 self.invA[0, 0] = 1.0 / self.A[0, 0]
             elif dim == 2:
-                self.invA[0, 0] =  self.A[1, 1] / self.detA
+                self.invA[0, 0] =  self.A[1, 1] / self.detA  # noqa
                 self.invA[0, 1] = -self.A[0, 1] / self.detA
                 self.invA[1, 0] = -self.A[1, 0] / self.detA
-                self.invA[1, 1] =  self.A[0, 0] / self.detA
+                self.invA[1, 1] =  self.A[0, 0] / self.detA  # noqa
             elif dim == 3:
                 self.invA[0, 0] = (-self.A[1, 2] * self.A[2, 1] +
                                    self.A[1, 1] * self.A[2, 2]) / self.detA
@@ -170,7 +170,7 @@ class MappingAffine(Mapping):
     def normals(self, X, tind, find, t2f):
         if self.dim == 1:
             Nref = np.array([[-1.0],
-                             [ 1.0]])
+                             [1.0]])
         elif self.dim == 2:
             Nref = np.array([[0.0, -1.0],
                              [1.0, 1.0],

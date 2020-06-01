@@ -19,7 +19,7 @@ class Basis:
     Please see the following implementations:
 
     - :class:`~skfem.assembly.InteriorBasis`, basis functions inside elements
-    - :class:`~skfem.assembly.FacetBasis`, basis functions on element boundaries
+    - :class:`~skfem.assembly.FacetBasis`, basis functions on boundaries
 
     """
 
@@ -70,7 +70,7 @@ class Basis:
         offset = element.nodal_dofs * mesh.p.shape[1]
 
         # edge dofs
-        if mesh.dim() == 3: 
+        if mesh.dim() == 3:
             self.edge_dofs = np.reshape(
                 np.arange(element.edge_dofs * mesh.edges.shape[1],
                           dtype=np.int64),
@@ -78,7 +78,7 @@ class Basis:
                 order='F') + offset
             offset = offset + element.edge_dofs * mesh.edges.shape[1]
         else:
-            self.edge_dofs = np.empty((0,0))
+            self.edge_dofs = np.empty((0, 0))
 
         # facet dofs
         self.facet_dofs = np.reshape(
@@ -172,7 +172,8 @@ class Basis:
         off = n_nodal
 
         facets = {
-            self.dofnames[i + off]: np.zeros((0, len(facet_ix)), dtype=np.int64)
+            self.dofnames[i + off]: np.zeros((0, len(facet_ix)),
+                                             dtype=np.int64)
             for i in range(n_facet) if self.dofnames[i + off] not in skip
         }
         for i in range(n_facet):
@@ -213,13 +214,13 @@ class Basis:
         This corresponds to a list of facet indices that can be passed over:
 
         >>> basis = InteriorBasis(m, ElementTriP1())
-        >>> basis.find_dofs({'left': m.facets_satisfying(lambda x: x[0] == 0)})
-        {'left': Dofs(nodal={'u': array([0, 2, 5])}, facet={}, edge={}, interior={})}
+        >>> basis.find_dofs({'left': np.array([1, 5])})['left']
+        Dofs(nodal={'u': array([0, 2, 5])}, facet={}, edge={}, interior={})
 
         Parameters
         ----------
         facets
-            A dictionary of facet indices. If `None`, use `self.mesh.boundaries`
+            A dictionary of facets. If `None`, use `self.mesh.boundaries`
             if set or otherwise use `{'all': self.mesh.boundary_facets()}`.
         skip
             List of dofnames to skip.
@@ -242,17 +243,17 @@ class Basis:
         Parameters
         ----------
         facets
-            A list of facet indices. If None, find facets by
-            Mesh.boundary_facets().  If callable, call Mesh.facets_satisfying to
-            get facets. If array, find the corresponding dofs. If dict of
-            arrays, find dofs for each entry. If dict of callables, call
+            A list of facet indices. If `None`, find facets by
+            Mesh.boundary_facets.  If callable, call Mesh.facets_satisfying
+            to get facets. If array, find the corresponding DOFs. If dict of
+            arrays, find DOFs for each entry. If dict of callables, call
             Mesh.facets_satisfying for each entry to get facets and then find
-            dofs for those.
+            DOFs for those.
 
         Returns
         -------
         Dofs or Dict[str, Dofs]
-            A subset of degrees-of-freedom as :class:`skfem.assembly.dofs.Dofs`.
+            A subset of DOFs as :class:`skfem.assembly.dofs.Dofs`.
 
         """
         if facets is None:
@@ -313,12 +314,12 @@ class Basis:
                                 out[j, k, :, :] += \
                                     values * self.basis[i][c][n][j, k]
                     elif len(refn.shape) == 5:  # third derivatives
-                        #import pdb; pdb.set_trace()
                         for j in range(out.shape[0]):
                             for k in range(out.shape[1]):
                                 for l in range(out.shape[2]):
                                     out[j, k, l, :, :] += \
-                                        values * self.basis[i][c][-1][n][j, k, l]
+                                        values * \
+                                        self.basis[i][c][-1][n][j, k, l]
                     elif len(refn.shape) == 6:  # fourth derivatives
                         for j in range(out.shape[0]):
                             for k in range(out.shape[1]):
@@ -355,20 +356,20 @@ class Basis:
     def split_indices(self) -> List[ndarray]:
         """Return indices for the solution components."""
         if isinstance(self.elem, ElementComposite):
-            off = np.zeros(4, dtype=np.int)
+            o = np.zeros(4, dtype=np.int)
             output = [None] * len(self.elem.elems)
             for k in range(len(self.elem.elems)):
                 e = self.elem.elems[k]
                 output[k] = np.concatenate((
-                    self.nodal_dofs[off[0]:(off[0] + e.nodal_dofs)].flatten(),
-                    self.edge_dofs[off[1]:(off[1] + e.edge_dofs)].flatten(),
-                    self.facet_dofs[off[2]:(off[2] + e.facet_dofs)].flatten(),
-                    self.interior_dofs[off[3]:(off[3] + e.interior_dofs)].flatten()
+                    self.nodal_dofs[o[0]:(o[0] + e.nodal_dofs)].flatten(),
+                    self.edge_dofs[o[1]:(o[1] + e.edge_dofs)].flatten(),
+                    self.facet_dofs[o[2]:(o[2] + e.facet_dofs)].flatten(),
+                    self.interior_dofs[o[3]:(o[3] + e.interior_dofs)].flatten()
                 )).astype(np.int)
-                off += np.array([e.nodal_dofs,
-                                 e.edge_dofs,
-                                 e.facet_dofs,
-                                 e.interior_dofs])
+                o += np.array([e.nodal_dofs,
+                               e.edge_dofs,
+                               e.facet_dofs,
+                               e.interior_dofs])
             return output
         raise ValueError("Basis.elem has only a single component!")
 

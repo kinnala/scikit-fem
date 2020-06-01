@@ -47,11 +47,11 @@ class MeshLine(Mesh):
         if p is None and t is None:
             p = np.array([[0., 1.]], dtype=np.float_)
         if len(p.shape) == 1:
-            p = np.array([p]) 
+            p = np.array([p])
         self.p = p
         self.boundaries = boundaries
         self.subdomains = subdomains
-        
+
         self.facets = np.arange(self.p.shape[1])[None, :]
         self.t = np.vstack([self.facets[0, :-1],
                             self.facets[0, 1:]]) if t is None else t
@@ -99,7 +99,9 @@ class MeshLine(Mesh):
         newp = np.hstack((p, 0.5*(p[:, self.t[0, marked]] +
                                   p[:, self.t[1, marked]])))
         newt = np.vstack((t[0, marked], mid))
-        newt = np.hstack((t[:, nonmarked], newt, np.vstack((mid, t[1, marked]))))
+        newt = np.hstack((t[:, nonmarked],
+                          newt,
+                          np.vstack((mid, t[1, marked]))))
 
         # update fields
         self.p = newp
@@ -156,7 +158,8 @@ class MeshLine(Mesh):
         return MeshQuad.init_tensor(self.p[0], other.p[0])
 
     def param(self):
-        return np.max(np.abs(self.p[0, self.t[1, :]] - self.p[0, self.t[0, :]]))
+        return np.max(np.abs(self.p[0, self.t[1, :]]
+                             - self.p[0, self.t[0, :]]))
 
     def mapping(self):
         from skfem.mapping import MappingAffine

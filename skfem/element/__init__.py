@@ -1,12 +1,14 @@
-"""This module defines finite elements (in a very generic sense).  The naming of
-the element classes reflects their compatibility with the mesh types.
+"""This module defines finite elements (in a very generic sense).
+
+The naming of the element classes reflects their compatibility with the mesh
+types.
 
 >>> from skfem.element import ElementTriP1
 >>> ElementTriP1.mesh_type
 skfem.mesh.mesh2d.mesh_tri.MeshTri
 
-In order to use an element, you simply initialize the respective object and pass
-it to the constructor of :class:`~skfem.assembly.InteriorBasis` or
+In order to use an element, you simply initialize the respective object and
+pass it to the constructor of :class:`~skfem.assembly.InteriorBasis` or
 :class:`~skfem.assembly.FacetBasis`.
 
 The supported elements include
@@ -54,10 +56,10 @@ from .element_quad import ElementQuad0, ElementQuad1, ElementQuad2,\
     ElementQuadBFS
 from .element_tet import ElementTetP0, ElementTetP1, ElementTetP2,\
     ElementTetRT0, ElementTetN0, ElementTetMini
-from .element_hex import ElementHex1, ElementHexS2
-from .element_line import ElementLineP1, ElementLineP2, ElementLinePp,\
-    ElementLineHermite
-from .element_composite import ElementComposite
+from .element_hex import ElementHex1, ElementHexS2  # noqa
+from .element_line import ElementLineP1, ElementLineP2,\
+    ElementLinePp, ElementLineHermite  # noqa
+from .element_composite import ElementComposite  # noqa
 
 
 __all__ = [

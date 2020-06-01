@@ -2,7 +2,8 @@
 
 import json
 
-from skfem.mesh import *
+from skfem.mesh import MeshLine, MeshTri, MeshQuad,\
+    MeshTet, MeshHex, Mesh
 
 
 def from_file(filename: str):
@@ -31,4 +32,4 @@ def from_file(filename: str):
 
 def to_file(mesh: Mesh, filename: str):
     with open(filename, 'w') as handle:
-        d = json.dump(mesh.to_dict(), handle)
+        _ = json.dump(mesh.to_dict(), handle)

@@ -35,8 +35,8 @@ class ElementGlobal(Element):
         N = len(self._pbasis[()])
         # loop over new basis
         for k in range(self.derivatives + 1):
+            diffs = list(itertools.product(*((list(range(self.dim)),) * k)))
             for itr in range(N):
-                diffs = list(itertools.product(*((list(range(self.dim)),) * k)))
                 for diff in diffs:
                     U[k][diff] += (V[:, itr, i][:, None]
                                    * self._pbasis[diff][itr](*x))
@@ -96,7 +96,7 @@ class ElementGlobal(Element):
                                  np.max([j - dy, 0]),
                                  np.max([k - dz, 0]),)))
 
-    def _pbasis_init(self, maxdeg, dim, Ndiff, is_tensorial = False):
+    def _pbasis_init(self, maxdeg, dim, Ndiff, is_tensorial=False):
         """Define power bases.
 
         Parameters
@@ -115,10 +115,10 @@ class ElementGlobal(Element):
         for k in range(Ndiff + 1):
             diffs = list(itertools.product(*((list(range(dim)),) * k)))
             for diff in diffs:
-                desc = ''.join([str(d) for d in diff])
-                dx = sum([1 for d in diff if d==0])
-                dy = sum([1 for d in diff if d==1]) if dim == 2 else None
-                dz = sum([1 for d in diff if d==2]) if dim == 3 else None
+                #  desc = ''.join([str(d) for d in diff])
+                dx = sum([1 for d in diff if d == 0])
+                dy = sum([1 for d in diff if d == 1]) if dim == 2 else None
+                dz = sum([1 for d in diff if d == 2]) if dim == 3 else None
                 if dim == 1:
                     self._pbasis[diff] = [
                         self._pbasis_create(i=i, dx=dx)
@@ -148,7 +148,7 @@ class ElementGlobal(Element):
         N = len(self._pbasis[()])
         V = np.zeros((len(tind), N, N))
         w = {
-            'v': np.array([mesh.p[:, mesh.t[itr, tind]]\
+            'v': np.array([mesh.p[:, mesh.t[itr, tind]]
                            for itr in range(mesh.t.shape[0])]),
         }
         if mesh.p.shape[0] >= 2:

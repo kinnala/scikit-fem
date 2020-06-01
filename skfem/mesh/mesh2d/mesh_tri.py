@@ -122,7 +122,7 @@ class MeshTri(Mesh2D):
         """
         npx = len(x)
         npy = len(y)
-        X, Y = np.meshgrid(np.sort(x), np.sort(y))   
+        X, Y = np.meshgrid(np.sort(x), np.sort(y))
         p = np.vstack((X.flatten('F'), Y.flatten('F')))
         ix = np.arange(npx * npy)
         nt = (npx - 1) * (npy - 1)
@@ -152,7 +152,7 @@ class MeshTri(Mesh2D):
     @classmethod
     def init_symmetric(cls) -> MeshType:
         r"""Initialize a symmetric mesh of the unit square.
-        
+
         The mesh topology is as follows::
 
             *------------*
@@ -177,7 +177,7 @@ class MeshTri(Mesh2D):
     @classmethod
     def init_sqsymmetric(cls: Type[MeshType]) -> MeshType:
         r"""Initialize a symmetric mesh of the unit square.
-        
+
         The mesh topology is as follows::
 
             *------*------*
@@ -206,17 +206,17 @@ class MeshTri(Mesh2D):
     @classmethod
     def init_refdom(cls: Type[MeshType]) -> MeshType:
         r"""Initialize a mesh that includes only the reference triangle.
-        
+
         The mesh topology is as follows::
 
             *
-            |\           
-            |  \         
-            |    \       
-            |      \      
-            |        \    
-            |          \  
-            |            \ 
+            |\
+            |  \
+            |    \
+            |      \
+            |        \
+            |          \
+            |            \
             O-------------*
 
         """
@@ -228,7 +228,7 @@ class MeshTri(Mesh2D):
     @classmethod
     def init_lshaped(cls: Type[MeshType]) -> MeshType:
         r"""Initialize a mesh for the L-shaped domain.
-        
+
         The mesh topology is as follows::
 
             *-------*
@@ -363,39 +363,40 @@ class MeshTri(Mesh2D):
                 t2facets = facets[m.t2f]
                 t2facets[2, t2facets[0, :] + t2facets[1, :] > 0] = 1
                 facets[m.t2f[t2facets == 1]] = 1
-                
+
             return facets
 
         def split_elements(m, facets):
             """Define new elements."""
             ix = (-1)*np.ones(m.facets.shape[1], dtype=np.int64)
-            ix[facets == 1] = np.arange(np.count_nonzero(facets)) + m.p.shape[1]
-            ix = ix[m.t2f] # (0, 1) (1, 2) (0, 2)
+            ix[facets == 1] = (np.arange(np.count_nonzero(facets))
+                               + m.p.shape[1])
+            ix = ix[m.t2f]
 
-            red =   (ix[0] >= 0) * (ix[1] >= 0) * (ix[2] >= 0)
-            blue1 = (ix[0] ==-1) * (ix[1] >= 0) * (ix[2] >= 0)
-            blue2 = (ix[0] >= 0) * (ix[1] ==-1) * (ix[2] >= 0)
-            green = (ix[0] ==-1) * (ix[1] ==-1) * (ix[2] >= 0)
-            rest =  (ix[0] ==-1) * (ix[1] ==-1) * (ix[2] ==-1)
+            red =   (ix[0] >= 0) * (ix[1] >= 0) * (ix[2] >= 0)  # noqa
+            blue1 = (ix[0] ==-1) * (ix[1] >= 0) * (ix[2] >= 0)  # noqa
+            blue2 = (ix[0] >= 0) * (ix[1] ==-1) * (ix[2] >= 0)  # noqa
+            green = (ix[0] ==-1) * (ix[1] ==-1) * (ix[2] >= 0)  # noqa
+            rest =  (ix[0] ==-1) * (ix[1] ==-1) * (ix[2] ==-1)  # noqa
 
             # new red elements
             t_red = np.hstack((
                 np.vstack((m.t[0, red], ix[0, red], ix[2, red])),
                 np.vstack((m.t[1, red], ix[0, red], ix[1, red])),
                 np.vstack((m.t[2, red], ix[1, red], ix[2, red])),
-                np.vstack(( ix[1, red], ix[2, red], ix[0, red])),
+                np.vstack(( ix[1, red], ix[2, red], ix[0, red])),  # noqa
             ))
 
             # new blue elements
             t_blue1 = np.hstack((
                 np.vstack((m.t[1, blue1], m.t[0, blue1], ix[2, blue1])),
-                np.vstack((m.t[1, blue1],  ix[1, blue1], ix[2, blue1])),
-                np.vstack((m.t[2, blue1],  ix[2, blue1], ix[1, blue1])),
+                np.vstack((m.t[1, blue1],  ix[1, blue1], ix[2, blue1])),  # noqa
+                np.vstack((m.t[2, blue1],  ix[2, blue1], ix[1, blue1])),  # noqa
             ))
 
             t_blue2 = np.hstack((
-                np.vstack((m.t[0, blue2], ix[0, blue2],  ix[2, blue2])),
-                np.vstack(( ix[2, blue2], ix[0, blue2], m.t[1, blue2])),
+                np.vstack((m.t[0, blue2], ix[0, blue2],  ix[2, blue2])),  # noqa
+                np.vstack(( ix[2, blue2], ix[0, blue2], m.t[1, blue2])),  # noqa
                 np.vstack((m.t[2, blue2], ix[2, blue2], m.t[1, blue2])),
             ))
 
@@ -410,7 +411,7 @@ class MeshTri(Mesh2D):
                       m.p[:, m.facets[1, facets == 1]])
 
             return np.hstack((m.p, p)),\
-                   np.hstack((m.t[:, rest], t_red, t_blue1, t_blue2, t_green))
+                np.hstack((m.t[:, rest], t_red, t_blue1, t_blue2, t_green))
 
         sorted_mesh = MeshTri(self.p, sort_mesh(self.p, self.t), sort_t=False)
         facets = find_facets(sorted_mesh, marked)

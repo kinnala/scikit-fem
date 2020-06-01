@@ -1,3 +1,3 @@
-from .mesh2d import Mesh2D
-from .mesh_tri import MeshTri
-from .mesh_quad import MeshQuad
+from .mesh2d import Mesh2D  # noqa
+from .mesh_tri import MeshTri  # noqa
+from .mesh_quad import MeshQuad  # noqa

@@ -34,7 +34,7 @@ class ElementTetP1(ElementH1):
                              1 + 0*x,
                              0*x])
         elif i == 3:
-            phi = z 
+            phi = z
             dphi = np.array([0*x,
                              0*x,
                              1 + 0*x])

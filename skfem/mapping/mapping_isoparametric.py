@@ -16,7 +16,7 @@ class MappingIsoparametric(Mapping):
                  mesh: Mesh,
                  elem: Element,
                  bndelem: Optional[Element] = None):
-        """Initialize an isoparametric mapping between
+        r"""Initialize an isoparametric mapping between
         the reference and the global element.
 
         This means that the mapping is defined through
@@ -172,19 +172,19 @@ class MappingIsoparametric(Mapping):
 
         if self.dim == 2:
             detDF = self.detDF(X, tind)
-            invDF[0, 0] =  J[1][1]
+            invDF[0, 0] =  J[1][1]  # noqa
             invDF[0, 1] = -J[0][1]
             invDF[1, 0] = -J[1][0]
-            invDF[1, 1] =  J[0][0]
+            invDF[1, 1] =  J[0][0]  # noqa
         elif self.dim == 3:
             invDF[0, 0] = -J[1][2] * J[2][1] + J[1][1] * J[2][2]
-            invDF[1, 0] =  J[1][2] * J[2][0] - J[1][0] * J[2][2]
+            invDF[1, 0] =  J[1][2] * J[2][0] - J[1][0] * J[2][2]  # noqa
             invDF[2, 0] = -J[1][1] * J[2][0] + J[1][0] * J[2][1]
-            invDF[0, 1] =  J[0][2] * J[2][1] - J[0][1] * J[2][2]
+            invDF[0, 1] =  J[0][2] * J[2][1] - J[0][1] * J[2][2]  # noqa
             invDF[1, 1] = -J[0][2] * J[2][0] + J[0][0] * J[2][2]
-            invDF[2, 1] =  J[0][1] * J[2][0] - J[0][0] * J[2][1]
+            invDF[2, 1] =  J[0][1] * J[2][0] - J[0][0] * J[2][1]  # noqa
             invDF[0, 2] = -J[0][2] * J[1][1] + J[0][1] * J[1][2]
-            invDF[1, 2] =  J[0][2] * J[1][0] - J[0][0] * J[1][2]
+            invDF[1, 2] =  J[0][2] * J[1][0] - J[0][0] * J[1][2]  # noqa
             invDF[2, 2] = -J[0][1] * J[1][0] + J[0][0] * J[1][1]
         else:
             raise Exception("Not implemented for the given dimension.")
@@ -194,19 +194,19 @@ class MappingIsoparametric(Mapping):
     def normals(self, X, tind, find, t2f):
         if self.dim == 1:
             Nref = np.array([[-1.],
-                             [ 1.]])
+                             [ 1.]])  # noqa
         elif self.dim == 2:
-            Nref = np.array([[ 0., -1.],
-                             [ 1.,  0.],
-                             [ 0.,  1.],
-                             [-1.,  0.]])
+            Nref = np.array([[ 0., -1.],  # noqa
+                             [ 1.,  0.],  # noqa
+                             [ 0.,  1.],  # noqa
+                             [-1.,  0.]])  # noqa
         elif self.dim == 3:
-            Nref = np.array([[ 1.,  0.,  0.],
-                             [ 0.,  0.,  1.],
-                             [ 0.,  1.,  0.],
-                             [ 0., -1.,  0.],
-                             [ 0.,  0., -1.],
-                             [-1.,  0.,  0.]])
+            Nref = np.array([[ 1.,  0.,  0.],  # noqa
+                             [ 0.,  0.,  1.],  # noqa
+                             [ 0.,  1.,  0.],  # noqa
+                             [ 0., -1.,  0.],  # noqa
+                             [ 0.,  0., -1.],  # noqa
+                             [-1.,  0.,  0.]])  # noqa
         else:
             raise Exception("Not implemented for the given dimension.")
 

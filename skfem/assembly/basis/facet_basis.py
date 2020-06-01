@@ -17,7 +17,7 @@ class FacetBasis(Basis):
     def __init__(self,
                  mesh,
                  elem,
-                 mapping = None,
+                 mapping=None,
                  intorder: int = None,
                  side: int = None,
                  facets: ndarray = None,
@@ -39,7 +39,7 @@ class FacetBasis(Basis):
             integrated exactly by the used quadrature. Not used if `quadrature`
             is specified.
         side
-            If 0 or 1, the basis functions are evaluated on the interior facets.
+            If 0 or 1, basis functions are evaluated on the interior facets.
             The numbers 0 and 1 refer to the different sides of the facets.
             Side 0 corresponds to the indices `mesh.f2t[0]`. If `None`, basis
             is evaluated only on the exterior facets.
@@ -65,7 +65,7 @@ class FacetBasis(Basis):
                 self.find = np.nonzero(self.mesh.f2t[1] == -1)[0]
                 self.tind = self.mesh.f2t[0, self.find]
             elif hasattr(self.mapping, 'helper_to_orig') and side in [0, 1]:
-                self.mapping.side = side # side effect
+                self.mapping.side = side
                 self.find = self.mapping.helper_to_orig[side]
                 self.tind = self.mesh.f2t[0, self.find]
             elif side in [0, 1]:
@@ -86,10 +86,10 @@ class FacetBasis(Basis):
         # construct normal vectors from side=0 always
         Y0 = self.mapping.invF(x, tind=self.mesh.f2t[0, self.find])
         self.normals = DiscreteField(
-            value = self.mapping.normals(Y0,
-                                         self.mesh.f2t[0, self.find],
-                                         self.find,
-                                         self.mesh.t2f)
+            value=self.mapping.normals(Y0,
+                                       self.mesh.f2t[0, self.find],
+                                       self.find,
+                                       self.mesh.t2f)
         )
 
         self.nelems = len(self.find)
@@ -113,5 +113,5 @@ class FacetBasis(Basis):
 
     def mesh_parameters(self) -> ndarray:
         return DiscreteField((np.abs(self.mapping.detDG(self.X, self.find))
-                              ** (1. / (self.mesh.dim() - 1.)))\
+                              ** (1. / (self.mesh.dim() - 1.)))
                              if self.mesh.dim() != 1 else np.array([0.]))

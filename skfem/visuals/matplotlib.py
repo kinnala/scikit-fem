@@ -9,7 +9,8 @@ from mpl_toolkits.mplot3d import Axes3D
 from numpy import ndarray
 
 from ..assembly import InteriorBasis
-from ..mesh import *
+from ..mesh import Mesh2D, MeshLine, MeshTri,\
+    MeshTet, MeshQuad
 
 
 @singledispatch
@@ -30,7 +31,7 @@ def _(m: MeshTet, **kwargs) -> Axes:
     fig = plt.figure()
     ax = Axes3D(fig)
     indexing = m.facets[:, bnd_facets].T
-    ax.plot_trisurf(m.p[0, :], m.p[1, :], m.p[2,:],
+    ax.plot_trisurf(m.p[0, :], m.p[1, :], m.p[2, :],
                     triangles=indexing, cmap=plt.cm.viridis, edgecolor='k')
     ax.set_axis_off()
     return ax
@@ -107,7 +108,6 @@ def _(m: Mesh2D, **kwargs) -> Axes:
             ax.text(mx[itr], my[itr], str(itr))
 
     return ax
-
 
 
 @singledispatch
