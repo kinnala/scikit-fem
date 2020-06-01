@@ -50,11 +50,11 @@ Python ecosystem such as meshio, pacopy, pyamg, and scikits.sparse.
 
 In contrast to FEniCS, Firedrake, SfePy, GetFEM++ and Netgen-NG, `scikit-fem`
 incorporates no compiled code making the installation quick and straightforward.
-We specifically target the finite element assembly instead of encapsulating the
-entire solution process from pre- to postprocessing into a single framework.  As
-a consequence, we cannot provide an end-to-end experience when it comes to
-distributed high-performance computing.  Instead, we focus on maximizing the
-performance and flexibility in a typical desktop environment.
+We specifically target finite element assembly instead of encapsulating the
+entire analysis from pre- to postprocessing into a single framework.  As a
+consequence, we cannot provide an end-to-end experience when it comes to
+distributed computing.  Instead, we focus on maximizing the performance and
+flexibility in typical desktop use cases.
 
 # Acknowledgements
 
