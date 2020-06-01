@@ -1,4 +1,6 @@
-from typing import List, Any, Tuple, Dict, TypeVar, Union
+from typing import List, Any, Tuple,\
+    Dict, TypeVar, Union,\
+    Optional
 
 import numpy as np
 from numpy import ndarray

@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Optional, Any
 
 import numpy as np
 
