@@ -36,3 +36,15 @@ from .mesh import Mesh, MeshType
 from .mesh_line import MeshLine
 from .mesh2d import Mesh2D, MeshTri, MeshQuad
 from .mesh3d import Mesh3D, MeshTet, MeshHex
+
+
+__all__ = [
+    "Mesh",
+    "MeshType",
+    "MeshLine",
+    "Mesh2D",
+    "MeshTri",
+    "MeshQuad",
+    "Mesh3D",
+    "MeshTet",
+    "MeshHex"]
