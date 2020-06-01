@@ -1,15 +1,15 @@
 ---
-title: 'scikit-fem: A Python package for assembling finite element matrices'
+title: 'scikit-fem: A Python package for finite element assembly'
 tags:
   - Python
   - numerics
   - finite element method
 authors:
   - name: Tom Gustafsson
-    orcid: XXXX-YYYY-ZZZZ-WWWW
+    orcid: 0000-0003-1611-5032
     affiliation: 1
   - name: Geordie McBain
-    orcid: XXXX-YYYY-ZZZZ-WWWW
+    orcid: 0000-0002-1904-122X
     affiliation: 2
 affiliations:
  - name: Department of Mathematics and Systems Analysis, Aalto University
@@ -34,13 +34,12 @@ into a system of linear equations $Ax=b$.  `scikit-fem` is a lightweight Python
 library for the creation, or *assembly*, of the finite element matrices $A$ and
 vectors $b$.  The user loads a computational mesh, picks suitable basis
 functions from the library's collection, and provides the PDE's weak
-formulation.  This results in matrices and vectors that can be used together
-with any sparse linear solvers in the SciPy ecosystem.
+formulation.  This results in matrices and vectors compatible with the SciPy
+ecosystem.
 
-# Workflow and features
+# Features
 
-In `scikit-fem`, the finite element mesh can be either loaded from external
-formats, defined via two NumPy arrays or created using
+`scikit-fem` supports the bgb 
 
 # Prior art
 
