@@ -217,10 +217,12 @@ def get_quadrature_tet(norder: int) -> Tuple[np.ndarray, np.ndarray]:
             ),
         }[
             norder
-        ]  # last one available from http://www.cfd-online.com/Wiki/Code:_Quadrature_on_Tetrahedra
-    except:
+        ]
+    # last one available from
+    # http://www.cfd-online.com/Wiki/Code:_Quadrature_on_Tetrahedra
+    except KeyError:
         raise NotImplementedError(
-            "The requested order of quadrature " "is not available."
+            "The requested order of quadrature is not available."
         )
 
 
@@ -2211,7 +2213,7 @@ def get_quadrature_tri(norder: int) -> Tuple[np.ndarray, np.ndarray]:
                 ),
             ),
         }[norder]
-    except:
+    except KeyError:
         raise NotImplementedError("The requested order of quadrature"
                                   "is not implemented!")
 
