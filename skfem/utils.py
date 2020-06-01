@@ -66,10 +66,12 @@ def solver_eigen_scipy(**kwargs) -> EigenSolver:
         'mode': 'normal',
     }
     params.update(kwargs)
+
     def solver(K, M, **solve_time_kwargs):
         params.update(solve_time_kwargs)
         from scipy.sparse.linalg import eigsh
         return eigsh(K, M=M, **params)
+
     return solver
 
 
