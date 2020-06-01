@@ -62,3 +62,16 @@ def asm(form: Form,
 
     """
     return form.assemble(*args, **kwargs)
+
+
+__all__ = [
+    "Basis",
+    "InteriorBasis",
+    "FacetBasis",
+    "Dofs",
+    "BilinearForm",
+    "LinearForm",
+    "Functional",
+    "bilinear_form",
+    "linear_form",
+    "functional"]
