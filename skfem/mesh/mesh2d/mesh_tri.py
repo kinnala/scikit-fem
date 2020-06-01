@@ -371,7 +371,7 @@ class MeshTri(Mesh2D):
             ix = (-1)*np.ones(m.facets.shape[1], dtype=np.int64)
             ix[facets == 1] = (np.arange(np.count_nonzero(facets))
                                + m.p.shape[1])
-            ix = ix[m.t2f] #  (0, 1) (1, 2) (0, 2)
+            ix = ix[m.t2f]
 
             red =   (ix[0] >= 0) * (ix[1] >= 0) * (ix[2] >= 0)  # noqa
             blue1 = (ix[0] ==-1) * (ix[1] >= 0) * (ix[2] >= 0)  # noqa
@@ -411,7 +411,7 @@ class MeshTri(Mesh2D):
                       m.p[:, m.facets[1, facets == 1]])
 
             return np.hstack((m.p, p)),\
-                   np.hstack((m.t[:, rest], t_red, t_blue1, t_blue2, t_green))
+                np.hstack((m.t[:, rest], t_red, t_blue1, t_blue2, t_green))
 
         sorted_mesh = MeshTri(self.p, sort_mesh(self.p, self.t), sort_t=False)
         facets = find_facets(sorted_mesh, marked)

@@ -430,12 +430,12 @@ class Mesh:
             **(self.boundaries if self.boundaries is not None else {}),
             **(other.boundaries if other.boundaries is not None else {}),
         } if self.boundaries is not None or other.boundaries is not None\
-          else None
+        else None
         subdomains = {
             **(self.subdomains if self.subdomains is not None else {}),
             **(other.subdomains if other.subdomains is not None else {}),
         } if self.subdomains is not None or other.subdomains is not None\
-          else None
+        else None
         return type(self)(p, t, boundaries, subdomains)
 
     @staticmethod

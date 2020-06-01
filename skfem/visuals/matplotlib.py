@@ -9,8 +9,8 @@ from mpl_toolkits.mplot3d import Axes3D
 from numpy import ndarray
 
 from ..assembly import InteriorBasis
-from ..mesh import Mesh, Mesh2D, MeshLine,\
-    MeshTri, MeshTet, MeshQuad
+from ..mesh import Mesh2D, MeshLine, MeshTri,\
+    MeshTet, MeshQuad
 
 
 @singledispatch

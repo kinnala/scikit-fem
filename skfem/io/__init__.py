@@ -1,1 +1,1 @@
-from .meshio import from_meshio
+from .meshio import from_meshio  # noqa
