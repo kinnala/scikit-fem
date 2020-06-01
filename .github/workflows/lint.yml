@@ -20,8 +20,8 @@ jobs:
         run: pip install flake8
 
       - name: Run linters
-        continue-on-error: true
         uses: samuelmeuli/lint-action@v1
         with:
           github_token: ${{ secrets.github_token }}
           flake8: true
+          flake8_dir: skfem
