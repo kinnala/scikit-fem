@@ -46,15 +46,16 @@ focus on computational experimentation.  We rely on pure interpreted Python code
 on top of the NumPy-SciPy base which makes `scikit-fem` easy to install and
 portable across multiple operating systems.  The reliance on NumPy arrays and
 SciPy sparse matrices enables interoperability with various packages in the
-Python ecosystem such as meshio `[@meshio]`, pacopy, pyamg, and scikits.sparse.
+Python ecosystem such as meshio [@meshio], pacopy, pyamg, and scikits.sparse.
 
-In contrast to FEniCS `[@fenics]`, Firedrake, SfePy, GetFEM++ and Netgen-NG,
-`scikit-fem` incorporates no compiled code making the installation quick and
-straightforward.  We specifically target finite element assembly instead of
-encapsulating the entire analysis from pre- to postprocessing into a single
-framework.  As a consequence, we cannot provide an end-to-end experience when it
-comes to distributed computing.  Instead, we focus on maximizing the performance
-and flexibility in typical desktop use cases.
+In contrast to FEniCS [@fenics], Firedrake [@firedrake], SfePy [@sfepy], GetFEM
+[@getfem] and NGSolve [@ngsolve], `scikit-fem` incorporates no compiled code
+making the installation quick and straightforward.  We specifically target
+finite element assembly instead of encapsulating the entire analysis from pre-
+to postprocessing into a single framework.  As a consequence, we cannot provide
+an end-to-end experience when it comes to distributed computing.  Instead, we
+focus on maximizing the performance and flexibility in a typical desktop use
+case.
 
 # Acknowledgements
 
