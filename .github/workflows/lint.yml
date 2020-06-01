@@ -25,4 +25,4 @@ jobs:
           github_token: ${{ secrets.github_token }}
           flake8: true
           flake8_dir: skfem
-          flake8_args: "--ignore=E741"
+          flake8_args: "--extend-ignore=E741"
