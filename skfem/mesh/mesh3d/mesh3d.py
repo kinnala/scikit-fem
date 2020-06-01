@@ -35,9 +35,10 @@ class Mesh3D(Mesh):
         facets = self.boundary_facets()
         boundary_edges = np.sort(np.hstack(
             tuple([np.vstack((self.facets[itr, facets],
-                              self.facets[(itr + 1) % self.facets.shape[0], facets]))\
+                              self.facets[(itr + 1) % self.facets.shape[0],
+                              facets]))
                    for itr in range(self.facets.shape[0])])).T, axis=1)
-        return np.nonzero((self.edges.T[:, None] == boundary_edges)\
+        return np.nonzero((self.edges.T[:, None] == boundary_edges)
                           .all(-1).any(-1))[0]
 
     def interior_edges(self) -> ndarray:
@@ -47,5 +48,6 @@ class Mesh3D(Mesh):
 
     def param(self) -> float:
         """Return mesh parameter, viz the length of the longest edge."""
-        lengths = np.linalg.norm(np.diff(self.p[:, self.edges], axis=1), axis=0)
+        lengths = np.linalg.norm(
+            np.diff(self.p[:, self.edges], axis=1), axis=0)
         return np.max(lengths)
