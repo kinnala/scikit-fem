@@ -34,40 +34,27 @@ into a system of linear equations $Ax=b$.  `scikit-fem` is a lightweight Python
 library for the creation, or *assembly*, of the finite element matrices $A$ and
 vectors $b$.  The user loads a computational mesh, picks suitable basis
 functions from the library's collection, and provides the PDE's weak
-formulation.  This results in matrices and vectors compatible with the SciPy
-ecosystem.
+formulation.  This results in matrices and vectors compatible with linear
+solvers in the SciPy ecosystem.
 
-# Features
-
-`scikit-fem` supports the bgb 
-
-# Prior art
+# Purpose and prior art
 
 There exist several open source frameworks – written in Python or with a Python
-interface – that implement the finite element method.  In contrast to Fenics,
-Firedrake, SfePy, GetFEM++ and Netgen-NG, `scikit-fem` does not have any
-compiled code making the installation quick and straightforward.  It
-specifically targets the finite element assembly instead of being an end-to-end
-finite element solver.
+interface – that implement the finite element method.  `scikit-fem` was
+developed as a lightweight alternative to the existing Python packages with a
+focus on computational experimentation.  We rely on pure interpreted Python code
+on top of the NumPy-SciPy base which makes `scikit-fem` easy to install and
+portable across multiple operating systems.  The reliance on NumPy arrays and
+SciPy sparse matrices enables interoperability with various packages in the
+Python ecosystem such as meshio, pacopy, pyamg, and scikits.sparse.
 
-
-# Citations
-
-Citations to entries in paper.bib should be in
-[rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
-format.
-
-If you want to cite a software repository URL (e.g. something on GitHub without a preferred
-citation) then you can do it with the example BibTeX entry below for @fidgit.
-
-For a quick reference, the following citation commands can be used:
-- `@author:2001`  ->  "Author et al. (2001)"
-- `[@author:2001]` -> "(Author et al., 2001)"
-- `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
-
-# Figures
-
-Figures can be included like this: ![Example figure.](figure.png)
+In contrast to FEniCS, Firedrake, SfePy, GetFEM++ and Netgen-NG, `scikit-fem`
+incorporates no compiled code making the installation quick and straightforward.
+We specifically target the finite element assembly instead of encapsulating the
+entire solution process from pre- to postprocessing into a single framework.  As
+a consequence, we cannot provide an end-to-end experience when it comes to
+distributed high-performance computing.  Instead, we focus on maximizing the
+performance and flexibility in a typical desktop environment.
 
 # Acknowledgements
 
