@@ -12,7 +12,7 @@ class ElementTetRT0(ElementHdiv):
     doflocs = np.array([[.5, .5, .0],
                         [.5, .0, .5],
                         [.0, .5, .5],
-                        [.5, .5, .5],])
+                        [.5, .5, .5]])
     mesh_type = MeshTet
 
     def lbasis(self, X, i):

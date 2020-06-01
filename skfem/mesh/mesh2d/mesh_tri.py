@@ -122,7 +122,7 @@ class MeshTri(Mesh2D):
         """
         npx = len(x)
         npy = len(y)
-        X, Y = np.meshgrid(np.sort(x), np.sort(y))   
+        X, Y = np.meshgrid(np.sort(x), np.sort(y))
         p = np.vstack((X.flatten('F'), Y.flatten('F')))
         ix = np.arange(npx * npy)
         nt = (npx - 1) * (npy - 1)
@@ -152,7 +152,7 @@ class MeshTri(Mesh2D):
     @classmethod
     def init_symmetric(cls) -> MeshType:
         r"""Initialize a symmetric mesh of the unit square.
-        
+
         The mesh topology is as follows::
 
             *------------*

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-"""This module defines different types of finite element meshes.  Meshes can be
-created using various built-in constructors or loaded from external formats
-using `meshio <https://github.com/nschloe/meshio>`_.  The supported types are
+"""This module defines different types of finite element meshes.  Meshes can
+be created using various built-in constructors or loaded from external
+formats using `meshio <https://github.com/nschloe/meshio>`_.  The supported
+types are
 
 - :class:`~skfem.mesh.MeshTri`, triangular mesh
 - :class:`~skfem.mesh.MeshQuad`, quadrilateral mesh

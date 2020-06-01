@@ -405,7 +405,7 @@ class Mesh:
             boundary.
         boundaries_only
             If True, include only facets on the boundary of the mesh.
-            
+
         """
         if self.boundaries is None:
             self.boundaries = {}

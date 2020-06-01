@@ -35,8 +35,8 @@ class ElementGlobal(Element):
         N = len(self._pbasis[()])
         # loop over new basis
         for k in range(self.derivatives + 1):
+            diffs = list(itertools.product(*((list(range(self.dim)),) * k)))
             for itr in range(N):
-                diffs = list(itertools.product(*((list(range(self.dim)),) * k)))
                 for diff in diffs:
                     U[k][diff] += (V[:, itr, i][:, None]
                                    * self._pbasis[diff][itr](*x))

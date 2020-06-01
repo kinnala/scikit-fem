@@ -136,7 +136,7 @@ class MeshHex(Mesh3D):
         npx = len(x)
         npy = len(y)
         npz = len(z)
-        X, Y, Z = np.meshgrid(np.sort(x), np.sort(y), np.sort(z))   
+        X, Y, Z = np.meshgrid(np.sort(x), np.sort(y), np.sort(z))
         p = np.vstack((X.flatten('F'), Y.flatten('F'), Z.flatten('F')))
         ix = np.arange(npx * npy * npz)
         ne = (npx - 1) * (npy - 1) * (npz - 1)
@@ -237,7 +237,7 @@ class MeshHex(Mesh3D):
         self.f2t[0, e_first] = t_tmp[ix_first]
         self.f2t[1, e_last] = t_tmp[ix_last]
 
-        ## second row to zero if repeated (i.e., on boundary)
+        # second row to zero if repeated (i.e., on boundary)
         self.f2t[1, np.nonzero(self.f2t[0, :] == self.f2t[1, :])[0]] = -1
 
     def _uniform_refine(self):

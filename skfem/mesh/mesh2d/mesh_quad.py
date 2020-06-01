@@ -16,7 +16,7 @@ class MeshQuad(Mesh2D):
         - :meth:`~skfem.mesh.MeshQuad.load` (requires meshio)
         - :meth:`~skfem.mesh.MeshQuad.init_refdom`
         - :meth:`~skfem.mesh.MeshQuad.init_tensor`
-    
+
     Attributes
     ----------
     facets
@@ -112,7 +112,7 @@ class MeshQuad(Mesh2D):
         """
         npx = len(x)
         npy = len(y)
-        X, Y = np.meshgrid(np.sort(x), np.sort(y))   
+        X, Y = np.meshgrid(np.sort(x), np.sort(y))
         p = np.vstack((X.flatten('F'), Y.flatten('F')))
         ix = np.arange(npx * npy)
         nt = (npx - 1) * (npy - 1)
@@ -135,7 +135,7 @@ class MeshQuad(Mesh2D):
     @classmethod
     def init_refdom(cls: Type[MeshType]) -> MeshType:
         """Initialize a mesh that includes only the reference quad.
-        
+
         The mesh topology is as follows::
 
             *-------------*
@@ -201,7 +201,7 @@ class MeshQuad(Mesh2D):
 
         # quadrilateral middle point
         mid = range(self.t.shape[1]) + np.max(t2f) + 1
-        
+
         # new vertices are the midpoints of edges ...
         newp1 = 0.5*np.vstack((p[0, e[0]] + p[0, e[1]],
                                p[1, e[0]] + p[1, e[1]]))
