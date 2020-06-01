@@ -75,8 +75,8 @@ class MappingMortar(Mapping):
         p = np.array([np.hstack((param(mesh1.p), param(mesh2.p)))])
         t = np.array([ixorig[:-1], ixorig[1:]])
 
-        # create 1-dimensional supermesh from the intersections of the projected
-        # facet elements
+        # create 1-dimensional supermesh from the intersections of the
+        # projected facet elements
         p = p[:, np.concatenate((t[0], np.array([t[1, -1]])))]
         range_max = np.min([np.max(param_p1), np.max(param_p2)])
         range_min = np.max([np.min(param_p1), np.min(param_p2)])
