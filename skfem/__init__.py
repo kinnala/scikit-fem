@@ -12,19 +12,19 @@ from skfem.mesh import __all__ as all_mesh
 from skfem.element import __all__ as all_element
 
 
-__all__ = all_mesh + all_assembly + all_element + [
-    'MappingAffine',  # noqa
-    'MappingIsoparametric',  # noqa
-    'MappingMortar',  # noqa
-    'adaptive_theta',  # noqa
-    'build_pc_ilu',  # noqa
-    'build_pc_diag',  # noqa
-    'condense',  # noqa
-    'derivative',  # noqa
-    'L2_projection',  # noqa
-    'project',  # noqa
-    'solve',  # noqa
-    'solver_direct_scipy',  # noqa
-    'solver_iter_pcg',  # noqa
-    'solver_iter_krylov',  # noqa
+__all__ = all_mesh + all_assembly + all_element + [  # noqa
+    'MappingAffine',
+    'MappingIsoparametric',
+    'MappingMortar',
+    'adaptive_theta',
+    'build_pc_ilu',
+    'build_pc_diag',
+    'condense',
+    'derivative',
+    'L2_projection',
+    'project',
+    'solve',
+    'solver_direct_scipy',
+    'solver_iter_pcg',
+    'solver_iter_krylov',
 ]

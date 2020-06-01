@@ -2,8 +2,9 @@ from typing import NamedTuple, Optional
 
 from numpy import ndarray
 
-# TODO: Deprecated. Remove after old style forms are gone.
+
 class FormParameters(NamedTuple):
+    """Deprecated. Remove after old style forms are gone."""
     w: Optional[ndarray] = None
     dw: Optional[ndarray] = None
     ddw: Optional[ndarray] = None

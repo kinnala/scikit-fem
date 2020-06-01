@@ -170,7 +170,7 @@ class MappingAffine(Mapping):
     def normals(self, X, tind, find, t2f):
         if self.dim == 1:
             Nref = np.array([[-1.0],
-                             [ 1.0]])
+                             [1.0]])
         elif self.dim == 2:
             Nref = np.array([[0.0, -1.0],
                              [1.0, 1.0],
