@@ -34,7 +34,7 @@ into a system of linear equations $Ax=b$.  `scikit-fem` is a lightweight Python
 library for the creation, or *assembly*, of the finite element matrix $A$ and
 vector $b$.  The user loads a computational mesh, picks suitable basis functions
 from the collection, and provides the PDE's weak formulation.  This results in
-sparse matrices and vectors compatible with the SciPy ecosystem [@scipy].
+sparse matrices and vectors compatible with the SciPy [@scipy] ecosystem.
 
 # Purpose and prior art
 
@@ -61,13 +61,12 @@ physical models or large scale distributed computing.
 
 The source code distribution [@skfem] ships with over 30 examples that
 demonstrate the library and its use.  Some examples are highlighted in
-\autoref{fig:nitsche}.
-Several publications already utilize `scikit-fem` in computational results,
-e.g., @mcbain2018, @gustafsson2019, and @gustafsson2020.  In addition,
-`scikit-fem` is a dependency in a recently published Python package for battery
-modelling [@pybamm].
+\autoref{fig:nitsche}.  Several publications already utilize computational
+results from `scikit-fem`, e.g., @mcbain2018, @gustafsson2019, and
+@gustafsson2020.  In addition, `scikit-fem` is a dependency in a recently
+published Python package for battery modelling [@pybamm].
 
-![A combination of quadratic triangular and biquadratic quadrilateral elements is used in solving the linear elastic contact problem using the Nitsche mortaring.\label{fig:example}](ex_nitsche.png)
+![A combination of quadratic triangular and biquadratic quadrilateral elements is used in solving the linear elastic contact problem using the Nitsche mortaring.\label{fig:nitsche}](ex_nitsche.png =200x)
 
 # Acknowledgements
 
