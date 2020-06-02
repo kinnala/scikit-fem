@@ -249,6 +249,14 @@ class MeshQuad(Mesh2D):
         t = self.t[[0, 1, 3]]
         t = np.hstack((t, self.t[[1, 2, 3]]))
 
+        kwargs = {'validate': False}
+
+        if self.subdomains:
+            kwargs['subdomains'] = {k: np.concatenate((v, v + self.t.shape[1]))
+                                    for k, v in self.subdomains.items()}
+
+        mesh = MeshTri(self.p, t, **kwargs)
+
         if x is not None:
             if len(x) == self.t.shape[1]:
                 # preserve elemental constant functions
@@ -256,9 +264,9 @@ class MeshQuad(Mesh2D):
             else:
                 raise Exception("The parameter x must have one " +
                                 "value per element.")
-            return MeshTri(self.p, t, validate=False), X
+            return mesh, X
         else:
-            return MeshTri(self.p, t, validate=False)
+            return mesh
 
     def _splitquads_symmetric(self):
         """Split quads into four triangles."""
