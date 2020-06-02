@@ -45,28 +45,30 @@ packages with a focus on computational experimentation and custom PDE-based
 model development.  We rely on pure interpreted Python code on top of the
 NumPy-SciPy base which makes `scikit-fem` easy to install and portable across
 multiple operating systems.  The reliance on NumPy arrays and SciPy sparse
-matrices enables interoperability with various useful packages in the wider
-Python ecosystem such as meshio [@meshio], pacopy, pyamg [@pyamg], and
-scikit-sparse.
+matrices enables interoperability with various packages in the Python ecosystem
+such as meshio [@meshio], pacopy, pyamg [@pyamg], and scikit-sparse.
 
 In contrast to FEniCS [@fenics], Firedrake [@firedrake], SfePy [@sfepy], GetFEM
 [@getfem] and NGSolve [@ngsolve], `scikit-fem` incorporates no compiled code
 making the installation quick and straightforward.  We specifically target
 finite element assembly instead of encapsulating the entire finite element
 analysis from pre- to postprocessing into a single framework.  As a consequence,
-we will not provide an end-to-end experience when it comes to, e.g., specific
-physical models or large scale distributed computing.
+we cannot provide an end-to-end experience when it comes to, e.g., specific
+physical models or distributed computing.  Our aim is to be generic and support
+as many finite element schemes as possible.  Currently we have a basic support
+for $H^1$-, $H(div)$-, $H(curl)$-, and $H^2$-conforming problems as well as
+various nonconforming approaches.
 
 # Examples and enabled work
 
 The source code distribution [@skfem] ships with over 30 examples that
-demonstrate the library and its use.  Some examples are highlighted in
-\autoref{fig:nitsche}.  Several publications already utilize computational
-results from `scikit-fem`, e.g., @mcbain2018, @gustafsson2019, and
-@gustafsson2020.  In addition, `scikit-fem` is a dependency in a recently
+demonstrate the library and its use.  Results for some of the examples are
+highlighted in \autoref{fig:nitsche}.  Several publications already utilize
+computational results from `scikit-fem`, e.g., @mcbain2018, @gustafsson2019, and
+@gustafsson2020.  In addition, `scikit-fem` is a dependency of a recently
 published Python package for battery modelling [@pybamm].
 
-![A combination of quadratic triangular and biquadratic quadrilateral elements is used in solving the linear elastic contact problem using the Nitsche mortaring.\label{fig:nitsche}](ex_nitsche.png =200x)
+![A combination of quadratic triangular and biquadratic quadrilateral elements is used in solving the linear elastic contact problem using the Nitsche mortaring.\label{fig:nitsche}](ex_nitsche.png)
 
 # Acknowledgements
 
