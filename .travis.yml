@@ -26,12 +26,10 @@ install:
   - pip install meshio dmsh scikit-sparse pacopy pygmsh pyamg flake8
 script:
   - python -m unittest discover
+  - flake8 skfem
 
 jobs:
   include:
-    - stage: lint
-      python: 3.6
-      script: flake8 skfem
     - stage: deploy
       script: skip
       python: 3.7
