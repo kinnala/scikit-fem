@@ -1,7 +1,7 @@
 import unittest
 
-from skfem.mesh import *
-from skfem.visuals.matplotlib import *
+from skfem.mesh import MeshTri, MeshQuad, MeshTet, MeshLine
+from skfem.visuals.matplotlib import draw, plot, plot3
 
 
 class CallDraw(unittest.TestCase):
