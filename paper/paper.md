@@ -54,12 +54,20 @@ In contrast to FEniCS [@fenics], Firedrake [@firedrake], SfePy [@sfepy], GetFEM
 making the installation quick and straightforward.  We specifically target
 finite element assembly instead of encapsulating the entire finite element
 analysis from pre- to postprocessing into a single framework.  As a consequence,
-we are not providing an end-to-end experience when it comes to, e.g., specific
+we will not provide an end-to-end experience when it comes to, e.g., specific
 physical models or large scale distributed computing.
 
-Several publications are already utilizing computational results from
-`scikit-fem`, e.g., bla bla bla.  In addition, `scikit-fem` is a dependency in a
-recently published Python package for battery modelling [@pybamm].
+# Examples and enabled work
+
+The source code distribution [@skfem] ships with over 30 examples that
+demonstrate the library and its use.  Some examples are highlighted in
+\autoref{fig:nitsche}.
+Several publications already utilize `scikit-fem` in computational results,
+e.g., @mcbain2018, @gustafsson2019, and @gustafsson2020.  In addition,
+`scikit-fem` is a dependency in a recently published Python package for battery
+modelling [@pybamm].
+
+![A combination of quadratic triangular and biquadratic quadrilateral elements is used in solving the linear elastic contact problem using the Nitsche mortaring.\label{fig:example}](ex_nitsche.png)
 
 # Acknowledgements
 
