@@ -38,7 +38,7 @@ sparse matrices and vectors compatible with the SciPy ecosystem [@scipy].
 
 # Purpose and prior art
 
-There exist several open source frameworks – written in Python or with a Python
+There exist several open source frameworks – in Python or with a Python
 interface – that implement the finite element method.  `scikit-fem` was
 developed as a simple and lightweight alternative to the existing Python
 packages with a focus on computational experimentation and custom PDE-based
@@ -52,11 +52,14 @@ scikit-sparse.
 In contrast to FEniCS [@fenics], Firedrake [@firedrake], SfePy [@sfepy], GetFEM
 [@getfem] and NGSolve [@ngsolve], `scikit-fem` incorporates no compiled code
 making the installation quick and straightforward.  We specifically target
-finite element assembly instead of encapsulating the entire analysis from pre-
-to postprocessing into a single framework.  As a consequence, we cannot provide
-an end-to-end experience when it comes to large scale distributed computing.
-Instead, we focus on maximizing the performance and flexibility in a typical
-desktop use case.
+finite element assembly instead of encapsulating the entire finite element
+analysis from pre- to postprocessing into a single framework.  As a consequence,
+we are not providing an end-to-end experience when it comes to, e.g., specific
+physical models or large scale distributed computing.
+
+Several publications are already utilizing computational results from
+`scikit-fem`, e.g., bla bla bla.  In addition, `scikit-fem` is a dependency in a
+recently published Python package for battery modelling [@pybamm].
 
 # Acknowledgements
 
