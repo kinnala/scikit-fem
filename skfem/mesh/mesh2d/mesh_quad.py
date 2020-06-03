@@ -1,3 +1,4 @@
+from itertools import dropwhile
 from typing import Optional, Type, Dict
 
 import numpy as np
@@ -244,10 +245,28 @@ class MeshQuad(Mesh2D):
 
         self._fix_boundaries(new_facets)
 
-    def _splitquads(self, x=None):
+    def to_meshtri(self, x=None):
         """Split each quad into two triangles and return MeshTri."""
         t = self.t[[0, 1, 3]]
         t = np.hstack((t, self.t[[1, 2, 3]]))
+
+        kwargs = {'validate': False}
+
+        if self.subdomains:
+            kwargs['subdomains'] = {k: np.concatenate((v, v + self.t.shape[1]))
+                                    for k, v in self.subdomains.items()}
+
+        mesh = MeshTri(self.p, t, **kwargs)
+
+        if self.boundaries:
+            mesh.boundaries = {}
+            for k in self.boundaries:
+                slots = enumerate(mesh.facets.T)
+                mesh.boundaries[k] = np.array([
+                    next(dropwhile(lambda slot: not(np.array_equal(f,
+                                                                   slot[1])),
+                                   slots))[0]
+                    for f in self.facets.T[np.sort(self.boundaries[k])]])
 
         if x is not None:
             if len(x) == self.t.shape[1]:
@@ -256,9 +275,11 @@ class MeshQuad(Mesh2D):
             else:
                 raise Exception("The parameter x must have one " +
                                 "value per element.")
-            return MeshTri(self.p, t, validate=False), X
+            return mesh, X
         else:
-            return MeshTri(self.p, t, validate=False)
+            return mesh
+
+    _splitquads = to_meshtri  # for backward-compatibility
 
     def _splitquads_symmetric(self):
         """Split quads into four triangles."""
