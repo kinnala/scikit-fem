@@ -185,16 +185,26 @@ class TestMeshQuadSplit(unittest.TestCase):
 
     def runTest(self):
         from docs.examples.ex17 import mesh
-        tri_mesh = mesh.to_meshtri()
+        mesh_tri = mesh.to_meshtri()
 
         for s in mesh.subdomains:
             self.assertEqual(np.setdiff1d(*[m.t.T[m.subdomains[s]]
-                                            for m in [mesh, tri_mesh]]).size,
+                                            for m in [mesh, mesh_tri]]).size,
                              0)
 
         for b in mesh.boundaries:
             np.testing.assert_array_equal(*[m.facets.T[m.boundaries[b]]
-                                            for m in [mesh, tri_mesh]])
+                                            for m in [mesh, mesh_tri]])
+
+    def runRefineTest(self):
+        mesh = MeshQuad()
+        mesh.define_boundary('left', lambda x: x[0] == 0)
+        mesh.refine()
+        mesh_tri = mesh.to_meshtri()
+
+        for b in mesh.boundaries:
+            np.testing.assert_array_equal(*[m.facets.T[m.boundaries[b]]
+                                            for m in [mesh, mesh_tri]])
 
 
 if __name__ == '__main__':

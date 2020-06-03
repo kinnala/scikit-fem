@@ -266,7 +266,7 @@ class MeshQuad(Mesh2D):
                     next(dropwhile(lambda slot: not(np.array_equal(f,
                                                                    slot[1])),
                                    slots))[0]
-                    for f in self.facets.T[self.boundaries[k]]])
+                    for f in self.facets.T[np.sort(self.boundaries[k])]])
 
         if x is not None:
             if len(x) == self.t.shape[1]:
