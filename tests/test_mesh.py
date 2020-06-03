@@ -186,8 +186,13 @@ class TestMeshQuadSplit(unittest.TestCase):
         from docs.examples.ex17 import mesh
         tri_mesh = mesh._splitquads()
 
-        for k in mesh.boundaries:
-            np.testing.assert_array_equal(*[m.facets.T[m.boundaries[k]]
+        for s in mesh.subdomains:
+            self.assertEqual(np.setdiff1d(*[m.t.T[m.subdomains[s]]
+                                            for m in [mesh, tri_mesh]]).size,
+                             0)
+
+        for b in mesh.boundaries:
+            np.testing.assert_array_equal(*[m.facets.T[m.boundaries[b]]
                                             for m in [mesh, tri_mesh]])
             
 
