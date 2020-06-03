@@ -38,24 +38,24 @@ matrices and vectors compatible with the SciPy [@scipy] ecosystem.
 
 # Purpose and prior art
 
-There exist several open source frameworks – in Python or with a Python
-interface – that implement the finite element method.  `scikit-fem` was
-developed as a simple and lightweight alternative to the existing Python
-packages with a focus on computational experimentation and custom PDE-based
-model development.  We rely on pure interpreted Python code on top of
-NumPy-SciPy base which makes `scikit-fem` easy to install and portable across
-multiple operating systems.  The reliance on plain NumPy arrays and SciPy sparse
-matrices enables interoperability with various packages in the Python ecosystem
-such as meshio [@meshio], pacopy, pyamg [@pyamg], and scikit-sparse.
+There exist several open source packages and frameworks that implement the
+finite element method.  `scikit-fem` was developed as a simple and lightweight
+alternative to the existing Python packages with a focus on computational
+experimentation and custom PDE-based model development.  We rely on pure
+interpreted Python code on top of NumPy-SciPy base which makes `scikit-fem` easy
+to install and portable across multiple operating systems.  The reliance on
+plain NumPy arrays and SciPy sparse matrices enables interoperability with
+various packages in the Python ecosystem such as meshio [@meshio], pacopy
+[@pacopy], and pyamg [@pyamg].
 
 In contrast to NGSolve [@ngsolve], FEniCS [@fenics], Firedrake [@firedrake],
-SfePy [@sfepy], and GetFEM [@getfem], `scikit-fem` incorporates no compiled code
-making the installation quick and straightforward.  We specifically target
-finite element assembly instead of encapsulating the entire finite element
-analysis from pre- to postprocessing into a single framework.  As a consequence,
-we cannot provide an end-to-end experience when it comes to, e.g., specific
+SfePy [@sfepy], and GetFEM [@getfem], `scikit-fem` adds no compiled code making
+the installation quick and straightforward.  We specifically target finite
+element assembly instead of encapsulating the entire finite element analysis
+from pre- to postprocessing into a single framework.  As a consequence, we
+cannot provide an end-to-end experience when it comes to, e.g., specific
 physical models or distributed computing.  Our aim is to be generic in terms of
-PDE's and, hence, support a wide variety of finite element schemes.  Currently
+PDE's and, hence, support a variety of finite element schemes.  Currently
 `scikit-fem` includes a basic support for $H^1$-, $H(\mathrm{div})$-,
 $H(\mathrm{curl})$-, and $H^2$-conforming problems as well as various
 nonconforming schemes.
@@ -66,11 +66,16 @@ The source code distribution [@skfem] ships with over 30 examples that
 demonstrate the library and its use.  We highlight the results of some of the
 examples in \autoref{fig:examples}.  Several publications already utilize
 computational results from `scikit-fem`, e.g., @mcbain2018, @gustafsson2019, and
-@gustafsson2020.  In addition, `scikit-fem` is used by a recently published
+@gustafsson2020.  In addition, `scikit-fem` is used in a recently published
 Python package for battery modelling [@pybamm].
 
-![(Top left.) A combination of triangular and quadrilateral elements is used to solve the linear elastic contact problem. (Top right.) A $H(\mathrm{curl}$-conforming model problem is discretized with tetrahedral Nédélec elements. (Bottom.) The Navier-Stokes flow over a backward-facing step is solved using the Taylor-Hood element for different Reynolds numbers.\label{fig:examples}](examples.png)
+![(Top left.) A combination of triangular and quadrilateral elements is used to solve the linear elastic contact problem. (Top right.) The lowest order tetrahedral Nédélect element is used to solve a $H(\mathrm{curl})$-conforming model problem. (Bottom.) The Taylor-Hood element is used to solve the Navier-Stokes flow over a backward-facing step for different Reynolds numbers.\label{fig:examples}](examples.png)
 
 # Acknowledgements
+
+The approach used in the vectorized finite element assembly has been inspired by
+the work of [@hannuka].  Tom Gustafsson has received external funding from the
+Finnish Cultural Foundation and the Academy of Finland (decision nr. 324611)
+while working on the project.
 
 # References
