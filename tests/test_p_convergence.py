@@ -2,7 +2,9 @@ import unittest
 
 import numpy as np
 
-from skfem import *
+from skfem import (MeshLine, ElementLinePp, InteriorBasis, LinearForm, asm,
+                   solve, condense, MeshQuad, ElementQuadP)
+
 from skfem.models.poisson import laplace
 
 
