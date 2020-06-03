@@ -180,6 +180,16 @@ class TestMeshAddition(unittest.TestCase):
         self.assertTrue(mesh.subdomains is None)
         self.assertTrue('top' in mesh.boundaries)
 
+class TestMeshQuadSplit(unittest.TestCase):
+
+    def runTest(self):
+        from docs.examples.ex17 import mesh
+        tri_mesh = mesh._splitquads()
+
+        for k in mesh.boundaries:
+            np.testing.assert_array_equal(*[m.facets.T[m.boundaries[k]]
+                                            for m in [mesh, tri_mesh]])
+            
 
 if __name__ == '__main__':
     unittest.main()
