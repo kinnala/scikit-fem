@@ -185,7 +185,7 @@ class TestMeshQuadSplit(unittest.TestCase):
 
     def runTest(self):
         from docs.examples.ex17 import mesh
-        tri_mesh = mesh.to_trimesh()
+        tri_mesh = mesh.to_meshtri()
 
         for s in mesh.subdomains:
             self.assertEqual(np.setdiff1d(*[m.t.T[m.subdomains[s]]
