@@ -1,3 +1,4 @@
+from itertools import dropwhile
 from typing import Optional, Type, Dict
 
 import numpy as np
@@ -256,6 +257,16 @@ class MeshQuad(Mesh2D):
                                     for k, v in self.subdomains.items()}
 
         mesh = MeshTri(self.p, t, **kwargs)
+
+        if self.boundaries:
+            mesh.boundaries = {}
+            for k in self.boundaries:
+                slots = enumerate(mesh.facets.T)
+                mesh.boundaries[k] = np.array([
+                    next(dropwhile(lambda slot: not(np.array_equal(f,
+                                                                   slot[1])),
+                                   slots))[0]
+                    for f in self.facets.T[self.boundaries[k]]])
 
         if x is not None:
             if len(x) == self.t.shape[1]:
