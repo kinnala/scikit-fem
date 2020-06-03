@@ -245,7 +245,7 @@ class MeshQuad(Mesh2D):
 
         self._fix_boundaries(new_facets)
 
-    def _splitquads(self, x=None):
+    def to_trimesh(self, x=None):
         """Split each quad into two triangles and return MeshTri."""
         t = self.t[[0, 1, 3]]
         t = np.hstack((t, self.t[[1, 2, 3]]))
@@ -278,6 +278,8 @@ class MeshQuad(Mesh2D):
             return mesh, X
         else:
             return mesh
+
+    _splitquads = to_trimesh  # for backward-compatibility
 
     def _splitquads_symmetric(self):
         """Split quads into four triangles."""
