@@ -22,11 +22,11 @@ bibliography: paper.bib
 
 # Summary
 
-Partial differential equations (PDE's) – such as Navier-Stokes equations in
+Partial differential equations (PDEs) – such as Navier-Stokes equations in
 fluid mechanics, Maxwell's equations in electromagnetism, and Schrödinger
 equation in quantum mechanics – are the basic building blocks of modern physics
 and engineering.  Finite element method (FEM) is a flexible computational
-technique for the discretization and solution of PDE's, especially in the case
+technique for the discretization and solution of PDEs, especially in the case
 of complex spatial domains.
 
 Conceptually, FEM transforms a time-independent (or temporally discretized) PDE
@@ -55,7 +55,7 @@ element assembly instead of encapsulating the entire finite element analysis
 from pre- to postprocessing into a single framework.  As a consequence, we
 cannot provide an end-to-end experience when it comes to, e.g., specific
 physical models or distributed computing.  Our aim is to be generic in terms of
-PDE's and, hence, support a variety of finite element schemes.  Currently
+PDEs and, hence, support a variety of finite element schemes.  Currently
 `scikit-fem` includes a basic support for $H^1$-, $H(\mathrm{div})$-,
 $H(\mathrm{curl})$-, and $H^2$-conforming problems as well as various
 nonconforming schemes.
