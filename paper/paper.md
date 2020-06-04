@@ -73,9 +73,8 @@ Python package for battery modelling [@pybamm].
 
 # Acknowledgements
 
-The approach used in the vectorized finite element assembly has been inspired by
-the work of @hannuka.  Tom Gustafsson has received external funding from the
-Finnish Cultural Foundation and the Academy of Finland (decision nr. 324611)
-while working on the project.
+Tom Gustafsson has received external funding from the Finnish Cultural
+Foundation and the Academy of Finland (decision nr. 324611) while working on the
+project.
 
 # References
