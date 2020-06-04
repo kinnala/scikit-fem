@@ -22,9 +22,9 @@ bibliography: paper.bib
 
 # Summary
 
-Partial differential equations (PDEs) – such as Navier–Stokes equations in
+Partial differential equations (PDEs)—such as Navier–Stokes equations in
 fluid mechanics, Maxwell's equations in electromagnetism, and Schrödinger
-equation in quantum mechanics – are the basic building blocks of modern physics
+equation in quantum mechanics—are the basic building blocks of modern physics
 and engineering.  Finite element method (FEM) is a flexible computational
 technique for the discretization and solution of PDEs, especially in the case
 of complex spatial domains.
