@@ -3,7 +3,7 @@ from pathlib import Path
 
 import numpy as np
 
-from skfem.mesh import *
+from skfem.mesh import Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 
 
 class MeshTests(unittest.TestCase):
@@ -41,20 +41,20 @@ class FaultyInputs(unittest.TestCase):
     def runTest(self):
         with self.assertRaises(Exception):
             # point belonging to no element
-            m = MeshTri(np.array([[0, 0], [0, 1], [1, 0], [1, 1]]).T,
-                        np.array([[0, 1, 2]]).T)
+            MeshTri(np.array([[0, 0], [0, 1], [1, 0], [1, 1]]).T,
+                    np.array([[0, 1, 2]]).T)
         with self.assertRaises(Exception):
             # wrong size inputs (t not matching to Mesh type)
-            m = MeshTet(np.array([[0, 0], [0, 1], [1, 0], [1, 1]]).T,
-                        np.array([[0, 1, 2]]).T)
+            MeshTet(np.array([[0, 0], [0, 1], [1, 0], [1, 1]]).T,
+                    np.array([[0, 1, 2]]).T)
         with self.assertRaises(Exception):
             # inputting trasposes
-            m = MeshTri(np.array([[0, 0], [0, 1], [1, 0], [1, 1]]),
-                        np.array([[0, 1, 2], [1, 2, 3]]))
+            MeshTri(np.array([[0, 0], [0, 1], [1, 0], [1, 1]]),
+                    np.array([[0, 1, 2], [1, 2, 3]]))
         with self.assertRaises(Exception):
             # floats in element connectivity
-            m = MeshTri(np.array([[0, 0], [0, 1], [1, 0], [1, 1]]).T,
-                        np.array([[0.0, 1.0, 2.0], [1.0, 2.0, 3.0]]).T)
+            MeshTri(np.array([[0, 0], [0, 1], [1, 0], [1, 1]]).T,
+                    np.array([[0.0, 1.0, 2.0], [1.0, 2.0, 3.0]]).T)
 
 
 class Loading(unittest.TestCase):
@@ -92,12 +92,14 @@ class RefinePreserveSubsets(unittest.TestCase):
                 m.define_boundary(name, handle, boundaries_only=False)
             m.refine()
             for name, handle in boundaries:
-                self.assertTrue((np.sort(m.boundaries[name])
-                                 == np.sort(m.facets_satisfying(handle))).all())
+                A = np.sort(m.boundaries[name])
+                B = np.sort(m.facets_satisfying(handle))
+                self.assertTrue((A == B).all())
             m.refine(2)
             for name, handle in boundaries:
-                self.assertTrue((np.sort(m.boundaries[name])
-                                 == np.sort(m.facets_satisfying(handle))).all())
+                A = np.sort(m.boundaries[name])
+                B = np.sort(m.facets_satisfying(handle))
+                self.assertTrue((A == B).all())
 
 
 class SaveLoadCycle(unittest.TestCase):
@@ -149,7 +151,8 @@ class TestBoundaryEdges(unittest.TestCase):
         self.assertEqual(len(m.boundary_edges()), m.edges.shape[1])
         m.refine()
         # check that there is a correct amount of boundary edges:
-        # 12 (cube edges) * 2 (per cube edge) + 6 (cube faces) * 8 (per cube face)
+        # 12 (cube edges) * 2 (per cube edge)
+        # + 6 (cube faces) * 8 (per cube face)
         # = 72 edges
         self.assertTrue(len(m.boundary_edges()) == 72)
 
@@ -162,7 +165,8 @@ class TestBoundaryEdges2(unittest.TestCase):
         self.assertTrue(len(m.boundary_edges()) == m.edges.shape[1])
         m.refine()
         # check that there is a correct amount of boundary edges:
-        # 12 (cube edges) * 2 (per cube edge) + 6 (cube faces) * 4 (per cube face)
+        # 12 (cube edges) * 2 (per cube edge)
+        # + 6 (cube faces) * 4 (per cube face)
         # = 48 edges
         self.assertEqual(len(m.boundary_edges()), 48)
 
