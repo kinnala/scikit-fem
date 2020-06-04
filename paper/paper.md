@@ -8,13 +8,13 @@ authors:
   - name: Tom Gustafsson
     orcid: 0000-0003-1611-5032
     affiliation: 1
-  - name: Geordie McBain
+  - name: G. D. McBain
     orcid: 0000-0002-1904-122X
     affiliation: 2
 affiliations:
  - name: Department of Mathematics and Systems Analysis, Aalto University
    index: 1
- - name: Affiliation 2
+ - name: Memjet North Ryde Pty Ltd, Macquarie Park, NSW, Australia
    index: 2
 date: 26 February 2020
 bibliography: paper.bib
