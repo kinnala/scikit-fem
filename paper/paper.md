@@ -14,7 +14,7 @@ authors:
 affiliations:
  - name: Department of Mathematics and Systems Analysis, Aalto University
    index: 1
- - name: Affiliation 2
+ - name: Memjet North Ryde Pty Ltd, Macquarie Park, NSW, Australia
    index: 2
 date: 26 February 2020
 bibliography: paper.bib
