@@ -63,8 +63,8 @@ nonconforming schemes.
 # Examples and enabled work
 
 The source code distribution [@skfem] ships with over 30 examples that
-demonstrate the library and its use.  We highlight the results of some of the
-examples in \autoref{fig:examples}.  Several publications already utilize
+demonstrate the library and its use. The results of some of the examples are
+highlighted in \autoref{fig:examples}.  Several publications already utilize
 computational results from `scikit-fem`, e.g., @mcbain2018, @gustafsson2019, and
 @gustafsson2020.  In addition, `scikit-fem` is used in a recently published
 Python package for battery modelling [@pybamm].
