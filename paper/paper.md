@@ -8,7 +8,7 @@ authors:
   - name: Tom Gustafsson
     orcid: 0000-0003-1611-5032
     affiliation: 1
-  - name: Geordie McBain
+  - name: G. D. McBain
     orcid: 0000-0002-1904-122X
     affiliation: 2
 affiliations:
