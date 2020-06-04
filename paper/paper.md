@@ -22,7 +22,7 @@ bibliography: paper.bib
 
 # Summary
 
-Partial differential equations (PDEs) – such as Navier-Stokes equations in
+Partial differential equations (PDEs) – such as Navier–Stokes equations in
 fluid mechanics, Maxwell's equations in electromagnetism, and Schrödinger
 equation in quantum mechanics – are the basic building blocks of modern physics
 and engineering.  Finite element method (FEM) is a flexible computational
@@ -42,7 +42,7 @@ There exist several open source packages and frameworks that implement the
 finite element method.  `scikit-fem` was developed as a simple and lightweight
 alternative to the existing Python packages with a focus on computational
 experimentation and custom PDE-based model development.  We rely on pure
-interpreted Python code on top of NumPy-SciPy base which makes `scikit-fem` easy
+interpreted Python code on top of NumPy–SciPy base which makes `scikit-fem` easy
 to install and portable across multiple operating systems.  The reliance on
 plain NumPy arrays and SciPy sparse matrices enables interoperability with
 various packages in the Python ecosystem such as meshio [@meshio], pacopy
@@ -69,7 +69,7 @@ computational results from `scikit-fem`, e.g., @mcbain2018, @gustafsson2019, and
 @gustafsson2020.  In addition, `scikit-fem` is used in a recently published
 Python package for battery modelling [@pybamm].
 
-![(Top left.) A combination of triangular and quadrilateral elements is used to solve the linear elastic contact problem. (Top right.) The lowest order tetrahedral Nédélect element is used to solve a $H(\mathrm{curl})$-conforming model problem. (Bottom.) The Taylor-Hood element is used to solve the Navier-Stokes flow over a backward-facing step for different Reynolds numbers.\label{fig:examples}](examples.png)
+![(Top left.) A combination of triangular and quadrilateral elements is used to solve the linear elastic contact problem. (Top right.) The lowest order tetrahedral Nédélect element is used to solve a $H(\mathrm{curl})$-conforming model problem. (Bottom.) The Taylor–Hood element is used to solve the Navier-Stokes flow over a backward-facing step for different Reynolds numbers.\label{fig:examples}](examples.png)
 
 # Acknowledgements
 
