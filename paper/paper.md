@@ -16,7 +16,7 @@ affiliations:
    index: 1
  - name: Memjet North Ryde Pty Ltd, Macquarie Park, NSW, Australia
    index: 2
-date: 26 February 2020
+date: 4 June 2020
 bibliography: paper.bib
 ---
 
@@ -74,7 +74,7 @@ Python package for battery modelling [@pybamm].
 # Acknowledgements
 
 The approach used in the vectorized finite element assembly has been inspired by
-the work of [@hannuka].  Tom Gustafsson has received external funding from the
+the work of @hannuka.  Tom Gustafsson has received external funding from the
 Finnish Cultural Foundation and the Academy of Finland (decision nr. 324611)
 while working on the project.
 
