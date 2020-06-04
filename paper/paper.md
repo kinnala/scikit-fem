@@ -69,7 +69,7 @@ computational results from `scikit-fem`, e.g., @mcbain2018, @gustafsson2019, and
 @gustafsson2020.  In addition, `scikit-fem` is used in a recently published
 Python package for battery modelling [@pybamm].
 
-![(Top left.) A combination of triangular and quadrilateral elements is used to solve the linear elastic contact problem. (Top right.) The lowest order tetrahedral Nédélect element is used to solve a $H(\mathrm{curl})$-conforming model problem. (Bottom.) The Taylor–Hood element is used to solve the Navier-Stokes flow over a backward-facing step for different Reynolds numbers.\label{fig:examples}](examples.png)
+![(Top left.) A combination of triangular and quadrilateral elements is used to solve the linear elastic contact problem. (Top right.) The lowest order tetrahedral Nédélec element is used to solve a $H(\mathrm{curl})$-conforming model problem. (Bottom.) The Taylor–Hood element is used to solve the Navier-Stokes flow over a backward-facing step for different Reynolds numbers.\label{fig:examples}](examples.png)
 
 # Acknowledgements
 
