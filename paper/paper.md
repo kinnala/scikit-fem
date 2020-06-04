@@ -22,10 +22,10 @@ bibliography: paper.bib
 
 # Summary
 
-Partial differential equations (PDEs)—such as Navier–Stokes equations in
-fluid mechanics, Maxwell's equations in electromagnetism, and Schrödinger
+Partial differential equations (PDEs)—such as the Navier–Stokes equations in
+fluid mechanics, the Maxwell equations in electromagnetism, and the Schrödinger
 equation in quantum mechanics—are the basic building blocks of modern physics
-and engineering.  Finite element method (FEM) is a flexible computational
+and engineering.  The finite element method (FEM) is a flexible computational
 technique for the discretization and solution of PDEs, especially in the case
 of complex spatial domains.
 
@@ -42,7 +42,7 @@ There exist several open source packages and frameworks that implement the
 finite element method.  `scikit-fem` was developed as a simple and lightweight
 alternative to the existing Python packages with a focus on computational
 experimentation and custom PDE-based model development.  We rely on pure
-interpreted Python code on top of NumPy–SciPy base which makes `scikit-fem` easy
+interpreted Python code on top of the NumPy–SciPy base which makes `scikit-fem` easy
 to install and portable across multiple operating systems.  The reliance on
 plain NumPy arrays and SciPy sparse matrices enables interoperability with
 various packages in the Python ecosystem such as meshio [@meshio], pacopy
