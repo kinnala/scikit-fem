@@ -79,6 +79,22 @@ class Mesh:
                 if not isinstance(v, ndarray):
                     self.subdomains[k] = np.array(v, dtype=np.int64)
 
+    @property
+    def nelements(self):
+        return self.t.shape[1]
+
+    @property
+    def nvertices(self):
+        return np.max(self.t) + 1
+
+    @property
+    def nfacets(self):
+        return self.facets.shape[1]
+
+    @property
+    def nedges(self):
+        return self.edges.shape[1]
+
     def __str__(self):
         return self.__repr__()
 

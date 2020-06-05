@@ -19,6 +19,7 @@ class ElementComposite(Element):
         self.facet_dofs = sum([e.facet_dofs for e in self.elems])
         self.interior_dofs = sum([e.interior_dofs for e in self.elems])
         self.maxdeg = sum([e.maxdeg for e in self.elems])
+        self.dim = self.elems[0].dim
 
         for e in self.elems:
             if e.mesh_type is not self.elems[0].mesh_type:
