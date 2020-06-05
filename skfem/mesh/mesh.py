@@ -255,6 +255,28 @@ class Mesh:
                    "not belonging to any element.")
             raise Exception(msg)
 
+    def expand_facets(self, facets: ndarray):
+        """Find vertices and edges corresponding to given facets."""
+
+        vertices = np.unique(self.facets[:, facets].flatten())
+
+        if self.dim() == 3:
+            edge_candidates = self.t2e[:, self.f2t[0, facets]].flatten()
+            # subset of edges that share all points with the given facets
+            subset_ix = np.nonzero(
+                np.prod(np.isin(self.edges[:, edge_candidates],
+                                self.facets[:, facets].flatten()),
+                        axis=0)
+            )[0]
+            edges = np.intersect1d(
+                self.boundary_edges(),
+                edge_candidates[subset_ix]
+            )
+        else:
+            edges = np.array([])
+
+        return vertices, edges
+
     def save(self,
              filename: str,
              point_data: Dict[str, ndarray] = None,
