@@ -34,7 +34,7 @@ class Basis:
 
         self.dofnum = Dofnum(mesh, elem)
 
-        if not isinstance(mesh, elem.mesh_type):
+        if mesh.refdom != elem.refdom:
             raise ValueError("Incompatible Mesh and Element.")
 
         # human readable names
