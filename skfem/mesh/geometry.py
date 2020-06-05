@@ -1,7 +1,9 @@
+import numpy as np
 from numpy import ndarray
 
-from skfem import MappingIsoparametric
-from skfem import Mesh
+from skfem.mapping import MappingIsoparametric
+from skfem.mesh import Mesh
+from skfem.element import ElementLineP2
 
 
 class Geometry(Mesh):
@@ -32,11 +34,15 @@ class Geometry(Mesh):
 
     @property
     def t(self):
-        return self.dofnum.topo.t
+        return self.dofnum.element_dofs
 
     @property
     def facets(self):
-        return self.dofnum.topo.facets
+        return np.vstack((
+            self.dofnum.nodal_dofs[:, self.dofnum.topo.facets[0]],
+            self.dofnum.nodal_dofs[:, self.dofnum.topo.facets[1]],
+            self.dofnum.facet_dofs,
+        ))
 
     @property
     def t2f(self):
@@ -47,7 +53,7 @@ class Geometry(Mesh):
         return self.dofnum.topo.t2e
 
     def mapping(self):
-        return MappingIsoparametric(self, self.dofnum.element)
+        return MappingIsoparametric(self, self.dofnum.element, ElementLineP2())
 
     def dim(self):
         return self.dofnum.element.dim

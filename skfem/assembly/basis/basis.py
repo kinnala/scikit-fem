@@ -32,7 +32,10 @@ class Basis:
 
         self.mapping = mesh.mapping() if mapping is None else mapping
 
-        self.dofnum = Dofnum(mesh, elem)
+        if hasattr(mesh, 'doflocs'):
+            self.dofnum = Dofnum(mesh.dofnum.topo, elem)
+        else:
+            self.dofnum = Dofnum(mesh, elem)
 
         if mesh.refdom != elem.refdom:
             raise ValueError("Incompatible Mesh and Element.")
