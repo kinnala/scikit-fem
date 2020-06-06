@@ -1,7 +1,10 @@
 import unittest
 import numpy as np
 
-from skfem import *
+from skfem.mesh import MeshHex, MeshQuad, MeshTri
+from skfem.element import ElementHex1, ElementQuad1
+from skfem.assembly import FacetBasis
+from skfem.mapping.mapping_mortar import MappingMortar
 
 
 class TestIsoparamNormals(unittest.TestCase):
@@ -19,10 +22,11 @@ class TestIsoparamNormals(unittest.TestCase):
         for itr in range(m.p.shape[0]):
             case = (x[itr] < eps) * (x[itr] > -eps)
             for jtr in range(m.p.shape[0]):
+                normals = fb.normals.f[jtr][case]
                 if itr == jtr:
-                    self.assertTrue((fb.normals.f[jtr][case] == -1).all())
+                    self.assertTrue((normals == -1).all())
                 else:
-                    self.assertTrue((np.abs(fb.normals.f[jtr][case]) < 1e-14).all())
+                    self.assertTrue((np.abs(normals) < 1e-14).all())
 
 
 class TestIsoparamNormalsQuad(TestIsoparamNormals):
