@@ -24,10 +24,10 @@ Forms are defined using an intuitive syntax:
 
 ```python
 from skfem import *
+from skfem.helpers import dot, grad
 
 @BilinearForm
 def laplace(u, v, w):
-    from skfem.helpers import dot, grad
     return dot(grad(u), grad(v))
 ```
 
@@ -44,8 +44,8 @@ mesh = MeshTet.init_tensor(*((np.linspace(0, 1, 60),) * 3))
 ```
 
 We support [many common finite
-elements](https://github.com/kinnala/scikit-fem/tree/master/skfem/element) and
-below assemble the stiffness matrix using second-order tetrahedra:
+elements](https://github.com/kinnala/scikit-fem/tree/master/skfem/element).
+Below the stiffness matrix is assembled using second-order tetrahedra:
 
 ```python
 basis = InteriorBasis(mesh, ElementTetP2())
@@ -55,13 +55,18 @@ A = laplace.assemble(basis)  # type: scipy.sparse.csr_matrix
 The matrix `A` has 1.5 million rows/columns and took only a few seconds to
 assemble!
 
-More examples can be found in the
-[source code distribution](https://github.com/kinnala/scikit-fem/tree/master/docs/examples).
+More examples can be found in the [source code
+distribution](https://github.com/kinnala/scikit-fem/tree/master/docs/examples).
+
+## Documentation
+
+The project is documented using Sphinx.  A recent version of the documentation
+can be found from [Github
+pages](https://kinnala.github.io/scikit-fem-docs/index.html).
 
 ## Installation
 
 The most recent release can be installed simply by `pip install scikit-fem`.
-
 For more cutting edge features, you can clone this repository.
 
 ## Acknowledgements
@@ -110,7 +115,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Unreleased
 
 #### Added
-- Compatible `Mesh` objects can be now merged using `+` operator
+- `Mesh.__add__`, for merging meshes using `+` operator
 - `ElementHexS2`, a 20-node quadratic hexahedral serendipity element
 
 #### Fixed
