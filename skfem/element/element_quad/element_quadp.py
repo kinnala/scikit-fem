@@ -1,7 +1,6 @@
 import numpy as np
 
 from ...mesh.mesh2d import MeshQuad
-from ..element_line import ElementLinePp
 
 
 class ElementQuadP(ElementLinePp):
