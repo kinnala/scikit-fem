@@ -3,7 +3,6 @@ from numpy import ndarray
 
 from skfem.mapping import MappingIsoparametric
 from skfem.mesh import Mesh
-from skfem.element import ElementLineP2
 
 
 class Geometry(Mesh):
