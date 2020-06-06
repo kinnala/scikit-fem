@@ -1,6 +1,7 @@
 import numpy as np
 
 from ..element_h1 import ElementH1
+from ..element_line.element_line_p1 import ElementLineP1
 from ...mesh.mesh2d import MeshTri
 
 
@@ -13,6 +14,7 @@ class ElementTriP1(ElementH1):
                         [1., 0.],
                         [0., 1.]])
     mesh_type = MeshTri
+    boundary_element = ElementLineP1()
 
     def lbasis(self, X, i):
         x, y = X

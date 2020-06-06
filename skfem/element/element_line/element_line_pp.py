@@ -17,7 +17,7 @@ class ElementLinePp(ElementH1):
             raise ValueError("p < 1 not supported.")
         if p < 3:
             warnings.warn(("Consider using ElementLineP{} instead "
-                           "of ElementLinePp.").format(p - 1))
+                           "of ElementLinePp.").format(p))
         self.interior_dofs = p - 1
         self.maxdeg = p
         self.dofnames = ['u'] + (p - 1) * ['u']

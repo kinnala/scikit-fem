@@ -2,6 +2,7 @@ import numpy as np
 
 from ..element_h1 import ElementH1
 from ...mesh.mesh2d import MeshQuad
+from ..element_line.element_line_p2 import ElementLineP2
 
 
 class ElementQuad2(ElementH1):
@@ -21,6 +22,7 @@ class ElementQuad2(ElementH1):
                         [0.0, 0.5],
                         [0.5, 0.5]])
     mesh_type = MeshQuad
+    boundary_element = ElementLineP2()
 
     def lbasis(self, X, i):
         X = 2 * X - 1

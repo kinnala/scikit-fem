@@ -1,6 +1,7 @@
 import numpy as np
 
 from ..element_h1 import ElementH1
+from ..element_line.element_line_p2 import ElementLineP2
 from ...mesh.mesh2d import MeshTri
 
 
@@ -17,6 +18,7 @@ class ElementTriP2(ElementH1):
                         [.5, .5],
                         [0., .5]])
     mesh_type = MeshTri
+    boundary_element = ElementLineP2()
 
     def lbasis(self, X, i):
         x, y = X
@@ -32,13 +34,13 @@ class ElementTriP2(ElementH1):
         elif i == 2:
             phi = 2. * y ** 2 - y
             dphi = np.array([0. * x, 4. * y - 1])
-        elif i == 3:  # 0->1
+        elif i == 3:
             phi = 4. * x - 4. * x ** 2 - 4. * x * y
             dphi = np.array([4 - 8. * x - 4. * y, -4. * x])
-        elif i == 4:  # 1->2
+        elif i == 4:
             phi = 4. * x * y
             dphi = np.array([4. * y, 4. * x])
-        elif i == 5:  # 0->2
+        elif i == 5:
             phi = 4. * y - 4. * x * y - 4. * y ** 2
             dphi = np.array([-4. * y, 4 - 4. * x - 8. * y])
         else:

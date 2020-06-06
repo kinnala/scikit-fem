@@ -53,7 +53,13 @@ class Geometry(Mesh):
         return self.dofnum.topo.t2e
 
     def mapping(self):
-        return MappingIsoparametric(self, self.dofnum.element, ElementLineP2())
+        if self.dofnum.element.boundary_element is not None:
+            return MappingIsoparametric(self,
+                                        self.dofnum.element,
+                                        self.dofnum.element.boundary_element)
+        else:
+            return MappingIsoparametric(self,
+                                        self.dofnum.element)
 
     def dim(self):
         return self.dofnum.element.dim

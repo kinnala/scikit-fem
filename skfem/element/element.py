@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, TypeVar
 
 import numpy as np
 from numpy import ndarray
@@ -7,7 +7,10 @@ from ..mesh import Mesh
 from .discrete_field import DiscreteField
 
 
-class Element():
+ElementType = TypeVar('ElementType', bound='Element')
+
+
+class Element:
     """Finite element.
 
     Attributes
@@ -45,6 +48,7 @@ class Element():
     maxdeg: int = -1
     dofnames: List[str] = []
     mesh_type: Mesh = None
+    boundary_element: ElementType = None
 
     def orient(self, mapping, i, tind=None):
         """Orient basis functions. By default all = 1."""
