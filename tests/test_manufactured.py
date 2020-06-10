@@ -4,8 +4,14 @@ import unittest
 
 import numpy as np
 
-from skfem import *
 from skfem.models.poisson import laplace, mass
+from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
+from skfem.element import (ElementHex1, ElementHexS2,
+                           ElementLineP1, ElementQuad1,
+                           ElementQuad2, ElementTetP1,
+                           ElementTriP2)
+from skfem.assembly import FacetBasis, InteriorBasis
+from skfem import asm, condense, solve, linear_form, bilinear_form
 
 
 class Line1D(unittest.TestCase):
@@ -30,7 +36,6 @@ class Line1D(unittest.TestCase):
         def boundary_flux(v, dv, w):
             return v * (w.x[0] == 1.)
 
-        n = m.p.shape[-1]
         L = asm(laplace, ib)
         b = asm(boundary_flux, fb)
         D = m.nodes_satisfying(lambda x: x == 0.0)
@@ -62,7 +67,6 @@ class LineNegative1D(unittest.TestCase):
         def boundary_flux(v, dv, w):
             return -v * (w.x[0] == 1.)
 
-        n = m.p.shape[-1]
         L = asm(laplace, ib)
         b = asm(boundary_flux, fb)
         D = m.nodes_satisfying(lambda x: x == 0.0)
@@ -94,7 +98,6 @@ class LineNeumann1D(unittest.TestCase):
         def boundary_flux(v, dv, w):
             return v * (w.x[0] == 1) - v * (w.x[0] == 0)
 
-        n = m.p.shape[-1]
         L = asm(laplace, ib)
         M = asm(mass, ib)
         b = asm(boundary_flux, fb)
