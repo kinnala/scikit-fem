@@ -1,4 +1,4 @@
-from unittest import TestCase
+from unittest import TestCase, main
 
 import numpy as np
 
@@ -48,7 +48,7 @@ class TestEx07(TestCase):
 
 class TestEx08(TestCase):
     def runTest(self):
-        import docs.examples.ex08 as ex08
+        import docs.examples.ex08 as ex08  # noqa
         # only run the initialization, nothing to test
 
 
@@ -114,19 +114,19 @@ class TestEx16(TestCase):
 
 class TestEx17(TestCase):
     def runTest(self):
-        import docs.examples.ex17 as ex
+        import docs.examples.ex17 as ex  # noqa
         # TODO improve
 
 
 class TestEx18(TestCase):
     def runTest(self):
-        import docs.examples.ex18 as ex
+        import docs.examples.ex18 as ex  # noqa
         # TODO improve
 
 
 class TestEx19(TestCase):
     def runTest(self):
-        import docs.examples.ex19 as ex
+        import docs.examples.ex19 as ex  # noqa
         # TODO improve
 
 
@@ -156,15 +156,15 @@ class TestEx22(TestCase):
 
 
 class TestEx23(TestCase):
-   def runTest(self):
-      import docs.examples.ex23 as ex
-      self.assertAlmostEqual(max(ex.lmbda_list), ex.turning_point,
-                             delta=5e-5)
+    def runTest(self):
+        import docs.examples.ex23 as ex
+        self.assertAlmostEqual(max(ex.lmbda_list), ex.turning_point,
+                               delta=5e-5)
 
 
 class TestEx24(TestCase):
     def runTest(self):
-        import docs.examples.ex24 as ex24
+        import docs.examples.ex24 as ex24  # noqa
 
 
 class TestEx25(TestCase):
@@ -177,15 +177,15 @@ class TestEx25(TestCase):
 
 class TestEx26(TestCase):
     def runTest(self):
-        import docs.examples.ex26 as ex26
+        import docs.examples.ex26 as ex26  # noqa
 
 
 class TestEx27(TestCase):
-   def runTest(self):
-      import docs.examples.ex27 as ex
-      _, psi = ex.psi.popitem()
-      self.assertAlmostEqual(min(psi), -0.027043, delta=1e-6)
-      self.assertAlmostEqual(max(psi), 0.6668, delta=1e-5)
+    def runTest(self):
+        import docs.examples.ex27 as ex
+        _, psi = ex.psi.popitem()
+        self.assertAlmostEqual(min(psi), -0.027043, delta=1e-6)
+        self.assertAlmostEqual(max(psi), 0.6668, delta=1e-5)
 
 
 class TestEx28(TestCase):
