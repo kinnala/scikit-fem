@@ -114,7 +114,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ElementHexS2`, a 20-node quadratic hexahedral serendipity element
 
 #### Fixed
-- `Mesh3D.boundary_edges` for hexahedral meshes
+- `Mesh3D.boundary_edges` was broken in case of hexahedral meshes
+- `skfem.utils.project` did not work for `ElementGlobal`
 
 ### [1.1.0] - 2020-05-18
 
