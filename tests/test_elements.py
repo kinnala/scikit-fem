@@ -3,7 +3,16 @@ from unittest import TestCase, main
 import numpy as np
 from numpy.testing import assert_array_equal
 
-from skfem import *
+from skfem.element import (ElementHex1, ElementHexS2, ElementLineP1,
+                           ElementLineP2, ElementLinePp, ElementQuad0,
+                           ElementQuad1, ElementQuad2, ElementQuadP,
+                           ElementQuadS2, ElementTetMini, ElementTetP0,
+                           ElementTetP1, ElementTetP2, ElementTriMini,
+                           ElementTriP0, ElementTriP1, ElementTriP2,
+                           ElementTriRT0, ElementVectorH1)
+from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
+from skfem.assembly.basis import InteriorBasis
+from skfem.mapping import MappingAffine
 
 
 class TestNodality(TestCase):
@@ -45,16 +54,15 @@ class TestNodality(TestCase):
             # of nodal dofs and non-nodal dofs.
             #
             # Nodal dof is defined so that there exists a point where the
-            # corresponding basis function is one, and other basis functions are
-            # zero. Non-nodal dof does not satisfy this property.
+            # corresponding basis function is one, and other basis functions
+            # are zero. Non-nodal dof does not satisfy this property.
             ix = np.isnan(np.sum(Ih, axis=1))
             Nnan = np.sum(ix)
             ixs = np.nonzero(~ix)[0]
             Ih = Ih[ixs].T[ixs].T
 
             assert_array_equal(Ih, np.eye(N - Nnan),
-                               err_msg = "{}".format(type(e)))
-
+                               err_msg="{}".format(type(e)))
 
 
 class TestNodalityTriRT0(TestCase):
@@ -70,11 +78,12 @@ class TestNodalityTriRT0(TestCase):
                             [-1., 0.]]).T
         for itr in range(N):
             # calculate integral of normal component over edge
-            Ih[itr] = np.sum(e.lbasis(e.doflocs.T, itr)[0] * normals, axis=0) *\
-                np.array([1., np.sqrt(2), 1.])
+            A = np.sum(e.lbasis(e.doflocs.T, itr)[0] * normals, axis=0)
+            n = np.array([1., np.sqrt(2), 1.])
+            Ih[itr] = A * n
 
         assert_array_equal(Ih, np.eye(N),
-                       err_msg = "{}".format(type(e)))
+                           err_msg="{}".format(type(e)))
 
 
 class TestComposite(TestCase):
@@ -176,16 +185,19 @@ class TestDerivatives(TestCase):
                     except ValueError:
                         break
                     diff = (out[0][1] - out[0][0]) / eps
+                    errmsg = 'x-derivative for {}th bfun failed for {}'
                     self.assertAlmostEqual(diff, out[1][0][0], delta=1e-3,
-                                           msg='x-derivative for {}th bfun failed for {}'.format(i, elem))
+                                           msg=errmsg.format(i, elem))
                     if elem.dim > 1:
                         diff = (out[0][3] - out[0][2]) / eps
+                        errmsg = 'y-derivative for {}th bfun failed for {}'
                         self.assertAlmostEqual(diff, out[1][1][3], delta=1e-3,
-                                               msg='y-derivative for {}th bfun failed for {}'.format(i, elem))
+                                               msg=errmsg.format(i, elem))
                     if elem.dim == 3:
                         diff = (out[0][5] - out[0][4]) / eps
+                        errmsg = 'z-derivative for {}th bfun failed for {}'
                         self.assertAlmostEqual(diff, out[1][2][4], delta=1e-3,
-                                               msg='z-derivative for {}th bfun failed for {}'.format(i, elem))
+                                               msg=errmsg.format(i, elem))
                     i += 1
 
 
@@ -208,7 +220,6 @@ class TestPartitionofUnity(TestCase):
 
     def runTest(self):
         for elem in self.elems:
-            eps = 1e-6
             if elem.dim == 1:
                 y = np.array([[.15]])
             elif elem.dim == 2:
