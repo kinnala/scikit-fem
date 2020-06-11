@@ -12,7 +12,7 @@ import scipy.sparse.linalg as spl
 from numpy import ndarray
 from scipy.sparse import spmatrix
 
-from skfem.assembly import asm, bilinear_form, linear_form, Dofs
+from skfem.assembly import asm, BilinearForm, LinearForm, Dofs
 from skfem.assembly.basis import Basis
 from skfem.element import ElementVectorH1
 
@@ -307,18 +307,20 @@ def project(fun,
 
     """
 
-    @bilinear_form
-    def mass(u, du, v, dv, w):
+    @BilinearForm
+    def mass(u, v, w):
         p = u * v
         return sum(p) if isinstance(basis_to.elem, ElementVectorH1) else p
 
-    @linear_form
-    def funv(v, dv, w):
+    @LinearForm
+    def funv(v, w):
         p = fun(*w.x) * v
         return sum(p) if isinstance(basis_to.elem, ElementVectorH1) else p
 
-    @bilinear_form
-    def deriv(u, du, v, dv, w):
+    @BilinearForm
+    def deriv(u, v, w):
+        from skfem.helpers import grad
+        du = grad(u)
         return du[diff] * v
 
     M = asm(mass, basis_to)
