@@ -73,11 +73,6 @@ For more cutting edge features, you can clone this repository.
 
 This project was started while working under a grant from the [Finnish Cultural Foundation](https://skr.fi/). The approach used in the finite element assembly has been inspired by the [work of A. Hannukainen and M. Juntunen](https://au.mathworks.com/matlabcentral/fileexchange/36108-hjfem_lite).
 
-A list of people who have directly contributed to the project:
-
-- Tom Gustafsson (Author)
-- [Geordie McBain](https://github.com/gdmcbain)
-
 ## Contributing
 
 We are happy to welcome any contributions to the library.  Reasonable projects
