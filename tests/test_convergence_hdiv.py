@@ -2,7 +2,10 @@ import unittest
 
 import numpy as np
 
-from skfem import *
+from skfem import BilinearForm, InteriorBasis, LinearForm, asm, solve
+from skfem.element import (ElementTetP0, ElementTetRT0, ElementTriP0,
+                           ElementTriRT0)
+from skfem.mesh import MeshTet, MeshTri
 
 
 class ConvergenceRaviartThomas(unittest.TestCase):
