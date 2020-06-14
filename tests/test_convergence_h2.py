@@ -1,6 +1,11 @@
 import unittest
-from skfem import *
-from skfem.helpers import *
+import numpy as np
+
+from skfem import BilinearForm, LinearForm, Functional, asm, condense, solve
+from skfem.helpers import dd, ddot
+from skfem.mesh import MeshQuad, MeshTri
+from skfem.element import ElementQuadBFS, ElementTriArgyris, ElementTriMorley
+from skfem.assembly import InteriorBasis
 
 
 class ConvergenceMorley(unittest.TestCase):
