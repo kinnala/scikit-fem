@@ -2,8 +2,15 @@ import unittest
 
 import numpy as np
 
-from skfem import *
+from skfem import BilinearForm, LinearForm, asm, solve, condense
 from skfem.models.poisson import laplace
+from skfem.element import (ElementHex1, ElementHexS2, ElementLineP1,
+                           ElementLineP2, ElementQuad1, ElementQuad2,
+                           ElementQuadS2, ElementTetMini, ElementTetP1,
+                           ElementTetP2, ElementTriMini, ElementTriP1,
+                           ElementTriP2)
+from skfem.assembly import FacetBasis, InteriorBasis
+from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 
 
 class ConvergenceQ1(unittest.TestCase):
@@ -35,7 +42,7 @@ class ConvergenceQ1(unittest.TestCase):
         hs = np.zeros(Nitrs)
 
         for itr in range(Nitrs):
-            if itr>0:
+            if itr > 0:
                 m.refine()
             ib = self.create_basis(m)
 
@@ -115,12 +122,15 @@ class ConvergenceQ1(unittest.TestCase):
         if m.dim() == 3:
             H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x.f)) ** 2 +
                                         (duh[1] - uy(x.f)) ** 2 +
-                                        (duh[2] - uz(x.f)) ** 2) * dx, axis=1)))
+                                        (duh[2] - uz(x.f)) ** 2) * dx,
+                                axis=1)))
         elif m.dim() == 2:
             H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x.f)) ** 2 +
-                                        (duh[1] - uy(x.f)) ** 2) * dx, axis=1)))
+                                        (duh[1] - uy(x.f)) ** 2) * dx,
+                                axis=1)))
         else:
-            H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x.f)) ** 2) * dx, axis=1)))
+            H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x.f)) ** 2) * dx,
+                                axis=1)))
 
         return L2, H1
 
