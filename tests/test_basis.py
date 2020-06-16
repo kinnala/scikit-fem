@@ -3,7 +3,11 @@ from unittest import TestCase
 import numpy as np
 from numpy.testing import assert_allclose
 
-from skfem import *
+from skfem import BilinearForm, asm, solve, condense
+from skfem.mesh import MeshTri, MeshTet, MeshHex
+from skfem.assembly import InteriorBasis
+from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
+                           ElementTetP2, ElementHexS2)
 
 
 class TestCompositeSplitting(TestCase):
@@ -29,7 +33,6 @@ class TestCompositeSplitting(TestCase):
         self.assertEqual(basis.find_dofs()['centreline'].all().size,
                          (2 + 1) * (2**(1 + 3) + 1) + 2 * 2**(1 + 3))
 
-        
         @BilinearForm
         def bilinf(u, p, v, q, w):
             from skfem.helpers import grad, ddot, div
