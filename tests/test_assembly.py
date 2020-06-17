@@ -2,12 +2,19 @@ import unittest
 
 import numpy as np
 
-from skfem import *
+from skfem import (BilinearForm, LinearForm, Functional, asm, bilinear_form,
+                   linear_form, solve, functional)
+from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
+                           ElementHexS2, ElementTetP0, ElementTetP1,
+                           ElementTetP2, ElementTriP1, ElementQuad2,
+                           ElementTriMorley, ElementVectorH1)
+from skfem.mesh import MeshQuad, MeshHex, MeshTet, MeshTri
+from skfem.assembly import FacetBasis, InteriorBasis
 
 
 class IntegrateOneOverBoundaryQ1(unittest.TestCase):
     elem = ElementQuad1()
-    
+
     def createBasis(self):
         m = MeshQuad()
         m.refine(6)
@@ -48,7 +55,7 @@ class IntegrateOneOverBoundaryHex1(IntegrateOneOverBoundaryQ1):
         self.boundary_area = 6.000
 
 
-class IntegrateOneOverBoundaryHex1(IntegrateOneOverBoundaryQ1):
+class IntegrateOneOverBoundaryHex1_2(IntegrateOneOverBoundaryQ1):
 
     def createBasis(self):
         m = MeshHex()
@@ -134,8 +141,8 @@ class BasisInterpolator(unittest.TestCase):
         x = self.initOnes(ib)
         f = ib.interpolator(x)
 
-        self.assertTrue(np.sum(f(np.array([np.sin(m.p[0, :]),
-                                           np.sin(3. * m.p[1, :])])) - 1.) < 1e-10)
+        X = np.array([np.sin(m.p[0, :]), np.sin(3. * m.p[1, :])])
+        self.assertTrue(np.sum(f(X) - 1.0) < 1.0e-10)
 
 
 class BasisInterpolatorTriP2(BasisInterpolator):
@@ -308,7 +315,7 @@ class TestFieldInterpolation(unittest.TestCase):
         self.assertAlmostEqual(feqx.assemble(basis, func=func), 1.)
 
 
-class TestFieldInterpolation(unittest.TestCase):
+class TestFieldInterpolation_2(unittest.TestCase):
 
     def runTest(self):
 
