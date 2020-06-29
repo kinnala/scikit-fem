@@ -37,7 +37,7 @@ components of the disturbance to the velocity:
    \mathrm j\alpha R u + R\;\frac{\mathrm dw}{\mathrm dz} &= 0
    
 This primitive system is second-order and can be discretized using
-one-dimensional Taylor–Hood or MINI elements; here the former are the default with the latter selectable with the `--mini` command-line option.
+one-dimensional Taylor–Hood or Mini elements; here the former are the default with the latter selectable with the `--element Mini` command-line option.
 
 The classical test-case for this problem is plane Poiseuille flow :math:`U(z) =
 1 - z^2` on :math:`-1 < z < 1` at :math:`\alpha = 1` and :math:`R = 10^4`
@@ -53,6 +53,7 @@ segments.
 
 """
 from skfem import *
+import skfem.element.element_line as element_line
 from skfem.models.general import divergence
 from skfem.models.poisson import laplace, mass
 
@@ -66,8 +67,8 @@ from scipy.sparse import block_diag, bmat, csr_matrix
 from scipy.sparse.linalg import eigs
 
 parser = ArgumentParser(description='Orr-Sommerfeld equation')
-parser.add_argument('-m', '--mini', action='store_true',
-                    help='MINI element')
+parser.add_argument('-e', '--element', type=str, default='P2',
+                    help='velocity element')
 args = parser.parse_args()
 
 U = Polynomial([1, 0, -1])      # base-flow profile
@@ -84,7 +85,7 @@ def base_shear(u, v, w):
 
 
 mesh = MeshLine(np.linspace(0, 1, 2**6))
-element = {'u': ElementLineMini() if args.mini else ElementLineP2(),
+element = {'u': getattr(element_line, f'ElementLine{args.element}')(),
            'p': ElementLineP1()}
 basis = {v: InteriorBasis(mesh, e, intorder=4) for v, e in element.items()}
 
