@@ -37,7 +37,7 @@ components of the disturbance to the velocity:
    \mathrm j\alpha R u + R\;\frac{\mathrm dw}{\mathrm dz} &= 0
    
 This primitive system is second-order and can be discretized using
-one-dimensional Taylor–Hood elements.
+one-dimensional Taylor–Hood or MINI elements; here the former are the default with the latter selectable with the `--mini` command-line option.
 
 The classical test-case for this problem is plane Poiseuille flow :math:`U(z) =
 1 - z^2` on :math:`-1 < z < 1` at :math:`\alpha = 1` and :math:`R = 10^4`
@@ -56,6 +56,7 @@ from skfem import *
 from skfem.models.general import divergence
 from skfem.models.poisson import laplace, mass
 
+from argparse import ArgumentParser
 from pathlib import Path
 
 from matplotlib.pyplot import subplots
@@ -64,6 +65,10 @@ from numpy.polynomial.polynomial import Polynomial
 from scipy.sparse import block_diag, bmat, csr_matrix
 from scipy.sparse.linalg import eigs
 
+parser = ArgumentParser(description='Orr-Sommerfeld equation')
+parser.add_argument('-m', '--mini', action='store_true',
+                    help='MINI element')
+args = parser.parse_args()
 
 U = Polynomial([1, 0, -1])      # base-flow profile
 
@@ -79,7 +84,8 @@ def base_shear(u, v, w):
 
 
 mesh = MeshLine(np.linspace(0, 1, 2**6))
-element = {'u': ElementLineP2(), 'p': ElementLineP1()}
+element = {'u': ElementLineMini() if args.mini else ElementLineP2(),
+           'p': ElementLineP1()}
 basis = {v: InteriorBasis(mesh, e, intorder=4) for v, e in element.items()}
 
 L = asm(laplace, basis['u'])
@@ -116,6 +122,7 @@ c['scikit-fem'] = eigs(pencil[0], M=pencil[1],
 
 
 if __name__ == '__main__':
+
     fig, ax = subplots()
     for (label, wavespeed), marker in zip(c.items(), 'o+'):
         ax.plot(wavespeed.real, wavespeed.imag,
