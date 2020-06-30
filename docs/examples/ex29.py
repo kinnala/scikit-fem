@@ -66,11 +66,16 @@ from numpy.polynomial.polynomial import Polynomial
 from scipy.sparse import block_diag, bmat, csr_matrix
 from scipy.sparse.linalg import eigs
 
-parser = ArgumentParser(description='Orr-Sommerfeld equation')
-parser.add_argument('-e', '--element', type=str, default='P2',
-                    help='velocity element')
-args = parser.parse_args()
 
+if __name__ == '__main__':
+    parser = ArgumentParser(description='Orr-Sommerfeld equation')
+    parser.add_argument('-e', '--element', type=str, default='P2',
+                        help='velocity element')
+    args = parser.parse_args()
+    u_element = args.element
+else:
+    u_element = 'P2'
+    
 U = Polynomial([1, 0, -1])      # base-flow profile
 
 
@@ -85,7 +90,7 @@ def base_shear(u, v, w):
 
 
 mesh = MeshLine(np.linspace(0, 1, 2**6))
-element = {'u': getattr(element_line, f'ElementLine{args.element}')(),
+element = {'u': getattr(element_line, f'ElementLine{u_element}')(),
            'p': ElementLineP1()}
 basis = {v: InteriorBasis(mesh, e, intorder=4) for v, e in element.items()}
 
