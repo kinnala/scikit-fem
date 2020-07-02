@@ -14,7 +14,7 @@ class ElementLineP1(ElementH1):
     mesh_type = MeshLine
 
     def lbasis(self, X, i):
-        x = X[0, :]
+        x = X[0]
 
         if i == 0:
             phi = 1 - x

@@ -8,12 +8,12 @@ class ElementTriMini(ElementH1):
     nodal_dofs = 1
     interior_dofs = 1
     dim = 2
-    maxdeg = 3
+    maxdeg = 1 + dim
     dofnames = ['u']
     doflocs = np.array([[0., 0.],
                         [1., 0.],
                         [0., 1.],
-                        [np.nan, np.nan]])
+                        [np.nan] * dim])
     mesh_type = MeshTri
 
     def lbasis(self, X, i):

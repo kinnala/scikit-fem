@@ -39,6 +39,7 @@ The supported elements include
     - :class:`~skfem.element.ElementLineP2`
     - :class:`~skfem.element.ElementLinePp`
     - :class:`~skfem.element.ElementLineHermite`
+    - :class:`~skfem.element.ElementLineMini`
 
 """
 
@@ -58,7 +59,7 @@ from .element_tet import ElementTetP0, ElementTetP1, ElementTetP2,\
     ElementTetRT0, ElementTetN0, ElementTetMini
 from .element_hex import ElementHex1, ElementHexS2  # noqa
 from .element_line import ElementLineP1, ElementLineP2,\
-    ElementLinePp, ElementLineHermite  # noqa
+    ElementLinePp, ElementLineHermite, ElementLineMini  # noqa
 from .element_composite import ElementComposite  # noqa
 
 
@@ -96,4 +97,5 @@ __all__ = [
     "ElementLineP2",
     "ElementLinePp",
     "ElementLineHermite",
+    "ElementLineMini",
     "ElementComposite"]
