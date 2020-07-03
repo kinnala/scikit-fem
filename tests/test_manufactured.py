@@ -130,7 +130,7 @@ class TestExactHexElement(unittest.TestCase):
 
         ib = InteriorBasis(m, self.elem())
 
-        A = asm(dudv, ib)
+        A = asm(laplace, ib)
 
         D = ib.get_dofs().all()
         I = ib.complement_dofs(D)
