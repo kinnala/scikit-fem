@@ -11,7 +11,7 @@ from skfem.element import (ElementHex1, ElementHexS2,
                            ElementQuad2, ElementTetP1,
                            ElementTriP2)
 from skfem.assembly import FacetBasis, InteriorBasis
-from skfem import asm, condense, solve, LinearForm, bilinear_form
+from skfem import asm, condense, solve, LinearForm
 
 
 class Line1D(unittest.TestCase):
@@ -48,6 +48,7 @@ class Line1D(unittest.TestCase):
 class Line1DP2(Line1D):
     e = ElementLineP2()
 
+
 class LineNegative1D(unittest.TestCase):
     """Solve the following problem:
 
@@ -64,19 +65,21 @@ class LineNegative1D(unittest.TestCase):
         m.refine(2)
         e = ElementLineP1()
         ib = InteriorBasis(m, e)
-        fb = FacetBasis(m, e)
+        m.define_boundary('left' ,lambda x: x[0] == 0.0)
+        m.define_boundary('right', lambda x: x[0] == 1.0)
+        fb = FacetBasis(m, e, facets=m.boundaries['right'])
 
         @LinearForm
         def boundary_flux(v, w):
-            return -v * (w.x[0] == 1.)
+            return -w.x[0] * v
 
         L = asm(laplace, ib)
         b = asm(boundary_flux, fb)
-        D = m.nodes_satisfying(lambda x: x == 0.0)
+        D = ib.find_dofs()['left'].all()
         I = ib.complement_dofs(D)  # noqa E741
         u = solve(*condense(L, b, I=I))  # noqa E741
 
-        self.assertTrue(np.sum(np.abs(u + m.p[0, :])) < 1e-10)
+        np.testing.assert_array_almost_equal(u[ib.nodal_dofs[0]], -m.p[0], -10)
 
 
 class LineNeumann1D(unittest.TestCase):
@@ -121,9 +124,6 @@ class TestExactHexElement(unittest.TestCase):
         return fun(basis.mesh.p)
 
     def runTest(self):
-        @bilinear_form
-        def dudv(u, du, v, dv, w):
-            return sum(du * dv)
 
         m = self.mesh()
         m.refine(4)
