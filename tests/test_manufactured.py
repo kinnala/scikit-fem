@@ -7,7 +7,7 @@ import numpy as np
 from skfem.models.poisson import laplace, mass
 from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 from skfem.element import (ElementHex1, ElementHexS2,
-                           ElementLineP1, ElementQuad1,
+                           ElementLineP1, ElementLineP2, ElementQuad1,
                            ElementQuad2, ElementTetP1,
                            ElementTriP2)
 from skfem.assembly import FacetBasis, InteriorBasis
@@ -25,12 +25,13 @@ class Line1D(unittest.TestCase):
 
     """
 
+    e = ElementLineP1()
+
     def runTest(self):
         m = MeshLine(np.linspace(0., 1.))
         m.refine(2)
-        e = ElementLineP1()
-        ib = InteriorBasis(m, e)
-        fb = FacetBasis(m, e)
+        ib = InteriorBasis(m, self.e)
+        fb = FacetBasis(m, self.e)
 
         @linear_form
         def boundary_flux(v, dv, w):
@@ -42,8 +43,10 @@ class Line1D(unittest.TestCase):
         I = ib.complement_dofs(D)  # noqa E741
         u = solve(*condense(L, b, I=I))  # noqa E741
 
-        self.assertTrue(np.sum(np.abs(u - m.p[0, :])) < 1e-10)
+        np.testing.assert_array_almost_equal(u[ib.nodal_dofs[0]], m.p[0], -10)
 
+class Line1DP2(Line1D):
+    e = ElementLineP2()
 
 class LineNegative1D(unittest.TestCase):
     """Solve the following problem:
