@@ -7,8 +7,8 @@ import numpy as np
 from skfem.models.poisson import laplace, mass
 from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 from skfem.element import (ElementHex1, ElementHexS2,
-                           ElementLineP1, ElementLineP2, ElementQuad1,
-                           ElementQuad2, ElementTetP1,
+                           ElementLineP1, ElementLineP2, ElementLineMini, 
+                           ElementQuad1, ElementQuad2, ElementTetP1,
                            ElementTriP2)
 from skfem.assembly import FacetBasis, InteriorBasis
 from skfem import asm, condense, solve, LinearForm
@@ -49,6 +49,10 @@ class Line1DP2(Line1D):
     e = ElementLineP2()
 
 
+class Line1DMini(Line1D):
+    e = ElementLineMini()
+
+
 class LineNegative1D(unittest.TestCase):
     """Solve the following problem:
 
@@ -59,15 +63,15 @@ class LineNegative1D(unittest.TestCase):
     Solution is u(x) = -x.
 
     """
+    e = ElementLineP1()
 
     def runTest(self):
         m = MeshLine(np.linspace(0., 1.))
         m.refine(2)
-        e = ElementLineP1()
-        ib = InteriorBasis(m, e)
+        ib = InteriorBasis(m, self.e)
         m.define_boundary('left' ,lambda x: x[0] == 0.0)
         m.define_boundary('right', lambda x: x[0] == 1.0)
-        fb = FacetBasis(m, e, facets=m.boundaries['right'])
+        fb = FacetBasis(m, self.e, facets=m.boundaries['right'])
 
         @LinearForm
         def boundary_flux(v, w):
@@ -82,6 +86,14 @@ class LineNegative1D(unittest.TestCase):
         np.testing.assert_array_almost_equal(u[ib.nodal_dofs[0]], -m.p[0], -10)
 
 
+class LineNegative1DP2(LineNegative1D):
+    e = ElementLineP2()
+
+
+class LineNegative1DMini(LineNegative1D):
+    e = ElementLineMini()
+
+
 class LineNeumann1D(unittest.TestCase):
     """Solve the following problem:
 
@@ -92,13 +104,13 @@ class LineNeumann1D(unittest.TestCase):
     Solution is u(x) = x-0.5.
 
     """
+    e = ElementLineP1()
 
     def runTest(self):
         m = MeshLine(np.linspace(0., 1.))
         m.refine(2)
-        e = ElementLineP1()
-        ib = InteriorBasis(m, e)
-        fb = FacetBasis(m, e)
+        ib = InteriorBasis(m, self.e)
+        fb = FacetBasis(m, self.e)
 
         @LinearForm
         def boundary_flux(v, w):
@@ -109,8 +121,16 @@ class LineNeumann1D(unittest.TestCase):
         b = asm(boundary_flux, fb)
         u = solve(L + 1e-6 * M, b)
 
-        self.assertTrue(np.sum(np.abs(u - m.p[0, :] + 0.5)) < 1e-4)
+        np.testing.assert_array_almost_equal(u[ib.nodal_dofs[0]], m.p[0] - .5, -4)
 
+
+class LineNeumann1DP2(LineNeumann1D):
+    e = ElementLineP2()
+
+
+class LineNeumann1DMini(LineNeumann1D):
+    e = ElementLineMini()
+    
 
 class TestExactHexElement(unittest.TestCase):
     mesh = MeshHex

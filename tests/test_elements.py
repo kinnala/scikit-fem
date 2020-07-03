@@ -3,13 +3,13 @@ from unittest import TestCase, main
 import numpy as np
 from numpy.testing import assert_array_equal
 
-from skfem.element import (ElementHex1, ElementHexS2, ElementLineP1,
-                           ElementLineP2, ElementLinePp, ElementQuad0,
-                           ElementQuad1, ElementQuad2, ElementQuadP,
-                           ElementQuadS2, ElementTetMini, ElementTetP0,
-                           ElementTetP1, ElementTetP2, ElementTriMini,
-                           ElementTriP0, ElementTriP1, ElementTriP2,
-                           ElementTriRT0, ElementVectorH1)
+from skfem.element import (ElementHex1, ElementHexS2, ElementLineP1, 
+                           ElementLineP2, ElementLinePp, ElementLineMini,
+                           ElementQuad0, ElementQuad1, ElementQuad2,
+                           ElementQuadP, ElementQuadS2, ElementTetMini, 
+                           ElementTetP0, ElementTetP1, ElementTetP2,
+                           ElementTriMini, ElementTriP0, ElementTriP1,
+                           ElementTriP2, ElementTriRT0, ElementVectorH1)
 from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 from skfem.assembly.basis import InteriorBasis
 from skfem.mapping import MappingAffine
@@ -23,6 +23,7 @@ class TestNodality(TestCase):
         ElementLineP2(),
         ElementLinePp(1),
         ElementLinePp(3),
+        ElementLineMini(),
         ElementTriP0(),
         ElementTriP1(),
         ElementTriP2(),
@@ -152,6 +153,7 @@ class TestDerivatives(TestCase):
     elems = [
         ElementLineP1(),
         ElementLineP2(),
+        ElementLineMini(),
         ElementTriP1(),
         ElementTriP2(),
         ElementTriMini(),
