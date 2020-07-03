@@ -11,7 +11,7 @@ from skfem.element import (ElementHex1, ElementHexS2,
                            ElementQuad2, ElementTetP1,
                            ElementTriP2)
 from skfem.assembly import FacetBasis, InteriorBasis
-from skfem import asm, condense, solve, linear_form, bilinear_form
+from skfem import asm, condense, solve, LinearForm, bilinear_form
 
 
 class Line1D(unittest.TestCase):
@@ -33,8 +33,8 @@ class Line1D(unittest.TestCase):
         ib = InteriorBasis(m, self.e)
         fb = FacetBasis(m, self.e)
 
-        @linear_form
-        def boundary_flux(v, dv, w):
+        @LinearForm
+        def boundary_flux(v, w):
             return v * (w.x[0] == 1.)
 
         L = asm(laplace, ib)
@@ -66,8 +66,8 @@ class LineNegative1D(unittest.TestCase):
         ib = InteriorBasis(m, e)
         fb = FacetBasis(m, e)
 
-        @linear_form
-        def boundary_flux(v, dv, w):
+        @LinearForm
+        def boundary_flux(v, w):
             return -v * (w.x[0] == 1.)
 
         L = asm(laplace, ib)
@@ -97,8 +97,8 @@ class LineNeumann1D(unittest.TestCase):
         ib = InteriorBasis(m, e)
         fb = FacetBasis(m, e)
 
-        @linear_form
-        def boundary_flux(v, dv, w):
+        @LinearForm
+        def boundary_flux(v, w):
             return v * (w.x[0] == 1) - v * (w.x[0] == 0)
 
         L = asm(laplace, ib)
