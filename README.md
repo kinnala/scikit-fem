@@ -110,12 +110,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Unreleased
 
 #### Added
-- `Mesh.__add__`, for merging meshes using `+` operator
+- `Mesh.__add__`, for merging meshes using `+` operator: duplicated nodes are
+  joined
 - `ElementHexS2`, a 20-node quadratic hexahedral serendipity element
+- `ElementLineMini`, MINI-element for one-dimensional mesh
 
 #### Fixed
 - `Mesh3D.boundary_edges` was broken in case of hexahedral meshes
 - `skfem.utils.project` did not work for `ElementGlobal`
+
+#### Changed
+- `MeshQuad._splitquads` aliased as `MeshQuad.to_meshtri`: should not be private
 
 ### [1.1.0] - 2020-05-18
 
@@ -124,7 +129,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Fixed
 - `Mesh3D.boundary_edges` incorrectly returned all edges where both nodes are on
-the boundary
+  the boundary
 
 ### [1.0.0] - 2020-04-22
 
