@@ -5,7 +5,8 @@ import numpy as np
 from skfem import BilinearForm, LinearForm, asm, solve, condense
 from skfem.models.poisson import laplace
 from skfem.element import (ElementHex1, ElementHexS2, ElementLineP1,
-                           ElementLineP2, ElementQuad1, ElementQuad2,
+                           ElementLineP2, ElementLineMini, 
+                           ElementQuad1, ElementQuad2,
                            ElementQuadS2, ElementTetMini, ElementTetP1,
                            ElementTetP2, ElementTriMini, ElementTriP1,
                            ElementTriP2)
@@ -275,6 +276,12 @@ class ConvergenceLineP2(ConvergenceQ1):
     def setUp(self):
         self.mesh = MeshLine()
         self.mesh.refine(3)
+
+class ConvergenceLineMini(ConvergenceLineP2):
+    
+    def create_basis(self, m):
+        e = ElementLineMini()
+        return InteriorBasis(m, e)
 
 
 class FacetConvergenceTetP2(unittest.TestCase):
