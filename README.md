@@ -109,6 +109,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
+### [1.2.0] - 2020-07-07
+
 #### Added
 - `Mesh.__add__`, for merging meshes using `+` operator: duplicated nodes are
   joined
