@@ -74,7 +74,7 @@ class Dofs(NamedTuple):
         return dict((k, np.union1d(d1.get(k, no), d2.get(k, no)))
                     for k in keys)
 
-    def __or__(self, other: Dofs):
+    def __or__(self, other):
         """For merging two sets of DOF's."""
         return Dofs(
             nodal=self._merge_dicts(self.nodal, other.nodal),
@@ -82,3 +82,6 @@ class Dofs(NamedTuple):
             edge=self._merge_dicts(self.edge, other.edge),
             interior=self._merge_dicts(self.interior, other.interior),
         )
+
+    def __array__(self):
+        return self.all()
