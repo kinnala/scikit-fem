@@ -66,3 +66,19 @@ class Dofs(NamedTuple):
                           "Returning an empty set of DOF's.")
 
         return output
+
+    @staticmethod
+    def _merge_dicts(d1, d2):
+        keys = set(d1).union(d2)
+        no = np.array([])
+        return dict((k, np.union1d(d1.get(k, no), d2.get(k, no)))
+                    for k in keys)
+
+    def __or__(self, other: Dofs):
+        """For merging two sets of DOF's."""
+        return Dofs(
+            nodal=self._merge_dicts(self.nodal, other.nodal),
+            facet=self._merge_dicts(self.facet, other.facet),
+            edge=self._merge_dicts(self.edge, other.edge),
+            interior=self._merge_dicts(self.interior, other.interior),
+        )
