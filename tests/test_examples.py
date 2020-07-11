@@ -244,7 +244,7 @@ class TestEx35(TestCase):
         # exact value depends also on mesh generation,
         # over which we don't have control.
         # tolerance is low, but might still break if mesh is slightly different
-        self.assertAlmostEqual(Z, 52.61913692531027, delta=1e-2)
+        self.assertAlmostEqual(Z, 52.563390368494424, delta=1e-1)
 
 
 if __name__ == '__main__':
