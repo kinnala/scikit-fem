@@ -1,4 +1,4 @@
-"""Bratu–Gelfand.
+r"""Bratu–Gelfand.
 
 .. note::
 

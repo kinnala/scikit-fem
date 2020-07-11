@@ -1,4 +1,4 @@
-"""Backward-facing step.
+r"""Backward-facing step.
 
 .. note::
    This example requires the external package `pymsh <https://pypi.org/project/pygmsh/>`_.

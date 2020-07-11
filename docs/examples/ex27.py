@@ -1,4 +1,6 @@
-r""".. warning::
+r"""Backward-facing step.
+
+.. warning::
    This example requires the external packages `pygmsh <https://pypi.org/project/pygmsh/>`_ and `pacopy <https://pypi.org/project/pacopy/>`_.
 
 

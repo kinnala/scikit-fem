@@ -1,4 +1,4 @@
-"""Creeping flow.
+r"""Creeping flow.
 
 .. note::
    This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_.

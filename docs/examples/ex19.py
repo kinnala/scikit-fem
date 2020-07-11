@@ -1,4 +1,4 @@
-"""Heat equation.
+r"""Heat equation.
 
 .. note::
    This example requires the external package `scikit-sparse <https://github.com/scikit-sparse/scikit-sparse>`_.

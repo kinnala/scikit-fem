@@ -1,4 +1,4 @@
-"""Nédélec elements.
+r"""Nédélec elements.
 
 This example solves the vector-valued problem
 

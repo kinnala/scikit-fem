@@ -1,4 +1,4 @@
-"""Insulated wire.
+r"""Insulated wire.
 
 .. note::
    This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_.

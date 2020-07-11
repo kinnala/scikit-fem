@@ -1,4 +1,4 @@
-"""Adaptive Poisson equation.
+r"""Adaptive Poisson equation.
 
 This example solves `ex01.py` adaptively in an L-shaped domain.
 Using linear elements, the error indicators read

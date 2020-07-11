@@ -1,4 +1,4 @@
-"""Preconditioned conjugate gradient for 3-D Poisson.
+r"""Preconditioned conjugate gradient for 3-D Poisson.
 
 .. note::
 
