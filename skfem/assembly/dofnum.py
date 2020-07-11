@@ -1,8 +1,18 @@
 import numpy as np
 
+from numpy import ndarray
+
 
 class Dofnum:
     """Numbering for the global degrees-of-freedom."""
+
+    nodal_dofs: ndarray = None
+    edge_dofs: ndarray = None
+    facet_dofs: ndarray = None
+    interior_dofs: ndarray = None
+
+    element_dofs: ndarray = None
+    N: int = 0
 
     def __init__(self, topo, element):
 
