@@ -58,6 +58,7 @@ class InteriorBasis(Basis):
             Optional tuple of quadrature points and weights.
 
         """
+
         super(InteriorBasis, self).__init__(mesh, elem, mapping)
 
         if quadrature is not None:
@@ -72,7 +73,7 @@ class InteriorBasis(Basis):
                       for j in range(self.Nbfun)]
 
         if elements is None:
-            self.nelems = self.mesh.t.shape[1]
+            self.nelems = mesh.t.shape[1]
             self.tind = np.arange(self.nelems, dtype=np.int64)
         else:
             self.nelems = len(elements)
@@ -80,8 +81,6 @@ class InteriorBasis(Basis):
 
         self.dx = (np.abs(self.mapping.detDF(self.X, tind=elements))
                    * np.tile(self.W, (self.nelems, 1)))
-
-        self.element_dofs = self.element_dofs[:, self.tind]
 
     def default_parameters(self):
         """Return default parameters for `~skfem.assembly.asm`."""

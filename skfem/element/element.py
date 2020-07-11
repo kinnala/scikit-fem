@@ -113,3 +113,11 @@ class Element():
         b = other.elems if isinstance(other, ElementComposite) else [other]
 
         return ElementComposite(*a, *b)
+
+    @property
+    def refdom(self):
+        return self.mesh_type.refdom
+
+    @property
+    def brefdom(self):
+        return self.mesh_type.brefdom
