@@ -237,6 +237,12 @@ class TestEx34(TestCase):
         from docs.examples.ex34 import err
         self.assertAlmostEqual(err, 0., delta=1e-13)
 
+class TestEx35(TestCase):
+    def runTest(self):
+        from docs.examples.ex35 import Z
+        # exact value depends also on mesh generaion, over which we don't have control
+        # tolerance is low, but might still break if mesh is slightly different
+        self.assertAlmostEqual(Z, 52.61913692531027, delta=1e-2)
 
 if __name__ == '__main__':
     main()
