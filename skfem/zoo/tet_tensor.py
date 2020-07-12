@@ -37,7 +37,8 @@ def build(x, y, z):
     p = np.array([x, y, z]).T.reshape(-1, 3).T
 
     # Create the elements.
-    a0 = np.add.outer(np.array(range(nx - 1)), nx*np.array(range(ny - 1)))
+    a0 = np.add.outer(np.array(range(nx - 1)),
+                      nx * np.array(range(ny - 1)))
     a = np.add.outer(a0, nx * ny * np.array(range(nz - 1)))
 
     elems0 = np.concatenate([a[..., None],
@@ -68,7 +69,7 @@ def build(x, y, z):
     elems1 = np.concatenate([a[..., None] + nx,
                              a[..., None] + 1 + nx,
                              a[..., None] + 1,
-                             a[..., None] + 1 + nx + nx*ny], axis=3)
+                             a[..., None] + 1 + nx + nx * ny], axis=3)
 
     elems1[1::2, 0::2, 0::2, 0] += 1
     elems1[0::2, 1::2, 0::2, 0] += 1
@@ -92,8 +93,8 @@ def build(x, y, z):
 
     elems2 = np.concatenate([a[..., None] + nx,
                              a[..., None] + 1,
-                             a[..., None] + nx*ny,
-                             a[..., None] + 1 + nx + nx*ny], axis=3)
+                             a[..., None] + nx * ny,
+                             a[..., None] + 1 + nx + nx * ny], axis=3)
 
     elems2[1::2, 0::2, 0::2, 0] += 1
     elems2[0::2, 1::2, 0::2, 0] += 1
@@ -116,9 +117,9 @@ def build(x, y, z):
     elems2[1::2, 1::2, 1::2, 3] -= 1
 
     elems3 = np.concatenate([a[..., None] + nx,
-                             a[..., None] + nx*ny,
-                             a[..., None] + nx + nx*ny,
-                             a[..., None] + 1 + nx + nx*ny], axis=3)
+                             a[..., None] + nx * ny,
+                             a[..., None] + nx + nx * ny,
+                             a[..., None] + 1 + nx + nx * ny], axis=3)
 
     elems3[1::2, 0::2, 0::2, 0] += 1
     elems3[0::2, 1::2, 0::2, 0] += 1
