@@ -1,7 +1,3 @@
-import warnings
-from typing import NamedTuple, Dict, Union, List
-from copy import deepcopy
-
 import numpy as np
 from numpy import ndarray
 
@@ -258,7 +254,8 @@ class Dofs:
 
         i4 = []
         for i in range(n_interior):
-            if self.element.dofnames[i + n_nodal + n_facet + n_edge] in dofnames:
+            if self.element.dofnames[i + n_nodal + n_facet
+                                     + n_edge] in dofnames:
                 i4.append(i)
 
         return (

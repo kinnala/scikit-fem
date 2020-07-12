@@ -70,6 +70,7 @@ __all__ = [
     "InteriorBasis",
     "FacetBasis",
     "Dofs",
+    "DofsView",
     "BilinearForm",
     "LinearForm",
     "Functional",
