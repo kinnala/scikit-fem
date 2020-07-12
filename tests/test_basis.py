@@ -41,11 +41,13 @@ class TestCompositeSplitting(TestCase):
 
         S = asm(bilinf, basis)
 
-        D = basis.find_dofs(skip=['u^2'])
+        D = basis.find_dofs()
         x = basis.zeros()
         x[D['up'].all('u^1^1')] = .1
 
-        x = solve(*condense(S, basis.zeros(), x=x, D=D))
+        x = solve(*condense(S, basis.zeros(), x=x,
+                            D=np.concatenate([v.all(['u^1^1', 'u^2^1'])
+                                              for _, v in D.items()])))
 
         (u, u_basis), (p, p_basis) = basis.split(x)
 
@@ -58,7 +60,8 @@ class TestCompositeSplitting(TestCase):
         self.assertTrue(isinstance(U.value, np.ndarray))
         self.assertTrue(isinstance(P.value, np.ndarray))
 
-        self.assertTrue((basis.doflocs[:, D['up'].all()][1] == 1.).all())
+        self.assertTrue((basis.doflocs[:, D['up'].all(['u^1^1',
+                                                       'u^2^1'])][1] == 1.).all())
 
 
 class TestFacetExpansion(TestCase):

@@ -12,7 +12,7 @@ import scipy.sparse.linalg as spl
 from numpy import ndarray
 from scipy.sparse import spmatrix
 
-from skfem.assembly import asm, BilinearForm, LinearForm, Dofs
+from skfem.assembly import asm, BilinearForm, LinearForm, DofsView
 from skfem.assembly.basis import Basis
 from skfem.element import ElementVectorH1
 
@@ -28,7 +28,7 @@ CondensedSystem = Union[spmatrix,
                         Tuple[spmatrix, ndarray, ndarray],
                         Tuple[spmatrix, ndarray, ndarray, ndarray],
                         Tuple[spmatrix, spmatrix, ndarray, ndarray]]
-DofsCollection = Union[ndarray, Dofs, Dict[str, Dofs]]
+DofsCollection = Union[ndarray, DofsView, Dict[str, DofsView]]
 
 
 # preconditioners, e.g. for :func:`skfem.utils.solver_iter_krylov`
@@ -185,7 +185,7 @@ def _flatten_dofs(S: DofsCollection) -> ndarray:
     else:
         if isinstance(S, ndarray):
             return S
-        elif isinstance(S, Dofs):
+        elif isinstance(S, DofsView):
             return S.all()
         elif isinstance(S, dict):
             return np.unique(np.concatenate([S[key].all() for key in S]))
