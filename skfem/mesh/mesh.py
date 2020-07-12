@@ -273,7 +273,7 @@ class Mesh:
                 edge_candidates[subset_ix]
             )
         else:
-            edges = np.array([])
+            edges = np.array([], dtype=np.int64)
 
         return vertices, edges
 
