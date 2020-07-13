@@ -6,11 +6,12 @@ from skfem.mesh import Mesh
 
 
 class DofsView:
+    """A proxy to a subset of :class:`skfem.assembly.Dofs`."""
 
-    nodal_ix: ndarray = None
-    edge_ix: ndarray = None
-    facet_ix: ndarray = None
-    interior_ix: ndarray = None
+    _nodal_ix: ndarray = None
+    _edge_ix: ndarray = None
+    _facet_ix: ndarray = None
+    _interior_ix: ndarray = None
 
     def __init__(self,
                  obj,
@@ -18,13 +19,13 @@ class DofsView:
                  edge_ix=None,
                  facet_ix=None,
                  interior_ix=None):
-        self.nodal_ix = np.empty((0,), dtype=np.int64)\
+        self._nodal_ix = np.empty((0,), dtype=np.int64)\
             if nodal_ix is None else nodal_ix
-        self.edge_ix = np.empty((0,), dtype=np.int64)\
+        self._edge_ix = np.empty((0,), dtype=np.int64)\
             if edge_ix is None else edge_ix
-        self.facet_ix = np.empty((0,), dtype=np.int64)\
+        self._facet_ix = np.empty((0,), dtype=np.int64)\
             if facet_ix is None else facet_ix
-        self.interior_ix = np.empty((0,), dtype=np.int64)\
+        self._interior_ix = np.empty((0,), dtype=np.int64)\
             if interior_ix is None else interior_ix
         self._obj = obj
 
@@ -36,10 +37,10 @@ class DofsView:
         return np.unique(
             np.concatenate(
                 (
-                    self._obj._nodal_dofs[i1][:, self.nodal_ix].flatten(),
-                    self._obj._facet_dofs[i2][:, self.facet_ix].flatten(),
-                    self._obj._edge_dofs[i3][:, self.edge_ix].flatten(),
-                    self._obj._interior_dofs[i4][:, self.interior_ix].flatten()
+                    self._obj._nodal_dofs[i1][:, self._nodal_ix].flatten(),
+                    self._obj._facet_dofs[i2][:, self._facet_ix].flatten(),
+                    self._obj._edge_dofs[i3][:, self._edge_ix].flatten(),
+                    self._obj._interior_dofs[i4][:, self._interior_ix].flatten()
                 )
             )
         )
@@ -47,20 +48,20 @@ class DofsView:
     @property
     def nodal(self):
         return self._by_name(self._nodal_dofs,
-                             ix=self.nodal_ix)
+                             ix=self._nodal_ix)
 
     @property
     def facet(self):
         return self._by_name(self._facet_dofs,
                              off=self._nodal_dofs.shape[0],
-                             ix=self.facet_ix)
+                             ix=self._facet_ix)
 
     @property
     def edge(self):
         return self._by_name(self._edge_dofs,
                              off=(self._nodal_dofs.shape[0]
                                   + self._facet_dofs.shape[0]),
-                             ix=self.edge_ix)
+                             ix=self._edge_ix)
 
     @property
     def interior(self):
@@ -68,7 +69,7 @@ class DofsView:
                              off=(self._nodal_dofs.shape[0]
                                   + self._facet_dofs.shape[0]
                                   + self._edge_dofs.shape[0]),
-                             ix=self.interior_ix)
+                             ix=self._interior_ix)
 
     def __getattr__(self, attr):
         return getattr(self._obj, attr)
@@ -77,11 +78,14 @@ class DofsView:
         """For merging two sets of DOF's."""
         return DofsView(
             self._obj,
-            np.union1d(self.nodal_ix, other.nodal_ix),
-            np.union1d(self.edge_ix, other.edge_ix),
-            np.union1d(self.facet_ix, other.facet_ix),
-            np.union1d(self.interior_ix, other.interior_ix)
+            np.union1d(self._nodal_ix, other._nodal_ix),
+            np.union1d(self._edge_ix, other._edge_ix),
+            np.union1d(self._facet_ix, other._facet_ix),
+            np.union1d(self._interior_ix, other._interior_ix)
         )
+
+    def __add__(self, other):
+        return self.__or__(self, other)
 
 
 class Dofs:

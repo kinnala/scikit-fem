@@ -23,8 +23,6 @@ class Basis:
 
     """
 
-    N: int = 0
-    dofnames: List[str] = []
     tind: ndarray = None
 
     def __init__(self, mesh, elem, mapping=None):
@@ -35,9 +33,6 @@ class Basis:
 
         if mesh.refdom != elem.refdom:
             raise ValueError("Incompatible Mesh and Element.")
-
-        # human readable names
-        self.dofnames = elem.dofnames
 
         # global degree-of-freedom location
         # disabled for MappingMortar by checking mapping.maps
@@ -95,7 +90,6 @@ class Basis:
 
     def _get_dofs(self, facets: ndarray):
         """Return :class:`skfem.assembly.DofsView` corresponding to facets."""
-
         return self.dofs.get_facet_dofs(facets)
 
     def find_dofs(self,
