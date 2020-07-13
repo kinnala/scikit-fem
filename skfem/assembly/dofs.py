@@ -36,12 +36,10 @@ class DofsView:
             i1, i2, i3, i4 = 4 * (slice(None),)
         return np.unique(
             np.concatenate(
-                (
-                    self._obj._nodal_dofs[i1][:, self._nodal_ix].flatten(),
-                    self._obj._facet_dofs[i2][:, self._facet_ix].flatten(),
-                    self._obj._edge_dofs[i3][:, self._edge_ix].flatten(),
-                    self._obj._interior_dofs[i4][:, self._interior_ix].flatten()
-                )
+                (self._obj._nodal_dofs[i1][:, self._nodal_ix].flatten(),
+                 self._obj._facet_dofs[i2][:, self._facet_ix].flatten(),
+                 self._obj._edge_dofs[i3][:, self._edge_ix].flatten(),
+                 self._obj._interior_dofs[i4][:, self._interior_ix].flatten())
             )
         )
 
@@ -150,8 +148,15 @@ class Dofs:
                                   + self._facet_dofs.shape[0]
                                   + self._edge_dofs.shape[0]))
 
-    def get_facet_dofs(self, facets):
+    def get_facet_dofs(self, facets: ndarray) -> DofsView:
+        """Return a subset of DOF's corresponding to the given facets.
 
+        Parameters
+        ----------
+        facets
+            An array of facet indices.
+
+        """
         nodal_ix, edge_ix = self.topo.expand_facets(facets)
         facet_ix = facets
 
@@ -276,12 +281,10 @@ class Dofs:
             i1, i2, i3, i4 = 4 * (slice(None),)
         return np.unique(
             np.concatenate(
-                (
-                    self._nodal_dofs[i1].flatten(),
-                    self._facet_dofs[i2].flatten(),
-                    self._edge_dofs[i3].flatten(),
-                    self._interior_dofs[i4].flatten()
-                )
+                (self._nodal_dofs[i1].flatten(),
+                 self._facet_dofs[i2].flatten(),
+                 self._edge_dofs[i3].flatten(),
+                 self._interior_dofs[i4].flatten())
             )
         )
 
