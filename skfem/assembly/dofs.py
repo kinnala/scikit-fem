@@ -1,3 +1,5 @@
+from typing import Union
+
 import numpy as np
 from numpy import ndarray
 
@@ -8,15 +10,15 @@ from skfem.mesh import Mesh
 class DofsView:
     """A subset of :class:`skfem.assembly.Dofs`."""
 
-    _nodal_ix: ndarray = None
-    _edge_ix: ndarray = None
-    _facet_ix: ndarray = None
-    _interior_ix: ndarray = None
+    _nodal_ix: Union[ndarray, slice] = None
+    _facet_ix: Union[ndarray, slice] = None
+    _edge_ix: Union[ndarray, slice] = None
+    _interior_ix: Union[ndarray, slice] = None
 
-    _nodal_rows = slice(None)
-    _edge_rows = slice(None)
-    _facet_rows = slice(None)
-    _interior_rows = slice(None)
+    _nodal_rows: Union[ndarray, slice] = None
+    _facet_rows: Union[ndarray, slice] = None
+    _edge_rows: Union[ndarray, slice] = None
+    _interior_rows: Union[ndarray, slice] = None
 
     def __init__(self,
                  obj,
@@ -165,8 +167,8 @@ class Dofs:
     """An object containing a set of degree-of-freedom indices."""
 
     _nodal_dofs: ndarray = None
-    _edge_dofs: ndarray = None
     _facet_dofs: ndarray = None
+    _edge_dofs: ndarray = None
     _interior_dofs: ndarray = None
 
     _element_dofs: ndarray = None

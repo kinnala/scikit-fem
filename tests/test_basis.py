@@ -87,31 +87,6 @@ class TestFacetExpansion(TestCase):
 
 
 class TestFacetExpansionHexS2(TestFacetExpansion):
+
     mesh_type = MeshHex
     elem_type = ElementHexS2
-
-
-class TestDofsMerge(TestCase):
-
-    def runTest(self):
-        m = MeshTri()
-        basis = InteriorBasis(m, ElementTriP2())
-        D1 = basis.get_dofs(lambda x: x[0] == 0)
-        D2 = basis.get_dofs(lambda x: x[0] == 1)
-        D3 = basis.get_dofs(lambda x: x[1] == 1)
-        D4 = basis.get_dofs(lambda x: x[1] == 0)
-        assert_allclose(D1 | D2 | D3 | D4,
-                        basis.get_dofs())
-        assert_allclose(D1 + D2 + D3 + D4,
-                        basis.get_dofs())
-
-
-class TestDofsSubset(TestCase):
-
-    def runTest(self):
-        m = MeshTri()
-        basis = InteriorBasis(m, ElementTriP2())
-        dofs = basis.get_dofs()
-
-        self.assertEqual(len(dofs.nodal['u']), 4)
-        self.assertEqual(len(dofs.facet['u']), 4)

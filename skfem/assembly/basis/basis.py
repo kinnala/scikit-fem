@@ -121,7 +121,7 @@ class Basis:
             else:
                 facets = self.mesh.boundaries
 
-        return {k: self.dofs.get_facet_dofs(facets[k], skip_dofnames=skip)\
+        return {k: self.dofs.get_facet_dofs(facets[k], skip_dofnames=skip)
                 for k in facets}
 
     def get_dofs(self, facets: Optional[Any] = None) -> Any:
@@ -155,7 +155,7 @@ class Basis:
                 if callable(f):
                     return self.mesh.facets_satisfying(f)
                 return f
-            return {k: self.dofs.get_facet_dofs(to_indices(facets[k]))\
+            return {k: self.dofs.get_facet_dofs(to_indices(facets[k]))
                     for k in facets}
         return self.dofs.get_facet_dofs(facets)
 
