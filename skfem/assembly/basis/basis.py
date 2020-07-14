@@ -88,12 +88,9 @@ class Basis:
             D = tuple(D[0][key].all() for key in D[0])
         return np.setdiff1d(np.arange(self.N), np.concatenate(D))
 
-    def _get_dofs(self, facets: ndarray):
-        """Return :class:`skfem.assembly.DofsView` corresponding to facets."""
-        return self.dofs.get_facet_dofs(facets)
-
     def find_dofs(self,
-                  facets: Dict[str, ndarray] = None) -> Dict[str, Dofs]:
+                  facets: Dict[str, ndarray] = None,
+                  skip: List[str] = None) -> Dict[str, Dofs]:
         """Return global DOF numbers corresponding to a dictionary of facets.
 
         Facets can be queried from :class:`~skfem.mesh.Mesh` objects:
@@ -114,6 +111,8 @@ class Basis:
         facets
             A dictionary of facets. If `None`, use `self.mesh.boundaries`
             if set or otherwise use `{'all': self.mesh.boundary_facets()}`.
+        skip
+            List of dofnames to skip.
 
         """
         if facets is None:
@@ -122,7 +121,8 @@ class Basis:
             else:
                 facets = self.mesh.boundaries
 
-        return {k: self._get_dofs(facets[k]) for k in facets}
+        return {k: self.dofs.get_facet_dofs(facets[k], skip_dofnames=skip)\
+                for k in facets}
 
     def get_dofs(self, facets: Optional[Any] = None) -> Any:
         """Find global DOF numbers.
@@ -155,9 +155,9 @@ class Basis:
                 if callable(f):
                     return self.mesh.facets_satisfying(f)
                 return f
-            return {k: self._get_dofs(to_indices(facets[k])) for k in facets}
-        else:
-            return self._get_dofs(facets)
+            return {k: self.dofs.get_facet_dofs(to_indices(facets[k]))\
+                    for k in facets}
+        return self.dofs.get_facet_dofs(facets)
 
     def default_parameters(self):
         """This is used by :func:`skfem.assembly.asm` to get the default
