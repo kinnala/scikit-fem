@@ -58,19 +58,19 @@ class Basis:
 
     @property
     def nodal_dofs(self):
-        return self.dofs._nodal_dofs
+        return self.dofs.nodal_dofs
 
     @property
     def facet_dofs(self):
-        return self.dofs._facet_dofs
+        return self.dofs.facet_dofs
 
     @property
     def edge_dofs(self):
-        return self.dofs._edge_dofs
+        return self.dofs.edge_dofs
 
     @property
     def interior_dofs(self):
-        return self.dofs._interior_dofs
+        return self.dofs.interior_dofs
 
     @property
     def N(self):
@@ -79,8 +79,8 @@ class Basis:
     @property
     def element_dofs(self):
         if self.tind is None:
-            return self.dofs._element_dofs
-        return self.dofs._element_dofs[:, self.tind]
+            return self.dofs.element_dofs
+        return self.dofs.element_dofs[:, self.tind]
 
     def complement_dofs(self, *D):
         if type(D[0]) is dict:

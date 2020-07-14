@@ -20,12 +20,12 @@ class TestDofsKeepSkipOperations(TestCase):
         assert_allclose(all_dofs.keep(['u', 'u_n']).keep('u'),
                         all_dofs.keep('u'))
 
-        assert_allclose(all_dofs.skip(['u_x', 'u_y', 'u_xx',
+        assert_allclose(all_dofs.drop(['u_x', 'u_y', 'u_xx',
                                        'u_xy', 'u_yy', 'u_n']),
                         all_dofs.keep('u'))
 
         assert_allclose(all_dofs,
-                        all_dofs.skip('does_not_exist'))
+                        all_dofs.drop('does_not_exist'))
 
         assert_allclose(np.empty((0,), dtype=np.int64),
                         all_dofs.keep('does_not_exist'))
@@ -41,6 +41,7 @@ class TestDofsNodalSubsets(TestCase):
         all_dofs = basis.get_dofs()
 
         self.assertEqual(len(all_dofs.keep('u').nodal), 1)
+        self.assertTrue('u' in all_dofs.keep('u').nodal)
 
 
 class TestDofsMerge(TestCase):
