@@ -113,6 +113,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Added
 - `Dofs.__or__` and `Dofs.__add__`, for merging degree-of-freedom sets
   (i.e. `Dofs` objects) using `|` and `+` operators
+- `Dofs.drop` and `Dofs.keep`, for further filtering the degree-of-freedom sets
 
 ### [1.2.0] - 2020-07-07
 
