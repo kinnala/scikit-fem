@@ -1,4 +1,4 @@
-from typing import Union, NamedTuple, Any
+from typing import Union, NamedTuple, Any, List
 
 import numpy as np
 from numpy import ndarray
@@ -94,29 +94,33 @@ class DofsView(NamedTuple):
 
     @property
     def nodal(self):
-        return self._by_name(self.nodal_dofs,
-                             ix=self.nodal_ix)
+        return self._by_name(self.nodal_dofs[self.nodal_rows],
+                             ix=self.nodal_ix,
+                             rows=self.nodal_rows)
 
     @property
     def facet(self):
-        return self._by_name(self.facet_dofs,
+        return self._by_name(self.facet_dofs[self.facet_rows],
                              off=self.nodal_dofs.shape[0],
-                             ix=self.facet_ix)
+                             ix=self.facet_ix,
+                             rows=self.facet_rows)
 
     @property
     def edge(self):
-        return self._by_name(self.edge_dofs,
+        return self._by_name(self.edge_dofs[self.edge_rows],
                              off=(self.nodal_dofs.shape[0]
                                   + self.facet_dofs.shape[0]),
-                             ix=self.edge_ix)
+                             ix=self.edge_ix,
+                             rows=self.edge_rows)
 
     @property
     def interior(self):
-        return self._by_name(self.interior_dofs,
+        return self._by_name(self.interior_dofs[self.interior_rows],
                              off=(self.nodal_dofs.shape[0]
                                   + self.facet_dofs.shape[0]
                                   + self.edge_dofs.shape[0]),
-                             ix=self.interior_ix)
+                             ix=self.interior_ix,
+                             rows=self.interior_rows)
 
     def __getattr__(self, attr):
         return getattr(self.obj, attr)
@@ -218,7 +222,9 @@ class Dofs:
         # total dofs
         self.N = np.max(self.element_dofs) + 1
 
-    def get_facet_dofs(self, facets: ndarray, skip_dofnames=None) -> DofsView:
+    def get_facet_dofs(self,
+                       facets: ndarray,
+                       skip_dofnames: List[str] = None) -> DofsView:
         """Return a subset of DOF's corresponding to the given facets.
 
         Parameters
@@ -245,32 +251,27 @@ class Dofs:
         )
 
     def _by_name(self,
-                 dofs,
-                 off=0,
-                 ix=None,
-                 rows=None):
+                 dofs: ndarray,
+                 off: int = 0,
+                 ix: Union[ndarray, slice] = None,
+                 rows: Union[ndarray, slice] = None):
 
         n_dofs = dofs.shape[0]
+        n_ents = dofs.shape[1] if ix is None else len(ix)
 
-        if ix is None:
-            n_ents = dofs.shape[1]
-        else:
-            n_ents = len(ix)
+        if rows is None:
+            rows = list(range(n_dofs))
 
         ents = {
-            self.element.dofnames[i + off]: np.zeros((0, n_ents),
-                                                     dtype=np.int64)
+            self.element.dofnames[rows[i] + off]: np.zeros((0, n_ents),
+                                                           dtype=np.int64)
             for i in range(n_dofs)
         }
         for i in range(n_dofs):
-            if ix is None:
-                ents[self.element.dofnames[i + off]] =\
-                    np.vstack((ents[self.element.dofnames[i + off]],
-                               dofs[i]))
-            else:
-                ents[self.element.dofnames[i + off]] =\
-                    np.vstack((ents[self.element.dofnames[i + off]],
-                               dofs[i, ix]))
+            new_row = dofs[i] if ix is None else dofs[i, ix]
+            ents[self.element.dofnames[rows[i] + off]] =\
+                np.vstack((ents[self.element.dofnames[rows[i] + off]],
+                           new_row))
 
         return {k: ents[k].flatten() for k in ents}
 
@@ -280,9 +281,11 @@ class Dofs:
             dofnames = [dofnames]
 
         if skip is True:
-            check = lambda x, y: x not in y
+            def check(x, y):
+                return x not in y
         else:
-            check = lambda x, y: x in y
+            def check(x, y):
+                return x in y
 
         n_nodal = self.nodal_dofs.shape[0]
         n_facet = self.facet_dofs.shape[0]
