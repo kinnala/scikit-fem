@@ -21,6 +21,7 @@ class DofsView(NamedTuple):
     interior_rows: Union[ndarray, slice] = slice(None)
 
     def flatten(self):
+        """Return all DOF indices as a single array."""
         return np.unique(
             np.concatenate((
                 (self.obj
@@ -52,7 +53,15 @@ class DofsView(NamedTuple):
     def _intersect_tuples(self, a, b):
         return tuple([self._intersect(a[i], b[i]) for i in range(len(a))])
 
-    def keep(self, dofnames):
+    def keep(self, dofnames: List[str]):
+        """Keep DOF's with the given names and remove others.
+
+        Parameters
+        ----------
+        dofnames
+            An array of DOF names, e.g. `["u", "u_n"]`.
+
+        """
         return DofsView(
             self.obj,
             self.nodal_ix,
@@ -69,6 +78,14 @@ class DofsView(NamedTuple):
         )
 
     def drop(self, dofnames):
+        """Remove DOF's with the given names.
+
+        Parameters
+        ----------
+        dofnames
+            An array of DOF names, e.g. `["u", "u_n"]`.
+
+        """
         return DofsView(
             self.obj,
             self.nodal_ix,
