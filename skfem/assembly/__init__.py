@@ -49,7 +49,7 @@ from numpy import ndarray
 from scipy.sparse import csr_matrix
 
 from .basis import Basis, InteriorBasis, FacetBasis
-from .dofs import Dofs
+from .dofs import Dofs, DofsView
 from .form import Form, BilinearForm, LinearForm, Functional,\
     bilinear_form, linear_form, functional
 
@@ -70,6 +70,7 @@ __all__ = [
     "InteriorBasis",
     "FacetBasis",
     "Dofs",
+    "DofsView",
     "BilinearForm",
     "LinearForm",
     "Functional",

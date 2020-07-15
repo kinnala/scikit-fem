@@ -1,4 +1,4 @@
-"""Laplace with mixed boundary conditions.
+r"""Laplace with mixed boundary conditions.
 
 .. note::
 

@@ -1,4 +1,4 @@
-"""Block diagonally preconditioned Stokes solver.
+r"""Block diagonally preconditioned Stokes solver.
 
 .. note::
 

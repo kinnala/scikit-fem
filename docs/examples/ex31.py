@@ -1,4 +1,4 @@
-"""Curved elements.
+r"""Curved elements.
 
 This example solves the eigenvalue problem
 

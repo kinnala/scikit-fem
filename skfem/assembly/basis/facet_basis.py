@@ -100,8 +100,6 @@ class FacetBasis(Basis):
         self.dx = (np.abs(self.mapping.detDG(self.X, find=self.find))
                    * np.tile(self.W, (self.nelems, 1)))
 
-        self.element_dofs = self.element_dofs[:, self.tind]
-
     def default_parameters(self):
         """Return default parameters for `~skfem.assembly.asm`."""
         return {'x': self.global_coordinates(),

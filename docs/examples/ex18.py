@@ -1,4 +1,4 @@
-"""Stokes equations.
+r"""Stokes equations.
 
 .. note::
    This example requires the external package `dmsh <https://pypi.org/project/dmsh/>`_.

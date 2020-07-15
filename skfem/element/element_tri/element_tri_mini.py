@@ -9,7 +9,7 @@ class ElementTriMini(ElementH1):
     interior_dofs = 1
     dim = 2
     maxdeg = 1 + dim
-    dofnames = ['u']
+    dofnames = ['u', 'NA']
     doflocs = np.array([[0., 0.],
                         [1., 0.],
                         [0., 1.],

@@ -79,6 +79,22 @@ class Mesh:
                 if not isinstance(v, ndarray):
                     self.subdomains[k] = np.array(v, dtype=np.int64)
 
+    @property
+    def nelements(self):
+        return self.t.shape[1]
+
+    @property
+    def nvertices(self):
+        return np.max(self.t) + 1
+
+    @property
+    def nfacets(self):
+        return self.facets.shape[1]
+
+    @property
+    def nedges(self):
+        return self.edges.shape[1]
+
     def __str__(self):
         return self.__repr__()
 
@@ -238,6 +254,28 @@ class Mesh:
             msg = ("Mesh._validate(): Mesh contains a vertex "
                    "not belonging to any element.")
             raise Exception(msg)
+
+    def expand_facets(self, facets: ndarray):
+        """Find vertices and edges corresponding to given facets."""
+
+        vertices = np.unique(self.facets[:, facets].flatten())
+
+        if self.dim() == 3:
+            edge_candidates = self.t2e[:, self.f2t[0, facets]].flatten()
+            # subset of edges that share all points with the given facets
+            subset_ix = np.nonzero(
+                np.prod(np.isin(self.edges[:, edge_candidates],
+                                self.facets[:, facets].flatten()),
+                        axis=0)
+            )[0]
+            edges = np.intersect1d(
+                self.boundary_edges(),
+                edge_candidates[subset_ix]
+            )
+        else:
+            edges = np.array([], dtype=np.int64)
+
+        return vertices, edges
 
     def save(self,
              filename: str,

@@ -1,4 +1,4 @@
-"""Nonlinear Poisson equation.
+r"""Nonlinear Poisson equation.
 
 This example solves the nonlinear minimal surface problem using Newton's method.
 
