@@ -59,6 +59,8 @@ Example 6: High-order plotting
 Example 7: Interior penalty method
 ==================================
 
+This example solves
+
 .. figure:: https://user-images.githubusercontent.com/973268/87662192-80d31780-c76a-11ea-9291-2d11920bc098.png
 
 `Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex07.py>`_
@@ -73,8 +75,19 @@ functions on a simple triangular mesh.
 
 `Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex08.py>`_
 
-Example 9: --
-=============
+Example 9: Three-dimensional Poisson equation
+=============================================
+
+.. note::
+   This example will make use of the external packages `PyAMG <https://pypi.org/project/pyamg/>`_ or `pyamgcl <https://pypi.org/project/pyamgcl/>`_, if installed.
+
+This example solves a three-dimensional Poisson equation using tetrahedral
+elements and a preconditioned conjugate gradient method.
+The figure was created using `Paraview <https://www.paraview.org/>`_.
+
+.. figure:: https://user-images.githubusercontent.com/973268/87681574-7a06cd80-c787-11ea-8cfd-6ff5079e752c.png
+
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex09.py>`_
 
 Example 10: Nonlinear minimal surface problem
 =============================================
