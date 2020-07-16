@@ -1,6 +1,6 @@
-=================================
- The documentation of scikit-fem
-=================================
+=============================
+ Documentation of scikit-fem
+=============================
 
 `scikit-fem <https://github.com/kinnala/scikit-fem>`_ is a lightweight Python 3.6+
 library for performing `finite element assembly
@@ -27,5 +27,4 @@ Table of contents
    self
    overview
    api
-   example1
-   example2
+   listofexamples
