@@ -59,7 +59,10 @@ Example 6: High-order plotting
 Example 7: Interior penalty method
 ==================================
 
-This example solves
+This example solves the Poisson problem :math:`-\Delta u = 1` with :math:`u=0`
+on the boundary using an interior penalty discontinuous Galerkin method.
+The finite element basis is piecewise linear but discontinuous over
+the element edges.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87662192-80d31780-c76a-11ea-9291-2d11920bc098.png
 
@@ -70,6 +73,7 @@ Example 8: Argyris basis functions
 
 This example visualizes the :math:`C^1`-continuous fifth degree Argyris basis
 functions on a simple triangular mesh.
+This element can be used in conforming discretization of biharmonic problems.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87662432-e0c9be00-c76a-11ea-85b9-711c6b34791e.png
 
@@ -78,14 +82,16 @@ functions on a simple triangular mesh.
 Example 9: Three-dimensional Poisson equation
 =============================================
 
-.. note::
-   This example will make use of the external packages `PyAMG <https://pypi.org/project/pyamg/>`_ or `pyamgcl <https://pypi.org/project/pyamgcl/>`_, if installed.
-
 This example solves a three-dimensional Poisson equation using tetrahedral
 elements and a preconditioned conjugate gradient method.
 The figure was created using `Paraview <https://www.paraview.org/>`_.
 
+.. note::
+
+   This example will make use of the external packages `PyAMG <https://pypi.org/project/pyamg/>`_ or `pyamgcl <https://pypi.org/project/pyamgcl/>`_, if installed.
+
 .. figure:: https://user-images.githubusercontent.com/973268/87681574-7a06cd80-c787-11ea-8cfd-6ff5079e752c.png
+   :width: 500px
 
 `Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex09.py>`_
 
@@ -96,8 +102,27 @@ Example 10: Nonlinear minimal surface problem
 
 `Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex10.py>`_
 
-Example 11: --
-==============
+Example 11: Three-dimensional linear elasticity
+===============================================
 
-Example 12: --
-==============
+This example solves a three-dimensional linear elastic problem using trilinear
+hexahedral elements. The figure was created using `Paraview <https://www.paraview.org/>`_.
+
+.. figure:: https://user-images.githubusercontent.com/973268/87685532-31054800-c78c-11ea-9b89-bc41dc0cb80c.png
+   :width: 500px
+
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex11.py>`_
+
+Example 12: Mesh generation and postprocessing
+==============================================
+
+This example demonstrates mesh generation using an external package and
+postprocessing the value of a functional, Boussinesq k-factor.
+
+.. note::
+
+   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_.
+
+.. figure:: https://user-images.githubusercontent.com/973268/87686059-bee13300-c78c-11ea-9693-727f0baf0433.png
+
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex12.py>`_
