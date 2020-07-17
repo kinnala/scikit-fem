@@ -1,6 +1,5 @@
 import numpy as np
 from numpy import ndarray
-from typing import Optional
 
 from .element import Element
 
