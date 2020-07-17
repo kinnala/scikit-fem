@@ -5,7 +5,7 @@ from numpy.testing import assert_allclose
 
 from skfem import BilinearForm, asm, solve, condense
 from skfem.mesh import MeshTri, MeshTet, MeshHex
-from skfem.assembly import InteriorBasis, Dofs
+from skfem.assembly import InteriorBasis, FacetBasis, Dofs
 from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
                            ElementTetP2, ElementHexS2)
 
@@ -61,7 +61,34 @@ class TestCompositeSplitting(TestCase):
         self.assertTrue((basis.doflocs[:, D['up'].all()][1] == 1.).all())
 
 
+class TestCompositeFacetAssembly(TestCase):
+
+    def runTest(self):
+
+        m = MeshTri()
+
+        fbasis1 = FacetBasis(m, ElementTriP1() * ElementTriP1(),
+                             facets=m.facets_satisfying(lambda x: x[0] == 0))
+        fbasis2 = FacetBasis(m, ElementTriP1(),
+                             facets=m.facets_satisfying(lambda x: x[0] == 0))
+
+        @BilinearForm
+        def uv1(u, p, v, q, w):
+            return u * v + p * q
+
+        @BilinearForm
+        def uv2(u, v, w):
+            return u * v
+
+        A = asm(uv1, fbasis1)
+        B = asm(uv2, fbasis2)
+
+        assert_allclose(A[0].todense()[0, ::2],
+                        B[0].todense()[0])
+
+
 class TestFacetExpansion(TestCase):
+
     mesh_type = MeshTet
     elem_type = ElementTetP2
 

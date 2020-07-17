@@ -94,7 +94,7 @@ class FacetBasis(Basis):
 
         self.nelems = len(self.find)
 
-        self.basis = [self.elem.gbasis(self.mapping, Y, j, self.tind)
+        self.basis = [self.elem.gbasis(self.mapping, Y, j, tind=self.tind)
                       for j in range(self.Nbfun)]
 
         self.dx = (np.abs(self.mapping.detDG(self.X, find=self.find))
