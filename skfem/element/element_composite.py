@@ -1,5 +1,6 @@
 import numpy as np
 from numpy import ndarray
+from typing import Optional
 
 from .element import Element
 
@@ -83,13 +84,13 @@ class ElementComposite(Element):
 
         return ns[i], inds[i]
 
-    def gbasis(self, mapping, X: ndarray, i: int, **kwargs):
+    def gbasis(self, mapping, X: ndarray, i: int, tind=None):
         n, ind = self._deduce_bfun(i)
         output = []
         for k, e in enumerate(self.elems):
             if n == k:
-                output.append(e.gbasis(mapping, X, ind, **kwargs)[0])
+                output.append(e.gbasis(mapping, X, ind, tind)[0])
             else:
-                output.append(e.gbasis(mapping, X, 0, **kwargs)[0]
+                output.append(e.gbasis(mapping, X, 0, tind)[0]
                               .zeros_like())
         return tuple(output)
