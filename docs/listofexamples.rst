@@ -31,6 +31,12 @@ combination of clamped, simply supported and free boundary conditions.
 Example 3: Linear elastic eigenvalue problem
 ============================================
 
+This example solves the linear elastic eigenvalue problem
+:math:`\mathrm{div}\,\sigma(u)= \lambda u` with
+the displacement fixed on the left hand side boundary.
+The following figure depicts the fifth eigenmode
+of the cantilever beam.
+
 .. figure:: https://user-images.githubusercontent.com/973268/87661134-cbec2b00-c768-11ea-81bc-f5455df7cc33.png
 
 `Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex03.py>`_
@@ -73,7 +79,7 @@ Example 8: Argyris basis functions
 
 This example visualizes the :math:`C^1`-continuous fifth degree Argyris basis
 functions on a simple triangular mesh.
-This element can be used in conforming discretization of biharmonic problems.
+This element can be used in the conforming discretization of biharmonic problems.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87662432-e0c9be00-c76a-11ea-85b9-711c6b34791e.png
 
@@ -82,9 +88,10 @@ This element can be used in conforming discretization of biharmonic problems.
 Example 9: Three-dimensional Poisson equation
 =============================================
 
-This example solves a three-dimensional Poisson equation using tetrahedral
-elements and a preconditioned conjugate gradient method.
-The figure was created using `Paraview <https://www.paraview.org/>`_.
+This example solves :math:`-\Delta u = 1`
+with :math:`u=0` on the boundary using tetrahedral elements and a preconditioned
+conjugate gradient method.  The figure was created using `Paraview
+<https://www.paraview.org/>`_.
 
 .. note::
 
@@ -98,6 +105,12 @@ The figure was created using `Paraview <https://www.paraview.org/>`_.
 Example 10: Nonlinear minimal surface problem
 =============================================
 
+This example solves the nonlinear minimal surface problem :math:`\nabla \cdot
+\left(\frac{1}{\sqrt{1 + \|u\|^2}} \nabla u \right)= 0` with :math:`u=g`
+prescribed on the boundary of the square domain.  The nonlinear problem is
+linearized using the Newton's method with an analytical Jacobian calculated by
+hand.
+
 .. figure:: https://user-images.githubusercontent.com/973268/87663902-1c658780-c76d-11ea-9e00-324a18769ad2.png
 
 `Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex10.py>`_
@@ -105,8 +118,11 @@ Example 10: Nonlinear minimal surface problem
 Example 11: Three-dimensional linear elasticity
 ===============================================
 
-This example solves a three-dimensional linear elastic problem using trilinear
-hexahedral elements. The figure was created using `Paraview <https://www.paraview.org/>`_.
+This example solves the three-dimensional linear elasticity equations
+:math:`\mathrm{div}\,\sigma(u)=0` using trilinear hexahedral elements.
+Dirichlet conditions are set on the opposing faces of a cube: one face remains
+fixed and the other is displaced slightly outwards.
+The figure was created using `Paraview <https://www.paraview.org/>`_.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87685532-31054800-c78c-11ea-9b89-bc41dc0cb80c.png
    :width: 500px
