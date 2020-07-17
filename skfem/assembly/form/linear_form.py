@@ -18,7 +18,7 @@ class LinearForm(Form):
     def assemble(self,
                  u: Basis,
                  v: Optional[Basis] = None,
-                 dtype = np.float,
+                 dtype=np.float,
                  **kwargs) -> ndarray:
 
         assert v is None
