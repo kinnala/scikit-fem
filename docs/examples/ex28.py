@@ -1,4 +1,4 @@
-"""Conjugate heat transfer.
+r"""Conjugate heat transfer.
 
 .. note::
    This example requires the external package

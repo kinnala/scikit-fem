@@ -1,4 +1,4 @@
-"""Spatially varying coefficient.
+r"""Spatially varying coefficient.
 
 This example demonstrates a spatially varying coefficient.
 

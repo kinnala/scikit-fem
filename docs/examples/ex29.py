@@ -1,4 +1,4 @@
-"""Linear hydrodynamic stability.
+r"""Linear hydrodynamic stability.
 
 The linear stability of one-dimensional solutions of the Navier–Stokes equations
 is governed by the `Orr–Sommerfeld equation

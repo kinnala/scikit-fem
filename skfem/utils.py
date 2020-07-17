@@ -2,8 +2,7 @@
 SciPy linear solvers."""
 
 import warnings
-from typing import Optional, Union, Tuple,\
-    Callable, Dict
+from typing import Optional, Union, Tuple, Callable, Dict
 
 import numpy as np
 import scipy.sparse as sp
@@ -12,7 +11,7 @@ import scipy.sparse.linalg as spl
 from numpy import ndarray
 from scipy.sparse import spmatrix
 
-from skfem.assembly import asm, BilinearForm, LinearForm, Dofs
+from skfem.assembly import asm, BilinearForm, LinearForm, DofsView
 from skfem.assembly.basis import Basis
 from skfem.element import ElementVectorH1
 
@@ -28,7 +27,7 @@ CondensedSystem = Union[spmatrix,
                         Tuple[spmatrix, ndarray, ndarray],
                         Tuple[spmatrix, ndarray, ndarray, ndarray],
                         Tuple[spmatrix, spmatrix, ndarray, ndarray]]
-DofsCollection = Union[ndarray, Dofs, Dict[str, Dofs]]
+DofsCollection = Union[ndarray, DofsView, Dict[str, DofsView]]
 
 
 # preconditioners, e.g. for :func:`skfem.utils.solver_iter_krylov`
@@ -76,6 +75,7 @@ def solver_eigen_scipy(**kwargs) -> EigenSolver:
 
 
 def solver_direct_scipy(**kwargs) -> LinearSolver:
+    """The default linear solver of SciPy."""
     def solver(A, b, **solve_time_kwargs):
         kwargs.update(solve_time_kwargs)
         return spl.spsolve(A, b, **kwargs)
@@ -185,10 +185,10 @@ def _flatten_dofs(S: DofsCollection) -> ndarray:
     else:
         if isinstance(S, ndarray):
             return S
-        elif isinstance(S, Dofs):
-            return S.all()
+        elif isinstance(S, DofsView):
+            return S.flatten()
         elif isinstance(S, dict):
-            return np.unique(np.concatenate([S[key].all() for key in S]))
+            return np.unique(np.concatenate([S[key].flatten() for key in S]))
         raise NotImplementedError("Unable to flatten the given set of DOF's.")
 
 
@@ -275,9 +275,9 @@ def rcm(A: spmatrix,
 def adaptive_theta(est, theta=0.5, max=None):
     """For choosing which elements to refine in an adaptive strategy."""
     if max is None:
-        return np.nonzero(theta*np.max(est) < est)[0]
+        return np.nonzero(theta * np.max(est) < est)[0]
     else:
-        return np.nonzero(theta*max < est)[0]
+        return np.nonzero(theta * max < est)[0]
 
 
 def project(fun,
@@ -341,8 +341,10 @@ def project(fun,
 
 # for backwards compatibility
 def L2_projection(a, b, c=None):
+    """Superseded by :func:`skfem.utils.project`."""
     return project(a, basis_to=b, I=c)
 
 
 def derivative(a, b, c, d=0):
+    """Superseded by :func:`skfem.utils.project`."""
     return project(a, basis_from=b, basis_to=c, diff=d)

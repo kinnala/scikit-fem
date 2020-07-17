@@ -1,4 +1,4 @@
-"""Restricting a problem to a subdomain.
+r"""Restricting a problem to a subdomain.
 
 .. note::
    This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_.

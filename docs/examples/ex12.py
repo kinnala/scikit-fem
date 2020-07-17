@@ -1,4 +1,4 @@
-"""Postprocessing Laplace equation.
+r"""Postprocessing Laplace equation.
 
 .. note::
 

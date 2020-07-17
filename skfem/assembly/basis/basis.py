@@ -23,20 +23,16 @@ class Basis:
 
     """
 
-    N: int = 0
-    dofnames: List[str] = []
+    tind: ndarray = None
 
     def __init__(self, mesh, elem, mapping=None):
 
         self.mapping = mesh.mapping() if mapping is None else mapping
 
-        self._build_dofnum(mesh, elem)
+        self.dofs = Dofs(mesh, elem)
 
-        if not isinstance(mesh, elem.mesh_type):
+        if mesh.refdom != elem.refdom:
             raise ValueError("Incompatible Mesh and Element.")
-
-        # human readable names
-        self.dofnames = elem.dofnames
 
         # global degree-of-freedom location
         # disabled for MappingMortar by checking mapping.maps
@@ -60,71 +56,31 @@ class Basis:
         self.refdom = mesh.refdom
         self.brefdom = mesh.brefdom
 
-    def _build_dofnum(self, mesh, element):
-        """Build global degree-of-freedom numbering."""
-        # vertex dofs
-        self.nodal_dofs = np.reshape(
-            np.arange(element.nodal_dofs * mesh.p.shape[1], dtype=np.int64),
-            (element.nodal_dofs, mesh.p.shape[1]),
-            order='F')
-        offset = element.nodal_dofs * mesh.p.shape[1]
+    @property
+    def nodal_dofs(self):
+        return self.dofs.nodal_dofs
 
-        # edge dofs
-        if mesh.dim() == 3:
-            self.edge_dofs = np.reshape(
-                np.arange(element.edge_dofs * mesh.edges.shape[1],
-                          dtype=np.int64),
-                (element.edge_dofs, mesh.edges.shape[1]),
-                order='F') + offset
-            offset = offset + element.edge_dofs * mesh.edges.shape[1]
-        else:
-            self.edge_dofs = np.empty((0, 0))
+    @property
+    def facet_dofs(self):
+        return self.dofs.facet_dofs
 
-        # facet dofs
-        self.facet_dofs = np.reshape(
-            np.arange(element.facet_dofs * mesh.facets.shape[1],
-                      dtype=np.int64),
-            (element.facet_dofs, mesh.facets.shape[1]),
-            order='F') + offset
-        offset = offset + element.facet_dofs * mesh.facets.shape[1]
+    @property
+    def edge_dofs(self):
+        return self.dofs.edge_dofs
 
-        # interior dofs
-        self.interior_dofs = np.reshape(
-            np.arange(element.interior_dofs * mesh.t.shape[1], dtype=np.int64),
-            (element.interior_dofs, mesh.t.shape[1]),
-            order='F') + offset
+    @property
+    def interior_dofs(self):
+        return self.dofs.interior_dofs
 
-        # global numbering
-        self.element_dofs = np.zeros((0, mesh.t.shape[1]), dtype=np.int64)
+    @property
+    def N(self):
+        return self.dofs.N
 
-        # nodal dofs
-        for itr in range(mesh.t.shape[0]):
-            self.element_dofs = np.vstack((
-                self.element_dofs,
-                self.nodal_dofs[:, mesh.t[itr]]
-            ))
-
-        # edge dofs
-        if mesh.dim() == 3:
-            for itr in range(mesh.t2e.shape[0]):
-                self.element_dofs = np.vstack((
-                    self.element_dofs,
-                    self.edge_dofs[:, mesh.t2e[itr]]
-                ))
-
-        # facet dofs
-        if mesh.dim() >= 2:
-            for itr in range(mesh.t2f.shape[0]):
-                self.element_dofs = np.vstack((
-                    self.element_dofs,
-                    self.facet_dofs[:, mesh.t2f[itr]]
-                ))
-
-        # interior dofs
-        self.element_dofs = np.vstack((self.element_dofs, self.interior_dofs))
-
-        # total dofs
-        self.N = np.max(self.element_dofs) + 1
+    @property
+    def element_dofs(self):
+        if self.tind is None:
+            return self.dofs.element_dofs
+        return self.dofs.element_dofs[:, self.tind]
 
     def complement_dofs(self, *D):
         if type(D[0]) is dict:
@@ -132,76 +88,9 @@ class Basis:
             D = tuple(D[0][key].all() for key in D[0])
         return np.setdiff1d(np.arange(self.N), np.concatenate(D))
 
-    def _get_dofs(self,
-                  facets: ndarray,
-                  skip: List[str] = []):
-        """Return :class:`skfem.assembly.Dofs` corresponding to facets."""
-        m = self.mesh
-        nodal_ix = np.unique(m.facets[:, facets].flatten())
-        facet_ix = facets
-
-        if m.dim() == 3:
-            edge_candidates = m.t2e[:, m.f2t[0, facets]].flatten()
-            # subset of edges that share all points with the given facets
-            subset_ix = np.nonzero(
-                np.prod(np.isin(m.edges[:, edge_candidates],
-                                m.facets[:, facets].flatten()),
-                        axis=0)
-            )[0]
-            edge_ix = np.intersect1d(
-                m.boundary_edges(),
-                edge_candidates[subset_ix]
-            )
-        else:
-            edge_ix = []
-
-        n_nodal = self.nodal_dofs.shape[0]
-        n_facet = self.facet_dofs.shape[0]
-        n_edge = self.edge_dofs.shape[0]
-
-        # group dofs based on 'dofnames' on different topological entities
-        nodals = {
-            self.dofnames[i]: np.zeros((0, len(nodal_ix)), dtype=np.int64)
-            for i in range(n_nodal) if self.dofnames[i] not in skip
-        }
-        for i in range(n_nodal):
-            if self.dofnames[i] not in skip:
-                nodals[self.dofnames[i]] =\
-                    np.vstack((nodals[self.dofnames[i]],
-                               self.nodal_dofs[i, nodal_ix]))
-        off = n_nodal
-
-        facets = {
-            self.dofnames[i + off]: np.zeros((0, len(facet_ix)),
-                                             dtype=np.int64)
-            for i in range(n_facet) if self.dofnames[i + off] not in skip
-        }
-        for i in range(n_facet):
-            if self.dofnames[i + off] not in skip:
-                facets[self.dofnames[i + off]] =\
-                    np.vstack((facets[self.dofnames[i + off]],
-                               self.facet_dofs[i, facet_ix]))
-        off += n_facet
-
-        edges = {
-            self.dofnames[i + off]: np.zeros((0, len(edge_ix)), dtype=np.int64)
-            for i in range(n_edge) if self.dofnames[i + off] not in skip
-        }
-        for i in range(n_edge):
-            if self.dofnames[i + off] not in skip:
-                edges[self.dofnames[i + off]] =\
-                    np.vstack((edges[self.dofnames[i + off]],
-                               self.edge_dofs[i, edge_ix]))
-
-        return Dofs(
-            nodal={k: nodals[k].flatten() for k in nodals},
-            facet={k: facets[k].flatten() for k in facets},
-            edge={k: edges[k].flatten() for k in edges}
-        )
-
     def find_dofs(self,
                   facets: Dict[str, ndarray] = None,
-                  skip: List[str] = []) -> Dict[str, Dofs]:
+                  skip: List[str] = None) -> Dict[str, Dofs]:
         """Return global DOF numbers corresponding to a dictionary of facets.
 
         Facets can be queried from :class:`~skfem.mesh.Mesh` objects:
@@ -232,7 +121,8 @@ class Basis:
             else:
                 facets = self.mesh.boundaries
 
-        return {k: self._get_dofs(facets[k], skip=skip) for k in facets}
+        return {k: self.dofs.get_facet_dofs(facets[k], skip_dofnames=skip)
+                for k in facets}
 
     def get_dofs(self, facets: Optional[Any] = None) -> Any:
         """Find global DOF numbers.
@@ -265,9 +155,9 @@ class Basis:
                 if callable(f):
                     return self.mesh.facets_satisfying(f)
                 return f
-            return {k: self._get_dofs(to_indices(facets[k])) for k in facets}
-        else:
-            return self._get_dofs(facets)
+            return {k: self.dofs.get_facet_dofs(to_indices(facets[k]))
+                    for k in facets}
+        return self.dofs.get_facet_dofs(facets)
 
     def default_parameters(self):
         """This is used by :func:`skfem.assembly.asm` to get the default

@@ -1,4 +1,4 @@
-"""Linear elasticity.
+r"""Linear elasticity.
 
 This example solves the linear elasticity problem using trilinear elements.  The
 weak form of the linear elasticity problem is defined in

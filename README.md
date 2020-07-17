@@ -4,6 +4,7 @@
 [![Build Status](https://travis-ci.com/kinnala/scikit-fem.svg?branch=master)](https://travis-ci.com/kinnala/scikit-fem)
 [![License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![DOI](https://zenodo.org/badge/115345426.svg)](https://zenodo.org/badge/latestdoi/115345426)
+[![status](https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e/status.svg)](https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e)
 
 
 `scikit-fem` is a lightweight Python 3.6+ library for performing [finite element
@@ -110,8 +111,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Unreleased
 
 #### Added
-- `Dofs.__or__`, for merging degree-of-freedom sets (i.e. `Dofs` objects) using
-  `|` operator
+- `Dofs.__or__` and `Dofs.__add__`, for merging degree-of-freedom sets
+  (i.e. `Dofs` objects) using `|` and `+` operators
+- `Dofs.drop` and `Dofs.keep`, for further filtering the degree-of-freedom sets
 
 ### [1.2.0] - 2020-07-07
 
