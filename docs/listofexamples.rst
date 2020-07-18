@@ -143,31 +143,84 @@ postprocessing the value of a functional, Boussinesq k-factor.
 
 `Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex12.py>`_
 
-Example 13: -
-=============
+Example 13: Laplace with mixed boundary conditions
+==================================================
+
+This example solves :math:`\Delta u = 0` in
+:math:`\Omega=\{(x,y):1<x^2+y^2<4,~0<\theta<\pi/2\}`, where :math:`\tan \theta =
+y/x`, with :math:`u = 0` on :math:`y = 0`, :math:`u = 1` on :math:`x =
+0`, and :math:`\frac{\partial u}{\partial n} = 0` on the rest of the
+boundary.
+
+.. note::
+
+   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87775065-226f6d00-c82e-11ea-950c-fe9a10901133.png
 
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex13.py>`_
 
-Example 14: -
-=============
+Example 14: Laplace with inhomogeneous boundary conditions
+==========================================================
+
+This example demonstrates how to impose coordinate-dependent Dirichlet
+conditions for the Laplace equation :math:`\Delta u = 0`. The solution will
+satisfy :math:`u=x^2 - y^2` on the boundary of the square domain.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87775119-3dda7800-c82e-11ea-8576-2219fcf31814.png
 
-Example 15: -
-=============
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex14.py>`_
+
+Example 15: One-dimensional Poisson equation
+============================================
+
+This example solves :math:`-u'' = 1` in :math:`(0,1)` with the boundary
+condition :math:`u(0)=u(1)=0`.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87775166-52b70b80-c82e-11ea-9009-c9fa0a9e28e8.png
+   :width: 500px
 
-Example 16: -
-=============
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex15.py>`_
+
+Example 16: Legendre's equation
+===============================
+
+This example solves the eigenvalue problem :math:`((1 - x^2) u')' + k u = 0` in
+:math:`(-1,1)`.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87775206-65c9db80-c82e-11ea-8c49-bf191915602a.png
+   :width: 500px
 
-Example 17: -
-=============
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex16.py>`_
+
+Example 17: Insulated wire
+==========================
+
+This example solves the steady heat conduction
+with generation in an insulated wire. In radial
+coordinates, the governing equations read: find :math:`T`
+satisfying
+
+.. math::
+   \nabla \cdot (k_0 \nabla T) + A = 0, \quad 0<r<a,
+and
+
+.. math::
+   \nabla \cdot (k_1 \nabla T) = 0, \quad a<r<b,
+with the boundary condition
+
+.. math::
+   k_1 \frac{\partial T}{\partial r} + h T = 0, \quad \text{on $r=b$}.
+The parameter values are :math:`k_0 = 101`, :math:`k_1 = 11`, :math:`A = 5`,
+:math:`h = 7`, and the geometry is defined as :math:`a=2` and :math:`b=3`.
+
+.. note::
+
+   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87775309-8db93f00-c82e-11ea-9015-add2226ad01e.png
+
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex17.py>`_
 
 Example 18: -
 =============
