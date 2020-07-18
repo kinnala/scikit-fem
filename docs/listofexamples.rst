@@ -142,3 +142,121 @@ postprocessing the value of a functional, Boussinesq k-factor.
 .. figure:: https://user-images.githubusercontent.com/973268/87686059-bee13300-c78c-11ea-9693-727f0baf0433.png
 
 `Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex12.py>`_
+
+Example 13: -
+=============
+
+.. figure:: https://user-images.githubusercontent.com/973268/87775065-226f6d00-c82e-11ea-950c-fe9a10901133.png
+
+
+Example 14: -
+=============
+
+.. figure:: https://user-images.githubusercontent.com/973268/87775119-3dda7800-c82e-11ea-8576-2219fcf31814.png
+
+Example 15: -
+=============
+
+.. figure:: https://user-images.githubusercontent.com/973268/87775166-52b70b80-c82e-11ea-9009-c9fa0a9e28e8.png
+
+Example 16: -
+=============
+
+.. figure:: https://user-images.githubusercontent.com/973268/87775206-65c9db80-c82e-11ea-8c49-bf191915602a.png
+
+Example 17: -
+=============
+
+.. figure:: https://user-images.githubusercontent.com/973268/87775309-8db93f00-c82e-11ea-9015-add2226ad01e.png
+
+Example 18: -
+=============
+
+.. figure:: https://user-images.githubusercontent.com/973268/87775390-b04b5800-c82e-11ea-8999-e22305e909c1.png
+
+Example 19: -
+=============
+
+.. figure:: https://user-images.githubusercontent.com/973268/87778846-7b420400-c834-11ea-8ff6-c439699b2802.gif
+
+Example 20: -
+=============
+
+.. figure:: https://user-images.githubusercontent.com/973268/87778910-9745a580-c834-11ea-8277-62d58a7fe7b8.png
+
+Example 21: -
+=============
+
+.. figure:: https://user-images.githubusercontent.com/973268/87779087-ebe92080-c834-11ea-9acc-d455b6124ad7.png
+
+Example 22: -
+=============
+
+.. figure:: https://user-images.githubusercontent.com/973268/87779195-15a24780-c835-11ea-9a18-767092ae9467.png
+
+Example 23: -
+=============
+
+.. figure:: https://user-images.githubusercontent.com/973268/87779278-38ccf700-c835-11ea-955a-b77a0336b791.png
+
+Example 24: -
+=============
+
+.. figure:: https://user-images.githubusercontent.com/973268/87858848-92b6e500-c939-11ea-81f9-cc51f254d19e.png
+
+Example 25: -
+=============
+
+.. figure:: https://user-images.githubusercontent.com/973268/87858907-f8a36c80-c939-11ea-87a2-7357d5f073b1.png
+
+Example 26: -
+=============
+
+.. figure:: https://user-images.githubusercontent.com/973268/87858933-3902ea80-c93a-11ea-9d54-464235ab6325.png
+
+Example 27: -
+=============
+
+.. figure:: https://user-images.githubusercontent.com/973268/87858972-97c86400-c93a-11ea-86e4-66f870b03e48.png
+
+Example 28: -
+=============
+
+.. figure:: https://user-images.githubusercontent.com/973268/87859005-c0505e00-c93a-11ea-9a78-72603edc242a.png
+
+Example 29: -
+=============
+
+.. figure:: https://user-images.githubusercontent.com/973268/87859022-e0801d00-c93a-11ea-978f-b1930627010b.png
+
+Example 30: -
+=============
+
+.. figure:: https://user-images.githubusercontent.com/973268/87859044-06a5bd00-c93b-11ea-84c2-9fbb9fc6e832.png
+
+Example 31: -
+=============
+
+.. figure:: https://user-images.githubusercontent.com/973268/87859068-32c13e00-c93b-11ea-984d-684e1e4c5066.png
+
+Example 32: -
+=============
+
+.. figure:: https://user-images.githubusercontent.com/973268/87859195-fcd08980-c93b-11ea-930e-ddcd26aabdb4.png
+   :width: 500px
+
+Example 33: -
+=============
+
+.. figure:: https://user-images.githubusercontent.com/973268/87859239-47520600-c93c-11ea-8241-d62fdfd2a9a2.png
+   :width: 500px
+
+Example 34: -
+=============
+
+.. figure:: https://user-images.githubusercontent.com/973268/87859267-749eb400-c93c-11ea-82cd-2d488fda39d4.png
+
+Example 35: -
+=============
+
+.. figure:: https://user-images.githubusercontent.com/973268/87859275-85e7c080-c93c-11ea-9e62-3a9a8ee86070.png
