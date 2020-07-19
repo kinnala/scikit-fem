@@ -42,7 +42,6 @@ class BilinearForm(Form):
     def assemble(self,
                  u: Basis,
                  v: Optional[Basis] = None,
-                 dtype=np.float,
                  **kwargs) -> Any:
 
         if v is None:
@@ -57,7 +56,7 @@ class BilinearForm(Form):
 
         # initialize COO data structures
         sz = u.Nbfun * v.Nbfun * nt
-        data = np.zeros(sz, dtype=dtype)
+        data = np.zeros(sz, dtype=self.dtype)
         rows = np.zeros(sz)
         cols = np.zeros(sz)
 

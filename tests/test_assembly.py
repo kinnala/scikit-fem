@@ -345,16 +345,16 @@ class TestComplexValuedAssembly(unittest.TestCase):
         basis = InteriorBasis(m, e)
         self.interior_area = 1
 
-        @BilinearForm
+        @BilinearForm(dtype=np.complex64)
         def complexmass(u, v, w):
             return 1j*u*v
 
-        @LinearForm
+        @LinearForm(dtype=np.complex64)
         def complexfun(v, w):
             return 1j*v
 
-        M = asm(complexmass, basis, dtype=np.complex)
-        f = asm(complexfun, basis, dtype=np.complex)
+        M = asm(complexmass, basis)
+        f = asm(complexfun, basis)
         ones = np.ones(M.shape[1])
 
         self.assertAlmostEqual(np.dot(ones, M @ ones), 1j*self.interior_area)
