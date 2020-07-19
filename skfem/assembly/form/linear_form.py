@@ -18,6 +18,7 @@ class LinearForm(Form):
     def assemble(self,
                  u: Basis,
                  v: Optional[Basis] = None,
+                 dtype=np.float,
                  **kwargs) -> ndarray:
 
         assert v is None
@@ -29,7 +30,7 @@ class LinearForm(Form):
 
         # initialize COO data structures
         sz = v.Nbfun * nt
-        data = np.zeros(sz)
+        data = np.zeros(sz, dtype=dtype)
         rows = np.zeros(sz)
         cols = np.zeros(sz)
 
