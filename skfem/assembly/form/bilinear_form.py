@@ -56,7 +56,7 @@ class BilinearForm(Form):
 
         # initialize COO data structures
         sz = u.Nbfun * v.Nbfun * nt
-        data = np.zeros(sz)
+        data = np.zeros(sz, dtype=self.dtype)
         rows = np.zeros(sz)
         cols = np.zeros(sz)
 

@@ -29,7 +29,7 @@ class LinearForm(Form):
 
         # initialize COO data structures
         sz = v.Nbfun * nt
-        data = np.zeros(sz)
+        data = np.zeros(sz, dtype=self.dtype)
         rows = np.zeros(sz)
         cols = np.zeros(sz)
 
