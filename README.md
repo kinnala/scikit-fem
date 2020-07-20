@@ -56,14 +56,12 @@ A = laplace.assemble(basis)  # type: scipy.sparse.csr_matrix
 The matrix `A` has 1.5 million rows/columns and took only a few seconds to
 assemble!
 
-More examples can be found in the [source code
-distribution](https://github.com/kinnala/scikit-fem/tree/master/docs/examples).
+More examples can be found in the [gallery](https://scikit-fem.readthedocs.io/en/latest/listofexamples.html).
 
 ## Documentation
 
 The project is documented using Sphinx.  A recent version of the documentation
-can be found from [Github
-pages](https://kinnala.github.io/scikit-fem-docs/index.html).
+can be found from [Read the Docs](https://scikit-fem.readthedocs.io/en/latest/).
 
 ## Installation
 
@@ -111,6 +109,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Unreleased
 
 #### Added
+- Support for complex-valued forms: `BilinearForm` and `LinearForm` now take
+  an optional argument `dtype` which defaults to `np.float64`
+  but can be also `np.complex64`
 - `Dofs.__or__` and `Dofs.__add__`, for merging degree-of-freedom sets
   (i.e. `Dofs` objects) using `|` and `+` operators
 - `Dofs.drop` and `Dofs.keep`, for further filtering the degree-of-freedom sets
