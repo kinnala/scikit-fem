@@ -57,20 +57,6 @@ in the discretization of the two elastic bodies.
 
 `Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex04.py>`_
 
-Example 5: Integral constraint
-==============================
-
-.. figure:: https://user-images.githubusercontent.com/973268/87661575-7ebc8900-c769-11ea-8e51-07aeb49797f9.png
-
-`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex05.py>`_
-
-Example 6: High-order plotting
-==============================
-
-.. figure:: https://user-images.githubusercontent.com/973268/87661665-aa3f7380-c769-11ea-9677-8ec0ff27184c.png
-
-`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex06.py>`_
-
 Example 7: Interior penalty method
 ==================================
 
