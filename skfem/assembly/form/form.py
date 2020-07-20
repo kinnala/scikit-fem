@@ -16,10 +16,15 @@ class FormDict(dict):
 
 class Form:
 
-    def __init__(self, form: Callable):
+    def __init__(self,
+                 form: Callable = None,
+                 dtype: type = np.float64):
         self.form = form
+        self.dtype = dtype
 
     def __call__(self, *args):
+        if self.form is None:  # decorate
+            return type(self)(form=args[0], dtype=self.dtype)
         return self.assemble(self.kernel(*args))
 
     def _kernel(self):
