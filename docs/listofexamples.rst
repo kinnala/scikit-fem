@@ -35,7 +35,7 @@ This example solves the linear elastic eigenvalue problem
 :math:`\mathrm{div}\,\sigma(u)= \lambda u` with
 the displacement fixed on the left hand side boundary.
 The following figure depicts the fifth eigenmode
-of the cantilever beam.
+of a cantilever beam.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87661134-cbec2b00-c768-11ea-81bc-f5455df7cc33.png
 
@@ -43,6 +43,15 @@ of the cantilever beam.
 
 Example 4: Linearized contact problem
 =====================================
+
+This example solves a single interation of the linearized contact problem
+between two elastic bodies using the Nitsche's method.
+Triangular and quadrilateral second-order elements are used
+in the discretization of the two elastic bodies.
+
+.. note::
+
+   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87661313-1372b700-c769-11ea-89ee-db144986a25a.png
 
@@ -222,15 +231,50 @@ The parameter values are :math:`k_0 = 101`, :math:`k_1 = 11`, :math:`A = 5`,
 
 `Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex17.py>`_
 
-Example 18: -
-=============
+Example 18: Stokes equations
+============================
+
+This example solves for the creeping flow problem in the primitive variables,
+i.e. velocity and pressure instead of the stream-function.  These are governed
+by the Stokes momentum
+
+.. math::
+   - \nu\Delta\boldsymbol{u} + \rho^{-1}\nabla p = \boldsymbol{f}
+
+and continuity equation
+
+.. math::
+   \nabla\cdot\boldsymbol{u} = 0.
+
+.. note::
+   This example requires the external package `dmsh <https://pypi.org/project/dmsh/>`_.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87775390-b04b5800-c82e-11ea-8999-e22305e909c1.png
 
-Example 19: -
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex18.py>`_
+
+Example 19: Heat equation
 =============
 
+This example solves the heat equation
+
+.. math::
+    \frac{\partial T}{\partial t} = \kappa\Delta T
+    
+in the domain :math:`|x|<w_0` and :math:`|y|<w_1` with the initial value
+
+.. math::
+    T(x,y,0) = \cos\frac{\pi x}{2w_0}\cos\frac{\pi y}{2w_1}
+
+using the generalized trapezoidal
+rule ("theta method").
+
+.. note::
+   This example requires the external package `scikit-sparse <https://github.com/scikit-sparse/scikit-sparse>`_.
+
 .. figure:: https://user-images.githubusercontent.com/973268/87778846-7b420400-c834-11ea-8ff6-c439699b2802.gif
+
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex19.py>`_
 
 Example 20: -
 =============
