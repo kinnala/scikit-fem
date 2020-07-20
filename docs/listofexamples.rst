@@ -44,7 +44,7 @@ of a cantilever beam.
 Example 4: Linearized contact problem
 =====================================
 
-This example solves a single interation of the linearized contact problem
+This example solves a single interation of the contact problem
 between two elastic bodies using the Nitsche's method.
 Triangular and quadrilateral second-order elements are used
 in the discretization of the two elastic bodies.
@@ -236,15 +236,7 @@ Example 18: Stokes equations
 
 This example solves for the creeping flow problem in the primitive variables,
 i.e. velocity and pressure instead of the stream-function.  These are governed
-by the Stokes momentum
-
-.. math::
-   - \nu\Delta\boldsymbol{u} + \rho^{-1}\nabla p = \boldsymbol{f}
-
-and continuity equation
-
-.. math::
-   \nabla\cdot\boldsymbol{u} = 0.
+by the Stokes momentum :math:`- \nu\Delta\boldsymbol{u} + \rho^{-1}\nabla p = \boldsymbol{f}` and the continuity equation :math:`\nabla\cdot\boldsymbol{u} = 0`.
 
 .. note::
    This example requires the external package `dmsh <https://pypi.org/project/dmsh/>`_.
@@ -254,19 +246,9 @@ and continuity equation
 `Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex18.py>`_
 
 Example 19: Heat equation
-=============
+=========================
 
-This example solves the heat equation
-
-.. math::
-    \frac{\partial T}{\partial t} = \kappa\Delta T
-    
-in the domain :math:`|x|<w_0` and :math:`|y|<w_1` with the initial value
-
-.. math::
-    T(x,y,0) = \cos\frac{\pi x}{2w_0}\cos\frac{\pi y}{2w_1}
-
-using the generalized trapezoidal
+This example solves the heat equation :math:`\frac{\partial T}{\partial t} = \kappa\Delta T` in the domain :math:`|x|<w_0` and :math:`|y|<w_1` with the initial value :math:`T_0(x,y) = \cos\frac{\pi x}{2w_0}\cos\frac{\pi y}{2w_1}` using the generalized trapezoidal
 rule ("theta method").
 
 .. note::
@@ -276,84 +258,233 @@ rule ("theta method").
 
 `Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex19.py>`_
 
-Example 20: -
-=============
+Example 20: Creeping flow via stream-function
+=============================================
+
+This example solves the creeping flow problem via the stream-function
+formulation.
+The stream-function :math:`\psi` for two-dimensional creeping flow is
+governed by the biharmonic equation :math:`\nu \Delta^2\psi = \mathrm{rot}\,\boldsymbol{f}` where :math:`\nu` is the kinematic viscosity (assumed constant),
+:math:`\boldsymbol{f}` the volumetric body-force, and :math:`\mathrm{rot}\,\boldsymbol{f} =
+\partial f_y/\partial x - \partial f_x/\partial y`.  The boundary
+conditions at a wall are that :math:`\psi` is constant (the wall is
+impermeable) and that the normal component of its gradient vanishes (no
+slip)
+
+.. note::
+   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87778910-9745a580-c834-11ea-8277-62d58a7fe7b8.png
 
-Example 21: -
-=============
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex20.py>`_
+
+Example 21: Structural vibration
+================================
+
+This example demonstrates the solution of a three-dimensional vector-valued
+eigenvalue problem by considering the vibration of an elastic structure.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87779087-ebe92080-c834-11ea-9acc-d455b6124ad7.png
 
-Example 22: -
-=============
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex21.py>`_
+
+Example 22: Adaptive Poisson equation
+=====================================
+
+This example solves Example 1 adaptively in an L-shaped domain.
+Using linear elements, the error indicators read :math:`\eta_K^2 = h_K^2 \|f\|_{0,K}^2` and :math:`\eta_E^2 = h_E \| [[\nabla u_h \cdot n ]] \|_{0,E}^2`   
+for each element :math:`K` and
+edge :math:`E`.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87779195-15a24780-c835-11ea-9a18-767092ae9467.png
 
-Example 23: -
-=============
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex22.py>`_
+
+Example 23: Bratu-Gelfand
+=========================
+
+This example solves the Bratu-Gelfand two-point boundary value problem :math:`u'' + \lambda \mathrm e^u = 0`, :math:`0 < x < 1`,
+with :math:`u(0)=u(1)=0` and where :math:`\lambda > 0` is a parameter.
+
+.. note::
+   This example requires the external package `pacopy <https://github.com/nschloe/pacopy>`_
 
 .. figure:: https://user-images.githubusercontent.com/973268/87779278-38ccf700-c835-11ea-955a-b77a0336b791.png
 
-Example 24: -
-=============
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex23.py>`_
+
+Example 24: Stokes flow with inhomogeneous boundary conditions
+==============================================================
+
+This example solves the Stokes flow over a backward-facing step
+with a parabolic velocity profile at the inlet.
+
+.. note::
+   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87858848-92b6e500-c939-11ea-81f9-cc51f254d19e.png
 
-Example 25: -
-=============
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex24.py>`_
+
+Example 25: Forced convection
+=============================
+
+This example solves the plane Graetz problem with the governing
+advection-diffusion equation :math:`\mathrm{Pe} \;u\frac{\partial T}{\partial x}
+= \nabla^2 T` where the velocity profile is :math:`u (y) = 6 y (1 - y)` and the
+Péclet number :math:`\mathrm{Pe}` is the mean velocity times the width divided
+by the thermal diffusivity.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87858907-f8a36c80-c939-11ea-87a2-7357d5f073b1.png
 
-Example 26: -
-=============
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex25.py>`_
+
+Example 26: Restricting problem to a subdomain
+==============================================
+
+This example extends Example 17 by restricting the solution to a subdomain.
+
+.. note::
+   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87858933-3902ea80-c93a-11ea-9d54-464235ab6325.png
 
-Example 27: -
-=============
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex26.py>`_
+
+Example 27: Backward-facing step
+================================
+
+This example uses `pacopy <https://pypi.org/project/pacopy/>`_ to extend
+the Stokes equations over a backward-facing step (Example 24) to finite Reynolds
+number; this means defining a residual for the nonlinear problem and its
+derivatives with respect to the solution and to the Reynolds number.
+
+.. note::
+   This example requires the external packages `pygmsh <https://pypi.org/project/pygmsh/>`_ and `pacopy <https://pypi.org/project/pacopy/>`_.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87858972-97c86400-c93a-11ea-86e4-66f870b03e48.png
 
-Example 28: -
-=============
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex27.py>`_
+
+Example 28: Conjugate heat transfer
+===================================
+
+This example extends Example 25 to conjugate heat transfer by giving a finite
+thickness and thermal conductivity to one of the walls.  The example is modified
+to a configuration for which there exists a fully developed solution which can be
+found in closed form: given a uniform heat flux over each of the walls, the
+temperature field asymptotically is the superposition of a uniform longitudinal
+gradient and a transverse profile.
+
+.. note::
+   This example requires the external package
+   `pygmsh <https://pypi.org/project/pygmsh/>`_.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87859005-c0505e00-c93a-11ea-9a78-72603edc242a.png
 
-Example 29: -
-=============
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex28.py>`_
+
+Example 29: Linear hydrodynamic stability
+=========================================
+
+The linear stability of one-dimensional solutions of the Navier-Stokes equations
+is governed by the `Orr-Sommerfeld equation <https://en.wikipedia.org/wiki/Orr%E2%80%93Sommerfeld_equation>`_.  This is expressed in terms of the stream-function
+:math:`\phi` of the perturbation, giving a two-point boundary value problem      
+:math:`\alpha\phi(\pm 1) = \phi'(\pm 1) = 0`
+for a complex fourth-order ordinary differential equation,
+
+.. math::
+   \left(\alpha^2-\frac{\mathrm d^2}{\mathrm dz^2}\right)^2\phi
+   = (\mathrm j\alpha R)\left\{
+     (c - U)\left(\alpha^2-\frac{\mathrm d^2}{\mathrm dz^2}\right)\phi
+     - U''\phi,
+   \right\}
+   
+where :math:`U(z)` is the base velocity profile, :math:`c` and :math:`\alpha`
+are the wavespeed and wavenumber of the disturbance, and :math:`R` is the
+Reynolds number.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87859022-e0801d00-c93a-11ea-978f-b1930627010b.png
+   :width: 500px
 
-Example 30: -
-=============
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex29.py>`_
+
+Example 30: Krylov-Uzawa method for the Stokes equation
+=======================================================
+
+This example solves the Stokes equation iteratively in a square domain.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87859044-06a5bd00-c93b-11ea-84c2-9fbb9fc6e832.png
 
-Example 31: -
-=============
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex30.py>`_
+
+Example 31: Curved elements
+===========================
+
+This example solves the eigenvalue problem :math:`-\Delta u = \lambda u`
+with the boundary condition :math:`u|_{\partial \Omega} = 0` using isoparametric
+mapping via biquadratic basis and finite element approximation using fifth-order
+quadrilaterals.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87859068-32c13e00-c93b-11ea-984d-684e1e4c5066.png
 
-Example 32: -
-=============
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex31.py>`_
+
+Example 32: Block diagonally preconditioned Stokes solver
+=========================================================
+
+This example solves the Stokes problem in three dimensions, with an
+algorithm that scales to reasonably fine meshes (a million tetrahedra in a few
+minutes). The figure was created using `Paraview <https://www.paraview.org/>`_.
+
+.. note::
+   This examples requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_ and an implementation of algebraic multigrid (either `pyamgcl    <https://pypi.org/project/pyamgcl>`_ or `pyamg <https://pypi.org/project/pyamg/>`_).
 
 .. figure:: https://user-images.githubusercontent.com/973268/87859195-fcd08980-c93b-11ea-930e-ddcd26aabdb4.png
    :width: 500px
 
-Example 33: -
-=============
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex32.py>`_
+
+Example 33: H(curl) conforming model problem
+============================================
+
+
+This example solves the vector-valued problem :math:`\nabla \times \nabla \times E + E  = f`
+in domain :math:`\Omega = [-1, 1]^3` with the boundary condition :math:`E \times
+n|_{\partial \Omega} = 0` using the lowest order Nédélec edge element.
+The figure was created using `Paraview <https://www.paraview.org/>`_.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87859239-47520600-c93c-11ea-8241-d62fdfd2a9a2.png
    :width: 500px
 
-Example 34: -
-=============
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex33.py>`_
+
+Example 34: Euler-Bernoulli beam
+================================
+
+
+This example solves the Euler-Bernoulli beam equation
+:math:`(EI u'')'' = 1`
+with the boundary conditions
+:math:`u(0)=u'(0) = 0` and using cubic Hermite elements.
+The exact solution at :math:`x=1` is :math:`u(1)=1/8`.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87859267-749eb400-c93c-11ea-82cd-2d488fda39d4.png
+   :width: 500px
 
-Example 35: -
-=============
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex34.py>`_
+
+Example 35: Characteristic impedance and velocity factor
+========================================================
+
+This example solves the series inductance (per meter) and parallel capacitance
+(per meter) of RG316 coaxial cable. These values are then used to compute the
+characteristic impedance and velocity factor of the cable.
+
+.. note::
+   This example requires the external package
+   `pygmsh <https://pypi.org/project/pygmsh/>`_.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87859275-85e7c080-c93c-11ea-9e62-3a9a8ee86070.png
+
+`Source code <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex35.py>`_
