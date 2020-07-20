@@ -19,8 +19,8 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'scikit-fem'
-copyright = '2018-20, Tom Gustafsson, Geordie McBain'
-author = 'Tom Gustafsson, Geordie McBain'
+copyright = '2018-2020, scikit-fem developers'
+author = 'scikit-fem developers'
 
 
 import re

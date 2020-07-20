@@ -1,6 +1,6 @@
-===================================
- A detailed description of the API
-===================================
+==========================
+ Detailed API description
+==========================
 
 This section contains a more detailed API documentation for the most commonly
 used interfaces of the library.
