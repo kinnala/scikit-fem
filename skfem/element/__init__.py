@@ -7,8 +7,8 @@ types.
 >>> ElementTriP1.mesh_type
 skfem.mesh.mesh2d.mesh_tri.MeshTri
 
-In order to use an element, you simply initialize the respective object and pass
-it to the constructor of :class:`~skfem.assembly.InteriorBasis` or
+In order to use an element, you simply initialize the respective object and
+pass it to the constructor of :class:`~skfem.assembly.InteriorBasis` or
 :class:`~skfem.assembly.FacetBasis`.  Run the following commands to find an
 up-to-date list of supported elements:
 
