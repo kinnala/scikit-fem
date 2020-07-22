@@ -155,6 +155,8 @@ boundary.
 
 `Source code of Example 13 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex13.py>`_
 
+.. _ex14:
+
 Example 14: Laplace with inhomogeneous boundary conditions
 ==========================================================
 
