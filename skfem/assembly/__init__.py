@@ -24,8 +24,13 @@ assembly. The basic workflow of assembly is the following:
 
 >>> A = asm(form_a, basis)
 >>> b = asm(form_l, basis)
+>>> A
+<4x4 sparse matrix of type '<class 'numpy.float64'>'
+	with 14 stored elements in Compressed Sparse Row format>
+>>> b
+array([0.0162037 , 0.15046296, 0.06712963, 0.09953704])
 
-The above steps assemble the matrix corresponding
+The above examples assemble the matrix corresponding
 to the bilinear form
 
 .. math::

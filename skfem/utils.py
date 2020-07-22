@@ -200,7 +200,15 @@ def condense(A: spmatrix,
              expand: bool = True) -> CondensedSystem:
     """Eliminate degrees-of-freedom from a linear system.
 
-    Supports also generalized eigenvalue problems.
+    The user should provide the linear system ``A`` and ``b``
+    and either the set of DOF's to eliminate (``D``) or the set
+    of DOF's to keep (``I``).  Optionally, nonzero values for
+    the eliminated DOF's can be supplied via ``x``.
+
+    .. note::
+
+        Supports also generalized eigenvalue problems
+        where ``b`` is a matrix.
 
     Parameters
     ----------
@@ -219,13 +227,14 @@ def condense(A: spmatrix,
     expand
         If `True` (default), returns also `x` and `I`. As a consequence,
         :func:`skfem.utils.solve` will expand the solution vector
-        automatically. Otherwise, r
+        automatically.
 
     Returns
     -------
     CondensedSystem
-        The condensed linear system (and optionally information about
-        the boundary values).
+        The condensed linear system and (optionally) information about
+        the boundary values.
+
     """
     D = _flatten_dofs(D)
     I = _flatten_dofs(I)
