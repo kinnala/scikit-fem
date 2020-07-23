@@ -10,12 +10,12 @@ Using the techniques described in :ref:`overview`, one obtains the linear system
 where :math:`A` corresponds to a bilinear form and :math:`b` corresponds to a
 linear form.
 Many times this system has no unique solution unless the degrees-of-freedom
-:math:`x` are further constrained by imposing boundary conditions.
+(DOF's) :math:`x` are further constrained by imposing boundary conditions.
 
 Essential boundary conditions
 =============================
 
-It is possible to eliminate degrees-of-freedom from the resulting system if some
+It is possible to eliminate DOF's from the resulting system if some
 of the values are known `a priori`.  Suppose that the vector :math:`x` can be
 split as
 
@@ -65,8 +65,8 @@ corresponding to the Poisson equation :math:`-\Delta u = 1`.
    >>> A = laplace.assemble(basis)
    >>> b = unit_load.assemble(basis)
 
-The condensed system can be obtained with :func:`skfem.utils.condense`.  Below
-we provide a list of degrees-of-freedom to eliminate via the keyword argument
+The condensed system is obtained with :func:`skfem.utils.condense`.  Below
+we provide the DOF's to eliminate via the keyword argument
 ``D``.
 
 .. code-block:: python
@@ -80,17 +80,18 @@ we provide a list of degrees-of-freedom to eliminate via the keyword argument
            0., 0., 0., 0., 0., 0., 0., 0.]),
     array([ 6, 12, 15, 19, 20, 21, 22, 23, 24]))
 
-By default, the eliminated degrees-of-freedom are assumed to be zero.
-Other values can be provided through the keyword argument ``x``,
-cf. :ref:`ex14`.
+By default, the eliminated DOF's are set to zero.
+Different values can be provided through the keyword argument ``x``;
+see :ref:`ex14`.
 
 Finding degrees-of-freedom
 ==========================
 
-Often we wish to constrain degrees-of-freedom (DOF's) on a specific part of the
-domain.  Currently the main tools for finding DOF's are
+Often the goal is to constrain DOF's on a specific part of
+the boundary.  Currently the main tools for finding DOF's are
 :meth:`skfem.assembly.Basis.find_dofs` and
-:meth:`skfem.assembly.Basis.get_dofs`.
+:meth:`skfem.assembly.Basis.get_dofs`.  Let us demonstrate
+the latter with an example.
 
 .. code-block:: python
 
@@ -99,21 +100,71 @@ domain.  Currently the main tools for finding DOF's are
    >>> m.refine(2)
    >>> basis = InteriorBasis(m, ElementTriP2())
 
-Finding DOF's corresponding to the left boundary:
+We first find the set of facets belonging to the left boundary.
 
+.. code-block:: python
+
+   >>> m.facets_satisfying(lambda x: x[0] == 0.)
+   array([ 1,  5, 14, 15])
+
+Next we supply the array of facet indices to
+:meth:`skfem.assembly.Basis.get_dofs`
+
+.. code-block:: python
+
+   >>> dofs = basis.get_dofs(m.facets_satisfying(lambda x: x[0] == 0.))
+   >>> dofs.nodal
+   {'u': array([ 0,  2,  5, 10, 14])}
+   >>> dofs.facet
+   {'u': array([26, 30, 39, 40])}
+
+The keys in the above dictionaries indicate the type of the
+DOF according to the following table:
+
++-----------+---------------------------------------------------------------+
+| Key       | Description                                                   |
++===========+===============================================================+
+| ``u``     | Point value                                                   |
++-----------+---------------------------------------------------------------+
+| ``u_n``   | Normal derivative                                             |
++-----------+---------------------------------------------------------------+
+| ``u_x``   | Partial derivative w.r.t. :math:`x`                           |
++-----------+---------------------------------------------------------------+
+| ``u_xx``  | Second partial derivative w.r.t :math:`x`                     |
++-----------+---------------------------------------------------------------+
+| ``u^n``   | Normal component of a vector field (e.g. Raviart-Thomas)      |
++-----------+---------------------------------------------------------------+
+| ``u^t``   | Tangential component of a vector field (e.g. Nédélec)         |
++-----------+---------------------------------------------------------------+
+| ``u^1``   | First component of a vector field                             |
++-----------+---------------------------------------------------------------+
+| ``u^1_x`` | Partial derivative of the first component w.r.t. :math:`x`    |
++-----------+---------------------------------------------------------------+
+| ``u^1^1`` | First component of the first component in a composite field   |
++-----------+---------------------------------------------------------------+
+| ``NA``    | Description not available (e.g. hierarchical or bubble DOF's) |
++-----------+---------------------------------------------------------------+
+
+The list of all DOF's belonging to the left boundary can be obtained as follows:
+
+.. code-block:: python
+
+   >>> dofs.flatten()
+   array([ 0,  2,  5, 10, 14, 26, 30, 39, 40])
+   
 
 Indexing of the degrees-of-freedom
 ==================================
 
 .. warning::
 
-   This section contains low-level details on the order of the
-   degrees-of-freedom in :math:`x`.
+   This section contains lower level details on the order of the DOF's.
+   Read this only if you did not find an answer in the above sections.
 
 The degrees-of-freedom :math:`x` are ordered automatically based on the mesh and
-the element type.  It is possible to investigate how the degrees-of-freedom
-match the different topological entities (`nodes`, `facets`, `edges`,
-`elements`) of the mesh.
+the element type.  It is possible to investigate manually how the
+degrees-of-freedom match the different topological entities (`nodes`, `facets`,
+`edges`, `elements`) of the mesh.
 
 .. note::
 
@@ -149,9 +200,9 @@ data structure:
    array([[0., 1., 0., 1.],
           [0., 0., 1., 1.]])
 
-In particular, the node at :math:`(0,0)` corresponds to the first value of the
-vector :math:`x`, the node at :math:`(1,0)` corresponds to the second value, and
-so on.
+In particular, the node at :math:`(0,0)` corresponds to the first element of the
+vector :math:`x`, the node at :math:`(1,0)` corresponds to the second element,
+and so on.
 
 Similarly, the degrees-of-freedom corresponding to the facets of the mesh are
 
@@ -160,7 +211,7 @@ Similarly, the degrees-of-freedom corresponding to the facets of the mesh are
    >>> basis.facet_dofs
    array([[4, 5, 6, 7, 8]])
 
-The corresponding facets can be also found in the mesh data structure:
+The corresponding facets are also present in the mesh data structure:
 
 .. code-block:: python
 
