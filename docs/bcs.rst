@@ -145,13 +145,22 @@ DOF according to the following table:
 | ``NA``    | Description not available (e.g. hierarchical or bubble DOF's) |
 +-----------+---------------------------------------------------------------+
 
-The list of all DOF's belonging to the left boundary can be obtained as follows:
+The list of all DOF's (belonging to the left boundary) can be obtained as
+follows:
 
 .. code-block:: python
 
    >>> dofs.flatten()
    array([ 0,  2,  5, 10, 14, 26, 30, 39, 40])
    
+Many DOF types are associated with a specific global coordinate.  These
+so-called DOF locations can be found as follows:
+
+.. code-block:: python
+
+   >>> basis.doflocs[:, dofs.flatten()]
+   array([[0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   ],
+          [0.   , 1.   , 0.5  , 0.25 , 0.75 , 0.125, 0.875, 0.375, 0.625]])
 
 Indexing of the degrees-of-freedom
 ==================================
@@ -159,7 +168,7 @@ Indexing of the degrees-of-freedom
 .. warning::
 
    This section contains lower level details on the order of the DOF's.
-   Read this only if you did not find an answer in the above sections.
+   Read this only if you did not find an answer in the previous section.
 
 The degrees-of-freedom :math:`x` are ordered automatically based on the mesh and
 the element type.  It is possible to investigate manually how the
@@ -168,10 +177,10 @@ degrees-of-freedom match the different topological entities (`nodes`, `facets`,
 
 .. note::
 
-   In scikit-fem, `edges` exist only for three-dimensional meshes so that
-   `facets` are something always shared between two elements of the mesh.  In
-   particular, we refer to the edges of triangular and quadrilateral meshes as
-   `facets`.
+   **Nomenclature:** In scikit-fem, `edges` exist only for three-dimensional
+   meshes so that `facets` are something always shared between two elements of
+   the mesh.  In particular, we refer to the edges of triangular and
+   quadrilateral meshes as `facets`.
 
 For example, consider the quadratic Lagrange triangle and the default two
 element mesh of the unit square:
@@ -211,7 +220,7 @@ Similarly, the degrees-of-freedom corresponding to the facets of the mesh are
    >>> basis.facet_dofs
    array([[4, 5, 6, 7, 8]])
 
-The corresponding facets are also present in the mesh data structure:
+The corresponding facets can be found in the mesh data structure:
 
 .. code-block:: python
 
@@ -221,3 +230,35 @@ The corresponding facets are also present in the mesh data structure:
    >>> .5 * m.p[:, m.facets].sum(axis=0)  # midpoints of the facets
    array([[0. , 0. , 0.5, 0.5, 0.5],
           [0.5, 0.5, 0.5, 1. , 1. ]])
+   
+Each DOF is associated either with a node (``nodal_dofs``), a facet
+(``facet_dofs``), an edge (``edge_dofs``), or an element (``interior_dofs``).
+
+Setting the degrees-of-freedom via a projection
+===============================================
+
+Directly defining the values of the boundary DOF's is not always easy, e.g.,
+when the DOF does not represent a point value or another intuitive quantity.  In
+such case it is possible to perform an :math:`L^2` projection of the boundary
+data :math:`u_0` onto the finite element space :math:`V_h` by solving for the
+function :math:`u_h \in V_h` which satisfies
+
+.. math::
+
+   \int_{\partial \Omega} u_h v\,\mathrm{d}s = \int_{\partial \Omega} u_0 v\,\mathrm{d}s\quad \forall v \in V_h,
+
+and which is zero in all DOF's inside the domain.
+
+It is straightforward to solve the above problem using scikit-fem:
+
+.. code-block::
+
+   >>> from skfem import *
+   >>> m = MeshQuad()
+   >>> m.refine(3)
+   >>> basis = FacetBasis(m, ElementQuadP(3))
+   >>> u_0 = lambda x, y: (x * y) ** 3
+   >>> M = BilinearForm(lambda u, v, w: u * v).assemble(basis)
+   >>> f = LinearForm(lambda v, w: u_0(*w.x) * v).assemble(basis)
+   >>> x = solve(*condense(M, f, D=basis.get_dofs().flatten()))
+   >>> x

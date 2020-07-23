@@ -7,9 +7,10 @@ from skfem import (BilinearForm, LinearForm, Functional, asm, bilinear_form,
 from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementHexS2, ElementTetP0, ElementTetP1,
                            ElementTetP2, ElementTriP1, ElementQuad2,
-                           ElementTriMorley, ElementVectorH1)
+                           ElementTriMorley, ElementVectorH1, ElementQuadP)
 from skfem.mesh import MeshQuad, MeshHex, MeshTet, MeshTri
 from skfem.assembly import FacetBasis, InteriorBasis
+from skfem.utils import project
 
 
 class IntegrateOneOverBoundaryQ1(unittest.TestCase):
@@ -192,21 +193,27 @@ class NormalVectorTestTri(unittest.TestCase):
         else:
             basis = FacetBasis(*self.case)
 
-        @linear_form
-        def linf(v, dv, w):
+        @LinearForm
+        def linf(v, w):
             return np.sum(w.n ** 2, axis=0) * v
 
         b = asm(linf, basis)
         m = self.case[0]
-        self.assertAlmostEqual(b @ np.ones(b.shape),
+        ones = np.zeros_like(b)
+        I = basis.get_dofs().flatten()
+        ones[I] = project(lambda x: 1.0 + x[0] * 0.,
+                          basis_to=basis,
+                          I=I)
+
+        self.assertAlmostEqual(b @ ones,
                                2 * m.p.shape[0],
                                places=10)
 
         if self.test_integrate_volume:
             # by Gauss theorem this integrates to one
             for itr in range(m.p.shape[0]):
-                @linear_form
-                def linf(v, dv, w):
+                @LinearForm
+                def linf(v, w):
                     return w.n[itr] * v
 
                 b = asm(linf, basis)
@@ -224,6 +231,11 @@ class NormalVectorTestTetP2(NormalVectorTestTri):
 
 class NormalVectorTestQuad(NormalVectorTestTri):
     case = (MeshQuad(), ElementQuad1())
+
+
+class NormalVectorTestQuadP(NormalVectorTestTri):
+    case = (MeshQuad(), ElementQuadP(3))
+    test_integrate_volume = False
 
 
 class NormalVectorTestHex(NormalVectorTestTri):

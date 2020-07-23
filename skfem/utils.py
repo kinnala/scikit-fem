@@ -3,6 +3,7 @@ SciPy linear solvers."""
 
 import warnings
 from typing import Optional, Union, Tuple, Callable, Dict
+from inspect import signature
 
 import numpy as np
 import scipy.sparse as sp
@@ -323,7 +324,13 @@ def project(fun,
 
     @LinearForm
     def funv(v, w):
-        p = fun(*w.x) * v
+        if len(signature(fun).parameters) == 1:
+            p = fun(w.x) * v
+        else:
+            warnings.warn("The function provided to 'project' should "
+                          "take only one argument in the future.",
+                          DeprecationWarning)
+            p = fun(*w.x) * v
         return sum(p) if isinstance(basis_to.elem, ElementVectorH1) else p
 
     @BilinearForm

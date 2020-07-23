@@ -29,8 +29,10 @@ class ElementLinePp(ElementH1):
     @staticmethod
     def _reval_legendre(y, p):
         """Re-evaluate Legendre polynomials."""
-        P = np.zeros((p + 1, len(y)))
-        dP = np.zeros((p + 1, 1, len(y)))
+        #P = np.zeros((p + 1, len(y)))
+        #dP = np.zeros((p + 1, 1, len(y)))
+        P = np.zeros((p + 1,) + y.shape)
+        dP = np.zeros((p + 1, 1) + y.shape)
 
         P[0] = 1. - y
         P[1] = y
