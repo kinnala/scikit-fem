@@ -294,7 +294,8 @@ def project(fun,
             basis_from: Basis = None,
             basis_to: Basis = None,
             diff: int = None,
-            I: ndarray = None) -> ndarray:
+            I: ndarray = None,
+            expand: bool = False) -> ndarray:
     """Projection from one basis to another.
 
     Parameters
@@ -309,6 +310,8 @@ def project(fun,
         Differentiate with respect to the given dimension.
     I
         Index set for limiting the projection to a subset.
+    expand
+        Passed to :func:`skfem.utils.condense`.
 
     Returns
     -------
@@ -350,7 +353,7 @@ def project(fun,
             f = asm(mass, basis_from, basis_to) @ fun
 
     if I is not None:
-        return solve(*condense(M, f, I=I, expand=False))
+        return solve(*condense(M, f, I=I, expand=expand))
 
     return solve(M, f)
 

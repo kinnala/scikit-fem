@@ -199,11 +199,10 @@ class NormalVectorTestTri(unittest.TestCase):
 
         b = asm(linf, basis)
         m = self.case[0]
-        ones = np.zeros_like(b)
-        I = basis.get_dofs().flatten()
-        ones[I] = project(lambda x: 1.0 + x[0] * 0.,
-                          basis_to=basis,
-                          I=I)
+        ones = project(lambda x: 1.0 + x[0] * 0.,
+                       basis_to=basis,
+                       I=basis.get_dofs().flatten(),
+                       expand=True)
 
         self.assertAlmostEqual(b @ ones,
                                2 * m.p.shape[0],
