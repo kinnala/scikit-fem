@@ -63,6 +63,18 @@ More examples can be found in the [gallery](https://scikit-fem.readthedocs.io/en
 The project is documented using Sphinx.  A recent version of the documentation
 can be found from [Read the Docs](https://scikit-fem.readthedocs.io/en/latest/).
 
+## Dependencies
+
+The minimal dependencies for installing and using `scikit-fem` are
+[numpy](https://numpy.org/), [scipy](https://www.scipy.org/) and
+[meshio](https://github.com/nschloe/meshio).  In addition, many
+[examples](https://scikit-fem.readthedocs.io/en/latest/listofexamples.html) use
+[matplotlib](https://matplotlib.org/) for visualization.
+
+Some examples demonstrate the use of external packages; see our [Travis CI job
+definition](https://github.com/kinnala/scikit-fem/blob/master/.travis.yml) for a
+full list of test dependencies.
+
 ## Installation
 
 The most recent release can be installed simply by `pip install scikit-fem`.
@@ -88,6 +100,7 @@ for first timers include:
 
 The library has been used in the preparation of the following scientific works:
 
+- Gustafsson, T., Stenberg, R., & Videman, J. (2020). Nitsche's method for Kirchhoff plates. arXiv preprint [arXiv:2007.00403](https://arxiv.org/abs/2007.00403).
 - Gustafsson, T., Stenberg, R., & Videman, J. (2020). On Nitsche's method for elastic contact problems. SIAM Journal on Scientific Computing, 42(2), B425–B446. arXiv preprint [arXiv:1902.09312](https://arxiv.org/abs/1902.09312).
 - Gustafsson, T., Stenberg, R., & Videman, J. (2019). Nitsche's Master-Slave Method for Elastic Contact Problems. [arXiv:1912.08279](https://arxiv.org/abs/1912.08279).
 - McBain, G. D., Mallinson, S. G., Brown, B. R., Gustafsson, T. (2019). Three ways to compute multiport inertance. The ANZIAM Journal, 60, C140–C155.  [Open access](https://doi.org/10.21914/anziamj.v60i0.14058).
