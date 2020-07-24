@@ -82,22 +82,21 @@ More examples can be found in the [gallery](https://scikit-fem.readthedocs.io/en
 The project is documented using Sphinx.  A recent version of the documentation
 can be found from [Read the Docs](https://scikit-fem.readthedocs.io/en/latest/).
 
-## Dependencies
-
-The minimal dependencies for installing and using `scikit-fem` are
-[numpy](https://numpy.org/), [scipy](https://www.scipy.org/) and
-[meshio](https://github.com/nschloe/meshio).  In addition, many
-[examples](https://scikit-fem.readthedocs.io/en/latest/listofexamples.html) use
-[matplotlib](https://matplotlib.org/) for visualization.
-
-Some examples demonstrate the use of external packages; see our [Travis CI job
-definition](https://github.com/kinnala/scikit-fem/blob/master/.travis.yml) for a
-full list of test dependencies.
-
 ## Installation
 
 The most recent release can be installed simply by `pip install scikit-fem`.
 For more cutting edge features, you can clone this repository.
+
+## Dependencies
+
+The minimal dependencies for installing `scikit-fem` are
+[numpy](https://numpy.org/), [scipy](https://www.scipy.org/) and
+[meshio](https://github.com/nschloe/meshio).  In addition, many
+[examples](https://scikit-fem.readthedocs.io/en/latest/listofexamples.html) use
+[matplotlib](https://matplotlib.org/) for visualization.  Some examples
+demonstrate the use of other external packages; see our [CI job
+definition](https://github.com/kinnala/scikit-fem/blob/master/.travis.yml) for a
+full list of test dependencies.
 
 ## Acknowledgements
 
