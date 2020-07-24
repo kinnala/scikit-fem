@@ -19,6 +19,19 @@ It contains *no compiled code* meaning that it's *easy to install* and
 use on all platforms that support NumPy.  Despite being fully interpreted, the
 code has a reasonably *good performance*.
 
+The following benchmark (`performance.py`) demonstrates how the time spent in
+finite element assembly is much smaller than the time spent in linear solve for
+larger problems.  The benchmark uses linear tetrahedral elements and the default
+direct sparse solver of `scipy.sparse.linalg.spsolve`.
+
+| Degrees-of-freedom | Assembly time (s) | Linear solve time (s) |
+| --- | --- | --- |
+| 26 | 0.0013850356723802786 | 0.0006379743378298978 |
+| 115 | 0.0024734779920739434 | 0.0008889799937605858 |
+| 645 | 0.011579616325131306 | 0.0018885709966222446 |
+| 4233 | 0.06748758465982974 | 0.06975097232498229 |
+| 30481 | 0.5530782516580075 | 7.881414389664617 |
+
 ## Examples
 
 Forms are defined using an intuitive syntax:
