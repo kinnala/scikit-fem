@@ -1,3 +1,8 @@
+"""A simple performance test.
+
+This script is used to generate the table in README.md.
+
+"""
 from timeit import timeit
 import numpy as np
 from skfem import *
@@ -22,7 +27,7 @@ print('| Degrees-of-freedom | Time spent in assembly (s) | Time spent in linear 
 print('| --- | --- | --- |')
 
 
-for N in range(4, 30, 2):
+for N in range(8, 30, 2):
     
     m = pre(N)
 

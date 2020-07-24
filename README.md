@@ -19,16 +19,14 @@ It contains *no compiled code* meaning that it's *easy to install* and
 use on all platforms that support NumPy.  Despite being fully interpreted, the
 code has a reasonably *good performance*.
 
-The following benchmark (`performance.py`) demonstrates how the time spent in
-finite element assembly is less than the time spent in linear solve for larger
-problems.  The benchmark uses linear tetrahedral elements and the default direct
-sparse solver of `scipy.sparse.linalg.spsolve` for solving the Laplace equation.
+The following benchmark (`docs/examples/performance.py`) demonstrates how the
+time spent in finite element assembly is less than the time spent in linear
+solve for larger problems.  The benchmark uses linear tetrahedral elements and
+the default direct sparse solver of `scipy.sparse.linalg.spsolve` for solving
+the Laplace equation.
 
 | Degrees-of-freedom | Time spent in assembly (s) | Time spent in linear solve (s) |
 | --- | --- | --- |
-| 64 | 0.0015200076741166413 | 0.0006685939927895864 |
-| 216 | 0.002609597344417125 | 0.0008159136632457376 |
-| 512 | 0.009787533005389074 | 0.003028002994445463 |
 | 1000 | 0.020067664658805977 | 0.0037054363444137075 |
 | 1728 | 0.022763118671718985 | 0.008123454657228043 |
 | 2744 | 0.03378102233788619 | 0.020783308330768097 |
