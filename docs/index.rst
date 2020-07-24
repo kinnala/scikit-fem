@@ -26,7 +26,7 @@ Table of contents
 
    self
    overview
-   bcs
    forms
+   bcs
    api
    listofexamples

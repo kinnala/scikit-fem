@@ -2,7 +2,8 @@
  Setting boundary conditions
 =============================
 
-Using the techniques described in :ref:`overview`, one obtains the linear system
+Using the techniques described in :ref:`overview` and :ref:`forms`, one obtains
+the linear system
 
 .. math::
    Ax = b
@@ -237,28 +238,41 @@ Each DOF is associated either with a node (``nodal_dofs``), a facet
 Setting the degrees-of-freedom via a projection
 ===============================================
 
-Directly defining the values of the boundary DOF's is not always easy, e.g.,
-when the DOF does not represent a point value or another intuitive quantity.  In
-such case it is possible to perform an :math:`L^2` projection of the boundary
-data :math:`u_0` onto the finite element space :math:`V_h` by solving for the
-function :math:`u_h \in V_h` which satisfies
+Defining the values of the boundary DOF's is not always easy, e.g., when the DOF
+does not represent a point value or another intuitive quantity.  Then it is
+possible to perform an :math:`L^2` projection of the boundary data :math:`u_0`
+onto the finite element space :math:`V_h` by solving for the function
+:math:`\widetilde{u_0} \in V_h` which satisfies
 
 .. math::
 
-   \int_{\partial \Omega} u_h v\,\mathrm{d}s = \int_{\partial \Omega} u_0 v\,\mathrm{d}s\quad \forall v \in V_h,
+   \int_{\partial \Omega} \widetilde{u_0} v\,\mathrm{d}s = \int_{\partial \Omega} u_0 v\,\mathrm{d}s\quad \forall v \in V_h,
 
 and which is zero in all DOF's inside the domain.
-
-It is straightforward to solve the above problem using scikit-fem:
+In the following snippet we solve explicitly the above variational problem:
 
 .. code-block::
 
    >>> from skfem import *
    >>> m = MeshQuad()
-   >>> m.refine(3)
    >>> basis = FacetBasis(m, ElementQuadP(3))
    >>> u_0 = lambda x, y: (x * y) ** 3
    >>> M = BilinearForm(lambda u, v, w: u * v).assemble(basis)
    >>> f = LinearForm(lambda v, w: u_0(*w.x) * v).assemble(basis)
-   >>> x = solve(*condense(M, f, D=basis.get_dofs().flatten()))
+   >>> x = solve(*condense(M, f, I=basis.get_dofs()))
    >>> x
+   array([ 2.87802132e-16,  1.62145397e-16,  1.00000000e+00,  1.66533454e-16,
+           4.59225774e-16, -4.41713127e-16,  4.63704316e-16,  1.25333771e-16,
+           6.12372436e-01,  1.58113883e-01,  6.12372436e-01,  1.58113883e-01,
+           0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00])
+
+Alternatively, you can use :func:`skfem.utils.project` which does exactly the
+same thing:
+
+.. code-block::
+
+   >>> project(u_0, basis_to=basis, I=basis.get_dofs(), expand=True)
+   array([ 2.87802132e-16,  1.62145397e-16,  1.00000000e+00,  1.66533454e-16,
+           4.59225774e-16, -4.41713127e-16,  4.63704316e-16,  1.25333771e-16,
+           6.12372436e-01,  1.58113883e-01,  6.12372436e-01,  1.58113883e-01,
+           0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00])

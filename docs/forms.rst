@@ -1,5 +1,9 @@
+.. _forms:
+
 ==================
  Anatomy of forms
 ==================
 
-Durp
+Forms are defined using Python functions.
+The idea is to take the 
+
