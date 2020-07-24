@@ -116,6 +116,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (i.e. `Dofs` objects) using `|` and `+` operators
 - `Dofs.drop` and `Dofs.keep`, for further filtering the degree-of-freedom sets
 
+#### Fixed
+- `FacetBasis` did not initialize with `ElementQuadP`
+
+#### Deprecated
+- `skfem.utils.project` will support functions like `lambda x: x[0]`
+  instead of `lambda x, y, z: x` in the future
+
 ### [1.2.0] - 2020-07-07
 
 #### Added
@@ -127,14 +134,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Fixed
 - `Mesh3D.boundary_edges` was broken in case of hexahedral meshes
 - `skfem.utils.project` did not work for `ElementGlobal`
-- `ElementQuadP` did not work with `FacetBasis`
 
 #### Changed
 - `MeshQuad._splitquads` aliased as `MeshQuad.to_meshtri`: should not be private
-
-#### Deprecated
-- `skfem.utils.project` will support functions like `lambda x: x[0]`
-  instead of `lambda x, y, z: x` in the future
 
 ### [1.1.0] - 2020-05-18
 

@@ -92,8 +92,8 @@ Notice how the shape of ``u[0]`` is what we expect also from the return value:
           [0.66666667, 0.16666667, 0.16666667]])
 
 
-Using predefined functions in the forms
-=======================================
+Use of predefined functions in the forms
+========================================
 
 It is sometimes necessary to use a previous solution vector in the form
 definition, e.g., when solving nonlinear problems.
@@ -114,9 +114,7 @@ finding :math:`u_{k+1} \in H^1_0(\Omega)` which satisfies
 
    \int_\Omega (u_{k} + 1) \nabla u_{k+1} \cdot \nabla v \,\mathrm{d}x = \int_\Omega v\,\mathrm{d}x
 
-for every :math:`v \in H^1_0(\Omega)` so that the previous approximation
-:math:`u_k` is given.
-
+for every :math:`v \in H^1_0(\Omega)`.
 Defining such forms requires the use of the argument ``w``:
 
 .. code-block:: python
@@ -128,7 +126,7 @@ Defining such forms requires the use of the argument ``w``:
    ... def bilinf(u, v, w):
    ...     return (w.u_k + 1.) * dot(grad(u), grad(v))
 
-When performing the fixed point iteration, we provide the previous
+When performing the fixed point iteration, we provide a previous
 solution to :func:`skfem.assembly.asm` as a keyword argument:
 
 .. code-block:: python
@@ -152,3 +150,18 @@ solution to :func:`skfem.assembly.asm` as a keyword argument:
    0.07035942044776827
    0.07035942044776916
    0.07035942044776922
+
+In the form definition, ``w`` is actually a dictionary with
+the user provided arguments and additional precomputed keys:
+
+.. code-block::
+
+   tom@tunkki:~/src/scikit-fem$ python -i test.py
+   >>> asm(integrand, InteriorBasis(MeshTri(), ElementTriP1()))
+   > /home/tom/src/scikit-fem/test.py(7)integrand()
+   -> return dot(grad(u), grad(v))
+   (Pdb) !w.keys()
+   dict_keys(['x', 'h'])
+
+By default, ``w.x`` corresponds to the global coordinates and ``w.h``
+corresponds to the local mesh parameter.
