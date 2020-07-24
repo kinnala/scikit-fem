@@ -20,17 +20,25 @@ use on all platforms that support NumPy.  Despite being fully interpreted, the
 code has a reasonably *good performance*.
 
 The following benchmark (`performance.py`) demonstrates how the time spent in
-finite element assembly is much smaller than the time spent in linear solve for
-larger problems.  The benchmark uses linear tetrahedral elements and the default
-direct sparse solver of `scipy.sparse.linalg.spsolve`.
+finite element assembly is less than the time spent in linear solve for larger
+problems.  The benchmark uses linear tetrahedral elements and the default direct
+sparse solver of `scipy.sparse.linalg.spsolve` for solving the Laplace equation.
 
-| Degrees-of-freedom | Assembly time (s) | Linear solve time (s) |
+| Degrees-of-freedom | Time spent in assembly (s) | Time spent in linear solve (s) |
 | --- | --- | --- |
-| 26 | 0.0013850356723802786 | 0.0006379743378298978 |
-| 115 | 0.0024734779920739434 | 0.0008889799937605858 |
-| 645 | 0.011579616325131306 | 0.0018885709966222446 |
-| 4233 | 0.06748758465982974 | 0.06975097232498229 |
-| 30481 | 0.5530782516580075 | 7.881414389664617 |
+| 64 | 0.0015200076741166413 | 0.0006685939927895864 |
+| 216 | 0.002609597344417125 | 0.0008159136632457376 |
+| 512 | 0.009787533005389074 | 0.003028002994445463 |
+| 1000 | 0.020067664658805977 | 0.0037054363444137075 |
+| 1728 | 0.022763118671718985 | 0.008123454657228043 |
+| 2744 | 0.03378102233788619 | 0.020783308330768097 |
+| 4096 | 0.044692154663304486 | 0.05756178432299445 |
+| 5832 | 0.06529411301016808 | 0.26006614298482117 |
+| 8000 | 0.09247205066882695 | 0.41909634032829973 |
+| 10648 | 0.14258869632612914 | 1.0872577403400403 |
+| 13824 | 0.1709109363340152 | 2.1439098239837526 |
+| 17576 | 0.23109773001245534 | 4.2809405889905365 |
+| 21952 | 0.3161410770068566 | 8.190604210676005 |
 
 ## Examples
 

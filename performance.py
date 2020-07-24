@@ -1,5 +1,5 @@
 from timeit import timeit
-
+import numpy as np
 from skfem import *
 
 
@@ -13,19 +13,18 @@ def linf(v, w):
     return 1. * v
 
 
-def pre(refs=0):
-    m = MeshTet()
-    m.refine(refs)
+def pre(N=3):
+    m = MeshTet.init_tensor(*(3 * (np.linspace(0., 1., N),)))
     return m
 
 
-print('| Degrees-of-freedom | Assembly time (s) | Linear solve time (s) |')
+print('| Degrees-of-freedom | Time spent in assembly (s) | Time spent in linear solve (s) |')
 print('| --- | --- | --- |')
 
 
-for refs in [1, 2, 3, 4, 5]:
+for N in range(4, 30, 2):
     
-    m = pre(refs)
+    m = pre(N)
 
     def assembler(m):
         basis = InteriorBasis(m, ElementTetP1())
