@@ -6,16 +6,7 @@ This script is used to generate the table in README.md.
 from timeit import timeit
 import numpy as np
 from skfem import *
-
-
-@BilinearForm
-def bilinf(u, v, w):
-    return sum(u.grad * v.grad)
-
-
-@LinearForm
-def linf(v, w):
-    return 1. * v
+from skfem.models.poisson import laplace, unit_load
 
 
 def pre(N=3):
@@ -33,8 +24,8 @@ for N in range(8, 30, 2):
 
     def assembler(m):
         basis = InteriorBasis(m, ElementTetP1())
-        return (asm(bilinf, basis),
-                asm(linf, basis),
+        return (asm(laplace, basis),
+                asm(unit_load, basis),
                 m.boundary_nodes())
 
     A, b, D = assembler(m)
