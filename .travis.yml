@@ -25,8 +25,8 @@ install:
   - source activate scikit-fem
   - pip install meshio dmsh scikit-sparse pacopy pygmsh pyamg flake8
 script:
+  - flake8 skfem || travis_terminate 1;
   - python -m unittest discover
-  - flake8 skfem
 
 jobs:
   include:

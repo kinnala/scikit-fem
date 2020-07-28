@@ -9,37 +9,22 @@ skfem.mesh.mesh2d.mesh_tri.MeshTri
 
 In order to use an element, you simply initialize the respective object and
 pass it to the constructor of :class:`~skfem.assembly.InteriorBasis` or
-:class:`~skfem.assembly.FacetBasis`.
+:class:`~skfem.assembly.FacetBasis`.  Run the following commands to find an
+up-to-date list of supported elements:
 
-The supported elements include
+>>> import skfem.element
+>>> dir(skfem.element)
 
-    - :class:`~skfem.element.ElementTriArgyris`
-    - :class:`~skfem.element.ElementHex1`
-    - :class:`~skfem.element.ElementTriMorley`
-    - :class:`~skfem.element.ElementTriMini`
-    - :class:`~skfem.element.ElementQuad0`
-    - :class:`~skfem.element.ElementQuad1`
-    - :class:`~skfem.element.ElementQuad2`
-    - :class:`~skfem.element.ElementQuadS2`
-    - :class:`~skfem.element.ElementQuadDG`
-    - :class:`~skfem.element.ElementQuadP`
-    - :class:`~skfem.element.ElementQuadBFS`
-    - :class:`~skfem.element.ElementTetN0`
-    - :class:`~skfem.element.ElementTetP0`
-    - :class:`~skfem.element.ElementTetP1`
-    - :class:`~skfem.element.ElementTetP2`
-    - :class:`~skfem.element.ElementTetRT0`
-    - :class:`~skfem.element.ElementTriDG`
-    - :class:`~skfem.element.ElementTriP0`
-    - :class:`~skfem.element.ElementTriP1`
-    - :class:`~skfem.element.ElementTriP2`
-    - :class:`~skfem.element.ElementTriRT0`
-    - :class:`~skfem.element.ElementVectorH1`
-    - :class:`~skfem.element.ElementLineP1`
-    - :class:`~skfem.element.ElementLineP2`
-    - :class:`~skfem.element.ElementLinePp`
-    - :class:`~skfem.element.ElementLineHermite`
-    - :class:`~skfem.element.ElementLineMini`
+The supported elements include (but are not limited to):
+
+    - One-dimensional, triangular, quadrilateral, tetrahedral and hexahedral
+      elements up to the polynomial degree of 2.
+    - More exotic :math:`H^2`-conforming elements such as the cubic
+      Hermite element, the Argyris triangle, and the Bogner-Fox-Schmit
+      quadrilateral.
+    - The lowest order Raviart-Thomas and Nédélec elements.
+    - Special elements for the Stokes equations and incompressible elasticity.
+    - Discontinuous elements for, e.g., interior penalty methods.
 
 """
 
