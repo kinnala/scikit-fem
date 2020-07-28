@@ -45,7 +45,7 @@ Class: Basis
 ============
 
 .. autoclass:: skfem.assembly.Basis
-   :members: find_dofs, interpolate
+   :members: find_dofs, get_dofs, interpolate
 
 .. autoclass:: skfem.assembly.InteriorBasis
    :members: __init__

@@ -19,6 +19,34 @@ It contains *no compiled code* meaning that it's *easy to install* and
 use on all platforms that support NumPy.  Despite being fully interpreted, the
 code has a reasonably *good performance*.
 
+*The following benchmark (`docs/examples/performance.py`) demonstrates the time
+spent on finite element assembly in comparison to the time spent on linear
+solve.  The given numbers were calculated using a ThinkPad X1 Carbon laptop (7th
+gen).  Note that the timings are only illustrative as they depend on, e.g., the
+type of element used, the number of quadrature points used, the type of linear
+solver, and the complexity of the forms.  This benchmark solves the Laplace
+equation using linear tetrahedral elements and the default direct sparse solver
+of `scipy.sparse.linalg.spsolve`.*
+
+| Degrees-of-freedom | Time spent on assembly (s) | Time spent on linear solve (s) |
+| --- | --- | --- |
+| 64 | 0.001719430962111801 | 0.0008631939999759197 |
+| 125 | 0.0022377190180122852 | 0.0009978360030800104 |
+| 216 | 0.004175334994215518 | 0.0016233620117418468 |
+| 512 | 0.006831337988842279 | 0.0018000249983742833 |
+| 1000 | 0.027329800999723375 | 0.006487983977422118 |
+| 1728 | 0.02035172702744603 | 0.00894418201642111 |
+| 4096 | 0.04277183400699869 | 0.054088378965388983 |
+| 8000 | 0.08925403101602569 | 0.39822074701078236 |
+| 15625 | 0.17675437999423593 | 3.5216876140329987 |
+| 32768 | 0.41025503899436444 | 24.167141190962866 |
+| 64000 | 0.8814217780018225 | 138.6927448490169 |
+| 125000 | 1.7890089299762622 | nan |
+| 262144 | 4.044992835028097 | nan |
+| 512000 | 8.037139102991205 | nan |
+| 1030301 | 20.241967056994326 | nan |
+
+
 ## Examples
 
 Forms are defined using an intuitive syntax:
@@ -53,9 +81,6 @@ basis = InteriorBasis(mesh, ElementTetP2())
 A = laplace.assemble(basis)  # type: scipy.sparse.csr_matrix
 ```
 
-The matrix `A` has 1.5 million rows/columns and took only a few seconds to
-assemble!
-
 More examples can be found in the [gallery](https://scikit-fem.readthedocs.io/en/latest/listofexamples.html).
 
 ## Documentation
@@ -67,6 +92,17 @@ can be found from [Read the Docs](https://scikit-fem.readthedocs.io/en/latest/).
 
 The most recent release can be installed simply by `pip install scikit-fem`.
 For more cutting edge features, you can clone this repository.
+
+## Dependencies
+
+The minimal dependencies for installing `scikit-fem` are
+[numpy](https://numpy.org/), [scipy](https://www.scipy.org/) and
+[meshio](https://github.com/nschloe/meshio).  In addition, many
+[examples](https://scikit-fem.readthedocs.io/en/latest/listofexamples.html) use
+[matplotlib](https://matplotlib.org/) for visualization.  Some examples
+demonstrate the use of other external packages; see our [CI job
+definition](https://github.com/kinnala/scikit-fem/blob/master/.travis.yml) for a
+full list of test dependencies.
 
 ## Acknowledgements
 
@@ -88,6 +124,7 @@ for first timers include:
 
 The library has been used in the preparation of the following scientific works:
 
+- Gustafsson, T., Stenberg, R., & Videman, J. (2020). Nitsche's method for Kirchhoff plates. arXiv preprint [arXiv:2007.00403](https://arxiv.org/abs/2007.00403).
 - Gustafsson, T., Stenberg, R., & Videman, J. (2020). On Nitsche's method for elastic contact problems. SIAM Journal on Scientific Computing, 42(2), B425–B446. arXiv preprint [arXiv:1902.09312](https://arxiv.org/abs/1902.09312).
 - Gustafsson, T., Stenberg, R., & Videman, J. (2019). Nitsche's Master-Slave Method for Elastic Contact Problems. [arXiv:1912.08279](https://arxiv.org/abs/1912.08279).
 - McBain, G. D., Mallinson, S. G., Brown, B. R., Gustafsson, T. (2019). Three ways to compute multiport inertance. The ANZIAM Journal, 60, C140–C155.  [Open access](https://doi.org/10.21914/anziamj.v60i0.14058).
@@ -115,6 +152,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Dofs.__or__` and `Dofs.__add__`, for merging degree-of-freedom sets
   (i.e. `Dofs` objects) using `|` and `+` operators
 - `Dofs.drop` and `Dofs.keep`, for further filtering the degree-of-freedom sets
+
+#### Fixed
+- `FacetBasis` did not initialize with `ElementQuadP`
+
+#### Deprecated
+- `skfem.utils.project` will support functions like `lambda x: x[0]`
+  instead of `lambda x, y, z: x` in the future
 
 ### [1.2.0] - 2020-07-07
 

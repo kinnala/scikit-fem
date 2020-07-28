@@ -109,8 +109,8 @@ class Basis:
         Parameters
         ----------
         facets
-            A dictionary of facets. If `None`, use `self.mesh.boundaries`
-            if set or otherwise use `{'all': self.mesh.boundary_facets()}`.
+            A dictionary of facets. If ``None``, use ``self.mesh.boundaries``
+            if set or otherwise use ``{'all': self.mesh.boundary_facets()}``.
         skip
             List of dofnames to skip.
 
@@ -128,22 +128,18 @@ class Basis:
         """Find global DOF numbers.
 
         Accepts a richer set of types than
-        :meth:`skfem.assembly.basis.Basis.find_dofs`.
+        :meth:`skfem.assembly.Basis.find_dofs`.
 
         Parameters
         ----------
         facets
-            A list of facet indices. If `None`, find facets by
-            Mesh.boundary_facets.  If callable, call Mesh.facets_satisfying
-            to get facets. If array, find the corresponding DOFs. If dict of
-            arrays, find DOFs for each entry. If dict of callables, call
-            Mesh.facets_satisfying for each entry to get facets and then find
-            DOFs for those.
-
-        Returns
-        -------
-        Dofs or Dict[str, Dofs]
-            A subset of DOFs as :class:`skfem.assembly.dofs.Dofs`.
+            A list of facet indices. If ``None``, find facets by
+            ``self.mesh.boundary_facets()``.  If callable, call
+            ``self.mesh.facets_satisfying(facets)`` to get the facets.
+            If array, simply find the corresponding DOF's. If a dictionary
+            of arrays, find DOF's for each entry. If a dictionary of
+            callables, call ``self.mesh.facets_satisfying`` for each entry to
+            get facets and then find DOF's for those.
 
         """
         if facets is None:
