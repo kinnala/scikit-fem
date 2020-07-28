@@ -1,16 +1,24 @@
 """Nonlinear Poisson equation.
 
-This example solves the nonlinear minimal surface problem using a Jacobian-free Newton-Krylov method.
+This example solves the nonlinear minimal surface problem using a Newton-Krylov method.
 
 """
 
 from skfem import *
 from skfem.helpers import grad, dot
+from skfem.models.poisson import laplace
 import numpy as np
 from scipy.optimize import root
 
 m = MeshTri()
 m.refine(5)
+
+
+@BilinearForm
+def jacobian(u, v, w):
+    return (1 / np.sqrt(1 + dot(grad(w['w']), grad(w['w']))) * dot(grad(u), grad(v))
+            -2 * dot(grad(u), grad(w['w'])) * dot(grad(w['w']), grad(v))
+            / 2 / (1 + dot(grad(w['w']), grad(w['w'])))**(3/2))
 
 
 @LinearForm
@@ -31,7 +39,13 @@ def residual(u: np.ndarray) -> np.ndarray:
     res[D] = 0.
     return res
 
-sol = root(residual, x, method='krylov', options={'disp': True})
+M = build_pc_ilu(asm(jacobian, basis, w=basis.interpolate(x)))
+
+sol = root(residual, x, method='krylov',
+           options={'disp': True,
+                    'jac_options': {
+                        'inner_M': M}})
+
 print(sol)
 x = sol.x 
 
