@@ -3,6 +3,7 @@ SciPy linear solvers."""
 
 import warnings
 from typing import Optional, Union, Tuple, Callable, Dict
+from inspect import signature
 
 import numpy as np
 import scipy.sparse as sp
@@ -200,7 +201,15 @@ def condense(A: spmatrix,
              expand: bool = True) -> CondensedSystem:
     """Eliminate degrees-of-freedom from a linear system.
 
-    Supports also generalized eigenvalue problems.
+    The user should provide the linear system ``A`` and ``b``
+    and either the set of DOF's to eliminate (``D``) or the set
+    of DOF's to keep (``I``).  Optionally, nonzero values for
+    the eliminated DOF's can be supplied via ``x``.
+
+    .. note::
+
+        Supports also generalized eigenvalue problems
+        where ``b`` is a matrix.
 
     Parameters
     ----------
@@ -219,13 +228,14 @@ def condense(A: spmatrix,
     expand
         If `True` (default), returns also `x` and `I`. As a consequence,
         :func:`skfem.utils.solve` will expand the solution vector
-        automatically. Otherwise, r
+        automatically.
 
     Returns
     -------
     CondensedSystem
-        The condensed linear system (and optionally information about
-        the boundary values).
+        The condensed linear system and (optionally) information about
+        the boundary values.
+
     """
     D = _flatten_dofs(D)
     I = _flatten_dofs(I)
@@ -284,7 +294,8 @@ def project(fun,
             basis_from: Basis = None,
             basis_to: Basis = None,
             diff: int = None,
-            I: ndarray = None) -> ndarray:
+            I: ndarray = None,
+            expand: bool = False) -> ndarray:
     """Projection from one basis to another.
 
     Parameters
@@ -299,6 +310,8 @@ def project(fun,
         Differentiate with respect to the given dimension.
     I
         Index set for limiting the projection to a subset.
+    expand
+        Passed to :func:`skfem.utils.condense`.
 
     Returns
     -------
@@ -314,7 +327,13 @@ def project(fun,
 
     @LinearForm
     def funv(v, w):
-        p = fun(*w.x) * v
+        if len(signature(fun).parameters) == 1:
+            p = fun(w.x) * v
+        else:
+            warnings.warn("The function provided to 'project' should "
+                          "take only one argument in the future.",
+                          DeprecationWarning)
+            p = fun(*w.x) * v
         return sum(p) if isinstance(basis_to.elem, ElementVectorH1) else p
 
     @BilinearForm
@@ -334,7 +353,7 @@ def project(fun,
             f = asm(mass, basis_from, basis_to) @ fun
 
     if I is not None:
-        return solve(*condense(M, f, I=I, expand=False))
+        return solve(*condense(M, f, I=I, expand=expand))
 
     return solve(M, f)
 
