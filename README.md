@@ -81,9 +81,6 @@ basis = InteriorBasis(mesh, ElementTetP2())
 A = laplace.assemble(basis)  # type: scipy.sparse.csr_matrix
 ```
 
-The matrix `A` has 1.5 million rows/columns and took only a few seconds to
-assemble!
-
 More examples can be found in the [gallery](https://scikit-fem.readthedocs.io/en/latest/listofexamples.html).
 
 ## Documentation
