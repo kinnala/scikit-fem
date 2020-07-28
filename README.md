@@ -19,24 +19,33 @@ It contains *no compiled code* meaning that it's *easy to install* and
 use on all platforms that support NumPy.  Despite being fully interpreted, the
 code has a reasonably *good performance*.
 
-The following benchmark (`docs/examples/performance.py`) demonstrates how the
-time spent in finite element assembly is less than the time spent in linear
-solve for larger problems.  The benchmark uses linear tetrahedral elements and
-the default direct sparse solver of `scipy.sparse.linalg.spsolve` for solving
-the Laplace equation.
+*The following benchmark (`docs/examples/performance.py`) demonstrates the time
+spent on finite element assembly in comparison to the time spent on linear
+solve.  The given numbers were calculated using a ThinkPad X1 Carbon laptop (7th
+gen).  Note that the timings are only illustrative as they depend on, e.g., the
+type of element used, the number of quadrature points used, the type of linear
+solver, and the complexity of the forms.  This benchmark solves the Laplace
+equation using linear tetrahedral elements and the default direct sparse solver
+of `scipy.sparse.linalg.spsolve`.*
 
-| Degrees-of-freedom | Time spent in assembly (s) | Time spent in linear solve (s) |
+| Degrees-of-freedom | Time spent on assembly (s) | Time spent on linear solve (s) |
 | --- | --- | --- |
-| 1000 | 0.020067664658805977 | 0.0037054363444137075 |
-| 1728 | 0.022763118671718985 | 0.008123454657228043 |
-| 2744 | 0.03378102233788619 | 0.020783308330768097 |
-| 4096 | 0.044692154663304486 | 0.05756178432299445 |
-| 5832 | 0.06529411301016808 | 0.26006614298482117 |
-| 8000 | 0.09247205066882695 | 0.41909634032829973 |
-| 10648 | 0.14258869632612914 | 1.0872577403400403 |
-| 13824 | 0.1709109363340152 | 2.1439098239837526 |
-| 17576 | 0.23109773001245534 | 4.2809405889905365 |
-| 21952 | 0.3161410770068566 | 8.190604210676005 |
+| 64 | 0.001719430962111801 | 0.0008631939999759197 |
+| 125 | 0.0022377190180122852 | 0.0009978360030800104 |
+| 216 | 0.004175334994215518 | 0.0016233620117418468 |
+| 512 | 0.006831337988842279 | 0.0018000249983742833 |
+| 1000 | 0.027329800999723375 | 0.006487983977422118 |
+| 1728 | 0.02035172702744603 | 0.00894418201642111 |
+| 4096 | 0.04277183400699869 | 0.054088378965388983 |
+| 8000 | 0.08925403101602569 | 0.39822074701078236 |
+| 15625 | 0.17675437999423593 | 3.5216876140329987 |
+| 32768 | 0.41025503899436444 | 24.167141190962866 |
+| 64000 | 0.8814217780018225 | 138.6927448490169 |
+| 125000 | 1.7890089299762622 | nan |
+| 262144 | 4.044992835028097 | nan |
+| 512000 | 8.037139102991205 | nan |
+| 1030301 | 20.241967056994326 | nan |
+
 
 ## Examples
 

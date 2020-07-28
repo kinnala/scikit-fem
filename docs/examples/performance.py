@@ -14,13 +14,13 @@ def pre(N=3):
     return m
 
 
-print('| Degrees-of-freedom | Time spent in assembly (s) | Time spent in linear solve (s) |')
+print('| Degrees-of-freedom | Time spent on assembly (s) | Time spent on linear solve (s) |')
 print('| --- | --- | --- |')
 
 
-for N in range(8, 30, 2):
-    
-    m = pre(N)
+for k in range(6, 21):
+
+    m = pre(int(2 ** (k / 3)))
 
     def assembler(m):
         basis = InteriorBasis(m, ElementTetP1())
@@ -30,11 +30,14 @@ for N in range(8, 30, 2):
 
     A, b, D = assembler(m)
 
-    assemble_time = timeit(lambda: assembler(m), number=3) / 3.
+    assemble_time = timeit(lambda: assembler(m), number=1)
 
     def solver(A, b):
         return solve(*condense(A, b, D=D))
 
-    solve_time = timeit(lambda: solver(A, b), number=3) / 3.
+    if A.shape[0] > 1e5:
+        solve_time = np.nan
+    else:
+        solve_time = timeit(lambda: solver(A, b), number=1)
 
     print('| {} | {} | {} |'.format(len(b), assemble_time, solve_time))
