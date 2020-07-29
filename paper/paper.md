@@ -42,8 +42,8 @@ There exist several open source packages and frameworks that implement the
 finite element method.  `scikit-fem` was developed as a simple and lightweight
 alternative to the existing Python packages with a focus on computational
 experimentation and custom PDE-based model development.  We rely on pure
-interpreted Python code on top of the NumPy–SciPy base which makes `scikit-fem` easy
-to install and portable across multiple operating systems.  The reliance on
+interpreted Python code on top of the NumPy–SciPy base which makes `scikit-fem`
+easy to install and portable across multiple operating systems.  The reliance on
 plain NumPy arrays and SciPy sparse matrices enables interoperability with
 various packages in the Python ecosystem such as meshio [@meshio], pacopy
 [@pacopy], and pyamg [@pyamg].
@@ -56,9 +56,22 @@ from pre- to postprocessing into a single framework.  As a consequence, we
 cannot provide an end-to-end experience when it comes to, e.g., specific
 physical models or distributed computing.  Our aim is to be generic in terms of
 PDEs and, hence, support a variety of finite element schemes.  Currently
-`scikit-fem` includes a basic support for $H^1$-, $H(\mathrm{div})$-,
+`scikit-fem` includes basic support for $H^1$-, $H(\mathrm{div})$-,
 $H(\mathrm{curl})$-, and $H^2$-conforming problems as well as various
 nonconforming schemes.
+
+We support forms that depend on the values and the derivatives of the trial and
+the test functions, high-order derivatives, local mesh parameter, nonuniform
+material fields, and existing finite element solutions.  Iterations related to,
+e.g., nonlinear problems (Newton's method and the variants, parameter
+continuation) or adaptive mesh refinement (evaluation of functionals, the
+marking strategy) should be implemented by the user although we aim to provide
+all the necessary tools and examples on using them, e.g., interpolation routines
+and mesh refinement.  The same applies to boundary conditions: the linear system
+$(A, b)$ is provided as such and eliminating or penalizing the correct
+degrees-of-freedom, implementing nonhomogeneous or periodic boundary conditions
+should be done after assembly either by the various helper routines of
+`scikit-fem` or by other means.
 
 # Examples and enabled work
 
