@@ -33,8 +33,8 @@ Conceptually, FEM transforms a time-independent (or temporally discretized) PDE
 into a system of linear equations $Ax=b$.  `scikit-fem` is a lightweight Python
 library for the creation, or *assembly*, of the finite element matrix $A$ and
 vector $b$.  The user loads a computational mesh, picks suitable basis
-functions, and provides the PDE's weak formulation.  This results in sparse
-matrices and vectors compatible with the SciPy [@scipy] ecosystem.
+functions, and provides the PDE's weak formulation [@fenicsbook].  This results
+in sparse matrices and vectors compatible with the SciPy [@scipy] ecosystem.
 
 # Purpose and prior art
 
@@ -62,14 +62,14 @@ nonconforming schemes.
 
 # Examples and enabled work
 
-The source code distribution [@skfem] ships with over 30 examples that
-demonstrate the library and its use. The results of some of the examples are
-highlighted in \autoref{fig:examples}.  Several publications already utilize
-computational results from `scikit-fem`, e.g., @mcbain2018, @gustafsson2019, and
+The documentation of `scikit-fem` contains over 30 examples that demonstrate the
+library and its use. The results of some of the examples are highlighted in
+\autoref{fig:examples}.  Several publications already utilize computational
+results from `scikit-fem`, e.g., @mcbain2018, @gustafsson2019, and
 @gustafsson2020.  In addition, `scikit-fem` is used in a recently published
 Python package for battery modelling [@pybamm].
 
-![(Top left.) A combination of triangular and quadrilateral elements is used to solve the linear elastic contact problem. (Top right.) The lowest order tetrahedral Nédélec element is used to solve a $H(\mathrm{curl})$-conforming model problem. (Bottom.) The Taylor–Hood element is used to solve the Navier–Stokes flow over a backward-facing step for different Reynolds numbers.\label{fig:examples}](examples.png)
+![(Top left.) A combination of triangular and quadrilateral elements is used to solve the linear elastic contact problem. (Top right.) The lowest order tetrahedral Nédélec element is used to solve the $H(\mathrm{curl})$-conforming model problem $\nabla \times \nabla \times E + E = f$. (Bottom.) The Taylor–Hood element is used to solve the Navier–Stokes flow over a backward-facing step for different Reynolds numbers.\label{fig:examples}](examples.png)
 
 # Acknowledgements
 
