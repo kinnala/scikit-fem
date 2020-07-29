@@ -46,7 +46,7 @@ can be verified by using the Python debugger:
 Now saving the above snippet as ``test.py`` and running it via ``python -i
 test.py`` allows experimenting with the form:
 
-.. code-block::
+.. code-block:: none
 
    tom@tunkki:~/src/scikit-fem$ python -i test.py
    >>> asm(integrand, InteriorBasis(MeshTri(), ElementTriP1()))
@@ -81,7 +81,7 @@ so that expressions such as ``u * v`` work as expected).
 
 Notice how the shape of ``u[0]`` is what we expect also from the return value:
 
-.. code-block::
+.. code-block:: none
 
    tom@tunkki:~/src/scikit-fem$ python -i test.py
    >>> asm(integrand, InteriorBasis(MeshTri(), ElementTriP1()))
@@ -154,7 +154,7 @@ solution to :func:`skfem.assembly.asm` as a keyword argument:
 In the form definition, ``w`` is actually a dictionary with
 the user provided arguments and additional precomputed keys:
 
-.. code-block::
+.. code-block:: none
 
    tom@tunkki:~/src/scikit-fem$ python -i test.py
    >>> asm(integrand, InteriorBasis(MeshTri(), ElementTriP1()))
