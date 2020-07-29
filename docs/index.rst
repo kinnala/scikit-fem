@@ -17,7 +17,7 @@ hexahedral meshes as well as one-dimensional problems.
 
         pip install scikit-fem
 
-    Full examples can be found `in the source code distribution <https://github.com/kinnala/scikit-fem/tree/master/docs/examples>`_.
+    Examples can be found in the `gallery <listofexamples.html>`_.
 
 Table of contents
 =================
@@ -28,5 +28,5 @@ Table of contents
    overview
    forms
    bcs
-   api
    listofexamples
+   api
