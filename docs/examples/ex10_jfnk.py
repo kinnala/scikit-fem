@@ -27,13 +27,14 @@ D = m.boundary_nodes()
 x[D] = np.sin(np.pi * m.p[0, D]) 
 
 def residual(u: np.ndarray) -> np.ndarray:
-    res = asm(rhs, basis, w=basis.interpolate(u))
-    res[D] = 0.
-    return res
+    u_full = np.empty_like(x)
+    u_full[I] = u
+    u_full[D] = x[D]
 
-sol = root(residual, x, method='krylov', options={'disp': True})
-print(sol)
-x = sol.x 
+    return asm(rhs, basis, w=basis.interpolate(u_full))[I]
+
+sol = root(residual, x[I], method='krylov', options={'disp': True})
+x[I] = sol.x 
 
 
 if __name__ == "__main__":
