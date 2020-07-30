@@ -52,5 +52,4 @@ they have a GPL-licensed dependency and, therefore, are also GPL-licensed.
 > along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 The contents of `skfem/` are distributed via Python Package Index as the package
-`scikit-fem`.  This distribution contains only source code with BSD (or a
-compatible) license.
+`scikit-fem`.  This distribution contains only BSD-licensed source code.
