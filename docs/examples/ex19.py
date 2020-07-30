@@ -21,7 +21,7 @@ cosine in each direction,
         \frac{2n_0 + 1}{w_0^2} + \frac{2n_1 + 1}{w_1^2}
       \right)
     \right\}
-    \cos\frac{\pi x}{2w_0}\cos\frac{\pi y}{2w_1}   
+    \cos\frac{\pi x}{2w_0}\cos\frac{\pi y}{2w_1}
 for :math:`n_0, n_1 = 0, 1, 2, \ldots`.
 
 Here we simulate the decay of the fundamental, :math:`n_0 = n_1 = 0`,
@@ -69,8 +69,8 @@ B = M - (1 - theta) * L * dt
 boundary = basis.find_dofs()
 interior = basis.complement_dofs(boundary)
 
-backsolve = splu(condense(A, D=boundary, expand=False).T  # splu prefers CSC
-            ).solve
+# transpose as splu prefers CSC
+backsolve = splu(condense(A, D=boundary, expand=False).T).solve
 
 u_init = (np.cos(np.pi * mesh.p[0, :] / 2 / halfwidth[0])
           * np.cos(np.pi * mesh.p[1, :] / 2 / halfwidth[1]))
