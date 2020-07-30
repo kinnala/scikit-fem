@@ -1,4 +1,8 @@
-The main source code of scikit-fem is distributed with the following license.
+This document describes the licensing of Python source code in the [scikit-fem
+Github repository](https://github.com/kinnala/scikit-fem).
+
+The following license applies to all source code unless otherwise mentioned
+later in this document or at the beginning of the respective files.
 
 > Copyright 2018-2020 scikit-fem developers
 > 
@@ -27,29 +31,25 @@ The main source code of scikit-fem is distributed with the following license.
 > LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 > OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-The above license applies to all files not included in the following list of
-exceptions.
+Some examples under `docs/examples/` are licensed differently.  In particular,
+they have a GPL-licensed dependency and, therefore, are also GPL-licensed.
 
-- skfem/zoo/tet_tensor.py
+- docs/examples/ex{04,12,13,17,20,24,26,27,28,32,35}.py
 
-> Copyright (c) 2016-2018 Nico Schlömer
+> Copyright 2018-2020 scikit-fem developers
 > 
-> Permission is hereby granted, free of charge, to any person obtaining
-> a copy of this software and associated documentation files (the
-> "Software"), to deal in the Software without restriction, including
-> without limitation the rights to use, copy, modify, merge, publish,
-> distribute, sublicense, and/or sell copies of the Software, and to
-> permit persons to whom the Software is furnished to do so, subject to
-> the following conditions:
+> This program is free software: you can redistribute it and/or modify
+> it under the terms of the GNU General Public License as published by
+> the Free Software Foundation, either version 3 of the License, or
+> (at your option) any later version.
 > 
-> The above copyright notice and this permission notice shall be
-> included in all copies or substantial portions of the Software.
+> This program is distributed in the hope that it will be useful,
+> but WITHOUT ANY WARRANTY; without even the implied warranty of
+> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> GNU General Public License for more details.
 > 
-> THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-> EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-> MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-> NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
-> BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
-> ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-> CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-> THE SOFTWARE.
+> You should have received a copy of the GNU General Public License
+> along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+The contents of `skfem/` are distributed via Python Package Index as the package
+`scikit-fem`.  This distribution contains only BSD-licensed source code.

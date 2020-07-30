@@ -113,16 +113,65 @@ class MeshTet(Mesh3D):
 
         Parameters
         ----------
-        x
+        x : numpy array (1d)
             The nodal coordinates in dimension x
-        y
+        y : numpy array (1d)
             The nodal coordinates in dimension y
-        z
+        z : numpy array (1d)
             The nodal coordinates in dimension z
 
         """
-        from skfem.zoo.tet_tensor import build
-        return cls(*build(x, y, z))
+        npx = len(x)
+        npy = len(y)
+        npz = len(z)
+        X, Y, Z = np.meshgrid(np.sort(x), np.sort(y), np.sort(z))
+        p = np.vstack((X.flatten('F'), Y.flatten('F'), Z.flatten('F')))
+        ix = np.arange(npx * npy * npz)
+        ne = (npx - 1) * (npy - 1) * (npz - 1)
+        t = np.zeros((8, ne))
+        ix = ix.reshape(npy, npx, npz, order='F').copy()
+        t[0] = (ix[0:(npy - 1), 0:(npx - 1), 0:(npz - 1)]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[1] = (ix[1:npy, 0:(npx - 1), 0:(npz - 1)]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[2] = (ix[0:(npy - 1), 1:npx, 0:(npz - 1)]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[3] = (ix[0:(npy - 1), 0:(npx - 1), 1:npz]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[4] = (ix[1:npy, 1:npx, 0:(npz - 1)]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[5] = (ix[1:npy, 0:(npx - 1), 1:npz]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[6] = (ix[0:(npy - 1), 1:npx, 1:npz]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[7] = (ix[1:npy, 1:npx, 1:npz]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+
+        T = np.zeros((4, 0))
+        T = np.hstack((T, t[[0, 1, 5, 7]]))
+        T = np.hstack((T, t[[0, 1, 4, 7]]))
+        T = np.hstack((T, t[[0, 2, 4, 7]]))
+        T = np.hstack((T, t[[0, 3, 5, 7]]))
+        T = np.hstack((T, t[[0, 2, 6, 7]]))
+        T = np.hstack((T, t[[0, 3, 6, 7]]))
+
+        return cls(p, T.astype(np.int64))
 
     def _build_mappings(self):
         """Build element-to-facet, element-to-edges, etc. mappings."""
