@@ -90,18 +90,6 @@ class MeshHex(Mesh3D):
             t = np.array([[0, 1, 2, 3, 4, 5, 6, 7]]).T
         elif p is None or t is None:
             raise Exception("Must provide p AND t or neither")
-        #
-        # TODO fix orientation if p and t is provided. refer to
-        # the default mesh for correct orientation
-        #
-        #   2---6
-        #  /   /|
-        # 4---7 3
-        # |   |/
-        # 1---5
-        #
-        # The hidden node is 0.
-        #
         self.p = p
         self.t = t
         self.boundaries = boundaries
@@ -142,38 +130,38 @@ class MeshHex(Mesh3D):
         ne = (npx - 1) * (npy - 1) * (npz - 1)
         t = np.zeros((8, ne))
         ix = ix.reshape(npy, npx, npz, order='F').copy()
-        t[0, :] = (ix[0:(npy - 1), 0:(npx - 1), 0:(npz - 1)]
-                   .reshape(ne, 1, order='F')
-                   .copy()
-                   .flatten())
-        t[1, :] = (ix[1:npy, 0:(npx - 1), 0:(npz - 1)]
-                   .reshape(ne, 1, order='F')
-                   .copy()
-                   .flatten())
-        t[2, :] = (ix[0:(npy - 1), 1:npx, 0:(npz - 1)]
-                   .reshape(ne, 1, order='F')
-                   .copy()
-                   .flatten())
-        t[3, :] = (ix[0:(npy - 1), 0:(npx - 1), 1:npz]
-                   .reshape(ne, 1, order='F')
-                   .copy()
-                   .flatten())
-        t[4, :] = (ix[1:npy, 1:npx, 0:(npz - 1)]
-                   .reshape(ne, 1, order='F')
-                   .copy()
-                   .flatten())
-        t[5, :] = (ix[1:npy, 0:(npx - 1), 1:npz]
-                   .reshape(ne, 1, order='F')
-                   .copy()
-                   .flatten())
-        t[6, :] = (ix[0:(npy - 1), 1:npx, 1:npz]
-                   .reshape(ne, 1, order='F')
-                   .copy()
-                   .flatten())
-        t[7, :] = (ix[1:npy, 1:npx, 1:npz]
-                   .reshape(ne, 1, order='F')
-                   .copy()
-                   .flatten())
+        t[0] = (ix[0:(npy - 1), 0:(npx - 1), 0:(npz - 1)]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[1] = (ix[1:npy, 0:(npx - 1), 0:(npz - 1)]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[2] = (ix[0:(npy - 1), 1:npx, 0:(npz - 1)]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[3] = (ix[0:(npy - 1), 0:(npx - 1), 1:npz]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[4] = (ix[1:npy, 1:npx, 0:(npz - 1)]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[5] = (ix[1:npy, 0:(npx - 1), 1:npz]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[6] = (ix[0:(npy - 1), 1:npx, 1:npz]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[7] = (ix[1:npy, 1:npx, 1:npz]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
         return cls(p, t.astype(np.int64))
 
     def _build_mappings(self):
