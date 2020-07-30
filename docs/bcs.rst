@@ -251,7 +251,7 @@ onto the finite element space :math:`V_h` by solving for the function
 and which is zero in all DOF's inside the domain.
 In the following snippet we solve explicitly the above variational problem:
 
-.. code-block::
+.. code-block:: python
 
    >>> from skfem import *
    >>> m = MeshQuad()
@@ -269,7 +269,7 @@ In the following snippet we solve explicitly the above variational problem:
 Alternatively, you can use :func:`skfem.utils.project` which does exactly the
 same thing:
 
-.. code-block::
+.. code-block:: python
 
    >>> project(u_0, basis_to=basis, I=basis.get_dofs(), expand=True)
    array([ 2.87802132e-16,  1.62145397e-16,  1.00000000e+00,  1.66533454e-16,
