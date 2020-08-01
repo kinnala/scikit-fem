@@ -70,7 +70,7 @@ should be implemented by the user although we provide basic tools such as
 interpolation routines and conforming mesh refinement, and examples on using
 them.  The same applies to boundary conditions: the linear system $(A, b)$ is
 provided as such and eliminating or penalizing the correct degrees-of-freedom,
-implementing nonhomogeneous or periodic boundary conditions should be done
+implementing inhomogeneous or periodic boundary conditions should be done
 separately either by using the various helper routines of `scikit-fem` or by
 other means.  `scikit-fem` has no explicit support for distributed computing
 although it could be a building block in parallel computations such as parameter
