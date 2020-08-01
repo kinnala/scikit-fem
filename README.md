@@ -104,6 +104,12 @@ demonstrate the use of other external packages; see our [CI job
 definition](https://github.com/kinnala/scikit-fem/blob/master/.travis.yml) for a
 full list of test dependencies.
 
+## Licensing
+
+The contents of `skfem/` and the PyPI package `scikit-fem` are licensed under
+the 3-clause BSD license.  Some examples under `docs/examples/` have a different
+license, see `LICENSE.md` for more information.
+
 ## Acknowledgements
 
 This project was started while working under a grant from the [Finnish Cultural Foundation](https://skr.fi/). The approach used in the finite element assembly has been inspired by the [work of A. Hannukainen and M. Juntunen](https://au.mathworks.com/matlabcentral/fileexchange/36108-hjfem_lite).

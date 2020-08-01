@@ -15,8 +15,8 @@ operator :math:`-\Delta` is
 
    a(u, v) = \int_\Omega \nabla u \cdot \nabla v \,\mathrm{d}x.
 
-In order to express this in scikit-fem we pick the integrand and write it as a
-Python function:
+In order to express this in scikit-fem, we write the integrand as a Python
+function:
 
 .. code-block:: python
 
@@ -30,8 +30,8 @@ Python function:
 Forms return NumPy arrays
 =========================
 
-The form definition should always return a two-dimensional NumPy array.  This
-can be verified by using the Python debugger:
+The form definition always returns a two-dimensional NumPy array.  This can be
+verified using the Python debugger:
 
 .. code-block:: python
 
@@ -43,10 +43,10 @@ can be verified by using the Python debugger:
        import pdb; pdb.set_trace()  # breakpoint
        return dot(grad(u), grad(v))
 
-Now saving the above snippet as ``test.py`` and running it via ``python -i
-test.py`` allows experimenting with the form:
+Saving the above snippet as ``test.py`` and running it via ``python -i test.py``
+allows experimenting:
 
-.. code-block::
+.. code-block:: none
 
    tom@tunkki:~/src/scikit-fem$ python -i test.py
    >>> asm(integrand, InteriorBasis(MeshTri(), ElementTriP1()))
@@ -56,10 +56,9 @@ test.py`` allows experimenting with the form:
    array([[2., 2., 2.],
           [1., 1., 1.]])
 
-Notice how ``dot(grad(u), grad(v))`` evaluates to a NumPy array with the shape
-`number of elements` x `number of quadrature points per element`.  The return
-value should always have such shape no matter which mesh or element type is
-used.
+Notice how ``dot(grad(u), grad(v))`` is a NumPy array with the shape `number of
+elements` x `number of quadrature points per element`.  The return value should
+always have such shape no matter which mesh or element type is used.
 
 Helpers are useful but not necessary
 ====================================
@@ -81,7 +80,7 @@ so that expressions such as ``u * v`` work as expected).
 
 Notice how the shape of ``u[0]`` is what we expect also from the return value:
 
-.. code-block::
+.. code-block:: none
 
    tom@tunkki:~/src/scikit-fem$ python -i test.py
    >>> asm(integrand, InteriorBasis(MeshTri(), ElementTriP1()))
@@ -97,14 +96,13 @@ Use of predefined functions in the forms
 
 It is sometimes necessary to use a previous solution vector in the form
 definition, e.g., when solving nonlinear problems.
-A simple fixed-point iteration for solving the nonlinear boundary
-value problem
+A simple fixed-point iteration for
 
 .. math::
 
    \begin{aligned}
-      -\nabla \cdot ((u + 1)\nabla u) &= 1 \quad \text{in $\Omega$} \\
-      u &= 0 \quad \text{on $\partial \Omega$}
+      -\nabla \cdot ((u + 1)\nabla u) &= 1 \quad \text{in $\Omega$}, \\
+      u &= 0 \quad \text{on $\partial \Omega$},
    \end{aligned}
 
 would correspond to repeatedly
@@ -126,8 +124,8 @@ Defining such forms requires the use of the argument ``w``:
    ... def bilinf(u, v, w):
    ...     return (w.u_k + 1.) * dot(grad(u), grad(v))
 
-When performing the fixed point iteration, we provide a previous
-solution to :func:`skfem.assembly.asm` as a keyword argument:
+The previous solution :math:`u_k` is provided to :func:`skfem.assembly.asm` as a
+keyword argument:
 
 .. code-block:: python
 
@@ -151,10 +149,10 @@ solution to :func:`skfem.assembly.asm` as a keyword argument:
    0.07035942044776916
    0.07035942044776922
 
-In the form definition, ``w`` is actually a dictionary with
-the user provided arguments and additional precomputed keys:
+Inside ``bilinf``, ``w`` is actually a dictionary of user provided arguments and
+additional default keys:
 
-.. code-block::
+.. code-block:: none
 
    tom@tunkki:~/src/scikit-fem$ python -i test.py
    >>> asm(integrand, InteriorBasis(MeshTri(), ElementTriP1()))
@@ -163,5 +161,5 @@ the user provided arguments and additional precomputed keys:
    (Pdb) !w.keys()
    dict_keys(['x', 'h'])
 
-By default, ``w.x`` corresponds to the global coordinates and ``w.h``
-corresponds to the local mesh parameter.
+By default, ``w['x']`` (or ``w.x``) corresponds to the global coordinates and
+``w['h']`` (or ``w.h``) corresponds to the local mesh parameter.
