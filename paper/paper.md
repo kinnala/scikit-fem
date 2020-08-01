@@ -73,8 +73,8 @@ provided as such and eliminating or penalizing the correct degrees-of-freedom,
 implementing inhomogeneous or periodic boundary conditions should be done
 separately either by using the various helper routines of `scikit-fem` or by
 other means.  `scikit-fem` has no explicit support for distributed computing
-although it could be a building block in parallel computations such as parameter
-sweeps or domain decomposition techniques.
+although it could be used as a building block in parallel computations such as
+parameter sweeps or domain decomposition techniques.
 
 # Examples and enabled work
 
