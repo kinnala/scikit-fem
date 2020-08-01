@@ -60,18 +60,21 @@ PDEs and, hence, support a variety of finite element schemes.  Currently
 $H(\mathrm{curl})$-, and $H^2$-conforming problems as well as various
 nonconforming schemes.
 
-We support weak forms that depend on the values and the derivatives of the trial
-and the test functions, high-order derivatives, local mesh parameter, nonuniform
-material fields, and existing finite element solutions.  Iterations related to,
-e.g., nonlinear problems (Newton's method and the variants, parameter
-continuation) or adaptive mesh refinement (evaluation of functionals, the
-marking strategy) should be implemented by the user although we aim to provide
-all the necessary tools and examples on using them, e.g., interpolation routines
-and mesh refinement.  The same applies to boundary conditions: the linear system
-$(A, b)$ is provided as such and eliminating or penalizing the correct
-degrees-of-freedom, implementing nonhomogeneous or periodic boundary conditions
-should be done after assembly either by the various helper routines of
-`scikit-fem` or by other means.
+`scikit-fem` accepts weak forms that depend on the values and the derivatives of
+the trial and the test functions, their high-order derivatives, the local mesh
+parameter, nonuniform material or coefficient fields defined at the quadrature
+points, or any existing finite element solutions.  Iterations related to, e.g.,
+nonlinear problems (Newton's method and the variants, parameter continuation) or
+adaptive mesh refinement (evaluation of functionals and the marking strategy)
+should be implemented by the user although we provide basic tools such as
+interpolation routines and conforming mesh refinement, and examples on using
+them.  The same applies to boundary conditions: the linear system $(A, b)$ is
+provided as such and eliminating or penalizing the correct degrees-of-freedom,
+implementing nonhomogeneous or periodic boundary conditions should be done
+separately either by using the various helper routines of `scikit-fem` or by
+other means.  `scikit-fem` has no explicit support for distributed computing
+although it could be a building block in parallel computations such as parameter
+sweeps or domain decomposition techniques.
 
 # Examples and enabled work
 
