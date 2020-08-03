@@ -69,14 +69,11 @@ def update(u: np.ndarray,
 
         print('Updating Jacobian preconditioner.')
 
-        u_full = np.empty_like(x)
-        u_full[I] = u
-        u_full[D] = x[D]
+        x[I] = u
 
-        J = asm(jacobian, basis, w=basis.interpolate(u_full))
+        J = asm(jacobian, basis, w=basis.interpolate(x))
         JI = condense(J, D=D, expand=False).tocsc()
-        JI_ilu = spilu(JI)
-        M.matvec = JI_ilu.solve
+        M = build_pc_ilu(JI)
 
     i[0] += 1
 
