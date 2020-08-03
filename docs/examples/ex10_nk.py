@@ -47,41 +47,33 @@ x = np.zeros(basis.N)
 I = m.interior_nodes()
 D = m.boundary_nodes()
 x[D] = np.sin(np.pi * m.p[0, D])
-
-
-def residual(u: np.ndarray) -> np.ndarray:
-    u_full = np.empty_like(x)
-    u_full[I] = u
-    u_full[D] = x[D]
-
-    return asm(rhs, basis, w=basis.interpolate(u_full))[I]
-
-
 M = LinearOperator([len(I)]*2, matvec=lambda u: u)
 
 
+def residual(u: np.ndarray) -> np.ndarray:
+    x[I] = u
+    return asm(rhs, basis, w=basis.interpolate(x))[I]
+
+    
 def update(u: np.ndarray,
            _: Optional[np.ndarray] = None,
-           i: List[int] = [0],
+           updates: List[int] = [0],
            period: int = np.inf) -> None:
 
-    if i[0] % period == 0:
-
+    if updates[0] % period == 0:
         print('Updating Jacobian preconditioner.')
-
         x[I] = u
-
         J = asm(jacobian, basis, w=basis.interpolate(x))
         JI = condense(J, D=D, expand=False).tocsc()
-        M = build_pc_ilu(JI)
+        M.matvec = spilu(JI).solve
 
-    i[0] += 1
+    updates[0] += 1
 
 
 M.update = update
 M.update(x[I])
 
-sol = root(residual, x[I], method='krylov', tol=1e-9,
+sol = root(residual, x[I], method='krylov',
            options={'disp': True,
                     'jac_options': {
                         'inner_M': M}})
