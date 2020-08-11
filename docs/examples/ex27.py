@@ -1,10 +1,10 @@
 r"""Backward-facing step.
 
 .. warning::
-   This example requires the external packages `pygmsh <https://pypi.org/project/pygmsh/>`_ and `pacopy 0.1.2 <https://pypi.org/project/pacopy/0.1.2/>`_.
+   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_.
 
 
-In this example, `pacopy 0.1.2 <https://pypi.org/project/pacopy/0.1.2/>`_ is used to extend
+In this example, natural parameter continuation is used to extend
 the Stokes equations over a backward-facing step to finite Reynolds
 number; this means defining a residual for the nonlinear problem and its
 derivatives with respect to the solution and to the parameter (here Reynolds
@@ -81,7 +81,181 @@ from scipy.sparse import bmat, block_diag, csr_matrix
 from pygmsh import generate_mesh
 from pygmsh.built_in import Geometry
 
-from pacopy import natural
+class NewtonConvergenceError(Exception):
+    """
+
+    Copied from pacopy 0.1.2, copyright N. Schlömer & G. D. McBain 2020 under
+    the MIT Licence.
+
+    https://raw.githubusercontent.com/nschloe/pacopy/v0.1.2/pacopy/natural.py
+
+    """
+    pass
+
+
+def newton(f, jacobian_solver, norm2, u0, tol=1.0e-10, max_iter=20, verbose=True):
+    """return a root of f near u0
+    
+    Copied from pacopy 0.1.2, copyright N. Schlömer & G. D. McBain 2020 under
+    the MIT Licence.
+
+    https://raw.githubusercontent.com/nschloe/pacopy/v0.1.2/pacopy/natural.py
+
+    """
+    
+    u = u0
+
+    fu = f(u)
+    nrm = np.sqrt(norm2(fu))
+    if verbose:
+        print(f"||F(u)|| = {nrm:e}")
+
+    k = 0
+    while k < max_iter:
+        if nrm < tol:
+            break
+        du = jacobian_solver(u, -fu)
+        u += du
+        fu = f(u)
+        nrm = np.sqrt(norm2(fu))
+        k += 1
+        if verbose:
+            print(f"||F(u)|| = {nrm:e}")
+
+    is_converged = nrm < tol
+
+    if not is_converged:
+        raise NewtonConvergenceError(
+            f"Newton's method didn't converge after {k} steps."
+        )
+
+    return u, k
+
+
+
+def natural(
+    problem,
+    u0,
+    lambda0,
+    callback,
+    lambda_stepsize0=1.0e-1,
+    lambda_stepsize_max=float("inf"),
+    lambda_stepsize_aggressiveness=2,
+    max_newton_steps=5,
+    newton_tol=1.0e-12,
+    max_steps=float("inf"),
+    verbose=True,
+    use_first_order_predictor=True,
+    milestones=None,
+):
+    """Natural parameter continuation.
+
+    The most naive parameter continuation. This simply solves :math:`F(u, \\lambda_0)=0`
+    using Newton's method, then changes :math:`\\lambda` slightly and solves again using
+    the previous solution as an initial guess. Cannot handle turning points.
+
+    Copied from pacopy 0.1.2, copyright N. Schlömer & G. D. McBain 2020 under
+    the MIT Licence.
+
+    https://raw.githubusercontent.com/nschloe/pacopy/v0.1.2/pacopy/natural.py
+
+    Args:
+        problem: Instance of the problem class
+        u0: Initial guess
+        lambda0: Initial parameter value
+        callback: Callback function
+        lambda_stepsize0 (float): Initial step size
+        lambda_stepsize_aggressiveness (float): The step size is adapted after each step
+            such that :code:`max_newton_steps` is exhausted approximately. This parameter
+            determines how aggressively the the step size is increased if too few Newton
+            steps were used.
+        lambda_stepsize_max (float): Maximum step size
+        max_newton_steps (int): Maxmimum number of Newton steps
+        newton_tol (float): Newton tolerance
+        max_steps (int): Maximum number of continuation steps
+        verbose (bool): Verbose output
+        use_first_order_predictor (bool): Once a solution has been found, one can use it
+            to bootstrap the Newton process for the next iteration (order 0). Another
+            possibility is to use :math:`u - s J^{-1}(u, \\lambda)
+            \\frac{df}{d\\lambda}`, a first-order approximation.
+        milestones (Optional[Iterable[float]]): Don't step over these values.
+    """
+    lmbda = lambda0
+    if milestones is not None:
+        milestones = iter(milestones)
+
+    k = 0
+    try:
+        u, _ = newton(
+            lambda u: problem.f(u, lmbda),
+            lambda u, rhs: problem.jacobian_solver(u, lmbda, rhs),
+            problem.norm2_r,
+            u0,
+            tol=newton_tol,
+            max_iter=max_newton_steps,
+        )
+    except NewtonConvergenceError as e:
+        print("No convergence for initial step.")
+        raise e
+
+    callback(k, lmbda, u)
+    k += 1
+
+    lambda_stepsize = lambda_stepsize0
+    if milestones is not None:
+        milestone = next(milestones)
+
+    while True:
+        if k > max_steps:
+            break
+
+        if verbose:
+            print(
+                f"Step {k}: lambda  {lmbda:.3e} + {lambda_stepsize:.3e}  "
+                f"->  {lmbda + lambda_stepsize:.3e}"
+            )
+
+        # Predictor
+        lmbda += lambda_stepsize
+        if milestones:
+            lmbda = min(lmbda, milestone)
+        if use_first_order_predictor:
+            du_dlmbda = problem.jacobian_solver(u, lmbda, -problem.df_dlmbda(u, lmbda))
+            u0 = u + du_dlmbda * lambda_stepsize
+        else:
+            u0 = u
+
+        # Corrector
+        try:
+            u, newton_steps = newton(
+                lambda u: problem.f(u, lmbda),
+                lambda u, rhs: problem.jacobian_solver(u, lmbda, rhs),
+                problem.norm2_r,
+                u0,
+                tol=newton_tol,
+                max_iter=max_newton_steps,
+            )
+        except NewtonConvergenceError:
+            if verbose:
+                print(f"No convergence for lambda={lmbda}.")
+            lmbda -= lambda_stepsize
+            lambda_stepsize /= 2
+            continue
+
+        callback(k, lmbda, u)
+        k += 1
+        if milestones is not None and lmbda == milestone:
+            try:
+                milestone = next(milestones)
+            except StopIteration:
+                break
+        else:
+            lambda_stepsize *= (
+                1
+                + lambda_stepsize_aggressiveness
+                * ((max_newton_steps - newton_steps) / (max_newton_steps - 1)) ** 2
+            )
+            lambda_stepsize = min(lambda_stepsize, lambda_stepsize_max)
 
 
 @LinearForm
