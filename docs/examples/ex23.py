@@ -16,7 +16,7 @@ For treatment by numerical continuation, we define the residual
     F(u, \lambda) = -u'' - \lambda \mathrm e^u
 .. literalinclude:: ex23.py
     :start-at: def f
-    :lines: 1-5	       
+    :lines: 1-5
 
 its derivative with respect to the parameter
 
@@ -24,7 +24,7 @@ its derivative with respect to the parameter
    \frac{\partial F}{\partial\lambda} = -\mathrm e^u
 .. literalinclude:: ex23.py
     :start-at: def df_dlmbda
-    :lines: 1-8	       
+    :lines: 1-8
 
 and the Jacobian
 
@@ -32,7 +32,7 @@ and the Jacobian
    J (u) = -\frac{\mathrm d^2}{\mathrm dx^2} - \lambda \mathrm e^u
 .. literalinclude:: ex23.py
     :start-at: def jacobian_solver
-    :lines: 1-11	       
+    :lines: 1-11
 
 The resulting bifurcation diagram, matches figure 1.1 (left) of Farrell, Birkisson, & Funke (2015).
 
