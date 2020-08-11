@@ -76,6 +76,7 @@ from typing import Tuple, Iterable
 from matplotlib.pyplot import subplots
 from matplotlib.tri import Triangulation
 import numpy as np
+from scipy.optimize import OptimizeResult
 from scipy.sparse import bmat, block_diag, csr_matrix
 
 from pygmsh import generate_mesh
@@ -93,43 +94,43 @@ class NewtonConvergenceError(Exception):
     pass
 
 
-def newton(f, jacobian_solver, norm2, u0, tol=1.0e-10, max_iter=20, verbose=True):
-    """return a root of f near u0
+# def newton(f, jacobian_solver, norm2, u0, tol=1.0e-10, max_iter=20, verbose=True):
+#     """return a root of f near u0
     
-    Copied from pacopy 0.1.2, copyright N. Schlömer & G. D. McBain 2020 under
-    the MIT Licence.
+#     Copied from pacopy 0.1.2, copyright N. Schlömer & G. D. McBain 2020 under
+#     the MIT Licence.
 
-    https://raw.githubusercontent.com/nschloe/pacopy/v0.1.2/pacopy/natural.py
+#     https://raw.githubusercontent.com/nschloe/pacopy/v0.1.2/pacopy/natural.py
 
-    """
+#     """
     
-    u = u0
+#     u = u0
 
-    fu = f(u)
-    nrm = np.sqrt(norm2(fu))
-    if verbose:
-        print(f"||F(u)|| = {nrm:e}")
+#     fu = f(u)
+#     nrm = np.sqrt(norm2(fu))
+#     if verbose:
+#         print(f"||F(u)|| = {nrm:e}")
 
-    k = 0
-    while k < max_iter:
-        if nrm < tol:
-            break
-        du = jacobian_solver(u, -fu)
-        u += du
-        fu = f(u)
-        nrm = np.sqrt(norm2(fu))
-        k += 1
-        if verbose:
-            print(f"||F(u)|| = {nrm:e}")
+#     k = 0
+#     while k < max_iter:
+#         if nrm < tol:
+#             break
+#         du = jacobian_solver(u, -fu)
+#         u += du
+#         fu = f(u)
+#         nrm = np.sqrt(norm2(fu))
+#         k += 1
+#         if verbose:
+#             print(f"||F(u)|| = {nrm:e}")
 
-    is_converged = nrm < tol
+#     is_converged = nrm < tol
 
-    if not is_converged:
-        raise NewtonConvergenceError(
-            f"Newton's method didn't converge after {k} steps."
-        )
+#     if not is_converged:
+#         raise NewtonConvergenceError(
+#             f"Newton's method didn't converge after {k} steps."
+#         )
 
-    return u, k
+#     return u, k
 
 
 
@@ -142,7 +143,7 @@ def natural(
     lambda_stepsize_max=float("inf"),
     lambda_stepsize_aggressiveness=2,
     max_newton_steps=5,
-    newton_tol=1.0e-12,
+    newton_tol=1e-9,
     max_steps=float("inf"),
     verbose=True,
     use_first_order_predictor=True,
@@ -185,18 +186,14 @@ def natural(
         milestones = iter(milestones)
 
     k = 0
-    try:
-        u, _ = newton(
-            lambda u: problem.f(u, lmbda),
-            lambda u, rhs: problem.jacobian_solver(u, lmbda, rhs),
-            problem.norm2_r,
-            u0,
-            tol=newton_tol,
-            max_iter=max_newton_steps,
-        )
-    except NewtonConvergenceError as e:
+    sol = problem.solve(u0,
+                        lmbda,
+                        tol=newton_tol,
+                        max_iter=max_newton_steps)
+    if sol.nit >= max_newton_steps:
         print("No convergence for initial step.")
-        raise e
+        raise NewtonConvergenceError
+    u = sol.x
 
     callback(k, lmbda, u)
     k += 1
@@ -226,21 +223,14 @@ def natural(
             u0 = u
 
         # Corrector
-        try:
-            u, newton_steps = newton(
-                lambda u: problem.f(u, lmbda),
-                lambda u, rhs: problem.jacobian_solver(u, lmbda, rhs),
-                problem.norm2_r,
-                u0,
-                tol=newton_tol,
-                max_iter=max_newton_steps,
-            )
-        except NewtonConvergenceError:
+        sol = problem.solve(u0, lmbda, tol=newton_tol, max_iter=max_newton_steps)
+        if sol.nit >= max_newton_steps:
             if verbose:
                 print(f"No convergence for lambda={lmbda}.")
             lmbda -= lambda_stepsize
             lambda_stepsize /= 2
             continue
+        u = sol.x
 
         callback(k, lmbda, u)
         k += 1
@@ -253,7 +243,7 @@ def natural(
             lambda_stepsize *= (
                 1
                 + lambda_stepsize_aggressiveness
-                * ((max_newton_steps - newton_steps) / (max_newton_steps - 1)) ** 2
+                * ((max_newton_steps - sol.nit) / (max_newton_steps - 1)) ** 2
             )
             lambda_stepsize = min(lambda_stepsize, lambda_stepsize_max)
 
@@ -436,6 +426,48 @@ class BackwardFacingStep:
         out[self.D] = uvp[self.D] - self.make_vector()[self.D]
         return out
 
+    def solve(self,
+              uvp: np.ndarray,
+              reynolds: float,
+              tol: float,
+              max_iter: int) -> OptimizeResult:
+        """return the solution at the given Reynolds number
+
+        Based on newton from pacopy 0.1.2 (copyright nschloe, gmcbain;
+        MIT Licence).
+
+        """
+
+        u = uvp
+        fu = self.f(u, reynolds)
+        nfev = 1
+        nrm = np.sqrt(self.norm2_r(fu))
+        print(f"||F(u)|| = {nrm:e}")
+        
+        njev = k = 0
+        while k < max_iter:
+            if nrm < tol:
+                return OptimizeResult(x=u, 
+                                      success=True,
+                                      nfev=nfev,
+                                      njev=njev,
+                                      nit=k)
+            du = self.jacobian_solver(u, reynolds, -fu)
+            njev += 1
+            u += du
+            fu = self.f(u, reynolds)
+            nfev += 1
+            nrm = np.sqrt(self.norm2_r(fu))
+            k += 1
+            print(f"||F(u)|| = {nrm:e}")
+        
+        return OptimizeResult(x=u, 
+                              success=False, 
+                              message="Newton's method didn't converge.", 
+                              nit=k,
+                              nfev=nfev,
+                              njev=njev)
+        
     def df_dlmbda(self, uvp: np.ndarray, reynolds: float) -> np.ndarray:
         out = self.N(uvp)
         out[self.D] = 0.
