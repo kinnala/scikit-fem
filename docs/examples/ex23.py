@@ -2,9 +2,9 @@ r"""Bratu–Gelfand.
 
 .. note::
 
-   This example requires the external package `pacopy <https://github.com/nschloe/pacopy>`_
+   This example requires the external package `pacopy 0.1.2 <https://pypi.org/project/pacopy/0.1.2/>`_
 
-Here the bifurcation diagram for the Bratu–Gelfand two-point boundary value problem is reproduced by numerical continuation as implemented in pacopy, and adapted from the pacopy example `Bratu <https://github.com/nschloe/pacopy/blob/master/README.md#bratu>`_.
+Here the bifurcation diagram for the Bratu–Gelfand two-point boundary value problem is reproduced by numerical continuation as implemented in pacopy, and adapted from the pacopy example `Bratu <https://github.com/nschloe/pacopy/blob/v0.1.2/README.md#bratu>`_.
 
 .. math::
     u'' + \lambda \mathrm e^u = 0, \quad 0 < x < 1,

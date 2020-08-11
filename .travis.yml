@@ -23,7 +23,7 @@ install:
   - conda info -a
   - conda create -q -n scikit-fem python=$TRAVIS_PYTHON_VERSION nomkl numpy scipy matplotlib ipython pip
   - source activate scikit-fem
-  - pip install meshio dmsh pacopy pygmsh pyamg flake8
+  - pip install meshio dmsh pacopy==0.1.2 pygmsh pyamg flake8
 script:
   - flake8 skfem || travis_terminate 1;
   - python -m unittest discover

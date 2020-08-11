@@ -1,10 +1,10 @@
 r"""Backward-facing step.
 
 .. warning::
-   This example requires the external packages `pygmsh <https://pypi.org/project/pygmsh/>`_ and `pacopy <https://pypi.org/project/pacopy/>`_.
+   This example requires the external packages `pygmsh <https://pypi.org/project/pygmsh/>`_ and `pacopy 0.1.2 <https://pypi.org/project/pacopy/0.1.2/>`_.
 
 
-In this example, `pacopy <https://pypi.org/project/pacopy/>`_ is used to extend
+In this example, `pacopy 0.1.2 <https://pypi.org/project/pacopy/0.1.2/>`_ is used to extend
 the Stokes equations over a backward-facing step to finite Reynolds
 number; this means defining a residual for the nonlinear problem and its
 derivatives with respect to the solution and to the parameter (here Reynolds
