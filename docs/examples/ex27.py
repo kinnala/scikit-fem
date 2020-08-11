@@ -1,7 +1,7 @@
 r"""Backward-facing step.
 
 .. warning::
-   This example requires the external packages `pygmsh <https://pypi.org/project/pygmsh/>`_ and `pacopy 0.1.2 <https://pypi.org/project/pacopy/0.1.2/>`_.
+   This example requires the external package `pacopy 0.1.2 <https://pypi.org/project/pacopy/0.1.2/>`_.
 
 
 In this example, `pacopy 0.1.2 <https://pypi.org/project/pacopy/0.1.2/>`_ is used to extend
