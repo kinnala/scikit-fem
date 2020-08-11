@@ -7,5 +7,5 @@ sphinx
 meshio
 dmsh
 pygmsh
-pacopy
+pacopy==0.1.2
 sphinx_rtd_theme

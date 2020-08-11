@@ -1,10 +1,10 @@
 r"""Backward-facing step.
 
 .. warning::
-   This example requires the external packages `pygmsh <https://pypi.org/project/pygmsh/>`_ and `pacopy <https://pypi.org/project/pacopy/>`_.
+   This example requires the external package `pacopy 0.1.2 <https://pypi.org/project/pacopy/0.1.2/>`_.
 
 
-In this example, `pacopy <https://pypi.org/project/pacopy/>`_ is used to extend
+In this example, `pacopy 0.1.2 <https://pypi.org/project/pacopy/0.1.2/>`_ is used to extend
 the Stokes equations over a backward-facing step to finite Reynolds
 number; this means defining a residual for the nonlinear problem and its
 derivatives with respect to the solution and to the parameter (here Reynolds
@@ -43,30 +43,13 @@ The Jacobian of the last nonlinear term is
 .. math::
    -\mathrm{Re} \int_\Omega ((\nabla \delta \boldsymbol{u}) \boldsymbol{u} + (\nabla \boldsymbol{u}) \delta \boldsymbol{u}) \cdot \boldsymbol{v} \,\mathrm{d}x.
 
-License
--------
-
-Copyright 2018-2020 scikit-fem developers
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 """
+
 from skfem import *
 from skfem.helpers import grad, dot
 from skfem.models.poisson import vector_laplace, laplace
 from skfem.models.general import divergence, rot
-from skfem.io import from_meshio
+import skfem.io.json
 
 from functools import partial
 from itertools import cycle, islice
@@ -77,9 +60,6 @@ from matplotlib.pyplot import subplots
 from matplotlib.tri import Triangulation
 import numpy as np
 from scipy.sparse import bmat, block_diag, csr_matrix
-
-from pygmsh import generate_mesh
-from pygmsh.built_in import Geometry
 
 from pacopy import natural
 
@@ -125,16 +105,14 @@ class BackwardFacingStep:
                'p': ElementTriP1()}
 
     def __init__(self,
-                 length: float = 35.,
-                 lcar: float = 1.):
+                 length: float = 35.):
 
-        self.mesh = self.make_mesh(self.make_geom(length, lcar))
+        self.mesh = skfem.io.json.from_file(Path(__file__).with_suffix(".json"))
         self.basis = {variable: InteriorBasis(self.mesh, e, intorder=3)
                       for variable, e in self.element.items()}
         self.basis['inlet'] = FacetBasis(self.mesh, self.element['u'],
                                          facets=self.mesh.boundaries['inlet'])
         self.basis['psi'] = InteriorBasis(self.mesh, ElementTriP2())
-        del self.mesh.boundaries['outlet']
         self.D = np.concatenate([b.all() for b in self.basis['u'].find_dofs().values()])
 
         A = asm(vector_laplace, self.basis['u'])
@@ -142,40 +120,6 @@ class BackwardFacingStep:
         self.S = bmat([[A, -B.T],
                        [-B, None]], 'csr')
         self.I = np.setdiff1d(np.arange(self.S.shape[0]), self.D)
-
-    @staticmethod
-    def make_geom(length: float, lcar: float) -> Geometry:
-        # Barkley et al (2002, figure 3 a - c)
-        geom = Geometry()
-
-        points = []
-        for point in [[0, -1, 0],
-                      [length, -1, 0],
-                      [length, 1, 0],
-                      [-1, 1, 0],
-                      [-1, 0, 0],
-                      [0, 0, 0]]:
-            points.append(geom.add_point(point, lcar))
-
-        lines = []
-        for termini in zip(points,
-                           islice(cycle(points), 1, None)):
-            lines.append(geom.add_line(*termini))
-
-        for k, label in [([1], 'outlet'),
-                         ([2], 'ceiling'),
-                         ([3], 'inlet'),
-                         ([0, 4, 5], 'floor')]:
-            geom.add_physical(list(np.array(lines)[k]), label)
-
-        geom.add_physical(
-            geom.add_plane_surface(geom.add_line_loop(lines)), 'domain')
-
-        return geom
-
-    @staticmethod
-    def make_mesh(geom: Geometry) -> MeshTri:
-        return from_meshio(generate_mesh(geom, dim=2))
 
     def inlet_dofs(self):
         return self.basis['inlet'].find_dofs()['inlet'].all()
@@ -281,7 +225,7 @@ class BackwardFacingStep:
         return duvp
 
 
-bfs = BackwardFacingStep(lcar=.2)
+bfs = BackwardFacingStep()
 psi = {}
 
 

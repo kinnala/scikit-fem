@@ -30,7 +30,7 @@ x = np.zeros(basis.N)
 
 I = m.interior_nodes()
 D = m.boundary_nodes()
-x[D] = np.sin(np.pi * m.p[0, D]) 
+x[D] = np.sin(np.pi * m.p[0, D])
 
 for itr in range(100):
     w = basis.interpolate(x)
