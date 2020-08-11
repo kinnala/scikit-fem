@@ -381,7 +381,7 @@ number; this means defining a residual for the nonlinear problem and its
 derivatives with respect to the solution and to the Reynolds number.
 
 .. note::
-   This example requires the external packages `pygmsh <https://pypi.org/project/pygmsh/>`___ and `pacopy 0.1.2 <https://pypi.org/project/pacopy/0.1.2>`__.
+   This example requires the external package `pacopy 0.1.2 <https://pypi.org/project/pacopy/0.1.2>`__.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87858972-97c86400-c93a-11ea-86e4-66f870b03e48.png
 
