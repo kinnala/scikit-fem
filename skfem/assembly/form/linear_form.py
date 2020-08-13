@@ -43,30 +43,3 @@ class LinearForm(Form):
 
     def _kernel(self, v, w, dx):
         return np.sum(self.form(*v, w) * dx, axis=1)
-
-
-def linear_form(form: Callable) -> LinearForm:
-
-    # for backwards compatibility
-    from .form_parameters import FormParameters
-
-    import warnings
-    warnings.warn("The old style @linear_form wrapper is deprecated. "
-                  "Consider using the new style forms, defined via "
-                  "@LinearForm.", DeprecationWarning)
-
-    class ClassicLinearForm(LinearForm):
-
-        def _kernel(self, v, w, dx):
-            v = v[0]
-            W = {k: w[k].f for k in w}
-            if 'w' in w:
-                W['dw'] = w['w'].df
-            if v.ddf is not None:
-                return np.sum(self.form(v=v.f, dv=v.df, ddv=v.ddf,
-                                        w=FormParameters(**W)) * dx, axis=1)
-            else:
-                return np.sum(self.form(v=v.f, dv=v.df,
-                                        w=FormParameters(**W)) * dx, axis=1)
-
-    return ClassicLinearForm(form)

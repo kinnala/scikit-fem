@@ -74,33 +74,3 @@ class BilinearForm(Form):
 
     def _kernel(self, u, v, w, dx):
         return np.sum(self.form(*u, *v, w) * dx, axis=1)
-
-
-def bilinear_form(form: Callable) -> BilinearForm:
-
-    # for backwards compatibility
-    from .form_parameters import FormParameters
-
-    import warnings
-    warnings.warn("The old style @bilinear_form wrapper is deprecated. "
-                  "Consider using the new style forms, defined via "
-                  "@BilinearForm.", DeprecationWarning)
-
-    class ClassicBilinearForm(BilinearForm):
-
-        def _kernel(self, u, v, w, dx):
-            u = u[0]
-            v = v[0]
-            W = {k: w[k].f for k in w}
-            if 'w' in w:
-                W['dw'] = w['w'].df
-            if u.ddf is not None:
-                return np.sum(self.form(u=u.f, du=u.df, ddu=u.ddf,
-                                        v=v.f, dv=v.df, ddv=v.ddf,
-                                        w=FormParameters(**W)) * dx, axis=1)
-            else:
-                return np.sum(self.form(u=u.f, du=u.df,
-                                        v=v.f, dv=v.df,
-                                        w=FormParameters(**W)) * dx, axis=1)
-
-    return ClassicBilinearForm(form)
