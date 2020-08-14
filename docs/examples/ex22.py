@@ -14,6 +14,7 @@ for each edge :math:`E`.
 """
 from skfem import *
 from skfem.models.poisson import laplace
+from skfem.helpers import grad
 import numpy as np
 
 m = MeshTri.init_lshaped()
@@ -32,27 +33,28 @@ def eval_estimator(m, u):
     # interior residual
     basis = InteriorBasis(m, e)
     
-    @functional
+    @Functional
     def interior_residual(w):
         h = w.h
         x, y = w.x
-        return h**2 * load_func(x, y)**2
+        return h ** 2 * load_func(x, y) ** 2
 
     eta_K = interior_residual.elemental(basis, w=basis.interpolate(u))
     
     # facet jump
     fbasis = [FacetBasis(m, e, side=i) for i in [0, 1]]   
-    w = [fbasis[i].interpolate(u) for i in [0, 1]]
+    w = {'u' + str(i + 1): fbasis[i].interpolate(u) for i in [0, 1]}
     
-    @functional
+    @Functional
     def edge_jump(w):
         h = w.h
         n = w.n
-        du1, du2 = w.dw
-        return h * ((du1[0] - du2[0])*n[0] +\
-                    (du1[1] - du2[1])*n[1])**2
+        dw1 = grad(w['u1'])
+        dw2 = grad(w['u2'])
+        return h * ((dw1[0] - dw2[0]) * n[0] +\
+                    (dw1[1] - dw2[1]) * n[1]) ** 2
 
-    eta_E = edge_jump.elemental(fbasis[0], w=w)
+    eta_E = edge_jump.elemental(fbasis[0], **w)
     
     tmp = np.zeros(m.facets.shape[1])
     np.add.at(tmp, fbasis[0].find, eta_E)
