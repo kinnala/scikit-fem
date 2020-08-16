@@ -2,8 +2,7 @@ import unittest
 
 import numpy as np
 
-from skfem import (BilinearForm, LinearForm, Functional, asm, bilinear_form,
-                   linear_form, solve, functional)
+from skfem import BilinearForm, LinearForm, Functional, asm, solve
 from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementHexS2, ElementTetP0, ElementTetP1,
                            ElementTetP2, ElementTriP1, ElementQuad2,
@@ -163,16 +162,18 @@ class BasisInterpolatorQuadS2(BasisInterpolator):
 
 
 class BasisInterpolatorMorley(BasisInterpolator):
+
     case = (MeshTri, ElementTriMorley)
 
     def initOnes(self, basis):
-        @bilinear_form
-        def mass(u, du, ddu, v, dv, ddv, w):
+
+        @BilinearForm
+        def mass(u, v, w):
             return u * v
 
-        @linear_form
-        def ones(v, dv, ddv, w):
-            return 1.0 * v
+        @LinearForm
+        def ones(v, w):
+            return 1. * v
 
         M = asm(mass, basis)
         f = asm(ones, basis)
@@ -256,7 +257,7 @@ class EvaluateFunctional(unittest.TestCase):
         e = ElementQuad1()
         basis = InteriorBasis(m, e)
 
-        @functional
+        @Functional
         def x_squared(w):
             return w.x[0] ** 2
 
