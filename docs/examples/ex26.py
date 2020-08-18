@@ -1,8 +1,5 @@
 r"""Restricting a problem to a subdomain.
 
-.. note::
-   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_.
-
 The `ex17.py` example solved the steady-state heat equation with uniform
 volumetric heating in a central wire surrounded by an annular insulating layer
 of lower thermal conductivity.  Here, the problem is completely restricted to
@@ -24,24 +21,6 @@ The exact solution is
 
 The novelty here is that the temperature is defined as a finite element function
 throughout the mesh (:math:`r < b`) but only solved on a subdomain.
-
-License
--------
-
-Copyright 2018-2020 scikit-fem developers
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
 from skfem import *
