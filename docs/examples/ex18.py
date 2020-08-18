@@ -1,8 +1,5 @@
 r"""Stokes equations.
 
-.. note::
-   This example requires the external package `dmsh <https://pypi.org/project/dmsh/>`_.
-
 This solves for the creeping flow problem in the primitive variables,
 i.e. velocity and pressure instead of the stream-function.  These are governed
 by the Stokes momentum
@@ -44,16 +41,18 @@ where :math:`\boldsymbol{rot}` is the adjoint of :math:`\mathrm{rot}`:
 
 """
 from skfem import *
+from skfem.io.json import from_file
 from skfem.models.poisson import vector_laplace, mass, laplace
 from skfem.models.general import divergence, rot
+
+from pathlib import Path
 
 import numpy as np
 from scipy.sparse import bmat
 
-import dmsh
 
-mesh = MeshTri(*map(np.transpose,
-                    dmsh.generate(dmsh.Circle([0., 0.], 1.), .1)))
+mesh = from_file(Path(__file__).with_name("disk.json")).to_meshtri()
+mesh.scale(1/np.linalg.norm(mesh.p, axis=0).max())  # unit radius
 
 element = {'u': ElementVectorH1(ElementTriP2()),
            'p': ElementTriP1()}
