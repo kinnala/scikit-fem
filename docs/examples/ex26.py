@@ -1,9 +1,9 @@
 r"""Restricting a problem to a subdomain.
 
 The `ex17.py` example solved the steady-state heat equation with uniform
-volumetric heating in a central wire surrounded by an annular insulating layer
+volumetric heating in a central core surrounded by an annular insulating layer
 of lower thermal conductivity.  Here, the problem is completely restricted to
-the wire, taking the temperature as zero throughout the annulus.
+the core, taking the temperature as zero throughout the annulus.
 
 Thus the problem reduces to the same Poisson equation with uniform forcing and
 homogeneous Dirichlet conditions:
@@ -32,15 +32,15 @@ from docs.examples.ex17 import mesh, basis, radii,\
     joule_heating, thermal_conductivity
 
 
-insulation = np.unique(basis.element_dofs[:, mesh.subdomains['insulation']])
+annulus = np.unique(basis.element_dofs[:, mesh.subdomains['annulus']])
 temperature = np.zeros(basis.N)
-wire = basis.complement_dofs(insulation)
-wire_basis = InteriorBasis(mesh, basis.elem, elements=mesh.subdomains['wire'])
-L = asm(laplace, wire_basis)
-f = asm(unit_load, wire_basis)
-temperature = solve(*condense(thermal_conductivity['wire'] * L,
+core = basis.complement_dofs(annulus)
+core_basis = InteriorBasis(mesh, basis.elem, elements=mesh.subdomains['core'])
+L = asm(laplace, core_basis)
+f = asm(unit_load, core_basis)
+temperature = solve(*condense(thermal_conductivity['core'] * L,
                               joule_heating * f,
-                              D=insulation))
+                              D=annulus))
 
 if __name__ == '__main__':
     from os.path import splitext
@@ -49,7 +49,7 @@ if __name__ == '__main__':
 
     T0 = {'skfem': basis.interpolator(temperature)(np.zeros((2, 1)))[0],
           'exact':
-          joule_heating * radii[0]**2 / 4 / thermal_conductivity['wire']}
+          joule_heating * radii[0]**2 / 4 / thermal_conductivity['core']}
     print('Central temperature:', T0)
 
     ax = draw(mesh)

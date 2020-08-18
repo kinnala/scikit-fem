@@ -35,10 +35,9 @@ from skfem.helpers import dot, grad
 from skfem.models.poisson import mass, unit_load
 from skfem.io.json import from_file
 
-radii = [2., 3.]
 joule_heating = 5.
 heat_transfer_coefficient = 7.
-thermal_conductivity = {'wire': 101.,  'insulation': 11.}
+thermal_conductivity = {'core': 101.,  'annulus': 11.}
 
 mesh = from_file(Path(__file__).with_name("disk.json"))
 
@@ -59,11 +58,11 @@ for subdomain, elements in mesh.subdomains.items():
 
 L = asm(conduction, basis, conductivity=conductivity)
 
-facet_basis = FacetBasis(mesh, element, facets=mesh.boundaries['convection'])
+facet_basis = FacetBasis(mesh, element, facets=mesh.boundaries['perimeter'])
 H = heat_transfer_coefficient * asm(convection, facet_basis)
 
-wire_basis = InteriorBasis(mesh, basis.elem, elements=mesh.subdomains['wire'])
-f = joule_heating * asm(unit_load, wire_basis)
+core_basis = InteriorBasis(mesh, basis.elem, elements=mesh.subdomains['core'])
+f = joule_heating * asm(unit_load, core_basis)
 
 temperature = solve(L + H, f)
 
@@ -73,13 +72,14 @@ if __name__ == '__main__':
     from sys import argv
     from skfem.visuals.matplotlib import draw, plot, savefig
 
+    radii = sorted([np.linalg.norm(mesh.p[:, mesh.t[:, s]], axis=0).max() for s in mesh.subdomains.values()])
     T0 = {'skfem': basis.interpolator(temperature)(np.zeros((2, 1)))[0],
           'exact':
-          (joule_heating * radii[0]**2 / 4 / thermal_conductivity['wire'] *
-           (2 * thermal_conductivity['wire'] / radii[1]
+          (joule_heating * radii[0]**2 / 4 / thermal_conductivity['core'] *
+           (2 * thermal_conductivity['core'] / radii[1]
             / heat_transfer_coefficient
-            + (2 * thermal_conductivity['wire']
-               / thermal_conductivity['insulation']
+            + (2 * thermal_conductivity['core']
+               / thermal_conductivity['annulus']
                * np.log(radii[1] / radii[0])) + 1))}
     print('Central temperature:', T0)
 
