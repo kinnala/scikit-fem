@@ -11,7 +11,6 @@ one step-length upstream and 35 downstream.
 
 """
 
-from itertools import cycle, islice
 from pathlib import Path
 
 from matplotlib.pyplot import subplots
@@ -21,10 +20,9 @@ from scipy.sparse import bmat
 from skfem import *
 from skfem.models.poisson import vector_laplace, laplace
 from skfem.models.general import divergence, rot
-from skfem.io import from_meshio
-import skfem.io.json
+from skfem.io.json import from_file
 
-mesh = skfem.io.json.from_file(Path(__file__).with_name("backward-facing_step.json"))
+mesh = from_file(Path(__file__).with_name("backward-facing_step.json"))
 
 element = {'u': ElementVectorH1(ElementTriP2()),
            'p': ElementTriP1()}

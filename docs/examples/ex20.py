@@ -3,7 +3,7 @@ r"""Creeping flow.
 The stream-function :math:`\psi` for two-dimensional creeping flow is
 governed by the biharmonic equation
 
-.. math::  
+.. math::
     \nu \Delta^2\psi = \mathrm{rot}\,\boldsymbol{f}
 where :math:`\nu` is the kinematic viscosity (assumed constant),
 :math:`\boldsymbol{f}` the volumetric body-force, and :math:`\mathrm{rot}\,\boldsymbol{f} \equiv
@@ -47,6 +47,7 @@ def biharmonic(u, v, w):
     from skfem.helpers import ddot, dd
 
     return ddot(dd(u), dd(v))
+
 
 stokes = asm(biharmonic, ib)
 rotf = asm(unit_load, ib)

@@ -52,7 +52,6 @@ from skfem.models.general import divergence, rot
 import skfem.io.json
 
 from functools import partial
-from itertools import cycle, islice
 from pathlib import Path
 from typing import Tuple, Iterable
 
