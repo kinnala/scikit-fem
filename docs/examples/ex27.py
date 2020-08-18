@@ -58,18 +58,6 @@ from scipy.optimize import OptimizeResult
 from scipy.sparse import bmat, block_diag, csr_matrix
 
 
-class NewtonConvergenceError(Exception):
-    """
-
-    Copied from pacopy 0.1.2, copyright N. Schlömer & G. D. McBain 2020 under
-    the MIT Licence.
-
-    https://raw.githubusercontent.com/nschloe/pacopy/v0.1.2/pacopy/natural.py
-
-    """
-    pass
-
-
 def natural(
     solver: Callable[[np.ndarray, float, float, int], OptimizeResult],
     jacobian_solver: Callable[[np.ndarray, float, np.ndarray], np.ndarray],
@@ -84,59 +72,34 @@ def natural(
     max_steps: float = float("inf"),
     verbose: bool = True,
     use_first_order_predictor: bool = True
-) -> Iterable[Tuple[float, np.ndarray]]:
-    """Natural parameter continuation.
+) -> Iterable[Tuple[float, OptimizeResult]]:
+    """Generate solutions from solver for a sequence of mu always including milestones.
 
     The most naive parameter continuation. This simply solves :math:`F(u, \\mu_0)=0`
     using Newton's method, then changes :math:`\\mu` slightly and solves again using
     the previous solution as an initial guess. Cannot handle turning points.
 
-    Copied from pacopy 0.1.2, copyright N. Schlömer & G. D. McBain 2020 under
+    Adapted from pacopy 0.1.2, copyright N. Schlömer & G. D. McBain 2020 under
     the MIT Licence.
 
     https://raw.githubusercontent.com/nschloe/pacopy/v0.1.2/pacopy/natural.py
 
-    Args:
-        problem: Instance of the problem class
-        u0: Initial guess
-        lambda0: Initial parameter value
-        postprocess: postprocess function
-        mu_stepsi   ze
-0 (float): Initial step size
-        mu_stepsize
-_aggressiveness (float): The step size is adapted after each step
-            such that :code:`max_newton_steps` is exhausted approximately. This parameter
-            determines how aggressively the the step size is increased if too few Newton
-            steps were used.
-        mu_stepsize
-_max (float): Maximum step size
-        max_newton_steps (int): Maxmimum number of Newton steps
-        newton_tol (float): Newton tolerance
-        max_steps (int): Maximum number of continuation steps
-        verbose (bool): Verbose output
-        use_first_order_predictor (bool): Once a solution has been found, one can use it
-            to bootstrap the Newton process for the next iteration (order 0). Another
-            possibility is to use :math:`u - s J^{-1}(u, \\mu)
-            \\frac{df}{d\\mu}`, a first-order approximation.
-        milestones (Optional[Iterable[float]]): Don't step over these values.
     """
     milestones = iter(milestones)
     mu = next(milestones)
     k = 0
     sol = solver(u0, mu, tol=newton_tol, max_iter=max_newton_steps)
-    if sol.nit >= max_newton_steps:
+    if not sol.success:
         raise RuntimeError(sol)
     u = sol.x
 
-    yield mu, u
+    yield mu, sol
     k += 1
 
     mu_stepsize = mu_stepsize0
     milestone = next(milestones)
 
-    while True:
-        if k > max_steps:
-            break
+    while k < max_steps:
 
         if verbose:
             print(
@@ -145,9 +108,7 @@ _max (float): Maximum step size
             )
 
         # Predictor
-        mu += mu_stepsize
-
-        mu = min(mu, milestone)
+        mu = min(mu + mu_stepsize, milestone)
         if use_first_order_predictor:
             du_dmu = jacobian_solver(u, mu, -df_dmu(u, mu))
             u0 = u + du_dmu * mu_stepsize
@@ -166,12 +127,12 @@ _max (float): Maximum step size
             continue
         u = sol.x
 
-        yield mu, u
+        yield mu, sol
         k += 1
         if mu == milestone:
             try:
                 milestone = next(milestones)
-            except StopIteration:
+            except StopIteration as s:
                 break
         else:
             mu_stepsize *= (
@@ -389,22 +350,20 @@ bfs = BackwardFacingStep()
 psi = {}
 
 
-
-
 if __name__ == '__main__':
     milestones = [0, 50., 150., 450., 750.]
 else:
     milestones = [0, 50.]
 
 
-for reynolds, uvp in natural(bfs.solve, bfs.jacobian_solver, bfs.df_dmu,
+for reynolds, sol in natural(bfs.solve, bfs.jacobian_solver, bfs.df_dmu,
                              bfs.make_vector(), milestones,
                              mu_stepsize0=50.):
     print(f'Re = {reynolds}')
 
     if reynolds in milestones:
 
-        psi[reynolds] = bfs.streamfunction(bfs.split(uvp)[0])
+        psi[reynolds] = bfs.streamfunction(bfs.split(sol.x)[0])
 
         if __name__ == '__main__':
             ax = bfs.streamlines(psi[reynolds])
