@@ -1,8 +1,5 @@
 r"""Backward-facing step.
 
-.. note::
-   This example requires the external package `pymsh <https://pypi.org/project/pygmsh/>`_.
-
 Following the example :ref:`stokesex`, this is another example of the Stokes flow.  The
 difference here is that the domain has an inlet (with an imposed velocity) and
 an outlet (through which fluid issues against a uniform pressure).
@@ -12,83 +9,28 @@ one step-length upstream and 35 downstream.
 
 * Barkley, D., M. G. M. Gomes, & R. D. Henderson (2002). Three-dimensional instability in flow over a backward-facing step. Journal of Fluid Mechanics 473. pp. 167–190. `doi:10.1017/s002211200200232x <http://dx.doi.org/10.1017/s002211200200232x>`_
 
-License
--------
-
-Copyright 2018-2020 scikit-fem developers
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 """
+
 from itertools import cycle, islice
+from pathlib import Path
 
 from matplotlib.pyplot import subplots
 import numpy as np
 from scipy.sparse import bmat
 
-from pygmsh import generate_mesh
-from pygmsh.built_in import Geometry
-
 from skfem import *
 from skfem.models.poisson import vector_laplace, laplace
 from skfem.models.general import divergence, rot
 from skfem.io import from_meshio
+import skfem.io.json
 
-
-def make_geom(length: float = 35.,
-              lcar: float = 1.) -> Geometry:
-    # Barkley et al (2002, figure 3 a - c)
-    geom = Geometry()
-
-    points = []
-    for point in [[0, -1, 0],
-                  [length, -1, 0],
-                  [length, 1, 0],
-                  [-1, 1, 0],
-                  [-1, 0, 0],
-                  [0, 0, 0]]:
-        points.append(geom.add_point(point, lcar))
-
-    lines = []
-    for termini in zip(points,
-                       islice(cycle(points), 1, None)):
-        lines.append(geom.add_line(*termini))
-
-    for k, label in [([1], 'outlet'),
-                     ([2], 'ceiling'),
-                     ([3], 'inlet'),
-                     ([0, 4, 5], 'floor')]:
-        geom.add_physical(list(np.array(lines)[k]), label)
-
-    geom.add_physical(
-        geom.add_plane_surface(geom.add_line_loop(lines)), 'domain')
-
-    return geom
-
-
-def make_mesh(*args, **kwargs) -> MeshTri:
-    return from_meshio(generate_mesh(make_geom(*args, **kwargs), dim=2))
-
-
-mesh = make_mesh(lcar=.5**2)
+mesh = skfem.io.json.from_file(Path(__file__).with_name("backward-facing_step.json"))
 
 element = {'u': ElementVectorH1(ElementTriP2()),
            'p': ElementTriP1()}
 basis = {variable: InteriorBasis(mesh, e, intorder=3)
          for variable, e in element.items()}
 
-del mesh.boundaries['outlet']
 D = np.concatenate([b.all() for b in basis['u'].find_dofs().values()])
 
 A = asm(vector_laplace, basis['u'])
