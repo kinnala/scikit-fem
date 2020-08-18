@@ -1,8 +1,5 @@
 r"""Creeping flow.
 
-.. note::
-   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_.
-
 The stream-function :math:`\psi` for two-dimensional creeping flow is
 governed by the biharmonic equation
 
@@ -28,41 +25,18 @@ polynomial solution with circular stream-lines:
 .. math::
     \psi = \left(1 - (x^2+y^2)/a^2\right)^2 / 64.
 
-License
--------
-
-Copyright 2018-2020 scikit-fem developers
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 """
+from pathlib import Path
+
 from skfem import *
-from skfem.io import from_meshio
+from skfem.io.json import from_file
 from skfem.models.poisson import unit_load
 
 import numpy as np
 
-from pygmsh import generate_mesh
-from pygmsh.built_in import Geometry
 
-
-geom = Geometry()
-circle = geom.add_circle([0.] * 3, 1., .5**3)
-geom.add_physical(circle.line_loop.lines, 'perimeter')
-geom.add_physical(circle.plane_surface, 'disk')
-mesh = from_meshio(generate_mesh(geom, dim=2))
-
+mesh = from_file(Path(__file__).with_name("disk.json")).to_meshtri()
+mesh.scale(1/np.linalg.norm(mesh.p, axis=0).max())  # unit radius
 element = ElementTriMorley()
 mapping = MappingAffine(mesh)
 ib = InteriorBasis(mesh, element, mapping, 2)

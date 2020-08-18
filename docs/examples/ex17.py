@@ -1,8 +1,5 @@
 r"""Insulated wire.
 
-.. note::
-   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_.
-
 This example solves the steady heat conduction
 with generation in an insulated wire. In radial
 coordinates, the governing equations read: find :math:`T`
@@ -26,63 +23,24 @@ For comparison purposes, the exact solution at the origin is
 .. math::
    T(r=0) = \frac{A b^2}{4 k_0} \left( \frac{2k_0}{bh} + \frac{2 k_0}{k_1} \log \frac{b}{a} + 1\right).
 
-License
--------
-
-Copyright 2018-2020 scikit-fem developers
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
+from pathlib import Path
 from typing import Optional
 
 import numpy as np
 
-from pygmsh import generate_mesh
-from pygmsh.built_in import Geometry
-
 from skfem import *
 from skfem.helpers import dot, grad
 from skfem.models.poisson import mass, unit_load
-from skfem.io import from_meshio
+from skfem.io.json import from_file
 
 radii = [2., 3.]
 joule_heating = 5.
 heat_transfer_coefficient = 7.
 thermal_conductivity = {'wire': 101.,  'insulation': 11.}
 
-
-def make_mesh(a: float,         # radius of wire
-              b: float,         # radius of insulation
-              dx: Optional[float] = None) -> MeshTri:
-
-    dx = a / 2 ** 3 if dx is None else dx
-
-    origin = np.zeros(3)
-    geom = Geometry()
-    wire = geom.add_circle(origin, a, dx, make_surface=True)
-    geom.add_physical(wire.plane_surface, 'wire')
-    insulation = geom.add_circle(origin, b, dx, holes=[wire.line_loop])
-    geom.add_physical(insulation.plane_surface, 'insulation')
-    geom.add_physical(insulation.line_loop.lines, 'convection')
-    geom.add_raw_code('Mesh.RecombineAll=1;')
-    geom.add_raw_code('Mesh.RecombinationAlgorithm=2;\n')
-
-    return from_meshio(generate_mesh(geom, dim=2))
-
-
-mesh = make_mesh(*radii)
+mesh = from_file(Path(__file__).with_name("disk.json"))
 
 
 @BilinearForm
