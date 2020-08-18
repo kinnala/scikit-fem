@@ -40,6 +40,7 @@ heat_transfer_coefficient = 7.
 thermal_conductivity = {'core': 101.,  'annulus': 11.}
 
 mesh = from_file(Path(__file__).with_name("disk.json"))
+radii = sorted([np.linalg.norm(mesh.p[:, mesh.t[:, s]], axis=0).max() for s in mesh.subdomains.values()])
 
 
 @BilinearForm
@@ -72,7 +73,6 @@ if __name__ == '__main__':
     from sys import argv
     from skfem.visuals.matplotlib import draw, plot, savefig
 
-    radii = sorted([np.linalg.norm(mesh.p[:, mesh.t[:, s]], axis=0).max() for s in mesh.subdomains.values()])
     T0 = {'skfem': basis.interpolator(temperature)(np.zeros((2, 1)))[0],
           'exact':
           (joule_heating * radii[0]**2 / 4 / thermal_conductivity['core'] *
