@@ -1,9 +1,5 @@
 r"""Backward-facing step.
 
-.. warning::
-   This example requires the external package `pacopy 0.1.2 <https://pypi.org/project/pacopy/0.1.2/>`_.
-
-
 In this example, natural parameter continuation is used to extend
 the Stokes equations over a backward-facing step to finite Reynolds
 number; this means defining a residual for the nonlinear problem and its
@@ -49,11 +45,11 @@ from skfem import *
 from skfem.helpers import grad, dot
 from skfem.models.poisson import vector_laplace, laplace
 from skfem.models.general import divergence, rot
-import skfem.io.json
+from skfem.io.json import from_file
 
 from functools import partial
 from pathlib import Path
-from typing import Tuple, Iterable
+from typing import Callable, Tuple, Iterable
 
 from matplotlib.pyplot import subplots
 from matplotlib.tri import Triangulation
@@ -74,65 +70,25 @@ class NewtonConvergenceError(Exception):
     pass
 
 
-# def newton(f, jacobian_solver, norm2, u0, tol=1.0e-10, max_iter=20, verbose=True):
-#     """return a root of f near u0
-    
-#     Copied from pacopy 0.1.2, copyright N. Schlömer & G. D. McBain 2020 under
-#     the MIT Licence.
-
-#     https://raw.githubusercontent.com/nschloe/pacopy/v0.1.2/pacopy/natural.py
-
-#     """
-    
-#     u = u0
-
-#     fu = f(u)
-#     nrm = np.sqrt(norm2(fu))
-#     if verbose:
-#         print(f"||F(u)|| = {nrm:e}")
-
-#     k = 0
-#     while k < max_iter:
-#         if nrm < tol:
-#             break
-#         du = jacobian_solver(u, -fu)
-#         u += du
-#         fu = f(u)
-#         nrm = np.sqrt(norm2(fu))
-#         k += 1
-#         if verbose:
-#             print(f"||F(u)|| = {nrm:e}")
-
-#     is_converged = nrm < tol
-
-#     if not is_converged:
-#         raise NewtonConvergenceError(
-#             f"Newton's method didn't converge after {k} steps."
-#         )
-
-#     return u, k
-
-
-
 def natural(
-    problem,
-    u0,
-    lambda0,
-    callback,
-    lambda_stepsize0=1.0e-1,
-    lambda_stepsize_max=float("inf"),
-    lambda_stepsize_aggressiveness=2,
-    max_newton_steps=5,
-    newton_tol=1e-9,
-    max_steps=float("inf"),
-    verbose=True,
-    use_first_order_predictor=True,
-    milestones=None,
-):
+    solver: Callable[[np.ndarray, float, float, int], OptimizeResult],
+    jacobian_solver: Callable[[np.ndarray, float, np.ndarray], np.ndarray],
+    df_dmu: Callable[[np.ndarray, float], np.ndarray],
+    u0: np.ndarray,
+    milestones: Iterable[float],
+    mu_stepsize0: float = 1.0e-1,
+    mu_stepsize_max: float = float("inf"),
+    mu_stepsize_aggressiveness: int = 2,
+    max_newton_steps: int = 5,
+    newton_tol: float = 1e-9,
+    max_steps: float = float("inf"),
+    verbose: bool = True,
+    use_first_order_predictor: bool = True
+) -> Iterable[Tuple[float, np.ndarray]]:
     """Natural parameter continuation.
 
-    The most naive parameter continuation. This simply solves :math:`F(u, \\lambda_0)=0`
-    using Newton's method, then changes :math:`\\lambda` slightly and solves again using
+    The most naive parameter continuation. This simply solves :math:`F(u, \\mu_0)=0`
+    using Newton's method, then changes :math:`\\mu` slightly and solves again using
     the previous solution as an initial guess. Cannot handle turning points.
 
     Copied from pacopy 0.1.2, copyright N. Schlömer & G. D. McBain 2020 under
@@ -144,43 +100,39 @@ def natural(
         problem: Instance of the problem class
         u0: Initial guess
         lambda0: Initial parameter value
-        callback: Callback function
-        lambda_stepsize0 (float): Initial step size
-        lambda_stepsize_aggressiveness (float): The step size is adapted after each step
+        postprocess: postprocess function
+        mu_stepsi   ze
+0 (float): Initial step size
+        mu_stepsize
+_aggressiveness (float): The step size is adapted after each step
             such that :code:`max_newton_steps` is exhausted approximately. This parameter
             determines how aggressively the the step size is increased if too few Newton
             steps were used.
-        lambda_stepsize_max (float): Maximum step size
+        mu_stepsize
+_max (float): Maximum step size
         max_newton_steps (int): Maxmimum number of Newton steps
         newton_tol (float): Newton tolerance
         max_steps (int): Maximum number of continuation steps
         verbose (bool): Verbose output
         use_first_order_predictor (bool): Once a solution has been found, one can use it
             to bootstrap the Newton process for the next iteration (order 0). Another
-            possibility is to use :math:`u - s J^{-1}(u, \\lambda)
-            \\frac{df}{d\\lambda}`, a first-order approximation.
+            possibility is to use :math:`u - s J^{-1}(u, \\mu)
+            \\frac{df}{d\\mu}`, a first-order approximation.
         milestones (Optional[Iterable[float]]): Don't step over these values.
     """
-    lmbda = lambda0
-    if milestones is not None:
-        milestones = iter(milestones)
-
+    milestones = iter(milestones)
+    mu = next(milestones)
     k = 0
-    sol = problem.solve(u0,
-                        lmbda,
-                        tol=newton_tol,
-                        max_iter=max_newton_steps)
+    sol = solver(u0, mu, tol=newton_tol, max_iter=max_newton_steps)
     if sol.nit >= max_newton_steps:
-        print("No convergence for initial step.")
-        raise NewtonConvergenceError
+        raise RuntimeError(sol)
     u = sol.x
 
-    callback(k, lmbda, u)
+    yield mu, u
     k += 1
 
-    lambda_stepsize = lambda_stepsize0
-    if milestones is not None:
-        milestone = next(milestones)
+    mu_stepsize = mu_stepsize0
+    milestone = next(milestones)
 
     while True:
         if k > max_steps:
@@ -188,44 +140,46 @@ def natural(
 
         if verbose:
             print(
-                f"Step {k}: lambda  {lmbda:.3e} + {lambda_stepsize:.3e}  "
-                f"->  {lmbda + lambda_stepsize:.3e}"
+                f"Step {k}: mu  {mu:.3e} + {mu_stepsize:.3e}  "
+                f"->  {mu + mu_stepsize:.3e}"
             )
 
         # Predictor
-        lmbda += lambda_stepsize
-        if milestones:
-            lmbda = min(lmbda, milestone)
+        mu += mu_stepsize
+
+        mu = min(mu, milestone)
         if use_first_order_predictor:
-            du_dlmbda = problem.jacobian_solver(u, lmbda, -problem.df_dlmbda(u, lmbda))
-            u0 = u + du_dlmbda * lambda_stepsize
+            du_dmu = jacobian_solver(u, mu, -df_dmu(u, mu))
+            u0 = u + du_dmu * mu_stepsize
+
         else:
             u0 = u
 
         # Corrector
-        sol = problem.solve(u0, lmbda, tol=newton_tol, max_iter=max_newton_steps)
+        sol = solver(u0, mu, tol=newton_tol, max_iter=max_newton_steps)
         if sol.nit >= max_newton_steps:
             if verbose:
-                print(f"No convergence for lambda={lmbda}.")
-            lmbda -= lambda_stepsize
-            lambda_stepsize /= 2
+                print(f"No convergence for mu={mu}.")
+            mu -= mu_stepsize
+
+            mu_stepsize /= 2
             continue
         u = sol.x
 
-        callback(k, lmbda, u)
+        yield mu, u
         k += 1
-        if milestones is not None and lmbda == milestone:
+        if mu == milestone:
             try:
                 milestone = next(milestones)
             except StopIteration:
                 break
         else:
-            lambda_stepsize *= (
+            mu_stepsize *= (
                 1
-                + lambda_stepsize_aggressiveness
+                + mu_stepsize_aggressiveness
                 * ((max_newton_steps - sol.nit) / (max_newton_steps - 1)) ** 2
             )
-            lambda_stepsize = min(lambda_stepsize, lambda_stepsize_max)
+            mu_stepsize = min(mu_stepsize, mu_stepsize_max)
 
 
 @LinearForm
@@ -271,7 +225,7 @@ class BackwardFacingStep:
     def __init__(self,
                  length: float = 35.):
 
-        self.mesh = skfem.io.json.from_file(Path(__file__).with_name("backward-facing_step.json"))
+        self.mesh = from_file(Path(__file__).with_name("backward-facing_step.json"))
         self.basis = {variable: InteriorBasis(self.mesh, e, intorder=3)
                       for variable, e in self.element.items()}
         self.basis['inlet'] = FacetBasis(self.mesh, self.element['u'],
@@ -387,32 +341,32 @@ class BackwardFacingStep:
         nfev = 1
         nrm = np.sqrt(self.norm2_r(fu))
         print(f"||F(u)|| = {nrm:e}")
-        
-        njev = k = 0
-        while k < max_iter:
+
+        njev = nit = 0
+        message = "Newton's method didn't converge."
+        success = False
+        while nit < max_iter:
             if nrm < tol:
-                return OptimizeResult(x=u, 
-                                      success=True,
-                                      nfev=nfev,
-                                      njev=njev,
-                                      nit=k)
+                success = True
+                message = "Solution found."
+                break
             du = self.jacobian_solver(u, reynolds, -fu)
             njev += 1
             u += du
             fu = self.f(u, reynolds)
             nfev += 1
             nrm = np.sqrt(self.norm2_r(fu))
-            k += 1
+            nit += 1
             print(f"||F(u)|| = {nrm:e}")
-        
-        return OptimizeResult(x=u, 
-                              success=False, 
-                              message="Newton's method didn't converge.", 
-                              nit=k,
+
+        return OptimizeResult(x=u,
+                              success=success,
+                              message=message,
+                              nit=nit,
                               nfev=nfev,
                               njev=njev)
-        
-    def df_dlmbda(self, uvp: np.ndarray, reynolds: float) -> np.ndarray:
+
+    def df_dmu(self, uvp: np.ndarray, reynolds: float) -> np.ndarray:
         out = self.N(uvp)
         out[self.D] = 0.
         return out
@@ -435,11 +389,17 @@ bfs = BackwardFacingStep()
 psi = {}
 
 
-def callback(_: int,
-             reynolds: float,
-             uvp: np.ndarray,
-             milestones=Iterable[float]):
-    """Echo the Reynolds number and plot streamlines at milestones"""
+
+
+if __name__ == '__main__':
+    milestones = [0, 50., 150., 450., 750.]
+else:
+    milestones = [0, 50.]
+
+
+for reynolds, uvp in natural(bfs.solve, bfs.jacobian_solver, bfs.df_dmu,
+                             bfs.make_vector(), milestones,
+                             mu_stepsize0=50.):
     print(f'Re = {reynolds}')
 
     if reynolds in milestones:
@@ -452,15 +412,3 @@ def callback(_: int,
             ax.get_figure().savefig(Path(__file__).with_name(
                 f'{Path(__file__).stem}-{reynolds}-psi.png'),
                                     bbox_inches="tight", pad_inches=0)
-
-
-if __name__ == '__main__':
-    milestones = [50., 150., 450., 750.]
-else:
-    milestones = [50.]
-
-natural(bfs, bfs.make_vector(), 0.,
-        partial(callback,
-                milestones=milestones),
-        lambda_stepsize0=50.,
-        milestones=milestones)
