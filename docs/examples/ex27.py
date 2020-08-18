@@ -49,7 +49,7 @@ from skfem.io.json import from_file
 
 from functools import partial
 from pathlib import Path
-from typing import Callable, Tuple, Iterable
+from typing import Callable, Tuple, Iterable, Optional
 
 from matplotlib.pyplot import subplots
 from matplotlib.tri import Triangulation
@@ -61,9 +61,9 @@ from scipy.sparse import bmat, block_diag, csr_matrix
 def natural(
     solver: Callable[[np.ndarray, float, float, int], OptimizeResult],
     jacobian_solver: Callable[[np.ndarray, float, np.ndarray], np.ndarray],
-    df_dmu: Callable[[np.ndarray, float], np.ndarray],
     u0: np.ndarray,
     milestones: Iterable[float],
+    df_dmu: Optional[Callable[[np.ndarray, float], np.ndarray]] = None,
     mu_stepsize0: float = 1.0e-1,
     mu_stepsize_max: float = float("inf"),
     mu_stepsize_aggressiveness: int = 2,
@@ -71,7 +71,6 @@ def natural(
     newton_tol: float = 1e-9,
     max_steps: float = float("inf"),
     verbose: bool = True,
-    use_first_order_predictor: bool = True
 ) -> Iterable[Tuple[float, OptimizeResult]]:
     """Generate solutions from solver for a sequence of mu always including milestones.
 
@@ -109,7 +108,7 @@ def natural(
 
         # Predictor
         mu = min(mu + mu_stepsize, milestone)
-        if use_first_order_predictor:
+        if df_dmu:
             du_dmu = jacobian_solver(u, mu, -df_dmu(u, mu))
             u0 = u + du_dmu * mu_stepsize
 
@@ -356,8 +355,9 @@ else:
     milestones = [0, 50.]
 
 
-for reynolds, sol in natural(bfs.solve, bfs.jacobian_solver, bfs.df_dmu,
+for reynolds, sol in natural(bfs.solve, bfs.jacobian_solver, 
                              bfs.make_vector(), milestones,
+                             df_dmu=bfs.df_dmu,
                              mu_stepsize0=50.):
     print(f'Re = {reynolds}')
 
