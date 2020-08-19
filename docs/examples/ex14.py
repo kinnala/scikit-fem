@@ -34,16 +34,16 @@ basis = InteriorBasis(m, e)
 A = asm(laplace, basis)
 
 
-def dirichlet(x, y):
+def dirichlet(x):
     """return a harmonic function"""
-    return ((x + 1.j * y) ** 2).real
+    return ((x[0] + 1.j * x[1]) ** 2).real
 
 
 boundary_basis = FacetBasis(m, e)
 boundary_dofs = boundary_basis.find_dofs()['all'].all()
 
 u = np.zeros(basis.N)
-u[boundary_dofs] = L2_projection(dirichlet, boundary_basis, boundary_dofs)
+u[boundary_dofs] = project(dirichlet, basis_to=boundary_basis, I=boundary_dofs)
 u = solve(*condense(A, np.zeros_like(u), u, D=boundary_dofs))
 
 
