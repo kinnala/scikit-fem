@@ -131,7 +131,7 @@ def natural(
         if mu == milestone:
             try:
                 milestone = next(milestones)
-            except StopIteration as s:
+            except StopIteration:
                 break
         else:
             mu_stepsize *= (
