@@ -355,7 +355,7 @@ else:
     milestones = [0, 50.]
 
 
-for reynolds, sol in natural(bfs.solve, bfs.jacobian_solver, 
+for reynolds, sol in natural(bfs.solve, bfs.jacobian_solver,
                              bfs.make_vector(), milestones,
                              df_dmu=bfs.df_dmu,
                              mu_stepsize0=50.):
