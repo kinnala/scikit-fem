@@ -124,15 +124,15 @@ class BackwardFacingStep:
         return self.basis['inlet'].find_dofs()['inlet'].all()
 
     @staticmethod
-    def parabolic(x, y):
+    def parabolic(x):
         """return the plane Poiseuille parabolic inlet profile"""
-        return 4 * y * (1. - y), np.zeros_like(y)
+        return np.stack([4 * x[1] * (1. - x[1]), np.zeros_like(x[0])])
 
     def make_vector(self):
         """prepopulate solution vector with Dirichlet conditions"""
         uvp = np.zeros(self.basis['u'].N + self.basis['p'].N)
         I = self.inlet_dofs()
-        uvp[I] = L2_projection(self.parabolic, self.basis['inlet'], I)
+        uvp[I] = project(self.parabolic, basis_to=self.basis['inlet'], I=I)
         return uvp
 
     def split(self, solution: np.ndarray) -> Tuple[np.ndarray,

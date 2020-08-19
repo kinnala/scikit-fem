@@ -42,12 +42,12 @@ inlet_basis = FacetBasis(mesh, element['u'], facets=mesh.boundaries['inlet'])
 inlet_dofs = inlet_basis.find_dofs()['inlet'].all()
 
 
-def parabolic(x, y):
+def parabolic(x):
     """return the plane Poiseuille parabolic inlet profile"""
-    return 4 * y * (1. - y), np.zeros_like(y)
+    return np.stack([4 * x[1] * (1. - x[1]), np.zeros_like(x[0])])
 
 
-uvp[inlet_dofs] = L2_projection(parabolic, inlet_basis, inlet_dofs)
+uvp[inlet_dofs] = project(parabolic, basis_to=inlet_basis, I=inlet_dofs)
 uvp = solve(*condense(K, np.zeros_like(uvp), uvp, D=D))
 
 velocity, pressure = np.split(uvp, [A.shape[0]])
