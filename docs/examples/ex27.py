@@ -52,7 +52,6 @@ from skfem.models.general import divergence, rot
 import skfem.io.json
 
 from functools import partial
-from itertools import cycle, islice
 from pathlib import Path
 from typing import Tuple, Iterable
 
@@ -107,7 +106,7 @@ class BackwardFacingStep:
     def __init__(self,
                  length: float = 35.):
 
-        self.mesh = skfem.io.json.from_file(Path(__file__).with_suffix(".json"))
+        self.mesh = skfem.io.json.from_file(Path(__file__).with_name("backward-facing_step.json"))
         self.basis = {variable: InteriorBasis(self.mesh, e, intorder=3)
                       for variable, e in self.element.items()}
         self.basis['inlet'] = FacetBasis(self.mesh, self.element['u'],
