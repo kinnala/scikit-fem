@@ -151,6 +151,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
+### [2.0.0] - 2020-08-21
+
 #### Added
 - Support for complex-valued forms: `BilinearForm` and `LinearForm` now take
   an optional argument `dtype` which defaults to `np.float64`
@@ -158,6 +160,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Dofs.__or__` and `Dofs.__add__`, for merging degree-of-freedom sets
   (i.e. `Dofs` objects) using `|` and `+` operators
 - `Dofs.drop` and `Dofs.keep`, for further filtering the degree-of-freedom sets
+
+### Removed
+- Support for old-style decorators `bilinear_form`, `linear_form`, and
+  `functional` (deprecated since 1.0.0)
 
 #### Fixed
 - `FacetBasis` did not initialize with `ElementQuadP`
