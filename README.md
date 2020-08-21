@@ -3,7 +3,6 @@
 [![PyPI version](https://badge.fury.io/py/scikit-fem.svg)](https://badge.fury.io/py/scikit-fem)
 [![Build Status](https://travis-ci.com/kinnala/scikit-fem.svg?branch=master)](https://travis-ci.com/kinnala/scikit-fem)
 [![License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
-[![DOI](https://zenodo.org/badge/115345426.svg)](https://zenodo.org/badge/latestdoi/115345426)
 [![status](https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e/status.svg)](https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e)
 
 
@@ -125,6 +124,24 @@ for first timers include:
 - Finding typos in the documentation.
 
 *By contributing code to scikit-fem, you are agreeing to release it under BSD-3-Clause, see LICENSE.md.*
+
+## Citing the library
+
+You may use the following BibTeX entry:
+```
+@article{skfem2020,
+  doi = {10.21105/joss.02369},
+  url = {https://doi.org/10.21105/joss.02369},
+  year = {2020},
+  publisher = {The Open Journal},
+  volume = {5},
+  number = {52},
+  pages = {2369},
+  author = {Tom Gustafsson and G. D. McBain},
+  title = {scikit-fem: A Python package for finite element assembly},
+  journal = {Journal of Open Source Software}
+}
+```
 
 ## In literature
 
