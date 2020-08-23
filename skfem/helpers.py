@@ -158,3 +158,4 @@ def inv(A):
     invA[2, 2] = (-A[0, 1] * A[1, 0] +
                 A[0, 0] * A[1, 1]) / detA
     return invA
+    
