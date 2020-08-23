@@ -62,7 +62,6 @@ the deformation gradient would be given by :math:`\mathbf{F} = \text{diag}(\lamb
 """
 from numpy import einsum, linalg as nla, zeros, zeros_like, concatenate, split as npsplit, hstack, abs as npabs, arange, sqrt
 from scipy.sparse import bmat
-# from sympy import symbols, simplify, lambdify, diff, sqrt, log
 from skfem.helpers import grad, transpose, det, inv
 from skfem import *
 
@@ -75,12 +74,13 @@ def F1(w):
     for i in range(3):
         F[i,i] += 1.
     F += grad(u)
-    Finv, J = inv(F)
+    J = det(F)
+    Finv = inv(F)
     return p * J * transpose(Finv) + mu * F
 
 def F2(w):
     u = w["disp"]
-    p = w["press"]
+    p = w["press"].value
     F = zeros_like(grad(u))
     for i in range(3):
         F[i,i] += 1.
@@ -106,7 +106,6 @@ def A11(w):
 
 def A12(w):
     u = w["disp"]
-    p = w["press"]
     F = zeros_like(grad(u))
     for i in range(3):
         F[i,i] += 1.
@@ -117,7 +116,7 @@ def A12(w):
 
 def A22(w):
     u = w["disp"]
-    p = w["press"]
+    p = w["press"].value
     
     Js = 0.5*(lmbda + p + 2.0*sqrt(lmbda*mu + 0.25*(lmbda + p)**2))/lmbda
     dJsdp=(0.25*lmbda + 0.25*p + 0.5*sqrt(lmbda*mu + 0.25*(lmbda + p)**2))/(lmbda*sqrt(lmbda*mu + 0.25*(lmbda + p)**2))
@@ -127,7 +126,7 @@ def A22(w):
     
 
 mesh = MeshTet()
-mesh.refine(3)
+mesh.refine(2)
 uelem = ElementVectorH1(ElementTetP2())
 pelem = ElementTetP1()
 elems = {
@@ -192,8 +191,8 @@ for itr in range(12):
     K12 = asm(b12, basis["p"], basis["u"], disp=uv, press = pv)
     K22 = asm(b22, basis["p"], basis["p"], disp=uv, press = pv)
     f = concatenate((
-        asm(a1, basis["u"], disp=uv, press = pv),
-        asm(a2, basis["p"], disp=uv, press = pv)
+        asm(a1, basis["u"], disp=uv, press=pv),
+        asm(a2, basis["p"], disp=uv, press=pv)
     ))
     K = bmat(
         [[K11, K12],
@@ -205,6 +204,18 @@ for itr in range(12):
     dp += delp
     normu = nla.norm(delu)
     normp = nla.norm(delp)
-    # print(f"{itr+1}, norm_du: {normu}, norm_dp: {normp}")
+    print(f"{itr+1}, norm_du: {normu}, norm_dp: {normp}")
     if normu < 1.e-8 and normp < 1.e-8:
         break
+
+
+
+if __name__ == "__main":
+    from meshio import xdmf, Mesh
+    xdmf.write("example36_results.xdmf",
+        Mesh(mesh.p, cells={"tetra": mesh.t.T},
+        point_data={
+            "u":du[basis["u"].nodal_dofs].T,
+            "p":dp[basis["p"].nodal_dofs].T
+        })
+    )
