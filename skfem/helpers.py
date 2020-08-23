@@ -2,7 +2,7 @@
 
 from typing import Union
 import numpy as np
-from numpy import ndarray
+from numpy import ndarray, zeros_like
 from skfem.element import DiscreteField
 
 
@@ -97,3 +97,64 @@ def eye(w, n):
     """Create diagonal matrix with w on diagonal."""
     return np.array([[w if i == j else 0. * w for i in range(n)]
                      for j in range(n)])
+
+def det(A):
+    """
+    Determinant of an array `A`
+    Parameters
+    ----------
+    A : (N, N,...) numpy.ndarray
+        Input array whose determinant is to be computed
+    Returns
+    -------
+    det : (...) numpy.ndarray
+        Determinant of `A`.
+    """
+    detA = zeros_like(A[0, 0])
+    detA = A[0, 0] * (A[1, 1] * A[2, 2] -
+                    A[1, 2] * A[2, 1]) -\
+        A[0, 1] * (A[1, 0] * A[2, 2] -
+                    A[1, 2] * A[2, 0]) +\
+        A[0, 2] * (A[1, 0] * A[2, 1] -
+                    A[1, 1] * A[2, 0])
+    return detA
+
+def inv(A):
+    """
+    Inverse of an array `A`
+    Parameters
+    ----------
+    A : (N, N,...) numpy.ndarray
+        Input array whose inverse is to be computed
+    Returns
+    -------
+    Ainv : (N, N,...) numpy.ndarray
+        Inverse of `A`.
+    """
+    invA = zeros_like(A)
+    detA = A[0, 0] * (A[1, 1] * A[2, 2] -
+                    A[1, 2] * A[2, 1]) -\
+        A[0, 1] * (A[1, 0] * A[2, 2] -
+                    A[1, 2] * A[2, 0]) +\
+        A[0, 2] * (A[1, 0] * A[2, 1] -
+                    A[1, 1] * A[2, 0])
+
+    invA[0, 0] = (-A[1, 2] * A[2, 1] +
+                A[1, 1] * A[2, 2]) / detA
+    invA[1, 0] = (A[1, 2] * A[2, 0] -
+                A[1, 0] * A[2, 2]) / detA
+    invA[2, 0] = (-A[1, 1] * A[2, 0] +
+                A[1, 0] * A[2, 1]) / detA
+    invA[0, 1] = (A[0, 2] * A[2, 1] -
+                A[0, 1] * A[2, 2]) / detA
+    invA[1, 1] = (-A[0, 2] * A[2, 0] +
+                A[0, 0] * A[2, 2]) / detA
+    invA[2, 1] = (A[0, 1] * A[2, 0] -
+                A[0, 0] * A[2, 1]) / detA
+    invA[0, 2] = (-A[0, 2] * A[1, 1] +
+                A[0, 1] * A[1, 2]) / detA
+    invA[1, 2] = (A[0, 2] * A[1, 0] -
+                A[0, 0] * A[1, 2]) / detA
+    invA[2, 2] = (-A[0, 1] * A[1, 0] +
+                A[0, 0] * A[1, 1]) / detA
+    return invA
