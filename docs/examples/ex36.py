@@ -55,10 +55,10 @@ The weak forms above result in a system of nonlinear algebraic equations for the
 a nonlinear solver. In the example below, we linearize :math:`\mathcal{F}_1` and :math:`\mathcal{F}_2` and setup solve for incremental displacement 
 and pressure dofs.
 
-The following demonstrates uniaxial tension in one direction, and the lateral edges allowed to remain free. The geometry is a unit cube 
+The following demonstrates uniaxial tension in one direction, and the lateral edges allowed to remain free. The geometry is a homogeneous unit cube 
 made up of a Neo-Hookean solid with :math:`\lambda/\mu = 1000`. For this loading and geometry, in the limit of :math:`\lambda/\mu\rightarrow +\infty`, 
 the deformation gradient would be given by :math:`\mathbf{F} = \text{diag}(\lambda,1/\sqrt{\lambda})` and the pressure field admits a closed form solution 
-:math:`p=-\mu/\ell^2` where :math:`\ell` is the applied stretch. 
+:math:`p=-\mu/\ell` where :math:`\ell` is the applied stretch. 
 """
 from numpy import einsum, linalg as nla, zeros, zeros_like, concatenate, split as npsplit, hstack, abs as npabs, arange, sqrt
 from scipy.sparse import bmat
