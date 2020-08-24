@@ -32,12 +32,12 @@ and pressure (:math:`p`). The corresponding weak form is given by
 find :math:`(\mathbf{u},p)\in (V_1 x V_2)` such that 
 
 .. math::
-   \mathcal{F}_1 = \int_\Omega \left( \mu\mathbf{F} + p\mathbf{F}^{-T} \right) : \nabla\mathbf{v}d\mathbf{X}
+   \mathcal{F}_1 = \int_\Omega \left( \mu\mathbf{F} + p\mathbf{F}^{-T} \right) : \nabla\mathbf{v}d\mathbf{X} = 0
 
 and 
 
 .. math::
-   \mathcal{F}_2 = \int_\Omega \frac{\partial\Psi*}{\partial p}q\ d\mathbf{X}
+   \mathcal{F}_2 = \int_\Omega \frac{\partial\Psi*}{\partial p}q\ d\mathbf{X} = 0
 
 for all :math:`(\mathbf{v},q)\in (V_1 x V_2)` and 
 
