@@ -98,6 +98,7 @@ def eye(w, n):
     return np.array([[w if i == j else 0. * w for i in range(n)]
                      for j in range(n)])
 
+
 def det(A):
     """
     Determinant of an array `A`
@@ -119,6 +120,7 @@ def det(A):
                     A[1, 1] * A[2, 0])
     return detA
 
+
 def inv(A):
     """
     Inverse of an array `A`
@@ -132,12 +134,12 @@ def inv(A):
         Inverse of `A`.
     """
     invA = zeros_like(A)
-    detA = A[0, 0] * (A[1, 1] * A[2, 2] -
-                    A[1, 2] * A[2, 1]) -\
-        A[0, 1] * (A[1, 0] * A[2, 2] -
-                    A[1, 2] * A[2, 0]) +\
-        A[0, 2] * (A[1, 0] * A[2, 1] -
+    detA = A[0, 0] * (A[1, 1] * A[2, 2] -\
+        A[1, 2] * A[2, 1]) -\
+            A[0, 1] * (A[1, 0] * A[2, 2] - A[1, 2] * A[2, 0]) +\
+                A[0, 2] * (A[1, 0] * A[2, 1] -\
                     A[1, 1] * A[2, 0])
+
 
     invA[0, 0] = (-A[1, 2] * A[2, 1] +
                 A[1, 1] * A[2, 2]) / detA
@@ -158,4 +160,3 @@ def inv(A):
     invA[2, 2] = (-A[0, 1] * A[1, 0] +
                 A[0, 0] * A[1, 1]) / detA
     return invA
-    
