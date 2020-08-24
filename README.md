@@ -3,7 +3,6 @@
 [![PyPI version](https://badge.fury.io/py/scikit-fem.svg)](https://badge.fury.io/py/scikit-fem)
 [![Build Status](https://travis-ci.com/kinnala/scikit-fem.svg?branch=master)](https://travis-ci.com/kinnala/scikit-fem)
 [![License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
-[![DOI](https://zenodo.org/badge/115345426.svg)](https://zenodo.org/badge/latestdoi/115345426)
 [![status](https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e/status.svg)](https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e)
 
 
@@ -126,6 +125,24 @@ for first timers include:
 
 *By contributing code to scikit-fem, you are agreeing to release it under BSD-3-Clause, see LICENSE.md.*
 
+## Citing the library
+
+You may use the following BibTeX entry:
+```
+@article{skfem2020,
+  doi = {10.21105/joss.02369},
+  url = {https://doi.org/10.21105/joss.02369},
+  year = {2020},
+  publisher = {The Open Journal},
+  volume = {5},
+  number = {52},
+  pages = {2369},
+  author = {Tom Gustafsson and G. D. McBain},
+  title = {scikit-fem: A Python package for finite element assembly},
+  journal = {Journal of Open Source Software}
+}
+```
+
 ## In literature
 
 The library has been used in the preparation of the following scientific works:
@@ -151,6 +168,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
+### [2.0.0] - 2020-08-21
+
 #### Added
 - Support for complex-valued forms: `BilinearForm` and `LinearForm` now take
   an optional argument `dtype` which defaults to `np.float64`
@@ -158,6 +177,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Dofs.__or__` and `Dofs.__add__`, for merging degree-of-freedom sets
   (i.e. `Dofs` objects) using `|` and `+` operators
 - `Dofs.drop` and `Dofs.keep`, for further filtering the degree-of-freedom sets
+
+### Removed
+- Support for old-style decorators `bilinear_form`, `linear_form`, and
+  `functional` (deprecated since 1.0.0)
 
 #### Fixed
 - `FacetBasis` did not initialize with `ElementQuadP`
