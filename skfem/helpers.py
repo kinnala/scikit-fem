@@ -101,10 +101,11 @@ def eye(w, n):
 
 def det(A):
     """
-    Determinant of an array `A`
+    Determinant of an array `A` over trailing axis (if any)
     Parameters
     ----------
     A : (N, N,...) numpy.ndarray
+        N = 2 or 3
         Input array whose determinant is to be computed
     Returns
     -------
@@ -112,21 +113,25 @@ def det(A):
         Determinant of `A`.
     """
     detA = zeros_like(A[0, 0])
-    detA = A[0, 0] * (A[1, 1] * A[2, 2] -
-                      A[1, 2] * A[2, 1]) -\
-        A[0, 1] * (A[1, 0] * A[2, 2] -
-                   A[1, 2] * A[2, 0]) +\
-        A[0, 2] * (A[1, 0] * A[2, 1] -
-                   A[1, 1] * A[2, 0])
+    if A.shape[0] == 3:
+        detA = A[0, 0] * (A[1, 1] * A[2, 2] -
+                        A[1, 2] * A[2, 1]) -\
+            A[0, 1] * (A[1, 0] * A[2, 2] -
+                    A[1, 2] * A[2, 0]) +\
+            A[0, 2] * (A[1, 0] * A[2, 1] -
+                    A[1, 1] * A[2, 0])
+    elif A.shape[0] == 2:
+        detA = A[0,0] * A[1,1] - A[1,0] * A[0,1]
     return detA
 
 
 def inv(A):
     """
-    Inverse of an array `A`
+    Inverse of an array `A` over trailing axis (if any)
     Parameters
     ----------
     A : (N, N,...) numpy.ndarray
+        N = 2 or 3
         Input array whose inverse is to be computed
     Returns
     -------
@@ -134,26 +139,29 @@ def inv(A):
         Inverse of `A`.
     """
     invA = zeros_like(A)
-    detA = A[0, 0] * (A[1, 1] * A[2, 2] - A[1, 2] * A[2, 1]) -\
-        A[0, 1] * (A[1, 0] * A[2, 2] - A[1, 2] * A[2, 0]) +\
-        A[0, 2] * (A[1, 0] * A[2, 1] - A[1, 1] * A[2, 0])
-
-    invA[0, 0] = (-A[1, 2] * A[2, 1] +
-                  A[1, 1] * A[2, 2]) / detA
-    invA[1, 0] = (A[1, 2] * A[2, 0] -
-                  A[1, 0] * A[2, 2]) / detA
-    invA[2, 0] = (-A[1, 1] * A[2, 0] +
-                  A[1, 0] * A[2, 1]) / detA
-    invA[0, 1] = (A[0, 2] * A[2, 1] -
-                  A[0, 1] * A[2, 2]) / detA
-    invA[1, 1] = (-A[0, 2] * A[2, 0] +
-                  A[0, 0] * A[2, 2]) / detA
-    invA[2, 1] = (A[0, 1] * A[2, 0] -
-                  A[0, 0] * A[2, 1]) / detA
-    invA[0, 2] = (-A[0, 2] * A[1, 1] +
-                  A[0, 1] * A[1, 2]) / detA
-    invA[1, 2] = (A[0, 2] * A[1, 0] -
-                  A[0, 0] * A[1, 2]) / detA
-    invA[2, 2] = (-A[0, 1] * A[1, 0] +
-                  A[0, 0] * A[1, 1]) / detA
+    detA = det(A)
+    if A.shape[0] == 3:
+        invA[0, 0] = (-A[1, 2] * A[2, 1] +
+                    A[1, 1] * A[2, 2]) / detA
+        invA[1, 0] = (A[1, 2] * A[2, 0] -
+                    A[1, 0] * A[2, 2]) / detA
+        invA[2, 0] = (-A[1, 1] * A[2, 0] +
+                    A[1, 0] * A[2, 1]) / detA
+        invA[0, 1] = (A[0, 2] * A[2, 1] -
+                    A[0, 1] * A[2, 2]) / detA
+        invA[1, 1] = (-A[0, 2] * A[2, 0] +
+                    A[0, 0] * A[2, 2]) / detA
+        invA[2, 1] = (A[0, 1] * A[2, 0] -
+                    A[0, 0] * A[2, 1]) / detA
+        invA[0, 2] = (-A[0, 2] * A[1, 1] +
+                    A[0, 1] * A[1, 2]) / detA
+        invA[1, 2] = (A[0, 2] * A[1, 0] -
+                    A[0, 0] * A[1, 2]) / detA
+        invA[2, 2] = (-A[0, 1] * A[1, 0] +
+                    A[0, 0] * A[1, 1]) / detA
+    elif A.shape[0] == 2:
+        invA[0, 0] = A[1, 1] / detA
+        invA[0, 1] = -A[0, 1] / detA
+        invA[1, 0] = -A[1, 0] / detA
+        invA[1, 1] = A[0, 0] / detA
     return invA

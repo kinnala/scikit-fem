@@ -506,3 +506,23 @@ characteristic impedance and velocity factor of the cable.
    The results of Example 35.
 
 See the `source code of Example 35 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex35.py>`_ for more information.
+
+Example 36: Nearly Incompressible Hyperelasticity 
+=================================================
+
+This example demonstrates an implementation of a two field mixed-formulation
+for nearly incompressible Neo-Hookean solids, namely 
+
+.. math::
+   \min_{\mathbf{u}\in\mathcal{K}}\max_{p}\int_\Omega \Psi*(\mathbf{F}, p)d\mathbf{X}
+
+where 
+
+.. math::
+   \Psi*(\mathbf{F}, p) = p (J-J*) + mu/2(I_1-3) - \mu\ln(J*) + \lambda/2(J*-1)^2
+
+.. figure:: https://user-images.githubusercontent.com/22624037/91212007-4055aa80-e6d5-11ea-8572-f27986887331.png
+
+   The displacement contour from Example 35
+
+See the `source code of Example 36 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex36.py>`_ for more information
