@@ -130,7 +130,7 @@ def A12(w):
     u = w["disp"]
     F = zeros_like(grad(u))
     for i in range(3):
-        F[i,i] += 1.
+        F[i, i] += 1.
     F += grad(u)
     J = det(F)
     Finv = inv(F)
