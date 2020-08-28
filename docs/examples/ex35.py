@@ -221,6 +221,24 @@ potential difference across the capacitor. Thus
 .. math::
    C = \\frac{2 E}{V^2}.
 
+License
+-------
+
+Copyright 2018-2020 scikit-fem developers
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 """
 from skfem.mesh import MeshTri
 from skfem.assembly import InteriorBasis, FacetBasis
@@ -370,10 +388,10 @@ voltage = 1
 # initialize the non-homogeneous Dirichlet conditions on the conductor surfaces
 U = np.zeros(K_elec.shape[0])
 U[dofs['inner_conductor_outer_surface'].all()] = project(
-    lambda x, y: voltage/2, basis_to=inner_conductor_outer_surface_basis,
+    lambda x: voltage/2, basis_to=inner_conductor_outer_surface_basis,
     I=dofs['inner_conductor_outer_surface'])
 U[dofs['outer_conductor_inner_surface'].all()] = project(
-    lambda x, y: -voltage/2, basis_to=outer_conductor_inner_surface_basis,
+    lambda x: -voltage/2, basis_to=outer_conductor_inner_surface_basis,
     I=dofs['outer_conductor_inner_surface'])
 
 U = solve(*condense(

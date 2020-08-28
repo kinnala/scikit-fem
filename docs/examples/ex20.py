@@ -1,12 +1,9 @@
 r"""Creeping flow.
 
-.. note::
-   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_.
-
 The stream-function :math:`\psi` for two-dimensional creeping flow is
 governed by the biharmonic equation
 
-.. math::  
+.. math::
     \nu \Delta^2\psi = \mathrm{rot}\,\boldsymbol{f}
 where :math:`\nu` is the kinematic viscosity (assumed constant),
 :math:`\boldsymbol{f}` the volumetric body-force, and :math:`\mathrm{rot}\,\boldsymbol{f} \equiv
@@ -29,22 +26,17 @@ polynomial solution with circular stream-lines:
     \psi = \left(1 - (x^2+y^2)/a^2\right)^2 / 64.
 
 """
+from pathlib import Path
+
 from skfem import *
-from skfem.io import from_meshio
+from skfem.io.json import from_file
 from skfem.models.poisson import unit_load
 
 import numpy as np
 
-from pygmsh import generate_mesh
-from pygmsh.built_in import Geometry
 
-
-geom = Geometry()
-circle = geom.add_circle([0.] * 3, 1., .5**3)
-geom.add_physical(circle.line_loop.lines, 'perimeter')
-geom.add_physical(circle.plane_surface, 'disk')
-mesh = from_meshio(generate_mesh(geom, dim=2))
-
+mesh = from_file(Path(__file__).with_name("disk.json")).to_meshtri()
+mesh.scale(1/np.linalg.norm(mesh.p, axis=0).max())  # unit radius
 element = ElementTriMorley()
 mapping = MappingAffine(mesh)
 ib = InteriorBasis(mesh, element, mapping, 2)
@@ -55,6 +47,7 @@ def biharmonic(u, v, w):
     from skfem.helpers import ddot, dd
 
     return ddot(dd(u), dd(v))
+
 
 stokes = asm(biharmonic, ib)
 rotf = asm(unit_load, ib)

@@ -2,9 +2,9 @@ r"""Bratu–Gelfand.
 
 .. note::
 
-   This example requires the external package `pacopy <https://github.com/nschloe/pacopy>`_
+   This example requires the external package `pacopy 0.1.2 <https://pypi.org/project/pacopy/0.1.2/>`_
 
-Here the bifurcation diagram for the Bratu–Gelfand two-point boundary value problem is reproduced by numerical continuation as implemented in pacopy, and adapted from the pacopy example `Bratu <https://github.com/nschloe/pacopy/blob/master/README.md#bratu>`_.
+Here the bifurcation diagram for the Bratu–Gelfand two-point boundary value problem is reproduced by numerical continuation as implemented in pacopy 0.1.2, and adapted from the pacopy 0.1.2 example `Bratu <https://github.com/nschloe/pacopy/blob/v0.1.2/README.md#bratu>`_.
 
 .. math::
     u'' + \lambda \mathrm e^u = 0, \quad 0 < x < 1,
@@ -16,7 +16,7 @@ For treatment by numerical continuation, we define the residual
     F(u, \lambda) = -u'' - \lambda \mathrm e^u
 .. literalinclude:: ex23.py
     :start-at: def f
-    :lines: 1-5	       
+    :lines: 1-5
 
 its derivative with respect to the parameter
 
@@ -24,7 +24,7 @@ its derivative with respect to the parameter
    \frac{\partial F}{\partial\lambda} = -\mathrm e^u
 .. literalinclude:: ex23.py
     :start-at: def df_dlmbda
-    :lines: 1-8	       
+    :lines: 1-8
 
 and the Jacobian
 
@@ -32,7 +32,7 @@ and the Jacobian
    J (u) = -\frac{\mathrm d^2}{\mathrm dx^2} - \lambda \mathrm e^u
 .. literalinclude:: ex23.py
     :start-at: def jacobian_solver
-    :lines: 1-11	       
+    :lines: 1-11
 
 The resulting bifurcation diagram, matches figure 1.1 (left) of Farrell, Birkisson, & Funke (2015).
 

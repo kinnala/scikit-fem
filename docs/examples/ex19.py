@@ -1,8 +1,5 @@
 r"""Heat equation.
 
-.. note::
-   This example requires the external package `scikit-sparse <https://github.com/scikit-sparse/scikit-sparse>`_.
-
 The solutions of the heat equation
 
 .. math::
@@ -24,7 +21,7 @@ cosine in each direction,
         \frac{2n_0 + 1}{w_0^2} + \frac{2n_1 + 1}{w_1^2}
       \right)
     \right\}
-    \cos\frac{\pi x}{2w_0}\cos\frac{\pi y}{2w_1}   
+    \cos\frac{\pi x}{2w_0}\cos\frac{\pi y}{2w_1}
 for :math:`n_0, n_1 = 0, 1, 2, \ldots`.
 
 Here we simulate the decay of the fundamental, :math:`n_0 = n_1 = 0`,
@@ -33,14 +30,8 @@ rule.
 
 For a constant time-step, this leads to a linear algebraic problem at
 each time with the same matrix but changing right-hand side.  This
-motivates factoring the matrix; since it is symmetric in the Galerkin
-finite element method, Cholesky's algorithm can be used.
+motivates factoring the matrix; e.g. with `scipy.sparse.linalg.splu`.
 
-An efficient sparse implementation of this is available in the external Python
-package `scikit-sparse <https://github.com/scikit-sparse/scikit-sparse>`_ which
-in turn requires the CHOLMOD library from `SuiteSparse
-<http://faculty.cse.tamu.edu/davis/suitesparse.html>`_.  The latter may not be
-available for all systems.
 
 """
 from math import ceil
@@ -48,8 +39,7 @@ from typing import Iterator, Tuple
 
 import numpy as np
 from scipy.sparse import csr_matrix
-
-from sksparse.cholmod import cholesky
+from scipy.sparse.linalg import splu
 
 from skfem import *
 from skfem.models.poisson import laplace, mass
@@ -79,8 +69,8 @@ B = M - (1 - theta) * L * dt
 boundary = basis.find_dofs()
 interior = basis.complement_dofs(boundary)
 
-backsolve = cholesky(condense(A, D=boundary, expand=False)
-                     .T)  # cholesky prefers CSC
+# transpose as splu prefers CSC
+backsolve = splu(condense(A, D=boundary, expand=False).T).solve
 
 u_init = (np.cos(np.pi * mesh.p[0, :] / 2 / halfwidth[0])
           * np.cos(np.pi * mesh.p[1, :] / 2 / halfwidth[1]))
