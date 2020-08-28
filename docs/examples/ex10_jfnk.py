@@ -26,15 +26,15 @@ I = m.interior_nodes()
 D = m.boundary_nodes()
 x[D] = np.sin(np.pi * m.p[0, D]) 
 
-def residual(u: np.ndarray) -> np.ndarray:
-    u_full = np.empty_like(x)
-    u_full[I] = u
-    u_full[D] = x[D]
 
-    return asm(rhs, basis, w=basis.interpolate(u_full))[I]
+def residual(w: np.ndarray) -> np.ndarray:
+    res = asm(rhs, basis, w=basis.interpolate(w))
+    res[D] = w[D] - x[D]
+    return res
 
-sol = root(residual, x[I], method='krylov', options={'disp': True})
-x[I] = sol.x 
+
+sol = root(residual, x, method='krylov', options={'disp': True})
+x = sol.x
 
 
 if __name__ == "__main__":
