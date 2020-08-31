@@ -40,4 +40,4 @@ for k in range(6, 21):
     else:
         solve_time = timeit(lambda: solver(A, b), number=1)
 
-    print('| {} | {} | {} |'.format(len(b), assemble_time, solve_time))
+    print('| {} | {:.5f} | {:.5f} |'.format(len(b), assemble_time, solve_time))
