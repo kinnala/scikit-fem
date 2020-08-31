@@ -14,7 +14,7 @@ def pre(N=3):
     return m
 
 
-print('| Degrees-of-freedom | Time spent on assembly (s) | Time spent on linear solve (s) |')
+print('| Degrees-of-freedom | Assembly (s) | Linear solve (s) |')
 print('| --- | --- | --- |')
 
 

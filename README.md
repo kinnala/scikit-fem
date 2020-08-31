@@ -27,7 +27,7 @@ solver, and the complexity of the forms.  This benchmark solves the Laplace
 equation using linear tetrahedral elements and the default direct sparse solver
 of `scipy.sparse.linalg.spsolve`.*
 
-| Degrees-of-freedom | Time spent on assembly (s) | Time spent on linear solve (s) |
+| Degrees-of-freedom | Assembly (s) | Linear solve (s) |
 | --- | --- | --- |
 | 64 | 0.00155 | 0.00073 |
 | 125 | 0.00203 | 0.00072 |
