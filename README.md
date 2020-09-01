@@ -1,9 +1,8 @@
 ![scikit-fem](https://github.com/kinnala/scikit-fem/blob/master/logo.png?raw=true)
 
-[![PyPI version](https://badge.fury.io/py/scikit-fem.svg)](https://badge.fury.io/py/scikit-fem)
+[![PyPI](https://img.shields.io/pypi/v/scikit-fem)](https://pypi.org/project/scikit-fem/)
 [![Build Status](https://travis-ci.com/kinnala/scikit-fem.svg?branch=master)](https://travis-ci.com/kinnala/scikit-fem)
 [![License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
-[![DOI](https://zenodo.org/badge/115345426.svg)](https://zenodo.org/badge/latestdoi/115345426)
 [![status](https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e/status.svg)](https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e)
 
 
@@ -28,23 +27,23 @@ solver, and the complexity of the forms.  This benchmark solves the Laplace
 equation using linear tetrahedral elements and the default direct sparse solver
 of `scipy.sparse.linalg.spsolve`.*
 
-| Degrees-of-freedom | Time spent on assembly (s) | Time spent on linear solve (s) |
+| Degrees-of-freedom | Assembly (s) | Linear solve (s) |
 | --- | --- | --- |
-| 64 | 0.001719430962111801 | 0.0008631939999759197 |
-| 125 | 0.0022377190180122852 | 0.0009978360030800104 |
-| 216 | 0.004175334994215518 | 0.0016233620117418468 |
-| 512 | 0.006831337988842279 | 0.0018000249983742833 |
-| 1000 | 0.027329800999723375 | 0.006487983977422118 |
-| 1728 | 0.02035172702744603 | 0.00894418201642111 |
-| 4096 | 0.04277183400699869 | 0.054088378965388983 |
-| 8000 | 0.08925403101602569 | 0.39822074701078236 |
-| 15625 | 0.17675437999423593 | 3.5216876140329987 |
-| 32768 | 0.41025503899436444 | 24.167141190962866 |
-| 64000 | 0.8814217780018225 | 138.6927448490169 |
-| 125000 | 1.7890089299762622 | nan |
-| 262144 | 4.044992835028097 | nan |
-| 512000 | 8.037139102991205 | nan |
-| 1030301 | 20.241967056994326 | nan |
+| 64 | 0.00155 | 0.00073 |
+| 125 | 0.00203 | 0.00072 |
+| 216 | 0.00276 | 0.00081 |
+| 512 | 0.00589 | 0.00127 |
+| 1000 | 0.01076 | 0.00247 |
+| 1728 | 0.02063 | 0.00538 |
+| 4096 | 0.04805 | 0.04241 |
+| 8000 | 0.09804 | 0.16269 |
+| 15625 | 0.20347 | 0.87741 |
+| 32768 | 0.46399 | 5.98163 |
+| 64000 | 1.00143 | 36.47855 |
+| 125000 | 2.05274 | nan |
+| 262144 | 4.48825 | nan |
+| 512000 | 8.82814 | nan |
+| 1030301 | 18.25461 | nan |
 
 
 ## Examples
@@ -126,6 +125,24 @@ for first timers include:
 
 *By contributing code to scikit-fem, you are agreeing to release it under BSD-3-Clause, see LICENSE.md.*
 
+## Citing the library
+
+You may use the following BibTeX entry:
+```
+@article{skfem2020,
+  doi = {10.21105/joss.02369},
+  url = {https://doi.org/10.21105/joss.02369},
+  year = {2020},
+  publisher = {The Open Journal},
+  volume = {5},
+  number = {52},
+  pages = {2369},
+  author = {Tom Gustafsson and G. D. McBain},
+  title = {scikit-fem: A Python package for finite element assembly},
+  journal = {Journal of Open Source Software}
+}
+```
+
 ## In literature
 
 The library has been used in the preparation of the following scientific works:
@@ -151,6 +168,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
+### [2.0.0] - 2020-08-21
+
 #### Added
 - Support for complex-valued forms: `BilinearForm` and `LinearForm` now take
   an optional argument `dtype` which defaults to `np.float64`
@@ -158,6 +177,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Dofs.__or__` and `Dofs.__add__`, for merging degree-of-freedom sets
   (i.e. `Dofs` objects) using `|` and `+` operators
 - `Dofs.drop` and `Dofs.keep`, for further filtering the degree-of-freedom sets
+
+### Removed
+- Support for old-style decorators `bilinear_form`, `linear_form`, and
+  `functional` (deprecated since 1.0.0)
 
 #### Fixed
 - `FacetBasis` did not initialize with `ElementQuadP`

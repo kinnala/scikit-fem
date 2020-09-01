@@ -1,4 +1,4 @@
-from typing import Callable, Dict
+from typing import Dict
 
 from numpy import ndarray
 import numpy as np
@@ -31,24 +31,3 @@ class Functional(Form):
                  v: Basis,
                  **kwargs) -> float:
         return np.sum(self.elemental(v, **kwargs))
-
-
-def functional(form: Callable) -> Functional:
-
-    # for backwards compatibility
-    from .form_parameters import FormParameters
-
-    import warnings
-    warnings.warn("The old style @functional wrapper is deprecated. "
-                  "Consider using the new style forms, defined via "
-                  "@Functional.", DeprecationWarning)
-
-    class ClassicFunctional(Functional):
-
-        def _kernel(self, w, dx):
-            W = {k: w[k].f for k in w}
-            if 'w' in w:
-                W['dw'] = w['w'].df
-            return np.sum(self.form(w=FormParameters(**W)) * dx, axis=1)
-
-    return ClassicFunctional(form)

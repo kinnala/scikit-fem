@@ -14,7 +14,7 @@ def pre(N=3):
     return m
 
 
-print('| Degrees-of-freedom | Time spent on assembly (s) | Time spent on linear solve (s) |')
+print('| Degrees-of-freedom | Assembly (s) | Linear solve (s) |')
 print('| --- | --- | --- |')
 
 
@@ -40,4 +40,4 @@ for k in range(6, 21):
     else:
         solve_time = timeit(lambda: solver(A, b), number=1)
 
-    print('| {} | {} | {} |'.format(len(b), assemble_time, solve_time))
+    print('| {} | {:.5f} | {:.5f} |'.format(len(b), assemble_time, solve_time))

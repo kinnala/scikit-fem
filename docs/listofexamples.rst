@@ -147,10 +147,6 @@ Example 12: Mesh generation and postprocessing
 This example demonstrates mesh generation using an external package and
 postprocessing the value of a functional, Boussinesq k-factor.
 
-.. note::
-
-   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`__.
-
 .. figure:: https://user-images.githubusercontent.com/973268/87686059-bee13300-c78c-11ea-9693-727f0baf0433.png
 
    The solution of Example 12.
@@ -227,10 +223,6 @@ and
 with the boundary condition
 :math:`k_1 \frac{\partial T}{\partial r} + h T = 0` on :math:`r=b`.
 
-.. note::
-
-   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`__.
-
 .. figure:: https://user-images.githubusercontent.com/973268/87775309-8db93f00-c82e-11ea-9015-add2226ad01e.png
 
    The solution of Example 17.
@@ -243,9 +235,6 @@ Example 18: Stokes equations
 This example solves for the creeping flow problem in the primitive variables,
 i.e. velocity and pressure instead of the stream-function.  These are governed
 by the Stokes momentum :math:`- \nu\Delta\boldsymbol{u} + \rho^{-1}\nabla p = \boldsymbol{f}` and the continuity equation :math:`\nabla\cdot\boldsymbol{u} = 0`.
-
-.. note::
-   This example requires the external package `dmsh <https://pypi.org/project/dmsh/>`_.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87775390-b04b5800-c82e-11ea-8999-e22305e909c1.png
 
@@ -277,9 +266,6 @@ governed by the biharmonic equation :math:`\nu \Delta^2\psi = \mathrm{rot}\,\bol
 conditions at a wall are that :math:`\psi` is constant (the wall is
 impermeable) and that the normal component of its gradient vanishes (no
 slip)
-
-.. note::
-   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`__.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87778910-9745a580-c834-11ea-8277-62d58a7fe7b8.png
 
@@ -320,7 +306,7 @@ This example solves the Bratu-Gelfand two-point boundary value problem :math:`u'
 with :math:`u(0)=u(1)=0` and where :math:`\lambda > 0` is a parameter.
 
 .. note::
-   This example requires the external package `pacopy <https://github.com/nschloe/pacopy>`__.
+   This example requires the external package `pacopy 0.1.2 <https://pypi.org/project/pacopy/0.1.2>`__.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87779278-38ccf700-c835-11ea-955a-b77a0336b791.png
 
@@ -333,9 +319,6 @@ Example 24: Stokes flow with inhomogeneous boundary conditions
 
 This example solves the Stokes flow over a backward-facing step
 with a parabolic velocity profile at the inlet.
-
-.. note::
-   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`__.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87858848-92b6e500-c939-11ea-81f9-cc51f254d19e.png
 
@@ -363,9 +346,6 @@ Example 26: Restricting problem to a subdomain
 
 This example extends Example 17 by restricting the solution to a subdomain.
 
-.. note::
-   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`__.
-
 .. figure:: https://user-images.githubusercontent.com/973268/87858933-3902ea80-c93a-11ea-9d54-464235ab6325.png
 
    The solution of Example 26.
@@ -375,13 +355,13 @@ See the `source code of Example 26 <https://github.com/kinnala/scikit-fem/blob/m
 Example 27: Backward-facing step
 ================================
 
-This example uses `pacopy <https://pypi.org/project/pacopy/>`__ to extend
+This example uses `pacopy 0.1.2 <https://pypi.org/project/pacopy/0.1.2>`__ to extend
 the Stokes equations over a backward-facing step (Example 24) to finite Reynolds
 number; this means defining a residual for the nonlinear problem and its
 derivatives with respect to the solution and to the Reynolds number.
 
 .. note::
-   This example requires the external packages `pygmsh <https://pypi.org/project/pygmsh/>`___ and `pacopy <https://pypi.org/project/pacopy/>`__.
+   This example requires the external package `pacopy 0.1.2 <https://pypi.org/project/pacopy/0.1.2>`__.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87858972-97c86400-c93a-11ea-86e4-66f870b03e48.png
 
@@ -526,3 +506,16 @@ characteristic impedance and velocity factor of the cable.
    The results of Example 35.
 
 See the `source code of Example 35 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex35.py>`_ for more information.
+
+Example 36: Nearly incompressible hyperelasticity
+=================================================
+
+This example demonstrates the implementation of a two field mixed formulation
+for nearly incompressible Neo-Hookean solids.
+
+.. figure:: https://user-images.githubusercontent.com/22624037/91212007-4055aa80-e6d5-11ea-8572-f27986887331.png
+
+   The displacement contour of Example 36.
+   The figure was created using `ParaView <https://www.paraview.org/>`__.
+
+See the `source code of Example 36 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex36.py>`_ for more information.
