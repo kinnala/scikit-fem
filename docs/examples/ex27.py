@@ -42,6 +42,7 @@ The Jacobian of the last nonlinear term is
 """
 
 from skfem import *
+from skfem.algorithms.continuation import natural_jfnk
 from skfem.helpers import grad, dot
 from skfem.models.poisson import vector_laplace, laplace
 from skfem.models.general import divergence, rot
@@ -56,90 +57,7 @@ from matplotlib.tri import Triangulation
 import numpy as np
 from scipy.optimize import OptimizeResult
 from scipy.sparse import bmat, block_diag, csr_matrix
-
-
-def natural(
-    solver: Callable[[np.ndarray, float, float, int], OptimizeResult],
-    jacobian_solver: Callable[[np.ndarray, float, np.ndarray], np.ndarray],
-    u0: np.ndarray,
-    milestones: Iterable[float],
-    df_dmu: Optional[Callable[[np.ndarray, float], np.ndarray]] = None,
-    mu_stepsize0: float = 1.0e-1,
-    mu_stepsize_max: float = float("inf"),
-    mu_stepsize_aggressiveness: int = 2,
-    max_newton_steps: int = 5,
-    newton_tol: float = 1e-9,
-    max_steps: float = float("inf"),
-    verbose: bool = True,
-) -> Iterable[Tuple[float, OptimizeResult]]:
-    """Generate solutions from solver for a sequence of mu always including milestones.
-
-    The most naive parameter continuation. This simply solves :math:`F(u, \\mu_0)=0`
-    using Newton's method, then changes :math:`\\mu` slightly and solves again using
-    the previous solution as an initial guess. Cannot handle turning points.
-
-    Adapted from pacopy 0.1.2, copyright N. Schlömer & G. D. McBain 2020 under
-    the MIT Licence.
-
-    https://raw.githubusercontent.com/nschloe/pacopy/v0.1.2/pacopy/natural.py
-
-    """
-    milestones = iter(milestones)
-    mu = next(milestones)
-    k = 0
-    sol = solver(u0, mu, tol=newton_tol, max_iter=max_newton_steps)
-    if not sol.success:
-        raise RuntimeError(sol)
-    u = sol.x
-
-    yield mu, sol
-    k += 1
-
-    mu_stepsize = mu_stepsize0
-    milestone = next(milestones)
-
-    while k < max_steps:
-
-        if verbose:
-            print(
-                f"Step {k}: mu  {mu:.3e} + {mu_stepsize:.3e}  "
-                f"->  {mu + mu_stepsize:.3e}"
-            )
-
-        # Predictor
-        mu = min(mu + mu_stepsize, milestone)
-        if df_dmu:
-            du_dmu = jacobian_solver(u, mu, -df_dmu(u, mu))
-            u0 = u + du_dmu * mu_stepsize
-
-        else:
-            u0 = u
-
-        # Corrector
-        sol = solver(u0, mu, tol=newton_tol, max_iter=max_newton_steps)
-        if sol.nit >= max_newton_steps:
-            if verbose:
-                print(f"No convergence for mu={mu}.")
-            mu -= mu_stepsize
-
-            mu_stepsize /= 2
-            continue
-        u = sol.x
-
-        yield mu, sol
-        k += 1
-        if mu == milestone:
-            try:
-                milestone = next(milestones)
-            except StopIteration:
-                break
-        else:
-            mu_stepsize *= (
-                1
-                + mu_stepsize_aggressiveness
-                * ((max_newton_steps - sol.nit) / (max_newton_steps - 1)) ** 2
-            )
-            mu_stepsize = min(mu_stepsize, mu_stepsize_max)
+from scipy.sparse.linalg import LinearOperator, splu
 
 
 @LinearForm
@@ -355,10 +273,46 @@ else:
     milestones = [0, 50.]
 
 
-for reynolds, sol in natural(bfs.solve, bfs.jacobian_solver,
-                             bfs.make_vector(), milestones,
-                             df_dmu=bfs.df_dmu,
-                             mu_stepsize0=50.):
+def residual(reynolds: float) -> Callable[[np.ndarray], np.ndarray]:
+    return partial(bfs.f, reynolds=reynolds)
+
+
+def preconditioner(reynolds: float, uvp: np.ndarray, update_tol: Optional[float] = 0.5) -> LinearOperator:
+    M = LinearOperator(2 * uvp.shape[:1], np.empty_like)
+
+    def update(uvp: np.ndarray, f: Optional[np.ndarray] = None) -> None:
+
+        if f is not None:
+            f_norm = np.linalg.norm(f)
+
+        if f is None or f_norm > update_tol * update.current_f_norm:
+            print("Updating preconditioner.")
+            u = bfs.basis['u'].interpolate(bfs.split(uvp)[0])
+
+            J = bfs.S + reynolds * block_diag([asm(acceleration_jacobian, bfs.basis['u'],
+                                                   wind=u),
+                                               csr_matrix((bfs.basis['p'].N,) * 2)])
+            J_I = condense(J, I=bfs.I, expand=False).tocsc()
+            solver = splu(J_I).solve
+
+            def precondition(rhs: np.ndarray) -> np.ndarray:
+                increment = np.zeros_like(rhs)
+                increment[bfs.I] = solver(rhs[bfs.I])
+                return increment
+
+            M.matvec = precondition
+
+        update.current_f_norm = float("inf") if f is None else f_norm
+
+    M.update = update
+    M.update(uvp)
+    return M
+
+
+for reynolds, sol in natural_jfnk(residual,
+                                  bfs.make_vector(), 
+                                  milestones,
+                                  preconditioner, 6):
     print(f'Re = {reynolds}')
 
     if reynolds in milestones:
