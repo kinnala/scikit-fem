@@ -318,7 +318,7 @@ for reynolds, sol in natural_jfnk(residual,
                                   preconditioner,
                                   {
                                       "maxiter": 9,
-                                      "tol_norm": bfs.norm, 
+                                      "tol_norm": bfs.norm,
                                   }):
     print(f'Re = {reynolds}')
 
