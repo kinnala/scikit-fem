@@ -9,7 +9,8 @@ def natural_jfnk(
     fun: Callable[[float], Callable[[np.ndarray], np.ndarray]],
     w: np.ndarray,
     milestones: Iterable[float],
-    preconditioner: Optional[Callable[[float, np.ndarray], LinearOperator]] = None,
+    preconditioner: Optional[Callable[[float, np.ndarray],
+                                      LinearOperator]] = None,
     root_options: Optional[Dict[str, Any]] = None,
 ) -> Iterator[Tuple[float, OptimizeResult]]:
     """Generate pairs (mu, x) such that `x` is a root of fun(`x`)
@@ -19,7 +20,8 @@ def natural_jfnk(
     `root_options` are passed on to root; e.g. maxiter, tol_norm.
     """
 
-    options = {"disp": True, "maxiter": 9, "jac_options": {}, **(root_options or {})}
+    options = {"disp": True, "maxiter": 9, "jac_options": {},
+               **(root_options or {})}
 
     mu = d_mu = np.NINF
     for milestone in milestones:
