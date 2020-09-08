@@ -316,7 +316,10 @@ for reynolds, sol in natural_jfnk(residual,
                                   bfs.make_vector(),
                                   milestones,
                                   preconditioner,
-                                  {"maxiter": 6, "tol_norm": bfs.norm, "fatol": 1e-12}):
+                                  {
+                                      "maxiter": 9,
+                                      "tol_norm": bfs.norm, 
+                                  }):
     print(f'Re = {reynolds}')
 
     if reynolds in milestones:
