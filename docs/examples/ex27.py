@@ -50,7 +50,7 @@ from skfem.io.json import from_file
 
 from functools import partial
 from pathlib import Path
-from typing import Callable, Tuple, Iterable, Optional
+from typing import Callable, Tuple, Optional
 
 from matplotlib.pyplot import subplots
 from matplotlib.tri import Triangulation
@@ -190,6 +190,9 @@ class BackwardFacingStep:
     def norm2_r(self, u: np.ndarray) -> float:
         return self.inner(u, u)
 
+    def norm(self, u: np.ndarray) -> float:
+        return np.linalg.norm(self.split(u)[0])
+
     def N(self, uvp: np.ndarray) -> np.ndarray:
         u = self.basis['u'].interpolate(self.split(uvp)[0])
         return np.hstack([asm(acceleration, self.basis['u'], wind=u),
@@ -310,9 +313,10 @@ def preconditioner(reynolds: float, uvp: np.ndarray, update_tol: Optional[float]
 
 
 for reynolds, sol in natural_jfnk(residual,
-                                  bfs.make_vector(), 
+                                  bfs.make_vector(),
                                   milestones,
-                                  preconditioner, 6):
+                                  preconditioner,
+                                  {"maxiter": 6, "tol_norm": bfs.norm, "fatol": 1e-12}):
     print(f'Re = {reynolds}')
 
     if reynolds in milestones:
