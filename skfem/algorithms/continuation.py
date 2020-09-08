@@ -42,8 +42,8 @@ def natural_jfnk(
                 options["jac_options"].update(inner_M=preconditioner(mu, w))
 
             sol = root(fun(mu), sol.x, method="krylov", options=options)
-            if sol.nit > options["maxiter"]:
-                print(f"No convergence for mu={mu}.")
+            if not sol.success:
+                print(f"No convergence for mu={mu}.", sol.message)
                 mu -= d_mu
                 d_mu /= 2
                 continue
