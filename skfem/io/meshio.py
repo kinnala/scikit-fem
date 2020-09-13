@@ -26,22 +26,32 @@ def from_meshio(m, force_mesh_type=None):
     Parameters
     ----------
     m
-        The mesh object from meshio.
+        The mesh from meshio.
     force_mesh_type
         An optional string forcing the mesh type if automatic detection
         fails. See skfem.importers.meshio.MESH_TYPE_MAPPING for possible
         values.
+
+    Returns
+    -------
+    A :class:`~skfem.mesh.Mesh` object.
 
     """
 
     cells = m.cells_dict
 
     if force_mesh_type is None:
+        meshio_type = None
+
         for k, v in MESH_TYPE_MAPPING.items():
             # find first if match
             if k in cells:
                 meshio_type, mesh_type = k, v
                 break
+
+        if meshio_type is None:
+            raise NotImplementedError("Mesh type(s) not supported "
+                                      "in import: {}.".format(cells.keys()))
     else:
         meshio_type, mesh_type = (force_mesh_type,
                                   MESH_TYPE_MAPPING[force_mesh_type])
