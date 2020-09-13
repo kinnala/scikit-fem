@@ -9,6 +9,7 @@ from skfem.mapping.mapping_mortar import MappingMortar
 
 class TestIsoparamNormals(unittest.TestCase):
     """Test that normals on x[i] == 0 are correct."""
+
     mesh = MeshHex
     elem = ElementHex1
 
@@ -30,6 +31,7 @@ class TestIsoparamNormals(unittest.TestCase):
 
 
 class TestIsoparamNormalsQuad(TestIsoparamNormals):
+
     mesh = MeshQuad
     elem = ElementQuad1
 
@@ -106,22 +108,26 @@ class TestMortarPair(unittest.TestCase):
 
 
 class TestMortarPairTriQuad(TestMortarPair):
+
     mesh1_type = MeshTri
     mesh2_type = MeshQuad
 
 
 class TestMortarPairQuadQuad(TestMortarPair):
+
     mesh1_type = MeshQuad
     mesh2_type = MeshQuad
 
 
 class TestMortarPairNoMatch1(TestMortarPair):
+
     mesh1_type = MeshQuad
     mesh2_type = MeshTri
     translate_y = 0.1
 
 
 class TestMortarPairNoMatch2(TestMortarPair):
+
     mesh1_type = MeshQuad
     mesh2_type = MeshTri
     translate_y = -np.pi / 10.
