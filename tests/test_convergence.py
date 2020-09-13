@@ -226,6 +226,9 @@ class ConvergenceHexS2(ConvergenceQ1):
 
 class ConvergenceHex2(ConvergenceHexS2):
 
+    rateL2 = 2.92
+    rateH1 = 2.01
+
     def create_basis(self, m):
         e = ElementHex2()
         return InteriorBasis(m, e)
