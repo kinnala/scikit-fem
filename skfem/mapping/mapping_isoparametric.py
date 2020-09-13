@@ -129,14 +129,14 @@ class MappingIsoparametric(Mapping):
         else:
             raise NotImplementedError
 
-    def invF(self, x, tind=None, newton_max_iters=50, newton_tol=1e-8):
+    def invF(self, x, tind=None, newton_max_iters=50, newton_tol=1e-12):
         """Newton iteration for evaluating inverse isoparametric mapping."""
         X = np.zeros(x.shape) + .5
         for _ in range(newton_max_iters):
             F = self.F(X, tind)
             invDF = self.invDF(X, tind)
             dX = np.einsum('ijkl,jkl->ikl', invDF, x - F)
-            X = X + dX
+            X = np.clip(X + dX, 0., 1.)
             if (np.linalg.norm(dX, 1, (0, 2)) < newton_tol).all():
                 return X
         raise Exception(("Newton iteration didn't converge "

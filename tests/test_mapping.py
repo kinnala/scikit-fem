@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 
 from skfem.mesh import MeshHex, MeshQuad, MeshTri
-from skfem.element import ElementHex1, ElementQuad1
+from skfem.element import ElementHex1, ElementQuad1, ElementHex2
 from skfem.assembly import FacetBasis
 from skfem.mapping.mapping_mortar import MappingMortar
 
@@ -36,6 +36,11 @@ class TestIsoparamNormalsQuad(TestIsoparamNormals):
     elem = ElementQuad1
 
 
+class TestIsoparamNormalsHex2(TestIsoparamNormals):
+
+    elem = ElementHex2
+
+
 class TestInverseMapping(unittest.TestCase):
     """Test that inverse mapping works for non-rectangular elements."""
 
@@ -49,7 +54,8 @@ class TestInverseMapping(unittest.TestCase):
         return m
 
     def within_refelem(self, y):
-        return (np.abs(y) < 1.0 + 1e-12).all()
+        return ((np.abs(y) < 1. + 1e-12).all()
+                and (np.abs(y) > 0. - 1e-12).all())
 
     def runTest(self):
         m = self.initialize_meshes()
@@ -77,6 +83,12 @@ class TestInverseMappingHex(TestInverseMapping):
                               [1., 1., 0.],
                               [1., 1., 1.]]).T, m0.t)
         return m
+
+
+class TestInverseMappingHex2(TestInverseMappingHex):
+    """This should be equivalent to TestInverseMappingHex."""
+
+    element = ElementHex2
 
 
 class TestMortarPair(unittest.TestCase):
