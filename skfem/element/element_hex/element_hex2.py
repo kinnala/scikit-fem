@@ -46,7 +46,7 @@ class ElementHex2(ElementH1):
     def __init__(self):
         X = self.doflocs.T
         V = self._power_basis(X)
-        self.invV = inv(V).T
+        self.invV = inv(V)
         self.invV[np.abs(self.invV) < 1e-10] = 0.
 
     def _power_basis(self, X):
@@ -174,11 +174,13 @@ class ElementHex2(ElementH1):
         ])
 
     def lbasis(self, X, i):
+        if i >= 27 or i < 0:
+            self._index_error()
         return (
-            np.sum(self.invV[i][:, None] * self._power_basis(X), axis=0),
+            np.einsum('i...,i...', self.invV[i], self._power_basis(X)),
             np.array([
-                np.sum(self.invV[i][:, None] * self._power_basis_dx(X), axis=0),
-                np.sum(self.invV[i][:, None] * self._power_basis_dy(X), axis=0),
-                np.sum(self.invV[i][:, None] * self._power_basis_dz(X), axis=0),
+                np.einsum('i...,i...', self.invV[i], self._power_basis_dx(X)),
+                np.einsum('i...,i...', self.invV[i], self._power_basis_dy(X)),
+                np.einsum('i...,i...', self.invV[i], self._power_basis_dz(X)),
             ])
         )

@@ -6,13 +6,15 @@ from skfem import BilinearForm, LinearForm, Functional, asm, solve
 from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementHexS2, ElementTetP0, ElementTetP1,
                            ElementTetP2, ElementTriP1, ElementQuad2,
-                           ElementTriMorley, ElementVectorH1, ElementQuadP)
+                           ElementTriMorley, ElementVectorH1, ElementQuadP,
+                           ElementHex2)
 from skfem.mesh import MeshQuad, MeshHex, MeshTet, MeshTri
 from skfem.assembly import FacetBasis, InteriorBasis
 from skfem.utils import project
 
 
 class IntegrateOneOverBoundaryQ1(unittest.TestCase):
+
     elem = ElementQuad1()
 
     def createBasis(self):
@@ -43,6 +45,7 @@ class IntegrateOneOverBoundaryQ1(unittest.TestCase):
 
 
 class IntegrateOneOverBoundaryS2(IntegrateOneOverBoundaryQ1):
+
     elem = ElementQuadS2()
 
 
@@ -61,6 +64,15 @@ class IntegrateOneOverBoundaryHex1_2(IntegrateOneOverBoundaryQ1):
         m = MeshHex()
         m.refine(3)
         self.fbasis = FacetBasis(m, ElementHexS2())
+        self.boundary_area = 6.000
+
+
+class IntegrateOneOverBoundaryHex2(IntegrateOneOverBoundaryQ1):
+
+    def createBasis(self):
+        m = MeshHex()
+        m.refine(3)
+        self.fbasis = FacetBasis(m, ElementHex2())
         self.boundary_area = 6.000
 
 
@@ -89,6 +101,7 @@ class IntegrateFuncOverBoundary(unittest.TestCase):
 
 
 class IntegrateFuncOverBoundaryPart(unittest.TestCase):
+
     case = (MeshHex, ElementHex1)
 
     def runTest(self):
@@ -110,22 +123,32 @@ class IntegrateFuncOverBoundaryPart(unittest.TestCase):
 
 
 class IntegrateFuncOverBoundaryPartHexS2(IntegrateFuncOverBoundaryPart):
+
     case = (MeshHex, ElementHexS2)
 
 
+class IntegrateFuncOverBoundaryPartHex2(IntegrateFuncOverBoundaryPart):
+
+    case = (MeshHex, ElementHex2)
+
+
 class IntegrateFuncOverBoundaryPartTetP1(IntegrateFuncOverBoundaryPart):
+
     case = (MeshTet, ElementTetP1)
 
 
 class IntegrateFuncOverBoundaryPartTetP2(IntegrateFuncOverBoundaryPart):
+
     case = (MeshTet, ElementTetP2)
 
 
 class IntegrateFuncOverBoundaryPartTetP0(IntegrateFuncOverBoundaryPart):
+
     case = (MeshTet, ElementTetP0)
 
 
 class BasisInterpolator(unittest.TestCase):
+
     case = (MeshTri, ElementTriP1)
 
     def initOnes(self, basis):
@@ -146,18 +169,22 @@ class BasisInterpolator(unittest.TestCase):
 
 
 class BasisInterpolatorTriP2(BasisInterpolator):
+
     case = (MeshQuad, ElementQuad1)
 
 
 class BasisInterpolatorQuad1(BasisInterpolator):
+
     case = (MeshQuad, ElementQuad1)
 
 
 class BasisInterpolatorQuad2(BasisInterpolator):
+
     case = (MeshQuad, ElementQuad2)
 
 
 class BasisInterpolatorQuadS2(BasisInterpolator):
+
     case = (MeshQuad, ElementQuadS2)
 
 
@@ -182,6 +209,7 @@ class BasisInterpolatorMorley(BasisInterpolator):
 
 
 class NormalVectorTestTri(unittest.TestCase):
+
     case = (MeshTri(), ElementTriP1())
     test_integrate_volume = True
     intorder = None
@@ -221,30 +249,43 @@ class NormalVectorTestTri(unittest.TestCase):
 
 
 class NormalVectorTestTet(NormalVectorTestTri):
+
     case = (MeshTet(), ElementTetP1())
 
 
 class NormalVectorTestTetP2(NormalVectorTestTri):
+
     case = (MeshTet(), ElementTetP2())
     test_integrate_volume = False
 
 
 class NormalVectorTestQuad(NormalVectorTestTri):
+
     case = (MeshQuad(), ElementQuad1())
 
 
 class NormalVectorTestQuadP(NormalVectorTestTri):
+
     case = (MeshQuad(), ElementQuadP(3))
     test_integrate_volume = False
 
 
 class NormalVectorTestHex(NormalVectorTestTri):
+
     case = (MeshHex(), ElementHex1())
     intorder = 3
 
 
 class NormalVectorTestHexS2(NormalVectorTestTri):
+
     case = (MeshHex(), ElementHexS2())
+    intorder = 3
+    test_integrate_volume = False
+
+
+class NormalVectorTestHex2(NormalVectorTestTri):
+
+    case = (MeshHex(), ElementHex2())
     intorder = 3
     test_integrate_volume = False
 

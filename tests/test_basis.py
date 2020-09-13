@@ -7,7 +7,7 @@ from skfem import BilinearForm, asm, solve, condense
 from skfem.mesh import MeshTri, MeshTet, MeshHex
 from skfem.assembly import InteriorBasis, FacetBasis, Dofs
 from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
-                           ElementTetP2, ElementHexS2)
+                           ElementTetP2, ElementHexS2, ElementHex2)
 
 
 class TestCompositeSplitting(TestCase):
@@ -117,3 +117,8 @@ class TestFacetExpansionHexS2(TestFacetExpansion):
 
     mesh_type = MeshHex
     elem_type = ElementHexS2
+
+
+class TestFacetExpansionHex2(TestFacetExpansionHexS2):
+
+    elem_type = ElementHex2
