@@ -241,5 +241,13 @@ class TestPartitionofUnity(TestCase):
             self.assertAlmostEqual(out, 1, msg='failed for {}'.format(elem))
 
 
+class TestElementLinePp(TestCase):
+
+    def test_p_less_than_1_error(self):
+        """Tests that exception is thrown when initializing with p < 1."""
+        with self.assertRaises(ValueError):
+            ElementLinePp(0)
+
+
 if __name__ == '__main__':
     main()
