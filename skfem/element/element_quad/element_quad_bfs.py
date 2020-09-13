@@ -5,6 +5,7 @@ from ...mesh.mesh2d import MeshQuad
 
 
 class ElementQuadBFS(ElementGlobal):
+
     nodal_dofs = 4
     dim = 2
     maxdeg = 6

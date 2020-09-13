@@ -5,6 +5,7 @@ from ...mesh.mesh2d import MeshTri
 
 
 class ElementTriP2(ElementH1):
+
     nodal_dofs = 1
     facet_dofs = 1
     dim = 2

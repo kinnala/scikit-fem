@@ -8,6 +8,7 @@ from ...mesh.mesh_line import MeshLine
 
 
 class ElementLinePp(ElementH1):
+
     nodal_dofs = 1
     dim = 1
     mesh_type = MeshLine

@@ -5,6 +5,7 @@ from ...mesh.mesh2d import MeshTri
 
 
 class ElementTriMini(ElementH1):
+
     nodal_dofs = 1
     interior_dofs = 1
     dim = 2

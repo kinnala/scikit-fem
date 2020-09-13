@@ -5,6 +5,7 @@ from ..element_line import ElementLinePp
 
 
 class ElementQuadP(ElementLinePp):
+
     nodal_dofs = 1
     dim = 2
     mesh_type = MeshQuad

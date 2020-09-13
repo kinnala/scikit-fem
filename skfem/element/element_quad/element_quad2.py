@@ -5,6 +5,7 @@ from ...mesh.mesh2d import MeshQuad
 
 
 class ElementQuad2(ElementH1):
+
     nodal_dofs = 1
     facet_dofs = 1
     interior_dofs = 1
