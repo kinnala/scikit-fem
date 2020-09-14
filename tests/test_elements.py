@@ -1,7 +1,7 @@
 from unittest import TestCase, main
 
 import numpy as np
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_allclose, assert_array_equal
 
 from skfem.element import (ElementHex1, ElementHexS2, ElementLineP1, 
                            ElementLineP2, ElementLinePp, ElementLineMini,
@@ -9,7 +9,8 @@ from skfem.element import (ElementHex1, ElementHexS2, ElementLineP1,
                            ElementQuadP, ElementQuadS2, ElementTetMini, 
                            ElementTetP0, ElementTetP1, ElementTetP2,
                            ElementTriMini, ElementTriP0, ElementTriP1,
-                           ElementTriP2, ElementTriRT0, ElementVectorH1)
+                           ElementTriP2, ElementTriRT0, ElementVectorH1,
+                           ElementHex2)
 from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 from skfem.assembly.basis import InteriorBasis
 from skfem.mapping import MappingAffine
@@ -40,6 +41,7 @@ class TestNodality(TestCase):
         ElementTetMini(),
         ElementHex1(),
         ElementHexS2(),
+        ElementHex2(),
     ]
 
     def runTest(self):
@@ -62,8 +64,8 @@ class TestNodality(TestCase):
             ixs = np.nonzero(~ix)[0]
             Ih = Ih[ixs].T[ixs].T
 
-            assert_array_equal(Ih, np.eye(N - Nnan),
-                               err_msg="{}".format(type(e)))
+            assert_allclose(Ih, np.eye(N - Nnan), atol=1e-13,
+                            err_msg="{}".format(type(e)))
 
 
 class TestNodalityTriRT0(TestCase):
@@ -83,8 +85,8 @@ class TestNodalityTriRT0(TestCase):
             n = np.array([1., np.sqrt(2), 1.])
             Ih[itr] = A * n
 
-        assert_array_equal(Ih, np.eye(N),
-                           err_msg="{}".format(type(e)))
+        assert_allclose(Ih, np.eye(N),
+                        err_msg="{}".format(type(e)))
 
 
 class TestComposite(TestCase):
@@ -165,6 +167,7 @@ class TestDerivatives(TestCase):
         ElementTetMini(),
         ElementHex1(),
         ElementHexS2(),
+        ElementHex2(),
     ]
 
     def runTest(self):
@@ -218,6 +221,7 @@ class TestPartitionofUnity(TestCase):
         ElementTetP2(),
         ElementHex1(),
         ElementHexS2(),
+        ElementHex2(),
     ]
 
     def runTest(self):
@@ -235,6 +239,14 @@ class TestPartitionofUnity(TestCase):
             for i in range(elem.doflocs.shape[0]):
                 out += elem.lbasis(y, i)[0][0]
             self.assertAlmostEqual(out, 1, msg='failed for {}'.format(elem))
+
+
+class TestElementLinePp(TestCase):
+
+    def test_p_less_than_1_error(self):
+        """Tests that exception is thrown when initializing with p < 1."""
+        with self.assertRaises(ValueError):
+            ElementLinePp(0)
 
 
 if __name__ == '__main__':

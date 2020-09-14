@@ -5,6 +5,7 @@ from ...mesh.mesh_line import MeshLine
 
 
 class ElementLineMini(ElementH1):
+
     nodal_dofs = 1
     interior_dofs = 1
     dim = 1

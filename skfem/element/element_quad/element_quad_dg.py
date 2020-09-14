@@ -3,6 +3,7 @@ from ...mesh.mesh2d import MeshQuad
 
 
 class ElementQuadDG(ElementH1):
+
     dim = 2
     mesh_type = MeshQuad
 

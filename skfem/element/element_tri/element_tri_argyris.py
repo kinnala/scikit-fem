@@ -5,6 +5,7 @@ from ...mesh.mesh2d import MeshTri
 
 
 class ElementTriArgyris(ElementGlobal):
+
     nodal_dofs = 6
     facet_dofs = 1
     dim = 2

@@ -5,6 +5,7 @@ from ...mesh.mesh3d import MeshTet
 
 
 class ElementTetP2(ElementH1):
+
     nodal_dofs = 1
     edge_dofs = 1
     dim = 3

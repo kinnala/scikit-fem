@@ -3,6 +3,7 @@ from ...mesh.mesh2d import MeshTri
 
 
 class ElementTriDG(ElementH1):
+
     dim = 2
     mesh_type = MeshTri
 

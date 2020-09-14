@@ -5,6 +5,7 @@ from ..element_h1 import ElementH1
 
 
 class ElementLineP2(ElementH1):
+
     nodal_dofs = 1
     interior_dofs = 1
     dim = 1

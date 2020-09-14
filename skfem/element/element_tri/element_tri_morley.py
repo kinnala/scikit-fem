@@ -5,6 +5,7 @@ from ...mesh.mesh2d import MeshTri
 
 
 class ElementTriMorley(ElementGlobal):
+
     nodal_dofs = 1
     facet_dofs = 1
     dim = 2

@@ -5,6 +5,7 @@ from ..element_h1 import ElementH1
 
 
 class ElementLineP1(ElementH1):
+
     nodal_dofs = 1
     dim = 1
     maxdeg = 1

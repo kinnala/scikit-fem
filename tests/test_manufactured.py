@@ -9,7 +9,7 @@ from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 from skfem.element import (ElementHex1, ElementHexS2,
                            ElementLineP1, ElementLineP2, ElementLineMini, 
                            ElementQuad1, ElementQuad2, ElementTetP1,
-                           ElementTriP2)
+                           ElementTriP2, ElementHex2)
 from skfem.assembly import FacetBasis, InteriorBasis
 from skfem import asm, condense, solve, LinearForm
 
@@ -133,6 +133,7 @@ class LineNeumann1DMini(LineNeumann1D):
     
 
 class TestExactHexElement(unittest.TestCase):
+
     mesh = MeshHex
     elem = ElementHex1
     funs = [
@@ -146,7 +147,7 @@ class TestExactHexElement(unittest.TestCase):
     def runTest(self):
 
         m = self.mesh()
-        m.refine(4)
+        m.refine(3)
 
         ib = InteriorBasis(m, self.elem())
 
@@ -163,8 +164,8 @@ class TestExactHexElement(unittest.TestCase):
 
 
 class TestExactHexS2(TestExactHexElement):
-    elem = ElementHexS2
 
+    elem = ElementHexS2
     funs = [
         lambda x: 1 + 0 * x[0],
     ]
@@ -173,7 +174,20 @@ class TestExactHexS2(TestExactHexElement):
         return fun(basis.doflocs)
 
 
+class TestExactHex2(TestExactHexElement):
+
+    elem = ElementHex2
+    funs = [
+        lambda x: 1 + 0 * x[0],
+        lambda x: 1 + x[0] * x[1] * x[2],
+    ]
+
+    def set_bc(self, fun, basis):
+        return fun(basis.doflocs)
+
+
 class TestExactQuadElement(TestExactHexElement):
+
     mesh = MeshQuad
     elem = ElementQuad1
     funs = [
@@ -183,6 +197,7 @@ class TestExactQuadElement(TestExactHexElement):
 
 
 class TestExactTetElement(TestExactHexElement):
+
     mesh = MeshTet
     elem = ElementTetP1
     funs = [
@@ -192,6 +207,7 @@ class TestExactTetElement(TestExactHexElement):
 
 
 class TestExactTriElementP2(TestExactHexElement):
+
     mesh = MeshTri
     elem = ElementTriP2
     funs = [
@@ -204,6 +220,7 @@ class TestExactTriElementP2(TestExactHexElement):
 
 
 class TestExactQuadElement2(TestExactTriElementP2):
+
     mesh = MeshQuad
     elem = ElementQuad2
 

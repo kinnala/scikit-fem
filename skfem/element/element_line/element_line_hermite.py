@@ -5,6 +5,7 @@ from ...mesh.mesh_line import MeshLine
 
 
 class ElementLineHermite(ElementGlobal):
+
     nodal_dofs = 2
     dim = 1
     maxdeg = 3

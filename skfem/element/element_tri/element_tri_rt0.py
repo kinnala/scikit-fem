@@ -5,6 +5,7 @@ from ...mesh.mesh2d import MeshTri
 
 
 class ElementTriRT0(ElementHdiv):
+
     facet_dofs = 1
     dim = 2
     maxdeg = 1

@@ -5,6 +5,7 @@ from ...mesh.mesh2d import MeshTri
 
 
 class ElementTriP0(ElementH1):
+
     interior_dofs = 1
     dim = 2
     maxdeg = 0

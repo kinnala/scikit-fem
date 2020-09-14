@@ -118,11 +118,13 @@ class SaveLoadCycle(unittest.TestCase):
 
 
 class SaveLoadCycleHex(SaveLoadCycle):
+
     cls = MeshHex
 
 
 class SerializeUnserializeCycle(unittest.TestCase):
     """Check to_dict/initialize cycles."""
+
     clss = [MeshTet,
             MeshTri,
             MeshHex,

@@ -4,7 +4,7 @@ import numpy as np
 
 from skfem import BilinearForm, LinearForm, asm, solve, condense
 from skfem.models.poisson import laplace
-from skfem.element import (ElementHex1, ElementHexS2, ElementLineP1,
+from skfem.element import (ElementHex1, ElementHex2, ElementHexS2, ElementLineP1,
                            ElementLineP2, ElementLineMini, 
                            ElementQuad1, ElementQuad2,
                            ElementQuadS2, ElementTetMini, ElementTetP1,
@@ -15,6 +15,7 @@ from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 
 
 class ConvergenceQ1(unittest.TestCase):
+
     rateL2 = 2.0
     rateH1 = 1.0
     eps = 0.1
@@ -145,6 +146,7 @@ class ConvergenceQ1(unittest.TestCase):
 
 
 class ConvergenceQ2(ConvergenceQ1):
+
     rateL2 = 3.0
     rateH1 = 2.0
 
@@ -176,6 +178,7 @@ class ConvergenceTriP1(ConvergenceQ1):
 
 
 class ConvergenceTriP2(ConvergenceTriP1):
+
     rateL2 = 3.0
     rateH1 = 2.0
 
@@ -192,6 +195,7 @@ class ConvergenceTriMini(ConvergenceTriP1):
 
 
 class ConvergenceHex1(ConvergenceQ1):
+
     rateL2 = 2.0
     rateH1 = 1.0
     eps = 0.11
@@ -206,6 +210,7 @@ class ConvergenceHex1(ConvergenceQ1):
 
 
 class ConvergenceHexS2(ConvergenceQ1):
+
     rateL2 = 3.05
     rateH1 = 2.21
     eps = 0.02
@@ -219,7 +224,18 @@ class ConvergenceHexS2(ConvergenceQ1):
         self.mesh.refine(1)
 
 
+class ConvergenceHex2(ConvergenceHexS2):
+
+    rateL2 = 2.92
+    rateH1 = 2.01
+
+    def create_basis(self, m):
+        e = ElementHex2()
+        return InteriorBasis(m, e)
+
+
 class ConvergenceTetP1(ConvergenceQ1):
+
     rateL2 = 2.0
     rateH1 = 1.0
     eps = 0.13
@@ -234,6 +250,7 @@ class ConvergenceTetP1(ConvergenceQ1):
 
 
 class ConvergenceTetP2(ConvergenceTetP1):
+
     rateL2 = 3.23
     rateH1 = 1.94
     eps = 0.01
@@ -266,6 +283,7 @@ class ConvergenceLineP1(ConvergenceQ1):
 
 
 class ConvergenceLineP2(ConvergenceQ1):
+
     rateL2 = 3.0
     rateH1 = 2.0
 
@@ -390,18 +408,21 @@ class FacetConvergenceTetP2(unittest.TestCase):
 
 
 class FacetConvergenceHex1(FacetConvergenceTetP2):
+
     case = (MeshHex, ElementHex1)
     limits = (0.9, 1.1)
     preref = 2
 
 
 class FacetConvergenceHexS2(FacetConvergenceTetP2):
+
     case = (MeshHex, ElementHexS2)
     limits = (1.9, 2.2)
     preref = 1
 
 
 class FacetConvergenceTetP1(FacetConvergenceTetP2):
+
     case = (MeshTet, ElementTetP1)
     limits = (0.9, 1.1)
     preref = 2

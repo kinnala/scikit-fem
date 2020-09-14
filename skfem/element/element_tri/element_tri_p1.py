@@ -5,6 +5,7 @@ from ...mesh.mesh2d import MeshTri
 
 
 class ElementTriP1(ElementH1):
+
     nodal_dofs = 1
     dim = 2
     maxdeg = 1
