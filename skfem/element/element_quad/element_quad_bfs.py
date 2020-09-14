@@ -30,6 +30,8 @@ class ElementQuadBFS(ElementGlobal):
     mesh_type = MeshQuad
 
     def gdof(self, F, w, i):
+        if i >= 16 or i < 0:
+            self._index_error()
         j = i % 4
         k = int(i / 4)
         if j == 0:
