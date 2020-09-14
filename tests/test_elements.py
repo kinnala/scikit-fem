@@ -10,7 +10,7 @@ from skfem.element import (ElementHex1, ElementHexS2, ElementLineP1,
                            ElementTetP0, ElementTetP1, ElementTetP2,
                            ElementTriMini, ElementTriP0, ElementTriP1,
                            ElementTriP2, ElementTriRT0, ElementVectorH1,
-                           ElementHex2)
+                           ElementHex2, ElementQuadBFS)
 from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 from skfem.assembly.basis import InteriorBasis
 from skfem.mapping import MappingAffine
@@ -247,6 +247,17 @@ class TestElementLinePp(TestCase):
         """Tests that exception is thrown when initializing with p < 1."""
         with self.assertRaises(ValueError):
             ElementLinePp(0)
+
+
+class TestElementQuadBFS(TestCase):
+
+    def test_throw_index_error(self):
+        """Tests that exception is thrown when i % 4 not in (0, 1, 2, 3)."""
+        element = ElementQuadBFS()
+        with self.assertRaises(ValueError):
+            element.gdof(0, 0, -1)
+        with self.assertRaises(ValueError):
+            element.gdof(0, 0, 16)
 
 
 if __name__ == '__main__':
