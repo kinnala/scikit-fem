@@ -519,3 +519,16 @@ for nearly incompressible Neo-Hookean solids.
    The figure was created using `ParaView <https://www.paraview.org/>`__.
 
 See the `source code of Example 36 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex36.py>`_ for more information.
+
+Example 37: Mixed Poisson equation
+==================================
+
+This example solves the mixed formulation of the Poisson equation
+using the lowest order Raviart-Thomas elements.
+
+.. figure:: https://user-images.githubusercontent.com/973268/93132097-c2862d00-f6dd-11ea-97ad-40aaf2732ad1.png
+
+   The piecewise constant solution field.
+   The figure was created using `ParaView <https://www.paraview.org/>`__.
+
+See the `source code of Example 37 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex37.py>`_ for more information.

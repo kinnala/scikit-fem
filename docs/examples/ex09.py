@@ -43,7 +43,7 @@ from scipy.sparse import spmatrix
 from scipy.sparse.linalg import LinearOperator
 
 p = np.linspace(0, 1, 16)
-m = MeshTet.init_tensor(*(p,)*3)
+m = MeshTet.init_tensor(*(p,) * 3)
 
 e = ElementTetP1()
 basis = InteriorBasis(m, e)
@@ -53,7 +53,7 @@ b = asm(unit_load, basis)
 
 I = m.interior_nodes()
 
-x = 0*b
+x = 0. * b
 
 if __name__ == "__main__":
     verbose = True
