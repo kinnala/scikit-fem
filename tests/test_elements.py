@@ -252,7 +252,7 @@ class TestElementLinePp(TestCase):
 class TestElementQuadBFS(TestCase):
 
     def test_throw_index_error(self):
-        """ Tests that exception is thrown when i % 4 not in (0, 1, 2, 3)."""
+        """Tests that exception is thrown when i % 4 not in (0, 1, 2, 3)."""
         element = ElementQuadBFS()
         with self.assertRaises(ValueError):
             element.gdof(0, 0, -1)
