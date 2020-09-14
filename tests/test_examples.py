@@ -285,5 +285,12 @@ class TestEx36(TestCase):
         self.assertAlmostEqual(dp[0], -0.5, delta=1.e-8)
 
 
+class TestEx37(TestCase):
+
+    def runTest(self):
+        from docs.examples.ex37 import u
+        self.assertAlmostEqual(np.max(u), 0.05594193697362236)
+
+
 if __name__ == '__main__':
     main()
