@@ -11,12 +11,12 @@ the linear system
 where :math:`A` corresponds to a bilinear form and :math:`b` corresponds to a
 linear form.
 Many times this system has no unique solution unless the degrees-of-freedom
-(DOF's) :math:`x` are further constrained by imposing boundary conditions.
+(DOFs) :math:`x` are further constrained by imposing boundary conditions.
 
 Essential boundary conditions
 =============================
 
-It is possible to eliminate DOF's from the resulting system if some
+It is possible to eliminate DOFs from the resulting system if some
 of the values are known `a priori`.  Suppose that the vector :math:`x` can be
 split as
 
@@ -67,7 +67,7 @@ corresponding to the Poisson equation :math:`-\Delta u = 1`.
    >>> b = unit_load.assemble(basis)
 
 The condensed system is obtained with :func:`skfem.utils.condense`.  Below
-we provide the DOF's to eliminate via the keyword argument
+we provide the DOFs to eliminate via the keyword argument
 ``D``.
 
 .. code-block:: python
@@ -81,15 +81,15 @@ we provide the DOF's to eliminate via the keyword argument
            0., 0., 0., 0., 0., 0., 0., 0.]),
     array([ 6, 12, 15, 19, 20, 21, 22, 23, 24]))
 
-By default, the eliminated DOF's are set to zero.
+By default, the eliminated DOFs are set to zero.
 Different values can be provided through the keyword argument ``x``;
 see :ref:`ex14`.
 
 Finding degrees-of-freedom
 ==========================
 
-Often the goal is to constrain DOF's on a specific part of
-the boundary.  Currently the main tools for finding DOF's are
+Often the goal is to constrain DOFs on a specific part of
+the boundary.  Currently the main tools for finding DOFs are
 :meth:`skfem.assembly.Basis.find_dofs` and
 :meth:`skfem.assembly.Basis.get_dofs`.  Let us demonstrate
 the latter with an example.
@@ -146,7 +146,7 @@ DOF according to the following table:
 | ``NA``    | Description not available (e.g. hierarchical or bubble DOF's) |
 +-----------+---------------------------------------------------------------+
 
-The list of all DOF's (belonging to the left boundary) can be obtained as
+The list of all DOFs (belonging to the left boundary) can be obtained as
 follows:
 
 .. code-block:: python
@@ -168,13 +168,12 @@ Indexing of the degrees-of-freedom
 
 .. warning::
 
-   This section contains lower level details on the order of the DOF's.
+   This section contains lower level details on the order of the DOFs.
    Read this only if you did not find an answer in the previous section.
 
-The degrees-of-freedom :math:`x` are ordered automatically based on the mesh and
-the element type.  It is possible to investigate manually how the
-degrees-of-freedom match the different topological entities (`nodes`, `facets`,
-`edges`, `elements`) of the mesh.
+The DOFs :math:`x` are ordered automatically based on the mesh and the element
+type.  It is possible to investigate manually how the DOFs match the different
+topological entities (`nodes`, `facets`, `edges`, `elements`) of the mesh.
 
 .. note::
 
@@ -194,7 +193,7 @@ element mesh of the unit square:
    Triangular mesh with 4 vertices and 2 elements.
    >>> basis = InteriorBasis(m, ElementTriP2())
 
-The degrees-of-freedom corresponding to the nodes (or vertices) of the mesh are
+The DOFs corresponding to the nodes (or vertices) of the mesh are
 
 .. code-block:: python
 
@@ -214,7 +213,7 @@ In particular, the node at :math:`(0,0)` corresponds to the first element of the
 vector :math:`x`, the node at :math:`(1,0)` corresponds to the second element,
 and so on.
 
-Similarly, the degrees-of-freedom corresponding to the facets of the mesh are
+Similarly, the DOFs corresponding to the facets of the mesh are
 
 .. code-block:: python
 
@@ -238,7 +237,7 @@ Each DOF is associated either with a node (``nodal_dofs``), a facet
 Setting the degrees-of-freedom via a projection
 ===============================================
 
-Defining the values of the boundary DOF's is not always easy, e.g., when the DOF
+Defining the values of the boundary DOFs is not always easy, e.g., when the DOF
 does not represent a point value or another intuitive quantity.  Then it is
 possible to perform an :math:`L^2` projection of the boundary data :math:`u_0`
 onto the finite element space :math:`V_h` by solving for the function
@@ -248,7 +247,7 @@ onto the finite element space :math:`V_h` by solving for the function
 
    \int_{\partial \Omega} \widetilde{u_0} v\,\mathrm{d}s = \int_{\partial \Omega} u_0 v\,\mathrm{d}s\quad \forall v \in V_h,
 
-and which is zero in all DOF's inside the domain.
+and which is zero in all DOFs inside the domain.
 In the following snippet we solve explicitly the above variational problem:
 
 .. code-block:: python

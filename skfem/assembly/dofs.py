@@ -54,7 +54,7 @@ class DofsView(NamedTuple):
         return tuple([self._intersect(a[i], b[i]) for i in range(len(a))])
 
     def keep(self, dofnames: List[str]):
-        """Keep DOF's with the given names and remove others.
+        """Keep DOFs with the given names and remove others.
 
         Parameters
         ----------
@@ -78,7 +78,7 @@ class DofsView(NamedTuple):
         )
 
     def drop(self, dofnames):
-        """Remove DOF's with the given names.
+        """Remove DOFs with the given names.
 
         Parameters
         ----------
@@ -143,7 +143,7 @@ class DofsView(NamedTuple):
         return getattr(self.obj, attr)
 
     def __or__(self, other):
-        """For merging two sets of DOF's."""
+        """For merging two sets of DOFs."""
         return DofsView(
             self.obj,
             np.union1d(self.nodal_ix, other.nodal_ix),
@@ -242,7 +242,7 @@ class Dofs:
     def get_facet_dofs(self,
                        facets: ndarray,
                        skip_dofnames: List[str] = None) -> DofsView:
-        """Return a subset of DOF's corresponding to the given facets.
+        """Return a subset of DOFs corresponding to the given facets.
 
         Parameters
         ----------

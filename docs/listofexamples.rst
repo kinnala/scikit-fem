@@ -9,7 +9,7 @@ Example 1: Poisson equation with unit load
 ==========================================
 
 This example solves the Poisson problem :math:`-\Delta u = 1` with the Dirichlet
-boundary condition :math:`u = 0` in the unit square using piecewise linear
+boundary condition :math:`u = 0` in the unit square using piecewise-linear
 triangular elements.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87638021-c3d1c280-c74b-11ea-9859-dd82555747f5.png
@@ -68,7 +68,7 @@ Example 7: Interior penalty method
 
 This example solves the Poisson problem :math:`-\Delta u = 1` with :math:`u=0`
 on the boundary using interior penalty discontinuous Galerkin method.
-The finite element basis is piecewise linear but discontinuous over
+The finite element basis is piecewise-linear but discontinuous over
 the element edges.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87662192-80d31780-c76a-11ea-9291-2d11920bc098.png

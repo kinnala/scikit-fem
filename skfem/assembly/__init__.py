@@ -30,7 +30,7 @@ assembly. The basic workflow of assembly is the following:
 >>> b
 array([0.0162037 , 0.15046296, 0.06712963, 0.09953704])
 
-The above examples assemble the matrix corresponding
+The above example assembles the matrix corresponding
 to the bilinear form
 
 .. math::
@@ -43,7 +43,7 @@ and the vector corresponding to the linear form
 
     l(v) = \int_0^1 \int_0^1 x^2v(x,y) \,\mathrm{d}x \,\mathrm{d}y
 
-using piecewise linear basis functions.
+using piecewise-linear basis functions.
 
 """
 

@@ -72,7 +72,7 @@ readable.  An alternative way to write the above form is
    def integrand(u, v, w):
        return u[1][0] * v[1][0] + u[1][1] * v[1][1]
 
-In fact, ``u`` and ``v`` are more or less tuples of NumPy arrays
+In fact, ``u`` and ``v`` are simply tuples of NumPy arrays
 with the values of the function at ``u[0]`` and the values
 of the gradient at ``u[1]`` (and some additional magic such as
 implementing ``__array__`` and ``__mul__``
@@ -94,7 +94,7 @@ Notice how the shape of ``u[0]`` is what we expect also from the return value:
 Use of predefined functions in the forms
 ========================================
 
-It is sometimes necessary to use a previous solution vector in the form
+Sometimes we use a previous solution vector in the form
 definition, e.g., when solving nonlinear problems.
 A simple fixed-point iteration for
 
@@ -113,7 +113,7 @@ finding :math:`u_{k+1} \in H^1_0(\Omega)` which satisfies
    \int_\Omega (u_{k} + 1) \nabla u_{k+1} \cdot \nabla v \,\mathrm{d}x = \int_\Omega v\,\mathrm{d}x
 
 for every :math:`v \in H^1_0(\Omega)`.
-Defining such forms requires the use of the argument ``w``:
+The argument ``w`` is used to define such forms:
 
 .. code-block:: python
 
@@ -124,8 +124,8 @@ Defining such forms requires the use of the argument ``w``:
    ... def bilinf(u, v, w):
    ...     return (w.u_k + 1.) * dot(grad(u), grad(v))
 
-The previous solution :math:`u_k` is provided to :func:`skfem.assembly.asm` as a
-keyword argument:
+The previous solution :math:`u_k` must be provided to
+:func:`~skfem.assembly.asm` as a keyword argument:
 
 .. code-block:: python
 
@@ -149,7 +149,7 @@ keyword argument:
    0.07035942044776916
    0.07035942044776922
 
-Inside ``bilinf``, ``w`` is actually a dictionary of user provided arguments and
+Inside the form definition, ``w`` is a dictionary of user provided arguments and
 additional default keys:
 
 .. code-block:: none
@@ -161,5 +161,6 @@ additional default keys:
    (Pdb) !w.keys()
    dict_keys(['x', 'h'])
 
-By default, ``w['x']`` (or ``w.x``) corresponds to the global coordinates and
-``w['h']`` (or ``w.h``) corresponds to the local mesh parameter.
+By default, ``w['x']`` (available also as ``w.x``) corresponds to the global
+coordinates and ``w['h']`` (available also as ``w.h``) corresponds to the local
+mesh parameter.

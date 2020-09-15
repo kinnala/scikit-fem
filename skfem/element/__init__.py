@@ -15,7 +15,7 @@ up-to-date list of supported elements:
 >>> import skfem.element
 >>> dir(skfem.element)
 
-The supported elements include (but are not limited to):
+The supported elements include:
 
     - One-dimensional, triangular, quadrilateral, tetrahedral and hexahedral
       elements up to the polynomial degree of 2.

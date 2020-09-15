@@ -2,7 +2,7 @@ r"""High-order plotting.
 
 This simple example demonstrates the usage and visualisation of biquadratic
 finite element basis. Many plotting tools, including matplotlib, provide tools
-for visualising piecewise linear triangular fields. Visualisation of
+for visualising piecewise-linear triangular fields. Visualisation of
 higher-order basis functions cannot be done directly and the mesh should be
 further refined just for visualisation purposes.
 

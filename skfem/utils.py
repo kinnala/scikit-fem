@@ -190,7 +190,7 @@ def _flatten_dofs(S: DofsCollection) -> ndarray:
             return S.flatten()
         elif isinstance(S, dict):
             return np.unique(np.concatenate([S[key].flatten() for key in S]))
-        raise NotImplementedError("Unable to flatten the given set of DOF's.")
+        raise NotImplementedError("Unable to flatten the given set of DOFs.")
 
 
 def condense(A: spmatrix,
@@ -202,9 +202,9 @@ def condense(A: spmatrix,
     """Eliminate degrees-of-freedom from a linear system.
 
     The user should provide the linear system ``A`` and ``b``
-    and either the set of DOF's to eliminate (``D``) or the set
-    of DOF's to keep (``I``).  Optionally, nonzero values for
-    the eliminated DOF's can be supplied via ``x``.
+    and either the set of DOFs to eliminate (``D``) or the set
+    of DOFs to keep (``I``).  Optionally, nonzero values for
+    the eliminated DOFs can be supplied via ``x``.
 
     .. note::
 
