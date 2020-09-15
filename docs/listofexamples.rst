@@ -104,7 +104,7 @@ conjugate gradient method.
    <https://pypi.org/project/pyamg/>`__ or `pyamgcl
    <https://pypi.org/project/pyamgcl/>`__, if installed.
 
-.. figure:: https://user-images.githubusercontent.com/973268/87681574-7a06cd80-c787-11ea-8cfd-6ff5079e752c.png
+.. figure:: https://user-images.githubusercontent.com/973268/93183072-33abfb80-f743-11ea-9076-1324cbf28531.png
 
    The solution of Example 9 on a cross-section of the tetrahedral mesh.  The
    figure was created using `ParaView <https://www.paraview.org/>`__.
