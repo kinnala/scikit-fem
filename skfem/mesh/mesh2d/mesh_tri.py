@@ -252,6 +252,46 @@ class MeshTri(Mesh2D):
                       [0, 3, 5]], dtype=np.intp).T
         return cls(p, t)
 
+    @classmethod
+    def init_circle(cls: Type[MeshType],
+                    Nrefs: int = 3) -> MeshType:
+        r"""Initialize a circle mesh.
+
+        Works by repeatedly refining the following mesh and moving
+        new nodes to the boundary::
+
+                   *
+                 / | \
+               /   |   \
+             /     |     \
+            *------O------*
+             \     |     /
+               \   |   /
+                 \ | /
+                   *
+
+        Parameters
+        ----------
+        Nrefs
+            Number of refinements, by default 3.
+
+        """
+        p = np.array([[0., 0.],
+                      [1., 0.],
+                      [0., 1.],
+                      [-1., 0.],
+                      [0., -1.]]).T
+        t = np.array([[0, 1, 2],
+                      [0, 1, 4],
+                      [0, 2, 3],
+                      [0, 3, 4]], dtype=np.intp).T
+        m = MeshTri(p, t)
+        for _ in range(Nrefs):
+            m.refine()
+            D = m.boundary_nodes()
+            m.p[:, D] = m.p[:, D] / np.linalg.norm(m.p[:, D], axis=0)
+        return m
+
     def _build_mappings(self, sort_t=True):
         # sort to preserve orientations etc.
         if sort_t:

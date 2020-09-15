@@ -29,7 +29,7 @@ def from_meshio(m, force_mesh_type=None):
         The mesh from meshio.
     force_mesh_type
         An optional string forcing the mesh type if automatic detection
-        fails. See skfem.importers.meshio.MESH_TYPE_MAPPING for possible
+        fails. See :data:`skfem.io.meshio.MESH_TYPE_MAPPING` for possible
         values.
 
     Returns
