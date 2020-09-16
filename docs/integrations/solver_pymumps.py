@@ -33,7 +33,7 @@ b = asm(unit_load, basis)
 
 I = m.interior_nodes()
 
-x = solve(*condense(A, b, I=I))
+x = solve(*condense(A, b, I=I), solver=solver_mumps())
 
 if __name__ == "__main__":
     from pathlib import Path
