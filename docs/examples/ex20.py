@@ -35,8 +35,7 @@ from skfem.models.poisson import unit_load
 import numpy as np
 
 
-mesh = from_file(Path(__file__).with_name("disk.json")).to_meshtri()
-mesh.scale(1/np.linalg.norm(mesh.p, axis=0).max())  # unit radius
+mesh = MeshTri.init_circle(4)
 element = ElementTriMorley()
 mapping = MappingAffine(mesh)
 ib = InteriorBasis(mesh, element, mapping, 2)

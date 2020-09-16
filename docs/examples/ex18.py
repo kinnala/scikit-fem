@@ -51,8 +51,7 @@ import numpy as np
 from scipy.sparse import bmat
 
 
-mesh = from_file(Path(__file__).with_name("disk.json")).to_meshtri()
-mesh.scale(1/np.linalg.norm(mesh.p, axis=0).max())  # unit radius
+mesh = MeshTri.init_circle(4)
 
 element = {'u': ElementVectorH1(ElementTriP2()),
            'p': ElementTriP1()}
