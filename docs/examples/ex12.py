@@ -25,10 +25,9 @@ from skfem.io.json import from_file
 
 import numpy as np
 
-m = from_file(Path(__file__).with_name("disk.json"))
-m.scale(1/np.linalg.norm(m.p, axis=0).max())  # unit radius
+m = MeshTri.init_circle(4)
 
-basis = InteriorBasis(m, ElementQuad2())
+basis = InteriorBasis(m, ElementTriP2())
 
 A = asm(laplace, basis)
 b = asm(unit_load, basis)
