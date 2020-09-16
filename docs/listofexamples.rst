@@ -141,11 +141,10 @@ fixed and the other is displaced slightly outwards.
 
 See the `source code of Example 11 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex11.py>`_ for more information.
 
-Example 12: Mesh generation and postprocessing
+Example 12: Postprocessing
 ==============================================
 
-This example demonstrates mesh generation using an external package and
-postprocessing the value of a functional, Boussinesq k-factor.
+This example demonstrates postprocessing the value of a functional, Boussinesq's k-factor.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87686059-bee13300-c78c-11ea-9693-727f0baf0433.png
 
