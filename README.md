@@ -51,7 +51,7 @@ of `scipy.sparse.linalg.spsolve`.*
 Forms are defined using an intuitive syntax:
 
 ```python
-from skfem import *
+from skfem import BilinearForm
 from skfem.helpers import dot, grad
 
 @BilinearForm
@@ -65,6 +65,7 @@ constructors:
 
 ```python
 import numpy as np
+from skfem import MeshLine, MeshTri, MeshTet
 
 mesh = MeshLine(np.array([0.0, 0.5, 1.0]))
 mesh = MeshTri.load("docs/examples/square.msh")
@@ -72,10 +73,12 @@ mesh = MeshTet.init_tensor(*((np.linspace(0, 1, 60),) * 3))
 ```
 
 We support [many common finite
-elements](https://github.com/kinnala/scikit-fem/tree/master/skfem/element).
+elements](https://github.com/kinnala/scikit-fem/blob/master/skfem/element/__init__.py#L51).
 Below the stiffness matrix is assembled using second-order tetrahedra:
 
 ```python
+from skfem import InteriorBasis, ElementTetP2
+
 basis = InteriorBasis(mesh, ElementTetP2())
 A = laplace.assemble(basis)  # type: scipy.sparse.csr_matrix
 ```
