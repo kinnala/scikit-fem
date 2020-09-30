@@ -38,8 +38,11 @@ class Mesh3D(Mesh):
                               self.facets[(itr + 1) % self.facets.shape[0],
                               facets]))
                    for itr in range(self.facets.shape[0])])).T, axis=1)
-        return np.nonzero((self.edges.T[:, None] == boundary_edges)
-                          .all(-1).any(-1))[0]
+        edge_candidates = self.t2e[:, self.f2t[0, facets]].flatten()
+        return edge_candidates[
+            (self.edges.T[edge_candidates, None] == boundary_edges)
+            .all(-1).any(-1)
+        ]
 
     def interior_edges(self) -> ndarray:
         """Return an array of interior edge indices."""
