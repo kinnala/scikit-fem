@@ -182,6 +182,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
+### Fixed
+
+- `Mesh3D.boundary_edges` (and, consequently, `Basis.find_dofs`) was slow
+  and used lots of memory due to an exhaustive search of all edges
+
 #### Added
 - `ElementHex2`, a triquadratic hexahedral element
 - `MeshTri.init_circle`, constructor for a circle mesh
@@ -264,19 +269,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed `skfem.importers` to `skfem.io`
 - Renamed `skfem.models.helpers` to `skfem.helpers`
 - `skfem.utils.solve` will now expand also the solutions of eigenvalue problems
-  
-
-### [0.4.1] - 2020-01-19
-
-#### Added
-- Additional keyword arguments to `skfem.utils.solve` get passed on to linear solvers
-
-#### Fixed
-- Made `skfem.visuals.matplotlib` Python 3.6 compatible
-
-### [0.4.0] - 2020-01-03
-
-#### Changed
-- Renamed `GlobalBasis` to `Basis`
-- Moved all `Mesh.plot` and `Mesh.draw` methods to `skfem.visuals` module
-- Made matplotlib an optional dependency
