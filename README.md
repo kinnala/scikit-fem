@@ -90,6 +90,17 @@ More examples can be found in the [gallery](https://scikit-fem.readthedocs.io/en
 The project is documented using Sphinx.  A recent version of the documentation
 can be found from [Read the Docs](https://scikit-fem.readthedocs.io/en/latest/).
 
+## Getting help
+
+If you encounter an issue and cannot find help from the documentation,
+you can use the Github issue tracker to ask questions.
+Try to provide a snippet of code which fails
+and include also the version of the library you are
+using.  The version can be found as follows:
+```
+python -c "from skfem import __version__; print(__version__)"
+```
+
 ## Installation
 
 The most recent release can be installed simply by `pip install scikit-fem`.
