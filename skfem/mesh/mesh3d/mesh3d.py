@@ -39,10 +39,12 @@ class Mesh3D(Mesh):
                               facets]))
                    for itr in range(self.facets.shape[0])])).T, axis=1)
         edge_candidates = np.unique(self.t2e[:, self.f2t[0, facets]])
-        return edge_candidates[
-            (self.edges.T[edge_candidates, None] == boundary_edges)
-            .all(-1).any(-1)
-        ]
+        A = self.edges[:, edge_candidates].T
+        B = boundary_edges
+        dims = A.max(0) + 1
+        ix = np.where(np.in1d(np.ravel_multi_index(A.T, dims),
+                              np.ravel_multi_index(B.T, dims)))[0]
+        return edge_candidates[ix]
 
     def interior_edges(self) -> ndarray:
         """Return an array of interior edge indices."""
