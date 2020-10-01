@@ -1,9 +1,5 @@
 r"""Laplace with mixed boundary conditions.
 
-.. note::
-
-   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_.
-
 This example is another extension of `ex01.py`, still solving the Laplace
 equation but now with mixed boundary conditions, two parts isopotential (charged
 and earthed) and the rest insulated. The isopotential parts are tagged during
@@ -21,24 +17,6 @@ The exact solution is :math:`u = 2 \theta / \pi`. The field strength is :math:`|
 so the conductance (for unit potential difference and conductivity) is
 :math:`\|\nabla u\|^2 = 2 \ln 2 / \pi`.
 
-License
--------
-
-Copyright 2018-2020 scikit-fem developers
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 """
 
 from skfem import *
@@ -47,28 +25,14 @@ from skfem.io import from_meshio
 
 import numpy as np
 
-from pygmsh import generate_mesh
-from pygmsh.built_in import Geometry
-
-geom = Geometry()
-points = []
-lines = []
 radii = [1., 2.]
 lcar = .1
-points.append(geom.add_point([0.] * 3, lcar))  # centre
-for x in radii:
-    points.append(geom.add_point([x, 0., 0.], lcar))
-for y in reversed(radii):
-    points.append(geom.add_point([0., y, 0.], lcar))
-lines.append(geom.add_line(*points[1:3]))
-geom.add_physical(lines[-1], 'ground')
-lines.append(geom.add_circle_arc(points[2], points[0], points[3]))
-lines.append(geom.add_line(points[3], points[4]))
-geom.add_physical(lines[-1], 'positive')
-lines.append(geom.add_circle_arc(points[4], points[0], points[1]))
-geom.add_physical(geom.add_plane_surface(geom.add_line_loop(lines)), 'domain')
 
-mesh = from_meshio(generate_mesh(geom, dim=2))
+mesh = MeshTri.init_tensor(np.linspace(*radii, 1 + int(np.diff(radii) / lcar)),
+                           np.linspace(0, np.pi/2, 1 + int(3*np.pi/4 / lcar)))
+mesh.define_boundary('ground', lambda xi: xi[1] == 0.)
+mesh.define_boundary('positive', lambda xi: xi[1] == np.pi/2)
+mesh.p = mesh.p[0] * np.stack([np.cos(mesh.p[1]), np.sin(mesh.p[1])])
 
 elements = ElementTriP2()
 basis = InteriorBasis(mesh, elements)
