@@ -161,10 +161,6 @@ y/x`, with :math:`u = 0` on :math:`y = 0`, :math:`u = 1` on :math:`x =
 0`, and :math:`\frac{\partial u}{\partial n} = 0` on the rest of the
 boundary.
 
-.. note::
-
-   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`__.
-
 .. figure:: https://user-images.githubusercontent.com/973268/87775065-226f6d00-c82e-11ea-950c-fe9a10901133.png
 
    The solution of Example 13.
