@@ -463,7 +463,7 @@ class MeshTri(Mesh2D):
         from skfem.mapping import MappingAffine
         return MappingAffine(self)
 
-    def element_finder(self):
+    def element_finder(self, mapping=None):
         from matplotlib.tri import Triangulation
 
         return Triangulation(self.p[0],

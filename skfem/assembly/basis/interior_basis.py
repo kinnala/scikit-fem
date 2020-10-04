@@ -138,7 +138,7 @@ class InteriorBasis(Basis):
         """Return a function handle, which can be used for finding
         pointwise values of the given solution vector."""
 
-        finder = self.mesh.element_finder()
+        finder = self.mesh.element_finder(mapping=self.mapping)
 
         def interpfun(x):
             tris = finder(*x)

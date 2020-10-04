@@ -299,7 +299,7 @@ class MeshQuad(Mesh2D):
         from skfem.element import ElementQuad1, ElementLineP1
         return MappingIsoparametric(self, ElementQuad1(), ElementLineP1())
 
-    def element_finder(self):
+    def element_finder(self, mapping=None):
         tri_finder = self._splitquads().element_finder()
 
         def finder(*args):

@@ -182,13 +182,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
+### Added
+
+- `MeshTet.element_finder` and `MeshLine.element_finder` for using
+  `InteriorBasis.interpolator` with these mesh structures.
+
 ### [2.1.1] - 2020-10-01
 
 ### Fixed
 
-- Further optimizations to `Mesh3D.boundary_edges`: tested to run on a
-  tetrahedral mesh with over 10 million elements with less than 11 GiB of
-  memory.
+- Further optimizations to `Mesh3D.boundary_edges`: tested to run on a laptop
+  with over 10 million elements.
 
 ### [2.1.0] - 2020-09-30
 
