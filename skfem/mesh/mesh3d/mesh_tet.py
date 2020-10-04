@@ -2,6 +2,7 @@ from typing import Type, Optional, Dict
 
 import numpy as np
 from numpy import ndarray
+from scipy.spatial import cKDTree
 
 from .mesh3d import Mesh3D
 from ..mesh import MeshType
@@ -341,6 +342,33 @@ class MeshTet(Mesh3D):
         self.t = newt
 
         self._build_mappings()
+
+    def element_finder(self, mapping=None):
+        """Return a function handle from location to element index.
+
+        Parameters
+        ----------
+        mapping
+            The affine mapping for the mesh.
+
+        """
+        if mapping is None:
+            raise NotImplementedError("Mapping must be provided.")
+
+        tree = cKDTree(np.mean(self.p[:, self.t], axis=1).T)
+
+        def finder(x, y, z):
+            ix = tree.query(np.array([x, y, z]).T, 5)[1].flatten()
+            X = mapping.invF(np.array([x, y, z])[:, None], ix)
+            inside = (
+                (X[0] >= 0)
+                * (X[1] >= 0)
+                * (X[2] >= 0)
+                * (1 - X[0] - X[1] - X[2] >= 0)
+            )
+            return np.array([ix[np.argmax(inside, axis=0)]]).flatten()
+
+        return finder
 
     def shapereg(self):
         """Return the largest shape-regularity constant."""

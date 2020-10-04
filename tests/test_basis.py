@@ -3,11 +3,12 @@ from unittest import TestCase
 import numpy as np
 from numpy.testing import assert_allclose
 
-from skfem import BilinearForm, asm, solve, condense
-from skfem.mesh import MeshTri, MeshTet, MeshHex
+from skfem import BilinearForm, asm, solve, condense, project
+from skfem.mesh import MeshTri, MeshTet, MeshHex, MeshQuad, MeshLine
 from skfem.assembly import InteriorBasis, FacetBasis, Dofs
 from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
-                           ElementTetP2, ElementHexS2, ElementHex2)
+                           ElementTetP2, ElementHexS2, ElementHex2,
+                           ElementQuad2, ElementLineP2)
 
 
 class TestCompositeSplitting(TestCase):
@@ -122,3 +123,58 @@ class TestFacetExpansionHexS2(TestFacetExpansion):
 class TestFacetExpansionHex2(TestFacetExpansionHexS2):
 
     elem_type = ElementHex2
+
+
+class TestInterpolatorTet(TestCase):
+
+    mesh_type = MeshTet
+    element_type = ElementTetP2
+    nrefs = 1
+
+    def runTest(self):
+        m = self.mesh_type()
+        m.refine(self.nrefs)
+        basis = InteriorBasis(m, self.element_type())
+        x = project(lambda x: x[0] ** 2, basis_to=basis)
+        fun = basis.interpolator(x)
+        X = np.linspace(0, 1, 10)
+        dim = m.dim()
+        if dim == 3:
+            y = fun(np.array([X, [0.31] * 10, [0.62] * 10]))
+        elif dim == 2:
+            y = fun(np.array([X, [0.31] * 10]))
+        else:
+            y = fun(np.array([X]))
+        assert_allclose(y, X ** 2, atol=1e-10)
+
+
+class TestInterpolatorTet2(TestInterpolatorTet):
+
+    mesh_type = MeshTet
+    element_type = ElementTetP2
+    nrefs = 3
+
+
+class TestInterpolatorTri(TestInterpolatorTet):
+
+    mesh_type = MeshTri
+    element_type = ElementTriP2
+
+
+class TestInterpolatorQuad(TestInterpolatorTet):
+
+    mesh_type = MeshQuad
+    element_type = ElementQuad2
+
+
+class TestInterpolatorLine(TestInterpolatorTet):
+
+    mesh_type = MeshLine
+    element_type = ElementLineP2
+
+
+class TestInterpolatorLine2(TestInterpolatorTet):
+
+    mesh_type = MeshLine
+    element_type = ElementLineP2
+    nrefs = 5

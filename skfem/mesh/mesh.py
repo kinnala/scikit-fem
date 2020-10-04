@@ -336,7 +336,7 @@ class Mesh:
         """Return an array of interior facet indices."""
         return np.nonzero(self.f2t[1, :] >= 0)[0]
 
-    def element_finder(self) -> Callable[[ndarray], ndarray]:
+    def element_finder(self, mapping=None) -> Callable[[ndarray], ndarray]:
         """Return a function, which returns element
         indices corresponding to the input points."""
         raise NotImplementedError("element_finder not implemented "
