@@ -240,6 +240,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
+from packaging import version
+
 from skfem.mesh import MeshTri
 from skfem.assembly import InteriorBasis, FacetBasis
 from skfem.utils import solve, asm, condense, project

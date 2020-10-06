@@ -73,12 +73,13 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
+from packaging import version
+
 from skfem import *
 from skfem.helpers import grad, dot
 from skfem.io import from_meshio
 from skfem.models.poisson import unit_load
 
-from packaging import version
 from matplotlib.pyplot import subplots
 import numpy as np
 
