@@ -77,7 +77,10 @@ from scipy.sparse import bmat, spmatrix
 from scipy.sparse.linalg import LinearOperator, minres
 
 import pygmsh
-from pygmsh.opencascade import Geometry
+if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
+    from pygmsh.opencascade import Geometry
+else:
+    from pygmsh.geo import Geometry
 
 try:
     try:

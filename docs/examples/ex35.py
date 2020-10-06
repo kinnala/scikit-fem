@@ -247,7 +247,10 @@ from skfem.element import ElementTriP1
 from skfem.models.poisson import laplace, unit_load, mass
 
 import pygmsh
-from pygmsh.built_in import Geometry
+if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
+    from pygmsh.built_in import Geometry
+else:
+    from pygmsh.geo import Geometry
 from skfem.io import from_meshio
 
 import numpy as np

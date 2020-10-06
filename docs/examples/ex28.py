@@ -83,7 +83,10 @@ from matplotlib.pyplot import subplots
 import numpy as np
 
 import pygmsh
-from pygmsh.built_in import Geometry
+if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
+    from pygmsh.built_in import Geometry
+else:
+    from pygmsh.geo import Geometry
 
 
 halfheight = 1.
