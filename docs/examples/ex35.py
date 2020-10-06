@@ -241,71 +241,117 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
 from packaging import version
+from contextlib import nullcontext
 
 from skfem.mesh import MeshTri
 from skfem.assembly import InteriorBasis, FacetBasis
 from skfem.utils import solve, asm, condense, project
 from skfem.element import ElementTriP1
 from skfem.models.poisson import laplace, unit_load, mass
-
-import pygmsh
-if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
-    from pygmsh.built_in import Geometry
-else:
-    from pygmsh.geo import Geometry
 from skfem.io import from_meshio
 
+import pygmsh
 import numpy as np
 
 
-def make_mesh() -> MeshTri:
-    # dimensions for RG316 coaxial cable
-    inner_conductor_diameter = 0.50e-3
-    inner_insulator_diameter = 1.52e-3
-    outer_conductor_diameter = 1.98e-3
-    outer_insulator_diameter = 2.48e-3
+if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
+    geometrycontext = nullcontext()
+else:
+    geometrycontext = pygmsh.geo.Geometry()
 
-    # characteristic length for mesh generation
-    lcar = 0.1e-3
+if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
 
-    geom = Geometry()
+    def make_mesh() -> MeshTri:
+        geom = pygmsh.built_in.Geometry()
 
-    inner_conductor = geom.add_circle(
-        (0, 0, 0), inner_conductor_diameter/2,
-        lcar=lcar)
-    geom.add_physical(
-        inner_conductor.plane_surface, label='inner_conductor')
-    geom.add_physical(
-        inner_conductor.line_loop.lines, label='inner_conductor_outer_surface')
+        # dimensions for RG316 coaxial cable
+        inner_conductor_diameter = 0.50e-3
+        inner_insulator_diameter = 1.52e-3
+        outer_conductor_diameter = 1.98e-3
+        outer_insulator_diameter = 2.48e-3
 
-    inner_insulator = geom.add_circle(
-        (0, 0, 0), inner_insulator_diameter/2,
-        lcar=lcar, holes=[inner_conductor.line_loop])
-    geom.add_physical(
-        inner_insulator.plane_surface, label='inner_insulator')
-    geom.add_physical(
-        inner_insulator.line_loop.lines, label='outer_conductor_inner_surface')
+        # characteristic length for mesh generation
+        lcar = 0.1e-3
 
-    outer_conductor = geom.add_circle(
-        (0, 0, 0), outer_conductor_diameter/2,
-        lcar=lcar, holes=[inner_insulator.line_loop])
-    geom.add_physical(
-        outer_conductor.plane_surface, label='outer_conductor')
-    geom.add_physical(
-        outer_conductor.line_loop.lines, label='outer_conductor_outer_surface')
+        inner_conductor = geom.add_circle(
+            (0, 0, 0), inner_conductor_diameter/2,
+            lcar)
+        geom.add_physical(
+            inner_conductor.plane_surface, label='inner_conductor')
+        geom.add_physical(
+            inner_conductor.line_loop.lines, label='inner_conductor_outer_surface')
 
-    outer_insulator = geom.add_circle(
-        (0, 0, 0), outer_insulator_diameter/2,
-        lcar=lcar, holes=[outer_conductor.line_loop])
-    geom.add_physical(
-        outer_insulator.plane_surface, label='outer_insulator')
-    geom.add_physical(
-        outer_insulator.line_loop.lines, label='boundary')
+        inner_insulator = geom.add_circle(
+            (0, 0, 0), inner_insulator_diameter/2,
+            lcar, holes=[inner_conductor.line_loop])
+        geom.add_physical(
+            inner_insulator.plane_surface, label='inner_insulator')
+        geom.add_physical(
+            inner_insulator.line_loop.lines, label='outer_conductor_inner_surface')
 
-    if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
+        outer_conductor = geom.add_circle(
+            (0, 0, 0), outer_conductor_diameter/2,
+            lcar, holes=[inner_insulator.line_loop])
+        geom.add_physical(
+            outer_conductor.plane_surface, label='outer_conductor')
+        geom.add_physical(
+            outer_conductor.line_loop.lines, label='outer_conductor_outer_surface')
+
+        outer_insulator = geom.add_circle(
+            (0, 0, 0), outer_insulator_diameter/2,
+            lcar, holes=[outer_conductor.line_loop])
+        geom.add_physical(
+            outer_insulator.plane_surface, label='outer_insulator')
+        geom.add_physical(
+                outer_insulator.line_loop.lines, label='boundary')
+
         return from_meshio(pygmsh.generate_mesh(geom, dim=2))
-    else:
-        return from_meshio(geom.generate_mesh(dim=2))
+
+else:
+
+    def make_mesh() -> MeshTri:
+        with geometrycontext as geom:
+            # dimensions for RG316 coaxial cable
+            inner_conductor_diameter = 0.50e-3
+            inner_insulator_diameter = 1.52e-3
+            outer_conductor_diameter = 1.98e-3
+            outer_insulator_diameter = 2.48e-3
+
+            # characteristic length for mesh generation
+            lcar = 0.1e-3
+
+            inner_conductor = geom.add_circle(
+                (0, 0, 0), inner_conductor_diameter/2,
+                mesh_size=lcar)
+            geom.add_physical(
+                inner_conductor.plane_surface, label='inner_conductor')
+            geom.add_physical(
+                inner_conductor.curve_loop, label='inner_conductor_outer_surface')
+
+            inner_insulator = geom.add_circle(
+                (0, 0, 0), inner_insulator_diameter/2,
+                mesh_size=lcar, holes=[inner_conductor.curve_loop])
+            geom.add_physical(
+                inner_insulator.plane_surface, label='inner_insulator')
+            geom.add_physical(
+                inner_insulator.curve_loop, label='outer_conductor_inner_surface')
+
+            outer_conductor = geom.add_circle(
+                (0, 0, 0), outer_conductor_diameter/2,
+                mesh_size=lcar, holes=[inner_insulator.curve_loop])
+            geom.add_physical(
+                outer_conductor.plane_surface, label='outer_conductor')
+            geom.add_physical(
+                outer_conductor.curve_loop, label='outer_conductor_outer_surface')
+
+            outer_insulator = geom.add_circle(
+                (0, 0, 0), outer_insulator_diameter/2,
+                mesh_size=lcar, holes=[outer_conductor.curve_loop])
+            geom.add_physical(
+                outer_insulator.plane_surface, label='outer_insulator')
+            geom.add_physical(
+                outer_insulator.curve_loop, label='boundary')
+            return from_meshio(geom.generate_mesh(dim=2))
 
 
 mesh = make_mesh()

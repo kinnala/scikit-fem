@@ -74,6 +74,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
 from packaging import version
+from contextlib import nullcontext
 
 from skfem import *
 from skfem.helpers import grad, dot
@@ -84,11 +85,12 @@ from matplotlib.pyplot import subplots
 import numpy as np
 
 import pygmsh
-if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
-    from pygmsh.built_in import Geometry
-else:
-    from pygmsh.geo import Geometry
 
+
+if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
+    geometrycontext = nullcontext()
+else:
+    geometrycontext = pygmsh.geo.Geometry()
 
 halfheight = 1.
 length = 10.
@@ -102,49 +104,55 @@ peclet = 357.
 def make_mesh(halfheight: float,  # mm
               length: float,
               thickness: float) -> MeshTri:
-    geom = Geometry()
-    points = []
-    lines = []
+    with geometrycontext as g:
+        if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
+            geom = pygmsh.built_in.Geometry()
+            geom.add_curve_loop = geom.add_line_loop
+        else:
+            geom = g
 
-    lcar = halfheight / 2**2
+        points = []
+        lines = []
 
-    for xy in [(0., halfheight),
-               (0., -halfheight),
-               (length, -halfheight),
-               (length, halfheight),
-               (0., -halfheight - thickness),
-               (length, -halfheight - thickness)]:
-        points.append(geom.add_point([*xy, 0.], lcar))
+        lcar = halfheight / 2**2
 
-    lines.append(geom.add_line(*points[:2]))
-    geom.add_physical(lines[-1], 'fluid-inlet')
+        for xy in [(0., halfheight),
+                   (0., -halfheight),
+                   (length, -halfheight),
+                   (length, halfheight),
+                   (0., -halfheight - thickness),
+                   (length, -halfheight - thickness)]:
+            points.append(geom.add_point([*xy, 0.], lcar))
 
-    lines.append(geom.add_line(*points[1:3]))
+        lines.append(geom.add_line(*points[:2]))
+        geom.add_physical(lines[-1], 'fluid-inlet')
 
-    lines.append(geom.add_line(*points[2:4]))
-    geom.add_physical(lines[-1], 'fluid-outlet')
+        lines.append(geom.add_line(*points[1:3]))
 
-    lines.append(geom.add_line(points[3], points[0]))
+        lines.append(geom.add_line(*points[2:4]))
+        geom.add_physical(lines[-1], 'fluid-outlet')
 
-    geom.add_physical(geom.add_plane_surface(geom.add_line_loop(lines)),
-                      'fluid')
+        lines.append(geom.add_line(points[3], points[0]))
 
-    lines.append(geom.add_line(points[1], points[4]))
-    geom.add_physical(lines[-1], 'solid-inlet')
+        geom.add_physical(geom.add_plane_surface(geom.add_curve_loop(lines)),
+                          'fluid')
 
-    lines.append(geom.add_line(*points[4:6]))
-    geom.add_physical(lines[-1], 'heated')
+        lines.append(geom.add_line(points[1], points[4]))
+        geom.add_physical(lines[-1], 'solid-inlet')
 
-    lines.append(geom.add_line(points[5], points[2]))
-    geom.add_physical(lines[-1], 'solid-outlet')
+        lines.append(geom.add_line(*points[4:6]))
+        geom.add_physical(lines[-1], 'heated')
 
-    geom.add_physical(geom.add_plane_surface(geom.add_line_loop(
-        [*lines[-3:], -lines[1]])), 'solid')
+        lines.append(geom.add_line(points[5], points[2]))
+        geom.add_physical(lines[-1], 'solid-outlet')
 
-    if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
-        return from_meshio(pygmsh.generate_mesh(geom, dim=2))
-    else:
-        return from_meshio(geom.generate_mesh(dim=2))
+        geom.add_physical(geom.add_plane_surface(geom.add_curve_loop(
+            [*lines[-3:], -lines[1]])), 'solid')
+
+        if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
+            return from_meshio(pygmsh.generate_mesh(geom, dim=2))
+        else:
+            return from_meshio(geom.generate_mesh(dim=2))
 
 
 mesh = make_mesh(halfheight, length, thickness)
