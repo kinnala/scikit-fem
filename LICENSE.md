@@ -34,7 +34,7 @@ later in this document or at the beginning of the respective files.
 Some examples under `docs/examples/` are licensed differently.  In particular,
 they have a GPL-licensed dependency and, therefore, are also GPL-licensed.
 
-- docs/examples/ex{04,28,32,35}.py
+- docs/examples/ex{04,28,32}.py
 
 > Copyright 2018-2020 scikit-fem developers
 > 
