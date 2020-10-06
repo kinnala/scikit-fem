@@ -8,4 +8,4 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests inside a container
-        uses: kinnala/scikit-fem-docker-action@v2
+        uses: kinnala/scikit-fem-docker-action@v3
