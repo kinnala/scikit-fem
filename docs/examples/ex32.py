@@ -67,7 +67,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 from typing import NamedTuple, Optional
 from packaging import version
-from contextlib import nullcontext
 
 from skfem import *
 from skfem.io.meshio import from_meshio

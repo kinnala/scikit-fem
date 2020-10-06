@@ -74,7 +74,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
 from packaging import version
-from contextlib import nullcontext
 
 from skfem import *
 from skfem.helpers import grad, dot
