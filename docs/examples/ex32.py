@@ -66,6 +66,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
 from typing import NamedTuple, Optional
+from packaging import version
 
 from skfem import *
 from skfem.io.meshio import from_meshio
@@ -76,8 +77,19 @@ import numpy as np
 from scipy.sparse import bmat, spmatrix
 from scipy.sparse.linalg import LinearOperator, minres
 
-from pygmsh import generate_mesh
-from pygmsh.opencascade import Geometry
+import pygmsh
+
+
+if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
+    class NullContextManager():
+        def __enter__(self):
+            return None
+        def __exit__(self, *args):
+            pass
+    geometrycontext = NullContextManager()
+else:
+    geometrycontext = pygmsh.occ.Geometry()
+
 
 try:
     try:
@@ -107,16 +119,22 @@ class Ellipsoid(NamedTuple):
     def semiaxes(self) -> np.ndarray:
         return np.array([self.a, self.b, self.c])
 
-    def geom(self, lcar: float) -> Geometry:
-        geom = Geometry()
-        geom.add_ellipsoid([0.]*3, self.semiaxes, lcar)
-        return geom
-
-    def mesh(self, geom: Optional[Geometry] = None, **kwargs) -> MeshTet:
-        return from_meshio(generate_mesh(geom or self.geom(**kwargs)))
+    def mesh(self, geom=None, lcar=.1) -> MeshTet:
+        with geometrycontext as g:
+            if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
+                geom = pygmsh.opencascade.Geometry()
+            else:
+                geom = g
+            geom.add_ellipsoid([0.]*3, self.semiaxes, lcar)
+            if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
+                return from_meshio(
+                    pygmsh.generate_mesh(geom))
+            else:
+                return from_meshio(
+                    geom.generate_mesh())
 
     def pressure(self, x, y, z) -> np.ndarray:
-        """exact pressure at zero Grashof number
+        """Exact pressure at zero Grashof number.
 
         * McBain, G. D. (2016). `Creeping convection in a horizontally heated ellipsoid
         <http://people.eng.unimelb.edu.au/imarusic/proceedings/20/548/%20Paper.pdf>`_.

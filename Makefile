@@ -1,17 +1,9 @@
-default:
-	ipython -m unittest discover -- -v
+default: build
+	GITHUB_WORKSPACE=/scikit-fem docker run -e GITHUB_WORKSPACE -v ${PWD}:"/scikit-fem" skfem
 
-coverage:
-	coverage run -m unittest discover
-	coverage report
-	coverage html
+build:
+	docker build -t skfem https://github.com/kinnala/scikit-fem-docker-action.git#main
 
-release:
-	@eval python setup.py sdist upload
-
-dox:
-	@eval sphinx-build -b html docs ../scikit-fem-docs
-
-doxall:
+sphinx:
 	-rm -r ../scikit-fem-docs/.doctrees/
 	@eval sphinx-build -a -b html docs ../scikit-fem-docs
