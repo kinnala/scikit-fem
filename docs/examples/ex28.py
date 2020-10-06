@@ -74,6 +74,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
 from packaging import version
+from pathlib import Path
 
 from skfem import *
 from skfem.helpers import grad, dot
