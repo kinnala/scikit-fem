@@ -246,7 +246,7 @@ from skfem.utils import solve, asm, condense, project
 from skfem.element import ElementTriP1
 from skfem.models.poisson import laplace, unit_load, mass
 
-from pygmsh import generate_mesh
+import pygmsh
 from pygmsh.built_in import Geometry
 from skfem.io import from_meshio
 
@@ -297,7 +297,10 @@ def make_mesh() -> MeshTri:
     geom.add_physical(
         outer_insulator.line_loop.lines, label='boundary')
 
-    return from_meshio(generate_mesh(geom, dim=2))
+    if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
+        return from_meshio(pygmsh.generate_mesh(geom, dim=2))
+    else:
+        return from_meshio(geom.generate_mesh(dim=2))
 
 
 mesh = make_mesh()

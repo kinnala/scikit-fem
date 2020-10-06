@@ -78,11 +78,13 @@ from skfem.helpers import grad, dot
 from skfem.io import from_meshio
 from skfem.models.poisson import unit_load
 
+from packaging import version
 from matplotlib.pyplot import subplots
 import numpy as np
 
-from pygmsh import generate_mesh
+import pygmsh
 from pygmsh.built_in import Geometry
+
 
 halfheight = 1.
 length = 10.
@@ -135,7 +137,10 @@ def make_mesh(halfheight: float,  # mm
     geom.add_physical(geom.add_plane_surface(geom.add_line_loop(
         [*lines[-3:], -lines[1]])), 'solid')
 
-    return from_meshio(generate_mesh(geom, dim=2))
+    if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
+        return from_meshio(pygmsh.generate_mesh(geom, dim=2))
+    else:
+        return from_meshio(geom.generate_mesh(dim=2))
 
 
 mesh = make_mesh(halfheight, length, thickness)

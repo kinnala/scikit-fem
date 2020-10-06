@@ -76,7 +76,7 @@ import numpy as np
 from scipy.sparse import bmat, spmatrix
 from scipy.sparse.linalg import LinearOperator, minres
 
-from pygmsh import generate_mesh
+import pygmsh
 from pygmsh.opencascade import Geometry
 
 try:
@@ -113,10 +113,14 @@ class Ellipsoid(NamedTuple):
         return geom
 
     def mesh(self, geom: Optional[Geometry] = None, **kwargs) -> MeshTet:
-        return from_meshio(generate_mesh(geom or self.geom(**kwargs)))
+        if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
+            return from_meshio(
+                pygmsh.generate_mesh(geom or self.geom(**kwargs)))
+        else:
+            return from_meshio((geom or self.geom(**kwargs)).generate_mesh())
 
     def pressure(self, x, y, z) -> np.ndarray:
-        """exact pressure at zero Grashof number
+        """Exact pressure at zero Grashof number.
 
         * McBain, G. D. (2016). `Creeping convection in a horizontally heated ellipsoid
         <http://people.eng.unimelb.edu.au/imarusic/proceedings/20/548/%20Paper.pdf>`_.
