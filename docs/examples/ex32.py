@@ -82,7 +82,12 @@ import pygmsh
 
 
 if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
-    geometrycontext = nullcontext()
+    class NullContextManager():
+        def __enter__(self):
+            return None
+        def __exit__(self, *args):
+            pass
+    geometrycontext = NullContextManager()
 else:
     geometrycontext = pygmsh.occ.Geometry()
 

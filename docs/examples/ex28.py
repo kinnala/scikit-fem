@@ -88,7 +88,12 @@ import pygmsh
 
 
 if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
-    geometrycontext = nullcontext()
+    class NullContextManager():
+        def __enter__(self):
+            return None
+        def __exit__(self, *args):
+            pass
+    geometrycontext = NullContextManager()
 else:
     geometrycontext = pygmsh.geo.Geometry()
 
@@ -157,6 +162,7 @@ def make_mesh(halfheight: float,  # mm
 
 mesh = make_mesh(halfheight, length, thickness)
 element = ElementTriP1()
+print(mesh.boundaries)
 basis = {
     'heat': InteriorBasis(mesh, element),
     'fluid': InteriorBasis(mesh, element, elements=mesh.subdomains['fluid']),
