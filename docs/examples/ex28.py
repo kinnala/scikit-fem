@@ -78,6 +78,7 @@ from packaging import version
 from skfem import *
 from skfem.helpers import grad, dot
 from skfem.io import from_meshio
+from skfem.io.json import from_file
 from skfem.models.poisson import unit_load
 
 from matplotlib.pyplot import subplots
@@ -158,10 +159,8 @@ def make_mesh(halfheight: float,  # mm
         else:
             return from_meshio(geom.generate_mesh(dim=2))
 
-
-mesh = make_mesh(halfheight, length, thickness)
+mesh = from_file(Path(__file__).with_name("ex28.json"))
 element = ElementTriP1()
-print(mesh.boundaries)
 basis = {
     'heat': InteriorBasis(mesh, element),
     'fluid': InteriorBasis(mesh, element, elements=mesh.subdomains['fluid']),
