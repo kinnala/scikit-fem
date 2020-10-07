@@ -2,7 +2,7 @@ r"""Block diagonally preconditioned Stokes solver.
 
 .. note::
 
-   This examples requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_ and an implementation of AMG (either `pyamgcl    <https://pypi.org/project/pyamgcl>`_ or `pyamg <https://pypi.org/project/pyamg/>`_).
+   This examples requires the external package `ngsimple <https://pypi.org/project/ngsimple/>`_ and an implementation of AMG (either `pyamgcl    <https://pypi.org/project/pyamgcl>`_ or `pyamg <https://pypi.org/project/pyamg/>`_).
 
 This example again solves the Stokes problem,
 
@@ -51,22 +51,10 @@ License
 
 Copyright 2018-2020 scikit-fem developers
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+TODO: What's an appropriate licence for a script using ngsimple?
 
 """
-from typing import NamedTuple, Optional
-from packaging import version
+from typing import NamedTuple
 
 from skfem import *
 from skfem.io.meshio import from_meshio
@@ -77,18 +65,7 @@ import numpy as np
 from scipy.sparse import bmat, spmatrix
 from scipy.sparse.linalg import LinearOperator, minres
 
-import pygmsh
-
-
-if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
-    class NullContextManager():
-        def __enter__(self):
-            return None
-        def __exit__(self, *args):
-            pass
-    geometrycontext = NullContextManager()
-else:
-    geometrycontext = pygmsh.occ.Geometry()
+import ngsimple
 
 
 try:
@@ -119,19 +96,14 @@ class Ellipsoid(NamedTuple):
     def semiaxes(self) -> np.ndarray:
         return np.array([self.a, self.b, self.c])
 
-    def mesh(self, geom=None, lcar=.1) -> MeshTet:
-        with geometrycontext as g:
-            if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
-                geom = pygmsh.opencascade.Geometry()
-            else:
-                geom = g
-            geom.add_ellipsoid([0.]*3, self.semiaxes, lcar)
-            if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
-                return from_meshio(
-                    pygmsh.generate_mesh(geom))
-            else:
-                return from_meshio(
-                    geom.generate_mesh())
+    def mesh(self, lcar=.1) -> MeshTet:
+        return from_meshio(ngsimple.generate("""
+        algebraic3d
+
+        solid main = ellipsoid (0, 0, 0; {}, 0, 0; 0, {}, 0; 0, 0, {});
+
+        tlo main;
+        """.format(*self.semiaxes), f"-maxh={lcar}"))
 
     def pressure(self, x, y, z) -> np.ndarray:
         """Exact pressure at zero Grashof number.
