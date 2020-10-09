@@ -31,7 +31,7 @@ def _(m: MeshTet, **kwargs) -> Axes:
     fig = plt.figure()
     ax = Axes3D(fig)
     indexing = m.facets[:, bnd_facets].T
-    ax.plot_trisurf(m.p[0, :], m.p[1, :], m.p[2, :],
+    ax.plot_trisurf(m.p[0], m.p[1], m.p[2],
                     triangles=indexing, cmap=plt.cm.viridis, edgecolor='k')
     ax.set_axis_off()
     return ax
@@ -77,10 +77,10 @@ def _(m: Mesh2D, **kwargs) -> Axes:
     # None insertion trick.
     xs = []
     ys = []
-    for s, t, u, v in zip(m.p[0, m.facets[0, :]],
-                          m.p[1, m.facets[0, :]],
-                          m.p[0, m.facets[1, :]],
-                          m.p[1, m.facets[1, :]]):
+    for s, t, u, v in zip(m.p[0, m.facets[0]],
+                          m.p[1, m.facets[0]],
+                          m.p[0, m.facets[1]],
+                          m.p[1, m.facets[1]]):
         xs.append(s)
         xs.append(u)
         xs.append(None)
@@ -94,10 +94,10 @@ def _(m: Mesh2D, **kwargs) -> Axes:
             ax.text(m.p[0, itr], m.p[1, itr], str(itr))
 
     if "facet_numbering" in kwargs:
-        mx = .5*(m.p[0, m.facets[0, :]] +
-                 m.p[0, m.facets[1, :]])
-        my = .5*(m.p[1, m.facets[0, :]] +
-                 m.p[1, m.facets[1, :]])
+        mx = .5*(m.p[0, m.facets[0]] +
+                 m.p[0, m.facets[1]])
+        my = .5*(m.p[1, m.facets[0]] +
+                 m.p[1, m.facets[1]])
         for itr in range(m.facets.shape[1]):
             ax.text(mx[itr], my[itr], str(itr))
 
@@ -129,10 +129,10 @@ def _(m: MeshLine, z: ndarray, **kwargs):
         ax = kwargs["ax"]
 
     color = kwargs["color"] if "color" in kwargs else 'ko-'
-    for y1, y2, s, t in zip(z[m.t[0, :]],
-                            z[m.t[1, :]],
-                            m.p[0, m.t[0, :]],
-                            m.p[0, m.t[1, :]]):
+    for y1, y2, s, t in zip(z[m.t[0]],
+                            z[m.t[1]],
+                            m.p[0, m.t[0]],
+                            m.p[0, m.t[1]]):
         xs.append(s)
         xs.append(t)
         xs.append(None)
@@ -185,10 +185,11 @@ def _(m: MeshTri, z: ndarray, **kwargs) -> Axes:
     else:
         ax = kwargs["ax"]
 
-    im = ax.tripcolor(m.p[0, :], m.p[1, :], m.t.T, z,
+    im = ax.tripcolor(m.p[0], m.p[1], m.t.T, z,
                       **{k: v for k, v in kwargs.items()
                          if k in ['shading',
                                   'edgecolors',
+                                  'cmap',
                                   'vmin',
                                   'vmax']})
 
