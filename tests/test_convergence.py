@@ -187,7 +187,7 @@ class ConvergenceTriP2(ConvergenceTriP1):
         return InteriorBasis(m, e)
 
 
-class ConvergenceTriP2(ConvergenceTriP1):
+class ConvergenceTriCR(ConvergenceTriP1):
 
     rateL2 = 2.0
     rateH1 = 1.0
