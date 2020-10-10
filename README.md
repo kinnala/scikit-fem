@@ -183,6 +183,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
+### Fixed
+
+- Fix `Mesh` for unsigned `Mesh.t`.
+
 ### Added
 
 - `MeshTet.element_finder` and `MeshLine.element_finder` for using
