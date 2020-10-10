@@ -20,7 +20,7 @@ class ElementTriCR(ElementH1):
 
         if i == 0:
             phi = 1. - 2. * y
-            dphi = np.array([ 0. * x, -2. + 0. * y])
+            dphi = np.array([0. * x, -2. + 0. * y])
         elif i == 1:
             phi = 2. * x + 2. * y - 1.
             dphi = np.array([2. + 0. * x, 2. + 0. * y])
