@@ -15,6 +15,7 @@ MESH_TYPE_MAPPING = OrderedDict([
     ('triangle', skfem.MeshTri),
     ('quad', skfem.MeshQuad),
     ('line', skfem.MeshLine),
+    ('triangle6', skfem.MeshTri2),
 ])
 
 TYPE_MESH_MAPPING = {v: k for k, v in MESH_TYPE_MAPPING.items()}
@@ -59,7 +60,7 @@ def from_meshio(m, force_mesh_type=None):
     def strip_extra_coordinates(p):
         if meshio_type == "line":
             return p[:, :1]
-        if meshio_type in ("quad", "triangle"):
+        if meshio_type in ("quad", "triangle", "triangle6"):
             return p[:, :2]
         return p
 
@@ -67,11 +68,11 @@ def from_meshio(m, force_mesh_type=None):
     p = np.ascontiguousarray(strip_extra_coordinates(m.points).T)
     t = np.ascontiguousarray(cells[meshio_type].T)
 
-    mtmp = mesh_type(p,
-                     (t[[0, 4, 3, 1, 7, 5, 2, 6]]
-                      if meshio_type == 'hexahedron'
-                      # vtk requires a different ordering
-                      else t))
+    # reorder t if needed
+    if meshio_type == 'hexahedron':
+        t = t[[0, 4, 3, 1, 7, 5, 2, 6]]
+
+    mtmp = mesh_type(p, t)
 
     try:
         # element to boundary element type mapping
