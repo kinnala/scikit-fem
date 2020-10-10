@@ -191,6 +191,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `MeshTet.element_finder` and `MeshLine.element_finder` for using
   `InteriorBasis.interpolator` with these mesh structures.
+- `ElementTriCR`, the nonconforming Crouzeix-Raviart element for Stokes flow.
 
 ### [2.1.1] - 2020-10-01
 

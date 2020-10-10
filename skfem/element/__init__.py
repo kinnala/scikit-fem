@@ -36,7 +36,7 @@ from .element_hdiv import ElementHdiv
 from .element_hcurl import ElementHcurl
 from .element_tri import ElementTriP1, ElementTriP2, ElementTriDG,\
     ElementTriP0, ElementTriRT0, ElementTriMorley,\
-    ElementTriArgyris, ElementTriMini
+    ElementTriArgyris, ElementTriMini, ElementTriCR
 from .element_quad import ElementQuad0, ElementQuad1, ElementQuad2,\
     ElementQuadS2, ElementQuadDG, ElementQuadP,\
     ElementQuadBFS
@@ -59,6 +59,7 @@ __all__ = [
     "ElementTriP2",
     "ElementTriDG",
     "ElementTriP0",
+    "ElementTriCR",
     "ElementTriRT0",
     "ElementTriMorley",
     "ElementTriArgyris",
