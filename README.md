@@ -185,12 +185,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fix `Mesh` for unsigned `Mesh.t`.
+- Fix `Mesh.validate` for unsigned `Mesh.t`.
 
 ### Added
 
 - `MeshTet.element_finder` and `MeshLine.element_finder` for using
-  `InteriorBasis.interpolator` with these mesh structures.
+  `InteriorBasis.interpolator`.
 - `ElementTriCR`, the nonconforming Crouzeix-Raviart element for Stokes flow.
 
 ### [2.1.1] - 2020-10-01
