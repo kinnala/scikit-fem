@@ -81,19 +81,19 @@ class Mesh:
 
     @property
     def nelements(self):
-        return self.t.shape[1]
+        return int(self.t.shape[1])
 
     @property
     def nvertices(self):
-        return np.max(self.t) + 1
+        return int(np.max(self.t) + 1)
 
     @property
     def nfacets(self):
-        return self.facets.shape[1]
+        return int(self.facets.shape[1])
 
     @property
     def nedges(self):
-        return self.edges.shape[1]
+        return int(self.edges.shape[1])
 
     def __str__(self):
         return self.__repr__()
@@ -221,7 +221,7 @@ class Mesh:
         """Perform mesh validity checks."""
         # check that element connectivity contains integers
         # NOTE: this is necessary for some plotting functionality
-        if not np.issubdtype(self.t[0, 0], np.signedinteger):
+        if not np.issubdtype(self.t[0, 0], np.integer):
             msg = ("Mesh._validate(): Element connectivity "
                    "must consist of integers.")
             raise Exception(msg)
