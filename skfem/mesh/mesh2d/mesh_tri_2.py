@@ -48,17 +48,9 @@ class MeshTri2(MeshTri):
 
     @classmethod
     def init_circle(cls, Nrefs=3):
-        p = np.array([[0., 0.],
-                      [1., 0.],
-                      [0., 1.],
-                      [-1., 0.],
-                      [0., -1.]]).T
-        t = np.array([[0, 1, 2],
-                      [0, 1, 4],
-                      [0, 2, 3],
-                      [0, 3, 4]], dtype=np.intp).T
         m = MeshTri.init_circle(Nrefs)
         m = cls(m.p, m.t)
         D = m._basis.get_dofs(m.boundary_facets()).flatten()
-        m._mesh.p[:, D] = m._mesh.p[:, D] / np.linalg.norm(m._mesh.p[:, D], axis=0)
+        m._mesh.p[:, D] =\
+            m._mesh.p[:, D] / np.linalg.norm(m._mesh.p[:, D], axis=0)
         return m
