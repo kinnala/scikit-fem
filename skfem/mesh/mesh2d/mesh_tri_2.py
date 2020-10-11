@@ -8,34 +8,13 @@ class MeshTri2(MeshTri):
     _mesh = None
     name = "Quadratic triangular"
 
-    def _fix_order(self, doflocs, t):
-        """Perform remapping in case doflocs are not given in the same order
-        as the DOFs in :class:`skfem.assembly.Dofs` object."""
-
-        # first set
-        dofs = t[:3]
-        remap = np.zeros(np.max(dofs) + 1, dtype=np.int)
-        udofs = np.unique(dofs)
-        remap[udofs] = np.arange(len(udofs), dtype=np.int)
-        dofs = remap[dofs]
-
-        # second set
-        dofs2 = t[3:]
-        remap2 = np.zeros(np.max(dofs2) + 1, dtype=np.int)
-        udofs2 = np.unique(dofs2)
-        remap2[udofs2] = np.arange(len(udofs2), dtype=np.int) + np.max(dofs) + 1
-        dofs2 = remap2[dofs2]
-        
-        doflocs = np.hstack((doflocs[:, udofs], doflocs[:, udofs2]))
-        return doflocs, np.vstack((dofs, dofs2))
-
     def __init__(self, doflocs, t, **kwargs):
 
         if t.shape[0] == 6:
-            doflocs, t = self._fix_order(doflocs, t)
+            dofs, ix = np.unique(t[:3], return_inverse=True)
             super(MeshTri2, self).__init__(
-                doflocs[:, :(np.max(t[:3]) + 1)],
-                t[:3],
+                doflocs[:, dofs],
+                np.arange(len(dofs), dtype=np.int)[ix].reshape(t[:3].shape),
                 sort_t=False,
                 **kwargs
             )
