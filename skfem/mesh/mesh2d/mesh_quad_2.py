@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 
 from .mesh_quad import MeshQuad
@@ -9,6 +11,11 @@ class MeshQuad2(MeshQuad):
     name = "Quadratic quadrilateral"
 
     def __init__(self, doflocs, t, **kwargs):
+
+        warnings.warn("MeshQuad2 is an experimental feature and "
+                      "not governed by the semantic versioning. "
+                      "Several features of MeshQuad are still "
+                      "missing.")
 
         if t.shape[0] == 9:
             dofs, ix = np.unique(t[:4], return_inverse=True)

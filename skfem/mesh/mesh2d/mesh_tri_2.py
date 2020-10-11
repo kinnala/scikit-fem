@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 
 from .mesh_tri import MeshTri
@@ -9,6 +11,11 @@ class MeshTri2(MeshTri):
     name = "Quadratic triangular"
 
     def __init__(self, doflocs, t, **kwargs):
+
+        warnings.warn("MeshTri2 is an experimental feature and "
+                      "not governed by the semantic versioning. "
+                      "Several features of MeshTri are still "
+                      "missing.")
 
         if t.shape[0] == 6:
             dofs, ix = np.unique(t[:3], return_inverse=True)
