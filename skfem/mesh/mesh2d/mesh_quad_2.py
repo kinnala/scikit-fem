@@ -17,19 +17,27 @@ class MeshQuad2(MeshQuad):
                 np.arange(len(dofs), dtype=np.int)[ix].reshape(t[:4].shape),
                 **kwargs
             )
-            from skfem.element import ElementQuad2
-            from skfem.assembly import InteriorBasis
-            self._elem = ElementQuad2()
-            self._basis = InteriorBasis(self, self._elem)
-            self._mesh = MeshQuad.from_basis(self._basis)
-            self._mesh.p = doflocs
-            self._mesh.t = t
         else:
             # fallback for refinterp
             super(MeshQuad2, self).__init__(doflocs, t, **kwargs)
+        from skfem.element import ElementQuad1, ElementQuad2
+        from skfem.assembly import InteriorBasis
+        from skfem.mapping import MappingIsoparametric
+        self._elem = ElementQuad2()
+        self._basis = InteriorBasis(
+            self,
+            self._elem,
+            MappingIsoparametric(self, ElementQuad1())
+        )
+        self._mesh = MeshQuad.from_basis(self._basis)
+        if t.shape[0] == 9:
+            self._mesh.p = doflocs
+            self._mesh.t = t
+
+    def refine(self, n=1):
+        super(MeshQuad2, self).refine(n)
+        self.__init__(self.p, self.t)
 
     def mapping(self):
-        if self._mesh is not None:
-            from skfem.mapping import MappingIsoparametric
-            return MappingIsoparametric(self._mesh, self._elem)
-        return super(MeshQuad2, self).mapping()
+        from skfem.mapping import MappingIsoparametric
+        return MappingIsoparametric(self._mesh, self._elem)

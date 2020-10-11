@@ -23,15 +23,35 @@ class MeshTri2(MeshTri):
             super(MeshTri2, self).__init__(doflocs, t, **kwargs)
         from skfem.element import ElementTriP2
         from skfem.assembly import InteriorBasis
+        from skfem.mapping import MappingAffine
         self._elem = ElementTriP2()
-        self._basis = InteriorBasis(self, self._elem)
+        self._basis = InteriorBasis(self, self._elem, MappingAffine(self))
         self._mesh = MeshTri.from_basis(self._basis)
         if t.shape[0] == 6:
             self._mesh.p = doflocs
             self._mesh.t = t
 
     def mapping(self):
-        if self._mesh is not None:
-            from skfem.mapping import MappingIsoparametric
-            return MappingIsoparametric(self._mesh, self._elem)
-        return super(MeshTri2, self).mapping()
+        from skfem.mapping import MappingIsoparametric
+        return MappingIsoparametric(self._mesh, self._elem)
+
+    def refine(self, n=1):
+        super(MeshTri2, self).refine(n)
+        self.__init__(self.p, self.t)
+
+    @classmethod
+    def init_circle(cls, Nrefs=3):
+        p = np.array([[0., 0.],
+                      [1., 0.],
+                      [0., 1.],
+                      [-1., 0.],
+                      [0., -1.]]).T
+        t = np.array([[0, 1, 2],
+                      [0, 1, 4],
+                      [0, 2, 3],
+                      [0, 3, 4]], dtype=np.intp).T
+        m = MeshTri.init_circle(Nrefs)
+        m = cls(m.p, m.t)
+        D = m._basis.get_dofs(m.boundary_facets()).flatten()
+        m._mesh.p[:, D] = m._mesh.p[:, D] / np.linalg.norm(m._mesh.p[:, D], axis=0)
+        return m
