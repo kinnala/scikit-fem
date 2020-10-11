@@ -21,7 +21,9 @@ def draw(m, **kwargs) -> Axes:
 
 @draw.register(InteriorBasis)
 def _(ib: InteriorBasis, **kwargs) -> Axes:
-    return draw(ib.mesh, **kwargs)
+    Nrefs = kwargs["Nrefs"] if "Nrefs" in kwargs else 1
+    m, _ = ib.refinterp(ib.mesh.p[0], Nrefs=Nrefs)
+    return draw(m, boundaries_only=True, **kwargs)
 
 
 @draw.register(MeshTet)
@@ -73,14 +75,18 @@ def _(m: Mesh2D, **kwargs) -> Axes:
         ax.set_axis_off()
     else:
         ax = kwargs["ax"]
+    if "boundaries_only" in kwargs:
+        facets = m.facets[:, m.boundary_facets()]
+    else:
+        facets = m.facets
     # faster plotting is achieved through
     # None insertion trick.
     xs = []
     ys = []
-    for s, t, u, v in zip(m.p[0, m.facets[0]],
-                          m.p[1, m.facets[0]],
-                          m.p[0, m.facets[1]],
-                          m.p[1, m.facets[1]]):
+    for s, t, u, v in zip(m.p[0, facets[0]],
+                          m.p[1, facets[0]],
+                          m.p[0, facets[1]],
+                          m.p[1, facets[1]]):
         xs.append(s)
         xs.append(u)
         xs.append(None)

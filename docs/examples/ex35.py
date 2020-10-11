@@ -231,7 +231,7 @@ from skfem.io.json import from_file
 import numpy as np
 
 
-mesh = from_file(Path(__file__).with_name("ex35.json"))
+mesh = from_file(Path(__file__).parent / 'meshes' / 'ex35.json')
 
 element = ElementTriP1()
 

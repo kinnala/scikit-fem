@@ -22,7 +22,7 @@ from skfem.models.poisson import vector_laplace, laplace
 from skfem.models.general import divergence, rot
 from skfem.io.json import from_file
 
-mesh = from_file(Path(__file__).with_name("backward-facing_step.json"))
+mesh = from_file(Path(__file__).parent / 'meshes' / 'backward-facing_step.json')
 
 element = {'u': ElementVectorH1(ElementTriP2()),
            'p': ElementTriP1()}

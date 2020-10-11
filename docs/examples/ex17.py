@@ -39,7 +39,7 @@ joule_heating = 5.
 heat_transfer_coefficient = 7.
 thermal_conductivity = {'core': 101.,  'annulus': 11.}
 
-mesh = from_file(Path(__file__).with_name("disk.json"))
+mesh = from_file(Path(__file__).parent / 'meshes' / 'disk.json')
 radii = sorted([np.linalg.norm(mesh.p[:, mesh.t[:, s]], axis=0).max() for s in mesh.subdomains.values()])
 
 

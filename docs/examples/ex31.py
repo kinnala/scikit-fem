@@ -13,35 +13,34 @@ from skfem import *
 from skfem.models.poisson import laplace, mass
 import numpy as np
 
-# create mesh and element for the finite element approximation
-m = MeshQuad()
-m.refine()
+
+p = np.array([[0.  ,  1.  ,  1.  ,  0.  ,  0.5 ,  0.  ,  1.  ,  0.5 ,  0.5 ,
+               0.25, -0.1 ,  0.75,  0.9 ,  1.1 ,  0.75,  0.1 ,  0.25,  0.5 ,
+               0.25,  0.75,  0.5 ,  0.25,  0.75,  0.75,  0.25],
+              [0.  ,  0.  ,  1.  ,  1.  ,  0.  ,  0.5 ,  0.5 ,  1.  ,  0.5 ,
+               0.1 ,  0.25, -0.1 ,  0.25,  0.75,  0.9 ,  0.75,  1.1 ,  0.25,
+               0.5 ,  0.5 ,  0.75,  0.25,  0.25,  0.75,  0.75]])
+
+t = np.array([[ 0,  4,  8,  5],
+              [ 4,  1,  6,  8],
+              [ 8,  6,  2,  7],
+              [ 5,  8,  7,  3],
+              [ 9, 11, 19, 18],
+              [17, 12, 13, 20],
+              [18, 19, 14, 16],
+              [10, 17, 20, 15],
+              [21, 22, 23, 24]])
+
+m = MeshQuad2(p, t)
 e = ElementQuadP(5)
 
-# create quadratic mesh for the local-to-global mapping
-E = ElementQuad2()
-mapping_basis = InteriorBasis(m, E)
-M = MeshQuad.from_basis(mapping_basis)
-
-# deform the quadratic mesh
-f1 = M.facets_satisfying(lambda x: (np.abs(x[0] - .5) == .5) * (x[1] > .5))
-f2 = M.facets_satisfying(lambda x: (np.abs(x[0] - .5) == .5) * (x[1] < .5))
-f3 = M.facets_satisfying(lambda x: (np.abs(x[1] - .5) == .5) * (x[0] > .5))
-f4 = M.facets_satisfying(lambda x: (np.abs(x[1] - .5) == .5) * (x[0] < .5))
-M.p[0, mapping_basis.facet_dofs[:, f1]] += 0.1
-M.p[0, mapping_basis.facet_dofs[:, f2]] -= 0.1
-M.p[1, mapping_basis.facet_dofs[:, f3]] -= 0.1
-M.p[1, mapping_basis.facet_dofs[:, f4]] += 0.1
-
 # create mapping for the finite element approximation and assemble
-mapping = MappingIsoparametric(M, E)
-basis = InteriorBasis(m, e, mapping)
+basis = InteriorBasis(m, e)
 
 A = asm(laplace, basis)
 M = asm(mass, basis)
 
 L, x = solve(*condense(A, M, D=basis.find_dofs()), k=8)
-
 
 if __name__ == '__main__':
 

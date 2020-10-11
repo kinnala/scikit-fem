@@ -160,7 +160,7 @@ def make_mesh(halfheight: float,  # mm
         else:
             return from_meshio(geom.generate_mesh(dim=2))
 
-mesh = from_file(Path(__file__).with_name("ex28.json"))
+mesh = from_file(Path(__file__).parent / 'meshes' / 'ex28.json')
 element = ElementTriP1()
 basis = {
     'heat': InteriorBasis(mesh, element),

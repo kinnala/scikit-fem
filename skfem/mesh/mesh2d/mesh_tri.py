@@ -285,7 +285,7 @@ class MeshTri(Mesh2D):
                       [0, 1, 4],
                       [0, 2, 3],
                       [0, 3, 4]], dtype=np.intp).T
-        m = MeshTri(p, t)
+        m = cls(p, t)
         for _ in range(Nrefs):
             m.refine()
             D = m.boundary_nodes()

@@ -1,15 +1,17 @@
 """Solve problems that have manufactured solutions."""
 
 import unittest
+from pathlib import Path
 
 import numpy as np
 
-from skfem.models.poisson import laplace, mass
-from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
+from skfem.models.poisson import laplace, mass, unit_load
+from skfem.mesh import (MeshHex, MeshLine, MeshQuad, MeshTet,
+                        MeshTri, MeshTri2, MeshQuad2)
 from skfem.element import (ElementHex1, ElementHexS2,
                            ElementLineP1, ElementLineP2, ElementLineMini, 
                            ElementQuad1, ElementQuad2, ElementTetP1,
-                           ElementTriP2, ElementHex2)
+                           ElementTriP2, ElementHex2, ElementTriP1)
 from skfem.assembly import FacetBasis, InteriorBasis
 from skfem import asm, condense, solve, LinearForm
 
@@ -223,6 +225,46 @@ class TestExactQuadElement2(TestExactTriElementP2):
 
     mesh = MeshQuad
     elem = ElementQuad2
+
+
+class SolveCirclePoisson(unittest.TestCase):
+
+    mesh_type = MeshTri2
+    element_type = ElementTriP1
+    filename = "quadratic_tri.msh"
+
+    def runTest(self):
+        path = Path(__file__).parents[1] / 'docs' / 'examples' / 'meshes'
+        m = self.mesh_type.load(path / self.filename)
+        basis = InteriorBasis(m, self.element_type())
+
+        A = laplace.assemble(basis)
+        b = unit_load.assemble(basis)
+        x = solve(*condense(A, b, D=basis.get_dofs()))
+
+        self.assertAlmostEqual(np.max(x), 0.06261690318912218, places=3)
+
+
+class SolveCirclePoissonQuad(SolveCirclePoisson):
+
+    mesh_type = MeshQuad2
+    element_type = ElementQuad1
+    filename = "quadratic_quad.msh"
+
+
+class SolveCirclePoissonQuad2(SolveCirclePoisson):
+
+    mesh_type = MeshQuad2
+    element_type = ElementQuad2
+    filename = "quadratic_quad.msh"
+
+
+class SolveCirclePoissonTri2(SolveCirclePoisson):
+
+    mesh_type = MeshTri2
+    element_type = ElementTriP2
+    filename = "quadratic_tri.msh"
+
 
 
 if __name__ == '__main__':
