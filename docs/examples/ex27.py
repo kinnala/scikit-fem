@@ -106,7 +106,7 @@ class BackwardFacingStep:
     def __init__(self,
                  length: float = 35.):
 
-        self.mesh = skfem.io.json.from_file(Path(__file__).with_name("backward-facing_step.json"))
+        self.mesh = skfem.io.json.from_file(Path(__file__).parent / 'meshes' / 'backward-facing_step.json')
         self.basis = {variable: InteriorBasis(self.mesh, e, intorder=3)
                       for variable, e in self.element.items()}
         self.basis['inlet'] = FacetBasis(self.mesh, self.element['u'],

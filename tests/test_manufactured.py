@@ -1,11 +1,13 @@
 """Solve problems that have manufactured solutions."""
 
 import unittest
+from pathlib import Path
 
 import numpy as np
 
 from skfem.models.poisson import laplace, mass
-from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
+from skfem.mesh import (MeshHex, MeshLine, MeshQuad, MeshTet,
+                        MeshTri, MeshTri2, MeshQuad2)
 from skfem.element import (ElementHex1, ElementHexS2,
                            ElementLineP1, ElementLineP2, ElementLineMini, 
                            ElementQuad1, ElementQuad2, ElementTetP1,
@@ -223,6 +225,23 @@ class TestExactQuadElement2(TestExactTriElementP2):
 
     mesh = MeshQuad
     elem = ElementQuad2
+
+
+class SolveCirclePoisson(unittest.TestCase):
+
+    mesh_type = MeshTri2
+    filename = "quadratic_tri.msh"
+
+    def runTest(self):
+        path = Path(__file__).parents[1] / 'docs' / 'examples' / 'meshes'
+        m = self.mesh_type.load(path / self.filename)
+
+
+class SolveCirclePoissonQuad(SolveCirclePoisson):
+
+    mesh_type = MeshQuad2
+    filename = "quadratic_quad.msh"
+
 
 
 if __name__ == '__main__':

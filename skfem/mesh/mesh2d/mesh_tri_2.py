@@ -18,16 +18,17 @@ class MeshTri2(MeshTri):
                 sort_t=False,
                 **kwargs
             )
-            from skfem.element import ElementTriP2
-            from skfem.assembly import InteriorBasis
-            self._elem = ElementTriP2()
-            self._basis = InteriorBasis(self, self._elem)
-            self._mesh = MeshTri.from_basis(self._basis)
-            self._mesh.p = doflocs
-            self._mesh.t = t
         else:
             # fallback for refinterp
             super(MeshTri2, self).__init__(doflocs, t, **kwargs)
+        from skfem.element import ElementTriP2
+        from skfem.assembly import InteriorBasis
+        self._elem = ElementTriP2()
+        self._basis = InteriorBasis(self, self._elem)
+        self._mesh = MeshTri.from_basis(self._basis)
+        if t.shape[0] == 6:
+            self._mesh.p = doflocs
+            self._mesh.t = t
 
     def mapping(self):
         if self._mesh is not None:

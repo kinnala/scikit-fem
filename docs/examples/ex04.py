@@ -49,24 +49,6 @@ This is a nonlinear problem since we do not know a priori which subset
    candidate boundary :math:`\Gamma_C` until convergence.
    Extending this example should be straightforward.
 
-License
--------
-
-Copyright 2018-2020 scikit-fem developers
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 """
 
 from skfem import *
@@ -80,25 +62,8 @@ from skfem.io.json import from_file, to_file
 from pathlib import Path
 
 # create meshes
-mesh_file = Path(__file__).with_name("ex04_mesh.json")
-try:
-    m = from_file(mesh_file)
-except FileNotFoundError:
-    from pygmsh import generate_mesh
-    from pygmsh.built_in import Geometry
-    geom = Geometry()
-    points = []
-    lines = []
-    points.append(geom.add_point([0., 0., 0.], .1))
-    points.append(geom.add_point([0., 1., 0.], .1))
-    points.append(geom.add_point([0.,-1., 0.], .1))
-    lines.append(geom.add_circle_arc(points[2], points[0], points[1]))
-    geom.add_physical(lines[-1], 'contact')
-    lines.append(geom.add_line(points[1], points[2]))
-    geom.add_physical(lines[-1], 'dirichlet')
-    geom.add_physical(geom.add_plane_surface(geom.add_line_loop(lines)), 'domain')
-    m = from_meshio(generate_mesh(geom, dim=2))
-    to_file(m, mesh_file)
+mesh_file = Path(__file__).parent / 'meshes' / 'ex04_mesh.json'
+m = from_file(mesh_file)
 
 M = MeshLine(np.linspace(0, 1, 6)) * MeshLine(np.linspace(-1, 1, 10))
 M.translate((1.0, 0.0))

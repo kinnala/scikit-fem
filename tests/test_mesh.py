@@ -62,15 +62,15 @@ class Loading(unittest.TestCase):
 
     def runTest(self):
         # submeshes
-        examples = Path(__file__).parents[1] / 'docs' / 'examples'
-        m = MeshTet.load(str(examples / 'box.msh'))
+        path = Path(__file__).parents[1] / 'docs' / 'examples' / 'meshes'
+        m = MeshTet.load(str(path / 'box.msh'))
         self.assertTrue((m.boundaries['top']
                          == m.facets_satisfying(lambda x: x[1] == 1)).all())
         self.assertTrue((m.boundaries['back']
                          == m.facets_satisfying(lambda x: x[2] == 0)).all())
         self.assertTrue((m.boundaries['front']
                          == m.facets_satisfying(lambda x: x[2] == 1)).all())
-        m = MeshTri.load(str(examples / 'square.msh'))
+        m = MeshTri.load(str(path / 'square.msh'))
         self.assertTrue((m.boundaries['top']
                          == m.facets_satisfying(lambda x: x[1] == 1)).all())
         self.assertTrue((m.boundaries['left']
