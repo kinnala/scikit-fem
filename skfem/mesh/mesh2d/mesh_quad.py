@@ -150,7 +150,9 @@ class MeshQuad(Mesh2D):
             O-------------*
 
         """
-        return cls()
+        p = np.array([[0., 0.], [1., 0.], [1., 1.], [0., 1.]]).T
+        t = np.array([[0, 1, 2, 3]]).T
+        return cls(p, t)
 
     def _build_mappings(self):
         # do not sort since order defines counterclockwise order

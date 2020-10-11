@@ -16,6 +16,7 @@ MESH_TYPE_MAPPING = OrderedDict([
     ('quad', skfem.MeshQuad),
     ('line', skfem.MeshLine),
     ('triangle6', skfem.MeshTri2),
+    ('quad9', skfem.MeshQuad2),
 ])
 
 TYPE_MESH_MAPPING = {v: k for k, v in MESH_TYPE_MAPPING.items()}
@@ -60,7 +61,7 @@ def from_meshio(m, force_mesh_type=None):
     def strip_extra_coordinates(p):
         if meshio_type == "line":
             return p[:, :1]
-        if meshio_type in ("quad", "triangle", "triangle6"):
+        if meshio_type in ("quad", "triangle", "triangle6", "quad9"):
             return p[:, :2]
         return p
 
