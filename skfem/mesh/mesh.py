@@ -260,24 +260,8 @@ class Mesh:
 
     def expand_facets(self, facets: ndarray):
         """Find vertices and edges corresponding to given facets."""
-
         vertices = np.unique(self.facets[:, facets].flatten())
-
-        if self.dim() == 3:
-            edge_candidates = self.t2e[:, self.f2t[0, facets]].flatten()
-            # subset of edges that share all points with the given facets
-            subset_ix = np.nonzero(
-                np.prod(np.isin(self.edges[:, edge_candidates],
-                                self.facets[:, facets].flatten()),
-                        axis=0)
-            )[0]
-            edges = np.intersect1d(
-                self.boundary_edges(),
-                edge_candidates[subset_ix]
-            )
-        else:
-            edges = np.array([], dtype=np.int64)
-
+        edges = np.array([], dtype=np.int64)
         return vertices, edges
 
     def save(self,
@@ -422,12 +406,8 @@ class Mesh:
         subdomains: Optional[Dict[str, ndarray]] = None
         if self.boundaries is not None:
             boundaries = {k: v.tolist() for k, v in self.boundaries.items()}
-        else:
-            boundaries = None
         if self.subdomains is not None:
             subdomains = {k: v.tolist() for k, v in self.subdomains.items()}
-        else:
-            subdomains = None
         return {
             'p': self.p.T.tolist(),
             't': self.t.T.tolist(),

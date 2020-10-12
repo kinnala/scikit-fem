@@ -20,6 +20,22 @@ class Mesh3D(Mesh):
     facets = np.array([], dtype=np.int64)
     t2f = np.array([], dtype=np.int64)
 
+    def expand_facets(self, facets: ndarray):
+        """Find vertices and edges corresponding to given facets."""
+        vertices = np.unique(self.facets[:, facets].flatten())
+        edge_candidates = self.t2e[:, self.f2t[0, facets]].flatten()
+        # subset of edges that share all points with the given facets
+        subset_ix = np.nonzero(
+            np.prod(np.isin(self.edges[:, edge_candidates],
+                            self.facets[:, facets].flatten()),
+                    axis=0)
+        )[0]
+        edges = np.intersect1d(
+            self.boundary_edges(),
+            edge_candidates[subset_ix]
+        )
+        return vertices, edges
+
     def edges_satisfying(self, test: Callable[[ndarray], bool]) -> ndarray:
         """Return edges whose midpoints satisfy some condition.
 
