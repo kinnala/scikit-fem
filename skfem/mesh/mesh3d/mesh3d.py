@@ -17,6 +17,8 @@ class Mesh3D(Mesh):
     """
     p = np.zeros((3, 0), dtype=np.float64)
     f2t = np.zeros((2, 0), dtype=np.int64)
+    facets = np.array([], dtype=np.int64)
+    t2f = np.array([], dtype=np.int64)
 
     def edges_satisfying(self, test: Callable[[ndarray], bool]) -> ndarray:
         """Return edges whose midpoints satisfy some condition.

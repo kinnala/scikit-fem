@@ -1,9 +1,8 @@
-from typing import Optional, List
+from typing import Optional, List, Type
 
 import numpy as np
 from numpy import ndarray
 
-from ..mesh import Mesh
 from .discrete_field import DiscreteField
 
 
@@ -44,7 +43,7 @@ class Element():
     dim: int = -1
     maxdeg: int = -1
     dofnames: List[str] = []
-    mesh_type: Mesh = None
+    mesh_type: Type = None
 
     def orient(self, mapping, i, tind=None):
         """Orient basis functions. By default all = 1."""

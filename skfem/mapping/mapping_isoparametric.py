@@ -1,10 +1,10 @@
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 from numpy import ndarray
 
 from skfem.element import Element
-from skfem.mesh import Mesh
+from skfem.mesh import Mesh2D, Mesh3D
 from .mapping import Mapping
 
 
@@ -13,7 +13,7 @@ class MappingIsoparametric(Mapping):
     hexahedral elements."""
 
     def __init__(self,
-                 mesh: Mesh,
+                 mesh: Union[Mesh2D, Mesh3D],
                  elem: Element,
                  bndelem: Optional[Element] = None):
         r"""Initialize an isoparametric mapping between

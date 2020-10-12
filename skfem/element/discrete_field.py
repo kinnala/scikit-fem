@@ -22,6 +22,9 @@ class DiscreteField(NamedTuple):
             return self.value * other.value
         return self.value * other
 
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
     def _split(self):
         """Split all components based on their first dimension."""
         return [DiscreteField(*[f[i] for f in self if f is not None])
@@ -36,6 +39,3 @@ class DiscreteField(NamedTuple):
             return np.zeros_like(x)
 
         return DiscreteField(*[zero_or_none(field) for field in self])
-
-
-DiscreteField.__rmul__ = DiscreteField.__mul__

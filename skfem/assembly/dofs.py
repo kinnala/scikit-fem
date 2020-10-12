@@ -167,8 +167,8 @@ class Dofs:
     element_dofs: ndarray = None
     N: int = 0
 
-    topo: Mesh = None
-    element: Element = None
+    topo: Mesh
+    element: Element
 
     def __init__(self, topo, element):
 
@@ -270,8 +270,8 @@ class Dofs:
     def _by_name(self,
                  dofs: ndarray,
                  off: int = 0,
-                 ix: Union[ndarray, slice] = None,
-                 rows: Union[ndarray, slice] = None):
+                 ix: ndarray = None,
+                 rows: ndarray = None):
 
         n_dofs = dofs.shape[0]
         n_ents = dofs.shape[1] if ix is None else len(ix)
