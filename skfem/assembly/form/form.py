@@ -1,9 +1,10 @@
-from typing import Callable
+from typing import Callable, Any, Optional
 
 import numpy as np
 from numpy import ndarray
 from scipy.sparse import coo_matrix
 
+from ..basis import Basis
 from ...element import DiscreteField
 
 
@@ -27,10 +28,10 @@ class Form:
             return type(self)(form=args[0], dtype=self.dtype)
         return self.assemble(self.kernel(*args))
 
-    def _kernel(self):
-        raise NotImplementedError
-
-    def assemble(self):
+    def assemble(self,
+                 u_basis: Basis,
+                 v_basis: Optional[Basis] = None,
+                 **kwargs) -> Any:
         raise NotImplementedError
 
     @staticmethod

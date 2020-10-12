@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 
 from numpy import ndarray
 import numpy as np
@@ -19,6 +19,8 @@ class Functional(Form):
     def _kernel(self,
                 w: Dict[str, DiscreteField],
                 dx: ndarray) -> ndarray:
+        if self.form is None:
+            raise Exception("Form function handle not defined.")
         return np.sum(self.form(w) * dx, axis=1)
 
     def elemental(self,
@@ -28,6 +30,9 @@ class Functional(Form):
         return self._kernel(w, v.dx)
 
     def assemble(self,
-                 v: Basis,
+                 u_basis: Basis,
+                 v_basis: Optional[Basis] = None,
                  **kwargs) -> float:
-        return np.sum(self.elemental(v, **kwargs))
+        assert v_basis is None
+        v_basis = u_basis
+        return np.sum(self.elemental(v_basis, **kwargs))

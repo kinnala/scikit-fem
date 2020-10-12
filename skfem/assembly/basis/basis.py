@@ -24,6 +24,9 @@ class Basis:
     """
 
     tind: ndarray = None
+    dx: ndarray = None
+    basis: List[ndarray] = None
+    X: ndarray = None
 
     def __init__(self, mesh, elem, mapping=None):
 
