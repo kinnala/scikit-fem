@@ -43,8 +43,8 @@ class Form:
             elif isinstance(w[k], ndarray):
                 w[k] = DiscreteField(w[k])
             elif isinstance(w[k], list):
-                w[k] = DiscreteField(np.array([z.f for z in w[k]]),
-                                     np.array([z.df for z in w[k]]))
+                w[k] = DiscreteField(np.array([z.value for z in w[k]]),
+                                     np.array([z.grad for z in w[k]]))
             elif isinstance(w[k], tuple):
                 w[k] = DiscreteField(*w[k])
             else:

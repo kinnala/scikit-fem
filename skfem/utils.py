@@ -268,7 +268,7 @@ def condense(A: spmatrix,
             Aout = A[I].T[I].T
             bout = b[I] - A[I].T[D].T @ x[D]
         else:
-            raise Exception("The second arg type not supported.")
+            raise Exception("Type of second arg not supported.")
         ret_value = (Aout, bout)
 
     if expand:
