@@ -4,7 +4,7 @@ from typing import Optional, Type, Dict
 import numpy as np
 from numpy import ndarray
 
-from .mesh2d import Mesh2D, MeshType
+from .mesh2d import Mesh2D
 from .mesh_tri import MeshTri
 
 
@@ -88,9 +88,9 @@ class MeshQuad(Mesh2D):
         self._build_mappings()
 
     @classmethod
-    def init_tensor(cls: Type[MeshType],
+    def init_tensor(cls: Type,
                     x: ndarray,
-                    y: ndarray) -> MeshType:
+                    y: ndarray) -> Mesh2D:
         """Initialize a tensor product mesh.
 
         The mesh topology is as follows::
@@ -134,7 +134,7 @@ class MeshQuad(Mesh2D):
         return cls(p, t.astype(np.int64))
 
     @classmethod
-    def init_refdom(cls: Type[MeshType]) -> MeshType:
+    def init_refdom(cls: Type) -> Mesh2D:
         """Initialize a mesh that includes only the reference quad.
 
         The mesh topology is as follows::

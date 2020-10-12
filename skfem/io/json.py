@@ -1,6 +1,7 @@
 """Import mesh from JSON as defined by :class:`skfem.mesh.to_dict`."""
 
 import json
+from typing import Type
 
 from skfem.mesh import (MeshLine, MeshTri, MeshQuad,
                         MeshTet, MeshHex, Mesh)
@@ -14,7 +15,7 @@ def from_file(filename: str) -> Mesh:
     dim = len(d['p'][0])
     nverts = len(d['t'][0])
 
-    mesh_type = Mesh
+    mesh_type: Type = Mesh
 
     if dim == 1:
         mesh_type = MeshLine

@@ -5,7 +5,6 @@ from numpy import ndarray
 from scipy.spatial import cKDTree
 
 from .mesh3d import Mesh3D
-from ..mesh import MeshType
 
 
 class MeshTet(Mesh3D):
@@ -96,7 +95,7 @@ class MeshTet(Mesh3D):
         self._build_mappings()
 
     @classmethod
-    def init_refdom(cls: Type[MeshType]) -> MeshType:
+    def init_refdom(cls: Type) -> Mesh3D:
         """Initialise a mesh of the reference domain."""
         p = np.array([[0., 0., 0.],
                       [1., 0., 0.],
@@ -106,10 +105,10 @@ class MeshTet(Mesh3D):
         return cls(p, t)
 
     @classmethod
-    def init_tensor(cls: Type[MeshType],
+    def init_tensor(cls: Type,
                     x: ndarray,
                     y: ndarray,
-                    z: ndarray) -> MeshType:
+                    z: ndarray) -> Mesh3D:
         """Initialise a tensor product mesh.
 
         Parameters

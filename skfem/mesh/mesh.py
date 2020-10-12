@@ -1,7 +1,5 @@
 import warnings
-from typing import Dict, Optional, Tuple, \
-    Type, TypeVar, Union, \
-    Callable
+from typing import Dict, Optional, Tuple, Type, TypeVar, Union, Callable
 
 import numpy as np
 from numpy import ndarray
@@ -46,11 +44,16 @@ class Mesh:
 
     p = np.array([], dtype=np.float64)
     t = np.array([], dtype=np.int64)
+    facets: ndarray
+    t2f: ndarray
+    f2t: ndarray
+    edges: ndarray
+    t2e: ndarray
 
-    subdomains: Dict[str, ndarray] = None
-    boundaries: Dict[str, ndarray] = None
+    subdomains: Optional[Dict[str, ndarray]] = None
+    boundaries: Optional[Dict[str, ndarray]] = None
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         """Check that p and t are C_CONTIGUOUS as this leads
         to better performance."""
         if self.p is not None:
@@ -160,7 +163,7 @@ class Mesh:
                 self.boundaries[name] = (facets[:, self.boundaries[name]]
                                          .flatten())
 
-    def remove_elements(self, element_indices: ndarray) -> MeshType:
+    def remove_elements(self, element_indices: ndarray) -> 'Mesh':
         """Construct new mesh with elements removed
         based on their indices.
 
@@ -279,7 +282,7 @@ class Mesh:
 
     def save(self,
              filename: str,
-             point_data: Dict[str, ndarray] = None,
+             point_data: Optional[Dict[str, ndarray]] = None,
              **kwargs) -> None:
         """Export the mesh and fields using meshio.
 
@@ -415,6 +418,8 @@ class Mesh:
 
     def to_dict(self) -> Dict[str, ndarray]:
         """Return json serializable dictionary."""
+        boundaries: Optional[Dict[str, ndarray]] = None
+        subdomains: Optional[Dict[str, ndarray]] = None
         if self.boundaries is not None:
             boundaries = {k: v.tolist() for k, v in self.boundaries.items()}
         else:
