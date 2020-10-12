@@ -2,8 +2,8 @@
 
 import json
 
-from skfem.mesh import MeshLine, MeshTri, MeshQuad,\
-    MeshTet, MeshHex, Mesh
+from skfem.mesh import (MeshLine, MeshTri, MeshQuad,
+                        MeshTet, MeshHex, Mesh)
 
 
 def from_file(filename: str) -> Mesh:
