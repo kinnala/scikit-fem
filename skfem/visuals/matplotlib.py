@@ -20,14 +20,14 @@ def draw(m, **kwargs) -> Axes:
 
 
 @draw.register(InteriorBasis)
-def _(ib: InteriorBasis, **kwargs) -> Axes:
+def draw_basis(ib: InteriorBasis, **kwargs) -> Axes:
     Nrefs = kwargs["Nrefs"] if "Nrefs" in kwargs else 1
     m, _ = ib.refinterp(ib.mesh.p[0], Nrefs=Nrefs)
     return draw(m, boundaries_only=True, **kwargs)
 
 
 @draw.register(MeshTet)
-def _(m: MeshTet, **kwargs) -> Axes:
+def draw_meshtet(m: MeshTet, **kwargs) -> Axes:
     """Visualize a tetrahedral mesh by drawing the boundary facets."""
     bnd_facets = m.boundary_facets()
     fig = plt.figure()
@@ -40,7 +40,7 @@ def _(m: MeshTet, **kwargs) -> Axes:
 
 
 @draw.register(Mesh2D)
-def _(m: Mesh2D, **kwargs) -> Axes:
+def draw_mesh2d(m: Mesh2D, **kwargs) -> Axes:
     """Visualise a two-dimensional mesh by drawing the edges.
 
     Parameters
@@ -123,7 +123,7 @@ def plot(m, u, **kwargs) -> Axes:
 
 
 @plot.register(MeshLine)
-def _(m: MeshLine, z: ndarray, **kwargs):
+def plot_meshline(m: MeshLine, z: ndarray, **kwargs):
     """Plot a function defined at the nodes of the 1D mesh."""
     if "ax" not in kwargs:
         # create new figure
@@ -151,7 +151,7 @@ def _(m: MeshLine, z: ndarray, **kwargs):
 
 
 @plot.register(MeshTri)
-def _(m: MeshTri, z: ndarray, **kwargs) -> Axes:
+def plot_meshtri(m: MeshTri, z: ndarray, **kwargs) -> Axes:
     """Visualise piecewise-linear function on a triangular mesh.
 
     Parameters
@@ -205,7 +205,7 @@ def _(m: MeshTri, z: ndarray, **kwargs) -> Axes:
 
 
 @plot.register(MeshQuad)
-def _(m: MeshQuad, z, **kwargs):
+def plot_meshquad(m: MeshQuad, z, **kwargs):
     """Visualise nodal functions on quadrilateral meshes.
 
     The quadrilaterals are split into two triangles
@@ -221,7 +221,7 @@ def _(m: MeshQuad, z, **kwargs):
 
 
 @plot.register(InteriorBasis)
-def _(basis: InteriorBasis, z: ndarray, **kwargs) -> Axes:
+def plot_basis(basis: InteriorBasis, z: ndarray, **kwargs) -> Axes:
     """Plot on a refined mesh via :meth:`InteriorBasis.refinterp`."""
     Nrefs = kwargs["Nrefs"] if "Nrefs" in kwargs else 1
     return plot(*basis.refinterp(z, Nrefs=Nrefs), **kwargs)
@@ -234,7 +234,7 @@ def plot3(m, z: ndarray, **kwargs) -> Axes:
 
 
 @plot3.register(MeshTri)
-def _(m: MeshTri, z: ndarray, **kwargs) -> Axes:
+def plot3_meshtri(m: MeshTri, z: ndarray, **kwargs) -> Axes:
     """Visualise piecewise-linear function, 3D plot.
 
     Parameters
@@ -265,7 +265,7 @@ def _(m: MeshTri, z: ndarray, **kwargs) -> Axes:
 
 
 @plot3.register(InteriorBasis)
-def _(basis: InteriorBasis, z: ndarray, **kwargs) -> Axes:
+def plot3_basis(basis: InteriorBasis, z: ndarray, **kwargs) -> Axes:
     """Plot on a refined mesh via :meth:`InteriorBasis.refinterp`."""
     Nrefs = kwargs["Nrefs"] if "Nrefs" in kwargs else 1
     return plot3(*basis.refinterp(z, Nrefs=Nrefs), **kwargs)
