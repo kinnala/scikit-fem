@@ -1,6 +1,4 @@
-from typing import List, Any, Tuple,\
-    Dict, TypeVar, Union,\
-    Optional
+from typing import List, Any, Tuple, Dict, Union, Optional
 
 import numpy as np
 from numpy import ndarray
@@ -8,9 +6,6 @@ from numpy import ndarray
 from skfem.assembly.dofs import Dofs
 from skfem.element.discrete_field import DiscreteField
 from skfem.element.element_composite import ElementComposite
-
-
-BasisType = TypeVar('BasisType', bound='Basis')
 
 
 class Basis:
@@ -25,10 +20,11 @@ class Basis:
 
     tind: ndarray = None
     dx: ndarray = None
-    basis: List[ndarray] = None
+    basis: List[ndarray] = [None]
     X: ndarray = None
+    W: ndarray = None
 
-    def __init__(self, mesh, elem, mapping=None):
+    def __init__(self, mesh, elem, mapping=None, quadrature=None):
 
         self.mapping = mesh.mapping() if mapping is None else mapping
 
@@ -262,7 +258,7 @@ class Basis:
             return output
         raise ValueError("Basis.elem has only a single component!")
 
-    def split_bases(self) -> List[BasisType]:
+    def split_bases(self) -> List['Basis']:
         """Return Basis objects for the solution components."""
         if isinstance(self.elem, ElementComposite):
             return [type(self)(self.mesh, e, self.mapping,
@@ -274,7 +270,7 @@ class Basis:
     def quadrature(self):
         return self.X, self.W
 
-    def split(self, x: ndarray) -> List[Tuple[ndarray, BasisType]]:
+    def split(self, x: ndarray) -> List[Tuple[ndarray, 'Basis']]:
         """Split a solution vector into components."""
         xs = [x[ix] for ix in self.split_indices()]
         return list(zip(xs, self.split_bases()))
