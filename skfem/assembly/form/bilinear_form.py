@@ -40,37 +40,50 @@ class BilinearForm(Form):
     """
 
     def assemble(self,
-                 u_basis: Basis,
-                 v_basis: Optional[Basis] = None,
+                 ubasis: Basis,
+                 vbasis: Optional[Basis] = None,
                  **kwargs) -> Any:
 
-        if v_basis is None:
-            v_basis = u_basis
-        elif u_basis.X.shape[1] != v_basis.X.shape[1]:
+        if vbasis is None:
+            vbasis = ubasis
+        elif ubasis.X.shape[1] != vbasis.X.shape[1]:
             raise ValueError("Quadrature mismatch: trial and test functions "
                              "should have same number of integration points.")
 
-        nt = u_basis.nelems
-        dx = u_basis.dx
-        w = FormDict({**u_basis.default_parameters(), **self.dictify(kwargs)})
+        nt = ubasis.nelems
+        dx = ubasis.dx
+        wdict = FormDict({
+            **ubasis.default_parameters(),
+            **self.dictify(kwargs)
+        })
 
         # initialize COO data structures
-        sz = u_basis.Nbfun * v_basis.Nbfun * nt
+        sz = ubasis.Nbfun * vbasis.Nbfun * nt
         data = np.zeros(sz, dtype=self.dtype)
         rows = np.zeros(sz)
         cols = np.zeros(sz)
 
         # loop over the indices of local stiffness matrix
-        for j in range(u_basis.Nbfun):
-            for i in range(v_basis.Nbfun):
-                ixs = slice(nt * (v_basis.Nbfun * j + i),
-                            nt * (v_basis.Nbfun * j + i + 1))
-                rows[ixs] = v_basis.element_dofs[i]
-                cols[ixs] = u_basis.element_dofs[j]
-                data[ixs] = self._kernel(u_basis.basis[j], v_basis.basis[i], w, dx)
+        for j in range(ubasis.Nbfun):
+            for i in range(vbasis.Nbfun):
+                ixs = slice(nt * (vbasis.Nbfun * j + i),
+                            nt * (vbasis.Nbfun * j + i + 1))
+                rows[ixs] = vbasis.element_dofs[i]
+                cols[ixs] = ubasis.element_dofs[j]
+                data[ixs] = self._kernel(
+                    ubasis.basis[j],
+                    vbasis.basis[i],
+                    wdict,
+                    dx
+                )
 
         # TODO: allow user to change, e.g. cuda or petsc
-        return self._assemble_scipy_matrix(data, rows, cols, (v_basis.N, u_basis.N))
+        return self._assemble_scipy_matrix(
+            data,
+            rows,
+            cols,
+            (vbasis.N, ubasis.N)
+        )
 
     def _kernel(self, u, v, w, dx):
         return np.sum(self.form(*u, *v, w) * dx, axis=1)

@@ -30,9 +30,9 @@ class Functional(Form):
         return self._kernel(w, v.dx)
 
     def assemble(self,
-                 u_basis: Basis,
-                 v_basis: Optional[Basis] = None,
+                 ubasis: Basis,
+                 vbasis: Optional[Basis] = None,
                  **kwargs) -> float:
-        assert v_basis is None
-        v_basis = u_basis
-        return np.sum(self.elemental(v_basis, **kwargs))
+        assert vbasis is None
+        vbasis = ubasis
+        return np.sum(self.elemental(vbasis, **kwargs))

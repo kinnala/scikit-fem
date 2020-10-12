@@ -29,8 +29,8 @@ class Form:
         return self.assemble(self.kernel(*args))
 
     def assemble(self,
-                 u_basis: Basis,
-                 v_basis: Optional[Basis] = None,
+                 ubasis: Basis,
+                 vbasis: Optional[Basis] = None,
                  **kwargs) -> Any:
         raise NotImplementedError
 
