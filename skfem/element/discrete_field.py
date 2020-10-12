@@ -39,3 +39,24 @@ class DiscreteField(NamedTuple):
             return np.zeros_like(x)
 
         return DiscreteField(*[zero_or_none(field) for field in self])
+
+    @property
+    def f(self):
+        """For backwards compatibility."""
+        return self.value
+
+    @property
+    def df(self):
+        """For backwards compatibility."""
+        if self.grad is not None:
+            return self.grad
+        elif self.div is not None:
+            return self.div
+        elif self.curl is not None:
+            return self.curl
+        return None
+
+    @property
+    def ddf(self):
+        """For backwards compatibility."""
+        return self.hess
