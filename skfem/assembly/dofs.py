@@ -20,7 +20,7 @@ class DofsView(NamedTuple):
     edge_rows: Union[ndarray, slice] = slice(None)
     interior_rows: Union[ndarray, slice] = slice(None)
 
-    def flatten(self):
+    def flatten(self) -> ndarray:
         """Return all DOF indices as a single array."""
         return np.unique(
             np.concatenate((
