@@ -259,8 +259,8 @@ class Dofs:
                     if self.element.nodal_dofs == 0
                     else nodal_ix)
         edge_ix = (np.empty((0,), dtype=np.int64)
-                    if self.element.edge_dofs == 0
-                    else edge_ix)
+                   if self.element.edge_dofs == 0
+                   else edge_ix)
         facet_ix = (np.empty((0,), dtype=np.int64)
                     if self.element.facet_dofs == 0
                     else facets)
