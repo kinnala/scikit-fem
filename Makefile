@@ -12,4 +12,4 @@ run:
 
 sphinx:
 	-rm -r ../scikit-fem-docs/.doctrees/
-	@eval sphinx-build -a -b html docs ../scikit-fem-docs
+	@eval sphinx-build -W -a -b html docs docs/_build

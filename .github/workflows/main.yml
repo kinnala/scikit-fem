@@ -1,11 +1,11 @@
 on: [push, pull_request]
 
 jobs:
-  run_tests:
+  run_tests_37:
     runs-on: ubuntu-latest
-    name: Run tests
+    name: Run tests on Python 3.7
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Run flake8, mypy and pytest on Python 3.7
-        uses: kinnala/scikit-fem-docker-action@v5
+      - name: Run tests
+        uses: kinnala/scikit-fem-docker-action@v6
