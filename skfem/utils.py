@@ -363,12 +363,15 @@ def project(fun,
     return solve(M, f)
 
 
-# for backwards compatibility
 def L2_projection(a, b, c=None):
-    """Superseded by :func:`skfem.utils.project`."""
+    """For backwards compatibility."""
+    warnings.warn("'L2_projection' is superseded by 'project'.",
+                  DeprecationWarning)
     return project(a, basis_to=b, I=c)
 
 
 def derivative(a, b, c, d=0):
-    """Superseded by :func:`skfem.utils.project`."""
+    """For backwards compatibility."""
+    warnings.warn("'derivative' is superseded by 'project'.",
+                  DeprecationWarning)
     return project(a, basis_from=b, basis_to=c, diff=d)
