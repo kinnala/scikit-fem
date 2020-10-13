@@ -252,8 +252,18 @@ class Dofs:
             An array of dofnames to skip.
 
         """
-        nodal_ix, edge_ix = self.topo.expand_facets(facets)
-        facet_ix = facets
+        if self.element.nodal_dofs > 0 or self.element.edge_dofs > 0:
+            nodal_ix, edge_ix = self.topo.expand_facets(facets)
+
+        nodal_ix = (np.empty((0,), dtype=np.int64)
+                    if self.element.nodal_dofs == 0
+                    else nodal_ix)
+        edge_ix = (np.empty((0,), dtype=np.int64)
+                    if self.element.edge_dofs == 0
+                    else edge_ix)
+        facet_ix = (np.empty((0,), dtype=np.int64)
+                    if self.element.facet_dofs == 0
+                    else facets)
 
         if skip_dofnames is None:
             skip_dofnames = []
