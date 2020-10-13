@@ -1,9 +1,9 @@
-from typing import Optional, List
+from typing import Optional, List, Type
 
 import numpy as np
 from numpy import ndarray
 
-from ..mesh import Mesh
+from skfem.mesh import Mesh
 from .discrete_field import DiscreteField
 
 
@@ -44,7 +44,7 @@ class Element():
     dim: int = -1
     maxdeg: int = -1
     dofnames: List[str] = []
-    mesh_type: Mesh = None
+    mesh_type: Type = Mesh
 
     def orient(self, mapping, i, tind=None):
         """Orient basis functions. By default all = 1."""
@@ -90,14 +90,8 @@ class Element():
     def _index_error(cls):
         raise ValueError("Index larger than the number of basis functions.")
 
-    def _bfun_counts(self):
-        """Count number of nodal/edge/facet/interior basis functions.
-
-        Returns
-        -------
-        4-tuple of basis function counts.
-
-        """
+    def _bfun_counts(self) -> ndarray:
+        """Count number of nodal/edge/facet/interior basis functions."""
         return np.array([self.nodal_dofs * self.mesh_type.t.shape[0],
                          self.edge_dofs * self.mesh_type.t2e.shape[0]
                          if hasattr(self.mesh_type, 'edges') else 0,

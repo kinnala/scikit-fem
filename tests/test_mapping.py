@@ -18,12 +18,12 @@ class TestIsoparamNormals(unittest.TestCase):
         m.refine()
         e = self.elem()
         fb = FacetBasis(m, e)
-        x = fb.global_coordinates().f
+        x = fb.global_coordinates().value
         eps = 1e-6
         for itr in range(m.p.shape[0]):
             case = (x[itr] < eps) * (x[itr] > -eps)
             for jtr in range(m.p.shape[0]):
-                normals = fb.normals.f[jtr][case]
+                normals = fb.normals.value[jtr][case]
                 if itr == jtr:
                     self.assertTrue((normals == -1).all())
                 else:

@@ -109,13 +109,13 @@ class TestComposite(TestCase):
             for i in [0, 1]:
                 # accessing i'th component looks slightly different
                 assert_array_equal(
-                    ev.gbasis(mapping, X, k)[0].f[i],
-                    ec.gbasis(mapping, X, k)[i].f
+                    ev.gbasis(mapping, X, k)[0].value[i],
+                    ec.gbasis(mapping, X, k)[i].value
                 )
                 for j in [0, 1]:
                     assert_array_equal(
-                        ev.gbasis(mapping, X, k)[0].df[i][j],
-                        ec.gbasis(mapping, X, k)[i].df[j]
+                        ev.gbasis(mapping, X, k)[0].grad[i][j],
+                        ec.gbasis(mapping, X, k)[i].grad[j]
                     )
 
 

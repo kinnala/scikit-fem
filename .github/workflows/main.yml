@@ -7,5 +7,5 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Run tests inside a container
-        uses: kinnala/scikit-fem-docker-action@v4
+      - name: Run flake8, mypy and pytest on Python 3.7
+        uses: kinnala/scikit-fem-docker-action@v5

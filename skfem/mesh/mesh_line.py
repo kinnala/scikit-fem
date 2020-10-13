@@ -44,9 +44,9 @@ class MeshLine(Mesh):
             If `True`, perform mesh validity checks.
 
         """
-        if p is None and t is None:
+        if p is None:
             p = np.array([[0., 1.]], dtype=np.float_)
-        if len(p.shape) == 1:
+        if p is not None and len(p.shape) == 1:
             p = np.array([p])
         self.p = p
         self.boundaries = boundaries

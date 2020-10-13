@@ -20,8 +20,8 @@ from skfem.element import ElementVectorH1
 # custom types for describing input and output values
 
 
-LinearSolver = Callable[[spmatrix, ndarray], ndarray]
-EigenSolver = Callable[[spmatrix, spmatrix], Tuple[ndarray, ndarray]]
+LinearSolver = Callable[..., ndarray]
+EigenSolver = Callable[..., Tuple[ndarray, ndarray]]
 CondensedSystem = Union[spmatrix,
                         Tuple[spmatrix, ndarray],
                         Tuple[spmatrix, spmatrix],
@@ -165,6 +165,8 @@ def solve(A: spmatrix,
             solver = solver_eigen_scipy(**kwargs)
         elif isinstance(b, ndarray):
             solver = solver_direct_scipy(**kwargs)
+        else:
+            raise NotImplementedError("Provided argument types not supported")
 
     if x is not None and I is not None:
         if isinstance(b, spmatrix):
@@ -183,14 +185,15 @@ def solve(A: spmatrix,
 def _flatten_dofs(S: DofsCollection) -> ndarray:
     if S is None:
         return None
-    else:
-        if isinstance(S, ndarray):
-            return S
-        elif isinstance(S, DofsView):
-            return S.flatten()
-        elif isinstance(S, dict):
-            return np.unique(np.concatenate([S[key].flatten() for key in S]))
-        raise NotImplementedError("Unable to flatten the given set of DOFs.")
+    if isinstance(S, ndarray):
+        return S
+    elif isinstance(S, DofsView):
+        return S.flatten()
+    elif isinstance(S, dict):
+        return np.unique(
+            np.concatenate([S[key].flatten() for key in S])  # type: ignore
+        )
+    raise NotImplementedError("Unable to flatten the given set of DOFs.")
 
 
 def condense(A: spmatrix,
@@ -252,6 +255,8 @@ def condense(A: spmatrix,
     else:
         raise Exception("Give only I or only D!")
 
+    ret_value: CondensedSystem = (None,)
+
     if b is None:
         ret_value = (A[I].T[I].T,)
     else:
@@ -263,7 +268,7 @@ def condense(A: spmatrix,
             Aout = A[I].T[I].T
             bout = b[I] - A[I].T[D].T @ x[D]
         else:
-            raise Exception("The second arg type not supported.")
+            raise Exception("Type of second arg not supported.")
         ret_value = (Aout, bout)
 
     if expand:

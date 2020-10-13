@@ -3,7 +3,7 @@ from typing import Optional, Type, Dict
 import numpy as np
 from numpy import ndarray
 
-from .mesh2d import Mesh2D, MeshType
+from .mesh2d import Mesh2D
 
 
 class MeshTri(Mesh2D):
@@ -97,9 +97,9 @@ class MeshTri(Mesh2D):
         self._build_mappings(sort_t=sort_t)
 
     @classmethod
-    def init_tensor(cls: Type[MeshType],
+    def init_tensor(cls: Type,
                     x: ndarray,
-                    y: ndarray) -> MeshType:
+                    y: ndarray) -> Mesh2D:
         r"""Initialize a tensor product mesh.
 
         The mesh topology is as follows::
@@ -150,7 +150,7 @@ class MeshTri(Mesh2D):
         return cls(p, t.astype(np.int64))
 
     @classmethod
-    def init_symmetric(cls) -> MeshType:
+    def init_symmetric(cls: Type) -> Mesh2D:
         r"""Initialize a symmetric mesh of the unit square.
 
         The mesh topology is as follows::
@@ -175,7 +175,7 @@ class MeshTri(Mesh2D):
         return cls(p, t)
 
     @classmethod
-    def init_sqsymmetric(cls: Type[MeshType]) -> MeshType:
+    def init_sqsymmetric(cls: Type) -> Mesh2D:
         r"""Initialize a symmetric mesh of the unit square.
 
         The mesh topology is as follows::
@@ -204,7 +204,7 @@ class MeshTri(Mesh2D):
         return cls(p, t)
 
     @classmethod
-    def init_refdom(cls: Type[MeshType]) -> MeshType:
+    def init_refdom(cls: Type) -> Mesh2D:
         r"""Initialize a mesh that includes only the reference triangle.
 
         The mesh topology is as follows::
@@ -226,7 +226,7 @@ class MeshTri(Mesh2D):
         return cls(p, t)
 
     @classmethod
-    def init_lshaped(cls: Type[MeshType]) -> MeshType:
+    def init_lshaped(cls: Type) -> Mesh2D:
         r"""Initialize a mesh for the L-shaped domain.
 
         The mesh topology is as follows::
@@ -253,8 +253,8 @@ class MeshTri(Mesh2D):
         return cls(p, t)
 
     @classmethod
-    def init_circle(cls: Type[MeshType],
-                    Nrefs: int = 3) -> MeshType:
+    def init_circle(cls: Type,
+                    Nrefs: int = 3) -> Mesh2D:
         r"""Initialize a circle mesh.
 
         Works by repeatedly refining the following mesh and moving

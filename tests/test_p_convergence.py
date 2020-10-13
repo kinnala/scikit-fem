@@ -55,12 +55,12 @@ class ConvergenceLinePp(unittest.TestCase):
         def u(y):
             return np.sin(np.pi * y[0])
 
-        L2 = np.sqrt(np.sum(np.sum((uh - u(x.f)) ** 2 * dx, axis=1)))
+        L2 = np.sqrt(np.sum(np.sum((uh - u(x.value)) ** 2 * dx, axis=1)))
 
         def ux(y):
             return np.pi * np.cos(np.pi * y[0])
 
-        H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x.f)) ** 2) * dx, axis=1)))
+        H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x.value)) ** 2) * dx, axis=1)))
 
         return L2, H1
 
@@ -116,12 +116,12 @@ class ConvergenceQuadP(unittest.TestCase):
             return (np.sin(np.pi * y[0]) *
                     np.sin(np.pi * y[1]))
 
-        L2 = np.sqrt(np.sum(np.sum((uh - u(x.f)) ** 2 * dx, axis=1)))
+        L2 = np.sqrt(np.sum(np.sum((uh - u(x.value)) ** 2 * dx, axis=1)))
 
         def ux(y):
             return np.pi * (np.cos(np.pi * y[0]) *
                             np.sin(np.pi * y[1]))
 
-        H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x.f)) ** 2) * dx, axis=1)))
+        H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x.value)) ** 2) * dx, axis=1)))
 
         return L2, H1
