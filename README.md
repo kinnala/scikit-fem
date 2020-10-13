@@ -118,6 +118,21 @@ demonstrate the use of other external packages; see our [CI job
 definition](https://github.com/kinnala/scikit-fem/blob/master/.travis.yml) for a
 full list of test dependencies.
 
+## Testing
+
+Currently the tests are run both by Travis (see `.travis.yml`) and by Github
+Actions (see `.github/workflows/main.yml`).  We are incrementally moving over to
+a container-based test suite in order to have more reproducible testing
+environment.
+
+See `Makefile` in the repository root for instructions on running the testing
+container locally using `docker`.  The container is built via `make build` which
+fetches the Dockerfile from
+[kinnala/scikit-fem-docker](https://github.com/kinnala/scikit-fem-docker-action),
+builds and tags the image as `skfem:latest`.  The tests can be run within the
+container via `make`.  An interactive debugging session can be started via `make
+run`.
+
 ## Licensing
 
 The contents of `skfem/` and the PyPI package `scikit-fem` are licensed under
