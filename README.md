@@ -208,6 +208,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `InteriorBasis.interpolator`.
 - `ElementTriCR`, the nonconforming Crouzeix-Raviart element for Stokes flow.
 
+### Deprecated
+
+- `L2_projection` will be replaced by `project`.
+- `derivative` will be replaced by `project`.
+
 ### [2.1.1] - 2020-10-01
 
 ### Fixed
@@ -244,8 +249,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `FacetBasis` did not initialize with `ElementQuadP`
 
 #### Deprecated
-- `skfem.utils.project` will support functions like `lambda x: x[0]`
-  instead of `lambda x, y, z: x` in the future
+- `project` will only support functions like `lambda x: x[0]` instead of `lambda
+  x, y, z: x` in the future
 
 ### [1.2.0] - 2020-07-07
 
