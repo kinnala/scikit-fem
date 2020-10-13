@@ -10,7 +10,8 @@ from skfem.element import (ElementHex1, ElementHexS2, ElementLineP1,
                            ElementTetP0, ElementTetP1, ElementTetP2,
                            ElementTriMini, ElementTriP0, ElementTriP1,
                            ElementTriP2, ElementTriRT0, ElementVectorH1,
-                           ElementHex2, ElementQuadBFS)
+                           ElementHex2, ElementQuadBFS, ElementTriCR,
+                           ElementTetCR, ElementTriHermite)
 from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 from skfem.assembly.basis import InteriorBasis
 from skfem.mapping import MappingAffine
@@ -42,6 +43,8 @@ class TestNodality(TestCase):
         ElementHex1(),
         ElementHexS2(),
         ElementHex2(),
+        ElementTetCR(),
+        ElementTriCR(),
     ]
 
     def runTest(self):
@@ -168,6 +171,8 @@ class TestDerivatives(TestCase):
         ElementHex1(),
         ElementHexS2(),
         ElementHex2(),
+        ElementTriCR(),
+        ElementTetCR(),
     ]
 
     def runTest(self):
@@ -222,6 +227,8 @@ class TestPartitionofUnity(TestCase):
         ElementHex1(),
         ElementHexS2(),
         ElementHex2(),
+        ElementTetCR(),
+        ElementTriCR(),
     ]
 
     def runTest(self):
