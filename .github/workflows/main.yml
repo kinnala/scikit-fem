@@ -8,4 +8,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run tests
-        uses: kinnala/scikit-fem-docker-action@v6
+        uses: kinnala/scikit-fem-docker-action@py37
+  run_tests_38:
+    runs-on: ubuntu-latest
+    name: Run tests on Python 3.8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run tests
+        uses: kinnala/scikit-fem-docker-action@py38
