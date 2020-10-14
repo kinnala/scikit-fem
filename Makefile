@@ -46,6 +46,6 @@ sphinx:
 # Release
 
 release:
-	-rm -r /dist
+	-rm -r dist
 	python -m pep517.build --source --binary .
 	twine upload dist/*
