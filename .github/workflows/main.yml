@@ -1,6 +1,14 @@
 on: [push, pull_request]
 
 jobs:
+  run_tests_36:
+    runs-on: ubuntu-latest
+    name: Run tests on Python 3.6
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run tests
+        uses: kinnala/scikit-fem-docker-action@py36
   run_tests_37:
     runs-on: ubuntu-latest
     name: Run tests on Python 3.7
@@ -17,3 +25,11 @@ jobs:
         uses: actions/checkout@v2
       - name: Run tests
         uses: kinnala/scikit-fem-docker-action@py38
+  run_tests_39:
+    runs-on: ubuntu-latest
+    name: Run tests on Python 3.9
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run tests
+        uses: kinnala/scikit-fem-docker-action@py39
