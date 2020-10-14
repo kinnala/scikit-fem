@@ -1,14 +1,43 @@
-default: build
-	GITHUB_WORKSPACE=/scikit-fem docker run -e GITHUB_WORKSPACE -v ${PWD}:"/scikit-fem" skfem
+# This Makefile can be used to locally run the container-based tests run by
+# Github Actions for https://github.com/kinnala/scikit-fem.
 
-build:
-	docker build -t skfem https://github.com/kinnala/scikit-fem-docker-action.git#main
+default: test_py37
+	@echo "Done!"
 
-rebuild:
-	docker build --no-cache -t skfem https://github.com/kinnala/scikit-fem-docker-action.git#main
+# Python 3.6
 
-run:
-	docker run -it -v ${PWD}:"/scikit-fem" --entrypoint /bin/bash skfem
+test_py36: build_py36
+	GITHUB_WORKSPACE=/scikit-fem docker run -e GITHUB_WORKSPACE -v ${PWD}:"/scikit-fem" skfem:py36
+
+build_py36:
+	docker build -t skfem:py36 https://github.com/kinnala/scikit-fem-docker-action.git#py36
+
+run_py36:
+	docker run -it -v ${PWD}:"/scikit-fem" --entrypoint /bin/bash skfem:py36
+
+# Python 3.7
+
+test_py37: build_py37
+	GITHUB_WORKSPACE=/scikit-fem docker run -e GITHUB_WORKSPACE -v ${PWD}:"/scikit-fem" skfem:py37
+
+build_py37:
+	docker build -t skfem:py37 https://github.com/kinnala/scikit-fem-docker-action.git#py37
+
+run_py37:
+	docker run -it -v ${PWD}:"/scikit-fem" --entrypoint /bin/bash skfem:py37
+
+# Python 3.8
+
+test_py38: build_py38
+	GITHUB_WORKSPACE=/scikit-fem docker run -e GITHUB_WORKSPACE -v ${PWD}:"/scikit-fem" skfem:py38
+
+build_py38:
+	docker build -t skfem:py38 https://github.com/kinnala/scikit-fem-docker-action.git#py38
+
+run_py38:
+	docker run -it -v ${PWD}:"/scikit-fem" --entrypoint /bin/bash skfem:py38
+
+# Documentation
 
 sphinx:
 	-rm -r ../scikit-fem-docs/.doctrees/
