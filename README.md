@@ -99,7 +99,7 @@ Try to provide a snippet of code which fails
 and include also the version of the library you are
 using.  The version can be found as follows:
 ```
-python -c "from skfem import __version__; print(__version__)"
+python -c "import pkg_resources; print(pkg_resources.get_distribution('scikit-fem').version)"
 ```
 
 ## Installation
@@ -115,23 +115,17 @@ The minimal dependencies for installing `scikit-fem` are
 [examples](https://scikit-fem.readthedocs.io/en/latest/listofexamples.html) use
 [matplotlib](https://matplotlib.org/) for visualization.  Some examples
 demonstrate the use of other external packages; see our [CI job
-definition](https://github.com/kinnala/scikit-fem/blob/master/.travis.yml) for a
+definition](https://github.com/kinnala/scikit-fem/blob/master/.github/workflows/main.yml) for a
 full list of test dependencies.
 
 ## Testing
 
-Currently the tests are run both by Travis (see `.travis.yml`) and by Github
-Actions (see `.github/workflows/main.yml`).  We are incrementally moving over to
-a container-based test suite in order to have more reproducible testing
-environment.
+The tests are run by Github Actions (see `.github/workflows/main.yml`).
 
-See `Makefile` in the repository root for instructions on running the testing
-container locally using `docker`.  The container is built via `make build` which
-fetches the Dockerfile from
-[kinnala/scikit-fem-docker](https://github.com/kinnala/scikit-fem-docker-action),
-builds and tags the image as `skfem:latest`.  The tests can be run within the
-container via `make`.  An interactive debugging session can be started via `make
-run`.
+The `Makefile` in the repository root has instructions for running the testing
+container locally using `docker`.  For example, use `make test_py38` to run the
+tests using `py38` branch from
+[kinnala/scikit-fem-docker-action](https://github.com/kinnala/scikit-fem-docker-action).
 
 ## Licensing
 
