@@ -99,7 +99,7 @@ Try to provide a snippet of code which fails
 and include also the version of the library you are
 using.  The version can be found as follows:
 ```
-python -c "from skfem import __version__; print(__version__)"
+python -c "import pkg_resources; print(pkg_resources.get_distribution('scikit-fem').version)"
 ```
 
 ## Installation
