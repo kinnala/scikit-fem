@@ -5,11 +5,11 @@ import numpy as np
 from skfem import BilinearForm, LinearForm, asm, solve, condense
 from skfem.models.poisson import laplace
 from skfem.element import (ElementHex1, ElementHex2, ElementHexS2, ElementLineP1,
-                           ElementLineP2, ElementLineMini, 
+                           ElementLineP2, ElementLineMini, ElementTetCR,
                            ElementQuad1, ElementQuad2,
                            ElementQuadS2, ElementTetMini, ElementTetP1,
                            ElementTetP2, ElementTriMini, ElementTriP1,
-                           ElementTriP2, ElementTriCR)
+                           ElementTriP2, ElementTriCR, ElementTriHermite)
 from skfem.assembly import FacetBasis, InteriorBasis
 from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 
@@ -51,7 +51,7 @@ class ConvergenceQ1(unittest.TestCase):
             A = asm(laplace, ib)
             b = asm(load, ib)
 
-            D = ib.get_dofs().all()
+            D = self.get_bc_nodes(ib)
             x = solve(*condense(A, b, D=D))
 
             # calculate error
@@ -69,6 +69,9 @@ class ConvergenceQ1(unittest.TestCase):
                         msg='observed H1 rate: {}'.format(rateH1))
         self.assertLess(H1s[-1], 0.3)
         self.assertLess(L2s[-1], 0.008)
+
+    def get_bc_nodes(self, ib):
+        return ib.get_dofs().all('u')
 
     def compute_error(self, m, basis, U):
         uh, duh, *_ = basis.interpolate(U)
@@ -187,6 +190,30 @@ class ConvergenceTriP2(ConvergenceTriP1):
         return InteriorBasis(m, e)
 
 
+class ConvergenceTriHermite(ConvergenceTriP1):
+
+    rateL2 = 4.0
+    rateH1 = 3.0
+    eps = 0.15
+
+    def create_basis(self, m):
+        e = ElementTriHermite()
+        return InteriorBasis(m, e)
+
+    def get_bc_nodes(self, ib):
+        return np.concatenate((
+            ib.get_dofs().all('u'),
+            ib.get_dofs(lambda x: x[0] == 0).all('u_y'),
+            ib.get_dofs(lambda x: x[0] == 1).all('u_y'),
+            ib.get_dofs(lambda x: x[1] == 0).all('u_x'),
+            ib.get_dofs(lambda x: x[1] == 1).all('u_x'),
+        ))
+
+    def setUp(self):
+        self.mesh = MeshTri.init_symmetric()
+        self.mesh.refine(2)
+
+
 class ConvergenceTriCR(ConvergenceTriP1):
 
     rateL2 = 2.0
@@ -257,6 +284,16 @@ class ConvergenceTetP1(ConvergenceQ1):
     def setUp(self):
         self.mesh = MeshTet()
         self.mesh.refine(2)
+
+
+class ConvergenceTetCR(ConvergenceTetP1):
+
+    rateL2 = 2.2
+    rateH1 = 1.13
+
+    def create_basis(self, m):
+        e = ElementTetCR()
+        return InteriorBasis(m, e)
 
 
 class ConvergenceTetP2(ConvergenceTetP1):
