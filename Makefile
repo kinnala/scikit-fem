@@ -42,3 +42,10 @@ run_py38:
 sphinx:
 	-rm -r ../scikit-fem-docs/.doctrees/
 	@eval sphinx-build -W -a -b html docs docs/_build
+
+# Release
+
+release:
+	-rm -r /dist
+	python -m pep517.build --source --binary .
+	twine upload dist/*
