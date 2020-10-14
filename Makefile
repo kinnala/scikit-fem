@@ -47,5 +47,7 @@ sphinx:
 
 release:
 	-rm -r dist
+	-rm -r build
+	-rm -r scikit_fem.egg-info
 	python -m pep517.build --source --binary .
 	twine upload dist/*
