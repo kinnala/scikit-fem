@@ -120,12 +120,12 @@ full list of test dependencies.
 
 ## Testing
 
-The tests are run by Github Actions (see `.github/workflows/main.yml`).
-
-The `Makefile` in the repository root has instructions for running the testing
-container locally using `docker`.  For example, use `make test_py38` to run the
-tests using `py38` branch from
+The tests are run by Github Actions.  The `Makefile` in the repository root has
+instructions for running the testing container locally using `docker`.  For
+example, use `make test_py38` to run the tests using `py38` branch from
 [kinnala/scikit-fem-docker-action](https://github.com/kinnala/scikit-fem-docker-action).
+The releases are tested in
+[kinnala/scikit-fem-release-tests](https://github.com/kinnala/scikit-fem-release-tests).
 
 ## Licensing
 
@@ -204,7 +204,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed: Fix `Mesh.validate` for unsigned `Mesh.t`.
 - Added: `MeshTet.element_finder` and `MeshLine.element_finder` for using
-  Added: `InteriorBasis.interpolator`.
+  `InteriorBasis.interpolator`.
 - Added: `ElementTriCR`, the nonconforming Crouzeix-Raviart element for Stokes flow.
 - Added: `ElementTetCR`, tetrahedral nonconforming Crouzeix-Raviart element.
 - Added: `ElementTriHermite`, an extension of `ElementLineHermite` to triangular
