@@ -192,119 +192,93 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
+### [2.2.2] - 2020-10-15
+
+- Fixed: Make the preconditioner in `TestEx32` more robust.
+
+### [2.2.1] - 2020-10-15
+
+- Fixed: Remove `tests` from the PyPI distribution.
+
 ### [2.2.0] - 2020-10-14
 
-### Fixed
-
-- Fix `Mesh.validate` for unsigned `Mesh.t`.
-
-### Added
-
-- `MeshTet.element_finder` and `MeshLine.element_finder` for using
-  `InteriorBasis.interpolator`.
-- `ElementTriCR`, the nonconforming Crouzeix-Raviart element for Stokes flow.
-- `ElementTetCR`, tetrahedral nonconforming Crouzeix-Raviart element.
-- `ElementTriHermite`, an extension of `ElementLineHermite` to triangular
+- Fixed: Fix `Mesh.validate` for unsigned `Mesh.t`.
+- Added: `MeshTet.element_finder` and `MeshLine.element_finder` for using
+  Added: `InteriorBasis.interpolator`.
+- Added: `ElementTriCR`, the nonconforming Crouzeix-Raviart element for Stokes flow.
+- Added: `ElementTetCR`, tetrahedral nonconforming Crouzeix-Raviart element.
+- Added: `ElementTriHermite`, an extension of `ElementLineHermite` to triangular
   meshes.
-
-### Deprecated
-
-- `L2_projection` will be replaced by `project`.
-- `derivative` will be replaced by `project`.
+- Deprecated: `L2_projection` will be replaced by `project`.
+- Deprecated: `derivative` will be replaced by `project`.
 
 ### [2.1.1] - 2020-10-01
 
-### Fixed
-
-- Further optimizations to `Mesh3D.boundary_edges`: tested to run on a laptop
+- Fixed: Further optimizations to `Mesh3D.boundary_edges`: tested to run on a laptop
   with over 10 million elements.
 
 ### [2.1.0] - 2020-09-30
 
-### Fixed
-
-- `Mesh3D.boundary_edges` (and, consequently, `Basis.find_dofs`) was slow
+- Fixed: `Mesh3D.boundary_edges` (and, consequently, `Basis.find_dofs`) was slow
   and used lots of memory due to an exhaustive search of all edges
-
-#### Added
-- `ElementHex2`, a triquadratic hexahedral element
-- `MeshTri.init_circle`, constructor for a circle mesh
+- Added: `ElementHex2`, a triquadratic hexahedral element
+- Added: `MeshTri.init_circle`, constructor for a circle mesh
 
 ### [2.0.0] - 2020-08-21
 
-#### Added
-- Support for complex-valued forms: `BilinearForm` and `LinearForm` now take
+- Added: Support for complex-valued forms: `BilinearForm` and `LinearForm` now take
   an optional argument `dtype` which defaults to `np.float64`
   but can be also `np.complex64`
-- `Dofs.__or__` and `Dofs.__add__`, for merging degree-of-freedom sets
+- Added: `Dofs.__or__` and `Dofs.__add__`, for merging degree-of-freedom sets
   (i.e. `Dofs` objects) using `|` and `+` operators
-- `Dofs.drop` and `Dofs.keep`, for further filtering the degree-of-freedom sets
-
-### Removed
-- Support for old-style decorators `bilinear_form`, `linear_form`, and
+- Added: `Dofs.drop` and `Dofs.keep`, for further filtering the degree-of-freedom sets
+- Removed: Support for old-style decorators `bilinear_form`, `linear_form`, and
   `functional` (deprecated since 1.0.0)
-
-#### Fixed
-- `FacetBasis` did not initialize with `ElementQuadP`
-
-#### Deprecated
-- `project` will only support functions like `lambda x: x[0]` instead of `lambda
-  x, y, z: x` in the future
+- Fixed: `FacetBasis` did not initialize with `ElementQuadP`
+- Deprecated: `project` will only support functions like `lambda x: x[0]`
+  instead of `lambda x, y, z: x` in the future
 
 ### [1.2.0] - 2020-07-07
 
-#### Added
-- `Mesh.__add__`, for merging meshes using `+` operator: duplicated nodes are
+- Added: `Mesh.__add__`, for merging meshes using `+` operator: duplicated nodes are
   joined
-- `ElementHexS2`, a 20-node quadratic hexahedral serendipity element
-- `ElementLineMini`, MINI-element for one-dimensional mesh
-
-#### Fixed
-- `Mesh3D.boundary_edges` was broken in case of hexahedral meshes
-- `skfem.utils.project` did not work for `ElementGlobal`
-
-#### Changed
-- `MeshQuad._splitquads` aliased as `MeshQuad.to_meshtri`: should not be private
+- Added: `ElementHexS2`, a 20-node quadratic hexahedral serendipity element
+- Added: `ElementLineMini`, MINI-element for one-dimensional mesh
+- Fixed: `Mesh3D.boundary_edges` was broken in case of hexahedral meshes
+- Fixed: `skfem.utils.project` did not work for `ElementGlobal`
+- Changed: `MeshQuad._splitquads` aliased as `MeshQuad.to_meshtri`: should not be private
 
 ### [1.1.0] - 2020-05-18
 
-#### Added
-- `ElementTetMini`, MINI-element for tetrahedral mesh
-
-#### Fixed
-- `Mesh3D.boundary_edges` incorrectly returned all edges where both nodes are on
+- Added: `ElementTetMini`, MINI-element for tetrahedral mesh
+- Fixed: `Mesh3D.boundary_edges` incorrectly returned all edges where both nodes are on
   the boundary
 
 ### [1.0.0] - 2020-04-22
 
-#### Added
-- New-style form constructors `BilinearForm`, `LinearForm`, and `Functional`
-- `skfem.io.json` for serialization of meshes to/from json-files
-- `ElementLinePp`, p-th order one-dimensional elements
-- `ElementQuadP`, p-th order quadrilateral elements
-- `ElementQuadDG` for transforming quadrilateral H1 elements to DG elements
-- `ElementQuadBFS`, Bogner-Fox-Schmit element for biharmonic problems
-- `ElementTriMini`, MINI-element for Stokes problems
-- `ElementComposite` for using multiple elements in one bilinear form
-- `ElementQuadS2`, quadratic Serendipity element
-- `ElementLineHermite`, cubic Hermite element for Euler-Bernoulli beams
-- `Mesh.define_boundary` for defining named boundaries
-- `Basis.find_dofs` for finding degree-of-freedom indices
-- `Mesh.from_basis` for defining high-order meshes
-- `Basis.split` for splitting multicomponent solutions
-- `MortarMapping` with basic support for mortar methods in 2D
-- `Basis` constructors now accept `quadrature` keyword argument for specifying
+- Added: New-style form constructors `BilinearForm`, `LinearForm`, and `Functional`
+- Added: `skfem.io.json` for serialization of meshes to/from json-files
+- Added: `ElementLinePp`, p-th order one-dimensional elements
+- Added: `ElementQuadP`, p-th order quadrilateral elements
+- Added: `ElementQuadDG` for transforming quadrilateral H1 elements to DG elements
+- Added: `ElementQuadBFS`, Bogner-Fox-Schmit element for biharmonic problems
+- Added: `ElementTriMini`, MINI-element for Stokes problems
+- Added: `ElementComposite` for using multiple elements in one bilinear form
+- Added: `ElementQuadS2`, quadratic Serendipity element
+- Added: `ElementLineHermite`, cubic Hermite element for Euler-Bernoulli beams
+- Added: `Mesh.define_boundary` for defining named boundaries
+- Added: `Basis.find_dofs` for finding degree-of-freedom indices
+- Added: `Mesh.from_basis` for defining high-order meshes
+- Added: `Basis.split` for splitting multicomponent solutions
+- Added: `MortarMapping` with basic support for mortar methods in 2D
+- Added: `Basis` constructors now accept `quadrature` keyword argument for specifying
   a custom quadrature rule
-
-#### Deprecated
-- Old-style form constructors `bilinear_form`, `linear_form`, and `functional`.
-
-#### Changed
-- `Basis.interpolate` returns `DiscreteField` objects instead of ndarray tuples
-- `Basis.interpolate` works now properly for vectorial and high-order elements
+- Deprecated: Old-style form constructors `bilinear_form`, `linear_form`, and `functional`.
+- Changed: `Basis.interpolate` returns `DiscreteField` objects instead of ndarray tuples
+- Changed: `Basis.interpolate` works now properly for vectorial and high-order elements
   by interpolating all components and higher order derivatives
-- `Form.assemble` accepts now any keyword arguments (with type `DiscreteField`)
+- Changed: `Form.assemble` accepts now any keyword arguments (with type `DiscreteField`)
   that are passed over to the forms
-- Renamed `skfem.importers` to `skfem.io`
-- Renamed `skfem.models.helpers` to `skfem.helpers`
-- `skfem.utils.solve` will now expand also the solutions of eigenvalue problems
+- Changed: Renamed `skfem.importers` to `skfem.io`
+- Changed: Renamed `skfem.models.helpers` to `skfem.helpers`
+- Changed: `skfem.utils.solve` will now expand also the solutions of eigenvalue problems
