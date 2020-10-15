@@ -62,13 +62,13 @@ else:
 
 Aint, bint = condense(A, b, I=I, expand=False)
 
-preconditioners = [None, build_pc_ilu(Aint)]
+preconditioners = [None, build_pc_ilu(Aint, drop_tol=1e-3)]
 
 try:
     from pyamg import smoothed_aggregation_solver
 
     def build_pc_amgsa(A: spmatrix, **kwargs) -> LinearOperator:
-        """AMG (smoothed aggregation) precondtioner"""
+        """AMG (smoothed aggregation) preconditioner"""
         return smoothed_aggregation_solver(A, **kwargs).aspreconditioner()
 
     preconditioners.append(build_pc_amgsa(Aint))

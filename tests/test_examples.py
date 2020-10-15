@@ -64,7 +64,7 @@ class TestEx09(TestCase):
 
     def runTest(self):
         import docs.examples.ex09 as ex09
-        self.assertAlmostEqual(np.max(ex09.x), 0.05528520791811886)
+        self.assertAlmostEqual(np.max(ex09.x), 0.05528520791811886, places=6)
 
 
 class TestEx10(TestCase):
