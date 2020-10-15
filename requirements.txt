@@ -2,9 +2,9 @@ numpy
 scipy
 matplotlib
 pytest
-ipython
-sphinx
 meshio
 pygmsh==6.1.1
 pacopy==0.1.2
+pyamg
+sphinx
 sphinx_rtd_theme
