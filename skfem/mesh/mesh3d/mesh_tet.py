@@ -173,6 +173,39 @@ class MeshTet(Mesh3D):
 
         return cls(p, T.astype(np.int64))
 
+    @classmethod
+    def init_sphere(cls: Type,
+                    Nrefs: int = 3) -> Mesh3D:
+        r"""Initialize a sphere mesh.
+
+        Parameters
+        ----------
+        Nrefs
+            Number of refinements, by default 3.
+
+        """
+        p = np.array([[0., 0., 0.],
+                      [1., 0., 0.],
+                      [0., 1., 0.],
+                      [0., 0., 1.],
+                      [-1., 0., 0.],
+                      [0., -1., 0.],
+                      [0., 0., -1.]]).T
+        t = np.array([[0, 1, 2, 3],
+                      [0, 4, 5, 6],
+                      [0, 1, 2, 6],
+                      [0, 1, 3, 5],
+                      [0, 2, 3, 4],
+                      [0, 4, 5, 3],
+                      [0, 4, 6, 2],
+                      [0, 5, 6, 1]], dtype=np.intp).T
+        m = cls(p, t)
+        for _ in range(Nrefs):
+            m.refine()
+            D = m.boundary_nodes()
+            m.p[:, D] = m.p[:, D] / np.linalg.norm(m.p[:, D], axis=0)
+        return m
+
     def _build_mappings(self):
         """Build element-to-facet, element-to-edges, etc. mappings."""
         # define edges: in the order (0,1) (1,2) (0,2) (0,3) (1,3) (2,3)
