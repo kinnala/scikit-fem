@@ -175,7 +175,7 @@ class MeshTet(Mesh3D):
 
     @classmethod
     def init_ball(cls: Type,
-                    Nrefs: int = 3) -> Mesh3D:
+                  Nrefs: int = 3) -> Mesh3D:
         r"""Initialize a ball mesh.
 
         Parameters
