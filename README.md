@@ -192,6 +192,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
+- Added: `MeshTet.init_ball` for meshing a ball.
+
 ### [2.2.3] - 2020-10-16
 
 - Fixed: Remove an unnecessary dependency.

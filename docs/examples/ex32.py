@@ -89,7 +89,7 @@ class Ellipsoid(NamedTuple):
         return np.array([self.a, self.b, self.c])
 
     def mesh(self) -> MeshTet:
-        m = MeshTet.init_sphere()
+        m = MeshTet.init_ball()
         m.scale((self.a, self.b, self.c))
         return m
 

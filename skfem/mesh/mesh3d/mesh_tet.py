@@ -174,9 +174,9 @@ class MeshTet(Mesh3D):
         return cls(p, T.astype(np.int64))
 
     @classmethod
-    def init_sphere(cls: Type,
+    def init_ball(cls: Type,
                     Nrefs: int = 3) -> Mesh3D:
-        r"""Initialize a sphere mesh.
+        r"""Initialize a ball mesh.
 
         Parameters
         ----------
