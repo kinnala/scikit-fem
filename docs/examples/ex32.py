@@ -86,7 +86,7 @@ class Sphere(NamedTuple):
     def pressure(self, x, y, z) -> np.ndarray:
         """Exact pressure at zero Grashof number.
 
-        * McBain, G. D. (2016). `Creeping convection in a horizontally heated ball
+        * McBain, G. D. (2016). `Creeping convection in a horizontally heated ellipsoid
         <http://people.eng.unimelb.edu.au/imarusic/proceedings/20/548/%20Paper.pdf>`_.
         *Proceedings of the Twentieth Australasian Fluid Mechanics Conference*, eq. 8
 
