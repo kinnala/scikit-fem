@@ -443,7 +443,7 @@ algorithm that scales to reasonably fine meshes (a million tetrahedra in a few
 minutes).
 
 .. note::
-   This examples requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`__ and an implementation of algebraic multigrid (either `pyamgcl    <https://pypi.org/project/pyamgcl>`_ or `pyamg <https://pypi.org/project/pyamg/>`_).
+   This examples requires an implementation of algebraic multigrid (either `pyamgcl    <https://pypi.org/project/pyamgcl>`_ or `pyamg <https://pypi.org/project/pyamg/>`_).
 
 .. figure:: https://user-images.githubusercontent.com/973268/87859195-fcd08980-c93b-11ea-930e-ddcd26aabdb4.png
 
