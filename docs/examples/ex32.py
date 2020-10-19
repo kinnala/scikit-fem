@@ -78,31 +78,21 @@ except ImportError:
         return smoothed_aggregation_solver(A, **kwargs).aspreconditioner()
 
 
-class Ellipsoid(NamedTuple):
-
-    a: float
-    b: float
-    c: float
-
-    @property
-    def semiaxes(self) -> np.ndarray:
-        return np.array([self.a, self.b, self.c])
+class Sphere(NamedTuple):
 
     def mesh(self) -> MeshTet:
-        m = MeshTet.init_ball()
-        m.scale((self.a, self.b, self.c))
-        return m
+        return MeshTet.init_ball()
 
     def pressure(self, x, y, z) -> np.ndarray:
         """Exact pressure at zero Grashof number.
 
-        * McBain, G. D. (2016). `Creeping convection in a horizontally heated ellipsoid
+        * McBain, G. D. (2016). `Creeping convection in a horizontally heated ball
         <http://people.eng.unimelb.edu.au/imarusic/proceedings/20/548/%20Paper.pdf>`_.
         *Proceedings of the Twentieth Australasian Fluid Mechanics Conference*, eq. 8
 
         """
 
-        a, b, c = self.semiaxes
+        a, b, c = np.ones(3)
         return (a**2 * (3 * a**2 + b**2) * x * y
                 / (3 * a**4 + 2 * a**2 * b**2 + 3 * b**4))
 
@@ -114,8 +104,8 @@ class Ellipsoid(NamedTuple):
         return LinearForm(form)
 
 
-ellipsoid = Ellipsoid(.5, .3, .2)
-mesh = ellipsoid.mesh()
+ball = Sphere()
+mesh = ball.mesh()
 
 element = {'u': ElementVectorH1(ElementTetP2()),
            'p': ElementTetP1()}
@@ -158,7 +148,7 @@ velocity, pressure = np.split(
           solver=solver_iter_krylov(minres, verbose=True, M=M)),
     [basis['u'].N])
 
-error_p = asm(ellipsoid.pressure_error(), basis['p'],
+error_p = asm(ball.pressure_error(), basis['p'],
               p=basis['p'].interpolate(pressure))
 l2error_p = np.sqrt(error_p.T @ Q @ error_p)
 
