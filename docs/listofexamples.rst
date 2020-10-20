@@ -53,10 +53,6 @@ between two elastic bodies using the Nitsche's method.
 Triangular and quadrilateral second-order elements are used
 in the discretization of the two elastic bodies.
 
-.. note::
-
-   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`__.
-
 .. figure:: https://user-images.githubusercontent.com/973268/87661313-1372b700-c769-11ea-89ee-db144986a25a.png
 
    The displaced meshes and the von Mises stress of Example 4.
