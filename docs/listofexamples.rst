@@ -492,10 +492,6 @@ This example solves the series inductance (per meter) and parallel capacitance
 (per meter) of RG316 coaxial cable. These values are then used to compute the
 characteristic impedance and velocity factor of the cable.
 
-.. note::
-   This example requires the external package
-   `pygmsh <https://pypi.org/project/pygmsh/>`__.
-
 .. figure:: https://user-images.githubusercontent.com/973268/87859275-85e7c080-c93c-11ea-9e62-3a9a8ee86070.png
 
    The results of Example 35.
