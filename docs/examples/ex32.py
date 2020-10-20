@@ -2,7 +2,7 @@ r"""Block diagonally preconditioned Stokes solver.
 
 .. note::
 
-   This examples requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`_ and an implementation of AMG (either `pyamgcl    <https://pypi.org/project/pyamgcl>`_ or `pyamg <https://pypi.org/project/pyamg/>`_).
+   This examples requires an implementation of AMG (either `pyamgcl <https://pypi.org/project/pyamgcl>`_ or `pyamg <https://pypi.org/project/pyamg/>`_).
 
 This example again solves the Stokes problem,
 
@@ -46,27 +46,9 @@ then be passed to the MINRES sparse iterative solver from SciPy.
 
 .. [McBAIN] McBain, G. D. (2016). `Creeping convection in a horizontally heated ellipsoid <http://people.eng.unimelb.edu.au/imarusic/proceedings/20/548/%20Paper.pdf>`_. *Proceedings of the Twentieth Australasian Fluid Mechanics Conference*.
 
-License
--------
-
-Copyright 2018-2020 scikit-fem developers
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-from typing import NamedTuple, Optional
-from packaging import version
+from typing import NamedTuple
 
 from skfem import *
 from skfem.io.meshio import from_meshio
@@ -76,19 +58,6 @@ from skfem.models.general import divergence
 import numpy as np
 from scipy.sparse import bmat, spmatrix
 from scipy.sparse.linalg import LinearOperator, minres
-
-import pygmsh
-
-
-if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
-    class NullContextManager():
-        def __enter__(self):
-            return None
-        def __exit__(self, *args):
-            pass
-    geometrycontext = NullContextManager()
-else:
-    geometrycontext = pygmsh.occ.Geometry()
 
 
 try:
@@ -109,29 +78,10 @@ except ImportError:
         return smoothed_aggregation_solver(A, **kwargs).aspreconditioner()
 
 
-class Ellipsoid(NamedTuple):
+class Sphere(NamedTuple):
 
-    a: float
-    b: float
-    c: float
-
-    @property
-    def semiaxes(self) -> np.ndarray:
-        return np.array([self.a, self.b, self.c])
-
-    def mesh(self, geom=None, lcar=.1) -> MeshTet:
-        with geometrycontext as g:
-            if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
-                geom = pygmsh.opencascade.Geometry()
-            else:
-                geom = g
-            geom.add_ellipsoid([0.]*3, self.semiaxes, lcar)
-            if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
-                return from_meshio(
-                    pygmsh.generate_mesh(geom))
-            else:
-                return from_meshio(
-                    geom.generate_mesh())
+    def mesh(self) -> MeshTet:
+        return MeshTet.init_ball()
 
     def pressure(self, x, y, z) -> np.ndarray:
         """Exact pressure at zero Grashof number.
@@ -142,7 +92,7 @@ class Ellipsoid(NamedTuple):
 
         """
 
-        a, b, c = self.semiaxes
+        a, b, _ = np.ones(3)  # semiaxes of ellipsoid
         return (a**2 * (3 * a**2 + b**2) * x * y
                 / (3 * a**4 + 2 * a**2 * b**2 + 3 * b**4))
 
@@ -154,8 +104,8 @@ class Ellipsoid(NamedTuple):
         return LinearForm(form)
 
 
-ellipsoid = Ellipsoid(.5, .3, .2)
-mesh = ellipsoid.mesh(lcar=.1)
+ball = Sphere()
+mesh = ball.mesh()
 
 element = {'u': ElementVectorH1(ElementTetP2()),
            'p': ElementTetP1()}
@@ -198,7 +148,7 @@ velocity, pressure = np.split(
           solver=solver_iter_krylov(minres, verbose=True, M=M)),
     [basis['u'].N])
 
-error_p = asm(ellipsoid.pressure_error(), basis['p'],
+error_p = asm(ball.pressure_error(), basis['p'],
               p=basis['p'].interpolate(pressure))
 l2error_p = np.sqrt(error_p.T @ Q @ error_p)
 

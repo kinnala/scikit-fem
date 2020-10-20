@@ -251,7 +251,7 @@ class TestEx32(TestCase):
 
     def runTest(self):
         from docs.examples.ex32 import l2error_p
-        self.assertLess(l2error_p, 3e-7)
+        self.assertLess(l2error_p, 1e-5)
 
 
 class TestEx33(TestCase):

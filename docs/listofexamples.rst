@@ -443,12 +443,12 @@ algorithm that scales to reasonably fine meshes (a million tetrahedra in a few
 minutes).
 
 .. note::
-   This examples requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`__ and an implementation of algebraic multigrid (either `pyamgcl    <https://pypi.org/project/pyamgcl>`_ or `pyamg <https://pypi.org/project/pyamg/>`_).
+   This examples requires an implementation of algebraic multigrid (either `pyamgcl <https://pypi.org/project/pyamgcl>`_ or `pyamg <https://pypi.org/project/pyamg/>`_).
 
-.. figure:: https://user-images.githubusercontent.com/973268/87859195-fcd08980-c93b-11ea-930e-ddcd26aabdb4.png
+.. figure:: https://user-images.githubusercontent.com/1588947/96520786-8a18d680-12bb-11eb-981a-c3388f2c8e35.png
 
-   The pressure field of Example 32.
-   The figure was created using `ParaView <https://www.paraview.org/>`_.
+   The velocity and pressure fields of Example 32, clipped in the plane of spanwise symmetry, *z* = 0.
+   The figure was created using `ParaView <https://www.paraview.org/>`_ 5.8.1.
 
 See the `source code of Example 32 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex32.py>`_ for more information.
 
