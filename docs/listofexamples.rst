@@ -53,10 +53,6 @@ between two elastic bodies using the Nitsche's method.
 Triangular and quadrilateral second-order elements are used
 in the discretization of the two elastic bodies.
 
-.. note::
-
-   This example requires the external package `pygmsh <https://pypi.org/project/pygmsh/>`__.
-
 .. figure:: https://user-images.githubusercontent.com/973268/87661313-1372b700-c769-11ea-89ee-db144986a25a.png
 
    The displaced meshes and the von Mises stress of Example 4.
@@ -491,10 +487,6 @@ Example 35: Characteristic impedance and velocity factor
 This example solves the series inductance (per meter) and parallel capacitance
 (per meter) of RG316 coaxial cable. These values are then used to compute the
 characteristic impedance and velocity factor of the cable.
-
-.. note::
-   This example requires the external package
-   `pygmsh <https://pypi.org/project/pygmsh/>`__.
 
 .. figure:: https://user-images.githubusercontent.com/973268/87859275-85e7c080-c93c-11ea-9e62-3a9a8ee86070.png
 
