@@ -4,7 +4,6 @@
 [![Conda](https://img.shields.io/conda/vn/conda-forge/scikit-fem)](https://anaconda.org/conda-forge/scikit-fem)
 [![Documentation](https://readthedocs.org/projects/pip/badge/?version=stable)](https://scikit-fem.readthedocs.io/)
 [![License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
-[![status](https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e/status.svg)](https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e)
 
 
 `scikit-fem` is a lightweight Python 3.6+ library for performing [finite element
@@ -143,7 +142,13 @@ license, see `LICENSE.md` for more information.
 
 ## Acknowledgements
 
-This project was started while working under a grant from the [Finnish Cultural Foundation](https://skr.fi/). The approach used in the finite element assembly has been inspired by the [work of A. Hannukainen and M. Juntunen](https://au.mathworks.com/matlabcentral/fileexchange/36108-hjfem_lite).
+This project was started while working under a grant from the [Finnish Cultural
+Foundation](https://skr.fi/).  Versions 2.0.0+ were prepared while working in a
+project funded by the [Academy of
+Finland](https://akareport.aka.fi/ibi_apps/WFServlet?IBIF_ex=x_HakKuvaus2&CLICKED_ON=&HAKNRO1=324611&UILANG=en).
+The approach used in the finite element assembly has been inspired by the [work
+of A. Hannukainen and
+M. Juntunen](https://au.mathworks.com/matlabcentral/fileexchange/36108-hjfem_lite).
 
 ## Contributing
 
@@ -160,6 +165,7 @@ for first timers include:
 ## Citing the library
 
 [![status](https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e/status.svg)](https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1420510.svg)](https://doi.org/10.5281/zenodo.1420510)
 
 You may use the following BibTeX entry:
 ```
@@ -176,6 +182,8 @@ You may use the following BibTeX entry:
   journal = {Journal of Open Source Software}
 }
 ```
+Use the Zenodo DOI instead if you want to cite to a specific version used in the
+preparation of a computational result.
 
 ## In literature
 
