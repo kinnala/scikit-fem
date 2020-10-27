@@ -1,7 +1,7 @@
 <img src="https://user-images.githubusercontent.com/973268/93522777-ac28dd00-f93a-11ea-8733-4ca8e62ab09d.png" width="45%">
 
 [![PyPI](https://img.shields.io/pypi/v/scikit-fem)](https://pypi.org/project/scikit-fem/)
-[![Conda](https://img.shields.io/conda/vn/conda-forge/scikit-fem)](https://anaconda.org/conda-forge/scikit-fem)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/scikit-fem)](https://pypi.org/project/scikit-fem/)
 [![Documentation](https://readthedocs.org/projects/pip/badge/?version=stable)](https://scikit-fem.readthedocs.io/)
 [![License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
@@ -51,6 +51,7 @@ of `scipy.sparse.linalg.spsolve`.*
 [![Conda](https://img.shields.io/conda/vn/conda-forge/scikit-fem)](https://anaconda.org/conda-forge/scikit-fem)
 
 The most recent release can be installed simply by `pip install scikit-fem`.
+You can also use `conda install -c conda-forge scikit-fem` if preferred.
 
 ## Examples
 
@@ -95,7 +96,7 @@ More examples can be found in the [gallery](https://scikit-fem.readthedocs.io/en
 
 [![Documentation](https://readthedocs.org/projects/pip/badge/?version=stable)](https://scikit-fem.readthedocs.io/)
 
-The project is documented using Sphinx under `/docs`.  Built version of the
+The project is documented using Sphinx under `docs/`.  Built version of the
 documentation can be found from [Read the
 Docs](https://scikit-fem.readthedocs.io/en/latest/).
 
@@ -182,8 +183,8 @@ You may use the following BibTeX entry:
   journal = {Journal of Open Source Software}
 }
 ```
-Use the Zenodo DOI instead if you want to cite to a specific version used in the
-preparation of a computational result.
+Use the Zenodo DOIs only if you want to cite a specific version,
+e.g., to ensure reproducibility.
 
 ## In literature
 
