@@ -1,10 +1,9 @@
 <img src="https://user-images.githubusercontent.com/973268/93522777-ac28dd00-f93a-11ea-8733-4ca8e62ab09d.png" width="45%">
 
 [![PyPI](https://img.shields.io/pypi/v/scikit-fem)](https://pypi.org/project/scikit-fem/)
-[![Conda](https://img.shields.io/conda/vn/conda-forge/scikit-fem)](https://anaconda.org/conda-forge/scikit-fem)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/scikit-fem)](https://pypi.org/project/scikit-fem/)
 [![Documentation](https://readthedocs.org/projects/pip/badge/?version=stable)](https://scikit-fem.readthedocs.io/)
 [![License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
-[![status](https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e/status.svg)](https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e)
 
 
 `scikit-fem` is a lightweight Python 3.6+ library for performing [finite element
@@ -46,6 +45,13 @@ of `scipy.sparse.linalg.spsolve`.*
 | 512000 | 8.82814 | nan |
 | 1030301 | 18.25461 | nan |
 
+## Installation
+
+[![PyPI](https://img.shields.io/pypi/v/scikit-fem)](https://pypi.org/project/scikit-fem/)
+[![Conda](https://img.shields.io/conda/vn/conda-forge/scikit-fem)](https://anaconda.org/conda-forge/scikit-fem)
+
+The most recent release can be installed simply by `pip install scikit-fem`.
+You can also use `conda install -c conda-forge scikit-fem` if preferred.
 
 ## Examples
 
@@ -88,24 +94,22 @@ More examples can be found in the [gallery](https://scikit-fem.readthedocs.io/en
 
 ## Documentation
 
-The project is documented using Sphinx.  A recent version of the documentation
-can be found from [Read the Docs](https://scikit-fem.readthedocs.io/en/latest/).
+[![Documentation](https://readthedocs.org/projects/pip/badge/?version=stable)](https://scikit-fem.readthedocs.io/)
+
+The project is documented using Sphinx under `docs/`.  Built version of the
+documentation can be found from [Read the
+Docs](https://scikit-fem.readthedocs.io/en/latest/).
 
 ## Getting help
 
 If you encounter an issue and cannot find help from the documentation,
-you can use the Github issue tracker to ask questions.
+you can use the Github issue tracker to [ask questions using the question label](https://github.com/kinnala/scikit-fem/issues?q=label%3Aquestion).
 Try to provide a snippet of code which fails
 and include also the version of the library you are
 using.  The version can be found as follows:
 ```
 python -c "import pkg_resources; print(pkg_resources.get_distribution('scikit-fem').version)"
 ```
-
-## Installation
-
-The most recent release can be installed simply by `pip install scikit-fem`.
-For more cutting edge features, you can clone this repository.
 
 ## Dependencies
 
@@ -114,20 +118,24 @@ The minimal dependencies for installing `scikit-fem` are
 [meshio](https://github.com/nschloe/meshio).  In addition, many
 [examples](https://scikit-fem.readthedocs.io/en/latest/listofexamples.html) use
 [matplotlib](https://matplotlib.org/) for visualization.  Some examples
-demonstrate the use of other external packages; see our [CI job
-definition](https://github.com/kinnala/scikit-fem/blob/master/.github/workflows/main.yml) for a
-full list of test dependencies.
+demonstrate the use of other external packages; see `requirements.txt` for a
+list of test dependencies.
 
 ## Testing
 
+[![Tests](https://github.com/kinnala/scikit-fem/workflows/tests/badge.svg)](https://github.com/kinnala/scikit-fem/actions)
+[![Release tests](https://github.com/kinnala/scikit-fem-release-tests/workflows/release%20tests/badge.svg)](https://github.com/kinnala/scikit-fem-release-tests/actions)
+
 The tests are run by Github Actions.  The `Makefile` in the repository root has
-instructions for running the testing container locally using `docker`.  For
-example, use `make test_py38` to run the tests using `py38` branch from
+targets for running the testing container locally using `docker`.  For example,
+`make test_py38` runs the tests using `py38` branch from
 [kinnala/scikit-fem-docker-action](https://github.com/kinnala/scikit-fem-docker-action).
 The releases are tested in
 [kinnala/scikit-fem-release-tests](https://github.com/kinnala/scikit-fem-release-tests).
 
 ## Licensing
+
+[![License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 The contents of `skfem/` and the PyPI package `scikit-fem` are licensed under
 the 3-clause BSD license.  Some examples under `docs/examples/` have a different
@@ -135,7 +143,13 @@ license, see `LICENSE.md` for more information.
 
 ## Acknowledgements
 
-This project was started while working under a grant from the [Finnish Cultural Foundation](https://skr.fi/). The approach used in the finite element assembly has been inspired by the [work of A. Hannukainen and M. Juntunen](https://au.mathworks.com/matlabcentral/fileexchange/36108-hjfem_lite).
+This project was started while working under a grant from the [Finnish Cultural
+Foundation](https://skr.fi/).  Versions 2.0.0+ were prepared while working in a
+project funded by the [Academy of
+Finland](https://akareport.aka.fi/ibi_apps/WFServlet?IBIF_ex=x_HakKuvaus2&CLICKED_ON=&HAKNRO1=324611&UILANG=en).
+The approach used in the finite element assembly has been inspired by the [work
+of A. Hannukainen and
+M. Juntunen](https://au.mathworks.com/matlabcentral/fileexchange/36108-hjfem_lite).
 
 ## Contributing
 
@@ -150,6 +164,9 @@ for first timers include:
 *By contributing code to scikit-fem, you are agreeing to release it under BSD-3-Clause, see LICENSE.md.*
 
 ## Citing the library
+
+[![status](https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e/status.svg)](https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1420510.svg)](https://doi.org/10.5281/zenodo.1420510)
 
 You may use the following BibTeX entry:
 ```
@@ -166,6 +183,8 @@ You may use the following BibTeX entry:
   journal = {Journal of Open Source Software}
 }
 ```
+Use the Zenodo DOIs only if you want to cite a specific version,
+e.g., to ensure reproducibility.
 
 ## In literature
 
