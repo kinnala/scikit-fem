@@ -1,9 +1,18 @@
+<p align="center">
 <img src="https://user-images.githubusercontent.com/973268/93522777-ac28dd00-f93a-11ea-8733-4ca8e62ab09d.png" width="45%">
+</p>
 
+<p align="center">
 [![PyPI](https://img.shields.io/pypi/v/scikit-fem)](https://pypi.org/project/scikit-fem/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/scikit-fem)](https://pypi.org/project/scikit-fem/)
+[![Conda](https://img.shields.io/conda/vn/conda-forge/scikit-fem)](https://anaconda.org/conda-forge/scikit-fem)
 [![Documentation](https://readthedocs.org/projects/pip/badge/?version=stable)](https://scikit-fem.readthedocs.io/)
 [![License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![Tests](https://github.com/kinnala/scikit-fem/workflows/tests/badge.svg)](https://github.com/kinnala/scikit-fem/actions)
+[![Release tests](https://github.com/kinnala/scikit-fem-release-tests/workflows/release%20tests/badge.svg)](https://github.com/kinnala/scikit-fem-release-tests/actions)
+[![status](https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e/status.svg)](https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1420510.svg)](https://doi.org/10.5281/zenodo.1420510)
+</p>
 
 
 `scikit-fem` is a lightweight Python 3.6+ library for performing [finite element
@@ -29,12 +38,6 @@ of `scipy.sparse.linalg.spsolve`.*
 
 | Degrees-of-freedom | Assembly (s) | Linear solve (s) |
 | --- | --- | --- |
-| 64 | 0.00155 | 0.00073 |
-| 125 | 0.00203 | 0.00072 |
-| 216 | 0.00276 | 0.00081 |
-| 512 | 0.00589 | 0.00127 |
-| 1000 | 0.01076 | 0.00247 |
-| 1728 | 0.02063 | 0.00538 |
 | 4096 | 0.04805 | 0.04241 |
 | 8000 | 0.09804 | 0.16269 |
 | 15625 | 0.20347 | 0.87741 |
@@ -47,11 +50,8 @@ of `scipy.sparse.linalg.spsolve`.*
 
 ## Installation
 
-[![PyPI](https://img.shields.io/pypi/v/scikit-fem)](https://pypi.org/project/scikit-fem/)
-[![Conda](https://img.shields.io/conda/vn/conda-forge/scikit-fem)](https://anaconda.org/conda-forge/scikit-fem)
-
 The most recent release can be installed simply by `pip install scikit-fem`.
-You can also use `conda install -c conda-forge scikit-fem` if preferred.
+Optionally you can use `conda install -c conda-forge scikit-fem`.
 
 ## Examples
 
@@ -94,8 +94,6 @@ More examples can be found in the [gallery](https://scikit-fem.readthedocs.io/en
 
 ## Documentation
 
-[![Documentation](https://readthedocs.org/projects/pip/badge/?version=stable)](https://scikit-fem.readthedocs.io/)
-
 The project is documented using Sphinx under `docs/`.  Built version of the
 documentation can be found from [Read the
 Docs](https://scikit-fem.readthedocs.io/en/latest/).
@@ -123,9 +121,6 @@ list of test dependencies.
 
 ## Testing
 
-[![Tests](https://github.com/kinnala/scikit-fem/workflows/tests/badge.svg)](https://github.com/kinnala/scikit-fem/actions)
-[![Release tests](https://github.com/kinnala/scikit-fem-release-tests/workflows/release%20tests/badge.svg)](https://github.com/kinnala/scikit-fem-release-tests/actions)
-
 The tests are run by Github Actions.  The `Makefile` in the repository root has
 targets for running the testing container locally using `docker`.  For example,
 `make test_py38` runs the tests using `py38` branch from
@@ -134,8 +129,6 @@ The releases are tested in
 [kinnala/scikit-fem-release-tests](https://github.com/kinnala/scikit-fem-release-tests).
 
 ## Licensing
-
-[![License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 The contents of `skfem/` and the PyPI package `scikit-fem` are licensed under
 the 3-clause BSD license.  Some examples under `docs/examples/` have a different
@@ -164,9 +157,6 @@ for first timers include:
 *By contributing code to scikit-fem, you are agreeing to release it under BSD-3-Clause, see LICENSE.md.*
 
 ## Citing the library
-
-[![status](https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e/status.svg)](https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1420510.svg)](https://doi.org/10.5281/zenodo.1420510)
 
 You may use the following BibTeX entry:
 ```
