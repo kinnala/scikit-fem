@@ -15,3 +15,9 @@ def divergence(u, v, w):
 def rot(v, w):
     return np.einsum('i...,ij...,j...',
                      w.w, np.array([[0, 1], [-1, 0]]), grad(v))
+
+
+@LinearForm
+def vrot(v, w):
+    return np.einsum('i...,ij...,j...',
+                     v, np.array([[0, 1], [-1, 0]]), grad(w['w']))
