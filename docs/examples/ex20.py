@@ -26,10 +26,8 @@ polynomial solution with circular stream-lines:
     \psi = \left(1 - (x^2+y^2)/a^2\right)^2 / 64.
 
 """
-from pathlib import Path
 
 from skfem import *
-from skfem.io.json import from_file
 from skfem.models.poisson import unit_load
 
 import numpy as np
