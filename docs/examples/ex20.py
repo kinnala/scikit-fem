@@ -74,5 +74,5 @@ if __name__ == "__main__":
         w=ib.interpolate(psi),
     )
     ax = draw(mesh)
-    ax.quiver(*mesh.p, *velocity, mesh.p[0])
+    ax.quiver(*mesh.p, *velocity.reshape((-1, 2)).T, mesh.p[0])
     ax.get_figure().savefig(f"{name}_velocity-vectors.png")
