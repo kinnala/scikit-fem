@@ -30,6 +30,9 @@ def curl(u: DiscreteField):
     """Curl."""
     if u.curl is not None:
         return u.curl
+    elif u.grad is not None:
+        if u.grad.shape[0] == 2:
+            return np.array([u.grad[1], -u.grad[0]])
     raise NotImplementedError
 
 
