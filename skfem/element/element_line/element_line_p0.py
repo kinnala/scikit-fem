@@ -14,4 +14,8 @@ class ElementLineP0(ElementH1):
     mesh_type = MeshLine
 
     def lbasis(self, X, i):
-        return 1. + 0. * X[0], 0. * X
+        if i == 0:
+            return 1. + 0. * X[0], 0. * X
+        else:
+            self._index_error()
+
