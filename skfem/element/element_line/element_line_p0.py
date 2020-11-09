@@ -18,4 +18,3 @@ class ElementLineP0(ElementH1):
             return 1. + 0. * X[0], 0. * X
         else:
             self._index_error()
-
