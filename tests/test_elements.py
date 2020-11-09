@@ -157,15 +157,19 @@ class TestDerivatives(TestCase):
     """Test values of derivatives."""
 
     elems = [
+        ElementLineP0(),
         ElementLineP1(),
         ElementLineP2(),
         ElementLineMini(),
+        ElementTriP0(),
         ElementTriP1(),
         ElementTriP2(),
         ElementTriMini(),
+        ElementQuad0(),
         ElementQuad1(),
         ElementQuad2(),
         ElementQuadS2(),
+        ElementTetP0(),
         ElementTetP1(),
         ElementTetP2(),
         ElementTetMini(),
