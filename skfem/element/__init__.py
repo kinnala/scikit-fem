@@ -85,6 +85,7 @@ __all__ = [
     "ElementHex1",
     "ElementHex2",
     "ElementHexS2",
+    "ElementLineP0",
     "ElementLineP1",
     "ElementLineP2",
     "ElementLinePp",
