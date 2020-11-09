@@ -201,6 +201,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
+- Added: `ElementLineP0`
 - Added: `skfem.helpers.curl` now calculates the rotated gradient for
   two-dimensional elements.
 - Added: `MeshTet.init_ball` for meshing a ball.
