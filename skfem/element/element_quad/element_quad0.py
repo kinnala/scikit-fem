@@ -10,7 +10,7 @@ class ElementQuad0(ElementH1):
     dim = 2
     maxdeg = 0
     dofnames = ['u']
-    doflocs = np.zeros((1, 2))
+    doflocs = np.array([[.5, .5]])
     mesh_type = MeshQuad
 
     def lbasis(self, X, i):
