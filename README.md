@@ -201,7 +201,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
-- Added: `ElementLineP0`
+- Fixed: `ElementQuad0` was not compatible with `FacetBasis`
+- Added: `ElementLineP0`, one-dimensional piecewise constant element
 - Added: `skfem.helpers.curl` now calculates the rotated gradient for
   two-dimensional elements.
 - Added: `MeshTet.init_ball` for meshing a ball.

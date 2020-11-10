@@ -10,11 +10,11 @@ class ElementQuad0(ElementH1):
     dim = 2
     maxdeg = 0
     dofnames = ['u']
-    doflocs = np.zeros((1, 2))
+    doflocs = np.array([[.5, .5]])
     mesh_type = MeshQuad
 
     def lbasis(self, X, i):
         if i == 0:
-            return np.ones(X.shape[1]), np.zeros_like(X)
+            return np.ones(X.shape[1:]), np.zeros_like(X)
         else:
             self._index_error()
