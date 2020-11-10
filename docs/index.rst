@@ -26,6 +26,7 @@ Table of contents
 
    self
    overview
+   elements
    forms
    bcs
    listofexamples

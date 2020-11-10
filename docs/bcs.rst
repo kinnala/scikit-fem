@@ -91,6 +91,8 @@ By default, the eliminated DOFs are set to zero.
 Different values can be provided through the keyword argument ``x``;
 see :ref:`ex14`.
 
+.. _finddofs:
+
 Finding degrees-of-freedom
 ==========================
 

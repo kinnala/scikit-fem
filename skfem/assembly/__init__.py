@@ -2,7 +2,7 @@
 r"""This module contains rest of the tools for performing the finite element
 assembly. The basic workflow of assembly is the following:
 
-1. Initialize :class:`~skfem.mesh.Mesh` and :class:`~skfem.mesh.Element`.
+1. Initialize :class:`~skfem.mesh.Mesh` and :class:`~skfem.element.Element`.
 
 >>> from skfem import *
 >>> m = MeshTri()

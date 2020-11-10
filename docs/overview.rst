@@ -13,8 +13,7 @@ Module: skfem.mesh
 Module: skfem.element
 =====================
 
-.. automodule:: skfem.element
-
+See :mod:`skfem.element`.
 
 Module: skfem.assembly
 ======================

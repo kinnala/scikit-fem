@@ -1,4 +1,4 @@
-"""This module defines finite elements (in a very generic sense).
+"""The module :mod:`skfem.element` defines finite elements in a generic sense.
 
 The naming of the element classes reflects their compatibility with the mesh
 types.
@@ -7,20 +7,10 @@ types.
 >>> ElementTriP1.mesh_type
 <class 'skfem.mesh.mesh2d.mesh_tri.MeshTri'>
 
-In order to use an element, you simply initialize the respective object and
-pass it to the constructor of :class:`~skfem.assembly.InteriorBasis` or
-:class:`~skfem.assembly.FacetBasis`.
-
-The supported elements include:
-
-    - One-dimensional, triangular, quadrilateral, tetrahedral and hexahedral
-      elements up to the polynomial degree of 2.
-    - More exotic :math:`H^2`-conforming elements such as the cubic
-      Hermite element, the Argyris triangle, and the Bogner-Fox-Schmit
-      quadrilateral.
-    - The lowest order Raviart-Thomas and Nédélec elements.
-    - Special elements for the Stokes equations and incompressible elasticity.
-    - Discontinuous elements for, e.g., interior penalty methods.
+In order to use an element, you simply initialize the respective object and pass
+it to the constructor of :class:`~skfem.assembly.InteriorBasis` or
+:class:`~skfem.assembly.FacetBasis`.  See below for a list of supported
+elements.
 
 """
 
@@ -54,6 +44,7 @@ __all__ = [
     "ElementVectorH1",
     "ElementHdiv",
     "ElementHcurl",
+    "ElementComposite",
     "ElementTriP1",
     "ElementTriP2",
     "ElementTriDG",
@@ -87,4 +78,4 @@ __all__ = [
     "ElementLinePp",
     "ElementLineHermite",
     "ElementLineMini",
-    "ElementComposite"]
+]

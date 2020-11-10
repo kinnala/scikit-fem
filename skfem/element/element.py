@@ -7,8 +7,8 @@ from skfem.mesh import Mesh
 from .discrete_field import DiscreteField
 
 
-class Element():
-    """Finite element.
+class Element:
+    """Evaluate finite element basis.
 
     Attributes
     ----------
@@ -23,18 +23,9 @@ class Element():
     dim
         The spatial dimension.
     maxdeg
-        Polynomial degree of the basis. Used to calculate quadrature rules.
+        Polynomial degree of the basis. Used to find quadrature rules.
     dofnames
-        A list of strings that indicate DOF types. Different possibilities:
-        - 'u' indicates that it is the point value
-        - 'u^1' indicates the first vectorial component
-        - 'u^n' indicates the normal component
-        - 'u^t' indicates the tangential component
-        - 'u_x' indicates the derivative wrt x
-        - 'u_n' indicates the normal derivative
-        - ...
-    mesh_type
-        Mesh type for calculating number of edges, etc.
+        A list of strings indicating the DOF types. See :ref:`finddofs`.
 
     """
     nodal_dofs: int = 0
