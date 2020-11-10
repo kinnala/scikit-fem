@@ -24,9 +24,11 @@ assembly. The basic workflow of assembly is the following:
 
 >>> A = asm(form_a, basis)
 >>> b = asm(form_l, basis)
->>> A
-<4x4 sparse matrix of type '<class 'numpy.float64'>'
-       with 14 stored elements in Compressed Sparse Row format>
+>>> A.todense()
+matrix([[0.08333333, 0.04166667, 0.04166667, 0.        ],
+        [0.04166667, 0.16666667, 0.08333333, 0.04166667],
+        [0.04166667, 0.08333333, 0.16666667, 0.04166667],
+        [0.        , 0.04166667, 0.04166667, 0.08333333]])
 >>> b
 array([0.0162037 , 0.15046296, 0.06712963, 0.09953704])
 

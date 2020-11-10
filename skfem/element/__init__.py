@@ -5,15 +5,11 @@ types.
 
 >>> from skfem.element import ElementTriP1
 >>> ElementTriP1.mesh_type
-skfem.mesh.mesh2d.mesh_tri.MeshTri
+<class 'skfem.mesh.mesh2d.mesh_tri.MeshTri'>
 
 In order to use an element, you simply initialize the respective object and
 pass it to the constructor of :class:`~skfem.assembly.InteriorBasis` or
-:class:`~skfem.assembly.FacetBasis`.  Run the following commands to find an
-up-to-date list of supported elements:
-
->>> import skfem.element
->>> dir(skfem.element)
+:class:`~skfem.assembly.FacetBasis`.
 
 The supported elements include:
 

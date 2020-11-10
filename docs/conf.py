@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'scikit-fem'
-copyright = '2018-2020, scikit-fem developers'
+copyright = '2018-20, scikit-fem developers'
 author = 'scikit-fem developers'
 
 
@@ -44,6 +44,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.autosummary',
+    'sphinx.ext.doctest',
 ]
 
 autosummary_generate = True
@@ -156,7 +157,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'scikit-fem', 'scikit-fem Documentation',
-     author, 'scikit-fem', 'One line description of project.',
+     author, 'scikit-fem', 'Simple finite element assemblers.',
      'Miscellaneous'),
 ]
 

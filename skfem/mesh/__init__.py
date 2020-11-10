@@ -24,9 +24,7 @@ Triangular mesh with 8 vertices and 6 elements.
 >>> MeshTri.init_tensor([0.0, 1.0], [0.0, 1.0, 2.0])
 Triangular mesh with 6 vertices and 4 elements.
 
-A list of constructors can be found in the class docstring:
-
->>> help(MeshTri)
+A list of constructors can be found in the class docstring.
 
 Importing from external formats can be done with the constructor
 :meth:`~skfem.mesh.Mesh.load`.
