@@ -56,7 +56,7 @@ which leads to the condensed system
 As an example, let us assemble the matrix :math:`A` and the vector :math:`b`
 corresponding to the Poisson equation :math:`-\Delta u = 1`.
 
-.. code-block:: python
+.. doctest::
 
    >>> from skfem import *
    >>> from skfem.models.poisson import laplace, unit_load
@@ -70,16 +70,22 @@ The condensed system is obtained with :func:`skfem.utils.condense`.  Below
 we provide the DOFs to eliminate via the keyword argument
 ``D``.
 
-.. code-block:: python
+.. doctest::
 
-   >>> condense(A, b, D=m.boundary_nodes())
-   (<9x9 sparse matrix of type '<class 'numpy.float64'>'
-           with 33 stored elements in Compressed Sparse Row format>,
+   >>> AII, bI, xI, I = condense(A, b, D=m.boundary_nodes())
+   >>> AII.todense()
+   matrix([[ 4.,  0.,  0.,  0., -1., -1., -1., -1.,  0.],
+           [ 0.,  4.,  0.,  0., -1.,  0., -1.,  0.,  0.],
+           [ 0.,  0.,  4.,  0.,  0., -1.,  0., -1.,  0.],
+           [ 0.,  0.,  0.,  4., -1., -1.,  0.,  0.,  0.],
+           [-1., -1.,  0., -1.,  4.,  0.,  0.,  0.,  0.],
+           [-1.,  0., -1., -1.,  0.,  4.,  0.,  0.,  0.],
+           [-1., -1.,  0.,  0.,  0.,  0.,  4.,  0., -1.],
+           [-1.,  0., -1.,  0.,  0.,  0.,  0.,  4., -1.],
+           [ 0.,  0.,  0.,  0.,  0.,  0., -1., -1.,  4.]])
+    >>> bI
     array([0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625,
-           0.0625]),
-    array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
-           0., 0., 0., 0., 0., 0., 0., 0.]),
-    array([ 6, 12, 15, 19, 20, 21, 22, 23, 24]))
+           0.0625])
 
 By default, the eliminated DOFs are set to zero.
 Different values can be provided through the keyword argument ``x``;
@@ -94,7 +100,7 @@ the boundary.  Currently the main tools for finding DOFs are
 :meth:`skfem.assembly.Basis.get_dofs`.  Let us demonstrate
 the latter with an example.
 
-.. code-block:: python
+.. doctest::
 
    >>> from skfem import *
    >>> m = MeshTri()
@@ -103,7 +109,7 @@ the latter with an example.
 
 We first find the set of facets belonging to the left boundary.
 
-.. code-block:: python
+.. doctest::
 
    >>> m.facets_satisfying(lambda x: x[0] == 0.)
    array([ 1,  5, 14, 15])
@@ -111,7 +117,7 @@ We first find the set of facets belonging to the left boundary.
 Next we supply the array of facet indices to
 :meth:`skfem.assembly.Basis.get_dofs`
 
-.. code-block:: python
+.. doctest::
 
    >>> dofs = basis.get_dofs(m.facets_satisfying(lambda x: x[0] == 0.))
    >>> dofs.nodal
@@ -149,7 +155,7 @@ DOF according to the following table:
 The list of all DOFs (belonging to the left boundary) can be obtained as
 follows:
 
-.. code-block:: python
+.. doctest::
 
    >>> dofs.flatten()
    array([ 0,  2,  5, 10, 14, 26, 30, 39, 40])
@@ -157,7 +163,7 @@ follows:
 Many DOF types are associated with a specific global coordinate.  These
 so-called DOF locations can be found as follows:
 
-.. code-block:: python
+.. doctest::
 
    >>> basis.doflocs[:, dofs.flatten()]
    array([[0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   ],
@@ -185,7 +191,7 @@ topological entities (`nodes`, `facets`, `edges`, `elements`) of the mesh.
 For example, consider the quadratic Lagrange triangle and the default two
 element mesh of the unit square:
 
-.. code-block:: python
+.. doctest::
 
    >>> from skfem import *
    >>> m = MeshTri()
@@ -195,7 +201,7 @@ element mesh of the unit square:
 
 The DOFs corresponding to the nodes (or vertices) of the mesh are
 
-.. code-block:: python
+.. doctest::
 
    >>> basis.nodal_dofs
    array([[0, 1, 2, 3]])
@@ -203,7 +209,7 @@ The DOFs corresponding to the nodes (or vertices) of the mesh are
 The first column above corresponds to the first column in the corresponding mesh
 data structure:
 
-.. code-block:: python
+.. doctest::
 
    >>> m.p
    array([[0., 1., 0., 1.],
@@ -215,14 +221,14 @@ and so on.
 
 Similarly, the DOFs corresponding to the facets of the mesh are
 
-.. code-block:: python
+.. doctest::
 
    >>> basis.facet_dofs
    array([[4, 5, 6, 7, 8]])
 
 The corresponding facets can be found in the mesh data structure:
 
-.. code-block:: python
+.. doctest::
 
    >>> m.facets
    array([[0, 0, 1, 1, 2],
@@ -250,7 +256,7 @@ onto the finite element space :math:`V_h` by solving for the function
 and which is zero in all DOFs inside the domain.
 In the following snippet we solve explicitly the above variational problem:
 
-.. code-block:: python
+.. doctest::
 
    >>> from skfem import *
    >>> m = MeshQuad()
@@ -268,7 +274,7 @@ In the following snippet we solve explicitly the above variational problem:
 Alternatively, you can use :func:`skfem.utils.project` which does exactly the
 same thing:
 
-.. code-block:: python
+.. doctest::
 
    >>> project(u_0, basis_to=basis, I=basis.get_dofs(), expand=True)
    array([ 2.87802132e-16,  1.62145397e-16,  1.00000000e+00,  1.66533454e-16,

@@ -18,14 +18,13 @@ operator :math:`-\Delta` is
 In order to express this in scikit-fem, we write the integrand as a Python
 function:
 
-.. code-block:: python
+.. doctest::
 
-   from skfem import *
-   from skfem.helpers import grad, dot
-
-   @BilinearForm
-   def integrand(u, v, w):
-       return dot(grad(u), grad(v))
+   >>> from skfem import *
+   >>> from skfem.helpers import grad, dot
+   >>> @BilinearForm
+   ... def integrand(u, v, w):
+   ...    return dot(grad(u), grad(v))
 
 Forms return NumPy arrays
 =========================
@@ -37,7 +36,6 @@ verified using the Python debugger:
 
    from skfem import *
    from skfem.helpers import grad, dot
-
    @BilinearForm
    def integrand(u, v, w):
        import pdb; pdb.set_trace()  # breakpoint
@@ -115,7 +113,7 @@ finding :math:`u_{k+1} \in H^1_0(\Omega)` which satisfies
 for every :math:`v \in H^1_0(\Omega)`.
 The argument ``w`` is used to define such forms:
 
-.. code-block:: python
+.. doctest::
 
    >>> from skfem import *
    >>> from skfem.models.poisson import unit_load
@@ -127,7 +125,7 @@ The argument ``w`` is used to define such forms:
 The previous solution :math:`u_k` must be provided to
 :func:`~skfem.assembly.asm` as a keyword argument:
 
-.. code-block:: python
+.. doctest::
 
    >>> m = MeshTri()
    >>> m.refine(3)
