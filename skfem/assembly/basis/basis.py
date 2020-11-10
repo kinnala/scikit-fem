@@ -94,6 +94,7 @@ class Basis:
 
         Facets can be queried from :class:`~skfem.mesh.Mesh` objects:
 
+        >>> from skfem import MeshTri
         >>> m = MeshTri()
         >>> m.refine()
         >>> m.facets_satisfying(lambda x: x[0] == 0)
@@ -101,9 +102,11 @@ class Basis:
 
         This corresponds to a list of facet indices that can be passed over:
 
+        >>> import numpy as np
+        >>> from skfem import InteriorBasis, ElementTriP1
         >>> basis = InteriorBasis(m, ElementTriP1())
-        >>> basis.find_dofs({'left': np.array([1, 5])})['left']
-        Dofs(nodal={'u': array([0, 2, 5])}, facet={}, edge={}, interior={})
+        >>> basis.find_dofs({'left': np.array([1, 5])})['left'].all()
+        array([0, 2, 5])
 
         Parameters
         ----------
