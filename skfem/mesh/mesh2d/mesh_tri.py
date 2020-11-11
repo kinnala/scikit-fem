@@ -338,8 +338,8 @@ class MeshTri(Mesh2D):
         t2f = self.t2f + sz
 
         # new vertices are the midpoints of edges
-        new_p = 0.5 * np.vstack((p[0, e[0]] + p[0, e[1]],
-                                 p[1, e[0]] + p[1, e[1]]))
+        new_p = .5 * np.vstack((p[0, e[0]] + p[0, e[1]],
+                                p[1, e[0]] + p[1, e[1]]))
         self.p = np.hstack((p, new_p))
 
         # build new triangle definitions
@@ -360,12 +360,12 @@ class MeshTri(Mesh2D):
         self._build_mappings()
 
         # finish mapping of indices between old and new facets
-        new_facets[0, t2f[2, :] - sz] = self.t2f[2, ix0]
-        new_facets[0, t2f[1, :] - sz] = self.t2f[2, ix1]
-        new_facets[0, t2f[0, :] - sz] = self.t2f[0, ix0]
-        new_facets[1, t2f[2, :] - sz] = self.t2f[0, ix2]
-        new_facets[1, t2f[1, :] - sz] = self.t2f[2, ix2]
-        new_facets[1, t2f[0, :] - sz] = self.t2f[0, ix1]
+        new_facets[0, t2f[2] - sz] = self.t2f[2, ix0]
+        new_facets[0, t2f[1] - sz] = self.t2f[2, ix1]
+        new_facets[0, t2f[0] - sz] = self.t2f[0, ix0]
+        new_facets[1, t2f[2] - sz] = self.t2f[0, ix2]
+        new_facets[1, t2f[1] - sz] = self.t2f[2, ix2]
+        new_facets[1, t2f[0] - sz] = self.t2f[0, ix1]
 
         self._fix_boundaries(new_facets)
 
