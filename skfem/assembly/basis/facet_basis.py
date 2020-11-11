@@ -1,9 +1,11 @@
-from typing import Tuple
+from typing import Tuple, Optional
 
 import numpy as np
 from numpy import ndarray
 
-from skfem.element import DiscreteField
+from skfem.element import Element, DiscreteField
+from skfem.mapping import Mapping
+from skfem.mesh import Mesh
 from skfem.quadrature import get_quadrature
 from .basis import Basis
 
@@ -15,13 +17,13 @@ class FacetBasis(Basis):
 
     """
     def __init__(self,
-                 mesh,
-                 elem,
-                 mapping=None,
-                 intorder: int = None,
-                 side: int = None,
-                 facets: ndarray = None,
-                 quadrature: Tuple[ndarray, ndarray] = None):
+                 mesh: Mesh,
+                 elem: Element,
+                 mapping: Optional[Mapping] = None,
+                 intorder: Optional[int] = None,
+                 side: Optional[int] = None,
+                 facets: Optional[ndarray] = None,
+                 quadrature: Optional[Tuple[ndarray, ndarray]] = None):
         """Combine :class:`~skfem.mesh.Mesh` and :class:`~skfem.element.Element`
         into a set of precomputed global basis functions at element facets.
 
