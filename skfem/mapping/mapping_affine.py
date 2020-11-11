@@ -40,7 +40,7 @@ class MappingAffine(Mapping):
             # affine mapping inverses
             self.invA = np.empty((dim, dim, nt))
             if dim == 1:
-                self.invA[0, 0] = 1.0 / self.A[0, 0]
+                self.invA[0, 0] = 1. / self.A[0, 0]
             elif dim == 2:
                 self.invA[0, 0] =  self.A[1, 1] / self.detA  # noqa
                 self.invA[0, 1] = -self.A[0, 1] / self.detA
@@ -75,23 +75,23 @@ class MappingAffine(Mapping):
             self.c = np.empty((dim, nf))
 
             for i in range(dim):
-                self.c[i] = mesh.p[i, mesh.facets[0, :]]
+                self.c[i] = mesh.p[i, mesh.facets[0]]
                 for j in range(dim-1):
-                    self.B[i, j] = (mesh.p[i, mesh.facets[j + 1, :]] -
-                                    mesh.p[i, mesh.facets[0, :]])
+                    self.B[i, j] = (mesh.p[i, mesh.facets[j + 1]] -
+                                    mesh.p[i, mesh.facets[0]])
 
             # area scaling
             if dim == 1:
                 self.detB = np.ones(nf)
             elif dim == 2:
-                self.detB = np.sqrt(self.B[0, 0]**2 + self.B[1, 0]**2)
+                self.detB = np.sqrt(self.B[0, 0] ** 2 + self.B[1, 0] ** 2)
             elif dim == 3:
-                self.detB = np.sqrt((self.B[1, 0]*self.B[2, 1] -
-                                     self.B[2, 0]*self.B[1, 1])**2 +
-                                    (-self.B[0, 0]*self.B[2, 1] +
-                                     self.B[2, 0]*self.B[0, 1])**2 +
-                                    (self.B[0, 0]*self.B[1, 1] -
-                                     self.B[1, 0]*self.B[0, 1])**2)
+                self.detB = np.sqrt((self.B[1, 0] * self.B[2, 1] -
+                                     self.B[2, 0] * self.B[1, 1]) ** 2 +
+                                    (-self.B[0, 0] * self.B[2, 1] +
+                                     self.B[2, 0] * self.B[0, 1]) ** 2 +
+                                    (self.B[0, 0] * self.B[1, 1] -
+                                     self.B[1, 0] * self.B[0, 1]) ** 2)
             else:
                 raise Exception("Not implemented for the given dimension.")
 
@@ -169,17 +169,17 @@ class MappingAffine(Mapping):
 
     def normals(self, X, tind, find, t2f):
         if self.dim == 1:
-            Nref = np.array([[-1.0],
-                             [1.0]])
+            Nref = np.array([[-1.],
+                             [1.]])
         elif self.dim == 2:
-            Nref = np.array([[0.0, -1.0],
-                             [1.0, 1.0],
-                             [-1.0, 0.0]])
+            Nref = np.array([[0., -1.],
+                             [1., 1.],
+                             [-1., 0.]])
         elif self.dim == 3:
-            Nref = np.array([[0.0, 0.0, -1.0],
-                             [0.0, -1.0, 0.0],
-                             [-1.0, 0.0, 0.0],
-                             [1.0, 1.0, 1.0]])
+            Nref = np.array([[0., 0., -1.],
+                             [0., -1., 0.],
+                             [-1., 0., 0.],
+                             [1., 1., 1.]])
         else:
             raise Exception("Not implemented for the given dimension.")
 
@@ -193,4 +193,4 @@ class MappingAffine(Mapping):
 
         n = np.einsum('ijkl,ik->jkl', invDF, N)
         nlength = np.sqrt(np.sum(n**2, axis=0))
-        return np.einsum('ijk,jk->ijk', n, 1.0/nlength)
+        return np.einsum('ijk,jk->ijk', n, 1. / nlength)
