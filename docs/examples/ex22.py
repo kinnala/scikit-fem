@@ -67,7 +67,7 @@ if __name__ == "__main__":
     draw(m)
 
 for itr in range(10): # 10 adaptive refinements
-    if itr > 1:
+    if itr > 0:
         m.refine(adaptive_theta(eval_estimator(m, u)))
         
     basis = InteriorBasis(m, e)
