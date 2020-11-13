@@ -66,7 +66,7 @@ if __name__ == "__main__":
     from skfem.visuals.matplotlib import draw, plot, show
     draw(m)
 
-for itr in range(10): # 10 adaptive refinements
+for itr in range(9): # 9 adaptive refinements
     if itr > 0:
         m.refine(adaptive_theta(eval_estimator(m, u)))
         
