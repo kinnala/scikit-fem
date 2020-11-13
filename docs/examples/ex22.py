@@ -74,7 +74,6 @@ for itr in range(10): # 10 adaptive refinements
     
     K = asm(laplace, basis)
     f = asm(load, basis)
-    u = np.zeros_like(f)
     
     I = m.interior_nodes()
     u = solve(*condense(K, f, I=I))
