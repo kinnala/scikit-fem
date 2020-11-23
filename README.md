@@ -201,6 +201,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
+&mdash;
+
+### [2.3.0] - 2020-11-23
+
 - Fixed: `ElementQuad0` was not compatible with `FacetBasis`
 - Added: `ElementLineP0`, one-dimensional piecewise constant element
 - Added: `skfem.helpers.curl` now calculates the rotated gradient for
