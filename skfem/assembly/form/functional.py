@@ -35,4 +35,4 @@ class Functional(Form):
                  **kwargs) -> float:
         assert vbasis is None
         vbasis = ubasis
-        return np.sum(self.elemental(vbasis, **kwargs))
+        return sum(self.elemental(vbasis, **kwargs).T)
