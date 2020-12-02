@@ -21,7 +21,7 @@ class Functional(Form):
                 dx: ndarray) -> ndarray:
         if self.form is None:
             raise Exception("Form function handle not defined.")
-        return np.sum(self.form(w) * dx, axis=1)
+        return (self.form(w) * dx).sum(axis=-1)
 
     def elemental(self,
                   v: Basis,
@@ -35,4 +35,4 @@ class Functional(Form):
                  **kwargs) -> float:
         assert vbasis is None
         vbasis = ubasis
-        return sum(self.elemental(vbasis, **kwargs).T)
+        return self.elemental(vbasis, **kwargs).sum(axis=-1)
