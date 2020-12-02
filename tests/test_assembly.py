@@ -389,6 +389,19 @@ class TestFieldInterpolation_2(unittest.TestCase):
         self.assertAlmostEqual(feqx.assemble(basis, func=func, gunc=gunc), 2.)
 
 
+class VectorialFunctional(unittest.TestCase):
+
+    def runTest(self):
+
+        @Functional
+        def hydrostatic_pressure(w):
+            return w.n * w.x[1]
+
+        np.testing.assert_allclose(
+            hydrostatic_pressure.assemble(FacetBasis(MeshTri(), ElementTriP1())), [0, 1]
+        )
+
+
 class TestComplexValuedAssembly(unittest.TestCase):
 
     def runTest(self):
