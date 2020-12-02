@@ -201,6 +201,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
+- Added: `Functional` now supports forms that evaluate to vectors or other
+  tensors.
+
 ### [2.3.0] - 2020-11-24
 
 - Fixed: `ElementQuad0` was not compatible with `FacetBasis`
