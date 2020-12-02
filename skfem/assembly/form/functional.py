@@ -1,7 +1,6 @@
 from typing import Dict, Optional
 
 from numpy import ndarray
-import numpy as np
 
 from .form import Form, FormDict
 from ..basis import Basis
@@ -21,7 +20,7 @@ class Functional(Form):
                 dx: ndarray) -> ndarray:
         if self.form is None:
             raise Exception("Form function handle not defined.")
-        return (self.form(w) * dx).sum(axis=-1)
+        return (self.form(w) * dx).sum(-1)
 
     def elemental(self,
                   v: Basis,
@@ -35,4 +34,4 @@ class Functional(Form):
                  **kwargs) -> float:
         assert vbasis is None
         vbasis = ubasis
-        return self.elemental(vbasis, **kwargs).sum(axis=-1)
+        return self.elemental(vbasis, **kwargs).sum(-1)
