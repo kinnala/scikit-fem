@@ -71,8 +71,8 @@ class MeshLine(Mesh):
 
         self.t2f = self.t
         # build f2t
-        e_tmp = np.hstack((self.t2f[0, :], self.t2f[1, :]))
-        t_tmp = np.tile(np.arange(self.t.shape[1]), (1, 2))[0]
+        e_tmp = self.t2f.flatten()
+        t_tmp = np.tile(np.arange(self.t.shape[1]), 2)
 
         e_first, ix_first = np.unique(e_tmp, return_index=True)
         e_last, ix_last = np.unique(e_tmp[::-1], return_index=True)
