@@ -96,8 +96,8 @@ class MeshLine(Mesh):
 
         nonmarked = np.setdiff1d(np.arange(t.shape[1]), marked)
 
-        newp = np.hstack((p, 0.5*(p[:, self.t[0, marked]] +
-                                  p[:, self.t[1, marked]])))
+        newp = np.hstack((p, 0.5*(p[:, t[0, marked]] +
+                                  p[:, t[1, marked]])))
         newt = np.vstack((t[0, marked], mid))
         newt = np.hstack((t[:, nonmarked],
                           newt,
