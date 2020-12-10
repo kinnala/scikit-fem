@@ -52,7 +52,7 @@ class MeshLine(Mesh):
         self.boundaries = boundaries
         self.subdomains = subdomains
 
-        self.facets = np.arange(self.p.shape[1])[None, :]
+        self.facets = self._facets()
         self.t = np.vstack([self.facets[0, :-1],
                             self.facets[0, 1:]]) if t is None else t
         super(MeshLine, self).__init__()
@@ -60,6 +60,9 @@ class MeshLine(Mesh):
 
         if validate:
             self._validate()
+
+    def _facets(self):
+        return np.arange(self.p.shape[1])[None, :]
 
     @classmethod
     def init_refdom(cls: Type[MeshType]) -> MeshType:
@@ -71,8 +74,8 @@ class MeshLine(Mesh):
 
         self.t2f = self.t
         # build f2t
-        e_tmp = np.hstack((self.t2f[0, :], self.t2f[1, :]))
-        t_tmp = np.tile(np.arange(self.t.shape[1]), (1, 2))[0]
+        e_tmp = self.t2f.flatten()
+        t_tmp = np.tile(np.arange(self.t.shape[1]), 2)
 
         e_first, ix_first = np.unique(e_tmp, return_index=True)
         e_last, ix_last = np.unique(e_tmp[::-1], return_index=True)
@@ -105,6 +108,7 @@ class MeshLine(Mesh):
         # update fields
         self.p = newp
         self.t = newt
+        self.facets = self._facets()
 
         self._build_mappings()
 
