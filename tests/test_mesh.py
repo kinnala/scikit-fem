@@ -213,5 +213,40 @@ class TestMeshQuadSplit(unittest.TestCase):
                                             for m in [mesh, mesh_tri]])
 
 
+class TestAdaptiveSplitting1D(unittest.TestCase):
+
+    def runTest(self):
+
+        m = MeshLine()
+
+        for itr in range(10):
+            prev_t_size = m.t.shape[1]
+            prev_p_size = m.p.shape[1]
+            m.refine([prev_t_size - 1])
+
+            # check that new size is current size + 1
+            self.assertEqual(prev_t_size, m.t.shape[1] - 1)
+            self.assertEqual(prev_p_size, m.p.shape[1] - 1)
+
+
+class TestAdaptiveSplitting2D(unittest.TestCase):
+
+    def runTest(self):
+
+        m = MeshTri()
+        prev_t_size = -1
+
+        for itr in range(5):
+            red_ix = prev_t_size - 1 if prev_t_size != -1\
+                else m.t.shape[1] - 1
+            prev_t_size = m.t.shape[1]
+            prev_p_size = m.p.shape[1]
+            m.refine([red_ix])
+
+            # check that new size is current size + 4
+            self.assertEqual(prev_t_size, m.t.shape[1] - 4)
+            self.assertEqual(prev_p_size, m.p.shape[1] - 3)
+
+
 if __name__ == '__main__':
     unittest.main()
