@@ -201,7 +201,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
-- Fixed: `MeshLine.refine(List[int])`
+- Fixed: `MeshLine.refine` now correctly performs adaptive refinement
 - Added: `Functional` now supports forms that evaluate to vectors or other
   tensors.
 
