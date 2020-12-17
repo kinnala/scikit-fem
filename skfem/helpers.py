@@ -57,12 +57,12 @@ def dd(u: DiscreteField):
     return u.hess
 
 
-def ddd(u: DiscreteField):
+def ddd(u):
     """Third derivative (if available)."""
     return u.hod[0]
 
 
-def dddd(u: DiscreteField):
+def dddd(u):
     """Fourth derivative (if available)."""
     return u.hod[1]
 
