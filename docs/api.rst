@@ -71,3 +71,24 @@ Module: skfem.utils
 .. autofunction:: skfem.utils.solve
 
 .. autofunction:: skfem.utils.condense
+
+Module: skfem.helpers
+=====================
+
+.. automodule:: skfem.helpers
+
+.. autofunction:: skfem.helpers.grad
+
+.. autofunction:: skfem.helpers.div
+
+.. autofunction:: skfem.helpers.curl
+
+.. autofunction:: skfem.helpers.d
+
+.. autofunction:: skfem.helpers.dd
+
+.. autofunction:: skfem.helpers.sym_grad
+
+.. autofunction:: skfem.helpers.dot
+
+.. autofunction:: skfem.helpers.ddot

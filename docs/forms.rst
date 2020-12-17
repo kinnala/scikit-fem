@@ -8,7 +8,7 @@ We consider forms as the basic building blocks of finite element assembly.
 Thus, it is important to understand how forms are used in scikit-fem and how to
 express them correctly.
 
-Let us begin with an example.  The bilinear form corresponding to the Laplace
+Let us begin with some examples.  The bilinear form corresponding to the Laplace
 operator :math:`-\Delta` is
 
 .. math::
@@ -20,11 +20,51 @@ function:
 
 .. doctest::
 
-   >>> from skfem import *
+   >>> from skfem import BilinearForm
    >>> from skfem.helpers import grad, dot
    >>> @BilinearForm
    ... def integrand(u, v, w):
    ...    return dot(grad(u), grad(v))
+
+A typical load vector is given by the :math:`L^2` inner product of a user-given
+function and the test function :math:`v`, e.g.,
+
+.. math::
+
+   b(v) = \int_\Omega \sin(\pi x) \sin(\pi y) v \,\mathrm{d}x.
+
+This can be written as
+
+.. doctest::
+
+   >>> import numpy as np
+   >>> from skfem import LinearForm
+   >>> @LinearForm
+   ... def loading(v, w):
+   ...    return np.sin(np.pi * w.x[0]) * np.sin(np.pi * w.x[1]) * v
+
+In addition, forms can depend on the local mesh parameter ``w.h`` or other
+finite element functions (see :ref:`predefined`).
+Moreover, boundary forms can depend on the normal vector ``ẁ.n``.
+One example is the form
+
+.. math::
+
+   l(\boldsymbol{v}) = \int_{\partial \Omega} \boldsymbol{v} \cdot \boldsymbol{n} \,\mathrm{d}s
+
+which can be written as
+
+.. doctest::
+
+   >>> from skfem import LinearForm
+   >>> from skfem.helpers import dot
+   >>> @LinearForm
+   ... def loading(v, w):
+   ...    return dot(w.n, v)
+
+The helper functions such as ``dot`` are discussed further in :ref:`helpers`.
+
+.. _formsreturn:
 
 Forms return NumPy arrays
 =========================
@@ -58,17 +98,20 @@ Notice how ``dot(grad(u), grad(v))`` is a NumPy array with the shape `number of
 elements` x `number of quadrature points per element`.  The return value should
 always have such shape no matter which mesh or element type is used.
 
+.. _helpers:
+
 Helpers are useful but not necessary
 ====================================
 
-The module ``skfem.helpers`` contains functions that make the forms more
+The module :mod:`skfem.helpers` contains functions that make the forms more
 readable.  An alternative way to write the above form is
 
-.. code-block:: python
+.. doctest:: python
 
-   @BilinearForm
-   def integrand(u, v, w):
-       return u[1][0] * v[1][0] + u[1][1] * v[1][1]
+   >>> from skfem import BilinearForm
+   >>> @BilinearForm
+   ... def integrand(u, v, w):
+   ...     return u[1][0] * v[1][0] + u[1][1] * v[1][1]
 
 In fact, ``u`` and ``v`` are simply tuples of NumPy arrays
 with the values of the function at ``u[0]`` and the values
@@ -76,7 +119,7 @@ of the gradient at ``u[1]`` (and some additional magic such as
 implementing ``__array__`` and ``__mul__``
 so that expressions such as ``u * v`` work as expected).
 
-Notice how the shape of ``u[0]`` is what we expect also from the return value:
+Notice how the shape of ``u[0]`` is what we expect also from the return value as discussed in :ref:`formsreturn`:
 
 .. code-block:: none
 
@@ -88,6 +131,8 @@ Notice how the shape of ``u[0]`` is what we expect also from the return value:
    array([[0.66666667, 0.16666667, 0.16666667],
           [0.66666667, 0.16666667, 0.16666667]])
 
+
+.. _predefined:
 
 Use of predefined functions in the forms
 ========================================
