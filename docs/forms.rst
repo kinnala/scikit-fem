@@ -110,7 +110,7 @@ readable.  An alternative way to write the above form is
 
    >>> @BilinearForm
    >>> def integrand(u, v, w):
-   >>>     return u[1][0] * v[1][0] + u[1][1] * v[1][1]
+   ...     return u[1][0] * v[1][0] + u[1][1] * v[1][1]
 
 In fact, ``u`` and ``v`` are simply tuples of NumPy arrays
 with the values of the function at ``u[0]`` and the values
