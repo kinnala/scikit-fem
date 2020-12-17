@@ -52,15 +52,18 @@ def sym_grad(u: DiscreteField):
     return .5 * (u.grad + transpose(u.grad))
 
 
-def dd(u):
+def dd(u: DiscreteField):
+    """Hessian (if available)."""
     return u.hess
 
 
-def ddd(u):
+def ddd(u: DiscreteField):
+    """Third derivative (if available)."""
     return u.hod[0]
 
 
-def dddd(u):
+def dddd(u: DiscreteField):
+    """Fourth derivative (if available)."""
     return u.hod[1]
 
 
@@ -104,16 +107,19 @@ def eye(w, n):
 
 def det(A):
     """
-    Determinant of an array `A` over trailing axis (if any)
+    Determinant of an array `A` over trailing axis (if any).
+
     Parameters
     ----------
     A : (N, N,...) numpy.ndarray
         N = 2 or 3
         Input array whose determinant is to be computed
+
     Returns
     -------
     det : (...) numpy.ndarray
         Determinant of `A`.
+
     """
     detA = zeros_like(A[0, 0])
     if A.shape[0] == 3:
@@ -129,17 +135,19 @@ def det(A):
 
 
 def inv(A):
-    """
-    Inverse of an array `A` over trailing axis (if any)
+    """Inverse of an array `A` over trailing axis (if any)
+
     Parameters
     ----------
     A : (N, N,...) numpy.ndarray
         N = 2 or 3
         Input array whose inverse is to be computed
+
     Returns
     -------
     Ainv : (N, N,...) numpy.ndarray
         Inverse of `A`.
+
     """
     invA = zeros_like(A)
     detA = det(A)
