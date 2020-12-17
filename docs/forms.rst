@@ -108,8 +108,9 @@ readable.  An alternative way to write the above form is
 
 .. doctest:: python
 
+   >>> from skfem import BilinearForm
    >>> @BilinearForm
-   >>> def integrand(u, v, w):
+   ... def integrand(u, v, w):
    ...     return u[1][0] * v[1][0] + u[1][1] * v[1][1]
 
 In fact, ``u`` and ``v`` are simply tuples of NumPy arrays
