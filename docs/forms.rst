@@ -8,7 +8,7 @@ We consider forms as the basic building blocks of finite element assembly.
 Thus, it is important to understand how forms are used in scikit-fem and how to
 express them correctly.
 
-Let us begin with an example.  The bilinear form corresponding to the Laplace
+Let us begin with some examples.  The bilinear form corresponding to the Laplace
 operator :math:`-\Delta` is
 
 .. math::
@@ -25,6 +25,26 @@ function:
    >>> @BilinearForm
    ... def integrand(u, v, w):
    ...    return dot(grad(u), grad(v))
+
+A typical load vector is given by the :math:`L^2` inner product of a user-given
+function and the test function :math:`v`, e.g.,
+
+.. math::
+
+   b(v) = \int_\Omega \sin(\pi x) \sin(\pi y) v \,\mathrm{d}x
+
+This can be written as
+
+   .. doctest::
+
+   >>> import numpy as np
+   >>> from skfem import *
+   >>> @LinearForm
+   ... def loading(v, w):
+   ...    return np.sin(np.pi * w.x[0]) * np.sin(np.pi * w.x[1]) * v
+
+In addition, the form can depend on the local mesh parameter ``w.h`` or other
+finite element functions (read below).
 
 Forms return NumPy arrays
 =========================
@@ -64,11 +84,11 @@ Helpers are useful but not necessary
 The module ``skfem.helpers`` contains functions that make the forms more
 readable.  An alternative way to write the above form is
 
-.. code-block:: python
+.. doctest:: python
 
-   @BilinearForm
-   def integrand(u, v, w):
-       return u[1][0] * v[1][0] + u[1][1] * v[1][1]
+   >>> @BilinearForm
+   >>> def integrand(u, v, w):
+   >>>     return u[1][0] * v[1][0] + u[1][1] * v[1][1]
 
 In fact, ``u`` and ``v`` are simply tuples of NumPy arrays
 with the values of the function at ``u[0]`` and the values
