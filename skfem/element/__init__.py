@@ -1,11 +1,26 @@
-"""The module :mod:`skfem.element` defines finite elements in a generic sense.
+"""The module :mod:`skfem.element` defines finite elements in a very generic
+sense.
 
-The naming of the element classes reflects their compatibility with the mesh
-types.
+Firstly, the naming of the element classes reflects their compatibility with the
+mesh types:
 
 >>> from skfem.element import ElementTriP1
 >>> ElementTriP1.mesh_type
 <class 'skfem.mesh.mesh2d.mesh_tri.MeshTri'>
+
+Secondly, the chosen finite element should be compatible with the approximated
+problem.  Stability of the finite element approximations is a broad topic and
+will not be covered here.  However, here are some general rules:
+
+* use subclasses of :class:`ElementH1` for standard second-order problems
+* use subclasses of :class:`ElementHdiv` and :class:`ElementHcurl` for mixed
+  problems with less regular solutions
+* use subclasses of :class:`ElementGlobal` for fourth-order problems or if there
+  are special postprocessing requirements, e.g., the use of high-order
+  derivatives.
+
+Thirdly, different finite element use different degrees-of-freedom.  See
+:ref:`finddofs` for more information.
 
 In order to use an element, you simply initialize the respective object and
 pass it to the constructor of :class:`~skfem.assembly.InteriorBasis` or
