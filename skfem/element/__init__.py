@@ -9,18 +9,23 @@ the mesh types:
 <class 'skfem.mesh.mesh2d.mesh_tri.MeshTri'>
 
 Secondly, the chosen finite element should be compatible with the approximated
-problem.  Stability of the finite element approximations is a broad topic and
-will not be covered here.  However, here are some general rules:
+partial differential equation.  Stability of the finite element approximations
+is a broad topic and will not be covered here.  However, here are some general
+rules:
 
 * use subclasses of :class:`ElementH1` for standard second-order problems
-* use subclasses of :class:`ElementHdiv` and :class:`ElementHcurl` for mixed
-  problems with less regular solutions
-* use subclasses of :class:`ElementGlobal` for fourth-order problems or if
-  there are special postprocessing requirements, e.g., the use of high-order
-  derivatives.
+* pay special attention to constrained problems, e.g., the Stokes system which
+  may require the use of elements such as :class:`ElementTriMini`
+* use subclasses of :class:`ElementHdiv` or :class:`ElementHcurl`, e.g.,
+  :class:`ElementTriRT0` or :class:`ElementTetN0`, for mixed problems with less
+  regular solutions
+* use subclasses of :class:`ElementGlobal`, e.g., :class:`ElementTriMorley` or
+  :class:`ElementTriArgyris`, for fourth-order problems or if there are special
+  postprocessing requirements, e.g., the need for high-order derivatives.
 
-Thirdly, different finite element use different degrees-of-freedom.  See
-:ref:`finddofs` for more information.
+Thirdly, different finite element spaces use different degrees-of-freedom.  It
+is up to the user to decide whether the given boundary condition can and should
+be enforced strongly or weakly.  See :ref:`finddofs` for more information.
 
 In order to use an element, you simply initialize the respective object and
 pass it to the constructor of :class:`~skfem.assembly.InteriorBasis` or
