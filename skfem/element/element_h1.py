@@ -5,9 +5,10 @@ from .discrete_field import DiscreteField
 
 
 class ElementH1(Element):
-    """A global element defined through identity mapping."""
+    """:math:`H^1`-conforming basis defined through a reference element."""
 
     def gbasis(self, mapping, X, i, tind=None):
+        """Identity transformation."""
         phi, dphi = self.lbasis(X, i)
         invDF = mapping.invDF(X, tind)
         if len(X.shape) == 2:

@@ -4,4 +4,5 @@
 
 .. automodule:: skfem.element
    :members:
-   :exclude-members: DiscreteField, ElementComposite, ElementVectorH1
+   :show-inheritance:
+   :exclude-members: DiscreteField

@@ -22,17 +22,22 @@ class Element:
     Attributes
     ----------
     nodal_dofs
-        Number of DOFs per node.
+        Number of DOFs per node.  Used within :class:`Basis` to define the
+        global DOF numbering.
     facet_dofs
-        Number of DOFs per facet.
+        Number of DOFs per facet.  Used within :class:`Basis` to define the
+        global DOF numbering.
     interior_dofs
-        Number of DOFs inside the element.
+        Number of DOFs inside the element.  Used within :class:`Basis` to
+        define the global DOF numbering.
     edge_dofs
-        Number of DOFs per edge.
+        Number of DOFs per edge.  Used within :class:`Basis` to define the
+        global DOF numbering.
     dim
         The spatial dimension.
     maxdeg
-        Polynomial degree of the basis. Used to find quadrature rules.
+        Polynomial degree of the basis.  Used within :class:`Basis` to
+        automatically find quadrature rules.
     dofnames
         A list of strings indicating the DOF types. See :ref:`finddofs`.
 

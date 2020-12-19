@@ -20,6 +20,10 @@ is a broad topic and will not be covered here.  However, here are some general
 rules:
 
 * use subclasses of :class:`ElementH1` for standard second-order problems
+* you can discretize vectorial problems by manually building the block matrices
+  (e.g., using ``scipy.sparse.bmat``) with scalar elements, or by using
+  :class:`ElementVectorH1` and :class:`ElementComposite` that abstract out the
+  creation of the block matrices
 * pay special attention to constrained problems, e.g., the Stokes system which
   may require the use of elements such as :class:`ElementTriMini`
 * use subclasses of :class:`ElementHdiv` or :class:`ElementHcurl`, e.g.,
