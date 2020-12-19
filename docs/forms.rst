@@ -8,7 +8,7 @@ We consider forms as the basic building blocks of finite element assembly.
 Thus, it is important to understand how forms are used in scikit-fem and how to
 express them correctly.
 
-Let us begin with some examples.  The bilinear form corresponding to the Laplace
+Let us begin with examples.  The bilinear form corresponding to the Laplace
 operator :math:`-\Delta` is
 
 .. math::
@@ -45,7 +45,7 @@ This can be written as
 
 In addition, forms can depend on the local mesh parameter ``w.h`` or other
 finite element functions (see :ref:`predefined`).
-Moreover, boundary forms can depend on the normal vector ``ẁ.n``.
+Moreover, boundary forms can depend on the normal vector ``w.n``.
 One example is the form
 
 .. math::
@@ -113,11 +113,12 @@ readable.  An alternative way to write the above form is
    ... def integrand(u, v, w):
    ...     return u[1][0] * v[1][0] + u[1][1] * v[1][1]
 
-In fact, ``u`` and ``v`` are simply tuples of NumPy arrays
-with the values of the function at ``u[0]`` and the values
-of the gradient at ``u[1]`` (and some additional magic such as
-implementing ``__array__`` and ``__mul__``
-so that expressions such as ``u * v`` work as expected).
+.. note::
+
+    In fact, ``u`` and ``v`` are simply tuples of NumPy arrays with the values
+    of the function at ``u[0]`` and the values of the gradient at ``u[1]`` (and
+    some additional magic such as implementing ``__array__`` and ``__mul__`` so
+    that expressions such as ``u * v`` work as expected).
 
 Notice how the shape of ``u[0]`` is what we expect also from the return value as discussed in :ref:`formsreturn`:
 

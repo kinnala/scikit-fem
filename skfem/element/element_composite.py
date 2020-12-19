@@ -9,7 +9,7 @@ from .element import Element
 class ElementComposite(Element):
     """Combine multiple elements.
 
-    Allows having different basis functions for different components of a
+    Allows using different basis functions for different components of a
     vectorial solution.
 
     """
@@ -87,6 +87,7 @@ class ElementComposite(Element):
         return ns[i], inds[i]
 
     def gbasis(self, mapping, X: ndarray, i: int, tind=None):
+        """Call correct :meth:`Element.gbasis` based on ``i``."""
         n, ind = self._deduce_bfun(i)
         output = []
         for k, e in enumerate(self.elems):

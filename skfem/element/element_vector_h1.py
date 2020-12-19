@@ -29,6 +29,7 @@ class ElementVectorH1(Element):
             ])
 
     def gbasis(self, mapping, X, i, tind=None):
+        """Set correct components to zero based on ``i``."""
         ind = int(np.floor(float(i) / float(self.dim)))
         n = i - self.dim * ind
         fields = []

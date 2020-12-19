@@ -4,8 +4,10 @@ from .discrete_field import DiscreteField
 
 
 class ElementHdiv(Element):
+    """:math:`H(div)`-conforming basis defined through a reference element."""
 
     def orient(self, mapping, i, tind=None):
+        """Orientation based on facet-to-triangle indexing."""
         if tind is not None:
             # TODO fix
             raise NotImplementedError("TODO: fix tind support in ElementHdiv")
@@ -13,6 +15,7 @@ class ElementHdiv(Element):
                          == np.arange(mapping.mesh.t.shape[1]))
 
     def gbasis(self, mapping, X, i, tind=None):
+        """Covariant Piola transformation."""
         phi, dphi = self.lbasis(X, i)
         DF = mapping.DF(X, tind)
         detDF = mapping.detDF(X, tind)
