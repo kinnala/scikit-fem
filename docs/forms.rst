@@ -113,11 +113,12 @@ readable.  An alternative way to write the above form is
    ... def integrand(u, v, w):
    ...     return u[1][0] * v[1][0] + u[1][1] * v[1][1]
 
-In fact, ``u`` and ``v`` are simply tuples of NumPy arrays
-with the values of the function at ``u[0]`` and the values
-of the gradient at ``u[1]`` (and some additional magic such as
-implementing ``__array__`` and ``__mul__``
-so that expressions such as ``u * v`` work as expected).
+.. note::
+
+    In fact, ``u`` and ``v`` are simply tuples of NumPy arrays with the values
+    of the function at ``u[0]`` and the values of the gradient at ``u[1]`` (and
+    some additional magic such as implementing ``__array__`` and ``__mul__`` so
+    that expressions such as ``u * v`` work as expected).
 
 Notice how the shape of ``u[0]`` is what we expect also from the return value as discussed in :ref:`formsreturn`:
 
