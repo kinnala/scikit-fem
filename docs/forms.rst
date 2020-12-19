@@ -8,7 +8,7 @@ We consider forms as the basic building blocks of finite element assembly.
 Thus, it is important to understand how forms are used in scikit-fem and how to
 express them correctly.
 
-Let us begin with some examples.  The bilinear form corresponding to the Laplace
+Let us begin with examples.  The bilinear form corresponding to the Laplace
 operator :math:`-\Delta` is
 
 .. math::
@@ -45,7 +45,7 @@ This can be written as
 
 In addition, forms can depend on the local mesh parameter ``w.h`` or other
 finite element functions (see :ref:`predefined`).
-Moreover, boundary forms can depend on the normal vector ``ẁ.n``.
+Moreover, boundary forms can depend on the normal vector ``w.n``.
 One example is the form
 
 .. math::
