@@ -1,6 +1,12 @@
 """The module :mod:`skfem.element` defines finite elements in a very generic
 sense.
 
+In order to use an element, you simply initialize the respective object and
+pass it to the constructor of :class:`~skfem.assembly.InteriorBasis` or
+:class:`~skfem.assembly.FacetBasis`.  See below for a list of supported
+elements.
+
+Here are some general instructions for choosing an :class:`Element` class.
 Firstly, the naming of the element classes reflects their compatibility with
 the mesh types:
 
@@ -23,14 +29,10 @@ rules:
   :class:`ElementTriArgyris`, for fourth-order problems or if there are special
   postprocessing requirements, e.g., the need for high-order derivatives.
 
-Thirdly, different finite element spaces use different degrees-of-freedom.  It
-is up to the user to decide whether the given boundary condition can and should
-be enforced strongly or weakly.  See :ref:`finddofs` for more information.
-
-In order to use an element, you simply initialize the respective object and
-pass it to the constructor of :class:`~skfem.assembly.InteriorBasis` or
-:class:`~skfem.assembly.FacetBasis`.  See below for a list of supported
-elements.
+Thirdly, the different finite element spaces use different degrees-of-freedom.
+It is up to the user to decide whether the given boundary condition can or
+should be enforced strongly or weakly.  See :ref:`finddofs` for more
+information.
 
 """
 

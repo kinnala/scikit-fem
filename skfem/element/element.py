@@ -10,6 +10,15 @@ from .discrete_field import DiscreteField
 class Element:
     """Evaluate finite element basis.
 
+    This class should not be initialized directly.  Use different subclasses,
+    e.g.,
+
+    - :class:`ElementLineP1`
+    - :class:`ElementTriP1`
+    - :class:`ElementQuad1`
+    - :class:`ElementTetP1`
+    - :class:`ElementHex1`
+
     Attributes
     ----------
     nodal_dofs
