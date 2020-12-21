@@ -43,6 +43,9 @@ sphinx:
 	-rm -r ../scikit-fem-docs/.doctrees/
 	@eval sphinx-build -W -a -b html docs docs/_build
 
+sphinx_doctest:
+	@eval sphinx-build -a -b doctest docs docs/_build
+
 # Release
 
 release:
