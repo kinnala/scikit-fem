@@ -149,9 +149,9 @@ M. Juntunen](https://au.mathworks.com/matlabcentral/fileexchange/36108-hjfem_lit
 We are happy to welcome any contributions to the library.  Reasonable projects
 for first timers include:
 
-- Filing out a [bug report](https://github.com/kinnala/scikit-fem/issues).
+- Filing out a [bug report](https://github.com/kinnala/scikit-fem/issues)
 - Writing an [example](https://github.com/kinnala/scikit-fem/tree/master/docs/examples)
-- Improving the [tests](https://github.com/kinnala/scikit-fem/tree/master/tests).
+- Improving the [tests](https://github.com/kinnala/scikit-fem/tree/master/tests)
 - Finding typos in the documentation.
 
 *By contributing code to scikit-fem, you are agreeing to release it under BSD-3-Clause, see LICENSE.md.*
