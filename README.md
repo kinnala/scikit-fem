@@ -201,14 +201,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
-- Fixed: `MeshLine.refine` now correctly performs adaptive refinement
+- Fixed: `MeshLine.refine` now correctly performs adaptive refinement.
 - Added: `Functional` now supports forms that evaluate to vectors or other
   tensors.
 
 ### [2.3.0] - 2020-11-24
 
-- Fixed: `ElementQuad0` was not compatible with `FacetBasis`
-- Added: `ElementLineP0`, one-dimensional piecewise constant element
+- Fixed: `ElementQuad0` was not compatible with `FacetBasis`.
+- Added: `ElementLineP0`, one-dimensional piecewise constant element.
 - Added: `skfem.helpers.curl` now calculates the rotated gradient for
   two-dimensional elements.
 - Added: `MeshTet.init_ball` for meshing a ball.
@@ -245,65 +245,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [2.1.0] - 2020-09-30
 
 - Fixed: `Mesh3D.boundary_edges` (and, consequently, `Basis.find_dofs`) was slow
-  and used lots of memory due to an exhaustive search of all edges
-- Added: `ElementHex2`, a triquadratic hexahedral element
-- Added: `MeshTri.init_circle`, constructor for a circle mesh
+  and used lots of memory due to an exhaustive search of all edges.
+- Added: `ElementHex2`, a triquadratic hexahedral element.
+- Added: `MeshTri.init_circle`, constructor for a circle mesh.
 
 ### [2.0.0] - 2020-08-21
 
 - Added: Support for complex-valued forms: `BilinearForm` and `LinearForm` now take
   an optional argument `dtype` which defaults to `np.float64`
-  but can be also `np.complex64`
+  but can be also `np.complex64`.
 - Added: `Dofs.__or__` and `Dofs.__add__`, for merging degree-of-freedom sets
-  (i.e. `Dofs` objects) using `|` and `+` operators
+  (i.e. `Dofs` objects) using `|` and `+` operators.
 - Added: `Dofs.drop` and `Dofs.keep`, for further filtering the degree-of-freedom sets
 - Removed: Support for old-style decorators `bilinear_form`, `linear_form`, and
-  `functional` (deprecated since 1.0.0)
-- Fixed: `FacetBasis` did not initialize with `ElementQuadP`
+  `functional` (deprecated since 1.0.0).
+- Fixed: `FacetBasis` did not initialize with `ElementQuadP`.
 - Deprecated: `project` will only support functions like `lambda x: x[0]`
-  instead of `lambda x, y, z: x` in the future
+  instead of `lambda x, y, z: x` in the future.
 
 ### [1.2.0] - 2020-07-07
 
 - Added: `Mesh.__add__`, for merging meshes using `+` operator: duplicated nodes are
-  joined
-- Added: `ElementHexS2`, a 20-node quadratic hexahedral serendipity element
-- Added: `ElementLineMini`, MINI-element for one-dimensional mesh
-- Fixed: `Mesh3D.boundary_edges` was broken in case of hexahedral meshes
-- Fixed: `skfem.utils.project` did not work for `ElementGlobal`
-- Changed: `MeshQuad._splitquads` aliased as `MeshQuad.to_meshtri`: should not be private
+  joined.
+- Added: `ElementHexS2`, a 20-node quadratic hexahedral serendipity element.
+- Added: `ElementLineMini`, MINI-element for one-dimensional mesh.
+- Fixed: `Mesh3D.boundary_edges` was broken in case of hexahedral meshes.
+- Fixed: `skfem.utils.project` did not work for `ElementGlobal`.
+- Changed: `MeshQuad._splitquads` aliased as `MeshQuad.to_meshtri`: should not be private.
 
 ### [1.1.0] - 2020-05-18
 
-- Added: `ElementTetMini`, MINI-element for tetrahedral mesh
+- Added: `ElementTetMini`, MINI-element for tetrahedral mesh.
 - Fixed: `Mesh3D.boundary_edges` incorrectly returned all edges where both nodes are on
-  the boundary
+  the boundary.
 
 ### [1.0.0] - 2020-04-22
 
-- Added: New-style form constructors `BilinearForm`, `LinearForm`, and `Functional`
-- Added: `skfem.io.json` for serialization of meshes to/from json-files
-- Added: `ElementLinePp`, p-th order one-dimensional elements
-- Added: `ElementQuadP`, p-th order quadrilateral elements
-- Added: `ElementQuadDG` for transforming quadrilateral H1 elements to DG elements
-- Added: `ElementQuadBFS`, Bogner-Fox-Schmit element for biharmonic problems
-- Added: `ElementTriMini`, MINI-element for Stokes problems
-- Added: `ElementComposite` for using multiple elements in one bilinear form
-- Added: `ElementQuadS2`, quadratic Serendipity element
-- Added: `ElementLineHermite`, cubic Hermite element for Euler-Bernoulli beams
-- Added: `Mesh.define_boundary` for defining named boundaries
-- Added: `Basis.find_dofs` for finding degree-of-freedom indices
-- Added: `Mesh.from_basis` for defining high-order meshes
-- Added: `Basis.split` for splitting multicomponent solutions
-- Added: `MortarMapping` with basic support for mortar methods in 2D
+- Added: New-style form constructors `BilinearForm`, `LinearForm`, and `Functional`.
+- Added: `skfem.io.json` for serialization of meshes to/from json-files.
+- Added: `ElementLinePp`, p-th order one-dimensional elements.
+- Added: `ElementQuadP`, p-th order quadrilateral elements.
+- Added: `ElementQuadDG` for transforming quadrilateral H1 elements to DG elements.
+- Added: `ElementQuadBFS`, Bogner-Fox-Schmit element for biharmonic problems.
+- Added: `ElementTriMini`, MINI-element for Stokes problems.
+- Added: `ElementComposite` for using multiple elements in one bilinear form.
+- Added: `ElementQuadS2`, quadratic Serendipity element.
+- Added: `ElementLineHermite`, cubic Hermite element for Euler-Bernoulli beams.
+- Added: `Mesh.define_boundary` for defining named boundaries.
+- Added: `Basis.find_dofs` for finding degree-of-freedom indices.
+- Added: `Mesh.from_basis` for defining high-order meshes.
+- Added: `Basis.split` for splitting multicomponent solutions.
+- Added: `MortarMapping` with basic support for mortar methods in 2D.
 - Added: `Basis` constructors now accept `quadrature` keyword argument for specifying
-  a custom quadrature rule
+  a custom quadrature rule.
 - Deprecated: Old-style form constructors `bilinear_form`, `linear_form`, and `functional`.
-- Changed: `Basis.interpolate` returns `DiscreteField` objects instead of ndarray tuples
+- Changed: `Basis.interpolate` returns `DiscreteField` objects instead of ndarray tuples.
 - Changed: `Basis.interpolate` works now properly for vectorial and high-order elements
-  by interpolating all components and higher order derivatives
+  by interpolating all components and higher order derivatives.
 - Changed: `Form.assemble` accepts now any keyword arguments (with type `DiscreteField`)
-  that are passed over to the forms
-- Changed: Renamed `skfem.importers` to `skfem.io`
-- Changed: Renamed `skfem.models.helpers` to `skfem.helpers`
-- Changed: `skfem.utils.solve` will now expand also the solutions of eigenvalue problems
+  that are passed over to the forms.
+- Changed: Renamed `skfem.importers` to `skfem.io`.
+- Changed: Renamed `skfem.models.helpers` to `skfem.helpers`.
+- Changed: `skfem.utils.solve` will now expand also the solutions of eigenvalue problems.
