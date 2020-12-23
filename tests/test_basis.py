@@ -1,14 +1,18 @@
 from unittest import TestCase
 
+import pytest
 import numpy as np
-from numpy.testing import assert_allclose
+from numpy.testing import assert_allclose, assert_almost_equal
 
 from skfem import BilinearForm, asm, solve, condense, project
 from skfem.mesh import MeshTri, MeshTet, MeshHex, MeshQuad, MeshLine
-from skfem.assembly import InteriorBasis, FacetBasis, Dofs
+from skfem.assembly import InteriorBasis, FacetBasis, Dofs, Functional
 from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
                            ElementTetP2, ElementHexS2, ElementHex2,
-                           ElementQuad2, ElementLineP2)
+                           ElementQuad2, ElementLineP2, ElementTriP0,
+                           ElementLineP0, ElementQuad1, ElementQuad0,
+                           ElementTetP1, ElementTetP0, ElementHex1,
+                           ElementHex0)
 
 
 class TestCompositeSplitting(TestCase):
@@ -178,3 +182,33 @@ class TestInterpolatorLine2(TestInterpolatorTet):
     mesh_type = MeshLine
     element_type = ElementLineP2
     nrefs = 5
+
+
+@pytest.mark.parametrize(
+    "mtype,bndmtype,e1,e2,e3",
+    [
+        (MeshTri, MeshLine, ElementTriP1(), ElementTriP0(), ElementLineP0()),
+        (MeshQuad, MeshLine, ElementQuad1(), ElementQuad0(), ElementLineP0()),
+        (MeshTet, MeshTri, ElementTetP1(), ElementTetP0(), ElementTriP0()),
+        (MeshHex, MeshQuad, ElementHex1(), ElementHex0(), ElementQuad0()),
+    ]
+)
+def test_trace(mtype, bndmtype, e1, e2, e3):
+
+    m = mtype()
+    m.refine(3)
+
+    # use the boundary where last coordinate is zero
+    basis = FacetBasis(m, e1,
+                       facets=m.facets_satisfying(lambda x: x[x.shape[0] - 1] == 0.0))
+    p, t, y = basis.trace(m.p[0], e2)
+
+    # drop the last coordinate to create trace mesh
+    nbasis = InteriorBasis(bndmtype(p[0:(p.shape[0] - 1)], t), e3)
+
+    @Functional
+    def integ(w):
+        return w['funy']
+
+    # integrate f(x) = x_1 over trace mesh
+    assert_almost_equal(integ.assemble(nbasis, funy=nbasis.interpolate(y)), .5)

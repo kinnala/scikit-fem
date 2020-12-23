@@ -5,6 +5,7 @@ from ...mesh.mesh3d import MeshHex
 
 
 class ElementHex1(ElementH1):
+
     nodal_dofs = 1
     dim = 3
     maxdeg = 3

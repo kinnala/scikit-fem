@@ -56,7 +56,8 @@ from .element_quad import (ElementQuad0, ElementQuad1, ElementQuad2,
 from .element_tet import (ElementTetP0, ElementTetP1, ElementTetP2,
                           ElementTetRT0, ElementTetN0, ElementTetMini,
                           ElementTetCR)
-from .element_hex import ElementHex1, ElementHex2, ElementHexS2  # noqa
+from .element_hex import (ElementHex0, ElementHex1, ElementHex2,
+                          ElementHexS2)  # noqa
 from .element_line import (ElementLineP0, ElementLineP1, ElementLineP2,
                            ElementLinePp, ElementLineHermite,
                            ElementLineMini)  # noqa
@@ -95,6 +96,7 @@ __all__ = [
     "ElementTetN0",
     "ElementTetMini",
     "ElementTetCR",
+    "ElementHex0",
     "ElementHex1",
     "ElementHex2",
     "ElementHexS2",

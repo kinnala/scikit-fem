@@ -117,7 +117,7 @@ class FacetBasis(Basis):
                              if self.mesh.dim() != 1 else np.array([0.]))
 
     def trace(self, x: ndarray, elem: Optional[Element] = None):
-        """Restrict solution to a boundary mesh.
+        """Restrict solution to a boundary/interface mesh.
 
         Parameters
         ----------
