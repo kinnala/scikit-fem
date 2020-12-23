@@ -115,3 +115,34 @@ class FacetBasis(Basis):
         return DiscreteField((np.abs(self.mapping.detDG(self.X, self.find))
                               ** (1. / (self.mesh.dim() - 1.)))
                              if self.mesh.dim() != 1 else np.array([0.]))
+
+    def trace(self, x: ndarray, elem: Optional[Element] = None):
+
+        from skfem.utils import project
+
+        if elem is None:  # use default element
+            from skfem.element import ElementTriP1
+            elem = ElementTriP1()
+
+        cls = type(self)
+        fbasis = cls(self.mesh,
+                     elem,
+                     facets=self.find,
+                     quadrature=(self.X, self.W))
+        I = fbasis.get_dofs(self.find).all()
+        if len(I) == 0:  # problem: no facet DOFs
+            # solution: take all interior DOFs
+            I = fbasis.dofs.interior_dofs[:, self.tind].flatten()
+        y = project(x, self, fbasis, I=I)
+
+        # build connectivity for lower dimensional mesh
+        ix = self.mesh.facets[:, self.find]
+        ixuniq = np.unique(ix)
+        b = np.zeros(np.max(ix) + 1, dtype=np.int64)
+        b[ixuniq] = np.arange(len(ixuniq), dtype=np.int64)
+
+        def create_mesh(p, t):
+            from skfem.mesh import MeshLine
+            return MeshLine(p[0], t)
+
+        return create_mesh(self.mesh.p[:, ixuniq], b[ix]), y
