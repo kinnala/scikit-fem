@@ -117,23 +117,29 @@ class FacetBasis(Basis):
                              if self.mesh.dim() != 1 else np.array([0.]))
 
     def trace(self, x: ndarray, elem: Optional[Element] = None):
+        """Restrict solution to a boundary mesh.
 
+        Parameters
+        ----------
+        x
+            The solution vector.
+        elem
+            If given, perform L2 projection onto the new element before
+            restriction.  L2 projection is performed on the boundary.
+
+        """
         from skfem.utils import project
 
-        if elem is None:  # use default element
-            from skfem.element import ElementTriP1
-            elem = ElementTriP1()
-
         cls = type(self)
-        fbasis = cls(self.mesh,
-                     elem,
-                     facets=self.find,
-                     quadrature=(self.X, self.W))
+        fbasis = self if elem is None else cls(self.mesh,
+                                               elem,
+                                               facets=self.find,
+                                               quadrature=(self.X, self.W))
         I = fbasis.get_dofs(self.find).all()
         if len(I) == 0:  # problem: no facet DOFs
             # solution: take all interior DOFs
             I = fbasis.dofs.interior_dofs[:, self.tind].flatten()
-        y = project(x, self, fbasis, I=I)
+        y = x[I] if elem is None else project(x, self, fbasis, I=I)
 
         # build connectivity for lower dimensional mesh
         ix = self.mesh.facets[:, self.find]
@@ -141,8 +147,4 @@ class FacetBasis(Basis):
         b = np.zeros(np.max(ix) + 1, dtype=np.int64)
         b[ixuniq] = np.arange(len(ixuniq), dtype=np.int64)
 
-        def create_mesh(p, t):
-            from skfem.mesh import MeshLine
-            return MeshLine(p[0], t)
-
-        return create_mesh(self.mesh.p[:, ixuniq], b[ix]), y
+        return self.mesh.p[:, ixuniq], b[ix], y
