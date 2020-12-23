@@ -127,6 +127,15 @@ class FacetBasis(Basis):
             If given, perform L2 projection onto the new element before
             restriction.  L2 projection is performed on the boundary.
 
+        Returns
+        -------
+        p
+            The nodes of the trace mesh.
+        t
+            The elements of the trace mesh.
+        y
+            The new (projected and) restricted solution vector.
+
         """
         from skfem.utils import project
 
