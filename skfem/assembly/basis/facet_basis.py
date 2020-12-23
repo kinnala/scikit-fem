@@ -108,15 +108,18 @@ class FacetBasis(Basis):
                 'h': self.mesh_parameters(),
                 'n': self.normals}
 
-    def global_coordinates(self) -> ndarray:
+    def global_coordinates(self) -> DiscreteField:
         return DiscreteField(self.mapping.G(self.X, find=self.find))
 
-    def mesh_parameters(self) -> ndarray:
+    def mesh_parameters(self) -> DiscreteField:
         return DiscreteField((np.abs(self.mapping.detDG(self.X, self.find))
                               ** (1. / (self.mesh.dim() - 1.)))
                              if self.mesh.dim() != 1 else np.array([0.]))
 
-    def trace(self, x: ndarray, elem: Optional[Element] = None):
+    def trace(self, x: ndarray,
+              elem: Optional[Element] = None) -> Tuple[ndarray,
+                                                       ndarray,
+                                                       ndarray]:
         """Restrict solution to a boundary/interface mesh.
 
         Parameters
