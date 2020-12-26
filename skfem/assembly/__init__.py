@@ -23,7 +23,9 @@ Mathematically the above forms are
 
 .. math::
 
-    a(u,v) = \int_\Omega u v \,\mathrm{d}x \quad \mathrm{and} \quad l(v) = \int_\Omega x^2v \,\mathrm{d}x.
+    a(u,v) = \int_\Omega u v \,\mathrm{d}x
+    \quad \mathrm{and} \quad
+    l(v) = \int_\Omega x^2v \,\mathrm{d}x.
 
 4. Assemble using :func:`~skfem.assembly.asm`.
 
