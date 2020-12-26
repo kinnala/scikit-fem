@@ -6,6 +6,9 @@ pass it to the constructor of :class:`~skfem.assembly.InteriorBasis` or
 :class:`~skfem.assembly.FacetBasis`.  See below for a list of supported
 elements.
 
+Choosing a finite element
+-------------------------
+
 Here are some general instructions for choosing an :class:`Element` class.
 Firstly, the naming of the element classes reflects their compatibility with
 the mesh types:
@@ -37,6 +40,9 @@ Thirdly, the different finite element spaces use different degrees-of-freedom.
 It is up to the user to decide whether the given boundary condition can or
 should be enforced strongly or weakly.  See :ref:`finddofs` for more
 information.
+
+List of elements
+----------------
 
 """
 
