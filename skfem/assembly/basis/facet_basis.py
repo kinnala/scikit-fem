@@ -116,7 +116,8 @@ class FacetBasis(Basis):
                               ** (1. / (self.mesh.dim() - 1.)))
                              if self.mesh.dim() != 1 else np.array([0.]))
 
-    def trace(self, x: ndarray,
+    def trace(self,
+              x: ndarray,
               elem: Optional[Element] = None) -> Tuple[ndarray,
                                                        ndarray,
                                                        ndarray]:
@@ -148,8 +149,10 @@ class FacetBasis(Basis):
                                                facets=self.find,
                                                quadrature=(self.X, self.W))
         I = fbasis.get_dofs(self.find).all()
-        if len(I) == 0:  # problem: no facet DOFs
-            # solution: take all interior DOFs
+        if len(I) == 0:  # special case: piecewise-constant elem
+            if fbasis.dofs.interior_dofs.shape[0] > 1:
+                # no one-to-one restriction: requires interpolation
+                raise NotImplementedError
             I = fbasis.dofs.interior_dofs[:, self.tind].flatten()
         y = x[I] if elem is None else project(x, self, fbasis, I=I)
 
