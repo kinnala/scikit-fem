@@ -149,10 +149,11 @@ class FacetBasis(Basis):
                                                facets=self.find,
                                                quadrature=(self.X, self.W))
         I = fbasis.get_dofs(self.find).all()
-        if len(I) == 0:  # special case: piecewise-constant elem
+        if len(I) == 0:  # special case: no facet DOFs
             if fbasis.dofs.interior_dofs.shape[0] > 1:
                 # no one-to-one restriction: requires interpolation
                 raise NotImplementedError
+            # special case: piecewise constant elem
             I = fbasis.dofs.interior_dofs[:, self.tind].flatten()
         y = x[I] if elem is None else project(x, self, fbasis, I=I)
 
