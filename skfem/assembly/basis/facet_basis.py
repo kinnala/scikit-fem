@@ -127,14 +127,14 @@ class FacetBasis(Basis):
               projection: Callable[[ndarray], ndarray],
               target_elem: Optional[Element] = None) -> Tuple[InteriorBasis,
                                                               ndarray]:
-        """Restrict solution to :math:`d-1` dimensional submesh.
+        """Restrict solution to :math:`d-1` dimensional trace mesh.
 
         The user must define how the boundary points are projected using the
         argument ``projection``.  For example,
 
         >>> projection = lambda p: p[0]
 
-        will keep only the `x`-coordinate.
+        will keep only the `x`-coordinate when initializing the trace mesh.
 
         Parameters
         ----------
@@ -188,7 +188,7 @@ class FacetBasis(Basis):
         if (type(target_elem), meshcls) not in TRACE_RESTRICT_MAP:
             raise Exception("The specified 'elem' not supported.")
         elemcls, target_meshcls = TRACE_RESTRICT_MAP[(type(target_elem),
-                                                      meshcls)]
+                                                      meshcls)]  # type: ignore
 
         fbasis = FacetBasis(self.mesh,
                             elemcls(),
