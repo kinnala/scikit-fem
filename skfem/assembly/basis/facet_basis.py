@@ -134,7 +134,7 @@ class FacetBasis(Basis):
 
         >>> projection = lambda p: p[0]
 
-        will drop the `y`-coordinate.
+        will keep only the `x`-coordinate.
 
         Parameters
         ----------

@@ -204,6 +204,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed: `MeshLine.refine` now correctly performs adaptive refinement.
 - Added: `Functional` now supports forms that evaluate to vectors or other
   tensors.
+- Added: `ElementHex0`, piecewise constant element for hexahedral meshes.
+- Added: `FacetBasis.trace` for restricting solutions to lower dimensional
+  meshes on boundaries or interfaces.
 
 ### [2.3.0] - 2020-11-24
 
