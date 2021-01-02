@@ -1,17 +1,17 @@
-from typing import Tuple, Optional, Callable
+from typing import Callable, Optional, Tuple
 
 import numpy as np
 from numpy import ndarray
-
-from skfem.element import (Element, DiscreteField, ElementLineP0,
-                           ElementLineP1, ElementLineP2, ElementTriP0,
-                           ElementTriP1, ElementTriP2, ElementTetP0,
-                           ElementTetP1, ElementTetP2, ElementQuad0,
-                           ElementQuad1, ElementQuad2, ElementHex0,
-                           ElementHex1, ElementHex2)
+from skfem.element import (DiscreteField, Element, ElementHex0, ElementHex1,
+                           ElementHex2, ElementLineP0, ElementLineP1,
+                           ElementLineP2, ElementQuad0, ElementQuad1,
+                           ElementQuad2, ElementTetP0, ElementTetP1,
+                           ElementTetP2, ElementTriP0, ElementTriP1,
+                           ElementTriP2)
 from skfem.mapping import Mapping
-from skfem.mesh import Mesh, MeshLine, MeshTri, MeshQuad, MeshTet, MeshHex
+from skfem.mesh import Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 from skfem.quadrature import get_quadrature
+
 from .basis import Basis
 from .interior_basis import InteriorBasis
 
