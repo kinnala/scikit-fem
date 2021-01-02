@@ -1,7 +1,8 @@
-from typing import Callable, Optional, Tuple
+from typing import Any, Callable, Dict, Optional, Tuple, Type
 
 import numpy as np
 from numpy import ndarray
+
 from skfem.element import (DiscreteField, Element, ElementHex0, ElementHex1,
                            ElementHex2, ElementLineP0, ElementLineP1,
                            ElementLineP2, ElementQuad0, ElementQuad1,
@@ -170,7 +171,7 @@ class FacetBasis(Basis):
         if target_elem is None:
             target_elem = DEFAULT_TARGET[meshcls]()
 
-        TRACE_RESTRICT_MAP = {
+        TRACE_RESTRICT_MAP: Dict[Tuple[Type[Element], Type[Mesh]], Any] = {
             (ElementLineP0, MeshTri): (ElementTriP0, MeshLine),
             (ElementLineP1, MeshTri): (ElementTriP1, MeshLine),
             (ElementLineP2, MeshTri): (ElementTriP2, MeshLine),
@@ -188,7 +189,7 @@ class FacetBasis(Basis):
         if (type(target_elem), meshcls) not in TRACE_RESTRICT_MAP:
             raise Exception("The specified 'elem' not supported.")
         elemcls, target_meshcls = TRACE_RESTRICT_MAP[(type(target_elem),
-                                                      meshcls)]  # type: ignore
+                                                      meshcls)]
 
         fbasis = FacetBasis(self.mesh,
                             elemcls(),
