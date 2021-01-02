@@ -1,4 +1,4 @@
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Callable
 
 import numpy as np
 from numpy import ndarray
@@ -124,7 +124,7 @@ class FacetBasis(Basis):
 
     def trace(self,
               x: ndarray,
-              projection,
+              projection: Callable[[ndarray], ndarray],
               target_elem: Optional[Element] = None) -> Tuple[InteriorBasis,
                                                               ndarray]:
         """Restrict solution to :math:`d-1` dimensional submesh.
