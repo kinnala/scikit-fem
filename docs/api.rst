@@ -51,7 +51,7 @@ Class: Basis
    :members: __init__
 
 .. autoclass:: skfem.assembly.FacetBasis
-   :members: __init__
+   :members: __init__, trace
 
 
 Class: Form

@@ -3,11 +3,17 @@ from typing import Tuple, Optional
 import numpy as np
 from numpy import ndarray
 
-from skfem.element import Element, DiscreteField
+from skfem.element import (Element, DiscreteField, ElementLineP0,
+                           ElementLineP1, ElementLineP2, ElementTriP0,
+                           ElementTriP1, ElementTriP2, ElementTetP0,
+                           ElementTetP1, ElementTetP2, ElementQuad0,
+                           ElementQuad1, ElementQuad2, ElementHex0,
+                           ElementHex1, ElementHex2)
 from skfem.mapping import Mapping
-from skfem.mesh import Mesh
+from skfem.mesh import Mesh, MeshLine, MeshTri, MeshQuad, MeshTet, MeshHex
 from skfem.quadrature import get_quadrature
 from .basis import Basis
+from .interior_basis import InteriorBasis
 
 
 class FacetBasis(Basis):
@@ -118,36 +124,76 @@ class FacetBasis(Basis):
 
     def trace(self,
               x: ndarray,
-              elem: Optional[Element] = None) -> Tuple[ndarray,
-                                                       ndarray,
-                                                       ndarray]:
-        """Restrict solution to a boundary/interface mesh.
+              projection,
+              target_elem: Optional[Element] = None) -> Tuple[InteriorBasis,
+                                                              ndarray]:
+        """Restrict solution to :math:`d-1` dimensional submesh.
+
+        The user must define how the boundary points are projected using the
+        argument ``projection``.  For example,
+
+        >>> projection = lambda p: p[0]
+
+        will drop the `y`-coordinate.
 
         Parameters
         ----------
         x
             The solution vector.
-        elem
-            If given, perform L2 projection onto the new element before
-            restriction.  L2 projection is performed on the boundary.
+        projection
+            A function defining the projection of the boundary points.  See
+            above for an example.
+        target_elem
+            Optional lower-dimensional finite element to project to.  If not
+            given, a piecewise constant element is used.
 
         Returns
         -------
-        p
-            The nodes of the trace mesh.
-        t
-            The elements of the trace mesh.
-        y
-            The new (projected and) restricted solution vector.
+        InteriorBasis
+            An object corresponding to the trace mesh.
+        ndarray
+            A projected solution vector defined on the trace mesh.
 
         """
         from skfem.utils import project
 
-        cls = type(self)
-        fbasis = self if elem is None else cls(self.mesh,
-                                               elem,
-                                               facets=self.find,
-                                               quadrature=(self.X, self.W))
+        DEFAULT_TARGET = {
+            MeshTri: ElementLineP0,
+            MeshQuad: ElementLineP0,
+            MeshTet: ElementTriP0,
+            MeshHex: ElementQuad0,
+        }
+
+        meshcls = type(self.mesh)
+        if meshcls not in DEFAULT_TARGET:
+            raise NotImplementedError("Mesh type not supported.")
+        if target_elem is None:
+            target_elem = DEFAULT_TARGET[meshcls]()
+
+        TRACE_RESTRICT_MAP = {
+            (ElementLineP0, MeshTri): (ElementTriP0, MeshLine),
+            (ElementLineP1, MeshTri): (ElementTriP1, MeshLine),
+            (ElementLineP2, MeshTri): (ElementTriP2, MeshLine),
+            (ElementLineP0, MeshQuad): (ElementQuad0, MeshLine),
+            (ElementLineP1, MeshQuad): (ElementQuad1, MeshLine),
+            (ElementLineP2, MeshQuad): (ElementQuad2, MeshLine),
+            (ElementTriP0, MeshTet): (ElementTetP0, MeshTri),
+            (ElementTriP1, MeshTet): (ElementTetP1, MeshTri),
+            (ElementTriP2, MeshTet): (ElementTetP2, MeshTri),
+            (ElementQuad0, MeshHex): (ElementHex0, MeshQuad),
+            (ElementQuad1, MeshHex): (ElementHex1, MeshQuad),
+            (ElementQuad2, MeshHex): (ElementHex2, MeshQuad),
+        }
+
+        if (type(target_elem), meshcls) not in TRACE_RESTRICT_MAP:
+            raise Exception("The specified 'elem' not supported.")
+        elemcls, target_meshcls = TRACE_RESTRICT_MAP[(type(target_elem),
+                                                      meshcls)]
+
+        fbasis = FacetBasis(self.mesh,
+                            elemcls(),
+                            facets=self.find,
+                            quadrature=(self.X, self.W))
         I = fbasis.get_dofs(self.find).all()
         if len(I) == 0:  # special case: no facet DOFs
             if fbasis.dofs.interior_dofs.shape[0] > 1:
@@ -155,7 +201,7 @@ class FacetBasis(Basis):
                 raise NotImplementedError
             # special case: piecewise constant elem
             I = fbasis.dofs.interior_dofs[:, self.tind].flatten()
-        y = x[I] if elem is None else project(x, self, fbasis, I=I)
+        y = project(x, self, fbasis, I=I)
 
         # build connectivity for lower dimensional mesh
         ix = self.mesh.facets[:, self.find]
@@ -163,4 +209,7 @@ class FacetBasis(Basis):
         b = np.zeros(np.max(ix) + 1, dtype=np.int64)
         b[ixuniq] = np.arange(len(ixuniq), dtype=np.int64)
 
-        return self.mesh.p[:, ixuniq], b[ix], y
+        return InteriorBasis(
+            target_meshcls(projection(self.mesh.p[:, ixuniq]), b[ix]),
+            target_elem
+        ), y

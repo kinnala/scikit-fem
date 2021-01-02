@@ -12,7 +12,7 @@ from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
                            ElementQuad2, ElementLineP2, ElementTriP0,
                            ElementLineP0, ElementQuad1, ElementQuad0,
                            ElementTetP1, ElementTetP0, ElementHex1,
-                           ElementHex0)
+                           ElementHex0, ElementLineP1)
 
 
 class TestCompositeSplitting(TestCase):
@@ -185,15 +185,23 @@ class TestInterpolatorLine2(TestInterpolatorTet):
 
 
 @pytest.mark.parametrize(
-    "mtype,bndmtype,e1,e2,e3",
+    "mtype,e1,e2",
     [
-        (MeshTri, MeshLine, ElementTriP1(), ElementTriP0(), ElementLineP0()),
-        (MeshQuad, MeshLine, ElementQuad1(), ElementQuad0(), ElementLineP0()),
-        (MeshTet, MeshTri, ElementTetP1(), ElementTetP0(), ElementTriP0()),
-        (MeshHex, MeshQuad, ElementHex1(), ElementHex0(), ElementQuad0()),
+        (MeshTri, ElementTriP1(), ElementLineP0()),
+        (MeshTri, ElementTriP1(), ElementLineP1()),
+        (MeshTri, ElementTriP2(), ElementLineP1()),
+        (MeshTri, ElementTriP2(), ElementLineP2()),
+        (MeshQuad, ElementQuad1(), ElementLineP0()),
+        (MeshQuad, ElementQuad1(), ElementLineP1()),
+        (MeshQuad, ElementQuad2(), ElementLineP2()),
+        (MeshTet, ElementTetP1(), ElementTriP0()),
+        (MeshTet, ElementTetP2(), ElementTriP2()),
+        (MeshHex, ElementHex1(), ElementQuad0()),
+        (MeshHex, ElementHex1(), ElementQuad1()),
+        (MeshHex, ElementHex2(), ElementQuad2()),
     ]
 )
-def test_trace(mtype, bndmtype, e1, e2, e3):
+def test_trace(mtype, e1, e2):
 
     m = mtype()
     m.refine(3)
@@ -201,14 +209,12 @@ def test_trace(mtype, bndmtype, e1, e2, e3):
     # use the boundary where last coordinate is zero
     basis = FacetBasis(m, e1,
                        facets=m.facets_satisfying(lambda x: x[x.shape[0] - 1] == 0.0))
-    p, t, y = basis.trace(m.p[0], e2)
-
-    # drop the last coordinate to create trace mesh
-    nbasis = InteriorBasis(bndmtype(p[0:(p.shape[0] - 1)], t), e3)
+    xfun = project(lambda x: x[0], basis_to=InteriorBasis(m, e1))
+    nbasis, y = basis.trace(xfun, lambda p: p[0:(p.shape[0] - 1)], target_elem=e2)
 
     @Functional
     def integ(w):
-        return w['funy']
+        return w.y
 
     # integrate f(x) = x_1 over trace mesh
-    assert_almost_equal(integ.assemble(nbasis, funy=nbasis.interpolate(y)), .5)
+    assert_almost_equal(integ.assemble(nbasis, y=nbasis.interpolate(y)), .5)
