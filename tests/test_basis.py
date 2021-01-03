@@ -191,6 +191,7 @@ class TestInterpolatorLine2(TestInterpolatorTet):
         (MeshTri, ElementTriP1(), ElementLineP1()),
         (MeshTri, ElementTriP2(), ElementLineP1()),
         (MeshTri, ElementTriP2(), ElementLineP2()),
+        (MeshTri, ElementTriP2(), None),
         (MeshQuad, ElementQuad1(), ElementLineP0()),
         (MeshQuad, ElementQuad1(), ElementLineP1()),
         (MeshQuad, ElementQuad2(), ElementLineP2()),
