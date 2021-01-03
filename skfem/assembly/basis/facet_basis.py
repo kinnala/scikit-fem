@@ -123,6 +123,33 @@ class FacetBasis(Basis):
                               ** (1. / (self.mesh.dim() - 1.)))
                              if self.mesh.dim() != 1 else np.array([0.]))
 
+    def _trace(self,
+               x: ndarray,
+               elem: Element) -> Tuple[ndarray, ndarray, ndarray]:
+        """Trace mesh reindexing and basis projection."""
+        from skfem.utils import project
+
+        fbasis = FacetBasis(self.mesh,
+                            elem,
+                            facets=self.find,
+                            quadrature=(self.X, self.W))
+        I = fbasis.get_dofs(self.find).all()
+        if len(I) == 0:  # special case: no facet DOFs
+            if fbasis.dofs.interior_dofs.shape[0] > 1:
+                # no one-to-one restriction: requires interpolation
+                raise NotImplementedError
+            # special case: piecewise constant elem
+            I = fbasis.dofs.interior_dofs[:, self.tind].flatten()
+        y = project(x, self, fbasis, I=I)
+
+        # build connectivity for lower dimensional mesh
+        ix = self.mesh.facets[:, self.find]
+        ixuniq = np.unique(ix)
+        b = np.zeros(np.max(ix) + 1, dtype=np.int64)
+        b[ixuniq] = np.arange(len(ixuniq), dtype=np.int64)
+
+        return self.mesh.p[:, ixuniq], b[ix], y
+
     def trace(self,
               x: ndarray,
               projection: Callable[[ndarray], ndarray],
@@ -156,8 +183,6 @@ class FacetBasis(Basis):
             A projected solution vector defined on the trace mesh.
 
         """
-        from skfem.utils import project
-
         DEFAULT_TARGET = {
             MeshTri: ElementLineP0,
             MeshQuad: ElementLineP0,
@@ -191,26 +216,9 @@ class FacetBasis(Basis):
         elemcls, target_meshcls = TRACE_RESTRICT_MAP[(type(target_elem),
                                                       meshcls)]
 
-        fbasis = FacetBasis(self.mesh,
-                            elemcls(),
-                            facets=self.find,
-                            quadrature=(self.X, self.W))
-        I = fbasis.get_dofs(self.find).all()
-        if len(I) == 0:  # special case: no facet DOFs
-            if fbasis.dofs.interior_dofs.shape[0] > 1:
-                # no one-to-one restriction: requires interpolation
-                raise NotImplementedError
-            # special case: piecewise constant elem
-            I = fbasis.dofs.interior_dofs[:, self.tind].flatten()
-        y = project(x, self, fbasis, I=I)
+        p, t, y = self._trace(x, elemcls())
 
-        # build connectivity for lower dimensional mesh
-        ix = self.mesh.facets[:, self.find]
-        ixuniq = np.unique(ix)
-        b = np.zeros(np.max(ix) + 1, dtype=np.int64)
-        b[ixuniq] = np.arange(len(ixuniq), dtype=np.int64)
-
-        return InteriorBasis(
-            target_meshcls(projection(self.mesh.p[:, ixuniq]), b[ix]),
-            target_elem
-        ), y
+        return (
+            InteriorBasis(target_meshcls(projection(p), t), target_elem),
+            y
+        )
