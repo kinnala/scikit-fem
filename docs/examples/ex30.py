@@ -111,11 +111,9 @@ pressure = solve(K, -dilatation0,
 
 velocity = flow(pressure)
 
-basis['psi'] = InteriorBasis(mesh, ElementQuad2())
+basis['psi'] = InteriorBasis(mesh, ElementQuad2(), intorder=3)
 psi = np.zeros(A.shape[0])
-vorticity = asm(rot, basis['psi'],
-                w=[basis['psi'].interpolate(velocity[i::2])
-                   for i in range(2)])
+vorticity = asm(rot, basis['psi'], w=basis['u'].interpolate(velocity))
 psi = solve(*condense(asm(laplace, basis['psi']), vorticity, D=basis['psi'].find_dofs()))
 psi0 = basis['psi'].interpolator(psi)(np.zeros((2, 1)))[0]
 

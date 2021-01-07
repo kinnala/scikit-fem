@@ -207,6 +207,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added: `ElementHex0`, piecewise constant element for hexahedral meshes.
 - Added: `FacetBasis.trace` for restricting solutions to lower dimensional
   meshes on boundaries or interfaces.
+- Deprecated: List and tuple keyword argument types to `asm`.
 
 ### [2.3.0] - 2020-11-24
 
