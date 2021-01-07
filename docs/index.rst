@@ -26,8 +26,8 @@ Table of contents
 
    self
    overview
-   elements
    forms
    bcs
+   elements
    listofexamples
    api

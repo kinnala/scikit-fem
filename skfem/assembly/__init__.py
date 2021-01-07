@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
-r"""This module contains rest of the tools for performing the finite element
-assembly. The basic workflow of assembly is the following:
+r"""This module performs the finite element assembly. The basic workflow is the
+following:
 
 1. Initialize :class:`~skfem.mesh.Mesh` and :class:`~skfem.element.Element`.
 
@@ -8,17 +7,25 @@ assembly. The basic workflow of assembly is the following:
 >>> m = MeshTri()
 >>> e = ElementTriP1()
 
-2. Create :class:`~skfem.assembly.InteriorBasis` and/or
+2. Create :class:`~skfem.assembly.InteriorBasis` or
    :class:`~skfem.assembly.FacetBasis` objects.
 
 >>> basis = InteriorBasis(m, e)
 
 3. Define the forms using :class:`~skfem.assembly.BilinearForm`,
-   :class:`~skfem.assembly.LinearForm`, and/or
+   :class:`~skfem.assembly.LinearForm`, or
    :class:`~skfem.assembly.Functional`.
 
 >>> form_a = BilinearForm(lambda u, v, w: u * v)
 >>> form_l = LinearForm(lambda v, w: w.x[0] ** 2 * v)
+
+Mathematically the above forms are
+
+.. math::
+
+    a(u,v) = \int_\Omega u v \,\mathrm{d}x
+    \quad \mathrm{and} \quad
+    l(v) = \int_\Omega x^2v \,\mathrm{d}x.
 
 4. Assemble using :func:`~skfem.assembly.asm`.
 
@@ -31,21 +38,6 @@ matrix([[0.08333333, 0.04166667, 0.04166667, 0.        ],
         [0.        , 0.04166667, 0.04166667, 0.08333333]])
 >>> b
 array([0.0162037 , 0.15046296, 0.06712963, 0.09953704])
-
-The above example assembles the matrix corresponding
-to the bilinear form
-
-.. math::
-
-    a(u,v) = \int_0^1 \int_0^1 u(x,y)v(x,y) \,\mathrm{d}x \,\mathrm{d}y
-
-and the vector corresponding to the linear form
-
-.. math::
-
-    l(v) = \int_0^1 \int_0^1 x^2v(x,y) \,\mathrm{d}x \,\mathrm{d}y
-
-using piecewise-linear basis functions.
 
 """
 
