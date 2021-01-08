@@ -196,7 +196,7 @@ class FacetBasis(Basis):
         if target_elem is None:
             target_elem = DEFAULT_TARGET[meshcls]()
 
-        TRACE_RESTRICT_MAP: Dict[Tuple[Type[Element], Type[Mesh]], Any] = {
+        ELEMENT_MAP: Dict[Tuple[Type[Element], Type[Mesh]], Type[Element]] = {
             (ElementLineP0, MeshTri): ElementTriP0,
             (ElementLineP1, MeshTri): ElementTriP1,
             (ElementLineP2, MeshTri): ElementTriP2,
@@ -211,9 +211,9 @@ class FacetBasis(Basis):
             (ElementQuad2, MeshHex): ElementHex2,
         }
 
-        if (type(target_elem), meshcls) not in TRACE_RESTRICT_MAP:
+        if (type(target_elem), meshcls) not in ELEMENT_MAP:
             raise Exception("The specified 'elem' not supported.")
-        elemcls = TRACE_RESTRICT_MAP[(type(target_elem), meshcls)]
+        elemcls = ELEMENT_MAP[(type(target_elem), meshcls)]
         target_meshcls = type(target_elem).mesh_type
 
         p, t, y = self._trace(x, elemcls())
