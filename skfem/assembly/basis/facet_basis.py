@@ -10,7 +10,7 @@ from skfem.element import (DiscreteField, Element, ElementHex0, ElementHex1,
                            ElementTetP2, ElementTriP0, ElementTriP1,
                            ElementTriP2)
 from skfem.mapping import Mapping
-from skfem.mesh import Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
+from skfem.mesh import Mesh, MeshHex, MeshQuad, MeshTet, MeshTri
 from skfem.quadrature import get_quadrature
 
 from .basis import Basis
