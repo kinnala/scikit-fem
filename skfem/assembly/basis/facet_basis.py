@@ -197,24 +197,24 @@ class FacetBasis(Basis):
             target_elem = DEFAULT_TARGET[meshcls]()
 
         TRACE_RESTRICT_MAP: Dict[Tuple[Type[Element], Type[Mesh]], Any] = {
-            (ElementLineP0, MeshTri): (ElementTriP0, MeshLine),
-            (ElementLineP1, MeshTri): (ElementTriP1, MeshLine),
-            (ElementLineP2, MeshTri): (ElementTriP2, MeshLine),
-            (ElementLineP0, MeshQuad): (ElementQuad0, MeshLine),
-            (ElementLineP1, MeshQuad): (ElementQuad1, MeshLine),
-            (ElementLineP2, MeshQuad): (ElementQuad2, MeshLine),
-            (ElementTriP0, MeshTet): (ElementTetP0, MeshTri),
-            (ElementTriP1, MeshTet): (ElementTetP1, MeshTri),
-            (ElementTriP2, MeshTet): (ElementTetP2, MeshTri),
-            (ElementQuad0, MeshHex): (ElementHex0, MeshQuad),
-            (ElementQuad1, MeshHex): (ElementHex1, MeshQuad),
-            (ElementQuad2, MeshHex): (ElementHex2, MeshQuad),
+            (ElementLineP0, MeshTri): ElementTriP0,
+            (ElementLineP1, MeshTri): ElementTriP1,
+            (ElementLineP2, MeshTri): ElementTriP2,
+            (ElementLineP0, MeshQuad): ElementQuad0,
+            (ElementLineP1, MeshQuad): ElementQuad1,
+            (ElementLineP2, MeshQuad): ElementQuad2,
+            (ElementTriP0, MeshTet): ElementTetP0,
+            (ElementTriP1, MeshTet): ElementTetP1,
+            (ElementTriP2, MeshTet): ElementTetP2,
+            (ElementQuad0, MeshHex): ElementHex0,
+            (ElementQuad1, MeshHex): ElementHex1,
+            (ElementQuad2, MeshHex): ElementHex2,
         }
 
         if (type(target_elem), meshcls) not in TRACE_RESTRICT_MAP:
             raise Exception("The specified 'elem' not supported.")
-        elemcls, target_meshcls = TRACE_RESTRICT_MAP[(type(target_elem),
-                                                      meshcls)]
+        elemcls = TRACE_RESTRICT_MAP[(type(target_elem), meshcls)]
+        target_meshcls = type(target_elem).mesh_type
 
         p, t, y = self._trace(x, elemcls())
 
