@@ -434,6 +434,13 @@ class Mesh:
             self.boundaries = {}
         self.boundaries[name] = self.facets_satisfying(test, boundaries_only)
 
+    def _reix(self, ix: ndarray) -> Tuple[ndarray, ndarray]:
+        """Connect ``self.p`` based on the indices ``ix``."""
+        ixuniq = np.unique(ix)
+        t = np.zeros(np.max(ix) + 1, dtype=np.int64)
+        t[ixuniq] = np.arange(len(ixuniq), dtype=np.int64)
+        return self.p[:, ixuniq], t[ix]
+
     def copy(self):
         from copy import deepcopy
         return deepcopy(self)

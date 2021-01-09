@@ -123,10 +123,10 @@ class FacetBasis(Basis):
                               ** (1. / (self.mesh.dim() - 1.)))
                              if self.mesh.dim() != 1 else np.array([0.]))
 
-    def _trace(self,
-               x: ndarray,
-               elem: Element) -> Tuple[ndarray, ndarray, ndarray]:
-        """Trace mesh reindexing and basis projection."""
+    def _trace_project(self,
+                       x: ndarray,
+                       elem: Element) -> ndarray:
+        """Trace mesh basis projection."""
         from skfem.utils import project
 
         fbasis = FacetBasis(self.mesh,
@@ -140,15 +140,7 @@ class FacetBasis(Basis):
                 raise NotImplementedError
             # special case: piecewise constant elem
             I = fbasis.dofs.interior_dofs[:, self.tind].flatten()
-        y = project(x, self, fbasis, I=I)
-
-        # build connectivity for lower dimensional mesh
-        ix = self.mesh.facets[:, self.find]
-        ixuniq = np.unique(ix)
-        b = np.zeros(np.max(ix) + 1, dtype=np.int64)
-        b[ixuniq] = np.arange(len(ixuniq), dtype=np.int64)
-
-        return self.mesh.p[:, ixuniq], b[ix], y
+        return project(x, self, fbasis, I=I)
 
     def trace(self,
               x: ndarray,
@@ -157,12 +149,12 @@ class FacetBasis(Basis):
                                                               ndarray]:
         """Restrict solution to :math:`d-1` dimensional trace mesh.
 
-        The user must define how the boundary points are projected using the
-        argument ``projection``.  For example,
+        The function ``projection`` defines how the boundary points are
+        projected to :math:`d-1` dimensional space.  For example,
 
         >>> projection = lambda p: p[0]
 
-        will keep only the `x`-coordinate when initializing the trace mesh.
+        will keep only the `x`-coordinate in the trace mesh.
 
         Parameters
         ----------
@@ -216,9 +208,9 @@ class FacetBasis(Basis):
         elemcls = ELEMENT_MAP[(type(target_elem), meshcls)]
         target_meshcls = type(target_elem).mesh_type
 
-        p, t, y = self._trace(x, elemcls())
+        p, t = self.mesh._reix(self.mesh.facets[:, self.find])
 
         return (
             InteriorBasis(target_meshcls(projection(p), t), target_elem),
-            y
+            self._trace_project(x, elemcls())
         )
