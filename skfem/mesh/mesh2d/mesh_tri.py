@@ -45,8 +45,8 @@ class MeshTri(Mesh2D):
                  t: Optional[ndarray] = None,
                  boundaries: Optional[Dict[str, ndarray]] = None,
                  subdomains: Optional[Dict[str, ndarray]] = None,
-                 validate: Optional[bool] = True,
-                 sort_t: Optional[bool] = True):
+                 validate: bool = True,
+                 sort_t: bool = True):
         r"""Initialize a triangular mesh.
 
         If no arguments are given, initializes a mesh with the following

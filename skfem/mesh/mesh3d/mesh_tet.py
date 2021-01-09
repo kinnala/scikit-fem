@@ -51,7 +51,7 @@ class MeshTet(Mesh3D):
                  t: Optional[ndarray] = None,
                  boundaries: Optional[Dict[str, ndarray]] = None,
                  subdomains: Optional[Dict[str, ndarray]] = None,
-                 validate=True):
+                 validate: bool = True):
         """Initialize a tetrahedral mesh.
 
         Parameters
