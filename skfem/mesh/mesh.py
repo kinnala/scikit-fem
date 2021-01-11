@@ -125,7 +125,7 @@ class Mesh:
         raise NotImplementedError("Adaptive refine not implemented "
                                   "for this mesh type!")
 
-    def refine(self, arg: Optional[Union[int, ndarray]] = None) -> MeshType:
+    def refine(self: MeshType, arg: Optional[Union[int, ndarray]] = None) -> MeshType:
         """Refine the mesh.
 
         Parameters
@@ -164,7 +164,7 @@ class Mesh:
                 self.boundaries[name] = (facets[:, self.boundaries[name]]
                                          .flatten())
 
-    def remove_elements(self, element_indices: ndarray) -> 'Mesh':
+    def remove_elements(self: MeshType, element_indices: ndarray) -> MeshType:
         """Construct new mesh with elements removed
         based on their indices.
 
@@ -193,7 +193,7 @@ class Mesh:
         meshclass = type(self)
         return meshclass(newp, newt.astype(np.intp))
 
-    def prune(self, element_indices: ndarray) -> MeshType:
+    def prune(self: MeshType, element_indices: ndarray) -> MeshType:
         """Construct new mesh with elements removed
         based on their indices.
 
@@ -207,7 +207,7 @@ class Mesh:
         meshclass = type(self)
         return meshclass(p, t)
 
-    def scale(self, scale: Union[float, DimTuple]) -> MeshType:
+    def scale(self: MeshType, scale: Union[float, DimTuple]) -> MeshType:
         """Scale the mesh.
 
         Parameters
@@ -225,7 +225,7 @@ class Mesh:
                 self.p[itr, :] *= scale
         return self
 
-    def translate(self, vec: DimTuple) -> MeshType:
+    def translate(self: MeshType, vec: DimTuple) -> MeshType:
         """Translate the mesh.
 
         Parameters
@@ -302,7 +302,7 @@ class Mesh:
         return to_file(self, filename, point_data, **kwargs)
 
     @classmethod
-    def from_basis(cls: Type[MeshType], basis):
+    def from_basis(cls: Type[MeshType], basis) -> MeshType:
         """Initialize a high-order mesh from :class:`skfem.assembly.Basis`."""
         if not isinstance(basis.mesh, cls):
             raise ValueError("Mesh and Basis must be compatible.")
