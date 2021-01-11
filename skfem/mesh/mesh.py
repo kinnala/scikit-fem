@@ -205,6 +205,9 @@ class Mesh:
         """
         p, t = self._reix(np.delete(self.t, element_indices, axis=1))
         meshcls = type(self)
+        if self.subdomains is not None or self.boundaries is not None:
+            warnings.warn("Named subdomains and boundaries are not "
+                          "persisted when removing elements.")
         return meshcls(p, t)
 
     def scale(self: MeshType, scale: Union[float, DimTuple]) -> MeshType:
