@@ -179,6 +179,8 @@ class Mesh:
             A new mesh object with the requested elements removed.
 
         """
+        warnings.warn("This method is deprecated in favour of prune", 
+                      DeprecationWarning)
         keep = np.setdiff1d(np.arange(self.t.shape[1]), element_indices)
         newt = self.t[:, keep]
         ptix = np.unique(newt)
@@ -190,6 +192,20 @@ class Mesh:
             raise Exception("The new mesh contains no points!")
         meshclass = type(self)
         return meshclass(newp, newt.astype(np.intp))
+
+    def prune(self, element_indices: ndarray) -> MeshType:
+        """Construct new mesh with elements removed
+        based on their indices.
+
+        Parameters
+        ----------
+        element_indices
+            List of element indices to remove.
+        """
+        keep = np.setdiff1d(np.arange(self.t.shape[1]), element_indices)
+        p, t = self._reix(self.t[:, keep])
+        meshclass = type(self)
+        return meshclass(p, t)
 
     def scale(self, scale: Union[float, DimTuple]) -> MeshType:
         """Scale the mesh.

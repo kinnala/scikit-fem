@@ -11,10 +11,10 @@ class MeshTests(unittest.TestCase):
     that are not tested elsewhere."""
 
     def runTest(self):
-        # Mesh.remove_elements
+        # Mesh.prune
         m = MeshTri()
         m.refine()
-        M = m.remove_elements(np.array([0]))
+        M = m.prune(np.array([0]))
         self.assertEqual(M.t.shape[1], 7)
 
         # Mesh.define_boundary
