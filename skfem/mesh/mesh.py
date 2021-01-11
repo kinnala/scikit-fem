@@ -165,8 +165,9 @@ class Mesh:
                                          .flatten())
 
     def remove_elements(self: MeshType, element_indices: ndarray) -> MeshType:
-        """Construct new mesh with elements removed
-        based on their indices.
+        """Deprecated in favor of :meth:`~skfem.mesh.Mesh.remove`.
+
+        Construct new mesh with elements removed based on their indices.
 
         Parameters
         ----------
@@ -193,8 +194,8 @@ class Mesh:
         meshcls = type(self)
         return meshcls(newp, newt.astype(np.intp))
 
-    def prune(self: MeshType, element_indices: ndarray) -> MeshType:
-        """Construct new mesh with elements removed based on their indices.
+    def remove(self: MeshType, element_indices: ndarray) -> MeshType:
+        """Construct a new mesh by removing elements.
 
         Parameters
         ----------
