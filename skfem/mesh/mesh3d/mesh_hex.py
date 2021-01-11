@@ -49,7 +49,7 @@ class MeshHex(Mesh3D):
                  t: Optional[ndarray] = None,
                  boundaries: Optional[Dict[str, ndarray]] = None,
                  subdomains: Optional[Dict[str, ndarray]] = None,
-                 validate=True):
+                 validate: bool = True):
         """Initialise a hexahedral mesh.
 
         If `t` is provided, order of vertices in each element should match the

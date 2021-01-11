@@ -111,7 +111,7 @@ class BackwardFacingStep:
                       for variable, e in self.element.items()}
         self.basis['inlet'] = FacetBasis(self.mesh, self.element['u'],
                                          facets=self.mesh.boundaries['inlet'])
-        self.basis['psi'] = InteriorBasis(self.mesh, ElementTriP2())
+        self.basis['psi'] = InteriorBasis(self.mesh, ElementTriP2(), intorder=3)
         self.D = np.concatenate([b.all() for b in self.basis['u'].find_dofs().values()])
 
         A = asm(vector_laplace, self.basis['u'])
@@ -144,8 +144,7 @@ class BackwardFacingStep:
         A = asm(laplace, self.basis['psi'])
         psi = np.zeros(self.basis['psi'].N)
         vorticity = asm(rot, self.basis['psi'],
-                        w=[self.basis['psi'].interpolate(velocity[i::2])
-                           for i in range(2)])
+                        w=self.basis['u'].interpolate(velocity))
         psi = solve(*condense(A, vorticity, D=self.basis['psi'].find_dofs()['floor'].all()))
         return psi
 

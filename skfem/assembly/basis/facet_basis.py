@@ -1,13 +1,20 @@
-from typing import Tuple, Optional
+from typing import Callable, Dict, Optional, Tuple, Type
 
 import numpy as np
 from numpy import ndarray
 
-from skfem.element import Element, DiscreteField
+from skfem.element import (DiscreteField, Element, ElementHex0, ElementHex1,
+                           ElementHex2, ElementLineP0, ElementLineP1,
+                           ElementLineP2, ElementQuad0, ElementQuad1,
+                           ElementQuad2, ElementTetP0, ElementTetP1,
+                           ElementTetP2, ElementTriP0, ElementTriP1,
+                           ElementTriP2)
 from skfem.mapping import Mapping
-from skfem.mesh import Mesh
+from skfem.mesh import Mesh, MeshHex, MeshQuad, MeshTet, MeshTri
 from skfem.quadrature import get_quadrature
+
 from .basis import Basis
+from .interior_basis import InteriorBasis
 
 
 class FacetBasis(Basis):
@@ -108,10 +115,102 @@ class FacetBasis(Basis):
                 'h': self.mesh_parameters(),
                 'n': self.normals}
 
-    def global_coordinates(self) -> ndarray:
+    def global_coordinates(self) -> DiscreteField:
         return DiscreteField(self.mapping.G(self.X, find=self.find))
 
-    def mesh_parameters(self) -> ndarray:
+    def mesh_parameters(self) -> DiscreteField:
         return DiscreteField((np.abs(self.mapping.detDG(self.X, self.find))
                               ** (1. / (self.mesh.dim() - 1.)))
                              if self.mesh.dim() != 1 else np.array([0.]))
+
+    def _trace_project(self,
+                       x: ndarray,
+                       elem: Element) -> ndarray:
+        """Trace mesh basis projection."""
+        from skfem.utils import project
+
+        fbasis = FacetBasis(self.mesh,
+                            elem,
+                            facets=self.find,
+                            quadrature=(self.X, self.W))
+        I = fbasis.get_dofs(self.find).all()
+        if len(I) == 0:  # special case: no facet DOFs
+            if fbasis.dofs.interior_dofs.shape[0] > 1:
+                # no one-to-one restriction: requires interpolation
+                raise NotImplementedError
+            # special case: piecewise constant elem
+            I = fbasis.dofs.interior_dofs[:, self.tind].flatten()
+        return project(x, self, fbasis, I=I)
+
+    def trace(self,
+              x: ndarray,
+              projection: Callable[[ndarray], ndarray],
+              target_elem: Optional[Element] = None) -> Tuple[InteriorBasis,
+                                                              ndarray]:
+        """Restrict solution to :math:`d-1` dimensional trace mesh.
+
+        The function ``projection`` defines how the boundary points are
+        projected to :math:`d-1` dimensional space.  For example,
+
+        >>> projection = lambda p: p[0]
+
+        will keep only the `x`-coordinate in the trace mesh.
+
+        Parameters
+        ----------
+        x
+            The solution vector.
+        projection
+            A function defining the projection of the boundary points.  See
+            above for an example.
+        target_elem
+            Optional lower-dimensional finite element to project to.  If not
+            given, a piecewise constant element is used.
+
+        Returns
+        -------
+        InteriorBasis
+            An object corresponding to the trace mesh.
+        ndarray
+            A projected solution vector defined on the trace mesh.
+
+        """
+        DEFAULT_TARGET = {
+            MeshTri: ElementLineP0,
+            MeshQuad: ElementLineP0,
+            MeshTet: ElementTriP0,
+            MeshHex: ElementQuad0,
+        }
+
+        meshcls = type(self.mesh)
+        if meshcls not in DEFAULT_TARGET:
+            raise NotImplementedError("Mesh type not supported.")
+        if target_elem is None:
+            target_elem = DEFAULT_TARGET[meshcls]()
+
+        ELEMENT_MAP: Dict[Tuple[Type[Element], Type[Mesh]], Type[Element]] = {
+            (ElementLineP0, MeshTri): ElementTriP0,
+            (ElementLineP1, MeshTri): ElementTriP1,
+            (ElementLineP2, MeshTri): ElementTriP2,
+            (ElementLineP0, MeshQuad): ElementQuad0,
+            (ElementLineP1, MeshQuad): ElementQuad1,
+            (ElementLineP2, MeshQuad): ElementQuad2,
+            (ElementTriP0, MeshTet): ElementTetP0,
+            (ElementTriP1, MeshTet): ElementTetP1,
+            (ElementTriP2, MeshTet): ElementTetP2,
+            (ElementQuad0, MeshHex): ElementHex0,
+            (ElementQuad1, MeshHex): ElementHex1,
+            (ElementQuad2, MeshHex): ElementHex2,
+        }
+
+        if (type(target_elem), meshcls) not in ELEMENT_MAP:
+            raise Exception("The specified 'elem' not supported.")
+        elemcls = ELEMENT_MAP[(type(target_elem), meshcls)]
+        target_meshcls = type(target_elem).mesh_type
+
+        p, t = self.mesh._reix(self.mesh.facets[:, self.find])
+
+        return (
+            InteriorBasis(target_meshcls(projection(p), t), target_elem),
+            self._trace_project(x, elemcls())
+        )

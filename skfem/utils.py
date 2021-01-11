@@ -296,10 +296,10 @@ def adaptive_theta(est, theta=0.5, max=None):
 
 
 def project(fun,
-            basis_from: Basis = None,
-            basis_to: Basis = None,
-            diff: int = None,
-            I: ndarray = None,
+            basis_from: Optional[Basis] = None,
+            basis_to: Optional[Basis] = None,
+            diff: Optional[int] = None,
+            I: Optional[ndarray] = None,
             expand: bool = False) -> ndarray:
     """Projection from one basis to another.
 
