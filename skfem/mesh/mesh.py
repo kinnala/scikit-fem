@@ -24,11 +24,11 @@ class Mesh:
     Attributes
     ----------
     p
-        The vertices of the mesh (dim x Nvertices). Each column corresponds to
-        a point.
+        The vertices of the mesh (`dim x Nvertices`). Each column corresponds
+        to a point.
     t
-        The element connectivity (dim x Nelements). Each column corresponds to
-        a element and contains column indices to `self.p`.
+        The element connectivity (`dim x Nelements`). Each column corresponds
+        to a element and contains column indices to ``self.p``.
     subdomains
         Named subsets of elements. Empty if not loaded from an external format.
     boundaries
