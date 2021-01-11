@@ -74,7 +74,7 @@ class MeshHex(Mesh3D):
         boundaries
             Named subsets of boundary facets.
         validate
-            If `True`, perform mesh validity checks.
+            If ``True``, perform mesh validity checks.
 
         """
         if p is None and t is None:

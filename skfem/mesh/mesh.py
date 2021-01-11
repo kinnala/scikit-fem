@@ -132,9 +132,9 @@ class Mesh:
         Parameters
         ----------
         arg
-            Multiple variations: If None, refine all elements. If integer,
-            perform multiple uniform refinements. If array of element
-            indices, perform adaptive refinement.
+            Multiple variations: If ``None``, refine all elements. If integer,
+            perform multiple uniform refinements. If array of element indices,
+            perform adaptive refinement.
 
         """
         if arg is None:
@@ -375,10 +375,10 @@ class Mesh:
         Parameters
         ----------
         test
-            A function which returns True for the facet midpoints that are to
-            be included in the return set.
+            A function which returns ``True`` for the facet midpoints that are
+            to be included in the return set.
         boundaries_only
-            If True, include only boundary facets.
+            If ``True``, include only boundary facets.
 
         """
         midp = [np.sum(self.p[itr, self.facets], axis=0) / self.facets.shape[0]
