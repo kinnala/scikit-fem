@@ -125,7 +125,8 @@ class Mesh:
         raise NotImplementedError("Adaptive refine not implemented "
                                   "for this mesh type!")
 
-    def refine(self: MeshType, arg: Optional[Union[int, ndarray]] = None) -> MeshType:
+    def refine(self: MeshType,
+               arg: Optional[Union[int, ndarray]] = None) -> MeshType:
         """Refine the mesh.
 
         Parameters
@@ -179,7 +180,7 @@ class Mesh:
             A new mesh object with the requested elements removed.
 
         """
-        warnings.warn("This method is deprecated in favour of prune", 
+        warnings.warn("This method is deprecated in favour of prune",
                       DeprecationWarning)
         keep = np.setdiff1d(np.arange(self.t.shape[1]), element_indices)
         newt = self.t[:, keep]
