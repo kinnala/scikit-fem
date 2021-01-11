@@ -191,22 +191,21 @@ class Mesh:
         newp = self.p[:, ptix]
         if newp.shape[1] == 0.0:
             raise Exception("The new mesh contains no points!")
-        meshclass = type(self)
-        return meshclass(newp, newt.astype(np.intp))
+        meshcls = type(self)
+        return meshcls(newp, newt.astype(np.intp))
 
     def prune(self: MeshType, element_indices: ndarray) -> MeshType:
-        """Construct new mesh with elements removed
-        based on their indices.
+        """Construct new mesh with elements removed based on their indices.
 
         Parameters
         ----------
         element_indices
             List of element indices to remove.
+
         """
-        keep = np.setdiff1d(np.arange(self.t.shape[1]), element_indices)
-        p, t = self._reix(self.t[:, keep])
-        meshclass = type(self)
-        return meshclass(p, t)
+        p, t = self._reix(np.delete(self.t, element_indices, axis=1))
+        meshcls = type(self)
+        return meshcls(p, t)
 
     def scale(self: MeshType, scale: Union[float, DimTuple]) -> MeshType:
         """Scale the mesh.
