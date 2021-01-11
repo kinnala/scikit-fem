@@ -96,7 +96,7 @@ class Basis:
 
         >>> from skfem import MeshTri
         >>> m = MeshTri()
-        >>> m.refine()
+        >>> m = m.refine()
         >>> m.facets_satisfying(lambda x: x[0] == 0)
         array([1, 5])
 
