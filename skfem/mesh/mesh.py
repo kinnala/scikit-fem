@@ -125,7 +125,7 @@ class Mesh:
         raise NotImplementedError("Adaptive refine not implemented "
                                   "for this mesh type!")
 
-    def refine(self, arg: Optional[Union[int, ndarray]] = None):
+    def refine(self, arg: Optional[Union[int, ndarray]] = None) -> MeshType:
         """Refine the mesh.
 
         Parameters
@@ -147,6 +147,7 @@ class Mesh:
             self._adaptive_refine(arg)
         else:
             raise NotImplementedError("The parameter type not supported.")
+        return self
 
     def _fix_boundaries(self, facets: ndarray):
         """This should be called after each refine to update the indices in
@@ -190,7 +191,7 @@ class Mesh:
         meshclass = type(self)
         return meshclass(newp, newt.astype(np.intp))
 
-    def scale(self, scale: Union[float, DimTuple]) -> None:
+    def scale(self, scale: Union[float, DimTuple]) -> MeshType:
         """Scale the mesh.
 
         Parameters
@@ -206,8 +207,9 @@ class Mesh:
                 self.p[itr, :] *= scale[itr]
             else:
                 self.p[itr, :] *= scale
+        return self
 
-    def translate(self, vec: DimTuple) -> None:
+    def translate(self, vec: DimTuple) -> MeshType:
         """Translate the mesh.
 
         Parameters
@@ -219,6 +221,7 @@ class Mesh:
         """
         for itr in range(int(self.dim())):
             self.p[itr, :] += vec[itr]
+        return self
 
     def _validate(self):
         """Perform mesh validity checks."""
