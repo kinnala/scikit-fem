@@ -60,8 +60,7 @@ corresponding to the Poisson equation :math:`-\Delta u = 1`.
 
    >>> from skfem import *
    >>> from skfem.models.poisson import laplace, unit_load
-   >>> m = MeshTri()
-   >>> m.refine(2)
+   >>> m = MeshTri().refine(2)
    >>> basis = InteriorBasis(m, ElementTriP1())
    >>> A = laplace.assemble(basis)
    >>> b = unit_load.assemble(basis)
@@ -105,8 +104,7 @@ the latter with an example.
 .. doctest::
 
    >>> from skfem import *
-   >>> m = MeshTri()
-   >>> m.refine(2)
+   >>> m = MeshTri().refine(2)
    >>> basis = InteriorBasis(m, ElementTriP2())
 
 We first find the set of facets belonging to the left boundary.
