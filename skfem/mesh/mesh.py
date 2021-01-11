@@ -165,34 +165,10 @@ class Mesh:
                                          .flatten())
 
     def remove_elements(self: MeshType, element_indices: ndarray) -> MeshType:
-        """Deprecated in favor of :meth:`~skfem.mesh.Mesh.remove`.
-
-        Construct new mesh with elements removed based on their indices.
-
-        Parameters
-        ----------
-        element_indices
-            List of element indices to remove.
-
-        Returns
-        -------
-        Mesh
-            A new mesh object with the requested elements removed.
-
-        """
-        warnings.warn("This method is deprecated in favour of prune",
+        """Deprecated in favor of :meth:`~skfem.mesh.Mesh.remove`."""
+        warnings.warn("This method is deprecated in favour of remove",
                       DeprecationWarning)
-        keep = np.setdiff1d(np.arange(self.t.shape[1]), element_indices)
-        newt = self.t[:, keep]
-        ptix = np.unique(newt)
-        reverse = np.zeros(self.p.shape[1])
-        reverse[ptix] = np.arange(len(ptix))
-        newt = reverse[newt]
-        newp = self.p[:, ptix]
-        if newp.shape[1] == 0.0:
-            raise Exception("The new mesh contains no points!")
-        meshcls = type(self)
-        return meshcls(newp, newt.astype(np.intp))
+        return self.remove(element_indices)
 
     def remove(self: MeshType, element_indices: ndarray) -> MeshType:
         """Construct a new mesh by removing elements.
