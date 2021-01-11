@@ -459,10 +459,10 @@ class Mesh:
         p = p[:, ixa]
         t = ixb[t]
         meshcls = type(self)
-        if (self.subdomains is not None
-            or self.boundaries is not None
-            or other.subdomains is not None
-            or other.boundaries is not None):
+        if self.subdomains is not None\
+           or self.boundaries is not None\
+           or other.subdomains is not None\
+           or other.boundaries is not None:
             warnings.warn("Named subdomains and boundaries are not "
                           "persisted when joining meshes.")
         return meshcls(p, t)
