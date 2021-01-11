@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Tuple
 
 import numpy as np
 from numpy import ndarray
@@ -20,7 +20,7 @@ class Mesh3D(Mesh):
     facets = np.array([], dtype=np.int64)
     t2f = np.array([], dtype=np.int64)
 
-    def expand_facets(self, facets: ndarray):
+    def _expand_facets(self, facets: ndarray) -> Tuple[ndarray, ndarray]:
         """Find vertices and edges corresponding to given facets."""
         vertices = np.unique(self.facets[:, facets].flatten())
         edge_candidates = self.t2e[:, self.f2t[0, facets]].flatten()

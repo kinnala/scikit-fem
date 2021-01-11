@@ -259,7 +259,7 @@ class Mesh:
                    "not belonging to any element.")
             raise Exception(msg)
 
-    def expand_facets(self, facets: ndarray):
+    def _expand_facets(self, facets: ndarray) -> Tuple[ndarray, ndarray]:
         """Find vertices and edges corresponding to given facets."""
         vertices = np.unique(self.facets[:, facets].flatten())
         edges = np.array([], dtype=np.int64)

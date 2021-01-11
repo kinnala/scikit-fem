@@ -253,7 +253,7 @@ class Dofs:
 
         """
         if self.element.nodal_dofs > 0 or self.element.edge_dofs > 0:
-            nodal_ix, edge_ix = self.topo.expand_facets(facets)
+            nodal_ix, edge_ix = self.topo._expand_facets(facets)
 
         nodal_ix = (np.empty((0,), dtype=np.int64)
                     if self.element.nodal_dofs == 0
