@@ -458,17 +458,14 @@ class Mesh:
                                   return_index=True, return_inverse=True)
         p = p[:, ixa]
         t = ixb[t]
-        boundaries = {
-            **(self.boundaries if self.boundaries is not None else {}),
-            **(other.boundaries if other.boundaries is not None else {}),
-        } if self.boundaries is not None or other.boundaries is not None\
-            else None
-        subdomains = {
-            **(self.subdomains if self.subdomains is not None else {}),
-            **(other.subdomains if other.subdomains is not None else {}),
-        } if self.subdomains is not None or other.subdomains is not None\
-            else None
-        return type(self)(p, t, boundaries, subdomains)
+        meshcls = type(self)
+        if (self.subdomains is not None
+            or self.boundaries is not None
+            or other.subdomains is not None
+            or other.boundaries is not None):
+            warnings.warn("Named subdomains and boundaries are not "
+                          "persisted when joining meshes.")
+        return meshcls(p, t)
 
     @staticmethod
     def strip_extra_coordinates(p: ndarray) -> ndarray:
