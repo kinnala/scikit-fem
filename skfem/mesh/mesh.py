@@ -28,12 +28,15 @@ class Mesh:
         to a point.
     t
         The element connectivity (`dim x Nelements`). Each column corresponds
-        to a element and contains column indices to ``self.p``.
+        to an element and contains column indices to ``self.p``.
     subdomains
-        Named subsets of elements. Empty if not loaded from an external format.
+        Named subsets of elements. Can be provided to the constructor or loaded
+        from an external format. Otherwise the value is ``None``.
     boundaries
-        Named subsets of boundary facets. Empty if not loaded from an external
-        format or defined via :meth:`~skfem.mesh.Mesh.define_boundary`.
+        Named subsets of boundary facets. Can be provided to the constructor as
+        a keyword argument, loaded from an external format or defined via
+        :meth:`~skfem.mesh.Mesh.define_boundary`. Otherwise the value is
+        ``None``.
 
     """
 
