@@ -42,8 +42,8 @@ class Mesh3D(Mesh):
         Parameters
         ----------
         test
-            Evaluates to 1 or True for edge midpoints of the edges belonging to
-            the output set.
+            Evaluates to 1 or ``True`` for edge midpoints of the edges
+            belonging to the output set.
 
         """
         return np.nonzero(test(self.p[:, self.edges].mean(1)))[0]

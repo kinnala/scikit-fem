@@ -63,7 +63,7 @@ class MeshQuad(Mesh2D):
         p
             The points of the mesh (2 x Nvertices).
         t
-            The element connectivity (4 x Nelems), i.e. indices to `self.p`.
+            The element connectivity (4 x Nelems), i.e. indices to ``self.p``.
             These should be in counter-clockwise order.
         subdomains
             Named subsets of elements.

@@ -118,7 +118,7 @@ class MeshLine(Mesh):
         Parameters
         ----------
         test : lambda function (1 param)
-            Evaluates to 1 or True for nodes belonging
+            Evaluates to 1 or ``True`` for nodes belonging
             to the output set.
 
         """

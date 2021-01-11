@@ -395,8 +395,8 @@ class Mesh:
         Parameters
         ----------
         test
-            A function which returns True for the element midpoints that are to
-            be included in the return set.
+            A function which returns ``True`` for the element midpoints that
+            are to be included in the return set.
 
         """
         midp = [np.sum(self.p[itr, self.t], axis=0) / self.t.shape[0]
@@ -443,10 +443,10 @@ class Mesh:
         name
             Name of the boundary.
         test
-            A function which returns True for facet midpoints belonging to the
-            boundary.
+            A function which returns ``True`` for facet midpoints belonging to
+            the boundary.
         boundaries_only
-            If True, include only facets on the boundary of the mesh.
+            If ``True``, include only facets on the boundary of the mesh.
 
         """
         if self.boundaries is None:

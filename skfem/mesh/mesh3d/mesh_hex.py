@@ -18,19 +18,19 @@ class MeshHex(Mesh3D):
     Attributes
     ----------
     facets
-        Each column contains four column indices to `self.p` (4 x Nfacets).
+        Each column contains four column indices to ``self.p`` (4 x Nfacets).
     f2t
-        Each column contains a pair of column indices to `self.t`
+        Each column contains a pair of column indices to ``self.t``
         or -1 on the second row if the corresponding
         facet is located on the boundary (2 x Nfacets).
     t2f
-        Each column contains four indices to `self.facets` (6 x Nelements).
+        Each column contains four indices to ``self.facets`` (6 x Nelements).
     edges
         Each column corresponds to an edge and contains two indices to
-        `self.p` (2 x Nedges).
+        ``self.p`` (2 x Nedges).
     t2e
         Each column contains twelve column indices of
-        `self.edges` (12 x Nelements).
+        ``self.edges`` (12 x Nelements).
 
     """
     refdom: str = "hex"

@@ -59,7 +59,7 @@ class MeshTet(Mesh3D):
         p
             The points of the mesh (3 x Nvertices).
         t
-            The element connectivity (6 x Nelems), i.e. indices to `self.p`.
+            The element connectivity (6 x Nelems), i.e. indices to ``self.p``.
         subdomains
             Named subsets of elements.
         boundaries
