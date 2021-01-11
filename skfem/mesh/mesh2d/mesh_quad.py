@@ -42,7 +42,7 @@ class MeshQuad(Mesh2D):
                  t: Optional[ndarray] = None,
                  boundaries: Optional[Dict[str, ndarray]] = None,
                  subdomains: Optional[Dict[str, ndarray]] = None,
-                 validate: Optional[bool] = True):
+                 validate: bool = True):
         """Initialize a quadrilateral mesh.
 
         If no arguments are given, initializes a mesh with the following
