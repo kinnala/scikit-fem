@@ -4,6 +4,7 @@ from typing import Dict, Optional, Tuple, Type, TypeVar, Union, Callable
 import numpy as np
 from numpy import ndarray
 
+
 MeshType = TypeVar('MeshType', bound='Mesh')
 DimTuple = Union[Tuple[float],
                  Tuple[float, float],
@@ -364,7 +365,7 @@ class Mesh:
 
         """
         midp = [np.sum(self.p[itr, self.facets], axis=0) / self.facets.shape[0]
-                for itr in range(self.p.shape[0])]
+                for itr in range(self.dim())]
         facets = np.nonzero(test(np.array(midp)))[0]
         if boundaries_only:
             facets = np.intersect1d(facets, self.boundary_facets())
@@ -382,7 +383,7 @@ class Mesh:
 
         """
         midp = [np.sum(self.p[itr, self.t], axis=0) / self.t.shape[0]
-                for itr in range(self.p.shape[0])]
+                for itr in range(self.dim())]
         return np.nonzero(test(np.array(midp)))[0]
 
     @classmethod
