@@ -220,9 +220,9 @@ class Mesh:
         """
         for itr in range(int(self.dim())):
             if isinstance(scale, tuple):
-                self.p[itr, :] *= scale[itr]
+                self.p[itr] *= scale[itr]
             else:
-                self.p[itr, :] *= scale
+                self.p[itr] *= scale
         return self
 
     def translate(self: MeshType, vec: DimTuple) -> MeshType:
@@ -236,7 +236,7 @@ class Mesh:
 
         """
         for itr in range(int(self.dim())):
-            self.p[itr, :] += vec[itr]
+            self.p[itr] += vec[itr]
         return self
 
     def _validate(self):
@@ -336,11 +336,11 @@ class Mesh:
 
     def boundary_facets(self) -> ndarray:
         """Return an array of boundary facet indices."""
-        return np.nonzero(self.f2t[1, :] == -1)[0]
+        return np.nonzero(self.f2t[1] == -1)[0]
 
     def interior_facets(self) -> ndarray:
         """Return an array of interior facet indices."""
-        return np.nonzero(self.f2t[1, :] >= 0)[0]
+        return np.nonzero(self.f2t[1] >= 0)[0]
 
     def element_finder(self, mapping=None) -> Callable[[ndarray], ndarray]:
         """Return a function, which returns element
