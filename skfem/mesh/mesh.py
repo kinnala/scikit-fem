@@ -151,13 +151,12 @@ class Mesh:
         return self
 
     def _fix_boundaries(self, facets: ndarray):
-        """This should be called after each refine to update the indices in
-        self.boundaries.
+        """This is called after refine to update ``self.boundaries``.
 
         Parameters
         ----------
         facets
-            An array of integers of size no-splitted-elems x no-facets.
+            An array of integers of size `no-splitted-elems x no-facets`.
 
         """
         if hasattr(self, "boundaries") and self.boundaries is not None:
