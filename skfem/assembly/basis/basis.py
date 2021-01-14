@@ -95,7 +95,7 @@ class Basis:
         Facets can be queried from :class:`~skfem.mesh.Mesh` objects:
 
         >>> from skfem import MeshTri
-        >>> m = MeshTri().refine()
+        >>> m = MeshTri().refined()
         >>> m.facets_satisfying(lambda x: x[0] == 0)
         array([1, 5])
 
