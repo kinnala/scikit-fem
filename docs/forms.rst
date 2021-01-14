@@ -173,7 +173,7 @@ The previous solution :math:`u_k` must be provided to
 
 .. doctest::
 
-   >>> m = MeshTri().refine(3)
+   >>> m = MeshTri().refined(3)
    >>> basis = InteriorBasis(m, ElementTriP1())
    >>> b = asm(unit_load, basis)
    >>> x = 0. * b.copy()

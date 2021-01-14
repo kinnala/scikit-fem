@@ -12,7 +12,7 @@ class MeshTests(unittest.TestCase):
 
     def runTest(self):
         # Mesh.remove
-        m = MeshTri().refine()
+        m = MeshTri().refined()
         M = m.remove(np.array([0]))
         self.assertEqual(M.t.shape[1], 7)
 

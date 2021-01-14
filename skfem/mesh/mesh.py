@@ -130,7 +130,7 @@ class Mesh:
                                   "for this mesh type!")
 
     def refine(self: MeshType,
-               arg: Optional[Union[int, ndarray]] = None) -> MeshType:
+               arg: Optional[Union[int, ndarray]] = None):
         """Refine the mesh.
 
         Parameters
@@ -152,7 +152,22 @@ class Mesh:
             self._adaptive_refine(arg)
         else:
             raise NotImplementedError("The parameter type not supported.")
-        return self
+
+    def refined(self: MeshType,
+                arg: Optional[Union[int, ndarray]] = None) -> MeshType:
+        """Return a refined mesh.
+
+        Parameters
+        ----------
+        arg
+            Multiple variations: If ``None``, refine all elements. If integer,
+            perform multiple uniform refinements. If array of element indices,
+            perform adaptive refinement.
+
+        """
+        nmesh = self.copy()
+        nmesh.refine(arg)
+        return nmesh
 
     def _fix_boundaries(self, facets: ndarray):
         """This is called after refine to update ``self.boundaries``.
@@ -190,7 +205,7 @@ class Mesh:
                           "persisted when removing elements.")
         return meshcls(p, t)
 
-    def scale(self: MeshType, scale: Union[float, DimTuple]) -> MeshType:
+    def scale(self: MeshType, scale: Union[float, DimTuple]):
         """Scale the mesh.
 
         Parameters
@@ -206,9 +221,23 @@ class Mesh:
                 self.p[itr] *= scale[itr]
             else:
                 self.p[itr] *= scale
-        return self
 
-    def translate(self: MeshType, vec: DimTuple) -> MeshType:
+    def scaled(self: MeshType, scale: Union[float, DimTuple]) -> MeshType:
+        """Return a new mesh with scaled dimensions.
+
+        Parameters
+        ----------
+        scale
+            Scale each dimension by this factor. If a single float is provided,
+            same scaling is used for all dimensions. Otherwise, provide a
+            tuple which has same size as the mesh dimension.
+
+        """
+        nmesh = self.copy()
+        nmesh.scale(scale)
+        return nmesh
+
+    def translate(self: MeshType, vec: DimTuple):
         """Translate the mesh.
 
         Parameters
@@ -220,7 +249,20 @@ class Mesh:
         """
         for itr in range(int(self.dim())):
             self.p[itr] += vec[itr]
-        return self
+
+    def translated(self: MeshType, vec: DimTuple) -> MeshType:
+        """Return a new translated mesh.
+
+        Parameters
+        ----------
+        vec
+            Translate the mesh by a vector. Must have same size as the mesh
+            dimension.
+
+        """
+        nmesh = self.copy()
+        nmesh.translate(vec)
+        return nmesh
 
     def _validate(self):
         """Perform mesh validity checks."""
