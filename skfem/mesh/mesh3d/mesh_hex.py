@@ -354,7 +354,7 @@ class MeshHex(Mesh3D):
         mesh = meshio.Mesh(self.p.T, cells, point_data, cell_data)
         meshio.write(filename, mesh)
 
-    def mapping(self):
+    def _mapping(self):
         from skfem.mapping import MappingIsoparametric
         from skfem.element import ElementHex1, ElementQuad1
         return MappingIsoparametric(self, ElementHex1(), ElementQuad1())

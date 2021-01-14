@@ -296,7 +296,7 @@ class MeshQuad(Mesh2D):
                        newt,
                        validate=False)
 
-    def mapping(self):
+    def _mapping(self):
         from skfem.mapping import MappingIsoparametric
         from skfem.element import ElementQuad1, ElementLineP1
         return MappingIsoparametric(self, ElementQuad1(), ElementLineP1())

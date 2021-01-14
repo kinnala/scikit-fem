@@ -26,7 +26,7 @@ class Basis:
 
     def __init__(self, mesh, elem, mapping=None, quadrature=None):
 
-        self.mapping = mesh.mapping() if mapping is None else mapping
+        self.mapping = mesh._mapping() if mapping is None else mapping
 
         self.dofs = Dofs(mesh, elem)
 

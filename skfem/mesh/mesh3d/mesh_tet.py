@@ -411,6 +411,6 @@ class MeshTet(Mesh3D):
         edgelenmat = np.vstack(tuple(edgelen(i) for i in range(6)))
         return np.max(np.max(edgelenmat, axis=0) / np.min(edgelenmat, axis=0))
 
-    def mapping(self):
+    def _mapping(self):
         from skfem.mapping import MappingAffine
         return MappingAffine(self)

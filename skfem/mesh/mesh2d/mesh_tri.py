@@ -459,7 +459,7 @@ class MeshTri(Mesh2D):
 
         self._build_mappings()
 
-    def mapping(self):
+    def _mapping(self):
         from skfem.mapping import MappingAffine
         return MappingAffine(self)
 

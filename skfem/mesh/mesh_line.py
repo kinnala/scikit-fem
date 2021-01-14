@@ -164,7 +164,7 @@ class MeshLine(Mesh):
         return np.max(np.abs(self.p[0, self.t[1, :]]
                              - self.p[0, self.t[0, :]]))
 
-    def mapping(self):
+    def _mapping(self):
         from skfem.mapping import MappingAffine
         return MappingAffine(self)
 

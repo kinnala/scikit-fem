@@ -115,7 +115,7 @@ class Mesh:
         """Return the spatial dimension of the mesh."""
         return int(self.p.shape[0])
 
-    def mapping(self):
+    def _mapping(self):
         """Default local-to-global mapping for the mesh."""
         raise NotImplementedError("Default mapping not implemented!")
 
