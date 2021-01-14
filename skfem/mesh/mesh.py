@@ -131,16 +131,9 @@ class Mesh:
 
     def refine(self: MeshType,
                arg: Optional[Union[int, ndarray]] = None):
-        """Refine the mesh.
-
-        Parameters
-        ----------
-        arg
-            Multiple variations: If ``None``, refine all elements. If integer,
-            perform multiple uniform refinements. If array of element indices,
-            perform adaptive refinement.
-
-        """
+        """Deprecated in favor of :meth:`~skfem.mesh.Mesh.refined`."""
+        warnings.warn("This method is deprecated in favour of refined",
+                      DeprecationWarning)
         if arg is None:
             self._uniform_refine()
         elif isinstance(arg, int):
@@ -206,16 +199,9 @@ class Mesh:
         return meshcls(p, t)
 
     def scale(self: MeshType, scale: Union[float, DimTuple]):
-        """Scale the mesh.
-
-        Parameters
-        ----------
-        scale
-            Scale each dimension by this factor. If a single float is provided,
-            same scaling is used for all dimensions. Otherwise, provide a
-            tuple which has same size as the mesh dimension.
-
-        """
+        """Deprecated in favor of :meth:`~skfem.mesh.Mesh.scaled`."""
+        warnings.warn("This method is deprecated in favour of scaled",
+                      DeprecationWarning)
         for itr in range(int(self.dim())):
             if isinstance(scale, tuple):
                 self.p[itr] *= scale[itr]
@@ -238,15 +224,9 @@ class Mesh:
         return nmesh
 
     def translate(self: MeshType, vec: DimTuple):
-        """Translate the mesh.
-
-        Parameters
-        ----------
-        vec
-            Translate the mesh by a vector. Must have same size as the mesh
-            dimension.
-
-        """
+        """Deprecated in favor of :meth:`~skfem.mesh.Mesh.translated`."""
+        warnings.warn("This method is deprecated in favour of translated",
+                      DeprecationWarning)
         for itr in range(int(self.dim())):
             self.p[itr] += vec[itr]
 
