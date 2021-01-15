@@ -59,13 +59,13 @@ class MeshTet(Mesh3D):
         p
             The points of the mesh (3 x Nvertices).
         t
-            The element connectivity (6 x Nelems), i.e. indices to `self.p`.
+            The element connectivity (6 x Nelems), i.e. indices to ``self.p``.
         subdomains
             Named subsets of elements.
         boundaries
             Named subsets of boundary facets.
         validate
-            If `True`, perform mesh validity checks.
+            If ``True``, perform mesh validity checks.
 
         """
         if p is None and t is None:
@@ -411,6 +411,6 @@ class MeshTet(Mesh3D):
         edgelenmat = np.vstack(tuple(edgelen(i) for i in range(6)))
         return np.max(np.max(edgelenmat, axis=0) / np.min(edgelenmat, axis=0))
 
-    def mapping(self):
+    def _mapping(self):
         from skfem.mapping import MappingAffine
         return MappingAffine(self)

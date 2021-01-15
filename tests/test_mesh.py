@@ -11,9 +11,8 @@ class MeshTests(unittest.TestCase):
     that are not tested elsewhere."""
 
     def runTest(self):
-        # Mesh.remove_elements
-        m = MeshTri()
-        m.refine()
+        # Mesh.remove
+        m = MeshTri().refined()
         M = m.remove_elements(np.array([0]))
         self.assertEqual(M.t.shape[1], 7)
 
@@ -179,12 +178,9 @@ class TestMeshAddition(unittest.TestCase):
         m = MeshTri()
         M = MeshTri()
         M.translate((1.0, 0.0))
-        M.define_boundary('top', lambda x: x[1] == 1.0)
         mesh = m + M
         self.assertTrue(mesh.p.shape[1] == 6)
         self.assertTrue(mesh.t.shape[1] == 4)
-        self.assertTrue(mesh.subdomains is None)
-        self.assertTrue('top' in mesh.boundaries)
 
 
 class TestMeshQuadSplit(unittest.TestCase):

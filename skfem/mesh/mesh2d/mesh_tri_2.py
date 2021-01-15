@@ -38,7 +38,7 @@ class MeshTri2(MeshTri):
             self._mesh.p = doflocs
             self._mesh.t = t
 
-    def mapping(self):
+    def _mapping(self):
         from skfem.mapping import MappingIsoparametric
         return MappingIsoparametric(self._mesh, self._elem)
 

@@ -18,19 +18,19 @@ class MeshHex(Mesh3D):
     Attributes
     ----------
     facets
-        Each column contains four column indices to `self.p` (4 x Nfacets).
+        Each column contains four column indices to ``self.p`` (4 x Nfacets).
     f2t
-        Each column contains a pair of column indices to `self.t`
+        Each column contains a pair of column indices to ``self.t``
         or -1 on the second row if the corresponding
         facet is located on the boundary (2 x Nfacets).
     t2f
-        Each column contains four indices to `self.facets` (6 x Nelements).
+        Each column contains four indices to ``self.facets`` (6 x Nelements).
     edges
         Each column corresponds to an edge and contains two indices to
-        `self.p` (2 x Nedges).
+        ``self.p`` (2 x Nedges).
     t2e
         Each column contains twelve column indices of
-        `self.edges` (12 x Nelements).
+        ``self.edges`` (12 x Nelements).
 
     """
     refdom: str = "hex"
@@ -74,7 +74,7 @@ class MeshHex(Mesh3D):
         boundaries
             Named subsets of boundary facets.
         validate
-            If `True`, perform mesh validity checks.
+            If ``True``, perform mesh validity checks.
 
         """
         if p is None and t is None:
@@ -354,7 +354,7 @@ class MeshHex(Mesh3D):
         mesh = meshio.Mesh(self.p.T, cells, point_data, cell_data)
         meshio.write(filename, mesh)
 
-    def mapping(self):
+    def _mapping(self):
         from skfem.mapping import MappingIsoparametric
         from skfem.element import ElementHex1, ElementQuad1
         return MappingIsoparametric(self, ElementHex1(), ElementQuad1())

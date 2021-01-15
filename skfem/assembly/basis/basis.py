@@ -26,7 +26,7 @@ class Basis:
 
     def __init__(self, mesh, elem, mapping=None, quadrature=None):
 
-        self.mapping = mesh.mapping() if mapping is None else mapping
+        self.mapping = mesh._mapping() if mapping is None else mapping
 
         self.dofs = Dofs(mesh, elem)
 
@@ -95,8 +95,7 @@ class Basis:
         Facets can be queried from :class:`~skfem.mesh.Mesh` objects:
 
         >>> from skfem import MeshTri
-        >>> m = MeshTri()
-        >>> m.refine()
+        >>> m = MeshTri().refined()
         >>> m.facets_satisfying(lambda x: x[0] == 0)
         array([1, 5])
 

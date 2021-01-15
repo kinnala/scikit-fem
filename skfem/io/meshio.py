@@ -58,15 +58,8 @@ def from_meshio(m, force_mesh_type=None):
         meshio_type, mesh_type = (force_mesh_type,
                                   MESH_TYPE_MAPPING[force_mesh_type])
 
-    def strip_extra_coordinates(p):
-        if meshio_type == "line":
-            return p[:, :1]
-        if meshio_type in ("quad", "triangle", "triangle6", "quad9"):
-            return p[:, :2]
-        return p
-
     # create p and t
-    p = np.ascontiguousarray(strip_extra_coordinates(m.points).T)
+    p = np.ascontiguousarray(mesh_type.strip_extra_coordinates(m.points).T)
     t = np.ascontiguousarray(cells[meshio_type].T)
 
     # reorder t if needed

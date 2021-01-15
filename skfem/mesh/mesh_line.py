@@ -41,7 +41,7 @@ class MeshLine(Mesh):
         boundaries
             Named subsets of boundary facets.
         validate
-            If `True`, perform mesh validity checks.
+            If ``True``, perform mesh validity checks.
 
         """
         if p is None:
@@ -118,7 +118,7 @@ class MeshLine(Mesh):
         Parameters
         ----------
         test : lambda function (1 param)
-            Evaluates to 1 or True for nodes belonging
+            Evaluates to 1 or ``True`` for nodes belonging
             to the output set.
 
         """
@@ -164,7 +164,7 @@ class MeshLine(Mesh):
         return np.max(np.abs(self.p[0, self.t[1, :]]
                              - self.p[0, self.t[0, :]]))
 
-    def mapping(self):
+    def _mapping(self):
         from skfem.mapping import MappingAffine
         return MappingAffine(self)
 

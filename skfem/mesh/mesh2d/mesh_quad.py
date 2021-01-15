@@ -63,14 +63,14 @@ class MeshQuad(Mesh2D):
         p
             The points of the mesh (2 x Nvertices).
         t
-            The element connectivity (4 x Nelems), i.e. indices to `self.p`.
+            The element connectivity (4 x Nelems), i.e. indices to ``self.p``.
             These should be in counter-clockwise order.
         subdomains
             Named subsets of elements.
         boundaries
             Named subsets of boundary facets.
         validate
-            If `True`, perform mesh validity checks.
+            If ``True``, perform mesh validity checks.
 
         """
         if p is None and t is None:
@@ -296,7 +296,7 @@ class MeshQuad(Mesh2D):
                        newt,
                        validate=False)
 
-    def mapping(self):
+    def _mapping(self):
         from skfem.mapping import MappingIsoparametric
         from skfem.element import ElementQuad1, ElementLineP1
         return MappingIsoparametric(self, ElementQuad1(), ElementLineP1())

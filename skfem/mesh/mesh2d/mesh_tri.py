@@ -68,15 +68,15 @@ class MeshTri(Mesh2D):
             An array containing the points of the mesh (2 x Nvertices).
         t
             An array containing the element connectivity (3 x Nelems), i.e.
-            indices to `self.p`.
+            indices to ``self.p``.
         subdomains
             Named subsets of elements.
         boundaries
             Named subsets of boundary facets.
         validate
-            If `True`, run mesh validity checks.
+            If ``True``, run mesh validity checks.
         sort_t
-            If `True`, sort the element connectivity matrix before building
+            If ``True``, sort the element connectivity matrix before building
             mappings.
 
         """
@@ -459,7 +459,7 @@ class MeshTri(Mesh2D):
 
         self._build_mappings()
 
-    def mapping(self):
+    def _mapping(self):
         from skfem.mapping import MappingAffine
         return MappingAffine(self)
 

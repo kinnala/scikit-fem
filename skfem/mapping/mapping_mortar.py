@@ -95,11 +95,11 @@ class MappingMortar(Mapping):
         normals = normal[:, None].repeat(t.shape[1], axis=1)
 
         # initialize mappings (for orienting)
-        map_super = m_super.mapping()
-        map_m1 = m1.mapping()
-        map_m2 = m2.mapping()
-        map_mesh1 = mesh1.mapping()
-        map_mesh2 = mesh2.mapping()
+        map_super = m_super._mapping()
+        map_m1 = m1._mapping()
+        map_m2 = m2._mapping()
+        map_mesh1 = mesh1._mapping()
+        map_mesh2 = mesh2._mapping()
 
         # matching of elements in the supermesh and the helper meshes
         mps = map_super.F(np.array([[.5]]))
@@ -132,11 +132,11 @@ class MappingMortar(Mapping):
         normals = normal[:, None].repeat(t.shape[1], axis=1)
 
         # initialize mappings (for orienting)
-        map_super = m_super.mapping()
-        map_m1 = m1.mapping()
-        map_m2 = m2.mapping()
-        map_mesh1 = mesh1.mapping()
-        map_mesh2 = mesh2.mapping()
+        map_super = m_super._mapping()
+        map_m1 = m1._mapping()
+        map_m2 = m2._mapping()
+        map_mesh1 = mesh1._mapping()
+        map_mesh2 = mesh2._mapping()
 
         # matching of elements in the supermesh and the helper meshes
         mps = map_super.F(np.array([[.5]]))

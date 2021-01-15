@@ -201,21 +201,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
-- Fixed: `MeshLine.refine` now correctly performs adaptive refinement.
+- Deprecated: List and tuple keyword argument types to `asm`.
+- Deprecated: `Mesh2D.mirror` in favor of the more general `Mesh.mirrored`.
+- Deprecated: `Mesh.refine`, `Mesh.scale` and `Mesh.translate` in favor of
+  `Mesh.refined`, `Mesh.scaled` and `Mesh.translated`.
+- Added: `Mesh.refined`, `Mesh.scaled`, and `Mesh.translated`. The new methods
+  return a copy instead of modifying `self`.
+- Added: `Mesh.mirrored` for mirroring a mesh using a normal and a point.
 - Added: `Functional` now supports forms that evaluate to vectors or other
   tensors.
 - Added: `ElementHex0`, piecewise constant element for hexahedral meshes.
-- Added: `FacetBasis.trace` for restricting solutions to lower dimensional
-  meshes on boundaries or interfaces.
-- Deprecated: List and tuple keyword argument types to `asm`.
+- Added: `FacetBasis.trace` for restricting existing solutions to lower
+  dimensional meshes on boundaries or interfaces.
+- Fixed: `MeshLine.refined` now correctly performs adaptive refinement of
+  one-dimensional meshes.
 
 ### [2.3.0] - 2020-11-24
 
-- Fixed: `ElementQuad0` was not compatible with `FacetBasis`.
 - Added: `ElementLineP0`, one-dimensional piecewise constant element.
 - Added: `skfem.helpers.curl` now calculates the rotated gradient for
   two-dimensional elements.
 - Added: `MeshTet.init_ball` for meshing a ball.
+- Fixed: `ElementQuad0` was not compatible with `FacetBasis`.
 
 ### [2.2.3] - 2020-10-16
 
@@ -231,15 +238,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### [2.2.0] - 2020-10-14
 
-- Fixed: Fix `Mesh.validate` for unsigned `Mesh.t`.
+- Deprecated: `L2_projection` will be replaced by `project`.
+- Deprecated: `derivative` will be replaced by `project`.
 - Added: `MeshTet.element_finder` and `MeshLine.element_finder` for using
   `InteriorBasis.interpolator`.
 - Added: `ElementTriCR`, the nonconforming Crouzeix-Raviart element for Stokes flow.
 - Added: `ElementTetCR`, tetrahedral nonconforming Crouzeix-Raviart element.
 - Added: `ElementTriHermite`, an extension of `ElementLineHermite` to triangular
   meshes.
-- Deprecated: `L2_projection` will be replaced by `project`.
-- Deprecated: `derivative` will be replaced by `project`.
+- Fixed: Fix `Mesh.validate` for unsigned `Mesh.t`.
 
 ### [2.1.1] - 2020-10-01
 
@@ -248,13 +255,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### [2.1.0] - 2020-09-30
 
-- Fixed: `Mesh3D.boundary_edges` (and, consequently, `Basis.find_dofs`) was slow
-  and used lots of memory due to an exhaustive search of all edges.
 - Added: `ElementHex2`, a triquadratic hexahedral element.
 - Added: `MeshTri.init_circle`, constructor for a circle mesh.
+- Fixed: `Mesh3D.boundary_edges` (and, consequently, `Basis.find_dofs`) was slow
+  and used lots of memory due to an exhaustive search of all edges.
 
 ### [2.0.0] - 2020-08-21
 
+- Deprecated: `project` will only support functions like `lambda x: x[0]`
+  instead of `lambda x, y, z: x` in the future.
 - Added: Support for complex-valued forms: `BilinearForm` and `LinearForm` now take
   an optional argument `dtype` which defaults to `np.float64`
   but can be also `np.complex64`.
@@ -264,18 +273,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed: Support for old-style decorators `bilinear_form`, `linear_form`, and
   `functional` (deprecated since 1.0.0).
 - Fixed: `FacetBasis` did not initialize with `ElementQuadP`.
-- Deprecated: `project` will only support functions like `lambda x: x[0]`
-  instead of `lambda x, y, z: x` in the future.
 
 ### [1.2.0] - 2020-07-07
 
+- Added: `MeshQuad._splitquads` aliased as `MeshQuad.to_meshtri`.
 - Added: `Mesh.__add__`, for merging meshes using `+` operator: duplicated nodes are
   joined.
 - Added: `ElementHexS2`, a 20-node quadratic hexahedral serendipity element.
 - Added: `ElementLineMini`, MINI-element for one-dimensional mesh.
 - Fixed: `Mesh3D.boundary_edges` was broken in case of hexahedral meshes.
 - Fixed: `skfem.utils.project` did not work for `ElementGlobal`.
-- Changed: `MeshQuad._splitquads` aliased as `MeshQuad.to_meshtri`: should not be private.
 
 ### [1.1.0] - 2020-05-18
 
@@ -285,6 +292,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### [1.0.0] - 2020-04-22
 
+- Deprecated: Old-style form constructors `bilinear_form`, `linear_form`, and `functional`.
+- Changed: `Basis.interpolate` returns `DiscreteField` objects instead of ndarray tuples.
+- Changed: `Basis.interpolate` works now properly for vectorial and high-order elements
+  by interpolating all components and higher order derivatives.
+- Changed: `Form.assemble` accepts now any keyword arguments (with type `DiscreteField`)
+  that are passed over to the forms.
+- Changed: Renamed `skfem.importers` to `skfem.io`.
+- Changed: Renamed `skfem.models.helpers` to `skfem.helpers`.
+- Changed: `skfem.utils.solve` will now expand also the solutions of eigenvalue problems.
 - Added: New-style form constructors `BilinearForm`, `LinearForm`, and `Functional`.
 - Added: `skfem.io.json` for serialization of meshes to/from json-files.
 - Added: `ElementLinePp`, p-th order one-dimensional elements.
@@ -302,12 +318,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added: `MortarMapping` with basic support for mortar methods in 2D.
 - Added: `Basis` constructors now accept `quadrature` keyword argument for specifying
   a custom quadrature rule.
-- Deprecated: Old-style form constructors `bilinear_form`, `linear_form`, and `functional`.
-- Changed: `Basis.interpolate` returns `DiscreteField` objects instead of ndarray tuples.
-- Changed: `Basis.interpolate` works now properly for vectorial and high-order elements
-  by interpolating all components and higher order derivatives.
-- Changed: `Form.assemble` accepts now any keyword arguments (with type `DiscreteField`)
-  that are passed over to the forms.
-- Changed: Renamed `skfem.importers` to `skfem.io`.
-- Changed: Renamed `skfem.models.helpers` to `skfem.helpers`.
-- Changed: `skfem.utils.solve` will now expand also the solutions of eigenvalue problems.

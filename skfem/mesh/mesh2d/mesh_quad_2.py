@@ -45,6 +45,6 @@ class MeshQuad2(MeshQuad):
         super(MeshQuad2, self).refine(n)
         self.__init__(self.p, self.t)
 
-    def mapping(self):
+    def _mapping(self):
         from skfem.mapping import MappingIsoparametric
         return MappingIsoparametric(self._mesh, self._elem)

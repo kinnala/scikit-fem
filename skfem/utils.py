@@ -229,7 +229,7 @@ def condense(A: spmatrix,
     D
         The set of degree-of-freedom indices to dismiss.
     expand
-        If `True` (default), returns also `x` and `I`. As a consequence,
+        If ``True`` (default), returns also `x` and `I`. As a consequence,
         :func:`skfem.utils.solve` will expand the solution vector
         automatically.
 
