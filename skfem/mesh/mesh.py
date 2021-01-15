@@ -238,12 +238,6 @@ class Mesh:
                                          .flatten())
 
     def remove_elements(self: MeshType, element_indices: ndarray) -> MeshType:
-        """Deprecated in favor of :meth:`~skfem.mesh.Mesh.remove`."""
-        warnings.warn("This method is deprecated in favour of remove",
-                      DeprecationWarning)
-        return self.remove(element_indices)
-
-    def remove(self: MeshType, element_indices: ndarray) -> MeshType:
         """Construct a new mesh by removing elements.
 
         Parameters

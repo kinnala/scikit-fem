@@ -13,7 +13,7 @@ class MeshTests(unittest.TestCase):
     def runTest(self):
         # Mesh.remove
         m = MeshTri().refined()
-        M = m.remove(np.array([0]))
+        M = m.remove_elements(np.array([0]))
         self.assertEqual(M.t.shape[1], 7)
 
         # Mesh.define_boundary
