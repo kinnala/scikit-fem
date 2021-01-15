@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 from numpy import ndarray
 
@@ -22,8 +24,13 @@ class Mesh2D(Mesh):
         super(Mesh2D, self).__init__()
 
     def mirror(self, a: float, b: float, c: float) -> Mesh:
-        """Mirror a mesh by the line :math:`ax + by + c = 0`.  Returns a new
-        :class:`~skfem.mesh.Mesh` object."""
+        """Mirror a mesh by the line :math:`ax + by + c = 0`.
+
+        Deprecated in favour of :meth:`~skfem.mesh.Mesh.mirrored`.
+
+        """
+        warnings.warn("This method is deprecated in favour of mirrored",
+                      DeprecationWarning)
         tmp = -2. * (a * self.p[0] + b * self.p[1] + c) / (a ** 2 + b ** 2)
         newx = a * tmp + self.p[0]
         newy = b * tmp + self.p[1]

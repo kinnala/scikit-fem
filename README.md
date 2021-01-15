@@ -202,17 +202,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Unreleased
 
 - Deprecated: List and tuple keyword argument types to `asm`.
-- Deprecated: `Mesh.refine`, `Mesh.scale` and `Mesh.translate` in
-  favor of `Mesh.refined`, `Mesh.scaled` and `Mesh.translated`.
+- Deprecated: `Mesh2D.mirror` in favor of the more general `Mesh.mirrored`.
+- Deprecated: `Mesh.refine`, `Mesh.scale` and `Mesh.translate` in favor of
+  `Mesh.refined`, `Mesh.scaled` and `Mesh.translated`.
 - Added: `Mesh.refined`, `Mesh.scaled`, and `Mesh.translated`. The new methods
   return a copy instead of modifying `self`.
+- Added: `Mesh.mirrored` for mirroring a mesh using a normal and a point.
 - Added: `Functional` now supports forms that evaluate to vectors or other
   tensors.
 - Added: `ElementHex0`, piecewise constant element for hexahedral meshes.
 - Added: `FacetBasis.trace` for restricting existing solutions to lower
   dimensional meshes on boundaries or interfaces.
-- Fixed: `MeshLine.refined` was untested, now it correctly performs adaptive
-  refinement.
+- Fixed: `MeshLine.refined` now correctly performs adaptive refinement of
+  one-dimensional meshes.
 
 ### [2.3.0] - 2020-11-24
 

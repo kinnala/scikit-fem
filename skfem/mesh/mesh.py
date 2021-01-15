@@ -299,6 +299,42 @@ class Mesh:
         nmesh.translate(vec)
         return nmesh
 
+    def mirrored(self: MeshType,
+                 normal: DimTuple,
+                 point: Optional[DimTuple] = None) -> MeshType:
+        """Return a mesh mirrored with respect to a normal.
+
+        Meant to be combined with the other methods to build more general
+        meshes, e.g.,
+
+        >>> from skfem import MeshTet
+        >>> m1 = MeshTet()
+        >>> m2 = m1.mirrored((1, 0, 0))
+        >>> m3 = m1.mirrored((0, 1, 0))
+        >>> m4 = m1.mirrored((0, 0, 1))
+        >>> m = m1 + m2 + m3 + m4
+        >>> (m.nvertices, m.nelements)
+        (20, 20)
+
+        Parameters
+        ----------
+        normal
+            The normal vector of the mirror plane.
+        point
+            An optional point through which the plane passes. By default, the
+            point corresponds to the origin.
+
+        """
+        if point is None:
+            point = (0,) * self.dim()
+        nmesh = self.copy()
+        p = nmesh.p
+        p0 = np.array(point)
+        n = np.array(normal)
+        n = n / np.linalg.norm(n)
+        nmesh.p += - 2. * np.dot(n, p - p0[:, None]) * n[:, None] + p0[:, None]
+        return nmesh
+
     def save(self,
              filename: str,
              point_data: Optional[Dict[str, ndarray]] = None,
