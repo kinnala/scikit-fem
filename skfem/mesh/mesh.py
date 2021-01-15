@@ -86,6 +86,51 @@ class Mesh:
                 if not isinstance(v, ndarray):
                     self.subdomains[k] = np.array(v, dtype=np.int64)
 
+    @classmethod
+    def load(cls: Type[MeshType], filename: str) -> MeshType:
+        """Import a mesh from a file using `meshio
+        <https://github.com/nschloe/meshio>`_.
+
+        Parameters
+        ----------
+        filename
+            The filename of the mesh.
+
+        """
+        from skfem.io.meshio import from_file
+        return from_file(filename)
+
+    @classmethod
+    def from_basis(cls: Type[MeshType], basis) -> MeshType:
+        """Initialize a high-order mesh from :class:`skfem.assembly.Basis`."""
+        if not isinstance(basis.mesh, cls):
+            raise ValueError("Mesh and Basis must be compatible.")
+        mesh = basis.mesh.copy()
+        mesh.p = basis.doflocs
+        mesh.t = basis.element_dofs
+        return mesh
+
+    @classmethod
+    def from_dict(cls: Type[MeshType], d) -> MeshType:
+        """Initialize a mesh from a dictionary."""
+        if 'p' not in d or 't' not in d:
+            raise ValueError("Dictionary must contain keys 'p' and 't'.")
+        else:
+            d['p'] = np.array(d['p']).T
+            d['t'] = np.array(d['t']).T
+        if 'boundaries' in d and d['boundaries'] is not None:
+            d['boundaries'] = {k: np.array(v)
+                               for k, v in d['boundaries'].items()}
+        if 'subdomains' in d and d['subdomains'] is not None:
+            d['subdomains'] = {k: np.array(v)
+                               for k, v in d['subdomains'].items()}
+        return cls(**d)
+
+    @classmethod
+    def dim(self):
+        """Return the spatial dimension of the mesh."""
+        return int(self.p.shape[0])
+
     @property
     def nelements(self):
         return int(self.t.shape[1])
@@ -110,24 +155,40 @@ class Mesh:
                 "with " + str(self.p.shape[1]) + " vertices "
                 "and " + str(self.t.shape[1]) + " elements.")
 
-    @classmethod
-    def dim(self):
-        """Return the spatial dimension of the mesh."""
-        return int(self.p.shape[0])
+    def __add__(self, other):
+        """Join two meshes."""
+        if not isinstance(other, type(self)):
+            raise TypeError("Can only join meshes with same type.")
+        p = np.hstack((self.p, other.p))
+        t = np.hstack((self.t, other.t + self.p.shape[1]))
+        tmp = np.ascontiguousarray(p.T)
+        tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]),
+                                  return_index=True, return_inverse=True)
+        p = p[:, ixa]
+        t = ixb[t]
+        meshcls = type(self)
+        if self.subdomains is not None\
+           or self.boundaries is not None\
+           or other.subdomains is not None\
+           or other.boundaries is not None:
+            warnings.warn("Named subdomains and boundaries are not "
+                          "persisted when joining meshes.")
+        return meshcls(p, t)
 
-    def _mapping(self):
-        """Default local-to-global mapping for the mesh."""
-        raise NotImplementedError("Default mapping not implemented!")
-
-    def _uniform_refine(self):
-        """Perform a single uniform mesh refinement."""
-        raise NotImplementedError("Single refine not implemented "
-                                  "for this mesh type!")
-
-    def _adaptive_refine(self, marked):
-        """Perform adaptive refinement."""
-        raise NotImplementedError("Adaptive refine not implemented "
-                                  "for this mesh type!")
+    def to_dict(self) -> Dict[str, ndarray]:
+        """Return json serializable dictionary."""
+        boundaries: Optional[Dict[str, ndarray]] = None
+        subdomains: Optional[Dict[str, ndarray]] = None
+        if self.boundaries is not None:
+            boundaries = {k: v.tolist() for k, v in self.boundaries.items()}
+        if self.subdomains is not None:
+            subdomains = {k: v.tolist() for k, v in self.subdomains.items()}
+        return {
+            'p': self.p.T.tolist(),
+            't': self.t.T.tolist(),
+            'boundaries': boundaries,
+            'subdomains': subdomains,
+        }
 
     def refine(self: MeshType,
                arg: Optional[Union[int, ndarray]] = None):
@@ -244,50 +305,6 @@ class Mesh:
         nmesh.translate(vec)
         return nmesh
 
-    def _validate(self):
-        """Perform mesh validity checks."""
-        # check that element connectivity contains integers
-        # NOTE: this is necessary for some plotting functionality
-        if not np.issubdtype(self.t[0, 0], np.integer):
-            msg = ("Mesh._validate(): Element connectivity "
-                   "must consist of integers.")
-            raise Exception(msg)
-
-        # check that vertex matrix has "correct" size
-        if self.p.shape[0] > 3:
-            msg = ("Mesh._validate(): We do not allow meshes "
-                   "embedded into larger than 3-dimensional "
-                   "Euclidean space! Please check that "
-                   "the given vertex matrix is of size Ndim x Nvertices.")
-            raise Exception(msg)
-
-        # check that element connectivity matrix has correct size
-        nvertices = {'line': 2, 'tri': 3, 'quad': 4, 'tet': 4, 'hex': 8}
-        if self.t.shape[0] != nvertices[self.refdom]:
-            msg = ("Mesh._validate(): The given connectivity "
-                   "matrix has wrong shape!")
-            raise Exception(msg)
-
-        # check that there are no duplicate points
-        tmp = np.ascontiguousarray(self.p.T)
-        if self.p.shape[1] != np.unique(tmp.view([('', tmp.dtype)]
-                                                 * tmp.shape[1])).shape[0]:
-            msg = "Mesh._validate(): Mesh contains duplicate vertices."
-            warnings.warn(msg)
-
-        # check that all points are at least in some element
-        if len(np.setdiff1d(np.arange(self.p.shape[1]),
-                            np.unique(self.t))) > 0:
-            msg = ("Mesh._validate(): Mesh contains a vertex "
-                   "not belonging to any element.")
-            raise Exception(msg)
-
-    def _expand_facets(self, facets: ndarray) -> Tuple[ndarray, ndarray]:
-        """Find vertices and edges corresponding to given facets."""
-        vertices = np.unique(self.facets[:, facets].flatten())
-        edges = np.array([], dtype=np.int64)
-        return vertices, edges
-
     def save(self,
              filename: str,
              point_data: Optional[Dict[str, ndarray]] = None,
@@ -305,30 +322,6 @@ class Mesh:
         """
         from skfem.io.meshio import to_file
         return to_file(self, filename, point_data, **kwargs)
-
-    @classmethod
-    def from_basis(cls: Type[MeshType], basis) -> MeshType:
-        """Initialize a high-order mesh from :class:`skfem.assembly.Basis`."""
-        if not isinstance(basis.mesh, cls):
-            raise ValueError("Mesh and Basis must be compatible.")
-        mesh = basis.mesh.copy()
-        mesh.p = basis.doflocs
-        mesh.t = basis.element_dofs
-        return mesh
-
-    @classmethod
-    def load(cls: Type[MeshType], filename: str) -> MeshType:
-        """Import a mesh from a file using `meshio
-        <https://github.com/nschloe/meshio>`_.
-
-        Parameters
-        ----------
-        filename
-            The filename of the mesh.
-
-        """
-        from skfem.io.meshio import from_file
-        return from_file(filename)
 
     def boundary_nodes(self) -> ndarray:
         """Return an array of boundary node indices."""
@@ -408,37 +401,6 @@ class Mesh:
                 for itr in range(self.dim())]
         return np.nonzero(test(np.array(midp)))[0]
 
-    @classmethod
-    def from_dict(cls: Type[MeshType], d) -> MeshType:
-        """Initialize a mesh from a dictionary."""
-        if 'p' not in d or 't' not in d:
-            raise ValueError("Dictionary must contain keys 'p' and 't'.")
-        else:
-            d['p'] = np.array(d['p']).T
-            d['t'] = np.array(d['t']).T
-        if 'boundaries' in d and d['boundaries'] is not None:
-            d['boundaries'] = {k: np.array(v)
-                               for k, v in d['boundaries'].items()}
-        if 'subdomains' in d and d['subdomains'] is not None:
-            d['subdomains'] = {k: np.array(v)
-                               for k, v in d['subdomains'].items()}
-        return cls(**d)
-
-    def to_dict(self) -> Dict[str, ndarray]:
-        """Return json serializable dictionary."""
-        boundaries: Optional[Dict[str, ndarray]] = None
-        subdomains: Optional[Dict[str, ndarray]] = None
-        if self.boundaries is not None:
-            boundaries = {k: v.tolist() for k, v in self.boundaries.items()}
-        if self.subdomains is not None:
-            subdomains = {k: v.tolist() for k, v in self.subdomains.items()}
-        return {
-            'p': self.p.T.tolist(),
-            't': self.t.T.tolist(),
-            'boundaries': boundaries,
-            'subdomains': subdomains,
-        }
-
     def define_boundary(self, name: str, test: Callable[[ndarray], ndarray],
                         boundaries_only: bool = True):
         """Define a named boundary via function handle.
@@ -458,6 +420,28 @@ class Mesh:
             self.boundaries = {}
         self.boundaries[name] = self.facets_satisfying(test, boundaries_only)
 
+    def copy(self):
+        from copy import deepcopy
+        return deepcopy(self)
+
+    @staticmethod
+    def strip_extra_coordinates(p: ndarray) -> ndarray:
+        return p
+
+    def _mapping(self):
+        """Default local-to-global mapping for the mesh."""
+        raise NotImplementedError("Default mapping not implemented!")
+
+    def _uniform_refine(self):
+        """Perform a single uniform mesh refinement."""
+        raise NotImplementedError("Single refine not implemented "
+                                  "for this mesh type!")
+
+    def _adaptive_refine(self, marked):
+        """Perform adaptive refinement."""
+        raise NotImplementedError("Adaptive refine not implemented "
+                                  "for this mesh type!")
+
     def _reix(self, ix: ndarray) -> Tuple[ndarray, ndarray]:
         """Connect ``self.p`` based on the indices ``ix``."""
         ixuniq = np.unique(ix)
@@ -465,30 +449,46 @@ class Mesh:
         t[ixuniq] = np.arange(len(ixuniq), dtype=np.int64)
         return self.p[:, ixuniq], t[ix]
 
-    def copy(self):
-        from copy import deepcopy
-        return deepcopy(self)
+    def _expand_facets(self, facets: ndarray) -> Tuple[ndarray, ndarray]:
+        """Find vertices and edges corresponding to given facets."""
+        vertices = np.unique(self.facets[:, facets].flatten())
+        edges = np.array([], dtype=np.int64)
+        return vertices, edges
 
-    def __add__(self, other):
-        """Join two meshes."""
-        if not isinstance(other, type(self)):
-            raise TypeError("Can only join meshes with same type.")
-        p = np.hstack((self.p, other.p))
-        t = np.hstack((self.t, other.t + self.p.shape[1]))
-        tmp = np.ascontiguousarray(p.T)
-        tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]),
-                                  return_index=True, return_inverse=True)
-        p = p[:, ixa]
-        t = ixb[t]
-        meshcls = type(self)
-        if self.subdomains is not None\
-           or self.boundaries is not None\
-           or other.subdomains is not None\
-           or other.boundaries is not None:
-            warnings.warn("Named subdomains and boundaries are not "
-                          "persisted when joining meshes.")
-        return meshcls(p, t)
+    def _validate(self):
+        """Perform mesh validity checks."""
+        # check that element connectivity contains integers
+        # NOTE: this is necessary for some plotting functionality
+        if not np.issubdtype(self.t[0, 0], np.integer):
+            msg = ("Mesh._validate(): Element connectivity "
+                   "must consist of integers.")
+            raise Exception(msg)
 
-    @staticmethod
-    def strip_extra_coordinates(p: ndarray) -> ndarray:
-        return p
+        # check that vertex matrix has "correct" size
+        if self.p.shape[0] > 3:
+            msg = ("Mesh._validate(): We do not allow meshes "
+                   "embedded into larger than 3-dimensional "
+                   "Euclidean space! Please check that "
+                   "the given vertex matrix is of size Ndim x Nvertices.")
+            raise Exception(msg)
+
+        # check that element connectivity matrix has correct size
+        nvertices = {'line': 2, 'tri': 3, 'quad': 4, 'tet': 4, 'hex': 8}
+        if self.t.shape[0] != nvertices[self.refdom]:
+            msg = ("Mesh._validate(): The given connectivity "
+                   "matrix has wrong shape!")
+            raise Exception(msg)
+
+        # check that there are no duplicate points
+        tmp = np.ascontiguousarray(self.p.T)
+        if self.p.shape[1] != np.unique(tmp.view([('', tmp.dtype)]
+                                                 * tmp.shape[1])).shape[0]:
+            msg = "Mesh._validate(): Mesh contains duplicate vertices."
+            warnings.warn(msg)
+
+        # check that all points are at least in some element
+        if len(np.setdiff1d(np.arange(self.p.shape[1]),
+                            np.unique(self.t))) > 0:
+            msg = ("Mesh._validate(): Mesh contains a vertex "
+                   "not belonging to any element.")
+            raise Exception(msg)
