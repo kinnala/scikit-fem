@@ -29,8 +29,7 @@ elements are defined using an isoparametric local-to-global mapping.
 from skfem import *
 from skfem.models.poisson import laplace, unit_load
 
-m = MeshQuad()
-m.refine(2)
+m = MeshQuad().refined(2)
 
 e1 = ElementQuad1()
 e = ElementQuad2()

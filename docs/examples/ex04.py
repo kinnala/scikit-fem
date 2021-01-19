@@ -65,10 +65,11 @@ from pathlib import Path
 mesh_file = Path(__file__).parent / 'meshes' / 'ex04_mesh.json'
 m = from_file(mesh_file)
 
-M = MeshLine(np.linspace(0, 1, 6)) * MeshLine(np.linspace(-1, 1, 10))
-M.translate((1.0, 0.0))
-M.refine()
-
+M = (
+    (MeshLine(np.linspace(0, 1, 6)) * MeshLine(np.linspace(-1, 1, 10)))
+    .translated((1.0, 0.0))
+    .refined()
+)
 
 # define elements and bases
 e1 = ElementTriP2()

@@ -69,8 +69,7 @@ from skfem import *
 from skfem.models.poisson import unit_load
 import numpy as np
 
-m = MeshTri.init_symmetric()
-m.refine(3)
+m = MeshTri.init_symmetric().refined(3)
 
 e = ElementTriMorley()
 ib = InteriorBasis(m, e)

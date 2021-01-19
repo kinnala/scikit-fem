@@ -1,8 +1,7 @@
 from skfem import *
 from skfem.models.poisson import laplace, unit_load
 
-m = MeshTri()
-m.refine(4)
+m = MeshTri().refined(4)
 
 e = ElementTriP1()
 basis = InteriorBasis(m, e)

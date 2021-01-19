@@ -10,8 +10,7 @@ import numpy as np
 from skfem import *
 from skfem.models.elasticity import linear_elasticity, lame_parameters
 
-m = MeshHex()
-m.refine(3)
+m = MeshHex().refined(3)
 e1 = ElementHex1()
 e = ElementVectorH1(e1)
 ib = InteriorBasis(m, e, MappingIsoparametric(m, e1), 3)

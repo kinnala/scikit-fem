@@ -20,11 +20,10 @@ class TestCompositeSplitting(TestCase):
     def runTest(self):
         """Solve Stokes problem, try splitting and other small things."""
 
-        m = MeshTri()
-        m.refine()
+        m = MeshTri().refined()
         m.define_boundary('centreline', lambda x: x[0] == .5,
                           boundaries_only=False)
-        m.refine(3)
+        m = m.refined(3)
 
         e = ElementVectorH1(ElementTriP2()) * ElementTriP1()
 
@@ -99,8 +98,7 @@ class TestFacetExpansion(TestCase):
 
     def runTest(self):
 
-        m = self.mesh_type()
-        m.refine(2)
+        m = self.mesh_type().refined(2)
 
         basis = InteriorBasis(m, self.elem_type())
 
@@ -136,8 +134,7 @@ class TestInterpolatorTet(TestCase):
     nrefs = 1
 
     def runTest(self):
-        m = self.mesh_type()
-        m.refine(self.nrefs)
+        m = self.mesh_type().refined(self.nrefs)
         basis = InteriorBasis(m, self.element_type())
         x = project(lambda x: x[0] ** 2, basis_to=basis)
         fun = basis.interpolator(x)
@@ -204,8 +201,7 @@ class TestInterpolatorLine2(TestInterpolatorTet):
 )
 def test_trace(mtype, e1, e2):
 
-    m = mtype()
-    m.refine(3)
+    m = mtype().refined(3)
 
     # use the boundary where last coordinate is zero
     basis = FacetBasis(m, e1,

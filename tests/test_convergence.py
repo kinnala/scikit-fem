@@ -144,8 +144,7 @@ class ConvergenceQ1(unittest.TestCase):
         return InteriorBasis(m, e)
 
     def setUp(self):
-        self.mesh = MeshQuad()
-        self.mesh.refine(2)
+        self.mesh = MeshQuad().refined(2)
 
 
 class ConvergenceQ2(ConvergenceQ1):
@@ -158,8 +157,7 @@ class ConvergenceQ2(ConvergenceQ1):
         return InteriorBasis(m, e)
 
     def setUp(self):
-        self.mesh = MeshQuad()
-        self.mesh.refine(2)
+        self.mesh = MeshQuad().refined(2)
 
 
 class ConvergenceQuadS2(ConvergenceQ2):
@@ -176,8 +174,7 @@ class ConvergenceTriP1(ConvergenceQ1):
         return InteriorBasis(m, e)
 
     def setUp(self):
-        self.mesh = MeshTri.init_sqsymmetric()
-        self.mesh.refine(2)
+        self.mesh = MeshTri.init_sqsymmetric().refined(2)
 
 
 class ConvergenceTriP2(ConvergenceTriP1):
@@ -210,8 +207,7 @@ class ConvergenceTriHermite(ConvergenceTriP1):
         ))
 
     def setUp(self):
-        self.mesh = MeshTri.init_symmetric()
-        self.mesh.refine(2)
+        self.mesh = MeshTri.init_symmetric().refined(2)
 
 
 class ConvergenceTriCR(ConvergenceTriP1):
@@ -242,8 +238,7 @@ class ConvergenceHex1(ConvergenceQ1):
         return InteriorBasis(m, e)
 
     def setUp(self):
-        self.mesh = MeshHex()
-        self.mesh.refine(2)
+        self.mesh = MeshHex().refined(2)
 
 
 class ConvergenceHexS2(ConvergenceQ1):
@@ -257,8 +252,7 @@ class ConvergenceHexS2(ConvergenceQ1):
         return InteriorBasis(m, e)
 
     def setUp(self):
-        self.mesh = MeshHex()
-        self.mesh.refine(1)
+        self.mesh = MeshHex().refined(1)
 
 
 class ConvergenceHex2(ConvergenceHexS2):
@@ -282,8 +276,7 @@ class ConvergenceTetP1(ConvergenceQ1):
         return InteriorBasis(m, e)
 
     def setUp(self):
-        self.mesh = MeshTet()
-        self.mesh.refine(2)
+        self.mesh = MeshTet().refined(2)
 
 
 class ConvergenceTetCR(ConvergenceTetP1):
@@ -307,8 +300,7 @@ class ConvergenceTetP2(ConvergenceTetP1):
         return InteriorBasis(m, e)
 
     def setUp(self):
-        self.mesh = MeshTet()
-        self.mesh.refine(1)
+        self.mesh = MeshTet().refined(1)
 
 
 class ConvergenceTetMini(ConvergenceTetP1):
@@ -325,8 +317,7 @@ class ConvergenceLineP1(ConvergenceQ1):
         return InteriorBasis(m, e)
 
     def setUp(self):
-        self.mesh = MeshLine()
-        self.mesh.refine(3)
+        self.mesh = MeshLine().refined(3)
 
 
 class ConvergenceLineP2(ConvergenceQ1):
@@ -339,8 +330,7 @@ class ConvergenceLineP2(ConvergenceQ1):
         return InteriorBasis(m, e)
 
     def setUp(self):
-        self.mesh = MeshLine()
-        self.mesh.refine(3)
+        self.mesh = MeshLine().refined(3)
 
 class ConvergenceLineMini(ConvergenceLineP2):
     
@@ -396,8 +386,7 @@ class FacetConvergenceTetP2(unittest.TestCase):
         L2err = np.array([])
 
         for itr in range(0, 3):
-            m = self.case[0]()
-            m.refine(self.preref + itr)
+            m = self.case[0]().refined(self.preref + itr)
 
             ib = InteriorBasis(m, self.case[1]())
             fb = FacetBasis(m, self.case[1]())

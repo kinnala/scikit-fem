@@ -17,8 +17,7 @@ class ConvergenceMorley(TestCase):
     abs_limit = 8e-5
 
     def runTest(self):
-        m = self.case[0]()
-        m.refine(self.prerefs)
+        m = self.case[0]().refined(self.prerefs)
 
         hs = []
         L2s = []
@@ -105,8 +104,7 @@ class ConvergenceHermite(TestCase):
     abs_limit = 8e-5
 
     def runTest(self):
-        m = self.case[0]()
-        m.refine(self.prerefs)
+        m = self.case[0]().refined(self.prerefs)
 
         hs = []
         L2s = []

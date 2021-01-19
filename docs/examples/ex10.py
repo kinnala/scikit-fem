@@ -8,8 +8,7 @@ from skfem import *
 from skfem.helpers import grad, dot
 import numpy as np
 
-m = MeshTri()
-m.refine(5)
+m = MeshTri().refined(5)
 
 
 @BilinearForm
