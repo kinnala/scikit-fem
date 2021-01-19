@@ -30,8 +30,7 @@ class Line1D(unittest.TestCase):
     e = ElementLineP1()
 
     def runTest(self):
-        m = MeshLine(np.linspace(0., 1.))
-        m.refine(2)
+        m = MeshLine(np.linspace(0., 1.)).refined(2)
         ib = InteriorBasis(m, self.e)
         fb = FacetBasis(m, self.e)
 
@@ -68,8 +67,7 @@ class LineNegative1D(unittest.TestCase):
     e = ElementLineP1()
 
     def runTest(self):
-        m = MeshLine(np.linspace(0., 1.))
-        m.refine(2)
+        m = MeshLine(np.linspace(0., 1.)).refined(2)
         ib = InteriorBasis(m, self.e)
         m.define_boundary('left' ,lambda x: x[0] == 0.0)
         m.define_boundary('right', lambda x: x[0] == 1.0)
@@ -109,8 +107,7 @@ class LineNeumann1D(unittest.TestCase):
     e = ElementLineP1()
 
     def runTest(self):
-        m = MeshLine(np.linspace(0., 1.))
-        m.refine(2)
+        m = MeshLine(np.linspace(0., 1.)).refined(2)
         ib = InteriorBasis(m, self.e)
         fb = FacetBasis(m, self.e)
 
@@ -148,8 +145,7 @@ class TestExactHexElement(unittest.TestCase):
 
     def runTest(self):
 
-        m = self.mesh()
-        m.refine(3)
+        m = self.mesh().refined(3)
 
         ib = InteriorBasis(m, self.elem())
 

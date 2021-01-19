@@ -10,8 +10,7 @@ from skfem.utils import L2_projection
 
 class InitializeScalarField(unittest.TestCase):
     def runTest(self):
-        mesh = MeshTri()
-        mesh.refine(5)
+        mesh = MeshTri().refined(5)
         basis = InteriorBasis(mesh, ElementTriP1())
 
         def fun(x, y):

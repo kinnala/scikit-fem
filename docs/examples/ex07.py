@@ -4,8 +4,7 @@ from skfem import *
 from skfem.helpers import grad, dot
 from skfem.models.poisson import laplace, unit_load
 
-m = MeshTri.init_sqsymmetric()
-m.refine()
+m = MeshTri.init_sqsymmetric().refined()
 mapping = MappingAffine(m)
 e = ElementTriDG(ElementTriP1())
 alpha = 1e-1

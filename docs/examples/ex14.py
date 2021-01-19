@@ -25,8 +25,7 @@ from skfem.models.poisson import laplace
 
 import numpy as np
 
-m = MeshTri()
-m.refine(4)
+m = MeshTri().refined(4)
 
 e = ElementTriP2()
 basis = InteriorBasis(m, e)

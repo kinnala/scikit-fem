@@ -18,8 +18,7 @@ class IntegrateOneOverBoundaryQ1(unittest.TestCase):
     elem = ElementQuad1()
 
     def createBasis(self):
-        m = MeshQuad()
-        m.refine(6)
+        m = MeshQuad().refined(6)
         self.fbasis = FacetBasis(m, self.elem)
         self.boundary_area = 4.0000
 
@@ -52,8 +51,7 @@ class IntegrateOneOverBoundaryS2(IntegrateOneOverBoundaryQ1):
 class IntegrateOneOverBoundaryHex1(IntegrateOneOverBoundaryQ1):
 
     def createBasis(self):
-        m = MeshHex()
-        m.refine(3)
+        m = MeshHex().refined(3)
         self.fbasis = FacetBasis(m, ElementHex1())
         self.boundary_area = 6.000
 
@@ -61,8 +59,7 @@ class IntegrateOneOverBoundaryHex1(IntegrateOneOverBoundaryQ1):
 class IntegrateOneOverBoundaryHex1_2(IntegrateOneOverBoundaryQ1):
 
     def createBasis(self):
-        m = MeshHex()
-        m.refine(3)
+        m = MeshHex().refined(3)
         self.fbasis = FacetBasis(m, ElementHexS2())
         self.boundary_area = 6.000
 
@@ -70,8 +67,7 @@ class IntegrateOneOverBoundaryHex1_2(IntegrateOneOverBoundaryQ1):
 class IntegrateOneOverBoundaryHex2(IntegrateOneOverBoundaryQ1):
 
     def createBasis(self):
-        m = MeshHex()
-        m.refine(3)
+        m = MeshHex().refined(3)
         self.fbasis = FacetBasis(m, ElementHex2())
         self.boundary_area = 6.000
 
@@ -84,8 +80,7 @@ class IntegrateFuncOverBoundary(unittest.TestCase):
                  (MeshTet, ElementTetP0)]
 
         for (mtype, etype) in cases:
-            m = mtype()
-            m.refine(3)
+            m = mtype().refined(3)
             fb = FacetBasis(m, etype())
 
             @BilinearForm
@@ -106,8 +101,7 @@ class IntegrateFuncOverBoundaryPart(unittest.TestCase):
 
     def runTest(self):
         mtype, etype = self.case
-        m = mtype()
-        m.refine(3)
+        m = mtype().refined(3)
         bnd = m.facets_satisfying(lambda x: x[0] == 1.0)
         fb = FacetBasis(m, etype(), facets=bnd)
 
@@ -156,8 +150,7 @@ class BasisInterpolator(unittest.TestCase):
 
     def runTest(self):
         mtype, etype = self.case
-        m = mtype()
-        m.refine(3)
+        m = mtype().refined(3)
         e = etype()
         ib = InteriorBasis(m, e)
 
@@ -215,19 +208,18 @@ class NormalVectorTestTri(unittest.TestCase):
     intorder = None
 
     def runTest(self):
-        self.case[0].refine()
+        m = self.case[0].refined()
 
         if self.intorder is not None:
-            basis = FacetBasis(*self.case, intorder=self.intorder)
+            basis = FacetBasis(m, self.case[1], intorder=self.intorder)
         else:
-            basis = FacetBasis(*self.case)
+            basis = FacetBasis(m, self.case[1])
 
         @LinearForm
         def linf(v, w):
             return np.sum(w.n ** 2, axis=0) * v
 
         b = asm(linf, basis)
-        m = self.case[0]
         ones = project(lambda x: 1.0 + x[0] * 0.,
                        basis_to=basis,
                        I=basis.get_dofs().flatten(),
@@ -293,8 +285,7 @@ class NormalVectorTestHex2(NormalVectorTestTri):
 class EvaluateFunctional(unittest.TestCase):
 
     def runTest(self):
-        m = MeshQuad()
-        m.refine(3)
+        m = MeshQuad().refined(3)
         e = ElementQuad1()
         basis = InteriorBasis(m, e)
 
@@ -312,8 +303,7 @@ class EvaluateFunctional(unittest.TestCase):
 class TestRefinterp(unittest.TestCase):
 
     def runTest(self):
-        m = MeshQuad()
-        m.refine(2)
+        m = MeshQuad().refined(2)
         e = ElementQuad1()
         basis = InteriorBasis(m, e)
 

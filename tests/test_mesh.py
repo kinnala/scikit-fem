@@ -83,18 +83,17 @@ class RefinePreserveSubsets(unittest.TestCase):
 
     def runTest(self):
         for mtype in (MeshLine, MeshTri, MeshQuad):
-            m = mtype()
-            m.refine(2)
+            m = mtype().refined(2)
             boundaries = [('external', lambda x: x[0] * (1. - x[0]) == 0.0),
                           ('internal', lambda x: x[0] == 0.5)]
             for name, handle in boundaries:
                 m.define_boundary(name, handle, boundaries_only=False)
-            m.refine()
+            m = m.refined()
             for name, handle in boundaries:
                 A = np.sort(m.boundaries[name])
                 B = np.sort(m.facets_satisfying(handle))
                 self.assertTrue((A == B).all())
-            m.refine(2)
+            m = m.refined(2)
             for name, handle in boundaries:
                 A = np.sort(m.boundaries[name])
                 B = np.sort(m.facets_satisfying(handle))
@@ -107,8 +106,7 @@ class SaveLoadCycle(unittest.TestCase):
 
     def runTest(self):
         from tempfile import NamedTemporaryFile
-        m = self.cls()
-        m.refine(2)
+        m = self.cls().refined(2)
         f = NamedTemporaryFile(delete=False)
         m.save(f.name + ".vtk")
         with self.assertWarnsRegex(UserWarning, '^Unable to load tagged'):
@@ -131,8 +129,7 @@ class SerializeUnserializeCycle(unittest.TestCase):
 
     def runTest(self):
         for cls in self.clss:
-            m = cls()
-            m.refine(2)
+            m = cls().refined(2)
             m.boundaries = {'down': m.facets_satisfying(lambda x: x[0] == 0)}
             m.subdomains = {'up': m.elements_satisfying(lambda x: x[0] > 0.5)}
             M = cls.from_dict(m.to_dict())
@@ -150,12 +147,11 @@ class TestBoundaryEdges(unittest.TestCase):
         m = MeshTet()
         # default mesh has all edges on the boundary
         self.assertEqual(len(m.boundary_edges()), m.edges.shape[1])
-        m.refine()
         # check that there is a correct amount of boundary edges:
         # 12 (cube edges) * 2 (per cube edge)
         # + 6 (cube faces) * 8 (per cube face)
         # = 72 edges
-        self.assertTrue(len(m.boundary_edges()) == 72)
+        self.assertTrue(len(m.refined().boundary_edges()) == 72)
 
 
 class TestBoundaryEdges2(unittest.TestCase):
@@ -164,12 +160,11 @@ class TestBoundaryEdges2(unittest.TestCase):
         m = MeshHex()
         # default mesh has all edges on the boundary
         self.assertTrue(len(m.boundary_edges()) == m.edges.shape[1])
-        m.refine()
         # check that there is a correct amount of boundary edges:
         # 12 (cube edges) * 2 (per cube edge)
         # + 6 (cube faces) * 4 (per cube face)
         # = 48 edges
-        self.assertEqual(len(m.boundary_edges()), 48)
+        self.assertEqual(len(m.refined().boundary_edges()), 48)
 
 
 class TestMeshAddition(unittest.TestCase):
@@ -201,7 +196,7 @@ class TestMeshQuadSplit(unittest.TestCase):
     def runRefineTest(self):
         mesh = MeshQuad()
         mesh.define_boundary('left', lambda x: x[0] == 0)
-        mesh.refine()
+        mesh = mesh.refined()
         mesh_tri = mesh.to_meshtri()
 
         for b in mesh.boundaries:
@@ -218,7 +213,7 @@ class TestAdaptiveSplitting1D(unittest.TestCase):
         for itr in range(10):
             prev_t_size = m.t.shape[1]
             prev_p_size = m.p.shape[1]
-            m.refine([prev_t_size - 1])
+            m = m.refined([prev_t_size - 1])
 
             # check that new size is current size + 1
             self.assertEqual(prev_t_size, m.t.shape[1] - 1)
@@ -237,7 +232,7 @@ class TestAdaptiveSplitting2D(unittest.TestCase):
                 else m.t.shape[1] - 1
             prev_t_size = m.t.shape[1]
             prev_p_size = m.p.shape[1]
-            m.refine([red_ix])
+            m = m.refined([red_ix])
 
             # check that new size is current size + 4
             self.assertEqual(prev_t_size, m.t.shape[1] - 4)

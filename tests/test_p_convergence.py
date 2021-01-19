@@ -12,8 +12,7 @@ class ConvergenceLinePp(unittest.TestCase):
     """Solve up to floating point precision."""
 
     def setUp(self):
-        self.mesh = MeshLine()
-        self.mesh.refine(3)
+        self.mesh = MeshLine().refined(3)
 
     def create_basis(self, m, p):
         e = ElementLinePp(p)
@@ -69,8 +68,7 @@ class ConvergenceQuadP(unittest.TestCase):
     """Solve up to floating point precision."""
 
     def setUp(self):
-        self.mesh = MeshQuad()
-        self.mesh.refine(1)
+        self.mesh = MeshQuad().refined(1)
         self.mesh.p[:, self.mesh.interior_nodes()] +=\
             0.05 * self.mesh.p[:, self.mesh.interior_nodes()]
 

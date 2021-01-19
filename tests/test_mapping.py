@@ -14,8 +14,7 @@ class TestIsoparamNormals(unittest.TestCase):
     elem = ElementHex1
 
     def runTest(self):
-        m = self.mesh()
-        m.refine()
+        m = self.mesh().refined()
         e = self.elem()
         fb = FacetBasis(m, e)
         x = fb.global_coordinates().value
@@ -101,11 +100,8 @@ class TestMortarPair(unittest.TestCase):
     translate_y = 0.0
 
     def init_meshes(self):
-        m1 = self.mesh1_type()
-        m1.refine(self.nrefs1)
-        m2 = self.mesh2_type()
-        m2.refine(self.nrefs2)
-        m2.translate((1.0, self.translate_y))
+        m1 = self.mesh1_type().refined(self.nrefs1)
+        m2 = self.mesh2_type().refined(self.nrefs2).translated((1.0, self.translate_y))
         return m1, m2
 
     def runTest(self):

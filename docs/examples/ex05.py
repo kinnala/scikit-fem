@@ -20,8 +20,7 @@ from skfem import *
 from skfem.helpers import dot, grad
 from skfem.models.poisson import laplace
 
-m = MeshTri()
-m.refine(5)
+m = MeshTri().refined(5)
 
 e = ElementTriP1()
 

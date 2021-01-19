@@ -69,7 +69,7 @@ class ConvergenceRaviartThomas(unittest.TestCase):
             Hdivs[itr] = self.compute_Hdiv(m, ib1, sigma)
             hs[itr] = m.param()
 
-            m.refine()
+            m = m.refined()
 
         rateL2 = np.polyfit(np.log(hs), np.log(L2s), 1)[0]
         rateHdiv = np.polyfit(np.log(hs), np.log(Hdivs), 1)[0]
@@ -132,8 +132,7 @@ class ConvergenceRaviartThomas(unittest.TestCase):
                 InteriorBasis(m, e0, intorder=2))
 
     def setUp(self):
-        self.mesh = MeshTri()
-        self.mesh.refine(4)
+        self.mesh = MeshTri().refined(4)
 
 
 class ConvergenceRaviartThomas3D(ConvergenceRaviartThomas):
@@ -150,5 +149,4 @@ class ConvergenceRaviartThomas3D(ConvergenceRaviartThomas):
                 InteriorBasis(m, e0, intorder=2))
 
     def setUp(self):
-        self.mesh = MeshTet()
-        self.mesh.refine(1)
+        self.mesh = MeshTet().refined(1)

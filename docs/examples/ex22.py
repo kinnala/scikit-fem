@@ -17,8 +17,7 @@ from skfem.models.poisson import laplace
 from skfem.helpers import grad
 import numpy as np
 
-m = MeshTri.init_lshaped()
-m.refine(2)
+m = MeshTri.init_lshaped().refined(2)
 e = ElementTriP1()
 
 def load_func(x, y):
@@ -68,7 +67,7 @@ if __name__ == "__main__":
 
 for itr in range(9): # 9 adaptive refinements
     if itr > 0:
-        m.refine(adaptive_theta(eval_estimator(m, u)))
+        m = m.refined(adaptive_theta(eval_estimator(m, u)))
         
     basis = InteriorBasis(m, e)
     

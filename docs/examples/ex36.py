@@ -149,8 +149,7 @@ def A22(w):
     return L
 
 
-mesh = MeshTet()
-mesh.refine(2)
+mesh = MeshTet().refined(2)
 uelem = ElementVectorH1(ElementTetP2())
 pelem = ElementTetP1()
 elems = {

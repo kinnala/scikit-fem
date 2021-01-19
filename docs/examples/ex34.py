@@ -11,8 +11,7 @@ The analytical solution gives :math:`u(1)=1/8`.
 """
 from skfem import *
 
-m = MeshLine()
-m.refine(3)
+m = MeshLine().refined(3)
 e = ElementLineHermite()
 basis = InteriorBasis(m, e)
 
