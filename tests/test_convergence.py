@@ -45,7 +45,7 @@ class ConvergenceQ1(unittest.TestCase):
 
         for itr in range(Nitrs):
             if itr > 0:
-                m.refine()
+                m = m.refined()
             ib = self.create_basis(m)
 
             A = asm(laplace, ib)

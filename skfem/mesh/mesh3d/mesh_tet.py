@@ -201,7 +201,7 @@ class MeshTet(Mesh3D):
                       [0, 5, 6, 1]], dtype=np.intp).T
         m = cls(p, t)
         for _ in range(Nrefs):
-            m.refine()
+            m = m.refined()
             D = m.boundary_nodes()
             m.p[:, D] = m.p[:, D] / np.linalg.norm(m.p[:, D], axis=0)
         return m

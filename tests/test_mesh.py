@@ -88,12 +88,12 @@ class RefinePreserveSubsets(unittest.TestCase):
                           ('internal', lambda x: x[0] == 0.5)]
             for name, handle in boundaries:
                 m.define_boundary(name, handle, boundaries_only=False)
-            m.refine()
+            m = m.refined()
             for name, handle in boundaries:
                 A = np.sort(m.boundaries[name])
                 B = np.sort(m.facets_satisfying(handle))
                 self.assertTrue((A == B).all())
-            m.refine(2)
+            m = m.refined(2)
             for name, handle in boundaries:
                 A = np.sort(m.boundaries[name])
                 B = np.sort(m.facets_satisfying(handle))
@@ -196,7 +196,7 @@ class TestMeshQuadSplit(unittest.TestCase):
     def runRefineTest(self):
         mesh = MeshQuad()
         mesh.define_boundary('left', lambda x: x[0] == 0)
-        mesh.refine()
+        mesh = mesh.refined()
         mesh_tri = mesh.to_meshtri()
 
         for b in mesh.boundaries:
@@ -213,7 +213,7 @@ class TestAdaptiveSplitting1D(unittest.TestCase):
         for itr in range(10):
             prev_t_size = m.t.shape[1]
             prev_p_size = m.p.shape[1]
-            m.refine([prev_t_size - 1])
+            m = m.refined([prev_t_size - 1])
 
             # check that new size is current size + 1
             self.assertEqual(prev_t_size, m.t.shape[1] - 1)
@@ -232,7 +232,7 @@ class TestAdaptiveSplitting2D(unittest.TestCase):
                 else m.t.shape[1] - 1
             prev_t_size = m.t.shape[1]
             prev_p_size = m.p.shape[1]
-            m.refine([red_ix])
+            m = m.refined([red_ix])
 
             # check that new size is current size + 4
             self.assertEqual(prev_t_size, m.t.shape[1] - 4)

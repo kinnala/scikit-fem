@@ -208,19 +208,18 @@ class NormalVectorTestTri(unittest.TestCase):
     intorder = None
 
     def runTest(self):
-        self.case[0].refine()
+        m = self.case[0].refined()
 
         if self.intorder is not None:
-            basis = FacetBasis(*self.case, intorder=self.intorder)
+            basis = FacetBasis(m, self.case[1], intorder=self.intorder)
         else:
-            basis = FacetBasis(*self.case)
+            basis = FacetBasis(m, self.case[1])
 
         @LinearForm
         def linf(v, w):
             return np.sum(w.n ** 2, axis=0) * v
 
         b = asm(linf, basis)
-        m = self.case[0]
         ones = project(lambda x: 1.0 + x[0] * 0.,
                        basis_to=basis,
                        I=basis.get_dofs().flatten(),

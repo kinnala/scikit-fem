@@ -70,7 +70,7 @@ class ConvergenceMorley(TestCase):
 
             L2s.append(L2)
             hs.append(m.param())
-            m.refine()
+            m = m.refined()
 
         hs = np.array(hs)
         L2s = np.array(L2s)
@@ -139,7 +139,7 @@ class ConvergenceHermite(TestCase):
 
             L2s.append(L2)
             hs.append(m.param())
-            m.refine()
+            m = m.refined()
 
         hs = np.array(hs)
         L2s = np.array(L2s)

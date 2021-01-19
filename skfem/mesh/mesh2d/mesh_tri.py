@@ -287,7 +287,7 @@ class MeshTri(Mesh2D):
                       [0, 3, 4]], dtype=np.intp).T
         m = cls(p, t)
         for _ in range(Nrefs):
-            m.refine()
+            m = m.refined()
             D = m.boundary_nodes()
             m.p[:, D] = m.p[:, D] / np.linalg.norm(m.p[:, D], axis=0)
         return m

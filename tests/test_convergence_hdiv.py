@@ -69,7 +69,7 @@ class ConvergenceRaviartThomas(unittest.TestCase):
             Hdivs[itr] = self.compute_Hdiv(m, ib1, sigma)
             hs[itr] = m.param()
 
-            m.refine()
+            m = m.refined()
 
         rateL2 = np.polyfit(np.log(hs), np.log(L2s), 1)[0]
         rateHdiv = np.polyfit(np.log(hs), np.log(Hdivs), 1)[0]
