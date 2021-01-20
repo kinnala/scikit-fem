@@ -2,7 +2,6 @@ from typing import Callable, Dict, Optional, Tuple, Type
 
 import numpy as np
 from numpy import ndarray
-
 from skfem.element import (DiscreteField, Element, ElementHex0, ElementHex1,
                            ElementHex2, ElementLineP0, ElementLineP1,
                            ElementLineP2, ElementQuad0, ElementQuad1,

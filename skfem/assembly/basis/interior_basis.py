@@ -1,11 +1,11 @@
-from typing import Optional, Callable, Tuple
+from typing import Callable, Optional, Tuple
 
 import numpy as np
 from numpy import ndarray
-
-from skfem.element import Element, DiscreteField
+from skfem.element import DiscreteField, Element
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh
+
 from .basis import Basis
 
 

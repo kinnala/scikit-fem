@@ -1,8 +1,7 @@
-from typing import List, Any, Tuple, Dict, Union, Optional
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from numpy import ndarray
-
 from skfem.assembly.dofs import Dofs
 from skfem.element.discrete_field import DiscreteField
 from skfem.element.element_composite import ElementComposite

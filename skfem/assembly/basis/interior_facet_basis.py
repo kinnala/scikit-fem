@@ -2,10 +2,9 @@ from typing import Optional, Tuple
 
 import numpy as np
 from numpy import ndarray
-
-from skfem.mesh import Mesh
 from skfem.element import Element
 from skfem.mapping import Mapping
+from skfem.mesh import Mesh
 
 from .facet_basis import FacetBasis
 
