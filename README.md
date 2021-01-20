@@ -207,7 +207,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
-- Added: Explicit Python 3.9 support for the base functionality
+- Fixed: Include explicit Python 3.9 support (for the base functionality)
 
 ### [2.4.0] - 2021-01-20
 
