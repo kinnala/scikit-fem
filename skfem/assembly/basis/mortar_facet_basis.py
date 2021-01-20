@@ -1,6 +1,5 @@
 from typing import Optional, Tuple
 
-import numpy as np
 from numpy import ndarray
 from skfem.element import Element
 from skfem.mapping import Mapping
