@@ -28,9 +28,9 @@ class Basis:
                  mesh,
                  elem,
                  mapping,
-                 intorder,
-                 quadrature,
-                 refdom):
+                 intorder=None,
+                 quadrature=None,
+                 refdom=None):
 
         self.mapping = mesh._mapping() if mapping is None else mapping
 

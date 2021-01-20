@@ -2,7 +2,7 @@ from typing import Optional, Tuple
 
 from numpy import ndarray
 from skfem.element import Element
-from skfem.mapping import Mapping
+from skfem.mapping import MappingMortar
 from skfem.mesh import Mesh
 
 from .facet_basis import FacetBasis
@@ -13,7 +13,7 @@ class MortarFacetBasis(FacetBasis):
     def __init__(self,
                  mesh: Mesh,
                  elem: Element,
-                 mapping: Optional[Mapping] = None,
+                 mapping: MappingMortar,
                  intorder: Optional[int] = None,
                  side: int = 0,
                  facets: Optional[ndarray] = None,
