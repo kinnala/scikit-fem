@@ -37,6 +37,17 @@ build_py38:
 run_py38:
 	docker run -it -v ${PWD}:"/scikit-fem" --entrypoint /bin/bash skfem:py38
 
+# Python 3.9
+
+test_py39: build_py39
+	GITHUB_WORKSPACE=/scikit-fem docker run -e GITHUB_WORKSPACE -v ${PWD}:"/scikit-fem" skfem:py39
+
+build_py39:
+	docker build -t skfem:py39 https://github.com/kinnala/scikit-fem-docker-action.git#py39
+
+run_py39:
+	docker run -it -v ${PWD}:"/scikit-fem" --entrypoint /bin/bash skfem:py39
+
 # Documentation
 
 sphinx:
