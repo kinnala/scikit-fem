@@ -207,6 +207,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
+### [2.4.0] - 2021-01-20
+
 - Deprecated: List and tuple keyword argument types to `asm`.
 - Deprecated: `Mesh2D.mirror` in favor of the more general `Mesh.mirrored`.
 - Deprecated: `Mesh.refine`, `Mesh.scale` and `Mesh.translate` in favor of
