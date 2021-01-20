@@ -17,16 +17,20 @@ from skfem.models.poisson import laplace
 from skfem.helpers import grad
 import numpy as np
 
+
 m = MeshTri.init_lshaped().refined(2)
 e = ElementTriP1()
 
+
 def load_func(x, y):
-    return 1.0
+    return 1.
+
 
 @LinearForm
 def load(v, w):
     x, y = w.x
     return load_func(x, y) * v
+
 
 def eval_estimator(m, u):    
     # interior residual
@@ -41,7 +45,7 @@ def eval_estimator(m, u):
     eta_K = interior_residual.elemental(basis, w=basis.interpolate(u))
     
     # facet jump
-    fbasis = [FacetBasis(m, e, side=i) for i in [0, 1]]   
+    fbasis = [InteriorFacetBasis(m, e, side=i) for i in [0, 1]]
     w = {'u' + str(i + 1): fbasis[i].interpolate(u) for i in [0, 1]}
     
     @Functional

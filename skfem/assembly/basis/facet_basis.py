@@ -11,7 +11,6 @@ from skfem.element import (DiscreteField, Element, ElementHex0, ElementHex1,
                            ElementTriP2)
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh, MeshHex, MeshQuad, MeshTet, MeshTri
-from skfem.quadrature import get_quadrature
 
 from .basis import Basis
 from .interior_basis import InteriorBasis
@@ -28,7 +27,7 @@ class FacetBasis(Basis):
                  elem: Element,
                  mapping: Optional[Mapping] = None,
                  intorder: Optional[int] = None,
-                 side: Optional[int] = None,
+                 side: int = 0,
                  facets: Optional[ndarray] = None,
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None):
         """Combine :class:`~skfem.mesh.Mesh` and :class:`~skfem.element.Element`
@@ -48,44 +47,27 @@ class FacetBasis(Basis):
             integrated exactly by the used quadrature. Not used if `quadrature`
             is specified.
         side
-            If 0 or 1, basis functions are evaluated on the interior facets.
-            The numbers 0 and 1 refer to the different sides of the facets.
-            Side 0 corresponds to the indices `mesh.f2t[0]`. If `None`, basis
-            is evaluated only on the exterior facets.
+            Choose which row of `mesh.f2t` is used to determine the element for
+            which the basis function is evaluated. By default, side=0.
         facets
             Optional subset of facet indices.
         quadrature
             Optional tuple of quadrature points and weights.
 
         """
-        super(FacetBasis, self).__init__(mesh, elem, mapping)
-
-        if quadrature is not None:
-            self.X, self.W = quadrature
-        else:
-            self.X, self.W = get_quadrature(
-                self.brefdom,
-                intorder if intorder is not None else 2 * self.elem.maxdeg
-            )
+        super(FacetBasis, self).__init__(mesh,
+                                         elem,
+                                         mapping,
+                                         intorder,
+                                         quadrature,
+                                         mesh.brefdom)
 
         # facets where the basis is evaluated
         if facets is None:
-            if side is None:
-                self.find = np.nonzero(self.mesh.f2t[1] == -1)[0]
-                self.tind = self.mesh.f2t[0, self.find]
-            elif hasattr(self.mapping, 'helper_to_orig') and side in [0, 1]:
-                self.mapping.side = side
-                self.find = self.mapping.helper_to_orig[side]
-                self.tind = self.mesh.f2t[0, self.find]
-            elif side in [0, 1]:
-                self.find = np.nonzero(self.mesh.f2t[1] != -1)[0]
-                self.tind = self.mesh.f2t[side, self.find]
-            else:
-                raise Exception("Parameter 'side' must be either 0 or 1. "
-                                "A facet shares only two elements.")
+            self.find = np.nonzero(self.mesh.f2t[1] == -1)[0]
         else:
             self.find = facets
-            self.tind = self.mesh.f2t[0, self.find]
+        self.tind = self.mesh.f2t[side, self.find]
 
         # boundary refdom to global facet
         x = self.mapping.G(self.X, find=self.find)

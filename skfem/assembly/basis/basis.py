@@ -6,6 +6,7 @@ from numpy import ndarray
 from skfem.assembly.dofs import Dofs
 from skfem.element.discrete_field import DiscreteField
 from skfem.element.element_composite import ElementComposite
+from skfem.quadrature import get_quadrature
 
 
 class Basis:
@@ -24,7 +25,13 @@ class Basis:
     X: ndarray = None
     W: ndarray = None
 
-    def __init__(self, mesh, elem, mapping=None, quadrature=None):
+    def __init__(self,
+                 mesh,
+                 elem,
+                 mapping,
+                 intorder,
+                 quadrature,
+                 refdom):
 
         self.mapping = mesh._mapping() if mapping is None else mapping
 
@@ -34,8 +41,7 @@ class Basis:
             raise ValueError("Incompatible Mesh and Element.")
 
         # global degree-of-freedom location
-        # disabled for MappingMortar by checking mapping.maps
-        if hasattr(elem, 'doflocs') and not hasattr(mapping, 'maps'):
+        if hasattr(elem, 'doflocs'):
             doflocs = self.mapping.F(elem.doflocs.T)
             self.doflocs = np.zeros((doflocs.shape[0], self.N))
 
@@ -52,8 +58,13 @@ class Basis:
 
         self.nelems = None  # subclasses should overwrite
 
-        self.refdom = mesh.refdom
-        self.brefdom = mesh.brefdom
+        if quadrature is not None:
+            self.X, self.W = quadrature
+        else:
+            self.X, self.W = get_quadrature(
+                refdom,
+                intorder if intorder is not None else 2 * self.elem.maxdeg
+            )
 
     @property
     def nodal_dofs(self):
