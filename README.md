@@ -94,9 +94,12 @@ More examples can be found in the [gallery](https://scikit-fem.readthedocs.io/en
 
 ## Documentation
 
-The project is documented using Sphinx under `docs/`.  Built version of the
-documentation can be found from [Read the
-Docs](https://scikit-fem.readthedocs.io/en/latest/).
+The project is documented using Sphinx under `docs/`.
+Built version can be found from [Read the Docs](https://scikit-fem.readthedocs.io/en/latest/).
+Here are direct links to additional resources:
+
+- [Examples from our test suite](https://scikit-fem.readthedocs.io/en/latest/listofexamples.html)
+- [Examples from the FEniCS tutorial](https://github.com/gdmcbain/fenics-tuto-in-skfem)
 
 ## Getting help
 
@@ -178,10 +181,13 @@ e.g., to ensure reproducibility.
 
 ## In literature
 
-The library has been used in the preparation of the following scientific works:
+The library has been used in the preparation of the following scientific works.
+Feel free to add your publication to the list.
 
+- Gustafsson, T. (2020). A simple technique for unstructured mesh generation via adaptive finite elements. arXiv preprint [arXiv:2011.07919](https://arxiv.org/abs/2011.07919).
+- Huang, X., Shi, Y., & Wang, W. (2020). A Morley-Wang-Xu element method for a fourth order elliptic singular perturbation problem. arXiv preprint [arXiv:2011.14064](https://arxiv.org/abs/2011.14064).
 - Gustafsson, T., Stenberg, R., & Videman, J. (2020). Nitsche's method for Kirchhoff plates. arXiv preprint [arXiv:2007.00403](https://arxiv.org/abs/2007.00403).
-
+- Aquino, A., Mallinson, S., McBain, G. D., Horrocks, G., & Barber, T. (2020). Two-dimensional numerical simulation of inkjet print-zone flows. 22nd Australasian Fluid Mechanics Conference AFMC2020. [Open access](https://doi.org/10.14264/c646e40).
 - Gustafsson, T., & McBain, G. D. (2020). scikit-fem: A Python package for finite element assembly. Journal of Open Source Software, 52(5). [Open access](https://doi.org/10.21105/joss.02369).
 - Gustafsson, T., Stenberg, R., & Videman, J. (2020). On Nitsche's method for elastic contact problems. SIAM Journal on Scientific Computing, 42(2), B425–B446. arXiv preprint [arXiv:1902.09312](https://arxiv.org/abs/1902.09312).
 - Gustafsson, T., Stenberg, R., & Videman, J. (2019). Nitsche's Master-Slave Method for Elastic Contact Problems. [arXiv:1912.08279](https://arxiv.org/abs/1912.08279).

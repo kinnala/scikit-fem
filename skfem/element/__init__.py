@@ -41,8 +41,11 @@ It is up to the user to decide whether the given boundary condition can or
 should be enforced strongly or weakly.  See :ref:`finddofs` for more
 information.
 
-List of elements
-----------------
+List of finite elements
+-----------------------
+
+The list of finite elements is generated automatically from the source code of
+:mod:`skfem.element`.
 
 """
 

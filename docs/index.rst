@@ -28,6 +28,5 @@ Table of contents
    overview
    forms
    bcs
-   elements
    listofexamples
    api

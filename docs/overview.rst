@@ -13,7 +13,10 @@ Module: skfem.mesh
 Module: skfem.element
 =====================
 
-This module defines finite elements. See :mod:`skfem.element`.
+.. automodule:: skfem.element
+   :members:
+   :show-inheritance:
+   :exclude-members: DiscreteField, Element, ElementH1, ElementHcurl, ElementHdiv, ElementComposite, ElementVectorH1
 
 Module: skfem.assembly
 ======================
