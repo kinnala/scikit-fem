@@ -11,5 +11,5 @@ def FacetBasis(*args, side=None, **kwargs):
         return ExteriorFacetBasis(*args, **kwargs)
     if 'mapping' in kwargs:
         if hasattr(kwargs['mapping'], 'helper_to_orig'):
-            return MortarFacetBasis(*args, **kwargs)
-    return InteriorFacetBasis(*args, **kwargs)
+            return MortarFacetBasis(*args, side=side, **kwargs)
+    return InteriorFacetBasis(*args, side=side, **kwargs)
