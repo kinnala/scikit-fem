@@ -5,19 +5,23 @@ from skfem.element import Element
 from skfem.mapping import MappingMortar
 from skfem.mesh import Mesh
 
-from .facet_basis import FacetBasis
+from .exterior_facet_basis import ExteriorFacetBasis
 
 
-class MortarFacetBasis(FacetBasis):
+class MortarFacetBasis(ExteriorFacetBasis):
 
     def __init__(self,
                  mesh: Mesh,
                  elem: Element,
                  mapping: MappingMortar,
                  intorder: Optional[int] = None,
-                 side: int = 0,
+                 quadrature: Optional[Tuple[ndarray, ndarray]] = None,
                  facets: Optional[ndarray] = None,
-                 quadrature: Optional[Tuple[ndarray, ndarray]] = None):
+                 side: int = 0):
+        """Precomputed global basis on the mortar mesh."""
+
+        if side not in (0, 1):
+            raise Exception("'side' must be 0 or 1.")
 
         if facets is None:
             mapping.side = side
@@ -27,6 +31,6 @@ class MortarFacetBasis(FacetBasis):
                                                elem,
                                                mapping=mapping,
                                                intorder=intorder,
-                                               side=0,
+                                               quadrature=quadrature,
                                                facets=facets,
-                                               quadrature=quadrature)
+                                               _side=0)

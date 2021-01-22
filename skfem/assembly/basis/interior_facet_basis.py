@@ -6,19 +6,23 @@ from skfem.element import Element
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh
 
-from .facet_basis import FacetBasis
+from .exterior_facet_basis import ExteriorFacetBasis
 
 
-class InteriorFacetBasis(FacetBasis):
+class InteriorFacetBasis(ExteriorFacetBasis):
 
     def __init__(self,
                  mesh: Mesh,
                  elem: Element,
                  mapping: Optional[Mapping] = None,
                  intorder: Optional[int] = None,
-                 side: int = 0,
+                 quadrature: Optional[Tuple[ndarray, ndarray]] = None,
                  facets: Optional[ndarray] = None,
-                 quadrature: Optional[Tuple[ndarray, ndarray]] = None):
+                 side: int = 0):
+        """Precomputed global basis on interior facets."""
+
+        if side not in (0, 1):
+            raise Exception("'side' must be 0 or 1.")
 
         if facets is None:
             facets = np.nonzero(mesh.f2t[1] != -1)[0]
@@ -27,6 +31,6 @@ class InteriorFacetBasis(FacetBasis):
                                                  elem,
                                                  mapping=mapping,
                                                  intorder=intorder,
-                                                 side=side,
+                                                 quadrature=quadrature,
                                                  facets=facets,
-                                                 quadrature=quadrature)
+                                                 _side=side)

@@ -15,8 +15,8 @@ from .basis import Basis
 from .interior_basis import InteriorBasis
 
 
-class FacetBasis(Basis):
-    """Basis functions evaluated at quadrature points on the element boundaries.
+class ExteriorFacetBasis(Basis):
+    """Global basis functions at quadrature points on the boundary.
 
     Initialized and used similarly as :class:`~skfem.assembly.InteriorBasis`.
 
@@ -26,11 +26,10 @@ class FacetBasis(Basis):
                  elem: Element,
                  mapping: Optional[Mapping] = None,
                  intorder: Optional[int] = None,
-                 side: int = 0,
+                 quadrature: Optional[Tuple[ndarray, ndarray]] = None,
                  facets: Optional[ndarray] = None,
-                 quadrature: Optional[Tuple[ndarray, ndarray]] = None):
-        """Combine :class:`~skfem.mesh.Mesh` and :class:`~skfem.element.Element`
-        into a set of precomputed global basis functions at element facets.
+                 _side: int = 0):
+        """Precomputed global basis on boundary facets.
 
         Parameters
         ----------
@@ -45,28 +44,25 @@ class FacetBasis(Basis):
             Optional integration order, i.e. the degree of polynomials that are
             integrated exactly by the used quadrature. Not used if `quadrature`
             is specified.
-        side
-            Choose which row of `mesh.f2t` is used to determine the element for
-            which the basis function is evaluated. By default, side=0.
-        facets
-            Optional subset of facet indices.
         quadrature
             Optional tuple of quadrature points and weights.
+        facets
+            Optional subset of facet indices.
 
         """
-        super(FacetBasis, self).__init__(mesh,
-                                         elem,
-                                         mapping,
-                                         intorder,
-                                         quadrature,
-                                         mesh.brefdom)
+        super(ExteriorFacetBasis, self).__init__(mesh,
+                                                 elem,
+                                                 mapping,
+                                                 intorder,
+                                                 quadrature,
+                                                 mesh.brefdom)
 
         # facets where the basis is evaluated
         if facets is None:
             self.find = np.nonzero(self.mesh.f2t[1] == -1)[0]
         else:
             self.find = facets
-        self.tind = self.mesh.f2t[side, self.find]
+        self.tind = self.mesh.f2t[_side, self.find]
 
         # boundary refdom to global facet
         x = self.mapping.G(self.X, find=self.find)
@@ -110,10 +106,10 @@ class FacetBasis(Basis):
         """Trace mesh basis projection."""
         from skfem.utils import project
 
-        fbasis = FacetBasis(self.mesh,
-                            elem,
-                            facets=self.find,
-                            quadrature=(self.X, self.W))
+        fbasis = ExteriorFacetBasis(self.mesh,
+                                    elem,
+                                    facets=self.find,
+                                    quadrature=(self.X, self.W))
         I = fbasis.get_dofs(self.find).all()
         if len(I) == 0:  # special case: no facet DOFs
             if fbasis.dofs.interior_dofs.shape[0] > 1:
