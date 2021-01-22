@@ -1,3 +1,4 @@
+import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -40,7 +41,7 @@ class Basis:
             raise ValueError("Incompatible Mesh and Element.")
 
         # global degree-of-freedom location
-        if hasattr(elem, 'doflocs'):
+        try:
             doflocs = self.mapping.F(elem.doflocs.T)
             self.doflocs = np.zeros((doflocs.shape[0], self.N))
 
@@ -49,6 +50,8 @@ class Basis:
                 for jtr in range(self.element_dofs.shape[0]):
                     self.doflocs[itr, self.element_dofs[jtr]] =\
                         doflocs[itr, :, jtr]
+        except Exception:
+            warnings.warn("Unable to calculate DOF locations.")
 
         self.mesh = mesh
         self.elem = elem
