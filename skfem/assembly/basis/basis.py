@@ -3,10 +3,11 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from numpy import ndarray
-from skfem.assembly.dofs import Dofs
-from skfem.element.discrete_field import DiscreteField
-from skfem.element.element_composite import ElementComposite
+from skfem.assembly.dofs import Dofs, DofsView
+from skfem.element import Element, DiscreteField, ElementComposite
+from skfem.mapping import Mapping
 from skfem.quadrature import get_quadrature
+from skfem.mesh import Mesh
 
 
 class Basis:
@@ -15,7 +16,9 @@ class Basis:
     Please see the following implementations:
 
     - :class:`~skfem.assembly.InteriorBasis`, basis functions inside elements
-    - :class:`~skfem.assembly.FacetBasis`, basis functions on boundaries
+    - :class:`~skfem.assembly.ExteriorFacetBasis`, basis functions on boundary
+    - :class:`~skfem.assembly.InteriorFacetBasis`, basis functions on facets
+      inside the domain
 
     """
 
@@ -26,12 +29,12 @@ class Basis:
     W: ndarray = None
 
     def __init__(self,
-                 mesh,
-                 elem,
-                 mapping,
-                 intorder=None,
-                 quadrature=None,
-                 refdom=None):
+                 mesh: Mesh,
+                 elem: Element,
+                 mapping: Optional[Mapping] = None,
+                 intorder: Optional[int] = None,
+                 quadrature: Optional[Tuple[ndarray, ndarray]] = None,
+                 refdom: str = "tri"):
 
         self.mapping = mesh._mapping() if mapping is None else mapping
 
@@ -58,7 +61,7 @@ class Basis:
 
         self.Nbfun = self.element_dofs.shape[0]
 
-        self.nelems = None  # subclasses should overwrite
+        self.nelems = 0  # subclasses should overwrite
 
         if quadrature is not None:
             self.X, self.W = quadrature
@@ -102,7 +105,7 @@ class Basis:
 
     def find_dofs(self,
                   facets: Dict[str, ndarray] = None,
-                  skip: List[str] = None) -> Dict[str, Dofs]:
+                  skip: List[str] = None) -> Dict[str, DofsView]:
         """Return global DOF numbers corresponding to a dictionary of facets.
 
         Facets can be queried from :class:`~skfem.mesh.Mesh` objects:
