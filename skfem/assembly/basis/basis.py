@@ -34,7 +34,7 @@ class Basis:
                  mapping: Optional[Mapping] = None,
                  intorder: Optional[int] = None,
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
-                 refdom: str = "tri"):
+                 refdom: str = "none"):
 
         self.mapping = mesh._mapping() if mapping is None else mapping
 
