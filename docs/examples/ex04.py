@@ -54,7 +54,8 @@ This is a nonlinear problem since we do not know a priori which subset
 from skfem import *
 from skfem.models.elasticity import linear_elasticity,\
     lame_parameters, linear_stress
-from skfem.models.helpers import dot, ddot, prod, sym_grad
+from skfem.models.helpers import dot, ddot,\
+    prod, sym_grad
 import numpy as np
 from skfem.io import from_meshio
 from skfem.io.json import from_file, to_file
@@ -86,8 +87,8 @@ mapping = MappingMortar.init_2D(m, M,
                                 np.array([0.0, 1.0]))
 
 mb = [
-    MortarFacetBasis(m, e, mapping=mapping, intorder=4, side=0),
-    MortarFacetBasis(M, E, mapping=mapping, intorder=4, side=1),
+    FacetBasis(m, e, mapping=mapping, intorder=4, side=0),
+    FacetBasis(M, E, mapping=mapping, intorder=4, side=1),
 ]
 
 # define bilinear forms

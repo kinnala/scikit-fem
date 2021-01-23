@@ -11,8 +11,8 @@ alpha = 1e-1
 
 ib = InteriorBasis(m, e)
 fb = {}
-fb[0] = InteriorFacetBasis(m, e, side=0)
-fb[1] = InteriorFacetBasis(m, e, side=1)
+fb[0] = FacetBasis(m, e, side=0)
+fb[1] = FacetBasis(m, e, side=1)
 bb = FacetBasis(m, e)
 
 @BilinearForm
