@@ -4,10 +4,10 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import numpy as np
 from numpy import ndarray
 from skfem.assembly.dofs import Dofs, DofsView
-from skfem.element import Element, DiscreteField, ElementComposite
+from skfem.element import DiscreteField, Element, ElementComposite
 from skfem.mapping import Mapping
-from skfem.quadrature import get_quadrature
 from skfem.mesh import Mesh
+from skfem.quadrature import get_quadrature
 
 
 class Basis:
