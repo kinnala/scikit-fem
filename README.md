@@ -209,8 +209,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Deprecated: `side` keyword argument to `FacetBasis` in favor of the more
   explicit `InteriorFacetBasis` and `MortarFacetBasis`.
-- Added: `ExteriorFacetBasis` for integrating over the boundary facets. Aliased
-  as `FacetBasis`.
 - Added: `InteriorFacetBasis` for integrating over the interior facets, e.g.,
   evaluating error estimators with jumps and implementing DG methods.
 - Added: `MortarFacetBasis` for integrating over the mortar mesh.

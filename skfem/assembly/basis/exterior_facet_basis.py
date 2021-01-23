@@ -18,7 +18,7 @@ from .interior_basis import InteriorBasis
 class ExteriorFacetBasis(Basis):
     """Global basis functions at quadrature points on the boundary.
 
-    Initialized and used similarly as :class:`~skfem.assembly.InteriorBasis`.
+    Aliased as ``FacetBasis``.
 
     """
     def __init__(self,
