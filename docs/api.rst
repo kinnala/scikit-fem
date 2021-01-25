@@ -50,7 +50,10 @@ Class: Basis
 .. autoclass:: skfem.assembly.InteriorBasis
    :members: __init__
 
-.. autoclass:: skfem.assembly.FacetBasis
+.. autoclass:: skfem.assembly.ExteriorFacetBasis
+   :members: __init__, trace
+
+.. autoclass:: skfem.assembly.InteriorFacetBasis
    :members: __init__, trace
 
 

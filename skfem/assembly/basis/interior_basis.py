@@ -1,12 +1,11 @@
-from typing import Optional, Callable, Tuple
+from typing import Callable, Optional, Tuple
 
 import numpy as np
 from numpy import ndarray
-
-from skfem.element import Element, DiscreteField
+from skfem.element import DiscreteField, Element
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh
-from skfem.quadrature import get_quadrature
+
 from .basis import Basis
 
 
@@ -58,16 +57,12 @@ class InteriorBasis(Basis):
             Optional tuple of quadrature points and weights.
 
         """
-
-        super(InteriorBasis, self).__init__(mesh, elem, mapping)
-
-        if quadrature is not None:
-            self.X, self.W = quadrature
-        else:
-            self.X, self.W = get_quadrature(
-                self.refdom,
-                intorder if intorder is not None else 2 * self.elem.maxdeg
-            )
+        super(InteriorBasis, self).__init__(mesh,
+                                            elem,
+                                            mapping,
+                                            intorder,
+                                            quadrature,
+                                            mesh.refdom)
 
         self.basis = [self.elem.gbasis(self.mapping, self.X, j, tind=elements)
                       for j in range(self.Nbfun)]

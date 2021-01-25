@@ -50,6 +50,7 @@ class Element:
     maxdeg: int = -1
     dofnames: List[str] = []
     mesh_type: Type = Mesh
+    doflocs: ndarray
 
     def orient(self, mapping, i, tind=None):
         """Orient basis functions. By default all = 1."""

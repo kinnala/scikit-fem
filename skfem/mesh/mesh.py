@@ -131,6 +131,10 @@ class Mesh:
         """Return the spatial dimension of the mesh."""
         return int(self.p.shape[0])
 
+    @classmethod
+    def init_refdom(self):
+        raise NotImplementedError
+
     @property
     def nelements(self):
         return int(self.t.shape[1])
