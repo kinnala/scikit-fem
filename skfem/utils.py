@@ -210,8 +210,12 @@ def _flatten_dofs(S: Optional[DofsCollection]) -> Optional[ndarray]:
     elif isinstance(S, DofsView):
         return S.flatten()
     elif isinstance(S, dict):
+        def _flatten_helper(S, key):
+            if key in S and isinstance(S[key], DofsView):
+                return S[key].flatten()
+            raise NotImplementedError
         return np.unique(
-            np.concatenate([S[key].flatten() for key in S])
+            np.concatenate([_flatten_helper(S, key) for key in S])
         )
     raise NotImplementedError("Unable to flatten the given set of DOFs.")
 
