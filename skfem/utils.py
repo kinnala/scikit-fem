@@ -196,13 +196,13 @@ def solve(A: spmatrix,
 
     """
     if isinstance(b, spmatrix):
-        return solve_eigen(A, b, x, I, solver, **kwargs)
+        return solve_eigen(A, b, x, I, solver, **kwargs)  # type: ignore
     elif isinstance(b, ndarray):
-        return solve_linear(A, b, x, I, solver, **kwargs)
+        return solve_linear(A, b, x, I, solver, **kwargs)  # type: ignore
     raise NotImplementedError("Provided argument types not supported")
 
 
-def _flatten_dofs(S: DofsCollection) -> ndarray:
+def _flatten_dofs(S: Optional[DofsCollection]) -> Optional[ndarray]:
     if S is None:
         return None
     if isinstance(S, ndarray):
@@ -211,7 +211,7 @@ def _flatten_dofs(S: DofsCollection) -> ndarray:
         return S.flatten()
     elif isinstance(S, dict):
         return np.unique(
-            np.concatenate([S[key].flatten() for key in S])  # type: ignore
+            np.concatenate([S[key].flatten() for key in S])
         )
     raise NotImplementedError("Unable to flatten the given set of DOFs.")
 

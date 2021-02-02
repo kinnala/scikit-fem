@@ -1,5 +1,4 @@
 from typing import Dict, Optional, Any
-from numbers import Number
 
 from numpy import ndarray
 
