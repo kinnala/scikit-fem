@@ -31,7 +31,7 @@ class DiscreteField(NamedTuple):
         return [DiscreteField(*[f[i] for f in self if f is not None])
                 for i in range(self.value.shape[0])]
 
-    def zeros_like(self):
+    def zeros_like(self) -> 'DiscreteField':
         """Return zero :class:`~skfem.element.DiscreteField` with same size."""
 
         def zero_or_none(x):

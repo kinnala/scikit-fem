@@ -22,11 +22,11 @@ class Basis:
 
     """
 
-    tind: ndarray = None
-    dx: ndarray = None
-    basis: List[ndarray] = [None]
-    X: ndarray = None
-    W: ndarray = None
+    tind: Optional[ndarray] = None
+    dx: ndarray
+    basis: List[Tuple[DiscreteField, ...]] = []
+    X: ndarray
+    W: ndarray
 
     def __init__(self,
                  mesh: Mesh,
@@ -259,16 +259,16 @@ class Basis:
     def split_indices(self) -> List[ndarray]:
         """Return indices for the solution components."""
         if isinstance(self.elem, ElementComposite):
-            o = np.zeros(4, dtype=np.int)
-            output = [None] * len(self.elem.elems)
+            o = np.zeros(4, dtype=np.int_)
+            output: List[ndarray] = []
             for k in range(len(self.elem.elems)):
                 e = self.elem.elems[k]
-                output[k] = np.concatenate((
+                output.append(np.concatenate((
                     self.nodal_dofs[o[0]:(o[0] + e.nodal_dofs)].flatten(),
                     self.edge_dofs[o[1]:(o[1] + e.edge_dofs)].flatten(),
                     self.facet_dofs[o[2]:(o[2] + e.facet_dofs)].flatten(),
                     self.interior_dofs[o[3]:(o[3] + e.interior_dofs)].flatten()
-                )).astype(np.int)
+                )).astype(np.int_))
                 o += np.array([e.nodal_dofs,
                                e.edge_dofs,
                                e.facet_dofs,
@@ -296,7 +296,7 @@ class Basis:
     def zero_w(self) -> ndarray:
         """Return a zero array with correct dimensions for
         :func:`~skfem.assembly.asm`."""
-        return np.zeros((self.nelems, len(self.W)))
+        return np.zeros((self.nelems, 0 if self.W is None else len(self.W)))
 
     def zeros(self) -> ndarray:
         """Return a zero array with same dimensions as the solution."""

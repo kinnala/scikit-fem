@@ -20,6 +20,7 @@ from skfem.element import ElementVectorH1
 # custom types for describing input and output values
 
 
+Solution = Union[ndarray, Tuple[ndarray, ndarray]]
 LinearSolver = Callable[..., ndarray]
 EigenSolver = Callable[..., Tuple[ndarray, ndarray]]
 CondensedSystem = Union[spmatrix,
@@ -134,13 +135,47 @@ def solver_iter_pcg(**kwargs) -> LinearSolver:
 
 # solve and condense
 
+def solve_eigen(A: spmatrix,
+                M: spmatrix,
+                x: Optional[ndarray] = None,
+                I: Optional[ndarray] = None,
+                solver: Optional[Union[EigenSolver]] = None,
+                **kwargs) -> Tuple[ndarray, ndarray]:
+
+    if solver is None:
+        solver = solver_eigen_scipy(**kwargs)
+
+    if x is not None and I is not None:
+        L, X = solver(A, M, **kwargs)
+        y = np.tile(x.copy()[:, None], (1, X.shape[1]))
+        y[I] = X
+        return L, y
+    return solver(A, M, **kwargs)
+
+
+def solve_linear(A: spmatrix,
+                 b: ndarray,
+                 x: Optional[ndarray] = None,
+                 I: Optional[ndarray] = None,
+                 solver: Optional[Union[LinearSolver]] = None,
+                 **kwargs) -> ndarray:
+
+    if solver is None:
+        solver = solver_direct_scipy(**kwargs)
+
+    if x is not None and I is not None:
+        y = x.copy()
+        y[I] = solver(A, b, **kwargs)
+        return y
+    return solver(A, b, **kwargs)
+
 
 def solve(A: spmatrix,
           b: Union[ndarray, spmatrix],
           x: Optional[ndarray] = None,
           I: Optional[ndarray] = None,
           solver: Optional[Union[LinearSolver, EigenSolver]] = None,
-          **kwargs) -> ndarray:
+          **kwargs) -> Solution:
     """Solve a linear system or a generalized eigenvalue problem.
 
     The remaining keyword arguments are passed to the solver.
@@ -160,26 +195,11 @@ def solve(A: spmatrix,
         :func:`skfem.utils.solver_iter_krylov`.
 
     """
-    if solver is None:
-        if isinstance(b, spmatrix):
-            solver = solver_eigen_scipy(**kwargs)
-        elif isinstance(b, ndarray):
-            solver = solver_direct_scipy(**kwargs)
-        else:
-            raise NotImplementedError("Provided argument types not supported")
-
-    if x is not None and I is not None:
-        if isinstance(b, spmatrix):
-            L, X = solver(A, b, **kwargs)
-            y = np.tile(x.copy()[:, None], (1, X.shape[1]))
-            y[I] = X
-            return L, y
-        else:
-            y = x.copy()
-            y[I] = solver(A, b, **kwargs)
-            return y
-    else:
-        return solver(A, b, **kwargs)
+    if isinstance(b, spmatrix):
+        return solve_eigen(A, b, x, I, solver, **kwargs)
+    elif isinstance(b, ndarray):
+        return solve_linear(A, b, x, I, solver, **kwargs)
+    raise NotImplementedError("Provided argument types not supported")
 
 
 def _flatten_dofs(S: DofsCollection) -> ndarray:
@@ -358,9 +378,9 @@ def project(fun,
             f = asm(mass, basis_from, basis_to) @ fun
 
     if I is not None:
-        return solve(*condense(M, f, I=I, expand=expand))
+        return solve_linear(*condense(M, f, I=I, expand=expand))
 
-    return solve(M, f)
+    return solve_linear(M, f)
 
 
 def L2_projection(a, b, c=None):

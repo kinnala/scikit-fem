@@ -104,6 +104,7 @@ class ExteriorFacetBasis(Basis):
                        x: ndarray,
                        elem: Element) -> ndarray:
         """Trace mesh basis projection."""
+
         from skfem.utils import project
 
         fbasis = ExteriorFacetBasis(self.mesh,
@@ -112,11 +113,14 @@ class ExteriorFacetBasis(Basis):
                                     quadrature=(self.X, self.W))
         I = fbasis.get_dofs(self.find).all()
         if len(I) == 0:  # special case: no facet DOFs
-            if fbasis.dofs.interior_dofs.shape[0] > 1:
-                # no one-to-one restriction: requires interpolation
-                raise NotImplementedError
-            # special case: piecewise constant elem
-            I = fbasis.dofs.interior_dofs[:, self.tind].flatten()
+            if fbasis.dofs.interior_dofs is not None:
+                if fbasis.dofs.interior_dofs.shape[0] > 1:
+                    # no one-to-one restriction: requires interpolation
+                    raise NotImplementedError
+                # special case: piecewise constant elem
+                I = fbasis.dofs.interior_dofs[:, self.tind].flatten()
+            else:
+                raise ValueError
         return project(x, self, fbasis, I=I)
 
     def trace(self,

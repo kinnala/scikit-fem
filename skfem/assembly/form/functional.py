@@ -1,4 +1,5 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Any
+from numbers import Number
 
 from numpy import ndarray
 
@@ -31,7 +32,7 @@ class Functional(Form):
     def assemble(self,
                  ubasis: Basis,
                  vbasis: Optional[Basis] = None,
-                 **kwargs) -> float:
+                 **kwargs) -> Any:
         assert vbasis is None
         vbasis = ubasis
         return self.elemental(vbasis, **kwargs).sum(-1)

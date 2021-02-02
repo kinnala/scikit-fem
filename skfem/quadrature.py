@@ -3,6 +3,7 @@
 from typing import Tuple
 
 import numpy as np
+from numpy.polynomial.legendre import leggauss
 
 
 def get_quadrature(refdom: str, norder: int) -> Tuple[np.ndarray, np.ndarray]:
@@ -2222,7 +2223,7 @@ def get_quadrature_line(norder: int) -> Tuple[np.ndarray, np.ndarray]:
     """Return a nth order accurate quadrature rule for line [0,1]."""
     if norder <= 1:
         norder = 2
-    X, W = np.polynomial.legendre.leggauss(int(np.ceil((norder + 1.0) / 2.0)))
+    X, W = leggauss(int(np.ceil((norder + 1.0) / 2.0)))
     return np.array([0.5 * X + 0.5]), W / 2.0
 
 
