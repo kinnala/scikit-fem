@@ -21,11 +21,13 @@ is the transformation of bilinear forms into sparse matrices and linear forms
 into vectors.  The library supports triangular, quadrilateral, tetrahedral and
 hexahedral meshes as well as one-dimensional problems.
 
-The library fills an important gap in the spectrum of finite element codes.
-The library is *lightweight* meaning that it has *minimal dependencies*.
+The library fills a gap in the spectrum of finite element codes.
+The library is *lightweight* and has *minimal dependencies*.
 It contains *no compiled code* meaning that it's *easy to install* and
 use on all platforms that support NumPy.  Despite being fully interpreted, the
-code has a reasonably *good performance*.
+code has a *reasonable performance*.
+
+## Benchmark
 
 *The following benchmark (`docs/examples/performance.py`) demonstrates the time
 spent on finite element assembly in comparison to the time spent on linear
