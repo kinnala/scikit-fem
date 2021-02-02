@@ -1,5 +1,7 @@
 import warnings
-from typing import Dict, Optional, Tuple, Type, TypeVar, Union, Callable
+from typing import (Dict, Optional, Tuple,
+                    Type, TypeVar, Union,
+                    Callable, List)
 
 import numpy as np
 from numpy import ndarray
@@ -179,10 +181,10 @@ class Mesh:
                           "persisted when joining meshes.")
         return meshcls(p, t)
 
-    def to_dict(self) -> Dict[str, ndarray]:
+    def to_dict(self) -> Dict[str, Optional[Dict[str, List[float]]]]:
         """Return json serializable dictionary."""
-        boundaries: Optional[Dict[str, ndarray]] = None
-        subdomains: Optional[Dict[str, ndarray]] = None
+        boundaries: Optional[Dict[str, List[float]]] = None
+        subdomains: Optional[Dict[str, List[float]]] = None
         if self.boundaries is not None:
             boundaries = {k: v.tolist() for k, v in self.boundaries.items()}
         if self.subdomains is not None:

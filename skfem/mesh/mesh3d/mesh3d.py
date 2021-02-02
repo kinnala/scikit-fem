@@ -66,7 +66,7 @@ class Mesh3D(Mesh):
 
     def interior_edges(self) -> ndarray:
         """Return an array of interior edge indices."""
-        return np.setdiff1d(np.arange(self.edges.shape[1], dtype=np.int),
+        return np.setdiff1d(np.arange(self.edges.shape[1], dtype=np.int64),
                             self.boundary_edges())
 
     def param(self) -> float:

@@ -1,4 +1,4 @@
-from typing import Union, NamedTuple, Any, List
+from typing import Union, NamedTuple, Any, List, Optional
 
 import numpy as np
 from numpy import ndarray
@@ -159,12 +159,12 @@ class DofsView(NamedTuple):
 class Dofs:
     """An object containing a set of degree-of-freedom indices."""
 
-    nodal_dofs: ndarray = None
-    facet_dofs: ndarray = None
-    edge_dofs: ndarray = None
-    interior_dofs: ndarray = None
+    nodal_dofs: Optional[ndarray] = None
+    facet_dofs: Optional[ndarray] = None
+    edge_dofs: Optional[ndarray] = None
+    interior_dofs: Optional[ndarray] = None
 
-    element_dofs: ndarray = None
+    element_dofs: Optional[ndarray] = None
     N: int = 0
 
     topo: Mesh
@@ -280,8 +280,8 @@ class Dofs:
     def _by_name(self,
                  dofs: ndarray,
                  off: int = 0,
-                 ix: ndarray = None,
-                 rows: ndarray = None):
+                 ix: Optional[ndarray] = None,
+                 rows: Optional[Union[List[int], ndarray]] = None):
 
         n_dofs = dofs.shape[0]
         n_ents = dofs.shape[1] if ix is None else len(ix)

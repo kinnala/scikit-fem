@@ -1,4 +1,4 @@
-from typing import Optional, List, Type
+from typing import Optional, List, Type, Tuple
 
 import numpy as np
 from numpy import ndarray
@@ -63,7 +63,7 @@ class Element:
                mapping,
                X: ndarray,
                i: int,
-               tind: Optional[ndarray] = None) -> DiscreteField:
+               tind: Optional[ndarray] = None) -> Tuple[DiscreteField, ...]:
         """Evaluate the global basis functions, given local points X.
 
         The global points - at which the global basis is evaluated at - are

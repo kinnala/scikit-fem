@@ -4,6 +4,7 @@ import numpy as np
 from numpy import ndarray
 
 from .element import Element
+from .discrete_field import DiscreteField
 
 
 class ElementComposite(Element):
@@ -14,7 +15,7 @@ class ElementComposite(Element):
 
     """
 
-    def __init__(self, *elems):
+    def __init__(self, *elems: Element):
         self.elems = elems
         self.nodal_dofs = sum([e.nodal_dofs for e in self.elems])
         self.edge_dofs = sum([e.edge_dofs for e in self.elems])
@@ -46,8 +47,9 @@ class ElementComposite(Element):
         self.dofnames = dofnames
 
         doflocs = []
-        for i in range(np.sum(np.array([e._bfun_counts()
-                                        for e in self.elems]))):
+        for i in np.arange(np.sum(np.array([e._bfun_counts()
+                                            for e in self.elems])),
+                           dtype=int):
             n, ind = self._deduce_bfun(i)
             doflocs.append(self.elems[n].doflocs[ind])
         self.doflocs = np.array(doflocs)
@@ -56,7 +58,8 @@ class ElementComposite(Element):
 
     def _deduce_bfun(self, i: int):
         """Deduce component and basis function for i'th index."""
-        counts: ndarray = sum([e._bfun_counts() for e in self.elems])
+        counts = np.sum(np.array([e._bfun_counts()
+                                  for e in self.elems]), axis=0)
         tmp: List[Any] = []
         ns: List[Any] = []
         if counts[0] > 0:
@@ -81,7 +84,7 @@ class ElementComposite(Element):
         for j in range(len(self.elems)):
             maskj = mask == j
             total = np.sum(maskj)
-            seq = np.arange(total, dtype=np.int)
+            seq = np.arange(total, dtype=np.int_)
             inds[maskj] = seq
 
         return ns[i], inds[i]
@@ -89,11 +92,10 @@ class ElementComposite(Element):
     def gbasis(self, mapping, X: ndarray, i: int, tind=None):
         """Call correct :meth:`Element.gbasis` based on ``i``."""
         n, ind = self._deduce_bfun(i)
-        output = []
+        output: List[DiscreteField] = []
         for k, e in enumerate(self.elems):
             if n == k:
                 output.append(e.gbasis(mapping, X, ind, tind)[0])
             else:
-                output.append(e.gbasis(mapping, X, 0, tind)[0]
-                              .zeros_like())
+                output.append(e.gbasis(mapping, X, 0, tind)[0].zeros_like())
         return tuple(output)
