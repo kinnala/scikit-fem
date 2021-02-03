@@ -11,7 +11,7 @@ def divergence(u, v, w):
 
 @LinearForm
 def rot(v, w):
-    return dot(curl(v), w.w)
+    return dot(curl(v), w["w"])
 
 
 @LinearForm
