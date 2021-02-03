@@ -16,4 +16,4 @@ def rot(v, w):
 
 @LinearForm
 def vrot(v, w):
-    return dot(v, curl(w.w))
+    return dot(v, curl(w["w"]))
