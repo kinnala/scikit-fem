@@ -307,4 +307,3 @@ class Basis:
     def with_element(self, elem: Element) -> 'Basis':
         """Create a copy of ``self`` that uses different element."""
         raise NotImplementedError
-
