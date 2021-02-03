@@ -25,6 +25,7 @@ Table of contents
 .. toctree::
 
    self
+   gettingstarted
    overview
    forms
    bcs
