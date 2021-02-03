@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'scikit-fem'
-copyright = '2018-20, scikit-fem developers'
+copyright = '2018-2021, scikit-fem developers'
 author = 'scikit-fem developers'
 
 
