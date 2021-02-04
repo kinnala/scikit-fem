@@ -26,8 +26,7 @@ Table of contents
 
    self
    gettingstarted
-   overview
-   forms
-   bcs
+   howto
+   advanced
    listofexamples
    api
