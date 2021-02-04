@@ -1,5 +1,7 @@
 import warnings
 from typing import Callable, Any, Optional
+from functools import partial
+from copy import deepcopy
 
 import numpy as np
 from numpy import ndarray
@@ -18,11 +20,18 @@ class FormDict(dict):
 
 class Form:
 
+    form: Optional[Callable] = None
+
     def __init__(self,
-                 form: Callable = None,
+                 form: Optional[Callable] = None,
                  dtype: type = np.float64):
-        self.form = form
+        self.form = form.form if isinstance(form, Form) else form
         self.dtype = dtype
+
+    def partial(self, *args, **kwargs):
+        form = deepcopy(self)
+        form.form = partial(form.form, *args, **kwargs)
+        return form
 
     def __call__(self, *args):
         if self.form is None:  # decorate

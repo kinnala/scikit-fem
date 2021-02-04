@@ -214,6 +214,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added: `InteriorFacetBasis` for integrating over the interior facets, e.g.,
   evaluating error estimators with jumps and implementing DG methods.
 - Added: `MortarFacetBasis` for integrating over the mortar mesh.
+- Added: `InteriorBasis.with_element` for reinitializing an equivalent basis
+  that uses a different element.
+- Added: `Form.partial` for applying `functools.partial` to the form function
+  wrapped by `Form`.
 - Fixed: Include explicit Python 3.9 support.
 
 ### [2.4.0] - 2021-01-20
