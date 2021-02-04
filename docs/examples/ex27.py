@@ -111,7 +111,7 @@ class BackwardFacingStep:
                       for variable, e in self.element.items()}
         self.basis['inlet'] = FacetBasis(self.mesh, self.element['u'],
                                          facets=self.mesh.boundaries['inlet'])
-        self.basis['psi'] = InteriorBasis(self.mesh, ElementTriP2(), intorder=3)
+        self.basis['psi'] = self.basis['u'].with_element(ElementTriP2())
         self.D = np.concatenate([b.all() for b in self.basis['u'].find_dofs().values()])
 
         A = asm(vector_laplace, self.basis['u'])
