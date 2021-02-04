@@ -247,7 +247,7 @@ class MeshQuad(Mesh2D):
 
         self._fix_boundaries(new_facets)
 
-    def to_meshtri(self, x=None) -> MeshTri:
+    def to_meshtri(self, x=None) -> Union[MeshTri, Tuple[MeshTri, ndarray]]:
         """Split each quad into two triangles and return MeshTri."""
         t = self.t[[0, 1, 3]]
         t = np.hstack((t, self.t[[1, 2, 3]]))
