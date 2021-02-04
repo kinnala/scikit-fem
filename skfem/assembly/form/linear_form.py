@@ -11,7 +11,7 @@ class LinearForm(Form):
     """A linear form for finite element assembly.
 
     Used similarly as :class:`~skfem.assembly.BilinearForm` with the expection
-    that forms take two parameters `v` and `w`.
+    that forms take two parameters ``v`` and ``w``.
 
     """
 
@@ -19,6 +19,16 @@ class LinearForm(Form):
                  ubasis: Basis,
                  vbasis: Optional[Basis] = None,
                  **kwargs) -> ndarray:
+        """Assemble the linear form into a vector.
+
+        Parameters
+        ----------
+        ubasis
+            The :class:`~skfem.assembly.Basis` for ``v``.
+        **kwargs
+            Any additional keyword arguments are appended to ``w``.
+
+        """
 
         assert vbasis is None
         vbasis = ubasis

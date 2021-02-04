@@ -226,7 +226,7 @@ def condense(A: spmatrix,
              I: DofsCollection = None,
              D: DofsCollection = None,
              expand: bool = True) -> CondensedSystem:
-    """Eliminate degrees-of-freedom from a linear system.
+    r"""Eliminate degrees-of-freedom from a linear system.
 
     The user should provide the linear system ``A`` and ``b``
     and either the set of DOFs to eliminate (``D``) or the set
@@ -237,6 +237,82 @@ def condense(A: spmatrix,
 
         Supports also generalized eigenvalue problems
         where ``b`` is a matrix.
+
+    Example
+    -------
+
+    Suppose that the solution vector :math:`x` can be
+    split as
+
+    .. math::
+
+       x = \begin{bmatrix}
+           x_I\\
+           x_D
+       \end{bmatrix}
+
+    where :math:`x_D` are known and :math:`x_I` are unknown.  This allows
+    splitting the linear system as
+
+    .. math::
+
+       \begin{bmatrix}
+           A_{II} & A_{ID}\\
+           A_{DI} & A_{DD}
+       \end{bmatrix}
+       \begin{bmatrix}
+           x_I\\
+           x_D
+       \end{bmatrix}
+       =
+       \begin{bmatrix}
+           b_I\\
+           b_D
+       \end{bmatrix}
+
+    which leads to the condensed system
+
+    .. math::
+
+       A_{II} x_I = b_I - A_{ID} x_D.
+
+
+    As an example, let us assemble the matrix :math:`A` and the vector
+    :math:`b` corresponding to the Poisson equation :math:`-\Delta u = 1`.
+
+    .. doctest::
+
+       >>> import skfem as fem
+       >>> from skfem.models.poisson import laplace, unit_load
+       >>> m = fem.MeshTri().refined(2)
+       >>> basis = fem.InteriorBasis(m, fem.ElementTriP1())
+       >>> A = laplace.assemble(basis)
+       >>> b = unit_load.assemble(basis)
+
+    The condensed system is obtained with :func:`skfem.utils.condense`.  Below
+    we provide the DOFs to eliminate via the keyword argument
+    ``D``.
+
+    .. doctest::
+
+       >>> AII, bI, xI, I = fem.condense(A, b, D=m.boundary_nodes())
+       >>> AII.todense()
+       matrix([[ 4.,  0.,  0.,  0., -1., -1., -1., -1.,  0.],
+               [ 0.,  4.,  0.,  0., -1.,  0., -1.,  0.,  0.],
+               [ 0.,  0.,  4.,  0.,  0., -1.,  0., -1.,  0.],
+               [ 0.,  0.,  0.,  4., -1., -1.,  0.,  0.,  0.],
+               [-1., -1.,  0., -1.,  4.,  0.,  0.,  0.,  0.],
+               [-1.,  0., -1., -1.,  0.,  4.,  0.,  0.,  0.],
+               [-1., -1.,  0.,  0.,  0.,  0.,  4.,  0., -1.],
+               [-1.,  0., -1.,  0.,  0.,  0.,  0.,  4., -1.],
+               [ 0.,  0.,  0.,  0.,  0.,  0., -1., -1.,  4.]])
+        >>> bI
+        array([0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625,
+               0.0625])
+
+    By default, the eliminated DOFs are set to zero.
+    Different values can be provided through the keyword argument ``x``;
+    see :ref:`ex14`.
 
     Parameters
     ----------

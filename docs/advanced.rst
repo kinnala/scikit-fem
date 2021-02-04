@@ -1,11 +1,17 @@
+===============
+Advanced topics
+===============
+
+This section contains advanced discussions around the features of scikit-fem
+with an aim to develop a more detailed understanding of the library.
+
 .. _forms:
 
-==================
- Anatomy of forms
-==================
+Anatomy of forms
+================
 
 We consider forms as the basic building blocks of finite element assembly.
-Thus, it is important to understand how forms are used in scikit-fem and how to
+Thus, it is useful to understand how forms are used in scikit-fem and how to
 express them correctly.
 
 Let us begin with examples.  The bilinear form corresponding to the Laplace
@@ -67,7 +73,7 @@ The helper functions such as ``dot`` are discussed further in :ref:`helpers`.
 .. _formsreturn:
 
 Forms return NumPy arrays
-=========================
+-------------------------
 
 The form definition always returns a two-dimensional NumPy array.  This can be
 verified using the Python debugger:
@@ -101,7 +107,7 @@ always have such shape no matter which mesh or element type is used.
 .. _helpers:
 
 Helpers are useful but not necessary
-====================================
+------------------------------------
 
 The module :mod:`skfem.helpers` contains functions that make the forms more
 readable.  An alternative way to write the above form is
@@ -133,77 +139,75 @@ Notice how the shape of ``u[0]`` is what we expect also from the return value as
           [0.66666667, 0.16666667, 0.16666667]])
 
 
-.. _predefined:
+.. _dofindexing:
 
-Use of predefined functions in the forms
-========================================
+Indexing of the degrees-of-freedom
+==================================
 
-Sometimes we use a previous solution vector in the form
-definition, e.g., when solving nonlinear problems.
-A simple fixed-point iteration for
+.. warning::
 
-.. math::
+   This section contains lower level details on the order of the DOFs.
+   Read this only if you did not find an answer in :ref:`finddofs`.
 
-   \begin{aligned}
-      -\nabla \cdot ((u + 1)\nabla u) &= 1 \quad \text{in $\Omega$}, \\
-      u &= 0 \quad \text{on $\partial \Omega$},
-   \end{aligned}
+The DOFs :math:`x` are ordered automatically based on the mesh and the element
+type.  It is possible to investigate manually how the DOFs match the different
+topological entities (`nodes`, `facets`, `edges`, `elements`) of the mesh.
 
-would correspond to repeatedly
-finding :math:`u_{k+1} \in H^1_0(\Omega)` which satisfies
+.. note::
 
-.. math::
+   **Nomenclature:** In scikit-fem, `edges` exist only for three-dimensional
+   meshes so that `facets` are something always shared between two elements of
+   the mesh.  In particular, we refer to the edges of triangular and
+   quadrilateral meshes as `facets`.
 
-   \int_\Omega (u_{k} + 1) \nabla u_{k+1} \cdot \nabla v \,\mathrm{d}x = \int_\Omega v\,\mathrm{d}x
-
-for every :math:`v \in H^1_0(\Omega)`.
-The argument ``w`` is used to define such forms:
+For example, consider the quadratic Lagrange triangle and the default two
+element mesh of the unit square:
 
 .. doctest::
 
    >>> from skfem import *
-   >>> from skfem.models.poisson import unit_load
-   >>> from skfem.helpers import grad, dot
-   >>> @BilinearForm
-   ... def bilinf(u, v, w):
-   ...     return (w.u_k + 1.) * dot(grad(u), grad(v))
+   >>> m = MeshTri()
+   >>> m
+   Triangular mesh with 4 vertices and 2 elements.
+   >>> basis = InteriorBasis(m, ElementTriP2())
 
-The previous solution :math:`u_k` must be provided to
-:func:`~skfem.assembly.asm` as a keyword argument:
+The DOFs corresponding to the nodes (or vertices) of the mesh are
 
 .. doctest::
 
-   >>> m = MeshTri().refined(3)
-   >>> basis = InteriorBasis(m, ElementTriP1())
-   >>> b = asm(unit_load, basis)
-   >>> x = 0. * b.copy()
-   >>> for itr in range(10):  # fixed point iteration
-   ...     A = asm(bilinf, basis, u_k=basis.interpolate(x))
-   ...     x = solve(*condense(A, b, I=m.interior_nodes()))
-   ...     print(x.max())
-   0.07278262867647059
-   0.07030433694174187
-   0.07036045457157739
-   0.07035940302769318
-   0.07035942072395032
-   0.07035942044353624
-   0.07035942044783286
-   0.07035942044776827
-   0.07035942044776916
-   0.07035942044776922
+   >>> basis.nodal_dofs
+   array([[0, 1, 2, 3]])
 
-Inside the form definition, ``w`` is a dictionary of user provided arguments and
-additional default keys:
+The first column above corresponds to the first column in the corresponding mesh
+data structure:
 
-.. code-block:: none
+.. doctest::
 
-   tom@tunkki:~/src/scikit-fem$ python -i test.py
-   >>> asm(integrand, InteriorBasis(MeshTri(), ElementTriP1()))
-   > /home/tom/src/scikit-fem/test.py(7)integrand()
-   -> return dot(grad(u), grad(v))
-   (Pdb) !w.keys()
-   dict_keys(['x', 'h'])
+   >>> m.p
+   array([[0., 1., 0., 1.],
+          [0., 0., 1., 1.]])
 
-By default, ``w['x']`` (available also as ``w.x``) corresponds to the global
-coordinates and ``w['h']`` (available also as ``w.h``) corresponds to the local
-mesh parameter.
+In particular, the node at :math:`(0,0)` corresponds to the first element of the
+vector :math:`x`, the node at :math:`(1,0)` corresponds to the second element,
+and so on.
+
+Similarly, the DOFs corresponding to the facets of the mesh are
+
+.. doctest::
+
+   >>> basis.facet_dofs
+   array([[4, 5, 6, 7, 8]])
+
+The corresponding facets can be found in the mesh data structure:
+
+.. doctest::
+
+   >>> m.facets
+   array([[0, 0, 1, 1, 2],
+          [1, 2, 2, 3, 3]])
+   >>> .5 * m.p[:, m.facets].sum(axis=0)  # midpoints of the facets
+   array([[0. , 0. , 0.5, 0.5, 0.5],
+          [0.5, 0.5, 0.5, 1. , 1. ]])
+   
+Each DOF is associated either with a node (``nodal_dofs``), a facet
+(``facet_dofs``), an edge (``edge_dofs``), or an element (``interior_dofs``).
