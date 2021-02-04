@@ -50,7 +50,7 @@ D = basis.find_dofs()
 
 x = solve(*condense(A, f, D=D))
 
-y_basis = InteriorBasis(m, ElementVectorH1(ElementTetP1()))
+y_basis = basis.with_element(ElementVectorH1(ElementTetP1()))
 y = project(x, basis, y_basis)
 
 if __name__ == '__main__':
