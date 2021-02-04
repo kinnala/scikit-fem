@@ -1,5 +1,5 @@
 from itertools import dropwhile
-from typing import Optional, Type, Dict
+from typing import Optional, Type, Dict, Union, Tuple
 
 import numpy as np
 from numpy import ndarray
