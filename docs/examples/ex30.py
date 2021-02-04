@@ -133,6 +133,6 @@ if __name__ == '__main__':
         f'{name}_pressure.png')
 
     ax = draw(mesh)
-    ax.tricontour(Triangulation(*mesh.p, mesh._splitquads().t.T),
+    ax.tricontour(Triangulation(*mesh.p, mesh.to_meshtri().t.T),
                   psi[basis['psi'].nodal_dofs.flatten()])
     ax.get_figure().savefig(f'{name}_stream-lines.png')
