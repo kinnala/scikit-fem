@@ -247,7 +247,7 @@ class MeshQuad(Mesh2D):
 
         self._fix_boundaries(new_facets)
 
-    def to_meshtri(self, x=None):
+    def to_meshtri(self, x=None) -> MeshTri:
         """Split each quad into two triangles and return MeshTri."""
         t = self.t[[0, 1, 3]]
         t = np.hstack((t, self.t[[1, 2, 3]]))
@@ -302,7 +302,7 @@ class MeshQuad(Mesh2D):
         return MappingIsoparametric(self, ElementQuad1(), ElementLineP1())
 
     def element_finder(self, mapping=None):
-        tri_finder = self._splitquads().element_finder()
+        tri_finder = self.to_meshtri().element_finder()
 
         def finder(*args):
             return tri_finder(*args) % self.t.shape[1]
