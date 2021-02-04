@@ -251,8 +251,8 @@ def condense(A: spmatrix,
            x_D
        \end{bmatrix}
 
-    where :math:`x_D` are known and :math:`x_I` are unknown.  This allows splitting
-    the linear system as
+    where :math:`x_D` are known and :math:`x_I` are unknown.  This allows
+    splitting the linear system as
 
     .. math::
 
@@ -277,8 +277,8 @@ def condense(A: spmatrix,
        A_{II} x_I = b_I - A_{ID} x_D.
 
 
-    As an example, let us assemble the matrix :math:`A` and the vector :math:`b`
-    corresponding to the Poisson equation :math:`-\Delta u = 1`.
+    As an example, let us assemble the matrix :math:`A` and the vector
+    :math:`b` corresponding to the Poisson equation :math:`-\Delta u = 1`.
 
     .. doctest::
 
