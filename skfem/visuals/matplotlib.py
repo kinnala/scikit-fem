@@ -214,10 +214,9 @@ def plot_meshquad(m: MeshQuad, z, **kwargs):
 
     """
     if len(z) == m.t.shape[-1]:
-        m, z = m.to_meshtri(z)
+        return plot(*m.to_meshtri(z), **kwargs)
     else:
-        m = m.to_meshtri()
-    return plot(m, z, **kwargs)
+        return plot(m.to_meshtri(), z, **kargs)
 
 
 @plot.register(InteriorBasis)
