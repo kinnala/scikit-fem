@@ -352,13 +352,12 @@ if __name__ == '__main__':
     from sys import argv
     from skfem.visuals.matplotlib import plot, savefig
     import matplotlib.pyplot as plt
-    from skfem.utils import derivative
 
-    B_x = derivative(A, global_basis, global_basis, 1)
-    B_y = -derivative(A, global_basis, global_basis, 0)
+    B_x = project(A, global_basis, global_basis, 1)
+    B_y = -project(A, global_basis, global_basis, 0)
 
-    E_x = -derivative(U, global_basis, global_basis, 0)
-    E_y = -derivative(U, global_basis, global_basis, 1)
+    E_x = -project(U, global_basis, global_basis, 0)
+    E_y = -project(U, global_basis, global_basis, 1)
 
     fig = plt.figure(figsize=(11.52, 5.12))
 
