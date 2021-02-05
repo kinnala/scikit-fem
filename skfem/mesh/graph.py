@@ -7,6 +7,7 @@ from numpy import ndarray
 from skfem import MappingIsoparametric, Element, ElementLineP1
 from skfem.assembly import Dofs
 from skfem import ElementTriP1
+from skfem import *
 
 from dataclasses import dataclass, field, replace
 
@@ -193,8 +194,21 @@ class Grid(Graph):
         return self.elem.mesh_type.brefdom
 
     def _mapping(self):
+
+        BOUNDARY_ELEMENT_MAP = {
+            ElementTriP1: ElementLineP1,
+            ElementTriP2: ElementLineP2,
+            ElementQuad1: ElementLineP1,
+            ElementQuad2: ElementLineP2,
+            ElementTetP1: ElementTriP1,
+            ElementTetP2: ElementTriP2,
+            ElementHex1: ElementQuad1,
+            ElementHex2: ElementQuad2,
+        }
+
         return MappingIsoparametric(replace(self, t=self.dofs.element_dofs),
-                                    self.elem)
+                                    self.elem,
+                                    BOUNDARY_ELEMENT_MAP[type(self.elem)]())
 
     def dim(self):
         return self.elem.dim

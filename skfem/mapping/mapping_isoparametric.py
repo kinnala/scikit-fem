@@ -194,19 +194,23 @@ class MappingIsoparametric(Mapping):
     def normals(self, X, tind, find, t2f):
         if self.dim == 1:
             Nref = np.array([[-1.],
-                             [ 1.]])  # noqa
-        elif self.dim == 2:
-            Nref = np.array([[ 0., -1.],  # noqa
-                             [ 1.,  0.],  # noqa
-                             [ 0.,  1.],  # noqa
-                             [-1.,  0.]])  # noqa
+                             [1.]])
+        elif self.dim == 2 and self.mesh.t2f.shape[0] == 3:
+            Nref = np.array([[0., -1.],
+                             [1., 1.],
+                             [-1., 0.]])
+        elif self.dim == 2 and self.mesh.t2f.shape[0] == 4:
+            Nref = np.array([[0., -1.],
+                             [1., 0.],
+                             [0., 1.],
+                             [-1., 0.]])
         elif self.dim == 3:
-            Nref = np.array([[ 1.,  0.,  0.],  # noqa
-                             [ 0.,  0.,  1.],  # noqa
-                             [ 0.,  1.,  0.],  # noqa
-                             [ 0., -1.,  0.],  # noqa
-                             [ 0.,  0., -1.],  # noqa
-                             [-1.,  0.,  0.]])  # noqa
+            Nref = np.array([[1., 0., 0.],
+                             [0., 0., 1.],
+                             [0., 1., 0.],
+                             [0., -1., 0.],
+                             [0., 0., -1.],
+                             [-1., 0., 0.]])
         else:
             raise Exception("Not implemented for the given dimension.")
 
