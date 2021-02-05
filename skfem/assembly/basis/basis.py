@@ -22,6 +22,8 @@ class Basis:
 
     """
 
+    mesh: Mesh
+    elem: Element
     tind: Optional[ndarray] = None
     dx: ndarray
     basis: List[Tuple[DiscreteField, ...]] = []
@@ -301,3 +303,7 @@ class Basis:
     def zeros(self) -> ndarray:
         """Return a zero array with same dimensions as the solution."""
         return np.zeros(self.N)
+
+    def with_element(self, elem: Element) -> 'Basis':
+        """Create a copy of ``self`` that uses different element."""
+        raise NotImplementedError

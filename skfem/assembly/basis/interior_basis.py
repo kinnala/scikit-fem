@@ -144,3 +144,13 @@ class InteriorBasis(Basis):
             return w
 
         return interpfun
+
+    def with_element(self, elem: Element) -> 'InteriorBasis':
+
+        return type(self)(
+            self.mesh,
+            elem,
+            mapping=self.mapping,
+            quadrature=self.quadrature,
+            elements=self.tind,
+        )

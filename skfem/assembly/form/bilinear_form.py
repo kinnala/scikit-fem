@@ -9,10 +9,17 @@ from ..basis import Basis
 class BilinearForm(Form):
     """A bilinear form for finite element assembly.
 
-    Bilinear forms take three arguments: trial function `u`, test function `v`,
-    and a dictionary of additional parameters `w`.
+    Bilinear forms are defined using functions that takes three arguments:
+    trial function ``u``, test function ``v``, and a dictionary of additional
+    parameters ``w``.
 
+    >>> from skfem import BilinearForm, InteriorBasis, MeshTri, ElementTriP1
     >>> form = BilinearForm(lambda u, v, w: u * v)
+    >>> form.assemble(InteriorBasis(MeshTri(), ElementTriP1())).todense()
+    matrix([[0.08333333, 0.04166667, 0.04166667, 0.        ],
+            [0.04166667, 0.16666667, 0.08333333, 0.04166667],
+            [0.04166667, 0.08333333, 0.16666667, 0.04166667],
+            [0.        , 0.04166667, 0.04166667, 0.08333333]])
 
     Alternatively, you can use :class:`~skfem.assembly.BilinearForm` as a
     decorator:
@@ -21,7 +28,7 @@ class BilinearForm(Form):
     ... def form(u, v, w):
     ...     return u * v
 
-    Inside the form definition, `u` and `v` are tuples containing the basis
+    Inside the form definition, ``u`` and ``v`` are tuples containing the basis
     function values at quadrature points.  They also contain the values of
     the derivatives:
 
@@ -30,11 +37,12 @@ class BilinearForm(Form):
     ...     # u[1][0] is first derivative with respect to x, and so on
     ...     return u[1][0] * v[1][0] + u[1][1] * v[1][1]  # laplacian
 
-    In practice, we suggest you to use helper functions:
+    In practice, we suggest you to use helper functions from
+    :mod:`skfem.helpers` to make the forms readable:
 
+    >>> from skfem.helpers import dot, grad
     >>> @BilinearForm
     ... def form(u, v, w):
-    ...     from skfem.helpers import dot, grad
     ...     return dot(grad(u), grad(v))
 
     """
@@ -43,6 +51,19 @@ class BilinearForm(Form):
                  ubasis: Basis,
                  vbasis: Optional[Basis] = None,
                  **kwargs) -> Any:
+        """Assemble the bilinear form into a sparse matrix.
+
+        Parameters
+        ----------
+        ubasis
+            The :class:`~skfem.assembly.Basis` for ``u``.
+        vbasis
+            Optionally, specify a different :class:`~skfem.assembly.Basis`
+            for ``v``.
+        **kwargs
+            Any additional keyword arguments are appended to ``w``.
+
+        """
 
         if vbasis is None:
             vbasis = ubasis

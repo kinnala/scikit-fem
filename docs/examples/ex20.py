@@ -29,6 +29,8 @@ polynomial solution with circular stream-lines:
 
 from skfem import *
 from skfem.models.poisson import unit_load
+from skfem.models.general import curluv
+from skfem.helpers import ddot, dd
 
 import numpy as np
 
@@ -41,8 +43,6 @@ ib = InteriorBasis(mesh, element, mapping, 2)
 
 @BilinearForm
 def biharmonic(u, v, w):
-    from skfem.helpers import ddot, dd
-
     return ddot(dd(u), dd(v))
 
 
@@ -52,10 +52,14 @@ rotf = asm(unit_load, ib)
 psi = solve(*condense(stokes, rotf, D=ib.find_dofs()))
 (psi0,) = ib.interpolator(psi)(np.zeros((2, 1)))
 
+velocity = asm(
+    LinearForm(curluv).partial(ib.interpolate(psi)),
+    ib.with_element(ElementVectorH1(ElementTriP1())),
+)
+
 if __name__ == "__main__":
     from os.path import splitext
     from sys import argv
-    from skfem.models.general import vrot
     from skfem.visuals.matplotlib import draw
     from matplotlib.tri import Triangulation
 
@@ -68,11 +72,6 @@ if __name__ == "__main__":
     name = splitext(argv[0])[0]
     ax.get_figure().savefig(f"{name}_stream-lines.png")
 
-    velocity = asm(
-        vrot,
-        InteriorBasis(mesh, ElementVectorH1(ElementTriP1()), quadrature=ib.quadrature),
-        w=ib.interpolate(psi),
-    )
     ax = draw(mesh)
     ax.quiver(*mesh.p, *velocity.reshape((-1, 2)).T, mesh.p[0])
     ax.get_figure().savefig(f"{name}_velocity-vectors.png")

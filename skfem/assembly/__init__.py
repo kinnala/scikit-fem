@@ -3,21 +3,23 @@ following:
 
 1. Initialize :class:`~skfem.mesh.Mesh` and :class:`~skfem.element.Element`.
 
->>> from skfem import *
->>> m = MeshTri()
->>> e = ElementTriP1()
+>>> import skfem as fem
+>>> m = fem.MeshTri()
+>>> e = fem.ElementTriP1()
+>>> m
+Triangular mesh with 4 vertices and 2 elements.
 
 2. Create :class:`~skfem.assembly.InteriorBasis` or
    :class:`~skfem.assembly.FacetBasis` objects.
 
->>> basis = InteriorBasis(m, e)
+>>> basis = fem.InteriorBasis(m, e)
 
 3. Define the forms using :class:`~skfem.assembly.BilinearForm`,
    :class:`~skfem.assembly.LinearForm`, or
    :class:`~skfem.assembly.Functional`.
 
->>> form_a = BilinearForm(lambda u, v, w: u * v)
->>> form_l = LinearForm(lambda v, w: w.x[0] ** 2 * v)
+>>> form_a = fem.BilinearForm(lambda u, v, w: u * v)
+>>> form_l = fem.LinearForm(lambda v, w: w.x[0] ** 2 * v)
 
 Mathematically the above forms are
 
@@ -29,8 +31,8 @@ Mathematically the above forms are
 
 4. Assemble using :func:`~skfem.assembly.asm`.
 
->>> A = asm(form_a, basis)
->>> b = asm(form_l, basis)
+>>> A = fem.asm(form_a, basis)
+>>> b = fem.asm(form_l, basis)
 >>> A.todense()
 matrix([[0.08333333, 0.04166667, 0.04166667, 0.        ],
         [0.04166667, 0.16666667, 0.08333333, 0.04166667],

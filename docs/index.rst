@@ -25,8 +25,8 @@ Table of contents
 .. toctree::
 
    self
-   overview
-   forms
-   bcs
+   gettingstarted
+   howto
+   advanced
    listofexamples
    api

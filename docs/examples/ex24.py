@@ -52,12 +52,10 @@ uvp = solve(*condense(K, np.zeros_like(uvp), uvp, D=D))
 
 velocity, pressure = np.split(uvp, [A.shape[0]])
 
-basis['psi'] = InteriorBasis(mesh, ElementTriP2())
+basis['psi'] = basis['u'].with_element(ElementTriP2())
 A = asm(laplace, basis['psi'])
 psi = np.zeros(basis['psi'].N)
-vorticity = asm(rot, basis['psi'],
-                w=[basis['psi'].interpolate(velocity[i::2])
-                   for i in range(2)])
+vorticity = asm(rot, basis['psi'], w=basis['u'].interpolate(velocity))
 psi = solve(*condense(A, vorticity, D=basis['psi'].find_dofs()['floor'].all()))
 
 

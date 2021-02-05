@@ -130,7 +130,7 @@ class ExteriorFacetBasis(Basis):
                                                               ndarray]:
         """Restrict solution to :math:`d-1` dimensional trace mesh.
 
-        The function ``projection`` defines how the boundary points are
+        The parameter ``projection`` defines how the boundary points are
         projected to :math:`d-1` dimensional space.  For example,
 
         >>> projection = lambda p: p[0]

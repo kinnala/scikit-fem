@@ -78,8 +78,7 @@ uvp = solve(*condense(K, f, D=basis['u'].find_dofs()))
 
 velocity, pressure = np.split(uvp, [A.shape[0]])
 
-basis['psi'] = InteriorBasis(mesh, ElementTriP2(),
-                             quadrature=basis['u'].quadrature)
+basis['psi'] = basis['u'].with_element(ElementTriP2())
 A = asm(laplace, basis['psi'])
 vorticity = asm(rot, basis['psi'], w=basis['u'].interpolate(velocity))
 psi = solve(*condense(A, vorticity, D=basis['psi'].find_dofs()))

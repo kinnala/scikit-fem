@@ -8,10 +8,10 @@ from ...element import DiscreteField
 
 
 class Functional(Form):
-    """A functional for finite element assembly.
+    """A functional for postprocessing finite element solution.
 
     Used similarly as :class:`~skfem.assembly.BilinearForm` with the expection
-    that forms take one parameter `w`.
+    that forms take one parameter ``w``.
 
     """
 
@@ -25,6 +25,7 @@ class Functional(Form):
     def elemental(self,
                   v: Basis,
                   **kwargs) -> ndarray:
+        """Evaluate the functional elementwise."""
         w = FormDict({**v.default_parameters(), **self.dictify(kwargs)})
         return self._kernel(w, v.dx)
 
@@ -32,6 +33,17 @@ class Functional(Form):
                  ubasis: Basis,
                  vbasis: Optional[Basis] = None,
                  **kwargs) -> Any:
+        """Evaluate the functional to a scalar.
+
+        Parameters
+        ----------
+        ubasis
+            The :class:`~skfem.assembly.Basis` for filling the default
+            parameters of ``w`` and integrating over the domain.
+        **kwargs
+            Any additional keyword arguments are appended to ``w``.
+
+        """
         assert vbasis is None
         vbasis = ubasis
         return self.elemental(vbasis, **kwargs).sum(-1)

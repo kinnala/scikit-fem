@@ -50,7 +50,7 @@ t = np.zeros(basis.N)
 t[dofs['floor'].all()] = 1.
 t = solve(*condense(A, np.zeros_like(t), t, I=interior))
 
-basis0 = InteriorBasis(mesh, ElementQuad0(), quadrature=basis.quadrature)
+basis0 = basis.with_element(ElementQuad0())
 t0 = solve(asm(mass, basis0),
            asm(mass, basis, basis0) @ t)
 
