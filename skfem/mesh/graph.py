@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Type
 
 import numpy as np
 
@@ -57,6 +57,12 @@ class Graph:
         return self._t2f
 
     @property
+    def f2t(self):
+        if not hasattr(self, '_f2t'):
+            self._f2t = Graph.build_inverse(self.t, self.t2f)
+        return self._f2t
+
+    @property
     def edges(self):
         if not hasattr(self, '_edges'):
             self._init_edges()
@@ -82,6 +88,23 @@ class Graph:
         mapping = ixb.reshape((len(indices), t.shape[1]))
 
         return np.ascontiguousarray(indexing), mapping
+
+    @staticmethod
+    def build_inverse(t, mapping):
+
+        e = mapping.flatten(order='C')
+        tix = np.tile(np.arange(t.shape[1]), (1, t.shape[0]))[0]
+
+        e_first, ix_first = np.unique(e, return_index=True)
+        e_last, ix_last = np.unique(e[::-1], return_index=True)
+        ix_last = e.shape[0] - ix_last - 1
+
+        inverse = np.zeros((2, np.max(mapping) + 1), dtype=np.int64)
+        inverse[0, e_first] = tix[ix_first]
+        inverse[1, e_last] = tix[ix_last]
+        inverse[1, np.nonzero(inverse[0] == inverse[1])[0]] = -1
+
+        return inverse
 
     @property
     def _edge_indices(self):
@@ -154,10 +177,12 @@ class Grid(Graph):
 
     p: ndarray
     elem: Element
-    dofs: Dofs = field(init=False)
 
-    def __post_init__(self):
-        self.dofs = Dofs(self, self.elem)
+    @property
+    def dofs(self):
+        if not hasattr(self, '_dofs'):
+            self._dofs = Dofs(self, self.elem)
+        return self._dofs
 
     @property
     def refdom(self):  # todo
