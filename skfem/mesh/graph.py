@@ -160,12 +160,12 @@ class Grid(Graph):
         self.dofs = Dofs(self, self.elem)
 
     @property
-    def refdom(self):
-        return "tri"
+    def refdom(self):  # todo
+        return self.elem.mesh_type.refdom
 
     @property
-    def brefdom(self):
-        return "line"
+    def brefdom(self):  # todo
+        return self.elem.mesh_type.brefdom
 
     def _mapping(self):
         return MappingIsoparametric(replace(self, t=self.dofs.element_dofs),
