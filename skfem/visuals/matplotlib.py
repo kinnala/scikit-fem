@@ -214,9 +214,9 @@ def plot_meshquad(m: MeshQuad, z, **kwargs):
 
     """
     if len(z) == m.t.shape[-1]:
-        m, z = m._splitquads(z)
+        m, z = m.to_meshtri(z)
     else:
-        m = m._splitquads()
+        m = m.to_meshtri()
     return plot(m, z, **kwargs)
 
 
