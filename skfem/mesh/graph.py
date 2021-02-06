@@ -13,7 +13,7 @@ from skfem import *
 from dataclasses import dataclass, field, replace
 
 
-@dataclass
+@dataclass(frozen=True)
 class Graph:
 
     t: ndarray
@@ -167,7 +167,7 @@ class Graph:
             raise Exception("!")
 
 
-@dataclass
+@dataclass(frozen=True)
 class Grid(Graph):
 
     p: ndarray
