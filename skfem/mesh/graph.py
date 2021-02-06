@@ -34,38 +34,38 @@ class Graph:
     def nedges(self):
         return self.edges.shape[1]
 
-    @lru_cache(maxsize=1)
     @property
+    @lru_cache(maxsize=1)
     def _facets_and_connectivity(self):
         return Graph.build_entities(self.t, self._facet_indices)
 
-    @lru_cache(maxsize=1)
     @property
+    @lru_cache(maxsize=1)
     def _edges_and_connectivity(self):
         return Graph.build_entities(self.t, self._edge_indices)
 
-    @lru_cache(maxsize=1)
     @property
+    @lru_cache(maxsize=1)
     def facets(self):
         return self._facets_and_connectivity[0]
 
-    @lru_cache(maxsize=1)
     @property
+    @lru_cache(maxsize=1)
     def t2f(self):
         return self._facets_and_connectivity[1]
 
-    @lru_cache(maxsize=1)
     @property
+    @lru_cache(maxsize=1)
     def f2t(self):
         return Graph.build_inverse(self.t, self.t2f)
 
-    @lru_cache(maxsize=1)
     @property
+    @lru_cache(maxsize=1)
     def edges(self):
         return self._edges_and_connectivity[0]
 
-    @lru_cache(maxsize=1)
     @property
+    @lru_cache(maxsize=1)
     def t2e(self):
         return self._edges_and_connectivity[1]
 
