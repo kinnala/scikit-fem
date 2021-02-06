@@ -1,3 +1,4 @@
+from functools import lru_cache
 from typing import Optional, Type
 
 import numpy as np
@@ -33,47 +34,40 @@ class Graph:
     def nedges(self):
         return self.edges.shape[1]
 
-    def _init_facets(self):
-        self._facets, self._t2f = Graph.build_entities(
-            self.t,
-            self._facet_indices
-        )
+    @lru_cache(maxsize=1)
+    @property
+    def _facets_and_connectivity(self):
+        return Graph.build_entities(self.t, self._facet_indices)
 
-    def _init_edges(self):
-        self._edges, self._t2e = Graph.build_entities(
-            self.t,
-            self._edge_indices
-        )
+    @lru_cache(maxsize=1)
+    @property
+    def _edges_and_connectivity(self):
+        return Graph.build_entities(self.t, self._edge_indices)
 
+    @lru_cache(maxsize=1)
     @property
     def facets(self):
-        if not hasattr(self, '_facets'):
-            self._init_facets()
-        return self._facets
+        return self._facets_and_connectivity[0]
 
+    @lru_cache(maxsize=1)
     @property
     def t2f(self):
-        if not hasattr(self, '_t2f'):
-            self._init_facets()
-        return self._t2f
+        return self._facets_and_connectivity[1]
 
+    @lru_cache(maxsize=1)
     @property
     def f2t(self):
-        if not hasattr(self, '_f2t'):
-            self._f2t = Graph.build_inverse(self.t, self.t2f)
-        return self._f2t
+        return Graph.build_inverse(self.t, self.t2f)
 
+    @lru_cache(maxsize=1)
     @property
     def edges(self):
-        if not hasattr(self, '_edges'):
-            self._init_edges()
-        return self._edges
+        return self._edges_and_connectivity[0]
 
+    @lru_cache(maxsize=1)
     @property
     def t2e(self):
-        if not hasattr(self, '_t2e'):
-            self._init_edges()
-        return self._t2e
+        return self._edges_and_connectivity[1]
 
     @staticmethod
     def build_entities(t, indices):
