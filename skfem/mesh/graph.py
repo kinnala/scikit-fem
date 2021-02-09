@@ -135,7 +135,7 @@ class Graph:
                 [6, 7],
             ]
         else:
-            raise Exception("!")
+            raise Exception("Cannot build edges for the given mesh.")
 
     @property
     def _facet_indices(self):
@@ -170,7 +170,7 @@ class Graph:
                 [3, 6, 7, 5],
             ]
         else:
-            raise Exception("!")
+            raise Exception("Cannot build facets for the given mesh.")
 
 
 @dataclass
@@ -178,6 +178,8 @@ class Grid(Graph):
 
     p: ndarray
     elem: Element
+    _p: Optional[ndarray] = None
+    _t: Optional[ndarray] = None
 
     @property
     def dofs(self):
@@ -206,9 +208,13 @@ class Grid(Graph):
             ElementHex2: ElementQuad2,
         }
 
-        return MappingIsoparametric(replace(self, t=self.dofs.element_dofs),
-                                    self.elem,
-                                    BOUNDARY_ELEMENT_MAP[type(self.elem)]())
+        return MappingIsoparametric(
+            replace(self,
+                    t=self._t,
+                    p=self._p) if self._t is not None else self,
+            self.elem,
+            BOUNDARY_ELEMENT_MAP[type(self.elem)]()
+        )
 
     def dim(self):
         return self.elem.dim
