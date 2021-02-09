@@ -10,6 +10,7 @@ from dataclasses import dataclass, replace
 @dataclass
 class Graph:
 
+    p: ndarray
     t: ndarray
 
     @property
@@ -27,6 +28,14 @@ class Graph:
     @property
     def nedges(self):
         return self.edges.shape[1]
+
+    @property
+    def nnodes(self):
+        return self.t.shape[0]
+
+    @property
+    def dimension(self):
+        return self.p.shape[0]
 
     def _init_facets(self):
         self._facets, self._t2f = Graph.build_entities(
@@ -105,57 +114,57 @@ class Graph:
     @property
     def _edge_indices(self):
 
-        if self.t.shape[0] == 4:
-            return [
-                [0, 1],
-                [1, 2],
-                [0, 2],
-                [0, 3],
-                [1, 3],
-                [2, 3],
-            ]
-        elif self.t.shape[0] == 8:
-            return [
-                [0, 1],
-                [0, 2],
-                [0, 3],
-                [1, 4],
-                [1, 5],
-                [2, 4],
-                [2, 6],
-                [3, 5],
-                [3, 6],
-                [4, 7],
-                [5, 7],
-                [6, 7],
-            ]
-        else:
-            raise Exception("Cannot build edges for the given mesh.")
+        if self.dimension == 3:
+            if self.nnodes == 4:
+                return [
+                    [0, 1],
+                    [1, 2],
+                    [0, 2],
+                    [0, 3],
+                    [1, 3],
+                    [2, 3],
+                ]
+            elif self.nnodes == 8:
+                return [
+                    [0, 1],
+                    [0, 2],
+                    [0, 3],
+                    [1, 4],
+                    [1, 5],
+                    [2, 4],
+                    [2, 6],
+                    [3, 5],
+                    [3, 6],
+                    [4, 7],
+                    [5, 7],
+                    [6, 7],
+                ]
+        raise Exception("Cannot build edges for the given mesh.")
 
     @property
     def _facet_indices(self):
 
-        if self.t.shape[0] == 3:
+        if self.nnodes == 3 and self.dimension == 2:
             return [
                 [0, 1],
                 [1, 2],
                 [0, 2],
             ]
-        elif self.t.shape[0] == 4:
+        elif self.nnodes == 4 and self.dimension == 2:
             return [
                 [0, 1],
                 [1, 2],
                 [2, 3],
                 [0, 3],
             ]
-        elif self.t.shape[0] == 6:
+        elif self.nnodes == 4 and self.dimension == 3:
             return [
                 [0, 1, 2],
                 [0, 1, 3],
                 [0, 2, 3],
                 [1, 2, 3],
             ]
-        elif self.t.shape[0] == 8:
+        elif self.nnodes == 8 and self.dimension == 3:
             return [
                 [0, 1, 4, 2],
                 [0, 2, 6, 3],
@@ -164,36 +173,55 @@ class Graph:
                 [1, 5, 7, 4],
                 [3, 6, 7, 5],
             ]
-        else:
-            raise Exception("Cannot build facets for the given mesh.")
+        return [[]]
+        #raise Exception("Cannot build facets for the given mesh.")
 
     def boundary_facets(self) -> ndarray:
         """Return an array of boundary facet indices."""
         return np.nonzero(self.f2t[1] == -1)[0]
 
-    def _expand_facets(self, facets: ndarray) -> Tuple[ndarray, ndarray]:
-        """Find vertices and edges corresponding to given facets."""
-        vertices = np.unique(self.facets[:, facets].flatten())
-        edges = np.array([], dtype=np.int64)
+    def boundary_edges(self) -> ndarray:
+        """Return an array of boundary edge indices."""
+        facets = self.boundary_facets()
+        boundary_edges = np.sort(np.hstack(
+            tuple([np.vstack((self.facets[itr, facets],
+                              self.facets[(itr + 1) % self.facets.shape[0],
+                              facets]))
+                   for itr in range(self.facets.shape[0])])).T, axis=1)
+        edge_candidates = np.unique(self.t2e[:, self.f2t[0, facets]])
+        A = self.edges[:, edge_candidates].T
+        B = boundary_edges
+        dims = A.max(0) + 1
+        ix = np.where(np.in1d(np.ravel_multi_index(A.T, dims),
+                              np.ravel_multi_index(B.T, dims)))[0]
+        return edge_candidates[ix]
+
+    def _expand_facets(self, ix: ndarray) -> Tuple[ndarray, ndarray]:
+
+        vertices = np.unique(self.facets[:, ix].flatten())
+
+        if self.dimension == 3:
+            edge_candidates = self.t2e[:, self.f2t[0, ix]].flatten()
+            # subset of edges that share all points with the given facets
+            subset = np.nonzero(
+                np.prod(np.isin(self.edges[:, edge_candidates],
+                                self.facets[:, ix].flatten()),
+                        axis=0)
+            )[0]
+            edges = np.intersect1d(self.boundary_edges(),
+                                   edge_candidates[subset])
+        else:
+            edges = np.array([], dtype=np.int64)
+
         return vertices, edges
 
 
 @dataclass
 class Grid(Graph):
 
-    p: ndarray
     elem: 'Element'
-    element_dofs: Optional[ndarray] = None
     doflocs: Optional[ndarray] = None
-
-    @property
-    def dofs(self):
-
-        from skfem.assembly import Dofs
-
-        if not hasattr(self, '_dofs'):
-            self._dofs = Dofs(self, self.elem)
-        return self._dofs
+    t_dofs: Optional[ndarray] = None
 
     @property
     def refdom(self):  # todo
@@ -225,7 +253,7 @@ class Grid(Graph):
 
         return MappingIsoparametric(
             replace(self,
-                    t=self.element_dofs,
+                    t=self.t_dofs,
                     p=self.doflocs) if self.doflocs is not None else self,
             self.elem,
             BOUNDARY_ELEMENT_MAP[type(self.elem)]()
@@ -242,11 +270,11 @@ class BaseMesh:
     def __init__(self, t, p, elem, element_dofs=None, doflocs=None):
 
         self.grid = Grid(
-            t=t,
             p=p,
+            t=t,
             elem=elem,
-            element_dofs=element_dofs,
             doflocs=doflocs,
+            t_dofs=element_dofs,
         )
 
     @classmethod
@@ -273,75 +301,23 @@ class MeshTri1(BaseMesh2D):
 
         from skfem.element import ElementTriP1
 
-        super(MeshTri1, self).__init__(
-            t,
-            p,
-            ElementTriP1(),
-        )
-
-    @classmethod
-    def init_circle(cls, Nrefs: int = 3):
-        r"""Initialize a circle mesh.
-
-        Repeatedly refines the following mesh and moves new nodes to the
-        boundary::
-
-                   *
-                 / | \
-               /   |   \
-             /     |     \
-            *------O------*
-             \     |     /
-               \   |   /
-                 \ | /
-                   *
-
-        Parameters
-        ----------
-        Nrefs
-            Number of refinements, by default 3.
-
-        """
-        p = np.array([[0., 0.],
-                      [1., 0.],
-                      [0., 1.],
-                      [-1., 0.],
-                      [0., -1.]]).T
-        t = np.array([[0, 1, 2],
-                      [0, 1, 4],
-                      [0, 2, 3],
-                      [0, 3, 4]], dtype=np.int64).T
-        m = cls(p, t)
-        for _ in range(Nrefs):
-            m = m.refined()
-            D = m.boundary_nodes()
-            m.p[:, D] = m.p[:, D] / np.linalg.norm(m.p[:, D], axis=0)
-        return m
+        super(MeshTri1, self).__init__(p, t, ElementTriP1())
 
 
 class MeshTri2(BaseMesh2D):
 
-    def __init__(self, doflocs, element_dofs, **kwargs):
+    def __init__(self, doflocs, t_dofs, **kwargs):
 
         from skfem.element import ElementTriP2
 
-        dofs, ix = np.unique(element_dofs[:3], return_inverse=True)
+        dofs, ix = np.unique(t_dofs[:3], return_inverse=True)
         p = doflocs[:, dofs]
         t = (np.arange(len(dofs), dtype=np.int64)[ix]
-             .reshape(element_dofs[:3].shape))
+             .reshape(t_dofs[:3].shape))
         super(MeshTri2, self).__init__(
-            t,
             p,
+            t,
             ElementTriP2(),
-            element_dofs,
             doflocs,
+            t_dofs,
         )
-
-    @classmethod
-    def init_circle(cls, Nrefs=3):
-        m = MeshTri1.init_circle(Nrefs)
-        m = cls(m.p, m.t)
-        D = m._basis.get_dofs(m.boundary_facets()).flatten()
-        m._mesh.p[:, D] =\
-            m._mesh.p[:, D] / np.linalg.norm(m._mesh.p[:, D], axis=0)
-        return m
