@@ -1,9 +1,10 @@
 from typing import Optional, Type, Tuple
 
+import warnings
+
 import numpy as np
 
 from numpy import ndarray
-
 from dataclasses import dataclass, replace
 
 
@@ -436,26 +437,35 @@ class Geometry(Graph):
 class BaseMesh:
 
     geom: Geometry
+    boundaries = None
 
-    def __init__(self, t, p, elem, element_dofs=None, doflocs=None):
+    def __init__(self, doflocs, dofs, elem, nnodes=None):
 
-        self.geom = Geometry(
-            p=p,
-            t=t,
-            elem=elem,
-            doflocs=doflocs,
-            t_dofs=element_dofs,
-        )
+        warnings.warn("High-order mesh is an experimental feature and "
+                      "not governed by the semantic versioning.")
+
+        if nnodes is not None:
+            uniq, ix = np.unique(dofs[:nnodes], return_inverse=True)
+            p = doflocs[:, uniq]
+            t = (np.arange(len(uniq), dtype=np.int64)[ix]
+                 .reshape(dofs[:nnodes].shape))
+        else:
+            p = doflocs
+            t = dofs
+
+        self.geom = Geometry(p, t, elem, doflocs, dofs)
 
     @classmethod
     def load(cls, filename):
-
         from skfem.io.meshio import from_file
-
         return from_file(filename)
 
     def __getattr__(self, item):
         return getattr(self.geom, item)
+
+    @staticmethod
+    def strip_extra_coordinates(p: ndarray) -> ndarray:
+        return p
 
 
 class BaseMesh2D(BaseMesh):
@@ -467,27 +477,39 @@ class BaseMesh2D(BaseMesh):
 
 class MeshTri1(BaseMesh2D):
 
-    def __init__(self, p, t, **kwargs):
-
+    def __init__(self, p=None, t=None):
         from skfem.element import ElementTriP1
-
         super(MeshTri1, self).__init__(p, t, ElementTriP1())
+
+class MeshQuad1(BaseMesh2D):
+
+    def __init__(self, p=None, t=None):
+        from skfem.element import ElementQuad1
+        super(MeshQuad1, self).__init__(p, t, ElementQuad1())
 
 
 class MeshTri2(BaseMesh2D):
 
-    def __init__(self, doflocs, t_dofs, **kwargs):
-
+    def __init__(self, doflocs, dofs):
         from skfem.element import ElementTriP2
+        super(MeshTri2, self).__init__(doflocs, dofs, ElementTriP2(), nnodes=3)
 
-        dofs, ix = np.unique(t_dofs[:3], return_inverse=True)
-        p = doflocs[:, dofs]
-        t = (np.arange(len(dofs), dtype=np.int64)[ix]
-             .reshape(t_dofs[:3].shape))
-        super(MeshTri2, self).__init__(
-            p,
-            t,
-            ElementTriP2(),
-            doflocs,
-            t_dofs,
-        )
+
+class MeshQuad2(BaseMesh2D):
+
+    def __init__(self, doflocs, dofs):
+        from skfem.element import ElementQuad2
+        super(MeshQuad2, self).__init__(doflocs, dofs, ElementQuad2(), nnodes=4)
+
+
+class MeshTet1(BaseMesh):
+
+    def __init__(self, p=None, t=None):
+        from skfem.element import ElementTetP1
+        super(MeshTet1, self).__init__(p, t, ElementTetP1())
+
+class MeshHex1(BaseMesh2D):
+
+    def __init__(self, p=None, t=None):
+        from skfem.element import ElementHex1
+        super(MeshHex1, self).__init__(p, t, ElementHex1())

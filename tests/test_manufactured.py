@@ -231,13 +231,7 @@ class SolveCirclePoisson(unittest.TestCase):
 
     def runTest(self):
         path = Path(__file__).parents[1] / 'docs' / 'examples' / 'meshes'
-        if self.filename is not None:
-            m = self.mesh_type.load(path / self.filename)
-        else:
-            m = self.mesh_type.init_circle(Nrefs=5)
-            m.p *= 0.5
-            if hasattr(m, '_mesh'):
-                m._mesh.p *= 0.5
+        m = self.mesh_type.load(path / self.filename)
         basis = InteriorBasis(m, self.element_type())
 
         A = laplace.assemble(basis)
@@ -266,17 +260,6 @@ class SolveCirclePoissonTri2(SolveCirclePoisson):
     mesh_type = MeshTri2
     element_type = ElementTriP2
     filename = "quadratic_tri.msh"
-
-
-class SolveCirclePoisson2(SolveCirclePoisson):
-
-    filename = None
-
-
-class SolveCirclePoisson3(SolveCirclePoisson):
-
-    mesh_type = MeshTri
-    filename = None
 
 
 if __name__ == '__main__':
