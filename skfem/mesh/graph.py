@@ -218,7 +218,7 @@ class Graph:
 @dataclass
 class Geometry(Graph):
 
-    elem: 'Element'
+    elem: 'Element'  # noqa
     doflocs: Optional[ndarray] = None
     dofs: Optional[ndarray] = None
 
