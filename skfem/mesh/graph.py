@@ -1,11 +1,11 @@
-from typing import Optional, Type, Tuple
+from typing import Optional, Tuple
 
 import warnings
 
 import numpy as np
 
 from numpy import ndarray
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 
 
 @dataclass
@@ -481,6 +481,7 @@ class MeshTri1(BaseMesh2D):
         from skfem.element import ElementTriP1
         super(MeshTri1, self).__init__(p, t, ElementTriP1())
 
+
 class MeshQuad1(BaseMesh2D):
 
     def __init__(self, p=None, t=None):
@@ -499,7 +500,12 @@ class MeshQuad2(BaseMesh2D):
 
     def __init__(self, doflocs, dofs):
         from skfem.element import ElementQuad2
-        super(MeshQuad2, self).__init__(doflocs, dofs, ElementQuad2(), nnodes=4)
+        super(MeshQuad2, self).__init__(
+            doflocs,
+            dofs,
+            ElementQuad2(),
+            nnodes=4,
+        )
 
 
 class MeshTet1(BaseMesh):
@@ -507,6 +513,7 @@ class MeshTet1(BaseMesh):
     def __init__(self, p=None, t=None):
         from skfem.element import ElementTetP1
         super(MeshTet1, self).__init__(p, t, ElementTetP1())
+
 
 class MeshHex1(BaseMesh2D):
 
