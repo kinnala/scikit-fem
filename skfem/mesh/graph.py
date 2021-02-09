@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Any
 
 import warnings
 
@@ -218,7 +218,7 @@ class Graph:
 @dataclass
 class Geometry(Graph):
 
-    elem: 'Element'  # noqa
+    elem: Any  # this is Element but cannot import it yet
     doflocs: Optional[ndarray] = None
     dofs: Optional[ndarray] = None
 
