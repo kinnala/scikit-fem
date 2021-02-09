@@ -231,14 +231,20 @@ class SolveCirclePoisson(unittest.TestCase):
 
     def runTest(self):
         path = Path(__file__).parents[1] / 'docs' / 'examples' / 'meshes'
-        m = self.mesh_type.load(path / self.filename)
+        if self.filename is not None:
+            m = self.mesh_type.load(path / self.filename)
+        else:
+            m = self.mesh_type.init_circle(Nrefs=5)
+            m.p *= 0.5
+            if hasattr(m, '_mesh'):
+                m._mesh.p *= 0.5
         basis = InteriorBasis(m, self.element_type())
 
         A = laplace.assemble(basis)
         b = unit_load.assemble(basis)
         x = solve(*condense(A, b, D=basis.get_dofs()))
 
-        self.assertAlmostEqual(np.max(x), 0.06261690318912218, places=3)
+        self.assertAlmostEqual(np.max(x), 0.06243516822727334, places=3)
 
 
 class SolveCirclePoissonQuad(SolveCirclePoisson):
@@ -261,6 +267,16 @@ class SolveCirclePoissonTri2(SolveCirclePoisson):
     element_type = ElementTriP2
     filename = "quadratic_tri.msh"
 
+
+class SolveCirclePoisson2(SolveCirclePoisson):
+
+    filename = None
+
+
+class SolveCirclePoisson3(SolveCirclePoisson):
+
+    mesh_type = MeshTri
+    filename = None
 
 
 if __name__ == '__main__':
