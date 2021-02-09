@@ -82,17 +82,16 @@ class Graph:
     @staticmethod
     def build_entities(t, indices):
 
-        indexing = np.sort(np.hstack(
-            tuple([t[entity] for entity in indices])
-        ), axis=0)
+        indexing = np.hstack(tuple([t[ix] for ix in indices]))
+        sorted_indexing = np.sort(indexing, axis=0)
 
-        indexing, ixa, ixb = np.unique(indexing,
-                                       axis=1,
-                                       return_index=True,
-                                       return_inverse=True)
+        sorted_indexing, ixa, ixb = np.unique(sorted_indexing,
+                                              axis=1,
+                                              return_index=True,
+                                              return_inverse=True)
         mapping = ixb.reshape((len(indices), t.shape[1]))
 
-        return np.ascontiguousarray(indexing), mapping
+        return np.ascontiguousarray(indexing[:, ixa]), mapping
 
     @staticmethod
     def build_inverse(t, mapping):
@@ -493,7 +492,12 @@ class MeshTri2(BaseMesh2D):
 
     def __init__(self, doflocs, dofs):
         from skfem.element import ElementTriP2
-        super(MeshTri2, self).__init__(doflocs, dofs, ElementTriP2(), nnodes=3)
+        super(MeshTri2, self).__init__(
+            doflocs,
+            dofs,
+            ElementTriP2(),
+            nnodes=3,
+        )
 
 
 class MeshQuad2(BaseMesh2D):
