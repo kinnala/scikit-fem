@@ -33,8 +33,7 @@ class Graph:
     def nnodes(self):
         return self.t.shape[0]
 
-    @property
-    def dimension(self):
+    def dim(self):
         return self.p.shape[0]
 
     def _init_facets(self):
@@ -114,7 +113,7 @@ class Graph:
     @property
     def _edge_indices(self):
 
-        if self.dimension == 3:
+        if self.dim() == 3:
             if self.nnodes == 4:
                 return [
                     [0, 1],
@@ -139,32 +138,32 @@ class Graph:
                     [5, 7],
                     [6, 7],
                 ]
-        raise Exception("Cannot build edges for the given mesh.")
+        raise NotImplementedError
 
     @property
     def _facet_indices(self):
 
-        if self.nnodes == 3 and self.dimension == 2:
+        if self.nnodes == 3 and self.dim() == 2:
             return [
                 [0, 1],
                 [1, 2],
                 [0, 2],
             ]
-        elif self.nnodes == 4 and self.dimension == 2:
+        elif self.nnodes == 4 and self.dim() == 2:
             return [
                 [0, 1],
                 [1, 2],
                 [2, 3],
                 [0, 3],
             ]
-        elif self.nnodes == 4 and self.dimension == 3:
+        elif self.nnodes == 4 and self.dim() == 3:
             return [
                 [0, 1, 2],
                 [0, 1, 3],
                 [0, 2, 3],
                 [1, 2, 3],
             ]
-        elif self.nnodes == 8 and self.dimension == 3:
+        elif self.nnodes == 8 and self.dim() == 3:
             return [
                 [0, 1, 4, 2],
                 [0, 2, 6, 3],
@@ -173,8 +172,7 @@ class Graph:
                 [1, 5, 7, 4],
                 [3, 6, 7, 5],
             ]
-        return [[]]
-        #raise Exception("Cannot build facets for the given mesh.")
+        raise NotImplementedError
 
     def boundary_facets(self) -> ndarray:
         """Return an array of boundary facet indices."""
@@ -200,7 +198,7 @@ class Graph:
 
         vertices = np.unique(self.facets[:, ix].flatten())
 
-        if self.dimension == 3:
+        if self.dim() == 3:
             edge_candidates = self.t2e[:, self.f2t[0, ix]].flatten()
             # subset of edges that share all points with the given facets
             subset = np.nonzero(
@@ -217,11 +215,19 @@ class Graph:
 
 
 @dataclass
-class Grid(Graph):
+class Geometry(Graph):
 
     elem: 'Element'
     doflocs: Optional[ndarray] = None
-    t_dofs: Optional[ndarray] = None
+    dofs: Optional[ndarray] = None
+
+    @property
+    def _p(self):
+        return self.p if self.doflocs is None else self.doflocs
+
+    @property
+    def _t(self):
+        return self.t if self.dofs is None else self.dofs
 
     @property
     def refdom(self):  # todo
@@ -231,9 +237,182 @@ class Grid(Graph):
     def brefdom(self):  # todo
         return self.elem.mesh_type.brefdom
 
-    def _mapping(self):
+    def F(self, X, tind=None):
+        if tind is None:
+            out = np.zeros((X.shape[0], self._t.shape[1], X.shape[1]))
+            for i in range(X.shape[0]):
+                for itr in range(self._t.shape[0]):
+                    phi, _ = self.elem.lbasis(X, itr)
+                    out[i] += self._p[i, self._t[itr]][:, None] * phi
+        else:
+            out = np.zeros((X.shape[0], len(tind), X.shape[-1]))
+            for i in range(X.shape[0]):
+                for itr in range(self._t.shape[0]):
+                    phi, _ = self.elem.lbasis(X, itr)
+                    out[i] += self._p[i, self._t[itr, tind]][:, None] * phi
+        return out
 
-        from skfem.mapping import MappingIsoparametric
+    def bndmap(self, i, X, find=None):
+        if find is None:
+            out = np.zeros((self.facets.shape[1], X.shape[1]))
+            for itr in range(self.facets.shape[0]):
+                phi, _ = self.bndelem.lbasis(X, itr)
+                out += self._p[i, self.facets[itr, :]][:, None] * phi
+            return out
+        else:
+            out = np.zeros((len(find), X.shape[-1]))
+            for itr in range(self.facets.shape[0]):
+                phi, _ = self.bndelem.lbasis(X, itr)
+                out += self._p[i, self.facets[itr, find]][:, None] * phi
+            return out
+
+    def bndJ(self, i, j, X, find=None):
+        if find is None:
+            out = np.zeros((self.facets.shape[1], X.shape[1]))
+            for itr in range(self.facets.shape[0]):
+                _, dphi = self.bndelem.lbasis(X, itr)
+                out += self._p[i, self.facets[itr, :]][:, None] * dphi[j]
+            return out
+        else:
+            out = np.zeros((len(find), X.shape[-1]))
+            for itr in range(self.facets.shape[0]):
+                _, dphi = self.bndelem.lbasis(X, itr)
+                out += self._p[i, self.facets[itr, find]][:, None] * dphi[j]
+            return out
+
+    def invF(self, x, tind=None, newton_max_iters=50, newton_tol=1e-12):
+        """Newton iteration for evaluating inverse isoparametric mapping."""
+        X = np.zeros(x.shape) + .5
+        for _ in range(newton_max_iters):
+            F = self.F(X, tind)
+            invDF = self.invDF(X, tind)
+            dX = np.einsum('ijkl,jkl->ikl', invDF, x - F)
+            X = np.clip(X + dX, 0., 1.)
+            if (np.linalg.norm(dX, 1, (0, 2)) < newton_tol).all():
+                return X
+        raise Exception(("Newton iteration didn't converge "
+                         "up to TOL={}".format(newton_tol)))
+
+    def normals(self, X, tind, find, t2f):
+        if self.dim() == 1:
+            Nref = np.array([[-1.],
+                             [1.]])
+        elif self.dim() == 2 and self.t2f.shape[0] == 3:
+            Nref = np.array([[0., -1.],
+                             [1., 1.],
+                             [-1., 0.]])
+        elif self.dim() == 2 and self.t2f.shape[0] == 4:
+            Nref = np.array([[0., -1.],
+                             [1., 0.],
+                             [0., 1.],
+                             [-1., 0.]])
+        elif self.dim() == 3:
+            Nref = np.array([[1., 0., 0.],
+                             [0., 0., 1.],
+                             [0., 1., 0.],
+                             [0., -1., 0.],
+                             [0., 0., -1.],
+                             [-1., 0., 0.]])
+        else:
+            raise Exception("Not implemented for the given dimension.")
+
+        invDF = self.invDF(X, tind)
+        N = np.empty((self.dim(), len(find)))
+
+        for itr in range(Nref.shape[0]):
+            ix = np.nonzero(t2f[itr, tind] == find)[0]
+            for jtr in range(Nref.shape[1]):
+                N[jtr, ix] = Nref[itr, jtr]
+
+        n = np.einsum('ijkl,ik->jkl', invDF, N)
+        nlen = np.sqrt(np.sum(n ** 2, axis=0))
+        return np.einsum('ijk,jk->ijk', n, 1. / nlen)
+
+    def detDG(self, X: ndarray, find: Optional[ndarray] = None):
+        if self.dim() == 2:
+            return np.sqrt(self.bndJ(0, 0, X, find) ** 2 +
+                           self.bndJ(1, 0, X, find) ** 2)
+        elif self.dim() == 3:
+            return np.sqrt(
+                (self.bndJ(1, 0, X, find) * self.bndJ(2, 1, X, find) -
+                 self.bndJ(2, 0, X, find) * self.bndJ(1, 1, X, find)) ** 2 +
+                (-self.bndJ(0, 0, X, find) * self.bndJ(2, 1, X, find) +
+                 self.bndJ(2, 0, X, find) * self.bndJ(0, 1, X, find)) ** 2 +
+                (self.bndJ(0, 0, X, find) * self.bndJ(1, 1, X, find) -
+                 self.bndJ(1, 0, X, find) * self.bndJ(0, 1, X, find)) ** 2
+            )
+        else:
+            raise NotImplementedError
+
+    def J(self, i, j, X, tind=None):
+        if tind is None:
+            out = np.zeros((self._t.shape[1], X.shape[1]))
+            for itr in range(self._t.shape[0]):
+                _, dphi = self.elem.lbasis(X, itr)
+                out += self._p[i, self._t[itr, :]][:, None] * dphi[j]
+        else:
+            out = np.zeros((len(tind), X.shape[-1]))
+            for itr in range(self._t.shape[0]):
+                _, dphi = self.elem.lbasis(X, itr)
+                out += self._p[i, self._t[itr, tind]][:, None] * dphi[j]
+        return out
+
+    def detDF(self, X, tind=None, J=None):
+        if J is None:
+            J = [[self.J(i, j, X, tind=tind) for j in range(self.dim())]
+                 for i in range(self.dim())]
+
+        if self.dim() == 2:
+            detDF = J[0][0] * J[1][1] - J[0][1] * J[1][0]
+        elif self.dim() == 3:
+            detDF = (J[0][0] * (J[1][1] * J[2][2] - J[1][2] * J[2][1]) -
+                     J[0][1] * (J[1][0] * J[2][2] - J[1][2] * J[2][0]) +
+                     J[0][2] * (J[1][0] * J[2][1] - J[1][1] * J[2][0]))
+        else:
+            raise NotImplementedError("Dimension not supported.")
+
+        if np.sum(detDF == 0) > 0:
+            raise ValueError("Zero Jacobian determinant!")
+
+        return detDF
+
+    def G(self, X, find=None) -> ndarray:
+        return np.array([self.bndmap(i, X, find=find)
+                         for i in range(self.dim())])
+
+    def invDF(self, X, tind=None):
+        J = [[self.J(i, j, X, tind=tind) for j in range(self.dim())]
+             for i in range(self.dim())]
+        detDF = self.detDF(X, tind, J=J)
+        invDF = np.empty((self.dim(), self.dim()) + J[0][0].shape)
+
+        if self.dim() == 2:
+            detDF = self.detDF(X, tind)
+            invDF[0, 0] = J[1][1]
+            invDF[0, 1] = -J[0][1]
+            invDF[1, 0] = -J[1][0]
+            invDF[1, 1] = J[0][0]
+        elif self.dim() == 3:
+            invDF[0, 0] = -J[1][2] * J[2][1] + J[1][1] * J[2][2]
+            invDF[1, 0] = J[1][2] * J[2][0] - J[1][0] * J[2][2]
+            invDF[2, 0] = -J[1][1] * J[2][0] + J[1][0] * J[2][1]
+            invDF[0, 1] = J[0][2] * J[2][1] - J[0][1] * J[2][2]
+            invDF[1, 1] = -J[0][2] * J[2][0] + J[0][0] * J[2][2]
+            invDF[2, 1] = J[0][1] * J[2][0] - J[0][0] * J[2][1]
+            invDF[0, 2] = -J[0][2] * J[1][1] + J[0][1] * J[1][2]
+            invDF[1, 2] = J[0][2] * J[1][0] - J[0][0] * J[1][2]
+            invDF[2, 2] = -J[0][1] * J[1][0] + J[0][0] * J[1][1]
+        else:
+            raise Exception("Not implemented for the given dimension.")
+
+        return invDF / detDF
+
+    def _mapping(self):
+        return self
+
+    @property
+    def bndelem(self):
+
         from skfem.element import (ElementTriP1, ElementTriP2,
                                    ElementLineP1, ElementLineP2,
                                    ElementQuad1, ElementQuad2,
@@ -251,25 +430,16 @@ class Grid(Graph):
             ElementHex2: ElementQuad2,
         }
 
-        return MappingIsoparametric(
-            replace(self,
-                    t=self.t_dofs,
-                    p=self.doflocs) if self.doflocs is not None else self,
-            self.elem,
-            BOUNDARY_ELEMENT_MAP[type(self.elem)]()
-        )
-
-    def dim(self):
-        return self.elem.dim
+        return BOUNDARY_ELEMENT_MAP[type(self.elem)]()
 
 
 class BaseMesh:
 
-    grid: Grid
+    geom: Geometry
 
     def __init__(self, t, p, elem, element_dofs=None, doflocs=None):
 
-        self.grid = Grid(
+        self.geom = Geometry(
             p=p,
             t=t,
             elem=elem,
@@ -285,7 +455,7 @@ class BaseMesh:
         return from_file(filename)
 
     def __getattr__(self, item):
-        return getattr(self.grid, item)
+        return getattr(self.geom, item)
 
 
 class BaseMesh2D(BaseMesh):
