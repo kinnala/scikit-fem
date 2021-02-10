@@ -3,7 +3,7 @@ from .element import Element
 from .discrete_field import DiscreteField
 
 
-class ElementVectorH1(Element):
+class ElementVector(Element):
 
     def __init__(self, elem):
         self.dim = elem.dim
@@ -35,8 +35,9 @@ class ElementVectorH1(Element):
         fields = []
         for field in self.elem.gbasis(mapping, X, ind, tind)[0]:
             if field is None:
-                continue
-            tmp = np.zeros((self.dim,) + field.shape)
-            tmp[n] = field
-            fields.append(tmp)
+                fields.append(None)
+            else:
+                tmp = np.zeros((self.dim,) + field.shape)
+                tmp[n] = field
+                fields.append(tmp)
         return (DiscreteField(*fields),)

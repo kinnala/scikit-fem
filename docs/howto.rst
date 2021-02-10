@@ -24,7 +24,7 @@ partial differential equation.  Here are some general guidelines:
   :class:`~skfem.element.ElementHex2`, for standard second-order problems.
 * Discretize vectorial problems either by manually building the block matrices
   (e.g., using ``scipy.sparse.bmat``) with scalar elements, or by using
-  :class:`~skfem.element.ElementVectorH1` or
+  :class:`~skfem.element.ElementVector` or
   :class:`~skfem.element.ElementComposite` that abstract out the creation of
   the block matrices.
 * Pay special attention to constrained problems, e.g., the Stokes system which
