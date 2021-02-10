@@ -3,7 +3,7 @@ from .element import Element
 from .discrete_field import DiscreteField
 
 
-class ElementVectorH1(Element):
+class ElementVector(Element):
 
     def __init__(self, elem):
         self.dim = elem.dim
