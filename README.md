@@ -208,6 +208,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
+### [2.5.0] - 2021-02-13
+
 - Deprecated: `side` keyword argument to `FacetBasis` in favor of the more
   explicit `InteriorFacetBasis` and `MortarFacetBasis`.
 - Added: `InteriorFacetBasis` for integrating over the interior facets, e.g.,
