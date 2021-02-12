@@ -14,7 +14,7 @@ from scipy.sparse import spmatrix
 
 from skfem.assembly import asm, BilinearForm, LinearForm, DofsView
 from skfem.assembly.basis import Basis
-from skfem.element import ElementVectorH1
+from skfem.element import ElementVector
 
 
 # custom types for describing input and output values
@@ -428,7 +428,7 @@ def project(fun,
     @BilinearForm
     def mass(u, v, w):
         p = u * v
-        return sum(p) if isinstance(basis_to.elem, ElementVectorH1) else p
+        return sum(p) if isinstance(basis_to.elem, ElementVector) else p
 
     @LinearForm
     def funv(v, w):
@@ -439,7 +439,7 @@ def project(fun,
                           "take only one argument in the future.",
                           DeprecationWarning)
             p = fun(*w.x) * v
-        return sum(p) if isinstance(basis_to.elem, ElementVectorH1) else p
+        return sum(p) if isinstance(basis_to.elem, ElementVector) else p
 
     @BilinearForm
     def deriv(u, v, w):

@@ -11,9 +11,9 @@ elements.
 from .discrete_field import DiscreteField
 from .element import Element
 from .element_h1 import ElementH1
-from .element_vector_h1 import ElementVectorH1
 from .element_hdiv import ElementHdiv
 from .element_hcurl import ElementHcurl
+from .element_vector import ElementVector
 from .element_tri import (ElementTriP1, ElementTriP2, ElementTriDG,
                           ElementTriP0, ElementTriRT0, ElementTriMorley,
                           ElementTriArgyris, ElementTriMini, ElementTriCR,
@@ -32,10 +32,15 @@ from .element_line import (ElementLineP0, ElementLineP1, ElementLineP2,
 from .element_composite import ElementComposite  # noqa
 
 
+# for backwards compatibility
+ElementVectorH1 = ElementVector
+
+
 __all__ = [
     "DiscreteField",
     "Element",
     "ElementH1",
+    "ElementVector",
     "ElementVectorH1",
     "ElementHdiv",
     "ElementHcurl",
