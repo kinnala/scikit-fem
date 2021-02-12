@@ -23,9 +23,9 @@ constructor :meth:`~skfem.mesh.Mesh.load`.
 
 from .mesh import Mesh, MeshType
 from .mesh_line import MeshLine
-from .mesh2d import (Mesh2D, MeshTri, MeshQuad,
-                     MeshTri2, MeshQuad2)
+from .mesh2d import Mesh2D, MeshTri, MeshQuad
 from .mesh3d import Mesh3D, MeshTet, MeshHex
+from .meshes import MeshTri2, MeshQuad2
 
 
 __all__ = [
@@ -39,4 +39,5 @@ __all__ = [
     "MeshQuad2",
     "Mesh3D",
     "MeshTet",
-    "MeshHex"]
+    "MeshHex",
+]
