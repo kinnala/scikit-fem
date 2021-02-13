@@ -58,7 +58,7 @@ class Mesh2D(Mesh):
     def _repr_svg_(self) -> Optional[str]:
         from skfem.visuals.svg import draw
         if self.t.shape[1] > 5000:
-            return
+            return None
         return draw(self)
 
     @staticmethod

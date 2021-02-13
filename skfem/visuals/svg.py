@@ -5,6 +5,7 @@ from functools import singledispatch
 import numpy as np
 
 from ..mesh import Mesh2D
+from ..assembly import InteriorBasis
 
 
 @singledispatch
@@ -57,3 +58,10 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> str:
         lines += template.format(s, t, u, v, stroke)
     return ("""<svg xmlns="http://www.w3.org/2000/svg" version="1.1" """
             """width="{}" height="{}">{}</svg>""").format(width, height, lines)
+
+
+@draw.register(InteriorBasis)
+def draw_basis(ib: InteriorBasis, **kwargs) -> Axes:
+    Nrefs = kwargs["Nrefs"] if "Nrefs" in kwargs else 2
+    m, _ = ib.refinterp(ib.mesh.p[0], Nrefs=Nrefs)
+    return draw(m, boundaries_only=True, **kwargs)
