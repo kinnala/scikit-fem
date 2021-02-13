@@ -61,7 +61,7 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> str:
 
 
 @draw.register(InteriorBasis)
-def draw_basis(ib: InteriorBasis, **kwargs) -> Axes:
+def draw_basis(ib: InteriorBasis, **kwargs) -> str:
     Nrefs = kwargs["Nrefs"] if "Nrefs" in kwargs else 2
     m, _ = ib.refinterp(ib.mesh.p[0], Nrefs=Nrefs)
     return draw(m, boundaries_only=True, **kwargs)
