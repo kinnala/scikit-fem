@@ -3,7 +3,6 @@
 from functools import singledispatch
 
 import numpy as np
-from numpy import ndarray
 
 from ..mesh import Mesh2D
 
