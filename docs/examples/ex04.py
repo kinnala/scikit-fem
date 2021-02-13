@@ -87,8 +87,8 @@ mapping = MappingMortar.init_2D(m, M,
                                 np.array([0.0, 1.0]))
 
 mb = [
-    FacetBasis(m, e, mapping=mapping, intorder=4, side=0),
-    FacetBasis(M, E, mapping=mapping, intorder=4, side=1),
+    MortarFacetBasis(m, e, mapping=mapping, intorder=4, side=0),
+    MortarFacetBasis(M, E, mapping=mapping, intorder=4, side=1),
 ]
 
 # define bilinear forms

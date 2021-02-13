@@ -41,7 +41,7 @@ def eval_estimator(m, u):
     eta_K = interior_residual.elemental(basis, w=basis.interpolate(u))
     
     # facet jump
-    fbasis = [FacetBasis(m, e, side=i) for i in [0, 1]]   
+    fbasis = [InteriorFacetBasis(m, e, side=i) for i in [0, 1]]
     w = {'u' + str(i + 1): fbasis[i].interpolate(u) for i in [0, 1]}
     
     @Functional
