@@ -5,8 +5,6 @@
 <p align="center">
 <a href="https://pypi.org/project/scikit-fem/" alt="PyPI"><img src="https://img.shields.io/pypi/v/scikit-fem" /></a>
 <a href="https://anaconda.org/conda-forge/scikit-fem" alt="Conda"><img src="https://img.shields.io/conda/vn/conda-forge/scikit-fem" /></a>
-<a href="https://pypi.org/project/scikit-fem/" alt="PyPI - Python Version"><img src="https://img.shields.io/pypi/pyversions/scikit-fem" /></a>
-<a href="https://opensource.org/licenses/BSD-3-Clause" alt="License"><img src="https://img.shields.io/badge/license-BSD%203--Clause-blue.svg" /></a>
 <a href="https://scikit-fem.readthedocs.io/" alt="Documentation"><img src="https://readthedocs.org/projects/pip/badge/?version=stable" /></a>
 <a href="https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e" alt="status"><img src="https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e/status.svg" /></a>
 <a href="https://github.com/kinnala/scikit-fem/actions" alt="Tests"><img src="https://github.com/kinnala/scikit-fem/workflows/tests/badge.svg" /></a>
