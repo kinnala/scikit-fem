@@ -55,6 +55,12 @@ class Mesh2D(Mesh):
         return np.max(np.linalg.norm(np.diff(self.p[:, self.facets], axis=1),
                                      axis=0))
 
+    def _repr_svg_(self) -> str:
+        from skfem.visuals.svg import draw
+        if self.t.shape[1] > 5000:
+            return None
+        return draw(self)
+
     @staticmethod
     def strip_extra_coordinates(p: ndarray) -> ndarray:
         return p[:, :2]

@@ -2,15 +2,15 @@
 
 from functools import singledispatch
 
-import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.axes import Axes
 from mpl_toolkits.mplot3d import Axes3D
 from numpy import ndarray
 
+import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
+
 from ..assembly import InteriorBasis
-from ..mesh import Mesh2D, MeshLine, MeshTri,\
-    MeshTet, MeshQuad
+from ..mesh import Mesh2D, MeshLine, MeshQuad, MeshTet, MeshTri
 
 
 @singledispatch
@@ -50,14 +50,16 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> Axes:
     ax (optional)
         A preinitialised Matplotlib axes for plotting.
     node_numbering (optional)
-        If true, draw node numbering.
+        If ``True``, draw node numbering.
     facet_numbering (optional)
-        If true, draw facet numbering.
+        If ``True``, draw facet numbering.
     element_numbering (optional)
-        If true, draw element numbering.
+        If ``True``, draw element numbering.
     aspect (optional)
-        Ratio of vertical to horizontal length-scales; ignored if ax
+        Ratio of vertical to horizontal length-scales; ignored if ``ax`` is
         specified
+    boundaries_only (optional)
+        If ``True``, draw only boundary edges.
 
     Returns
     -------
