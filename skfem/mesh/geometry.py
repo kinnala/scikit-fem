@@ -1,5 +1,5 @@
 from dataclasses import dataclass, replace
-from typing import Any, Optional
+from typing import NamedTuple
 
 from numpy import ndarray
 
@@ -35,9 +35,6 @@ class Geometry(Graph):
 
     def _mapping(self):
         from skfem.mapping import MappingAffine, MappingIsoparametric
-        #if self.doflocs is None:
-        #    return MappingAffine(self)
-        from typing import NamedTuple
 
         class FakeMesh(NamedTuple):
             p: ndarray

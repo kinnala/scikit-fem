@@ -1,7 +1,6 @@
 """Import any formats supported by meshio."""
 
 import warnings
-from collections import OrderedDict
 
 import meshio
 import numpy as np
@@ -9,15 +8,15 @@ import numpy as np
 import skfem
 
 
-MESH_TYPE_MAPPING = OrderedDict([
-    ('tetra', skfem.MeshTet),
-    ('hexahedron', skfem.MeshHex),
-    ('triangle', skfem.MeshTri),
-    ('quad', skfem.MeshQuad),
-    ('line', skfem.MeshLine),
-    ('triangle6', skfem.MeshTri2),
-    ('quad9', skfem.MeshQuad2),
-])
+MESH_TYPE_MAPPING = {
+    'tetra': skfem.MeshTet,
+    'hexahedron': skfem.MeshHex,
+    'triangle': skfem.MeshTri,
+    'quad': skfem.MeshQuad,
+    'line': skfem.MeshLine,
+    'triangle6': skfem.MeshTri2,
+    'quad9': skfem.MeshQuad2,
+}
 
 TYPE_MESH_MAPPING = {v: k for k, v in MESH_TYPE_MAPPING.items()}
 
