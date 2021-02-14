@@ -4,23 +4,27 @@ from typing import Any, Optional
 from numpy import ndarray
 
 from .graph import Graph
+from ..assembly import Dofs
+from ..element import Element, ElementVector
 
 
 @dataclass
 class Geometry(Graph):
 
-    elem: Any  # this is Element but cannot import it yet
-    doflocs: Optional[ndarray] = None
-    dofs: Optional[ndarray] = None
+    elem: Element
+    doflocs: ndarray
+    affine: bool = False
 
     @property
-    def _p(self):
-        return self.p if self.doflocs is None else self.doflocs
+    def p(self):
+        return self.doflocs
 
     @property
-    def _t(self):
-        return self.t if self.dofs is None else self.dofs
-
+    def dofs(self):
+        if not hasattr(self, '_dofs'):
+            self._dofs = Dofs(self, self.elem)
+        return self._dofs
+    
     @property
     def refdom(self):  # todo
         return self.elem.mesh_type.refdom
@@ -31,10 +35,26 @@ class Geometry(Graph):
 
     def _mapping(self):
         from skfem.mapping import MappingAffine, MappingIsoparametric
-        if self.doflocs is None:
-            return MappingAffine(self)
+        #if self.doflocs is None:
+        #    return MappingAffine(self)
+        from typing import NamedTuple
+
+        class FakeMesh(NamedTuple):
+            p: ndarray
+            t: ndarray
+            facets: ndarray
+
+        fakemesh = FakeMesh(
+            self.doflocs,
+            self.dofs.element_dofs,
+            self.facets,
+        )
+
+        if self.affine:
+            return MappingAffine(fakemesh)
+
         return MappingIsoparametric(
-            replace(self, p=self._p, t=self._t),
+            fakemesh,
             self.elem,
             self.bndelem,
         )

@@ -9,8 +9,11 @@ from numpy import ndarray
 @dataclass
 class Graph:
 
-    p: ndarray
+    _dim: int
     t: ndarray
+
+    def dim(self):
+        return self._dim
 
     @property
     def nelements(self):
@@ -31,9 +34,6 @@ class Graph:
     @property
     def nnodes(self):
         return self.t.shape[0]
-
-    def dim(self):
-        return self.p.shape[0]
 
     def _init_facets(self):
         self._facets, self._t2f = Graph.build_entities(
