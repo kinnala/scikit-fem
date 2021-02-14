@@ -61,7 +61,6 @@ class MeshTri2(BaseMesh2D):
         __t = (np.arange(len(uniq), dtype=np.int64)[ix]
                .reshape(_t.shape))
         super(MeshTri2, self).__init__(2, __t, ElementTriP2(), _p)
-        import pdb; pdb.set_trace()
         self.doflocs[:, t[3:].flatten('F')] = self.doflocs[:, self.dofs.element_dofs[3:].flatten('F')]
 
 
