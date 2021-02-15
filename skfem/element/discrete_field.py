@@ -13,7 +13,8 @@ class DiscreteField(NamedTuple):
     div: Optional[ndarray] = None
     curl: Optional[ndarray] = None
     hess: Optional[ndarray] = None
-    hod: Optional[ndarray] = None
+    grad3: Optional[ndarray] = None
+    grad4: Optional[ndarray] = None
 
     def __array__(self):
         return self.value

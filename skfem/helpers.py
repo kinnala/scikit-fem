@@ -59,12 +59,12 @@ def dd(u: DiscreteField):
 
 def ddd(u):
     """Third derivative (if available)."""
-    return u.hod[0]
+    return u.grad3
 
 
 def dddd(u):
     """Fourth derivative (if available)."""
-    return u.hod[1]
+    return u.grad4
 
 
 def dot(u: FieldOrArray, v: FieldOrArray):

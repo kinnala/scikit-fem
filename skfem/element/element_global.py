@@ -41,17 +41,16 @@ class ElementGlobal(Element):
                     U[k][diff] += (V[:, itr, i][:, None]
                                    * self._pbasis[diff][itr](*x))
 
-        # put higher order derivatives into a single array
-        hod = np.empty((self.derivatives - 2,), dtype=object)
+        hod = {}
         for k in range(self.derivatives - 2):
-            hod[k] = U[k + 3]
+            hod['grad{}'.format(k + 3)] = U[k + 3]
 
         return (
             DiscreteField(
                 value=U[0],
                 grad=U[1],
                 hess=U[2],
-                hod=hod,
+                **hod
             ),
         )
 
