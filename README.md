@@ -206,6 +206,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
+- Added: New shorthands for higher order derivatives when using `ElementGlobal`:
+  `u.grad3` for third order derivatives, `u.grad4` for fourth order derivatices, etc.
+
 ### [2.5.0] - 2021-02-13
 
 - Deprecated: `side` keyword argument to `FacetBasis` in favor of the more
