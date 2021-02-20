@@ -4,6 +4,7 @@ import numpy as np
 from numpy import ndarray
 
 from .mesh3d import Mesh3D
+from ...refdom import RefHex
 
 
 class MeshHex(Mesh3D):
@@ -33,8 +34,7 @@ class MeshHex(Mesh3D):
         ``self.edges`` (12 x Nelements).
 
     """
-    refdom: str = "hex"
-    brefdom: str = "quad"
+    refdom = RefHex
     meshio_type: str = "hexahedron"
     name: str = "Hexahedral"
 

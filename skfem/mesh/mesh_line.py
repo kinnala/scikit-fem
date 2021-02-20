@@ -4,13 +4,13 @@ import numpy as np
 from numpy import ndarray
 
 from ..mesh import Mesh, MeshType
+from ..refdom import RefLine
 
 
 class MeshLine(Mesh):
     """One-dimensional mesh."""
 
-    refdom: str = "line"
-    brefdom: str = "point"
+    refdom = RefLine
     meshio_type: str = "line"
     name: str = "One-dimensional"
 

@@ -1,12 +1,12 @@
 import numpy as np
+
 from ..element_hcurl import ElementHcurl
-from ...mesh.mesh3d import MeshTet
+from ...refdom import RefTet
 
 
 class ElementTetN0(ElementHcurl):
 
     edge_dofs = 1
-    dim = 3
     maxdeg = 1
     dofnames = ['u^t']
     doflocs = np.array([[.5, 0., 0.],
@@ -15,7 +15,7 @@ class ElementTetN0(ElementHcurl):
                         [0., 0., .5],
                         [.5, 0., .5],
                         [0., .5, .5]])
-    mesh_type = MeshTet
+    refdom = RefTet
 
     def lbasis(self, X, i):
         x, y, z = X

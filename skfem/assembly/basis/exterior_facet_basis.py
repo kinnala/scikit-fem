@@ -9,7 +9,7 @@ from skfem.element import (DiscreteField, Element, ElementHex0, ElementHex1,
                            ElementTetP2, ElementTriP0, ElementTriP1,
                            ElementTriP2)
 from skfem.mapping import Mapping
-from skfem.mesh import Mesh, MeshHex, MeshQuad, MeshTet, MeshTri
+from skfem.mesh import Mesh, MeshHex, MeshQuad, MeshTet, MeshTri, MeshLine
 
 from .basis import Basis
 from .interior_basis import InteriorBasis
@@ -187,7 +187,12 @@ class ExteriorFacetBasis(Basis):
         if (type(target_elem), meshcls) not in ELEMENT_MAP:
             raise Exception("The specified 'elem' not supported.")
         elemcls = ELEMENT_MAP[(type(target_elem), meshcls)]
-        target_meshcls = type(target_elem).mesh_type
+        target_meshcls = {
+            MeshTri: MeshLine,
+            MeshQuad: MeshLine,
+            MeshTet: MeshTri,
+            MeshHex: MeshQuad,
+        }[meshcls]
 
         p, t = self.mesh._reix(self.mesh.facets[:, self.find])
 

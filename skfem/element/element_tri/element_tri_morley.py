@@ -1,14 +1,13 @@
 import numpy as np
 
 from ..element_global import ElementGlobal
-from ...mesh.mesh2d import MeshTri
+from ...refdom import RefTri
 
 
 class ElementTriMorley(ElementGlobal):
 
     nodal_dofs = 1
     facet_dofs = 1
-    dim = 2
     maxdeg = 2
     dofnames = ['u', 'u_n']
     doflocs = np.array([[0., 0.],
@@ -17,7 +16,7 @@ class ElementTriMorley(ElementGlobal):
                         [.5, 0.],
                         [.5, .5],
                         [0., .5]])
-    mesh_type = MeshTri
+    refdom = RefTri
 
     def gdof(self, F, w, i):
         if i == 0:

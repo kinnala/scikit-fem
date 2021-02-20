@@ -1,7 +1,7 @@
 import numpy as np
 
 from ..element_h1 import ElementH1
-from ...mesh.mesh2d import MeshTri
+from ...refdom import RefTri
 
 
 class ElementTriMini(ElementH1):
@@ -9,13 +9,13 @@ class ElementTriMini(ElementH1):
     nodal_dofs = 1
     interior_dofs = 1
     dim = 2
-    maxdeg = 1 + dim
+    maxdeg = 3
     dofnames = ['u', 'NA']
     doflocs = np.array([[0., 0.],
                         [1., 0.],
                         [0., 1.],
-                        [np.nan] * dim])
-    mesh_type = MeshTri
+                        [np.nan, np.nan]])
+    refdom = RefTri
 
     def lbasis(self, X, i):
         x, y = X

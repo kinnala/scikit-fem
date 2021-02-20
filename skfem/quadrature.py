@@ -1,40 +1,20 @@
 """Tabulated and generated quadrature points for various reference domains."""
 
-from typing import Tuple
+from typing import Tuple, Type
 
 import numpy as np
 from numpy.polynomial.legendre import leggauss
+from .refdom import RefPoint, RefLine, RefTri, RefQuad, RefTet, RefHex
 
 
-def get_quadrature(refdom: str, norder: int) -> Tuple[np.ndarray, np.ndarray]:
+def get_quadrature(refdom: Type, norder: int) -> Tuple[np.ndarray, np.ndarray]:
     """Return a nth order accurate quadrature rule for different reference
     domains.
 
     Parameters
     ----------
     refdom
-        The name of the reference domain. Valid reference domains can be found
-        in the following table.
-
-        +-------+-----------------+----------------+
-        | Name  | Corner points   | Maximum order  |
-        +-------+-----------------+----------------+
-        | point | N.A.            | infty          |
-        +-------+-----------------+----------------+
-        | line  | 0, 1            | infty          |
-        +-------+-----------------+----------------+
-        | tri   | (0,0) (0,1)     | 19             |
-        |       | (1,0)           |                |
-        +-------+-----------------+----------------+
-        | quad  | (0,0) (1,0)     | infty          |
-        |       | (1,1) (0,1)     |                |
-        +-------+-----------------+----------------+
-        | tet   | (0,0,0) (0,0,1) | 4              |
-        |       | (0,1,0) (1,0,0) |                |
-        +-------+-----------------+----------------+
-        | hex   | (0,0,0),        | infty          |
-        |       | (1,1,1), etc.   |                |
-        +-------+-----------------+----------------+
+        The reference domain type.
 
     norder
         The polynomial order upto which the requested quadrature rule is
@@ -46,15 +26,15 @@ def get_quadrature(refdom: str, norder: int) -> Tuple[np.ndarray, np.ndarray]:
         weights (Nqp).
 
     """
-    if refdom == "tri":
+    if refdom == RefTri:
         return get_quadrature_tri(norder)
-    elif refdom == "tet":
+    elif refdom == RefTet:
         return get_quadrature_tet(norder)
-    elif refdom == "line":
+    elif refdom == RefLine:
         return get_quadrature_line(norder)
-    elif refdom == "point":
+    elif refdom == RefPoint:
         return get_quadrature_point(norder)
-    elif refdom == "quad":
+    elif refdom == RefQuad:
         X, W = get_quadrature_line(norder)
         # generate tensor product rule from 1D rule
         A, B = np.meshgrid(X, X)
@@ -63,7 +43,7 @@ def get_quadrature(refdom: str, norder: int) -> Tuple[np.ndarray, np.ndarray]:
         Z = A * B
         W = Z.flatten(order="F")
         return Y, W
-    elif refdom == "hex":
+    elif refdom == RefHex:
         X, W = get_quadrature_line(norder)
         # generate tensor product rule from 1D rule
         A, B, C = np.meshgrid(X, X, X)

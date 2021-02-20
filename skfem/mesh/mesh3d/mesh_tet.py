@@ -5,6 +5,7 @@ from numpy import ndarray
 from scipy.spatial import cKDTree
 
 from .mesh3d import Mesh3D
+from ...refdom import RefTet
 
 
 class MeshTet(Mesh3D):
@@ -35,8 +36,7 @@ class MeshTet(Mesh3D):
         Each column contains six indices to `self.edges` (6 x Nelements).
 
     """
-    refdom: str = "tet"
-    brefdom: str = "tri"
+    refdom = RefTet
     meshio_type: str = "tetra"
     name: str = "Tetrahedral"
 

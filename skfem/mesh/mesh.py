@@ -6,6 +6,8 @@ from typing import (Dict, Optional, Tuple,
 import numpy as np
 from numpy import ndarray
 
+from ..refdom import Refdom
+
 
 MeshType = TypeVar('MeshType', bound='Mesh')
 DimTuple = Union[Tuple[float],
@@ -43,8 +45,7 @@ class Mesh:
 
     """
 
-    refdom: str = "none"
-    brefdom: str = "none"
+    refdom: Type = Refdom
     meshio_type: str = "none"
     name: str = "Abstract"
 
@@ -87,6 +88,10 @@ class Mesh:
             for k, v in self.subdomains.items():
                 if not isinstance(v, ndarray):
                     self.subdomains[k] = np.array(v, dtype=np.int64)
+
+    @property
+    def brefdom(self):
+        return self.refdom.brefdom
 
     @classmethod
     def load(cls: Type[MeshType], filename: str) -> MeshType:
@@ -509,8 +514,7 @@ class Mesh:
             raise Exception(msg)
 
         # check that element connectivity matrix has correct size
-        nvertices = {'line': 2, 'tri': 3, 'quad': 4, 'tet': 4, 'hex': 8}
-        if self.t.shape[0] != nvertices[self.refdom]:
+        if self.t.shape[0] != self.refdom.t.shape[0]:
             msg = ("Mesh._validate(): The given connectivity "
                    "matrix has wrong shape!")
             raise Exception(msg)

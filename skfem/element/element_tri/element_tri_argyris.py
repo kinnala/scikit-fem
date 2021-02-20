@@ -1,14 +1,13 @@
 import numpy as np
 
 from ..element_global import ElementGlobal
-from ...mesh.mesh2d import MeshTri
+from ...refdom import RefTri
 
 
 class ElementTriArgyris(ElementGlobal):
 
     nodal_dofs = 6
     facet_dofs = 1
-    dim = 2
     maxdeg = 5
     dofnames = ['u', 'u_x', 'u_y', 'u_xx', 'u_xy', 'u_yy', 'u_n']
     doflocs = np.array([[0., 0.],
@@ -32,7 +31,7 @@ class ElementTriArgyris(ElementGlobal):
                         [.5, 0.],
                         [.5, .5],
                         [0., .5]])
-    mesh_type = MeshTri
+    refdom = RefTri
 
     def gdof(self, F, w, i):
         if i < 18:

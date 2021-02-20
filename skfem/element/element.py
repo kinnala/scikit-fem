@@ -4,6 +4,7 @@ import numpy as np
 from numpy import ndarray
 
 from skfem.mesh import Mesh
+from ..refdom import Refdom
 from .discrete_field import DiscreteField
 
 
@@ -49,8 +50,12 @@ class Element:
     dim: int = -1
     maxdeg: int = -1
     dofnames: List[str] = []
-    mesh_type: Type = Mesh
+    refdom: Type = Refdom
     doflocs: ndarray
+
+    @property
+    def dim(self):
+        return self.refdom.dim()
 
     def orient(self, mapping, i, tind=None):
         """Orient basis functions. By default all = 1."""
@@ -98,11 +103,9 @@ class Element:
 
     def _bfun_counts(self) -> ndarray:
         """Count number of nodal/edge/facet/interior basis functions."""
-        return np.array([self.nodal_dofs * self.mesh_type.t.shape[0],
-                         self.edge_dofs * self.mesh_type.t2e.shape[0]
-                         if hasattr(self.mesh_type, 'edges') else 0,
-                         self.facet_dofs * self.mesh_type.t2f.shape[0]
-                         if hasattr(self.mesh_type, 'facets') else 0,
+        return np.array([self.nodal_dofs * self.refdom.nnodes,
+                         self.edge_dofs * self.refdom.nedges,
+                         self.facet_dofs * self.refdom.nfacets,
                          self.interior_dofs])
 
     def __mul__(self, other):
@@ -113,11 +116,3 @@ class Element:
         b = other.elems if isinstance(other, ElementComposite) else [other]
 
         return ElementComposite(*a, *b)
-
-    @property
-    def refdom(self):
-        return self.mesh_type.refdom
-
-    @property
-    def brefdom(self):
-        return self.mesh_type.brefdom

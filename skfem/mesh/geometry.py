@@ -26,12 +26,12 @@ class Geometry(Graph):
         return self._dofs
     
     @property
-    def refdom(self):  # todo
-        return self.elem.mesh_type.refdom
+    def refdom(self):
+        return self.elem.refdom
 
     @property
-    def brefdom(self):  # todo
-        return self.elem.mesh_type.brefdom
+    def brefdom(self):
+        return self.elem.refdom.brefdom
 
     def _mapping(self):
         from skfem.mapping import MappingAffine, MappingIsoparametric

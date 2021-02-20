@@ -5,14 +5,13 @@ import numpy as np
 from numpy.polynomial.legendre import Legendre
 
 from ..element_h1 import ElementH1
-from ...mesh.mesh_line import MeshLine
+from ...refdom import RefLine
 
 
 class ElementLinePp(ElementH1):
 
     nodal_dofs = 1
-    dim = 1
-    mesh_type: Type = MeshLine
+    refdom = RefLine
 
     def __init__(self, p):
         if p < 1:

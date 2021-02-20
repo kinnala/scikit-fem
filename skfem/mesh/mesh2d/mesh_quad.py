@@ -6,6 +6,7 @@ from numpy import ndarray
 
 from .mesh2d import Mesh2D
 from .mesh_tri import MeshTri
+from ...refdom import RefQuad
 
 
 class MeshQuad(Mesh2D):
@@ -29,8 +30,7 @@ class MeshQuad(Mesh2D):
         Each column contains four indices to facets (4 x Nelements).
 
     """
-    refdom: str = "quad"
-    brefdom: str = "line"
+    refdom = RefQuad
     meshio_type: str = "quad"
     name: str = "Quadrilateral"
 

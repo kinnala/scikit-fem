@@ -4,6 +4,7 @@ import numpy as np
 from numpy import ndarray
 
 from .mesh2d import Mesh2D
+from ...refdom import RefTri
 
 
 class MeshTri(Mesh2D):
@@ -32,8 +33,7 @@ class MeshTri(Mesh2D):
         Each column contains three indices to facets.
 
     """
-    refdom: str = "tri"
-    brefdom: str = "line"
+    refdom = RefTri
     meshio_type: str = "triangle"
     name: str = "Triangular"
 
