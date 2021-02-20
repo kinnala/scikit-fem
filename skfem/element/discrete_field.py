@@ -13,7 +13,10 @@ class DiscreteField(NamedTuple):
     div: Optional[ndarray] = None
     curl: Optional[ndarray] = None
     hess: Optional[ndarray] = None
-    hod: Optional[ndarray] = None
+    grad3: Optional[ndarray] = None
+    grad4: Optional[ndarray] = None
+    grad5: Optional[ndarray] = None
+    grad6: Optional[ndarray] = None
 
     def __array__(self):
         return self.value
@@ -40,6 +43,16 @@ class DiscreteField(NamedTuple):
             return np.zeros_like(x)
 
         return DiscreteField(*[zero_or_none(field) for field in self])
+
+    @property
+    def hod(self):
+        """For backwards compatibility."""
+        return np.array([
+            self.grad3,
+            self.grad4,
+            self.grad5,
+            self.grad6,
+        ], dtype=object)
 
     @property
     def f(self):
