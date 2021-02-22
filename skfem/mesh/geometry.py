@@ -15,7 +15,7 @@ class Geometry:
 
     doflocs: ndarray
     t: ndarray
-    elem: Element
+    elem: Type[Element] = Element
     affine: bool = False
 
     @property
@@ -25,7 +25,7 @@ class Geometry:
     @property
     def dofs(self):
         if not hasattr(self, '_dofs'):
-            self._dofs = Dofs(self, self.elem)
+            self._dofs = Dofs(self, self.elem())
         return self._dofs
 
     @property
@@ -55,7 +55,7 @@ class Geometry:
 
         return MappingIsoparametric(
             fakemesh,
-            self.elem,
+            self.elem(),
             self.bndelem,
         )
 
@@ -67,7 +67,7 @@ class Geometry:
                                    ElementTetP1, ElementTetP2, ElementTriP1,
                                    ElementTriP2)
 
-        BOUNDARY_ELEMENT_MAP = {
+        BOUNDARY_ELEMENT_MAP = {  # TODO move to Element attributes
             ElementTriP1: ElementLineP1,
             ElementTriP2: ElementLineP2,
             ElementQuad1: ElementLineP1,
@@ -78,7 +78,7 @@ class Geometry:
             ElementHex2: ElementQuad2,
         }
 
-        return BOUNDARY_ELEMENT_MAP[type(self.elem)]()
+        return BOUNDARY_ELEMENT_MAP[self.elem]()
 
     def dim(self):
         return self.elem.refdom.dim()
@@ -114,6 +114,14 @@ class Geometry:
             self.t,
             self._edge_indices
         )
+
+    @property
+    def subdomains(self):
+        return None  # TODO
+
+    @property
+    def boundaries(self):
+        return None
 
     @property
     def facets(self):
@@ -239,7 +247,7 @@ class Geometry:
                 [3, 6, 7, 5],
             ]
         warnings.warn("Unable to construct facets.")
-        return [[]]
+        return [[]]  # TODO remove and raise exception?
 
     def boundary_facets(self) -> ndarray:
         """Return an array of boundary facet indices."""
@@ -280,34 +288,18 @@ class Geometry:
 
         return vertices, edges
 
-
-class BaseMesh:
-
-    geom: Geometry
-    _elem: Type
-    boundaries = None
-    subdomains = None
-
-    def __init__(self, p=None, t=None):
-
-        M = self._elem.refdom.nnodes
-        if t.shape[0] > M:
+    def __post_init__(self):
+        M = self.elem.refdom.nnodes
+        if self.t.shape[0] > M:  # TODO check that works for 3D quadratic
+            p, t = self.doflocs, self.t
             _t = t[:M]
             uniq, ix = np.unique(_t, return_inverse=True)
             rest = np.setdiff1d(np.arange(np.max(t) + 1, dtype=np.int64),
                                 uniq)
             _p = np.hstack((p[:, uniq], p[:, rest]))
-            __t = (np.arange(len(uniq), dtype=np.int64)[ix]
-                   .reshape(_t.shape))
-        else:
-            __t = t
-            _p = p
-        self.geom = Geometry(
-            _p,
-            __t,
-            self._elem(),
-        )
-        if t.shape[0] > M:
+            _t = (np.arange(len(uniq), dtype=np.int64)[ix]
+                  .reshape(_t.shape))
+            self.doflocs, self.t = _p, _t
             self.doflocs[:, self.dofs.element_dofs[M:].flatten('F')] =\
                 p[:, t[M:].flatten('F')]
 
@@ -316,54 +308,27 @@ class BaseMesh:
         from skfem.io.meshio import from_file
         return from_file(filename)
 
-    @classmethod
-    def init_refdom(cls):
-        return cls(*cls._elem.refdom.init_refdom())
-
-    def __getattr__(self, item):
-        return getattr(self.geom, item)
-
-    @staticmethod
-    def strip_extra_coordinates(p: ndarray) -> ndarray:
-        return p
-
-
-class BaseMesh2D(BaseMesh):
-
-    @staticmethod
+    @staticmethod  # TODO fix for 3d
     def strip_extra_coordinates(p: ndarray) -> ndarray:
         return p[:, :2]
 
 
-class MeshTri1(BaseMesh2D):
-
-    _elem = ElementTriP1
-
-
-class MeshQuad1(BaseMesh2D):
-
-    _elem = ElementQuad1
+@dataclass
+class MeshTri1(Geometry):
+    elem: Type[Element] = ElementTriP1
+    affine: bool = True
 
 
-class MeshTri2(BaseMesh2D):
-
-    _elem = ElementTriP2
-
-    @classmethod
-    def init_refdom(cls):
-        return MeshTri1(*MeshTri1._elem.refdom.init_refdom())
+@dataclass
+class MeshQuad1(Geometry):
+    elem: Type[Element] = ElementQuad1
 
 
-class MeshQuad2(BaseMesh2D):
-
-    _elem = ElementQuad2
-
-
-class MeshTet1(BaseMesh):
-
-    _elem = ElementTetP1
+@dataclass
+class MeshTri2(Geometry):
+    elem: Type[Element] = ElementTriP2
 
 
-class MeshHex1(BaseMesh2D):
-
-    _elem = ElementHex1
+@dataclass
+class MeshQuad2(Geometry):
+    elem: Type[Element] = ElementQuad2
