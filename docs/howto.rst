@@ -12,8 +12,8 @@ Here are some instructions for choosing an
 classes reflects their compatibility with the mesh types:
 
 >>> from skfem.element import ElementTriP1
->>> ElementTriP1.mesh_type
-<class 'skfem.mesh.mesh2d.mesh_tri.MeshTri'>
+>>> ElementTriP1.refdom
+<class 'skfem.refdom.RefTri'>
 
 Secondly, the chosen finite element should be compatible with the approximated
 partial differential equation.  Here are some general guidelines:
