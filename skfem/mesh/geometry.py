@@ -332,3 +332,14 @@ class MeshTri2(Geometry):
 @dataclass
 class MeshQuad2(Geometry):
     elem: Type[Element] = ElementQuad2
+
+
+@dataclass
+class MeshTet1(Geometry):
+    elem: Type[Element] = ElementTetP1
+    affine: bool = True
+
+
+@dataclass
+class MeshHex1(Geometry):
+    elem: Type[Element] = ElementHex1
