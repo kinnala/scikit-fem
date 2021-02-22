@@ -1,11 +1,11 @@
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from typing import NamedTuple
 
 from numpy import ndarray
 
 from .graph import Graph
 from ..assembly import Dofs
-from ..element import Element, ElementVector
+from ..element import Element
 
 
 @dataclass
@@ -24,7 +24,7 @@ class Geometry(Graph):
         if not hasattr(self, '_dofs'):
             self._dofs = Dofs(self, self.elem)
         return self._dofs
-    
+
     @property
     def refdom(self):
         return self.elem.refdom

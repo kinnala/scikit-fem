@@ -3,7 +3,6 @@ from typing import Optional, List, Type, Tuple
 import numpy as np
 from numpy import ndarray
 
-from skfem.mesh import Mesh
 from ..refdom import Refdom
 from .discrete_field import DiscreteField
 

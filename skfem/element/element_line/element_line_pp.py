@@ -1,5 +1,4 @@
 import warnings
-from typing import Type
 
 import numpy as np
 from numpy.polynomial.legendre import Legendre

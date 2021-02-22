@@ -1,11 +1,10 @@
-import warnings
 from typing import Type
 
 import numpy as np
 from numpy import ndarray
 
 from .geometry import Geometry
-from ..element import (Element, ElementTriP1, ElementQuad1, ElementTriP2,
+from ..element import (ElementTriP1, ElementQuad1, ElementTriP2,
                        ElementQuad2, ElementTetP1, ElementHex1)
 
 
