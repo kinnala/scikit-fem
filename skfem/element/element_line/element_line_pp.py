@@ -1,16 +1,17 @@
 import warnings
+from typing import Type
 
 import numpy as np
 from numpy.polynomial.legendre import Legendre
 
 from ..element_h1 import ElementH1
-from ...refdom import RefLine
+from ...refdom import Refdom, RefLine
 
 
 class ElementLinePp(ElementH1):
 
     nodal_dofs = 1
-    refdom = RefLine
+    refdom: Type[Refdom] = RefLine
 
     def __init__(self, p):
         if p < 1:

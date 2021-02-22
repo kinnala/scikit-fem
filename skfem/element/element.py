@@ -46,10 +46,9 @@ class Element:
     facet_dofs: int = 0
     interior_dofs: int = 0
     edge_dofs: int = 0
-    dim: int = -1
     maxdeg: int = -1
     dofnames: List[str] = []
-    refdom: Type = Refdom
+    refdom: Type[Refdom] = Refdom
     doflocs: ndarray
 
     @property

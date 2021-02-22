@@ -1,5 +1,5 @@
 import warnings
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, Type
 
 import numpy as np
 from numpy import ndarray
@@ -8,6 +8,7 @@ from skfem.element import DiscreteField, Element, ElementComposite
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh
 from skfem.quadrature import get_quadrature
+from skfem.refdom import Refdom
 
 
 class Basis:
@@ -36,7 +37,7 @@ class Basis:
                  mapping: Optional[Mapping] = None,
                  intorder: Optional[int] = None,
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
-                 refdom: str = "none"):
+                 refdom: Type[Refdom] = Refdom):
 
         self.mapping = mesh._mapping() if mapping is None else mapping
 

@@ -4,10 +4,11 @@ from typing import Tuple, Type
 
 import numpy as np
 from numpy.polynomial.legendre import leggauss
-from .refdom import RefPoint, RefLine, RefTri, RefQuad, RefTet, RefHex
+from .refdom import Refdom, RefPoint, RefLine, RefTri, RefQuad, RefTet, RefHex
 
 
-def get_quadrature(refdom: Type, norder: int) -> Tuple[np.ndarray, np.ndarray]:
+def get_quadrature(refdom: Type[Refdom],
+                   norder: int) -> Tuple[np.ndarray, np.ndarray]:
     """Return a nth order accurate quadrature rule for different reference
     domains.
 
