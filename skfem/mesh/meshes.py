@@ -12,32 +12,33 @@ from ..element import (Element, ElementTriP1, ElementQuad1, ElementTriP2,
 class BaseMesh:
 
     geom: Geometry
-    boundaries = None
     _elem: Type
+    boundaries = None
+    subdomains = None
 
     def __init__(self, p=None, t=None):
 
-        if t.shape[0] > self._elem.refdom.nnodes:
-            m = self._elem.refdom.nnodes
-            _t = t[:m]
+        M = self._elem.refdom.nnodes
+        if t.shape[0] > M:
+            _t = t[:M]
             uniq, ix = np.unique(_t, return_inverse=True)
             rest = np.setdiff1d(np.arange(np.max(t) + 1, dtype=np.int64),
                                 uniq)
-            _p = p[:, uniq]
-            p = np.hstack((_p, p[:, rest]))
+            _p = np.hstack((p[:, uniq], p[:, rest]))
             __t = (np.arange(len(uniq), dtype=np.int64)[ix]
                    .reshape(_t.shape))
         else:
             __t = t
+            _p = p
         self.geom = Geometry(
             self._elem.refdom.dim(),
             __t,
             self._elem(),
-            p,
+            _p,
         )
-        if t.shape[0] > self._elem.refdom.nnodes:
-            self.doflocs[:, t[m:].flatten('F')] =\
-                self.doflocs[:, self.dofs.element_dofs[m:].flatten('F')]
+        if t.shape[0] > M:
+            self.doflocs[:, self.dofs.element_dofs[M:].flatten('F')] =\
+                p[:, t[M:].flatten('F')]
 
     @classmethod
     def load(cls, filename):
