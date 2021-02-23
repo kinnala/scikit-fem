@@ -308,38 +308,53 @@ class Geometry:
         from skfem.io.meshio import from_file
         return from_file(filename)
 
-    @staticmethod  # TODO fix for 3d
+    @staticmethod
     def strip_extra_coordinates(p: ndarray) -> ndarray:
+        return p
+
+
+@dataclass
+class Geometry2D(Geometry):
+
+    @staticmethod
+    def strip_extra_coordinates(p: ndarray) -> ndarray:
+        """For meshio which appends :math:`z = 0` to 2D meshes."""
         return p[:, :2]
 
 
 @dataclass
-class MeshTri1(Geometry):
+class MeshTri1(Geometry2D):
+
     elem: Type[Element] = ElementTriP1
     affine: bool = True
 
 
 @dataclass
-class MeshQuad1(Geometry):
+class MeshQuad1(Geometry2D):
+
     elem: Type[Element] = ElementQuad1
 
 
 @dataclass
-class MeshTri2(Geometry):
+class MeshTri2(Geometry2D):
+
     elem: Type[Element] = ElementTriP2
 
 
 @dataclass
-class MeshQuad2(Geometry):
+class MeshQuad2(Geometry2D):
+
     elem: Type[Element] = ElementQuad2
 
 
 @dataclass
 class MeshTet1(Geometry):
+
     elem: Type[Element] = ElementTetP1
     affine: bool = True
 
 
 @dataclass
 class MeshHex1(Geometry):
+
     elem: Type[Element] = ElementHex1
