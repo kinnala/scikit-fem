@@ -1,5 +1,5 @@
 import warnings
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import NamedTuple, Tuple, Type
 
 import numpy as np
@@ -37,6 +37,7 @@ class Geometry:
         return self.elem.refdom.brefdom
 
     def _mapping(self):
+        # TODO cache mapping
         from skfem.mapping import MappingAffine, MappingIsoparametric
 
         class FakeMesh(NamedTuple):
@@ -290,7 +291,9 @@ class Geometry:
 
     def __post_init__(self):
         M = self.elem.refdom.nnodes
-        if self.t.shape[0] > M:  # TODO check that works for 3D quadratic
+        if self.nnodes > M:  # TODO check that works for 3D quadratic
+            # TODO add check for cases where reordering is not required
+            # reorder DOFs to the expected format: vertex DOFs are first
             p, t = self.doflocs, self.t
             _t = t[:M]
             uniq, ix = np.unique(_t, return_inverse=True)
@@ -310,7 +313,17 @@ class Geometry:
 
     @staticmethod
     def strip_extra_coordinates(p: ndarray) -> ndarray:
+        """Fallback for 3D meshes."""
         return p
+
+    def with_element(self, nelem: Type[Element]):
+        mapping = self._mapping()
+        return replace(
+            self,
+            doflocs=mapping.F(nelem.doflocs.T),
+            elem=nelem,
+            affine=False,
+        )
 
 
 @dataclass
