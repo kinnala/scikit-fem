@@ -317,12 +317,36 @@ class Geometry:
         return p
 
     def with_element(self, nelem: Type[Element]):
+        """Increase the order of the mesh."""
         mapping = self._mapping()
+        dofs = Dofs(self, nelem())
+        locs = mapping.F(nelem.doflocs.T)
+        doflocs = np.zeros((locs.shape[0], dofs.N))
+
+        # match mapped dofs and global dof numbering
+        for itr in range(locs.shape[0]):
+            for jtr in range(dofs.element_dofs.shape[0]):
+                doflocs[itr, dofs.element_dofs[jtr]] = locs[itr, :, jtr]
+
         return replace(
             self,
-            doflocs=mapping.F(nelem.doflocs.T),
+            doflocs=doflocs,
             elem=nelem,
             affine=False,
+        )
+
+    def refined(self):
+        p, t, facets, t2f = self.doflocs, self.t, self.facets, self.t2f
+        sz = p.shape[1]
+        return replace(
+            self,
+            doflocs=np.hstack((p, np.mean(p[:, facets], axis=0))),
+            t=np.hstack((
+                np.vstack((t[0], t2f[0] + sz, t2f[2] + sz)),
+                np.vstack((t[1], t2f[0] + sz, t2f[1] + sz)),
+                np.vstack((t[2], t2f[2] + sz, t2f[1] + sz)),
+                np.vstack((t2f[0] + sz, t2f[1] + sz, t2f[2] + sz)),
+            )),
         )
 
 
