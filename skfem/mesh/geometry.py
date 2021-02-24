@@ -343,6 +343,10 @@ class Geometry2D(Geometry):
         """For meshio which appends :math:`z = 0` to 2D meshes."""
         return p[:, :2]
 
+    def _repr_svg_(self) -> str:
+        from skfem.visuals.svg import draw
+        return draw(self)
+
 
 @dataclass
 class MeshTri1(Geometry2D):
@@ -357,7 +361,7 @@ class MeshTri1(Geometry2D):
         sz = p.shape[1]
         return replace(
             self,
-            doflocs=np.hstack((p, np.mean(p[:, self.facets], axis=0))),
+            doflocs=np.hstack((p, p[:, self.facets].mean(axis=1))),
             t=np.hstack((
                 np.vstack((t[0], t2f[0] + sz, t2f[2] + sz)),
                 np.vstack((t[1], t2f[0] + sz, t2f[1] + sz)),
@@ -377,6 +381,23 @@ class MeshQuad1(Geometry2D):
 class MeshTri2(Geometry2D):
 
     elem: Type[Element] = ElementTriP2
+
+    def refined(self):
+        p = self.doflocs
+        t = self.t
+        t2f = self.t2f
+        sz = p.shape[1]
+        return replace(
+            self,
+            doflocs=np.hstack((p, np.mean(p[:, self.facets], axis=0))),
+            t=np.hstack((
+                np.vstack((t[0], t2f[0] + sz, t2f[2] + sz)),
+                np.vstack((t[1], t2f[0] + sz, t2f[1] + sz)),
+                np.vstack((t[2], t2f[2] + sz, t2f[1] + sz)),
+                np.vstack((t2f[0] + sz, t2f[1] + sz, t2f[2] + sz)),
+            )),
+        )
+
 
 
 @dataclass

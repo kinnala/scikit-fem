@@ -6,6 +6,7 @@ import numpy as np
 
 from ..mesh import Mesh2D
 from ..assembly import InteriorBasis
+from ..mesh.geometry import Geometry2D
 
 
 @singledispatch
@@ -33,7 +34,7 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> str:
         facets = m.facets[:, m.boundary_facets()]
     else:
         facets = m.facets
-    p = m.p
+    p = m.p.copy()
     maxx = np.max(p[0])
     minx = np.min(p[0])
     maxy = np.max(p[1])
@@ -58,6 +59,11 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> str:
         lines += template.format(s, t, u, v, stroke)
     return ("""<svg xmlns="http://www.w3.org/2000/svg" version="1.1" """
             """width="{}" height="{}">{}</svg>""").format(width, height, lines)
+
+
+@draw.register(Geometry2D)
+def draw_geometry2d(m: Geometry2D, **kwargs) -> str:
+    return draw_mesh2d(m, **kwargs)
 
 
 @draw.register(InteriorBasis)
