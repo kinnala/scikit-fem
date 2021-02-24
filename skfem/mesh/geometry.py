@@ -186,7 +186,7 @@ class Geometry:
         return inverse
 
     @property
-    def _edge_indices(self):
+    def _edge_indices(self):  # TODO consider moving to Refdom
 
         if self.dim() == 3:
             if self.nnodes == 4:
@@ -216,7 +216,7 @@ class Geometry:
         raise NotImplementedError
 
     @property
-    def _facet_indices(self):
+    def _facet_indices(self):  # TODO consider moving to Refdom
 
         if self.nnodes == 3 and self.dim() == 2:
             return [
@@ -316,6 +316,12 @@ class Geometry:
         """Fallback for 3D meshes."""
         return p
 
+    def refined(self, times: int = 1):
+        m = self
+        for _ in range(times):
+            m = m._uniform()
+        return m
+
     @classmethod
     def from_mesh(cls, mesh):
         mapping = mesh._mapping()
@@ -334,6 +340,35 @@ class Geometry:
             t=mesh.t,
         )
 
+    @classmethod
+    def init_refdom(cls):
+        return cls(cls.elem.refdom.p, cls.elem.refdom.t)
+
+    def _splitref(self, nrefs: int = 1):
+
+        cls = type(self)
+        m = cls.init_refdom().refined(nrefs)
+        X = m.p
+        x = self._mapping().F(m.p)
+
+        # create connectivity for the new mesh
+        nt = self.nelements
+        t = np.tile(m.t, (1, nt))
+        dt = np.max(t)
+        t += ((dt + 1)
+              * (np.tile(np.arange(nt), (m.t.shape[0] * m.t.shape[1], 1))
+                 .flatten('F')
+                 .reshape((-1, m.t.shape[0])).T))
+
+        if X.shape[0] == 1:
+            p = np.array([x.flatten()])
+        else:
+            p = x[0].flatten()
+            for itr in range(len(x) - 1):
+                p = np.vstack((p, x[itr + 1].flatten()))
+
+        return cls(p, t)
+
 
 @dataclass
 class Geometry2D(Geometry):
@@ -345,7 +380,7 @@ class Geometry2D(Geometry):
 
     def _repr_svg_(self) -> str:
         from skfem.visuals.svg import draw
-        return draw(self)
+        return draw(self, nrefs=2, boundaries_only=True)
 
 
 @dataclass
@@ -354,7 +389,7 @@ class MeshTri1(Geometry2D):
     elem: Type[Element] = ElementTriP1
     affine: bool = True
 
-    def refined(self):
+    def _uniform(self):
         p = self.doflocs
         t = self.t
         t2f = self.t2f
@@ -382,14 +417,14 @@ class MeshTri2(Geometry2D):
 
     elem: Type[Element] = ElementTriP2
 
-    def refined(self):
+    def _uniform(self):
         p = self.doflocs
         t = self.t
         t2f = self.t2f
         sz = p.shape[1]
         return replace(
             self,
-            doflocs=np.hstack((p, np.mean(p[:, self.facets], axis=0))),
+            doflocs=np.hstack((p, p[:, self.facets].mean(axis=1))),
             t=np.hstack((
                 np.vstack((t[0], t2f[0] + sz, t2f[2] + sz)),
                 np.vstack((t[1], t2f[0] + sz, t2f[1] + sz)),

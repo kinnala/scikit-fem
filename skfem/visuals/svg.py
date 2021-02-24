@@ -63,6 +63,8 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> str:
 
 @draw.register(Geometry2D)
 def draw_geometry2d(m: Geometry2D, **kwargs) -> str:
+    nrefs = kwargs["nrefs"] if "nrefs" in kwargs else 1
+    m = m._splitref(nrefs)
     return draw_mesh2d(m, **kwargs)
 
 

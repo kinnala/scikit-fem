@@ -91,7 +91,7 @@ class InteriorBasis(Basis):
 
     def refinterp(self,
                   interp: ndarray,
-                  Nrefs: Optional[int] = 1) -> Tuple[Mesh, ndarray]:
+                  Nrefs: int = 1) -> Tuple[Mesh, ndarray]:
         """Refine and interpolate (for plotting)."""
         # mesh reference domain, refine and take the vertices
         meshclass = type(self.mesh)
