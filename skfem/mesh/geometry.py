@@ -107,13 +107,13 @@ class Geometry:
     def _init_facets(self):
         self._facets, self._t2f = self.build_entities(
             self.t,
-            self._facet_indices
+            self.elem.refdom.facets
         )
 
     def _init_edges(self):
         self._edges, self._t2e = self.build_entities(
             self.t,
-            self._edge_indices
+            self.elem.refdom.edges
         )
 
     @property
@@ -185,71 +185,6 @@ class Geometry:
 
         return inverse
 
-    @property
-    def _edge_indices(self):  # TODO consider moving to Refdom
-
-        if self.dim() == 3:
-            if self.nnodes == 4:
-                return [
-                    [0, 1],
-                    [1, 2],
-                    [0, 2],
-                    [0, 3],
-                    [1, 3],
-                    [2, 3],
-                ]
-            elif self.nnodes == 8:
-                return [
-                    [0, 1],
-                    [0, 2],
-                    [0, 3],
-                    [1, 4],
-                    [1, 5],
-                    [2, 4],
-                    [2, 6],
-                    [3, 5],
-                    [3, 6],
-                    [4, 7],
-                    [5, 7],
-                    [6, 7],
-                ]
-        raise NotImplementedError
-
-    @property
-    def _facet_indices(self):  # TODO consider moving to Refdom
-
-        if self.nnodes == 3 and self.dim() == 2:
-            return [
-                [0, 1],
-                [1, 2],
-                [0, 2],
-            ]
-        elif self.nnodes == 4 and self.dim() == 2:
-            return [
-                [0, 1],
-                [1, 2],
-                [2, 3],
-                [0, 3],
-            ]
-        elif self.nnodes == 4 and self.dim() == 3:
-            return [
-                [0, 1, 2],
-                [0, 1, 3],
-                [0, 2, 3],
-                [1, 2, 3],
-            ]
-        elif self.nnodes == 8 and self.dim() == 3:
-            return [
-                [0, 1, 4, 2],
-                [0, 2, 6, 3],
-                [0, 3, 5, 1],
-                [2, 4, 7, 6],
-                [1, 5, 7, 4],
-                [3, 6, 7, 5],
-            ]
-        warnings.warn("Unable to construct facets.")
-        return [[]]  # TODO remove and raise exception?
-
     def boundary_facets(self) -> ndarray:
         """Return an array of boundary facet indices."""
         return np.nonzero(self.f2t[1] == -1)[0]
@@ -293,19 +228,20 @@ class Geometry:
 
         M = self.elem.refdom.nnodes
         if self.nnodes > M:  # TODO check that works for 3D quadratic
-            # TODO add check for cases where reordering is not required
             # reorder DOFs to the expected format: vertex DOFs are first
             p, t = self.doflocs, self.t
             _t = t[:M]
             uniq, ix = np.unique(_t, return_inverse=True)
             rest = np.setdiff1d(np.arange(np.max(t) + 1, dtype=np.int64),
                                 uniq)
-            _p = np.hstack((p[:, uniq], p[:, rest]))
-            _t = (np.arange(len(uniq), dtype=np.int64)[ix]
-                  .reshape(_t.shape))
-            self.doflocs, self.t = _p, _t
-            self.doflocs[:, self.dofs.element_dofs[M:].flatten('F')] =\
+            self.t = np.arange(len(uniq), dtype=np.int64)[ix].reshape(_t.shape)
+            _p = np.hstack((
+                p[:, uniq],
+                np.zeros((p.shape[0], np.max(t) + 1 - len(uniq))),
+            ))
+            _p[:, self.dofs.element_dofs[M:].flatten('F')] =\
                 p[:, t[M:].flatten('F')]
+            self.doflocs = _p
 
     @classmethod
     def load(cls, filename):
