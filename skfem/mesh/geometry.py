@@ -259,6 +259,9 @@ class Geometry:
             m = m._uniform()
         return m
 
+    def _uniform(self):
+        raise NotImplementedError
+
     @classmethod
     def from_mesh(cls, mesh):
         mapping = mesh._mapping()
