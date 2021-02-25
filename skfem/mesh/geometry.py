@@ -1,4 +1,3 @@
-import warnings
 from dataclasses import dataclass, replace
 from typing import NamedTuple, Tuple, Type
 
@@ -232,8 +231,6 @@ class Geometry:
             p, t = self.doflocs, self.t
             _t = t[:M]
             uniq, ix = np.unique(_t, return_inverse=True)
-            rest = np.setdiff1d(np.arange(np.max(t) + 1, dtype=np.int64),
-                                uniq)
             self.t = np.arange(len(uniq), dtype=np.int64)[ix].reshape(_t.shape)
             _p = np.hstack((
                 p[:, uniq],
