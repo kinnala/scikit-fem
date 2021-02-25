@@ -290,6 +290,7 @@ class Geometry:
         return vertices, edges
 
     def __post_init__(self):
+
         M = self.elem.refdom.nnodes
         if self.nnodes > M:  # TODO check that works for 3D quadratic
             # TODO add check for cases where reordering is not required
@@ -411,32 +412,37 @@ class MeshQuad1(Geometry2D):
 
     elem: Type[Element] = ElementQuad1
 
-
-@dataclass
-class MeshTri2(Geometry2D):
-
-    elem: Type[Element] = ElementTriP2
-
     def _uniform(self):
         p = self.doflocs
         t = self.t
         t2f = self.t2f
         sz = p.shape[1]
+        mid = np.arange(t.shape[1], dtype=np.int64) + np.max(t2f) + sz + 1
         return replace(
             self,
-            doflocs=np.hstack((p, p[:, self.facets].mean(axis=1))),
+            doflocs=np.hstack((
+                p,
+                p[:, self.facets].mean(axis=1),
+                p[:, self.t].mean(axis=1),
+            )),
             t=np.hstack((
-                np.vstack((t[0], t2f[0] + sz, t2f[2] + sz)),
-                np.vstack((t[1], t2f[0] + sz, t2f[1] + sz)),
-                np.vstack((t[2], t2f[2] + sz, t2f[1] + sz)),
-                np.vstack((t2f[0] + sz, t2f[1] + sz, t2f[2] + sz)),
+                np.vstack((t[0], t2f[0] + sz, mid, t2f[3] + sz)),
+                np.vstack((t2f[0] + sz, t[1], t2f[1] + sz, mid)),
+                np.vstack((mid, t2f[1] + sz, t[2], t2f[2] + sz)),
+                np.vstack((t2f[3] + sz, mid, t2f[2] + sz, t[3])),
             )),
         )
 
 
+@dataclass
+class MeshTri2(MeshTri1):
+
+    elem: Type[Element] = ElementTriP2
+    affine: bool = False
+
 
 @dataclass
-class MeshQuad2(Geometry2D):
+class MeshQuad2(MeshQuad1):
 
     elem: Type[Element] = ElementQuad2
 
