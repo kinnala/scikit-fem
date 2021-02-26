@@ -1,5 +1,6 @@
 from dataclasses import dataclass, replace
-from typing import NamedTuple, Tuple, Type, Union
+from typing import Tuple, Type, Union
+from collections import namedtuple
 
 import numpy as np
 from numpy import ndarray
@@ -8,10 +9,11 @@ from ..assembly import Dofs
 from ..element import (Element, ElementHex1, ElementQuad1, ElementQuad2,
                        ElementTetP1, ElementTriP1, ElementTriP2,
                        BOUNDARY_ELEMENT_MAP)
+from ..mapping import MappingAffine, MappingIsoparametric
 
 
 @dataclass
-class Geometry:
+class BaseMesh:
 
     doflocs: ndarray
     t: ndarray
@@ -37,28 +39,22 @@ class Geometry:
         return self.elem.refdom.brefdom
 
     def _mapping(self):
-        # TODO cache mapping
-        from skfem.mapping import MappingAffine, MappingIsoparametric
-
-        class FakeMesh(NamedTuple):
-            p: ndarray
-            t: ndarray
-            facets: ndarray
-
-        fakemesh = FakeMesh(
-            self.doflocs,
-            self.dofs.element_dofs,
-            self.facets,
-        )
-
-        if self.affine:
-            return MappingAffine(fakemesh)
-
-        return MappingIsoparametric(
-            fakemesh,
-            self.elem(),
-            self.bndelem,
-        )
+        """Return a default reference mapping for the mesh."""
+        if not hasattr(self, '_cached_mapping'):
+            fakemesh = namedtuple('Mesh', ['p', 't', 'facets'])(
+                self.doflocs,
+                self.dofs.element_dofs,
+                self.facets,
+            )
+            if self.affine:
+                self._cached_mapping = MappingAffine(fakemesh)
+            else:
+                self._cached_mapping = MappingIsoparametric(
+                    fakemesh,
+                    self.elem(),
+                    self.bndelem,
+                )
+        return self._cached_mapping
 
     @property
     def bndelem(self):
@@ -262,7 +258,7 @@ class Geometry:
         """
         if isinstance(times_or_ix, int):
             m = self
-            for _ in range(times):
+            for _ in range(times_or_ix):
                 m = m._uniform()
         elif isinstance(times_or_ix, ndarray):
             m = m._adaptive(times_or_ix)
@@ -344,7 +340,7 @@ class Geometry:
 
 
 @dataclass
-class Geometry2D(Geometry):
+class BaseMesh2D(BaseMesh):
 
     @staticmethod
     def strip_extra_coordinates(p: ndarray) -> ndarray:
@@ -357,7 +353,7 @@ class Geometry2D(Geometry):
 
 
 @dataclass
-class MeshTri1(Geometry2D):
+class MeshTri1(BaseMesh2D):
 
     elem: Type[Element] = ElementTriP1
     affine: bool = True
@@ -380,7 +376,7 @@ class MeshTri1(Geometry2D):
 
 
 @dataclass
-class MeshQuad1(Geometry2D):
+class MeshQuad1(BaseMesh2D):
 
     elem: Type[Element] = ElementQuad1
 
@@ -420,13 +416,13 @@ class MeshQuad2(MeshQuad1):
 
 
 @dataclass
-class MeshTet1(Geometry):
+class MeshTet1(BaseMesh):
 
     elem: Type[Element] = ElementTetP1
     affine: bool = True
 
 
 @dataclass
-class MeshHex1(Geometry):
+class MeshHex1(BaseMesh):
 
     elem: Type[Element] = ElementHex1

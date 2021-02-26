@@ -1,4 +1,4 @@
-from typing import Callable, Dict, Optional, Tuple, Type
+from typing import Callable, Optional, Tuple
 
 import numpy as np
 from numpy import ndarray
