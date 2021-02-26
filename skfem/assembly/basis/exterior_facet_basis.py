@@ -2,10 +2,11 @@ from typing import Callable, Dict, Optional, Tuple, Type
 
 import numpy as np
 from numpy import ndarray
-from skfem.element import (DiscreteField, Element, ElementTetP0, ElementTriP0,
-                           ElementQuad0, ElementHex0, BOUNDARY_ELEMENT_MAP)
+from skfem.element import (BOUNDARY_ELEMENT_MAP, DiscreteField, Element,
+                           ElementHex0, ElementQuad0, ElementTetP0,
+                           ElementTriP0)
 from skfem.mapping import Mapping
-from skfem.mesh import Mesh, MeshHex, MeshQuad, MeshTet, MeshTri, MeshLine
+from skfem.mesh import Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 
 from .basis import Basis
 from .interior_basis import InteriorBasis
