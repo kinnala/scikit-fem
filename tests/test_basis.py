@@ -184,19 +184,19 @@ class TestInterpolatorLine2(TestInterpolatorTet):
 @pytest.mark.parametrize(
     "mtype,e1,e2",
     [
-        (MeshTri, ElementTriP1(), ElementLineP0()),
-        (MeshTri, ElementTriP1(), ElementLineP1()),
-        (MeshTri, ElementTriP2(), ElementLineP1()),
-        (MeshTri, ElementTriP2(), ElementLineP2()),
+        (MeshTri, ElementTriP1(), ElementTriP0()),
+        (MeshTri, ElementTriP1(), ElementTriP1()),
+        (MeshTri, ElementTriP2(), ElementTriP1()),
+        (MeshTri, ElementTriP2(), ElementTriP2()),
         (MeshTri, ElementTriP2(), None),
-        (MeshQuad, ElementQuad1(), ElementLineP0()),
-        (MeshQuad, ElementQuad1(), ElementLineP1()),
-        (MeshQuad, ElementQuad2(), ElementLineP2()),
-        (MeshTet, ElementTetP1(), ElementTriP0()),
-        (MeshTet, ElementTetP2(), ElementTriP2()),
-        (MeshHex, ElementHex1(), ElementQuad0()),
-        (MeshHex, ElementHex1(), ElementQuad1()),
-        (MeshHex, ElementHex2(), ElementQuad2()),
+        (MeshQuad, ElementQuad1(), ElementQuad0()),
+        (MeshQuad, ElementQuad1(), ElementQuad1()),
+        (MeshQuad, ElementQuad2(), ElementQuad2()),
+        (MeshTet, ElementTetP1(), ElementTetP0()),
+        (MeshTet, ElementTetP2(), ElementTetP2()),
+        (MeshHex, ElementHex1(), ElementHex0()),
+        (MeshHex, ElementHex1(), ElementHex1()),
+        (MeshHex, ElementHex2(), ElementHex2()),
     ]
 )
 def test_trace(mtype, e1, e2):

@@ -1,12 +1,13 @@
 from dataclasses import dataclass, replace
-from typing import NamedTuple, Tuple, Type
+from typing import NamedTuple, Tuple, Type, Union
 
 import numpy as np
 from numpy import ndarray
 
 from ..assembly import Dofs
 from ..element import (Element, ElementHex1, ElementQuad1, ElementQuad2,
-                       ElementTetP1, ElementTriP1, ElementTriP2)
+                       ElementTetP1, ElementTriP1, ElementTriP2,
+                       BOUNDARY_ELEMENT_MAP)
 
 
 @dataclass
@@ -61,23 +62,6 @@ class Geometry:
 
     @property
     def bndelem(self):
-
-        from skfem.element import (ElementHex1, ElementHex2, ElementLineP1,
-                                   ElementLineP2, ElementQuad1, ElementQuad2,
-                                   ElementTetP1, ElementTetP2, ElementTriP1,
-                                   ElementTriP2)
-
-        BOUNDARY_ELEMENT_MAP = {  # TODO move to Element attributes
-            ElementTriP1: ElementLineP1,
-            ElementTriP2: ElementLineP2,
-            ElementQuad1: ElementLineP1,
-            ElementQuad2: ElementLineP2,
-            ElementTetP1: ElementTriP1,
-            ElementTetP2: ElementTriP2,
-            ElementHex1: ElementQuad1,
-            ElementHex2: ElementQuad2,
-        }
-
         return BOUNDARY_ELEMENT_MAP[self.elem]()
 
     def dim(self):
@@ -117,7 +101,7 @@ class Geometry:
 
     @property
     def subdomains(self):
-        return None  # TODO
+        return None
 
     @property
     def boundaries(self):
@@ -155,7 +139,7 @@ class Geometry:
 
     @staticmethod
     def build_entities(t, indices):
-
+        """Build low dimensional topological entities."""
         indexing = np.hstack(tuple([t[ix] for ix in indices]))
         sorted_indexing = np.sort(indexing, axis=0)
 
@@ -169,7 +153,7 @@ class Geometry:
 
     @staticmethod
     def build_inverse(t, mapping):
-
+        """Build inverse mapping from low dimensional topological entities."""
         e = mapping.flatten(order='C')
         tix = np.tile(np.arange(t.shape[1]), (1, t.shape[0]))[0]
 
@@ -205,7 +189,14 @@ class Geometry:
         return edge_candidates[ix]
 
     def _expand_facets(self, ix: ndarray) -> Tuple[ndarray, ndarray]:
+        """Return vertices and edges corresponding to given facet indices.
 
+        Parameters
+        ----------
+        ix
+            An array of facet indices.
+
+        """
         vertices = np.unique(self.facets[:, ix].flatten())
 
         if self.dim() == 3:
@@ -224,7 +215,16 @@ class Geometry:
         return vertices, edges
 
     def __post_init__(self):
+        """Support node orders used in external formats.
 
+        We expect ``self.doflocs`` to be ordered based on the
+        degrees-of-freedom in :class:`skfem.assembly.Dofs`.  External formats
+        for high order meshes commonly use a less strict ordering scheme and
+        the extra nodes are described as additional rows in ``self.t``.  This
+        method attempts to accommodate external formas by reordering
+        ``self.doflocs`` and changing the indices in ``self.t``.
+
+        """
         M = self.elem.refdom.nnodes
         if self.nnodes > M:  # TODO check that works for 3D quadratic
             # reorder DOFs to the expected format: vertex DOFs are first
@@ -250,17 +250,45 @@ class Geometry:
         """Fallback for 3D meshes."""
         return p
 
-    def refined(self, times: int = 1):
-        m = self
-        for _ in range(times):
-            m = m._uniform()
+    def refined(self, times_or_ix: Union[int, ndarray] = 1):
+        """Return a refined mesh.
+
+        Parameters
+        ----------
+        times_or_ix
+            Either an integer giving the number of uniform refinements or an
+            array of element indices for adaptive refinement.
+
+        """
+        if isinstance(times_or_ix, int):
+            m = self
+            for _ in range(times):
+                m = m._uniform()
+        elif isinstance(times_or_ix, ndarray):
+            m = m._adaptive(times_or_ix)
+        else:
+            raise NotImplementedError
         return m
 
     def _uniform(self):
+        """Perform a single uniform refinement."""
+        raise NotImplementedError
+
+    def _adaptive(self, ix: ndarray):
+        """Adaptively refine the given set of elements."""
         raise NotImplementedError
 
     @classmethod
     def from_mesh(cls, mesh):
+        """Reuse an existing mesh by adding nodes.
+
+        Parameters
+        ----------
+        mesh
+            The mesh used in the initialization.  Connectivity of the new mesh
+            will match ``mesh.t``.
+
+        """
         mapping = mesh._mapping()
         nelem = cls.elem
         dofs = Dofs(mesh, nelem())
@@ -279,10 +307,18 @@ class Geometry:
 
     @classmethod
     def init_refdom(cls):
+        """Initialize a mesh corresponding to the reference domain."""
         return cls(cls.elem.refdom.p, cls.elem.refdom.t)
 
     def _splitref(self, nrefs: int = 1):
+        """Split mesh into separate nonconnected elements and refine.
 
+        Parameters
+        ----------
+        nrefs
+            The number of refinements.
+
+        """
         cls = type(self)
         m = cls.init_refdom().refined(nrefs)
         X = m.p

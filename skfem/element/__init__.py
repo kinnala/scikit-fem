@@ -32,6 +32,21 @@ from .element_line import (ElementLineP0, ElementLineP1, ElementLineP2,
 from .element_composite import ElementComposite  # noqa
 
 
+BOUNDARY_ELEMENT_MAP = {
+    ElementTriP0: ElementLineP0,
+    ElementTriP1: ElementLineP1,
+    ElementTriP2: ElementLineP2,
+    ElementQuad0: ElementLineP0,
+    ElementQuad1: ElementLineP1,
+    ElementQuad2: ElementLineP2,
+    ElementTetP0: ElementTriP0,
+    ElementTetP1: ElementTriP1,
+    ElementTetP2: ElementTriP2,
+    ElementHex0: ElementQuad0,
+    ElementHex1: ElementQuad1,
+    ElementHex2: ElementQuad2,
+}
+
 # for backwards compatibility
 ElementVectorH1 = ElementVector
 
