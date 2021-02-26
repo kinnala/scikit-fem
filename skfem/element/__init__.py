@@ -7,7 +7,7 @@ pass it to the constructor of :class:`~skfem.assembly.InteriorBasis` or
 elements.
 
 """
-
+from typing import Type, Dict
 from .discrete_field import DiscreteField
 from .element import Element
 from .element_h1 import ElementH1
@@ -32,7 +32,7 @@ from .element_line import (ElementLineP0, ElementLineP1, ElementLineP2,
 from .element_composite import ElementComposite  # noqa
 
 
-BOUNDARY_ELEMENT_MAP = {
+BOUNDARY_ELEMENT_MAP: Dict[Type[Element], Type[Element]] = {
     ElementTriP0: ElementLineP0,
     ElementTriP1: ElementLineP1,
     ElementTriP2: ElementLineP2,
