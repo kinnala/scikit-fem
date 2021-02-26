@@ -25,7 +25,8 @@ from .mesh import Mesh, MeshType
 from .mesh_line import MeshLine
 from .mesh2d import Mesh2D, MeshTri, MeshQuad
 from .mesh3d import Mesh3D, MeshTet, MeshHex
-from .geometry import MeshTri2, MeshQuad2
+from .geometry import (MeshTri1, MeshTri2, MeshQuad1, MeshQuad2, MeshTet1,
+                       MeshHex1)
 
 
 __all__ = [
@@ -34,10 +35,14 @@ __all__ = [
     "MeshLine",
     "Mesh2D",
     "MeshTri",
+    "MeshTri1",
     "MeshTri2",
     "MeshQuad",
+    "MeshQuad1",
     "MeshQuad2",
     "Mesh3D",
     "MeshTet",
+    "MeshTet1",
     "MeshHex",
+    "MeshHex1",
 ]
