@@ -123,6 +123,15 @@ class BaseMesh:
                               np.ravel_multi_index(B.T, dims)))[0]
         return edge_candidates[ix]
 
+    def boundary_nodes(self) -> ndarray:
+        """Return an array of boundary node indices."""
+        return np.unique(self.facets[:, self.boundary_facets()])
+
+    def interior_nodes(self) -> ndarray:
+        """Return an array of interior node indices."""
+        return np.setdiff1d(np.arange(0, self.p.shape[1]),
+                            self.boundary_nodes())
+
     def _expand_facets(self, ix: ndarray) -> Tuple[ndarray, ndarray]:
         """Return vertices and edges corresponding to given facet indices.
 

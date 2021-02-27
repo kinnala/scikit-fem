@@ -171,8 +171,7 @@ class TestMeshAddition(unittest.TestCase):
 
     def runTest(self):
         m = MeshTri()
-        M = MeshTri()
-        M.translate((1.0, 0.0))
+        M = MeshTri().translated((1.0, 0.0))
         mesh = m + M
         self.assertTrue(mesh.p.shape[1] == 6)
         self.assertTrue(mesh.t.shape[1] == 4)
