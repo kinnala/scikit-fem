@@ -19,6 +19,7 @@ class BaseMesh:
     t: ndarray
     elem: Type[Element] = Element
     affine: bool = False
+    validate: bool = False  # for backwards compatibility
 
     @property
     def p(self):
