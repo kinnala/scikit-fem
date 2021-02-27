@@ -38,30 +38,9 @@ class BaseMesh:
     def brefdom(self):
         return self.elem.refdom.brefdom
 
-    def _mapping(self):
-        """Return a default reference mapping for the mesh."""
-        if not hasattr(self, '_cached_mapping'):
-            fakemesh = namedtuple('Mesh', ['p', 't', 'facets'])(
-                self.doflocs,
-                self.dofs.element_dofs,
-                self.facets,
-            )
-            if self.affine:
-                self._cached_mapping = MappingAffine(fakemesh)
-            else:
-                self._cached_mapping = MappingIsoparametric(
-                    fakemesh,
-                    self.elem(),
-                    self.bndelem,
-                )
-        return self._cached_mapping
-
     @property
     def bndelem(self):
         return BOUNDARY_ELEMENT_MAP[self.elem]()
-
-    def dim(self):
-        return self.elem.refdom.dim()
 
     @property
     def nelements(self):
@@ -82,18 +61,6 @@ class BaseMesh:
     @property
     def nnodes(self):
         return self.t.shape[0]
-
-    def _init_facets(self):
-        self._facets, self._t2f = self.build_entities(
-            self.t,
-            self.elem.refdom.facets
-        )
-
-    def _init_edges(self):
-        self._edges, self._t2e = self.build_entities(
-            self.t,
-            self.elem.refdom.edges
-        )
 
     @property
     def subdomains(self):
@@ -133,36 +100,8 @@ class BaseMesh:
             self._init_edges()
         return self._t2e
 
-    @staticmethod
-    def build_entities(t, indices):
-        """Build low dimensional topological entities."""
-        indexing = np.hstack(tuple([t[ix] for ix in indices]))
-        sorted_indexing = np.sort(indexing, axis=0)
-
-        sorted_indexing, ixa, ixb = np.unique(sorted_indexing,
-                                              axis=1,
-                                              return_index=True,
-                                              return_inverse=True)
-        mapping = ixb.reshape((len(indices), t.shape[1]))
-
-        return np.ascontiguousarray(indexing[:, ixa]), mapping
-
-    @staticmethod
-    def build_inverse(t, mapping):
-        """Build inverse mapping from low dimensional topological entities."""
-        e = mapping.flatten(order='C')
-        tix = np.tile(np.arange(t.shape[1]), (1, t.shape[0]))[0]
-
-        e_first, ix_first = np.unique(e, return_index=True)
-        e_last, ix_last = np.unique(e[::-1], return_index=True)
-        ix_last = e.shape[0] - ix_last - 1
-
-        inverse = np.zeros((2, np.max(mapping) + 1), dtype=np.int64)
-        inverse[0, e_first] = tix[ix_first]
-        inverse[1, e_last] = tix[ix_last]
-        inverse[1, np.nonzero(inverse[0] == inverse[1])[0]] = -1
-
-        return inverse
+    def dim(self):
+        return self.elem.refdom.dim()
 
     def boundary_facets(self) -> ndarray:
         """Return an array of boundary facet indices."""
@@ -210,6 +149,38 @@ class BaseMesh:
 
         return vertices, edges
 
+    def _mapping(self):
+        """Return a default reference mapping for the mesh."""
+        if not hasattr(self, '_cached_mapping'):
+            fakemesh = namedtuple('Mesh', ['p', 't', 'facets'])(
+                self.doflocs,
+                self.dofs.element_dofs,
+                self.facets,
+            )
+            if self.affine:
+                self._cached_mapping = MappingAffine(fakemesh)
+            else:
+                self._cached_mapping = MappingIsoparametric(
+                    fakemesh,
+                    self.elem(),
+                    self.bndelem,
+                )
+        return self._cached_mapping
+
+    def _init_facets(self):
+        """Initialize ``self.facets``."""
+        self._facets, self._t2f = self.build_entities(
+            self.t,
+            self.elem.refdom.facets
+        )
+
+    def _init_edges(self):
+        """Initialize ``self.edges``."""
+        self._edges, self._t2e = self.build_entities(
+            self.t,
+            self.elem.refdom.edges
+        )
+
     def __post_init__(self):
         """Support node orders used in external formats.
 
@@ -240,39 +211,6 @@ class BaseMesh:
     def load(cls, filename):
         from skfem.io.meshio import from_file
         return from_file(filename)
-
-    @staticmethod
-    def strip_extra_coordinates(p: ndarray) -> ndarray:
-        """Fallback for 3D meshes."""
-        return p
-
-    def refined(self, times_or_ix: Union[int, ndarray] = 1):
-        """Return a refined mesh.
-
-        Parameters
-        ----------
-        times_or_ix
-            Either an integer giving the number of uniform refinements or an
-            array of element indices for adaptive refinement.
-
-        """
-        if isinstance(times_or_ix, int):
-            m = self
-            for _ in range(times_or_ix):
-                m = m._uniform()
-        elif isinstance(times_or_ix, ndarray):
-            m = m._adaptive(times_or_ix)
-        else:
-            raise NotImplementedError
-        return m
-
-    def _uniform(self):
-        """Perform a single uniform refinement."""
-        raise NotImplementedError
-
-    def _adaptive(self, ix: ndarray):
-        """Adaptively refine the given set of elements."""
-        raise NotImplementedError
 
     @classmethod
     def from_mesh(cls, mesh):
@@ -306,8 +244,38 @@ class BaseMesh:
         """Initialize a mesh corresponding to the reference domain."""
         return cls(cls.elem.refdom.p, cls.elem.refdom.t)
 
+    def refined(self, times_or_ix: Union[int, ndarray] = 1):
+        """Return a refined mesh.
+
+        Parameters
+        ----------
+        times_or_ix
+            Either an integer giving the number of uniform refinements or an
+            array of element indices for adaptive refinement.
+
+        """
+        if isinstance(times_or_ix, int):
+            m = self
+            for _ in range(times_or_ix):
+                m = m._uniform()
+        elif isinstance(times_or_ix, ndarray):
+            m = m._adaptive(times_or_ix)
+        else:
+            raise NotImplementedError
+        return m
+
+    def _uniform(self):
+        """Perform a single uniform refinement."""
+        raise NotImplementedError
+
+    def _adaptive(self, ix: ndarray):
+        """Adaptively refine the given set of elements."""
+        raise NotImplementedError
+
     def _splitref(self, nrefs: int = 1):
         """Split mesh into separate nonconnected elements and refine.
+
+        Used for visualization purposes.
 
         Parameters
         ----------
@@ -337,6 +305,42 @@ class BaseMesh:
                 p = np.vstack((p, x[itr + 1].flatten()))
 
         return cls(p, t)
+
+    @staticmethod
+    def build_entities(t, indices):
+        """Build low dimensional topological entities."""
+        indexing = np.hstack(tuple([t[ix] for ix in indices]))
+        sorted_indexing = np.sort(indexing, axis=0)
+
+        sorted_indexing, ixa, ixb = np.unique(sorted_indexing,
+                                              axis=1,
+                                              return_index=True,
+                                              return_inverse=True)
+        mapping = ixb.reshape((len(indices), t.shape[1]))
+
+        return np.ascontiguousarray(indexing[:, ixa]), mapping
+
+    @staticmethod
+    def build_inverse(t, mapping):
+        """Build inverse mapping from low dimensional topological entities."""
+        e = mapping.flatten(order='C')
+        tix = np.tile(np.arange(t.shape[1]), (1, t.shape[0]))[0]
+
+        e_first, ix_first = np.unique(e, return_index=True)
+        e_last, ix_last = np.unique(e[::-1], return_index=True)
+        ix_last = e.shape[0] - ix_last - 1
+
+        inverse = np.zeros((2, np.max(mapping) + 1), dtype=np.int64)
+        inverse[0, e_first] = tix[ix_first]
+        inverse[1, e_last] = tix[ix_last]
+        inverse[1, np.nonzero(inverse[0] == inverse[1])[0]] = -1
+
+        return inverse
+
+    @staticmethod
+    def strip_extra_coordinates(p: ndarray) -> ndarray:
+        """Fallback for 3D meshes."""
+        return p
 
 
 @dataclass
