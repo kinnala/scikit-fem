@@ -264,6 +264,37 @@ class BaseMesh:
             raise NotImplementedError
         return m
 
+    def scaled(self, factors):
+        """Return a new mesh with scaled dimensions.
+
+        Parameters
+        ----------
+        factors
+            Scale each dimension by a factor.
+
+        """
+        return replace(
+            self,
+            doflocs=np.array([self.doflocs[itr] * factors[itr]
+                              for itr in range(len(factors))]),
+        )
+
+    def translated(self, diffs):
+        """Return a new translated mesh.
+
+        Parameters
+        ----------
+        diffs
+            Translate the mesh by a vector. Must have same size as the mesh
+            dimension.
+
+        """
+        return replace(
+            self,
+            doflocs=np.array([self.doflocs[itr] + diffs[itr]
+                              for itr in range(len(diffs))]),
+        )
+
     def _uniform(self):
         """Perform a single uniform refinement."""
         raise NotImplementedError

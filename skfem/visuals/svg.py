@@ -43,11 +43,11 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> str:
     if "height" in kwargs:
         height = kwargs["height"]
     else:
-        height = width * (maxy - miny) / (maxx - miny)
+        height = width * (maxy - miny) / (maxx - minx)
     stroke = kwargs["stroke"] if "stroke" in kwargs else 1
     sx = (width - 2 * stroke) / (maxx - minx)
     sy = (height - 2 * stroke) / (maxy - miny)
-    p[0] = sx * (p[0] - miny) + stroke
+    p[0] = sx * (p[0] - minx) + stroke
     p[1] = sy * (maxy - p[1]) + stroke
     template = ("""<line x1="{}" y1="{}" x2="{}" y2="{}" """
                 """style="stroke:black;stroke-width:{}"/>""")
