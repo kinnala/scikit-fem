@@ -1,15 +1,13 @@
 from dataclasses import dataclass, replace
-from typing import Tuple, Type, Union
+from typing import Tuple, Type, Union, Optional
 from collections import namedtuple
 
 import numpy as np
 from numpy import ndarray
 
-from ..assembly import Dofs
 from ..element import (Element, ElementHex1, ElementQuad1, ElementQuad2,
                        ElementTetP1, ElementTriP1, ElementTriP2,
                        BOUNDARY_ELEMENT_MAP)
-from ..mapping import MappingAffine, MappingIsoparametric
 
 
 @dataclass
@@ -27,6 +25,7 @@ class BaseMesh:
 
     @property
     def dofs(self):
+        from skfem.assembly import Dofs
         if not hasattr(self, '_dofs'):
             self._dofs = Dofs(self, self.elem())
         return self._dofs
@@ -152,6 +151,7 @@ class BaseMesh:
 
     def _mapping(self):
         """Return a default reference mapping for the mesh."""
+        from skfem.mapping import MappingAffine, MappingIsoparametric
         if not hasattr(self, '_cached_mapping'):
             fakemesh = namedtuple('Mesh', ['p', 't', 'facets'])(
                 self.doflocs,
@@ -224,6 +224,8 @@ class BaseMesh:
             will match ``mesh.t``.
 
         """
+        from skfem.assembly import Dofs
+
         mapping = mesh._mapping()
         nelem = cls.elem
         dofs = Dofs(mesh, nelem())
@@ -389,6 +391,11 @@ class BaseMesh2D(BaseMesh):
 
 
 @dataclass
+class BaseMesh3D(BaseMesh):
+    pass
+
+
+@dataclass
 class MeshTri1(BaseMesh2D):
 
     doflocs: ndarray = np.array([[0., 1., 0., 1.],
@@ -400,6 +407,7 @@ class MeshTri1(BaseMesh2D):
     affine: bool = True
 
     def _uniform(self):
+
         p = self.doflocs
         t = self.t
         t2f = self.t2f
@@ -428,6 +436,7 @@ class MeshQuad1(BaseMesh2D):
     elem: Type[Element] = ElementQuad1
 
     def _uniform(self):
+
         p = self.doflocs
         t = self.t
         t2f = self.t2f
@@ -448,6 +457,22 @@ class MeshQuad1(BaseMesh2D):
             )),
         )
 
+    def to_meshtri(self, x: Optional[ndarray] = None):
+
+        t = self.t[[0, 1, 3]]
+        t = np.hstack((t, self.t[[1, 2, 3]]))
+        mesh = MeshTri1(self.doflocs, t)
+
+        if x is not None:
+            if len(x) == self.t.shape[1]:
+                # preserve elemental constant functions
+                X = np.concatenate((x, x))
+            else:
+                raise Exception("The parameter x must have one value per "
+                                "element.")
+            return mesh, X
+        return mesh
+
 
 @dataclass
 class MeshTri2(MeshTri1):
@@ -463,13 +488,35 @@ class MeshQuad2(MeshQuad1):
 
 
 @dataclass
-class MeshTet1(BaseMesh):
+class MeshTet1(BaseMesh3D):
 
+    doflocs: ndarray = np.array([[0., 0., 0.],
+                                 [0., 0., 1.],
+                                 [0., 1., 0.],
+                                 [1., 0., 0.],
+                                 [0., 1., 1.],
+                                 [1., 0., 1.],
+                                 [1., 1., 0.],
+                                 [1., 1., 1.]], dtype=np.float64).T
+    t: ndarray = np.array([[0, 1, 2, 3],
+                           [3, 5, 1, 7],
+                           [2, 3, 6, 7],
+                           [2, 3, 1, 7],
+                           [1, 2, 4, 7]], dtype=np.int64).T
     elem: Type[Element] = ElementTetP1
     affine: bool = True
 
 
 @dataclass
-class MeshHex1(BaseMesh):
+class MeshHex1(BaseMesh3D):
 
+    doflocs: ndarray = np.array([[0., 0., 0.],
+                                 [0., 0., 1.],
+                                 [0., 1., 0.],
+                                 [1., 0., 0.],
+                                 [0., 1., 1.],
+                                 [1., 0., 1.],
+                                 [1., 1., 0.],
+                                 [1., 1., 1.]], dtype=np.float64).T
+    t: ndarray = np.array([[0, 1, 2, 3, 4, 5, 6, 7]], dtype=np.int64).T
     elem: Type[Element] = ElementHex1

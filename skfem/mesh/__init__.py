@@ -23,8 +23,12 @@ constructor :meth:`~skfem.mesh.Mesh.load`.
 
 from .mesh import Mesh, MeshType
 from .mesh_line import MeshLine
-from .mesh2d import Mesh2D, MeshTri, MeshQuad
-from .mesh3d import Mesh3D, MeshTet, MeshHex
+from .base_mesh import BaseMesh3D as Mesh3D
+from .base_mesh import MeshTet1 as MeshTet
+from .base_mesh import MeshHex1 as MeshHex
+from .base_mesh import BaseMesh2D as Mesh2D
+from .base_mesh import MeshTri1 as MeshTri
+from .base_mesh import MeshQuad1 as MeshQuad
 from .base_mesh import (MeshTri1, MeshTri2, MeshQuad1, MeshQuad2, MeshTet1,
                         MeshHex1)
 
