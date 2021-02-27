@@ -390,6 +390,11 @@ class BaseMesh2D(BaseMesh):
 @dataclass
 class MeshTri1(BaseMesh2D):
 
+    doflocs: ndarray = np.array([[0., 1., 0., 1.],
+                                 [0., 0., 1., 1.]], dtype=np.float64)
+    t: ndarray = np.array([[0, 1],
+                           [1, 3],
+                           [2, 2]], dtype=np.int64)
     elem: Type[Element] = ElementTriP1
     affine: bool = True
 
@@ -413,6 +418,12 @@ class MeshTri1(BaseMesh2D):
 @dataclass
 class MeshQuad1(BaseMesh2D):
 
+    doflocs: ndarray = np.array([[0., 1., 1., 0.],
+                                 [0., 0., 1., 1.]], dtype=np.float64)
+    t: ndarray = np.array([[0],
+                           [1],
+                           [2],
+                           [3]], dtype=np.int64)
     elem: Type[Element] = ElementQuad1
 
     def _uniform(self):
