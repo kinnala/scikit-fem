@@ -20,7 +20,14 @@ class BaseMesh:
     named_t: Optional[Dict[str, ndarray]] = None
     elem: Type[Element] = Element
     affine: bool = False
-    validate: bool = False  # for backwards compatibility
+    validate: bool = False  # unused; for backwards compatibility
+    # Some parts of the library, most notably the normal vector construction in
+    # ElementGlobal._eval_dofs, assume that the element indices are ascending
+    # because this leads to consistent normal vectors for both elements sharing
+    # a facet.  Therefore, the element indices are sorted in a triangle mesh.
+    # However, some algorithms (e.g., adaptive refinement) require switching
+    # off this behaviour and, hence, this flag exists.
+    sort_t: bool = False
 
     @property
     def p(self):
@@ -220,7 +227,9 @@ class BaseMesh:
         """Return a default reference mapping for the mesh."""
         from skfem.mapping import MappingAffine, MappingIsoparametric
         if not hasattr(self, '_cached_mapping'):
-            fakemesh = namedtuple('FakeMesh', ['p', 't', 'facets', 't2f', 'f2t', 'dim'])(
+            FakeMesh = namedtuple('FakeMesh',
+                                  ['p', 't', 'facets', 't2f', 'f2t', 'dim'])
+            fakemesh = FakeMesh(
                 self.doflocs,
                 self.dofs.element_dofs,
                 self.facets,
@@ -263,6 +272,9 @@ class BaseMesh:
         ``self.doflocs`` and changing the indices in ``self.t``.
 
         """
+        if self.sort_t:
+            self.t = np.sort(self.t, axis=0)
+
         if not isinstance(self.doflocs, ndarray):
             # for backwards compatibility: support standard lists
             self.doflocs = np.array(self.doflocs, dtype=np.float64)
@@ -594,6 +606,7 @@ class MeshTri1(BaseMesh2D):
                            [1, 3, 2]], dtype=np.int64).T
     elem: Type[Element] = ElementTriP1
     affine: bool = True
+    sort_t: bool = True
 
     @classmethod
     def init_tensor(cls: Type, x: ndarray, y: ndarray):
@@ -874,7 +887,8 @@ class MeshTri1(BaseMesh2D):
 
         sorted_mesh = replace(
             self,
-            t=sort_mesh(self.p, self.t)
+            t=sort_mesh(self.p, self.t),
+            sort_t=False,
         )
         facets = find_facets(sorted_mesh, marked)
         doflocs, t = split_elements(sorted_mesh, facets)
@@ -1001,6 +1015,7 @@ class MeshTri2(MeshTri1):
 
     elem: Type[Element] = ElementTriP2
     affine: bool = False
+    sort_t: bool = False
 
 
 @dataclass
@@ -1046,10 +1061,10 @@ class MeshTet1(BaseMesh3D):
             ix = tree.query(np.array([x, y, z]).T, 5)[1].flatten()
             X = mapping.invF(np.array([x, y, z])[:, None], ix)
             inside = (
-                (X[0] >= 0)
-                * (X[1] >= 0)
-                * (X[2] >= 0)
-                * (1 - X[0] - X[1] - X[2] >= 0)
+                (X[0] >= 0) *
+                (X[1] >= 0) *
+                (X[2] >= 0) *
+                (1 - X[0] - X[1] - X[2] >= 0)
             )
             return np.array([ix[np.argmax(inside, axis=0)]]).flatten()
 
@@ -1253,13 +1268,12 @@ class MeshHex1(BaseMesh3D):
         )
 
     def _uniform(self):
-
         p = self.doflocs
         t = self.t
         sz = p.shape[1]
         t2e = self.t2e.copy() + sz
         t2f = self.t2f.copy() + np.max(t2e) + 1
-        mid = range(self.t.shape[1]) + np.max(t2f) + 1
+        mid = np.arange(self.t.shape[1], dtype=np.int64) + np.max(t2f) + 1
 
         doflocs = np.hstack((
             p,
@@ -1293,7 +1307,6 @@ class MeshHex1(BaseMesh3D):
                 mid, t2f[4], t2f[3], t2f[5], t2e[9], t2e[10], t2e[11], t[7]
             ))
         ))
-
         return replace(self, doflocs=doflocs, t=t)
 
     @classmethod
