@@ -4,6 +4,7 @@ from collections import namedtuple
 
 import numpy as np
 from numpy import ndarray
+from scipy.spatial import cKDTree
 
 from ..element import (Element, ElementHex1, ElementQuad1, ElementQuad2,
                        ElementTetP1, ElementTriP1, ElementTriP2,
@@ -495,6 +496,29 @@ class BaseMesh:
         """Return mesh parameter, viz the length of the longest edge."""
         raise NotImplementedError
 
+    def _reix(self, ix: ndarray) -> Tuple[ndarray, ndarray]:
+        """Connect ``self.p`` based on the indices ``ix``."""
+        ixuniq = np.unique(ix)
+        t = np.zeros(np.max(ix) + 1, dtype=np.int64)
+        t[ixuniq] = np.arange(len(ixuniq), dtype=np.int64)
+        return self.p[:, ixuniq], t[ix]
+
+    def remove_elements(self, element_indices: ndarray):
+        """Construct a new mesh by removing elements.
+
+        Parameters
+        ----------
+        element_indices
+            List of element indices to remove.
+
+        """
+        p, t = self._reix(np.delete(self.t, element_indices, axis=1))
+        return replace(
+            self,
+            doflocs=p,
+            t=t,
+        )
+
 
 @dataclass
 class BaseMesh2D(BaseMesh):
@@ -522,6 +546,39 @@ class BaseMesh3D(BaseMesh):
             np.linalg.norm(np.diff(self.p[:, self.edges], axis=1), axis=0)
         )
 
+    def edges_satisfying(self, test: Callable[[ndarray], bool]) -> ndarray:
+        """Return edges whose midpoints satisfy some condition.
+
+        Parameters
+        ----------
+        test
+            Evaluates to 1 or ``True`` for edge midpoints of the edges
+            belonging to the output set.
+
+        """
+        return np.nonzero(test(self.p[:, self.edges].mean(1)))[0]
+
+    def boundary_edges(self) -> ndarray:
+        """Return an array of boundary edge indices."""
+        facets = self.boundary_facets()
+        boundary_edges = np.sort(np.hstack(
+            tuple([np.vstack((self.facets[itr, facets],
+                              self.facets[(itr + 1) % self.facets.shape[0],
+                              facets]))
+                   for itr in range(self.facets.shape[0])])).T, axis=1)
+        edge_candidates = np.unique(self.t2e[:, self.f2t[0, facets]])
+        A = self.edges[:, edge_candidates].T
+        B = boundary_edges
+        dims = A.max(0) + 1
+        ix = np.where(np.in1d(np.ravel_multi_index(A.T, dims),
+                              np.ravel_multi_index(B.T, dims)))[0]
+        return edge_candidates[ix]
+
+    def interior_edges(self) -> ndarray:
+        """Return an array of interior edge indices."""
+        return np.setdiff1d(np.arange(self.edges.shape[1], dtype=np.int64),
+                            self.boundary_edges())
+
 
 @dataclass
 class MeshTri1(BaseMesh2D):
@@ -534,6 +591,179 @@ class MeshTri1(BaseMesh2D):
                            [1, 3, 2]], dtype=np.int64).T
     elem: Type[Element] = ElementTriP1
     affine: bool = True
+
+    @classmethod
+    def init_tensor(cls: Type, x: ndarray, y: ndarray):
+        r"""Initialize a tensor product mesh.
+
+        The mesh topology is as follows::
+
+            *---------------*
+            |'-.|'-.|`'---._|
+            |---+---+-------|
+            |\  |\  |'.     |
+            | \ | \ |  '-.  |
+            |  \|  \|     '.|
+            *---------------*
+
+        Parameters
+        ----------
+        x
+            The nodal coordinates in dimension `x`.
+        y
+            The nodal coordinates in dimension `y`.
+
+        """
+        npx = len(x)
+        npy = len(y)
+        X, Y = np.meshgrid(np.sort(x), np.sort(y))
+        p = np.vstack((X.flatten('F'), Y.flatten('F')))
+        ix = np.arange(npx * npy)
+        nt = (npx - 1) * (npy - 1)
+        t = np.zeros((3, 2 * nt))
+        ix = ix.reshape(npy, npx, order='F').copy()
+        t[0, :nt] = (ix[0:(npy-1), 0:(npx-1)].reshape(nt, 1, order='F')
+                     .copy()
+                     .flatten())
+        t[1, :nt] = (ix[1:npy, 0:(npx-1)].reshape(nt, 1, order='F')
+                     .copy()
+                     .flatten())
+        t[2, :nt] = (ix[1:npy, 1:npx].reshape(nt, 1, order='F')
+                     .copy()
+                     .flatten())
+        t[0, nt:] = (ix[0:(npy-1), 0:(npx-1)].reshape(nt, 1, order='F')
+                     .copy()
+                     .flatten())
+        t[1, nt:] = (ix[0:(npy-1), 1:npx].reshape(nt, 1, order='F')
+                     .copy()
+                     .flatten())
+        t[2, nt:] = (ix[1:npy, 1:npx].reshape(nt, 1, order='F')
+                     .copy()
+                     .flatten())
+
+        return cls(p, t.astype(np.int64))
+
+    @classmethod
+    def init_symmetric(cls: Type) -> BaseMesh2D:
+        r"""Initialize a symmetric mesh of the unit square.
+
+        The mesh topology is as follows::
+
+            *------------*
+            |\          /|
+            |  \      /  |
+            |    \  /    |
+            |     *      |
+            |    /  \    |
+            |  /      \  |
+            |/          \|
+            O------------*
+
+        """
+        p = np.array([[0., 1., 1., 0., .5],
+                      [0., 0., 1., 1., .5]], dtype=np.float64)
+        t = np.array([[0, 1, 4],
+                      [1, 2, 4],
+                      [2, 3, 4],
+                      [0, 3, 4]], dtype=np.int64).T
+        return cls(p, t)
+
+    @classmethod
+    def init_sqsymmetric(cls: Type) -> BaseMesh2D:
+        r"""Initialize a symmetric mesh of the unit square.
+
+        The mesh topology is as follows::
+
+            *------*------*
+            |\     |     /|
+            |  \   |   /  |
+            |    \ | /    |
+            *------*------*
+            |    / | \    |
+            |  /   |   \  |
+            |/     |     \|
+            O------*------*
+
+        """
+        p = np.array([[0., .5, 1., 0., .5, 1., 0., .5, 1.],
+                      [0., 0., 0., .5, .5, .5, 1., 1., 1.]], dtype=np.float64)
+        t = np.array([[0, 1, 4],
+                      [1, 2, 4],
+                      [2, 4, 5],
+                      [0, 3, 4],
+                      [3, 4, 6],
+                      [4, 6, 7],
+                      [4, 7, 8],
+                      [4, 5, 8]], dtype=np.int64).T
+        return cls(p, t)
+
+    @classmethod
+    def init_lshaped(cls: Type) -> BaseMesh2D:
+        r"""Initialize a mesh for the L-shaped domain.
+
+        The mesh topology is as follows::
+
+            *-------*
+            | \     |
+            |   \   |
+            |     \ |
+            |-------O-------*
+            |     / | \     |
+            |   /   |   \   |
+            | /     |     \ |
+            *---------------*
+
+        """
+        p = np.array([[0., 1., 0., -1.,  0., -1., -1.,  1.],
+                      [0., 0., 1.,  0., -1., -1.,  1., -1.]], dtype=np.float64)
+        t = np.array([[0, 1, 7],
+                      [0, 2, 6],
+                      [0, 6, 3],
+                      [0, 7, 4],
+                      [0, 4, 5],
+                      [0, 3, 5]], dtype=np.int64).T
+        return cls(p, t)
+
+    @classmethod
+    def init_circle(cls: Type,
+                    Nrefs: int = 3) -> BaseMesh2D:
+        r"""Initialize a circle mesh.
+
+        Works by repeatedly refining the following mesh and moving
+        new nodes to the boundary::
+
+                   *
+                 / | \
+               /   |   \
+             /     |     \
+            *------O------*
+             \     |     /
+               \   |   /
+                 \ | /
+                   *
+
+        Parameters
+        ----------
+        Nrefs
+            Number of refinements, by default 3.
+
+        """
+        p = np.array([[0., 0.],
+                      [1., 0.],
+                      [0., 1.],
+                      [-1., 0.],
+                      [0., -1.]]).T
+        t = np.array([[0, 1, 2],
+                      [0, 1, 4],
+                      [0, 2, 3],
+                      [0, 3, 4]], dtype=np.intp).T
+        m = cls(p, t)
+        for _ in range(Nrefs):
+            m = m.refined()
+            D = m.boundary_nodes()
+            tmp = m.p[:, D] / np.linalg.norm(m.p[:, D], axis=0)
+            m = replace(m, doflocs=tmp)
+        return m
 
     def _uniform(self):
 
@@ -651,6 +881,13 @@ class MeshTri1(BaseMesh2D):
             t=t,
         )
 
+    def element_finder(self, mapping=None):
+        from matplotlib.tri import Triangulation  # todo replace with ckdtree
+
+        return Triangulation(self.p[0],
+                             self.p[1],
+                             self.t.T).get_trifinder()
+
 
 @dataclass
 class MeshQuad1(BaseMesh2D):
@@ -684,6 +921,52 @@ class MeshQuad1(BaseMesh2D):
             )),
         )
 
+    @classmethod
+    def init_tensor(cls: Type,
+                    x: ndarray,
+                    y: ndarray):
+        """Initialize a tensor product mesh.
+
+        The mesh topology is as follows::
+
+            *-------------*
+            |   |  |      |
+            |---+--+------|
+            |   |  |      |
+            |   |  |      |
+            |   |  |      |
+            *-------------*
+
+        Parameters
+        ----------
+        x
+            The nodal coordinates in dimension `x`.
+        y
+            The nodal coordinates in dimension `y`.
+
+        """
+        npx = len(x)
+        npy = len(y)
+        X, Y = np.meshgrid(np.sort(x), np.sort(y))
+        p = np.vstack((X.flatten('F'), Y.flatten('F')))
+        ix = np.arange(npx * npy)
+        nt = (npx - 1) * (npy - 1)
+        t = np.zeros((4, nt))
+        ix = ix.reshape(npy, npx, order='F').copy()
+        t[0] = (ix[0:(npy-1), 0:(npx-1)].reshape(nt, 1, order='F')
+                .copy()
+                .flatten())
+        t[1] = (ix[1:npy, 0:(npx-1)].reshape(nt, 1, order='F')
+                .copy()
+                .flatten())
+        t[2] = (ix[1:npy, 1:npx].reshape(nt, 1, order='F')
+                .copy()
+                .flatten())
+        t[3] = (ix[0:(npy-1), 1:npx].reshape(nt, 1, order='F')
+                .copy()
+                .flatten())
+        return cls(p, t.astype(np.int64))
+
     def to_meshtri(self, x: Optional[ndarray] = None):
 
         t = self.t[[0, 1, 3]]
@@ -699,6 +982,14 @@ class MeshQuad1(BaseMesh2D):
                                 "element.")
             return mesh, X
         return mesh
+
+    def element_finder(self, mapping=None):
+        tri_finder = self.to_meshtri().element_finder()
+
+        def finder(*args):
+            return tri_finder(*args) % self.t.shape[1]
+
+        return finder
 
 
 @dataclass
@@ -732,6 +1023,33 @@ class MeshTet1(BaseMesh3D):
                            [1, 2, 4, 7]], dtype=np.int64).T
     elem: Type[Element] = ElementTetP1
     affine: bool = True
+
+    def element_finder(self, mapping=None):
+        """Return a function handle from location to element index.
+
+        Parameters
+        ----------
+        mapping
+            The affine mapping for the mesh.
+
+        """
+        if mapping is None:
+            raise NotImplementedError("Mapping must be provided.")
+
+        tree = cKDTree(np.mean(self.p[:, self.t], axis=1).T)
+
+        def finder(x, y, z):
+            ix = tree.query(np.array([x, y, z]).T, 5)[1].flatten()
+            X = mapping.invF(np.array([x, y, z])[:, None], ix)
+            inside = (
+                (X[0] >= 0)
+                * (X[1] >= 0)
+                * (X[2] >= 0)
+                * (1 - X[0] - X[1] - X[2] >= 0)
+            )
+            return np.array([ix[np.argmax(inside, axis=0)]]).flatten()
+
+        return finder
 
     def _uniform(self):
 
@@ -803,6 +1121,109 @@ class MeshTet1(BaseMesh3D):
             t=newt,
         )
 
+    @classmethod
+    def init_tensor(cls: Type,
+                    x: ndarray,
+                    y: ndarray,
+                    z: ndarray):
+        """Initialize a tensor product mesh.
+
+        Parameters
+        ----------
+        x
+            The nodal coordinates in dimension `x`.
+        y
+            The nodal coordinates in dimension `y`.
+        z
+            The nodal coordinates in dimension `z`.
+
+        """
+        npx = len(x)
+        npy = len(y)
+        npz = len(z)
+        X, Y, Z = np.meshgrid(np.sort(x), np.sort(y), np.sort(z))
+        p = np.vstack((X.flatten('F'), Y.flatten('F'), Z.flatten('F')))
+        ix = np.arange(npx * npy * npz)
+        ne = (npx - 1) * (npy - 1) * (npz - 1)
+        t = np.zeros((8, ne))
+        ix = ix.reshape(npy, npx, npz, order='F').copy()
+        t[0] = (ix[0:(npy - 1), 0:(npx - 1), 0:(npz - 1)]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[1] = (ix[1:npy, 0:(npx - 1), 0:(npz - 1)]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[2] = (ix[0:(npy - 1), 1:npx, 0:(npz - 1)]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[3] = (ix[0:(npy - 1), 0:(npx - 1), 1:npz]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[4] = (ix[1:npy, 1:npx, 0:(npz - 1)]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[5] = (ix[1:npy, 0:(npx - 1), 1:npz]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[6] = (ix[0:(npy - 1), 1:npx, 1:npz]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[7] = (ix[1:npy, 1:npx, 1:npz]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+
+        T = np.zeros((4, 0))
+        T = np.hstack((T, t[[0, 1, 5, 7]]))
+        T = np.hstack((T, t[[0, 1, 4, 7]]))
+        T = np.hstack((T, t[[0, 2, 4, 7]]))
+        T = np.hstack((T, t[[0, 3, 5, 7]]))
+        T = np.hstack((T, t[[0, 2, 6, 7]]))
+        T = np.hstack((T, t[[0, 3, 6, 7]]))
+
+        return cls(p, T.astype(np.int64))
+
+    @classmethod
+    def init_ball(cls: Type,
+                  Nrefs: int = 3):
+        """Initialize a ball mesh.
+
+        Parameters
+        ----------
+        Nrefs
+            Number of refinements, by default 3.
+
+        """
+        p = np.array([[0., 0., 0.],
+                      [1., 0., 0.],
+                      [0., 1., 0.],
+                      [0., 0., 1.],
+                      [-1., 0., 0.],
+                      [0., -1., 0.],
+                      [0., 0., -1.]]).T
+        t = np.array([[0, 1, 2, 3],
+                      [0, 4, 5, 6],
+                      [0, 1, 2, 6],
+                      [0, 1, 3, 5],
+                      [0, 2, 3, 4],
+                      [0, 4, 5, 3],
+                      [0, 4, 6, 2],
+                      [0, 5, 6, 1]], dtype=np.intp).T
+        m = cls(p, t)
+        for _ in range(Nrefs):
+            m = m.refined()
+            D = m.boundary_nodes()
+            tmp = m.p[:, D] / np.linalg.norm(m.p[:, D], axis=0)
+            m = replace(m, doflocs=tmp)
+        return m
+
 
 @dataclass
 class MeshHex1(BaseMesh3D):
@@ -861,3 +1282,63 @@ class MeshHex1(BaseMesh3D):
         ))
 
         return replace(self, doflocs=doflocs, t=t)
+
+    @classmethod
+    def init_tensor(cls: Type,
+                    x: ndarray,
+                    y: ndarray,
+                    z: ndarray):
+        """Initialize a tensor product mesh.
+
+        Parameters
+        ----------
+        x
+            The nodal coordinates in dimension `x`.
+        y
+            The nodal coordinates in dimension `y`.
+        z
+            The nodal coordinates in dimension `z`.
+
+        """
+        npx = len(x)
+        npy = len(y)
+        npz = len(z)
+        X, Y, Z = np.meshgrid(np.sort(x), np.sort(y), np.sort(z))
+        p = np.vstack((X.flatten('F'), Y.flatten('F'), Z.flatten('F')))
+        ix = np.arange(npx * npy * npz)
+        ne = (npx - 1) * (npy - 1) * (npz - 1)
+        t = np.zeros((8, ne))
+        ix = ix.reshape(npy, npx, npz, order='F').copy()
+        t[0] = (ix[0:(npy - 1), 0:(npx - 1), 0:(npz - 1)]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[1] = (ix[1:npy, 0:(npx - 1), 0:(npz - 1)]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[2] = (ix[0:(npy - 1), 1:npx, 0:(npz - 1)]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[3] = (ix[0:(npy - 1), 0:(npx - 1), 1:npz]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[4] = (ix[1:npy, 1:npx, 0:(npz - 1)]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[5] = (ix[1:npy, 0:(npx - 1), 1:npz]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[6] = (ix[0:(npy - 1), 1:npx, 1:npz]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        t[7] = (ix[1:npy, 1:npx, 1:npz]
+                .reshape(ne, 1, order='F')
+                .copy()
+                .flatten())
+        return cls(p, t.astype(np.int64))
