@@ -1,6 +1,7 @@
 from dataclasses import dataclass, replace
 from typing import Tuple, Type, Union, Optional, Dict, Callable
 from collections import namedtuple
+from itertools import dropwhile
 
 import numpy as np
 from numpy import ndarray
@@ -986,10 +987,28 @@ class MeshQuad1(BaseMesh2D):
         return cls(p, t.astype(np.int64))
 
     def to_meshtri(self, x: Optional[ndarray] = None):
+        """Split each quadrilateral into two triangles."""
+        t = np.hstack((self.t[[0, 1, 3]], self.t[[1, 2, 3]]))
 
-        t = self.t[[0, 1, 3]]
-        t = np.hstack((t, self.t[[1, 2, 3]]))
-        mesh = MeshTri1(self.doflocs, t)
+        if self.named_t:
+            named_t = {k: np.concatenate((v, v + self.t.shape[1]))
+                       for k, v in self.named_t.items()}
+
+        mesh = MeshTri1(self.doflocs, t, named_t=named_t)
+
+        if self.named_facets:
+            named_facets = {}
+            for k in self.named_facets:
+                slots = enumerate(mesh.facets.T)
+                named_facets[k] = np.array([
+                    next(dropwhile(lambda slot: not(np.array_equal(f,
+                                                                   slot[1])),
+                                   slots))[0]
+                    for f in self.facets.T[np.sort(self.named_facets[k])]])
+            mesh = replace(
+                mesh,
+                named_facets=named_facets,
+            )
 
         if x is not None:
             if len(x) == self.t.shape[1]:
