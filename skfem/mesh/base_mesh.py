@@ -1071,23 +1071,14 @@ class MeshTet1(BaseMesh3D):
         return finder
 
     def _uniform(self):
-
         t = self.t
         p = self.p
         e = self.edges
         sz = p.shape[1]
-        t2e = self.t2e + sz
+        t2e = self.t2e.copy() + sz
 
         # new vertices are the midpoints of edges
-        newp = .5 * np.vstack((p[0, e[0]] + p[0, e[1]],
-                               p[1, e[0]] + p[1, e[1]],
-                               p[2, e[0]] + p[2, e[1]]))
-        newp = np.hstack((p, newp))
-        # new tets
-        newt = np.vstack((t[0], t2e[0], t2e[2], t2e[3]))
-        newt = np.hstack((newt, np.vstack((t[1], t2e[0], t2e[1], t2e[4]))))
-        newt = np.hstack((newt, np.vstack((t[2], t2e[1], t2e[2], t2e[5]))))
-        newt = np.hstack((newt, np.vstack((t[3], t2e[3], t2e[4], t2e[5]))))
+        newp = np.hstack((p, p[:, self.edges].mean(axis=1)))
 
         # compute middle pyramid diagonal lengths and choose shortest
         d1 = ((newp[0, t2e[2]] - newp[0, t2e[4]]) ** 2 +
@@ -1102,37 +1093,27 @@ class MeshTet1(BaseMesh3D):
         c1 = I1 * I2
         c2 = (~I1) * I3
         c3 = (~I2) * (~I3)
+
         # splitting the pyramid in the middle;
         # diagonals are [2,4], [1,3] and [0,5]
-
-        # case 1: diagonal [2,4]
-        newt = np.hstack((newt, np.vstack((t2e[2, c1], t2e[4, c1],
-                                           t2e[0, c1], t2e[1, c1]))))
-        newt = np.hstack((newt, np.vstack((t2e[2, c1], t2e[4, c1],
-                                           t2e[0, c1], t2e[3, c1]))))
-        newt = np.hstack((newt, np.vstack((t2e[2, c1], t2e[4, c1],
-                                           t2e[1, c1], t2e[5, c1]))))
-        newt = np.hstack((newt, np.vstack((t2e[2, c1], t2e[4, c1],
-                                           t2e[3, c1], t2e[5, c1]))))
-        # case 2: diagonal [1,3]
-        newt = np.hstack((newt, np.vstack((t2e[1, c2], t2e[3, c2],
-                                           t2e[0, c2], t2e[4, c2]))))
-        newt = np.hstack((newt, np.vstack((t2e[1, c2], t2e[3, c2],
-                                           t2e[4, c2], t2e[5, c2]))))
-        newt = np.hstack((newt, np.vstack((t2e[1, c2], t2e[3, c2],
-                                           t2e[5, c2], t2e[2, c2]))))
-        newt = np.hstack((newt, np.vstack((t2e[1, c2], t2e[3, c2],
-                                           t2e[2, c2], t2e[0, c2]))))
-        # case 3: diagonal [0,5]
-        newt = np.hstack((newt, np.vstack((t2e[0, c3], t2e[5, c3],
-                                           t2e[1, c3], t2e[4, c3]))))
-        newt = np.hstack((newt, np.vstack((t2e[0, c3], t2e[5, c3],
-                                           t2e[4, c3], t2e[3, c3]))))
-        newt = np.hstack((newt, np.vstack((t2e[0, c3], t2e[5, c3],
-                                           t2e[3, c3], t2e[2, c3]))))
-        newt = np.hstack((newt, np.vstack((t2e[0, c3], t2e[5, c3],
-                                           t2e[2, c3], t2e[1, c3]))))
-        # update fields
+        newt = np.hstack((
+            np.vstack((t[0], t2e[0], t2e[2], t2e[3])),
+            np.vstack((t[1], t2e[0], t2e[1], t2e[4])),
+            np.vstack((t[2], t2e[1], t2e[2], t2e[5])),
+            np.vstack((t[3], t2e[3], t2e[4], t2e[5])),
+            np.vstack((t2e[2, c1], t2e[4, c1], t2e[0, c1], t2e[1, c1])),
+            np.vstack((t2e[2, c1], t2e[4, c1], t2e[0, c1], t2e[3, c1])),
+            np.vstack((t2e[2, c1], t2e[4, c1], t2e[1, c1], t2e[5, c1])),
+            np.vstack((t2e[2, c1], t2e[4, c1], t2e[3, c1], t2e[5, c1])),
+            np.vstack((t2e[1, c2], t2e[3, c2], t2e[0, c2], t2e[4, c2])),
+            np.vstack((t2e[1, c2], t2e[3, c2], t2e[4, c2], t2e[5, c2])),
+            np.vstack((t2e[1, c2], t2e[3, c2], t2e[5, c2], t2e[2, c2])),
+            np.vstack((t2e[1, c2], t2e[3, c2], t2e[2, c2], t2e[0, c2])),
+            np.vstack((t2e[0, c3], t2e[5, c3], t2e[1, c3], t2e[4, c3])),
+            np.vstack((t2e[0, c3], t2e[5, c3], t2e[4, c3], t2e[3, c3])),
+            np.vstack((t2e[0, c3], t2e[5, c3], t2e[3, c3], t2e[2, c3])),
+            np.vstack((t2e[0, c3], t2e[5, c3], t2e[2, c3], t2e[1, c3])),
+        ))
 
         return replace(
             self,
@@ -1282,30 +1263,22 @@ class MeshHex1(BaseMesh3D):
             .125 * np.sum(p[:, t], axis=1),
         ))
         t = np.hstack((
-            np.vstack((
-                t[0], t2e[0], t2e[1], t2e[2], t2f[0], t2f[2], t2f[1], mid
-            )),
-            np.vstack((
-                t2e[0], t[1], t2f[0], t2f[2], t2e[3],t2e[4], mid, t2f[4]
-            )),
-            np.vstack((
-                t2e[1], t2f[0], t[2], t2f[1], t2e[5], mid, t2e[6], t2f[3]
-            )),
-            np.vstack((
-                t2e[2], t2f[2], t2f[1], t[3], mid, t2e[7], t2e[8], t2f[5]
-            )),
-            np.vstack((
-                t2f[0], t2e[3], t2e[5], mid, t[4], t2f[4], t2f[3], t2e[9]
-            )),
-            np.vstack((
-                t2f[2], t2e[4], mid, t2e[7], t2f[4], t[5], t2f[5], t2e[10]
-            )),
-            np.vstack((
-                t2f[1], mid, t2e[6], t2e[8], t2f[3], t2f[5], t[6], t2e[11]
-            )),
-            np.vstack((
-                mid, t2f[4], t2f[3], t2f[5], t2e[9], t2e[10], t2e[11], t[7]
-            ))
+            np.vstack((t[0], t2e[0], t2e[1], t2e[2],
+                       t2f[0], t2f[2], t2f[1], mid)),
+            np.vstack((t2e[0], t[1], t2f[0], t2f[2],
+                       t2e[3],t2e[4], mid, t2f[4])),
+            np.vstack((t2e[1], t2f[0], t[2], t2f[1],
+                       t2e[5], mid, t2e[6], t2f[3])),
+            np.vstack((t2e[2], t2f[2], t2f[1], t[3],
+                       mid, t2e[7], t2e[8], t2f[5])),
+            np.vstack((t2f[0], t2e[3], t2e[5], mid,
+                       t[4], t2f[4], t2f[3], t2e[9])),
+            np.vstack((t2f[2], t2e[4], mid, t2e[7],
+                       t2f[4], t[5], t2f[5], t2e[10])),
+            np.vstack((t2f[1], mid, t2e[6], t2e[8],
+                       t2f[3], t2f[5], t[6], t2e[11])),
+            np.vstack((mid, t2f[4], t2f[3], t2f[5],
+                       t2e[9], t2e[10], t2e[11], t[7]))
         ))
         return replace(self, doflocs=doflocs, t=t)
 
