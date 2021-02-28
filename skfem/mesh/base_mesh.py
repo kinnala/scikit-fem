@@ -217,11 +217,12 @@ class BaseMesh:
         """Return a default reference mapping for the mesh."""
         from skfem.mapping import MappingAffine, MappingIsoparametric
         if not hasattr(self, '_cached_mapping'):
-            fakemesh = namedtuple('FakeMesh', ['p', 't', 'facets', 't2f', 'dim'])(
+            fakemesh = namedtuple('FakeMesh', ['p', 't', 'facets', 't2f', 'f2t', 'dim'])(
                 self.doflocs,
                 self.dofs.element_dofs,
                 self.facets,
                 self.t2f,
+                self.f2t,
                 lambda: self.dim(),
             )
             if self.affine:
@@ -259,7 +260,16 @@ class BaseMesh:
         ``self.doflocs`` and changing the indices in ``self.t``.
 
         """
+        if not isinstance(self.doflocs, ndarray):
+            # for backwards-compatibility: support standard lists
+            self.doflocs = np.array(self.doflocs, dtype=np.float64)
+
+        if not isinstance(self.t, ndarray):
+            # for backwards-compatibility: support standard lists
+            self.t = np.array(self.t, dtype=np.int64)
+
         M = self.elem.refdom.nnodes
+
         if self.nnodes > M:  # TODO check that works for 3D quadratic
             # reorder DOFs to the expected format: vertex DOFs are first
             p, t = self.doflocs, self.t
@@ -273,6 +283,7 @@ class BaseMesh:
             _p[:, self.dofs.element_dofs[M:].flatten('F')] =\
                 p[:, t[M:].flatten('F')]
             self.doflocs = _p
+
 
     def save(self,
              filename: str,
@@ -458,9 +469,18 @@ class BaseMesh:
         """Fallback for 3D meshes."""
         return p
 
+    def param(self) -> float:
+        """Return mesh parameter, viz the length of the longest edge."""
+        raise NotImplementedError
+
 
 @dataclass
 class BaseMesh2D(BaseMesh):
+
+    def param(self) -> float:
+        return np.max(
+            np.linalg.norm(np.diff(self.p[:, self.facets], axis=1), axis=0)
+        )
 
     @staticmethod
     def strip_extra_coordinates(p: ndarray) -> ndarray:
@@ -474,7 +494,11 @@ class BaseMesh2D(BaseMesh):
 
 @dataclass
 class BaseMesh3D(BaseMesh):
-    pass
+
+    def param(self) -> float:
+        return np.max(
+            np.linalg.norm(np.diff(self.p[:, self.edges], axis=1), axis=0)
+        )
 
 
 @dataclass
