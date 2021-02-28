@@ -261,11 +261,11 @@ class BaseMesh:
 
         """
         if not isinstance(self.doflocs, ndarray):
-            # for backwards-compatibility: support standard lists
+            # for backwards compatibility: support standard lists
             self.doflocs = np.array(self.doflocs, dtype=np.float64)
 
         if not isinstance(self.t, ndarray):
-            # for backwards-compatibility: support standard lists
+            # for backwards compatibility: support standard lists
             self.t = np.array(self.t, dtype=np.int64)
 
         M = self.elem.refdom.nnodes
@@ -509,7 +509,7 @@ class MeshTri1(BaseMesh2D):
                                  [0., 1.],
                                  [1., 1.]], dtype=np.float64).T
     t: ndarray = np.array([[0, 1, 2],
-                           [1, 3, 2]], dtype=np.int64)
+                           [1, 3, 2]], dtype=np.int64).T
     elem: Type[Element] = ElementTriP1
     affine: bool = True
 
