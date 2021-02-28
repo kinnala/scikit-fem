@@ -16,8 +16,8 @@ class BaseMesh:
 
     doflocs: ndarray
     t: ndarray
-    _boundaries: Optional[Dict[str, ndarray]] = None
-    _subdomains: Optional[Dict[str, ndarray]] = None
+    named_facets: Optional[Dict[str, ndarray]] = None
+    named_t: Optional[Dict[str, ndarray]] = None
     elem: Type[Element] = Element
     affine: bool = False
     validate: bool = False  # for backwards compatibility
@@ -67,11 +67,11 @@ class BaseMesh:
 
     @property
     def subdomains(self):
-        return self._subdomains
+        return self.named_t
 
     @property
     def boundaries(self):
-        return self._boundaries
+        return self.named_facets
 
     @property
     def facets(self):
@@ -327,8 +327,8 @@ class BaseMesh:
             data['subdomains'] = {k: np.array(v)
                                   for k, v in data['subdomains'].items()}
         data['doflocs'] = data.pop('p')
-        data['_boundaries'] = data.pop('boundaries')
-        data['_subdomains'] = data.pop('subdomains')
+        data['named_facets'] = data.pop('boundaries')
+        data['named_t'] = data.pop('subdomains')
         return cls(**data)
 
     @classmethod
@@ -882,7 +882,7 @@ class MeshTri1(BaseMesh2D):
         )
 
     def element_finder(self, mapping=None):
-        from matplotlib.tri import Triangulation  # todo replace with ckdtree
+        from matplotlib.tri import Triangulation  # TODO replace with ckdtree
 
         return Triangulation(self.p[0],
                              self.p[1],
