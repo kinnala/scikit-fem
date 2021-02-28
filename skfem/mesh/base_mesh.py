@@ -1,5 +1,5 @@
 from dataclasses import dataclass, replace
-from typing import Tuple, Type, Union, Optional
+from typing import Tuple, Type, Union, Optional, Dict, Callable
 from collections import namedtuple
 
 import numpy as np
@@ -132,6 +132,61 @@ class BaseMesh:
         return np.setdiff1d(np.arange(0, self.p.shape[1]),
                             self.boundary_nodes())
 
+    def nodes_satisfying(self,
+                         test: Callable[[ndarray], ndarray],
+                         boundaries_only: bool = False) -> ndarray:
+        """Return nodes that satisfy some condition.
+
+        Parameters
+        ----------
+        test
+            A function which returns True for the set of nodes that are to be
+            included in the return set.
+        boundaries_only
+            If True, include only boundary facets.
+
+        """
+        nodes = np.nonzero(test(self.p))[0]
+        if boundaries_only:
+            nodes = np.intersect1d(nodes, self.boundary_nodes())
+        return nodes
+
+    def facets_satisfying(self,
+                          test: Callable[[ndarray], ndarray],
+                          boundaries_only: bool = False) -> ndarray:
+        """Return facets whose midpoints satisfy some condition.
+
+        Parameters
+        ----------
+        test
+            A function which returns ``True`` for the facet midpoints that are
+            to be included in the return set.
+        boundaries_only
+            If ``True``, include only boundary facets.
+
+        """
+        midp = [np.sum(self.p[itr, self.facets], axis=0) / self.facets.shape[0]
+                for itr in range(self.dim())]
+        facets = np.nonzero(test(np.array(midp)))[0]
+        if boundaries_only:
+            facets = np.intersect1d(facets, self.boundary_facets())
+        return facets
+
+    def elements_satisfying(self,
+                            test: Callable[[ndarray], ndarray]) -> ndarray:
+        """Return elements whose midpoints satisfy some condition.
+
+        Parameters
+        ----------
+        test
+            A function which returns ``True`` for the element midpoints that
+            are to be included in the return set.
+
+        """
+        midp = [np.sum(self.p[itr, self.t], axis=0) / self.t.shape[0]
+                for itr in range(self.dim())]
+        return np.nonzero(test(np.array(midp)))[0]
+
     def _expand_facets(self, ix: ndarray) -> Tuple[ndarray, ndarray]:
         """Return vertices and edges corresponding to given facet indices.
 
@@ -162,10 +217,11 @@ class BaseMesh:
         """Return a default reference mapping for the mesh."""
         from skfem.mapping import MappingAffine, MappingIsoparametric
         if not hasattr(self, '_cached_mapping'):
-            fakemesh = namedtuple('Mesh', ['p', 't', 'facets'])(
+            fakemesh = namedtuple('FakeMesh', ['p', 't', 'facets', 'dim'])(
                 self.doflocs,
                 self.dofs.element_dofs,
                 self.facets,
+                lambda: self.dim(),
             )
             if self.affine:
                 self._cached_mapping = MappingAffine(fakemesh)
@@ -217,6 +273,24 @@ class BaseMesh:
                 p[:, t[M:].flatten('F')]
             self.doflocs = _p
 
+    def save(self,
+             filename: str,
+             point_data: Optional[Dict[str, ndarray]] = None,
+             **kwargs) -> None:
+        """Export the mesh and fields using meshio.
+
+        Parameters
+        ----------
+        filename
+            The output filename, with suffix determining format;
+            e.g. .msh, .vtk, .xdmf
+        point_data
+            Data related to the vertices of the mesh.
+
+        """
+        from skfem.io.meshio import to_file
+        return to_file(self, filename, point_data, **kwargs)
+
     @classmethod
     def load(cls, filename):
         from skfem.io.meshio import from_file
@@ -266,14 +340,12 @@ class BaseMesh:
             array of element indices for adaptive refinement.
 
         """
+        m = self
         if isinstance(times_or_ix, int):
-            m = self
             for _ in range(times_or_ix):
                 m = m._uniform()
-        elif isinstance(times_or_ix, ndarray):
+        else:    
             m = m._adaptive(times_or_ix)
-        else:
-            raise NotImplementedError
         return m
 
     def scaled(self, factors):
@@ -432,6 +504,105 @@ class MeshTri1(BaseMesh2D):
             )),
         )
 
+    def _adaptive(self, marked):
+        """Refine the set of marked elements."""
+
+        def sort_mesh(p, t):
+            """Make (0, 2) the longest edge in t."""
+            l01 = np.sqrt(np.sum((p[:, t[0]] - p[:, t[1]]) ** 2, axis=0))
+            l12 = np.sqrt(np.sum((p[:, t[1]] - p[:, t[2]]) ** 2, axis=0))
+            l02 = np.sqrt(np.sum((p[:, t[0]] - p[:, t[2]]) ** 2, axis=0))
+
+            ix01 = (l01 > l02) * (l01 > l12)
+            ix12 = (l12 > l01) * (l12 > l02)
+
+            # row swaps
+            tmp = t[2, ix01]
+            t[2, ix01] = t[1, ix01]
+            t[1, ix01] = tmp
+
+            tmp = t[0, ix12]
+            t[0, ix12] = t[1, ix12]
+            t[1, ix12] = tmp
+
+            return t
+
+        def find_facets(m, marked_elems):
+            """Find the facets to split."""
+            facets = np.zeros(m.facets.shape[1], dtype=np.int64)
+            facets[m.t2f[:, marked_elems].flatten('F')] = 1
+            prev_nnz = -1e10
+
+            while np.count_nonzero(facets) - prev_nnz > 0:
+                prev_nnz = np.count_nonzero(facets)
+                t2facets = facets[m.t2f]
+                t2facets[2, t2facets[0, :] + t2facets[1, :] > 0] = 1
+                facets[m.t2f[t2facets == 1]] = 1
+
+            return facets
+
+        def split_elements(m, facets):
+            """Define new elements."""
+            ix = (-1)*np.ones(m.facets.shape[1], dtype=np.int64)
+            ix[facets == 1] = (np.arange(np.count_nonzero(facets))
+                               + m.p.shape[1])
+            ix = ix[m.t2f]
+
+            red =   (ix[0] >= 0) * (ix[1] >= 0) * (ix[2] >= 0)  # noqa
+            blue1 = (ix[0] ==-1) * (ix[1] >= 0) * (ix[2] >= 0)  # noqa
+            blue2 = (ix[0] >= 0) * (ix[1] ==-1) * (ix[2] >= 0)  # noqa
+            green = (ix[0] ==-1) * (ix[1] ==-1) * (ix[2] >= 0)  # noqa
+            rest =  (ix[0] ==-1) * (ix[1] ==-1) * (ix[2] ==-1)  # noqa
+
+            # new red elements
+            t_red = np.hstack((
+                np.vstack((m.t[0, red], ix[0, red], ix[2, red])),
+                np.vstack((m.t[1, red], ix[0, red], ix[1, red])),
+                np.vstack((m.t[2, red], ix[1, red], ix[2, red])),
+                np.vstack(( ix[1, red], ix[2, red], ix[0, red])),  # noqa
+            ))
+
+            # new blue elements
+            t_blue1 = np.hstack((
+                np.vstack((m.t[1, blue1], m.t[0, blue1], ix[2, blue1])),
+                np.vstack((m.t[1, blue1],  ix[1, blue1], ix[2, blue1])),  # noqa
+                np.vstack((m.t[2, blue1],  ix[2, blue1], ix[1, blue1])),  # noqa
+            ))
+
+            t_blue2 = np.hstack((
+                np.vstack((m.t[0, blue2], ix[0, blue2],  ix[2, blue2])),  # noqa
+                np.vstack(( ix[2, blue2], ix[0, blue2], m.t[1, blue2])),  # noqa
+                np.vstack((m.t[2, blue2], ix[2, blue2], m.t[1, blue2])),
+            ))
+
+            # new green elements
+            t_green = np.hstack((
+                np.vstack((m.t[1, green], ix[2, green], m.t[0, green])),
+                np.vstack((m.t[2, green], ix[2, green], m.t[1, green])),
+            ))
+
+            # new nodes
+            p = .5 * (m.p[:, m.facets[0, facets == 1]] +
+                      m.p[:, m.facets[1, facets == 1]])
+
+            return (
+                np.hstack((m.p, p)),
+                np.hstack((m.t[:, rest], t_red, t_blue1, t_blue2, t_green)),
+            )
+
+        sorted_mesh = replace(
+            self,
+            t=sort_mesh(self.p, self.t)
+        )
+        facets = find_facets(sorted_mesh, marked)
+        doflocs, t = split_elements(sorted_mesh, facets)
+
+        return replace(
+            self,
+            doflocs=doflocs,
+            t=t,
+        )
+
 
 @dataclass
 class MeshQuad1(BaseMesh2D):
@@ -514,6 +685,76 @@ class MeshTet1(BaseMesh3D):
                            [1, 2, 4, 7]], dtype=np.int64).T
     elem: Type[Element] = ElementTetP1
     affine: bool = True
+
+    def _uniform(self):
+
+        t = self.t
+        p = self.p
+        e = self.edges
+        sz = p.shape[1]
+        t2e = self.t2e + sz
+
+        # new vertices are the midpoints of edges
+        newp = .5 * np.vstack((p[0, e[0]] + p[0, e[1]],
+                               p[1, e[0]] + p[1, e[1]],
+                               p[2, e[0]] + p[2, e[1]]))
+        newp = np.hstack((p, newp))
+        # new tets
+        newt = np.vstack((t[0], t2e[0], t2e[2], t2e[3]))
+        newt = np.hstack((newt, np.vstack((t[1], t2e[0], t2e[1], t2e[4]))))
+        newt = np.hstack((newt, np.vstack((t[2], t2e[1], t2e[2], t2e[5]))))
+        newt = np.hstack((newt, np.vstack((t[3], t2e[3], t2e[4], t2e[5]))))
+
+        # compute middle pyramid diagonal lengths and choose shortest
+        d1 = ((newp[0, t2e[2]] - newp[0, t2e[4]]) ** 2 +
+              (newp[1, t2e[2]] - newp[1, t2e[4]]) ** 2)
+        d2 = ((newp[0, t2e[1]] - newp[0, t2e[3]]) ** 2 +
+              (newp[1, t2e[1]] - newp[1, t2e[3]]) ** 2)
+        d3 = ((newp[0, t2e[0]] - newp[0, t2e[5]]) ** 2 +
+              (newp[1, t2e[0]] - newp[1, t2e[5]]) ** 2)
+        I1 = d1 < d2
+        I2 = d1 < d3
+        I3 = d2 < d3
+        c1 = I1 * I2
+        c2 = (~I1) * I3
+        c3 = (~I2) * (~I3)
+        # splitting the pyramid in the middle;
+        # diagonals are [2,4], [1,3] and [0,5]
+
+        # case 1: diagonal [2,4]
+        newt = np.hstack((newt, np.vstack((t2e[2, c1], t2e[4, c1],
+                                           t2e[0, c1], t2e[1, c1]))))
+        newt = np.hstack((newt, np.vstack((t2e[2, c1], t2e[4, c1],
+                                           t2e[0, c1], t2e[3, c1]))))
+        newt = np.hstack((newt, np.vstack((t2e[2, c1], t2e[4, c1],
+                                           t2e[1, c1], t2e[5, c1]))))
+        newt = np.hstack((newt, np.vstack((t2e[2, c1], t2e[4, c1],
+                                           t2e[3, c1], t2e[5, c1]))))
+        # case 2: diagonal [1,3]
+        newt = np.hstack((newt, np.vstack((t2e[1, c2], t2e[3, c2],
+                                           t2e[0, c2], t2e[4, c2]))))
+        newt = np.hstack((newt, np.vstack((t2e[1, c2], t2e[3, c2],
+                                           t2e[4, c2], t2e[5, c2]))))
+        newt = np.hstack((newt, np.vstack((t2e[1, c2], t2e[3, c2],
+                                           t2e[5, c2], t2e[2, c2]))))
+        newt = np.hstack((newt, np.vstack((t2e[1, c2], t2e[3, c2],
+                                           t2e[2, c2], t2e[0, c2]))))
+        # case 3: diagonal [0,5]
+        newt = np.hstack((newt, np.vstack((t2e[0, c3], t2e[5, c3],
+                                           t2e[1, c3], t2e[4, c3]))))
+        newt = np.hstack((newt, np.vstack((t2e[0, c3], t2e[5, c3],
+                                           t2e[4, c3], t2e[3, c3]))))
+        newt = np.hstack((newt, np.vstack((t2e[0, c3], t2e[5, c3],
+                                           t2e[3, c3], t2e[2, c3]))))
+        newt = np.hstack((newt, np.vstack((t2e[0, c3], t2e[5, c3],
+                                           t2e[2, c3], t2e[1, c3]))))
+        # update fields
+
+        return replace(
+            self,
+            doflocs=newp,
+            t=newt,
+        )
 
 
 @dataclass
