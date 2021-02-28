@@ -800,99 +800,101 @@ class MeshTri1(BaseMesh2D):
             )),
         )
 
-    def _adaptive(self, marked):
-        """Refine the set of marked elements."""
+    @staticmethod
+    def _adaptive_sort_mesh(p, t):
+        """Make (0, 2) the longest edge in t."""
+        l01 = np.sqrt(np.sum((p[:, t[0]] - p[:, t[1]]) ** 2, axis=0))
+        l12 = np.sqrt(np.sum((p[:, t[1]] - p[:, t[2]]) ** 2, axis=0))
+        l02 = np.sqrt(np.sum((p[:, t[0]] - p[:, t[2]]) ** 2, axis=0))
 
-        def sort_mesh(p, t):
-            """Make (0, 2) the longest edge in t."""
-            l01 = np.sqrt(np.sum((p[:, t[0]] - p[:, t[1]]) ** 2, axis=0))
-            l12 = np.sqrt(np.sum((p[:, t[1]] - p[:, t[2]]) ** 2, axis=0))
-            l02 = np.sqrt(np.sum((p[:, t[0]] - p[:, t[2]]) ** 2, axis=0))
+        ix01 = (l01 > l02) * (l01 > l12)
+        ix12 = (l12 > l01) * (l12 > l02)
 
-            ix01 = (l01 > l02) * (l01 > l12)
-            ix12 = (l12 > l01) * (l12 > l02)
+        # row swaps
+        tmp = t[2, ix01]
+        t[2, ix01] = t[1, ix01]
+        t[1, ix01] = tmp
 
-            # row swaps
-            tmp = t[2, ix01]
-            t[2, ix01] = t[1, ix01]
-            t[1, ix01] = tmp
+        tmp = t[0, ix12]
+        t[0, ix12] = t[1, ix12]
+        t[1, ix12] = tmp
 
-            tmp = t[0, ix12]
-            t[0, ix12] = t[1, ix12]
-            t[1, ix12] = tmp
+        return t
 
-            return t
+    @staticmethod
+    def _adaptive_find_facets(m, marked_elems):
+        """Find the facets to split."""
+        facets = np.zeros(m.facets.shape[1], dtype=np.int64)
+        facets[m.t2f[:, marked_elems].flatten('F')] = 1
+        prev_nnz = -1e10
 
-        def find_facets(m, marked_elems):
-            """Find the facets to split."""
-            facets = np.zeros(m.facets.shape[1], dtype=np.int64)
-            facets[m.t2f[:, marked_elems].flatten('F')] = 1
-            prev_nnz = -1e10
-
-            while np.count_nonzero(facets) - prev_nnz > 0:
-                prev_nnz = np.count_nonzero(facets)
-                t2facets = facets[m.t2f]
-                t2facets[2, t2facets[0] + t2facets[1] > 0] = 1
-                facets[m.t2f[t2facets == 1]] = 1
+        while np.count_nonzero(facets) - prev_nnz > 0:
+            prev_nnz = np.count_nonzero(facets)
+            t2facets = facets[m.t2f]
+            t2facets[2, t2facets[0] + t2facets[1] > 0] = 1
+            facets[m.t2f[t2facets == 1]] = 1
 
             return facets
 
-        def split_elements(m, facets):
-            """Define new elements."""
-            ix = (-1) * np.ones(m.facets.shape[1], dtype=np.int64)
-            ix[facets == 1] = (np.arange(np.count_nonzero(facets))
-                               + m.p.shape[1])
-            ix = ix[m.t2f]
+    @staticmethod
+    def _adaptive_split_elements(m, facets):
+        """Define new elements."""
+        ix = (-1) * np.ones(m.facets.shape[1], dtype=np.int64)
+        ix[facets == 1] = (np.arange(np.count_nonzero(facets))
+                           + m.p.shape[1])
+        ix = ix[m.t2f]
 
-            red =   (ix[0] >= 0) * (ix[1] >= 0) * (ix[2] >= 0)  # noqa
-            blue1 = (ix[0] ==-1) * (ix[1] >= 0) * (ix[2] >= 0)  # noqa
-            blue2 = (ix[0] >= 0) * (ix[1] ==-1) * (ix[2] >= 0)  # noqa
-            green = (ix[0] ==-1) * (ix[1] ==-1) * (ix[2] >= 0)  # noqa
-            rest =  (ix[0] ==-1) * (ix[1] ==-1) * (ix[2] ==-1)  # noqa
+        red =   (ix[0] >= 0) * (ix[1] >= 0) * (ix[2] >= 0)  # noqa
+        blue1 = (ix[0] ==-1) * (ix[1] >= 0) * (ix[2] >= 0)  # noqa
+        blue2 = (ix[0] >= 0) * (ix[1] ==-1) * (ix[2] >= 0)  # noqa
+        green = (ix[0] ==-1) * (ix[1] ==-1) * (ix[2] >= 0)  # noqa
+        rest =  (ix[0] ==-1) * (ix[1] ==-1) * (ix[2] ==-1)  # noqa
 
-            # new red elements
-            t_red = np.hstack((
-                np.vstack((m.t[0, red], ix[0, red], ix[2, red])),
-                np.vstack((m.t[1, red], ix[0, red], ix[1, red])),
-                np.vstack((m.t[2, red], ix[1, red], ix[2, red])),
-                np.vstack(( ix[1, red], ix[2, red], ix[0, red])),  # noqa
-            ))
+        # new red elements
+        t_red = np.hstack((
+            np.vstack((m.t[0, red], ix[0, red], ix[2, red])),
+            np.vstack((m.t[1, red], ix[0, red], ix[1, red])),
+            np.vstack((m.t[2, red], ix[1, red], ix[2, red])),
+            np.vstack(( ix[1, red], ix[2, red], ix[0, red])),  # noqa
+        ))
 
-            # new blue elements
-            t_blue1 = np.hstack((
-                np.vstack((m.t[1, blue1], m.t[0, blue1], ix[2, blue1])),
-                np.vstack((m.t[1, blue1],  ix[1, blue1], ix[2, blue1])),  # noqa
-                np.vstack((m.t[2, blue1],  ix[2, blue1], ix[1, blue1])),  # noqa
-            ))
+        # new blue elements
+        t_blue1 = np.hstack((
+            np.vstack((m.t[1, blue1], m.t[0, blue1], ix[2, blue1])),
+            np.vstack((m.t[1, blue1],  ix[1, blue1], ix[2, blue1])),  # noqa
+            np.vstack((m.t[2, blue1],  ix[2, blue1], ix[1, blue1])),  # noqa
+        ))
 
-            t_blue2 = np.hstack((
-                np.vstack((m.t[0, blue2], ix[0, blue2],  ix[2, blue2])),  # noqa
-                np.vstack(( ix[2, blue2], ix[0, blue2], m.t[1, blue2])),  # noqa
-                np.vstack((m.t[2, blue2], ix[2, blue2], m.t[1, blue2])),
-            ))
+        t_blue2 = np.hstack((
+            np.vstack((m.t[0, blue2], ix[0, blue2],  ix[2, blue2])),  # noqa
+            np.vstack(( ix[2, blue2], ix[0, blue2], m.t[1, blue2])),  # noqa
+            np.vstack((m.t[2, blue2], ix[2, blue2], m.t[1, blue2])),
+        ))
 
-            # new green elements
-            t_green = np.hstack((
-                np.vstack((m.t[1, green], ix[2, green], m.t[0, green])),
-                np.vstack((m.t[2, green], ix[2, green], m.t[1, green])),
-            ))
+        # new green elements
+        t_green = np.hstack((
+            np.vstack((m.t[1, green], ix[2, green], m.t[0, green])),
+            np.vstack((m.t[2, green], ix[2, green], m.t[1, green])),
+        ))
 
-            # new nodes
-            p = .5 * (m.p[:, m.facets[0, facets == 1]] +
-                      m.p[:, m.facets[1, facets == 1]])
+        # new nodes
+        p = .5 * (m.p[:, m.facets[0, facets == 1]] +
+                  m.p[:, m.facets[1, facets == 1]])
 
-            return (
-                np.hstack((m.p, p)),
-                np.hstack((m.t[:, rest], t_red, t_blue1, t_blue2, t_green)),
-            )
+        return (
+            np.hstack((m.p, p)),
+            np.hstack((m.t[:, rest], t_red, t_blue1, t_blue2, t_green)),
+        )
+
+    def _adaptive(self, marked):
 
         sorted_mesh = replace(
             self,
-            t=sort_mesh(self.p, self.t),
+            t=self._adaptive_sort_mesh(self.p, self.t),
             sort_t=False,
         )
-        facets = find_facets(sorted_mesh, marked)
-        doflocs, t = split_elements(sorted_mesh, facets)
+        facets = self._adaptive_find_facets(sorted_mesh, marked)
+        doflocs, t = self._adaptive_split_elements(sorted_mesh, facets)
 
         return replace(
             self,
@@ -990,6 +992,7 @@ class MeshQuad1(BaseMesh2D):
         """Split each quadrilateral into two triangles."""
         t = np.hstack((self.t[[0, 1, 3]], self.t[[1, 2, 3]]))
 
+        named_t = None
         if self.named_t:
             named_t = {k: np.concatenate((v, v + self.t.shape[1]))
                        for k, v in self.named_t.items()}
