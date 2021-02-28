@@ -65,7 +65,6 @@ def from_meshio(m, force_mesh_type=None):
     if meshio_type == 'hexahedron':
         t = t[[0, 4, 3, 1, 7, 5, 2, 6]]
 
-    mtmp = mesh_type(p, t)
 
     try:
         # element to boundary element type mapping
@@ -126,11 +125,11 @@ def from_meshio(m, force_mesh_type=None):
                 tagindex = np.nonzero(tags == tag)[0]
                 boundaries[find_tagname(tag)] = index[tagindex, 1]
 
-        mtmp.boundaries = boundaries
-        mtmp.subdomains = subdomains
+        mtmp = mesh_type(p, t, boundaries, subdomains)
 
     except Exception:
         warnings.warn("Unable to load tagged boundaries/subdomains.")
+        mtmp = mesh_type(p, t)
 
     return mtmp
 

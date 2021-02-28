@@ -15,6 +15,8 @@ class BaseMesh:
 
     doflocs: ndarray
     t: ndarray
+    _boundaries: Optional[Dict[str, ndarray]] = None
+    _subdomains: Optional[Dict[str, ndarray]] = None
     elem: Type[Element] = Element
     affine: bool = False
     validate: bool = False  # for backwards compatibility
@@ -64,11 +66,11 @@ class BaseMesh:
 
     @property
     def subdomains(self):
-        return None
+        return self._subdomains
 
     @property
     def boundaries(self):
-        return None
+        return self._boundaries
 
     @property
     def facets(self):
@@ -303,10 +305,30 @@ class BaseMesh:
         from skfem.io.meshio import to_file
         return to_file(self, filename, point_data, **kwargs)
 
+
     @classmethod
     def load(cls, filename):
         from skfem.io.meshio import from_file
         return from_file(filename)
+
+    @classmethod
+    def from_dict(cls, data):
+        """For backwards compatibility."""
+        if 'p' not in data or 't' not in data:
+            raise ValueError("Dictionary must contain keys 'p' and 't'.")
+        else:
+            data['p'] = np.array(data['p']).T
+            data['t'] = np.array(data['t']).T
+        if 'boundaries' in data and data['boundaries'] is not None:
+            data['boundaries'] = {k: np.array(v)
+                                  for k, v in data['boundaries'].items()}
+        if 'subdomains' in data and data['subdomains'] is not None:
+            data['subdomains'] = {k: np.array(v)
+                                  for k, v in data['subdomains'].items()}
+        data['doflocs'] = data.pop('p')
+        data['_boundaries'] = data.pop('boundaries')
+        data['_subdomains'] = data.pop('subdomains')
+        return cls(**data)
 
     @classmethod
     def from_mesh(cls, mesh):
