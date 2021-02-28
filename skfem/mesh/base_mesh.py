@@ -250,7 +250,6 @@ class BaseMesh:
         self._edges, self._t2e = self.build_entities(
             self.t,
             self.elem.refdom.edges,
-            sort=True,
         )
 
     def __post_init__(self):
@@ -458,7 +457,7 @@ class BaseMesh:
         return cls(p, t)
 
     @staticmethod
-    def build_entities(t, indices, sort=False):
+    def build_entities(t, indices, sort=True):
         """Build low dimensional topological entities."""
         indexing = np.hstack(tuple([t[ix] for ix in indices]))
         sorted_indexing = np.sort(indexing, axis=0)
@@ -730,7 +729,7 @@ class MeshTri1(BaseMesh2D):
 
     @classmethod
     def init_circle(cls: Type,
-                    Nrefs: int = 3) -> BaseMesh2D:
+                    nrefs: int = 3) -> BaseMesh2D:
         r"""Initialize a circle mesh.
 
         Works by repeatedly refining the following mesh and moving
@@ -748,7 +747,7 @@ class MeshTri1(BaseMesh2D):
 
         Parameters
         ----------
-        Nrefs
+        nrefs
             Number of refinements, by default 3.
 
         """
@@ -756,16 +755,17 @@ class MeshTri1(BaseMesh2D):
                       [1., 0.],
                       [0., 1.],
                       [-1., 0.],
-                      [0., -1.]]).T
+                      [0., -1.]], dtype=np.float64).T
         t = np.array([[0, 1, 2],
                       [0, 1, 4],
                       [0, 2, 3],
-                      [0, 3, 4]], dtype=np.intp).T
+                      [0, 3, 4]], dtype=np.int64).T
         m = cls(p, t)
-        for _ in range(Nrefs):
+        for _ in range(nrefs):
             m = m.refined()
             D = m.boundary_nodes()
-            tmp = m.p[:, D] / np.linalg.norm(m.p[:, D], axis=0)
+            tmp = m.p
+            tmp[:, D] = tmp[:, D] / np.linalg.norm(tmp[:, D], axis=0)
             m = replace(m, doflocs=tmp)
         return m
 
@@ -773,16 +773,16 @@ class MeshTri1(BaseMesh2D):
 
         p = self.doflocs
         t = self.t
-        t2f = self.t2f
         sz = p.shape[1]
+        t2f = self.t2f.copy() + sz
         return replace(
             self,
             doflocs=np.hstack((p, p[:, self.facets].mean(axis=1))),
             t=np.hstack((
-                np.vstack((t[0], t2f[0] + sz, t2f[2] + sz)),
-                np.vstack((t[1], t2f[0] + sz, t2f[1] + sz)),
-                np.vstack((t[2], t2f[2] + sz, t2f[1] + sz)),
-                np.vstack((t2f[0] + sz, t2f[1] + sz, t2f[2] + sz)),
+                np.vstack((t[0], t2f[0], t2f[2])),
+                np.vstack((t[1], t2f[0], t2f[1])),
+                np.vstack((t[2], t2f[2], t2f[1])),
+                np.vstack((t2f[0], t2f[1], t2f[2])),
             )),
         )
 
@@ -907,9 +907,9 @@ class MeshQuad1(BaseMesh2D):
 
         p = self.doflocs
         t = self.t
-        t2f = self.t2f
         sz = p.shape[1]
-        mid = np.arange(t.shape[1], dtype=np.int64) + np.max(t2f) + sz + 1
+        t2f = self.t2f.copy() + sz
+        mid = np.arange(t.shape[1], dtype=np.int64) + np.max(t2f) + 1
         return replace(
             self,
             doflocs=np.hstack((
@@ -918,10 +918,10 @@ class MeshQuad1(BaseMesh2D):
                 p[:, self.t].mean(axis=1),
             )),
             t=np.hstack((
-                np.vstack((t[0], t2f[0] + sz, mid, t2f[3] + sz)),
-                np.vstack((t2f[0] + sz, t[1], t2f[1] + sz, mid)),
-                np.vstack((mid, t2f[1] + sz, t[2], t2f[2] + sz)),
-                np.vstack((t2f[3] + sz, mid, t2f[2] + sz, t[3])),
+                np.vstack((t[0], t2f[0], mid, t2f[3])),
+                np.vstack((t2f[0], t[1], t2f[1], mid)),
+                np.vstack((mid, t2f[1], t[2], t2f[2])),
+                np.vstack((t2f[3], mid, t2f[2], t[3])),
             )),
         )
 
@@ -1196,12 +1196,12 @@ class MeshTet1(BaseMesh3D):
 
     @classmethod
     def init_ball(cls: Type,
-                  Nrefs: int = 3):
+                  nrefs: int = 3):
         """Initialize a ball mesh.
 
         Parameters
         ----------
-        Nrefs
+        nrefs
             Number of refinements, by default 3.
 
         """
@@ -1211,7 +1211,7 @@ class MeshTet1(BaseMesh3D):
                       [0., 0., 1.],
                       [-1., 0., 0.],
                       [0., -1., 0.],
-                      [0., 0., -1.]]).T
+                      [0., 0., -1.]], dtype=np.float64).T
         t = np.array([[0, 1, 2, 3],
                       [0, 4, 5, 6],
                       [0, 1, 2, 6],
@@ -1219,12 +1219,13 @@ class MeshTet1(BaseMesh3D):
                       [0, 2, 3, 4],
                       [0, 4, 5, 3],
                       [0, 4, 6, 2],
-                      [0, 5, 6, 1]], dtype=np.intp).T
+                      [0, 5, 6, 1]], dtype=np.int64).T
         m = cls(p, t)
-        for _ in range(Nrefs):
+        for _ in range(nrefs):
             m = m.refined()
             D = m.boundary_nodes()
-            tmp = m.p[:, D] / np.linalg.norm(m.p[:, D], axis=0)
+            tmp = m.p
+            tmp[:, D] = tmp[:, D] / np.linalg.norm(tmp[:, D], axis=0)
             m = replace(m, doflocs=tmp)
         return m
 
@@ -1242,6 +1243,14 @@ class MeshHex1(BaseMesh3D):
                                  [1., 1., 1.]], dtype=np.float64).T
     t: ndarray = np.array([[0, 1, 2, 3, 4, 5, 6, 7]], dtype=np.int64).T
     elem: Type[Element] = ElementHex1
+
+    def _init_facets(self):
+        """Initialize ``self.facets`` without sorting"""
+        self._facets, self._t2f = self.build_entities(
+            self.t,
+            self.elem.refdom.facets,
+            sort=False,
+        )
 
     def _uniform(self):
 

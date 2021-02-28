@@ -50,7 +50,7 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> str:
     p[0] = sx * (p[0] - minx) + stroke
     p[1] = sy * (maxy - p[1]) + stroke
     template = ("""<line x1="{}" y1="{}" x2="{}" y2="{}" """
-                """style="stroke:black;stroke-width:{}"/>""")
+                """style="stroke:#7856FA;stroke-width:{}"/>""")
     lines = ""
     for s, t, u, v in zip(p[0, facets[0]],
                           p[1, facets[0]],
