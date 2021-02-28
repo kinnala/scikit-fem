@@ -504,11 +504,12 @@ class BaseMesh3D(BaseMesh):
 @dataclass
 class MeshTri1(BaseMesh2D):
 
-    doflocs: ndarray = np.array([[0., 1., 0., 1.],
-                                 [0., 0., 1., 1.]], dtype=np.float64)
-    t: ndarray = np.array([[0, 1],
-                           [1, 3],
-                           [2, 2]], dtype=np.int64)
+    doflocs: ndarray = np.array([[0., 0.],
+                                 [1., 0.],
+                                 [0., 1.],
+                                 [1., 1.]], dtype=np.float64).T
+    t: ndarray = np.array([[0, 1, 2],
+                           [1, 3, 2], dtype=np.int64)
     elem: Type[Element] = ElementTriP1
     affine: bool = True
 
@@ -561,14 +562,14 @@ class MeshTri1(BaseMesh2D):
             while np.count_nonzero(facets) - prev_nnz > 0:
                 prev_nnz = np.count_nonzero(facets)
                 t2facets = facets[m.t2f]
-                t2facets[2, t2facets[0, :] + t2facets[1, :] > 0] = 1
+                t2facets[2, t2facets[0] + t2facets[1] > 0] = 1
                 facets[m.t2f[t2facets == 1]] = 1
 
             return facets
 
         def split_elements(m, facets):
             """Define new elements."""
-            ix = (-1)*np.ones(m.facets.shape[1], dtype=np.int64)
+            ix = (-1) * np.ones(m.facets.shape[1], dtype=np.int64)
             ix[facets == 1] = (np.arange(np.count_nonzero(facets))
                                + m.p.shape[1])
             ix = ix[m.t2f]
@@ -632,12 +633,11 @@ class MeshTri1(BaseMesh2D):
 @dataclass
 class MeshQuad1(BaseMesh2D):
 
-    doflocs: ndarray = np.array([[0., 1., 1., 0.],
-                                 [0., 0., 1., 1.]], dtype=np.float64)
-    t: ndarray = np.array([[0],
-                           [1],
-                           [2],
-                           [3]], dtype=np.int64)
+    doflocs: ndarray = np.array([[0., 0.],
+                                 [1., 0.],
+                                 [1., 1.],
+                                 [0., 1.]], dtype=np.float64).T
+    t: ndarray = np.array([[0, 1, 2, 3]], dtype=np.int64).T
     elem: Type[Element] = ElementQuad1
 
     def _uniform(self):
