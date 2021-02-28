@@ -509,7 +509,7 @@ class MeshTri1(BaseMesh2D):
                                  [0., 1.],
                                  [1., 1.]], dtype=np.float64).T
     t: ndarray = np.array([[0, 1, 2],
-                           [1, 3, 2], dtype=np.int64)
+                           [1, 3, 2]], dtype=np.int64)
     elem: Type[Element] = ElementTriP1
     affine: bool = True
 
