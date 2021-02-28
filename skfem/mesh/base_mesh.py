@@ -242,14 +242,15 @@ class BaseMesh:
         """Initialize ``self.facets``."""
         self._facets, self._t2f = self.build_entities(
             self.t,
-            self.elem.refdom.facets
+            self.elem.refdom.facets,
         )
 
     def _init_edges(self):
         """Initialize ``self.edges``."""
         self._edges, self._t2e = self.build_entities(
             self.t,
-            self.elem.refdom.edges
+            self.elem.refdom.edges,
+            sort=True,
         )
 
     def __post_init__(self):
@@ -457,7 +458,7 @@ class BaseMesh:
         return cls(p, t)
 
     @staticmethod
-    def build_entities(t, indices):
+    def build_entities(t, indices, sort=False):
         """Build low dimensional topological entities."""
         indexing = np.hstack(tuple([t[ix] for ix in indices]))
         sorted_indexing = np.sort(indexing, axis=0)
@@ -467,6 +468,9 @@ class BaseMesh:
                                               return_index=True,
                                               return_inverse=True)
         mapping = ixb.reshape((len(indices), t.shape[1]))
+
+        if sort:
+            return np.ascontiguousarray(sorted_indexing), mapping
 
         return np.ascontiguousarray(indexing[:, ixa]), mapping
 
