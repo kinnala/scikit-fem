@@ -529,3 +529,47 @@ class MeshHex1(BaseMesh3D):
                                  [1., 1., 1.]], dtype=np.float64).T
     t: ndarray = np.array([[0, 1, 2, 3, 4, 5, 6, 7]], dtype=np.int64).T
     elem: Type[Element] = ElementHex1
+
+    def _uniform(self):
+
+        p = self.doflocs
+        t = self.t
+        sz = p.shape[1]
+        t2e = self.t2e.copy() + sz
+        t2f = self.t2f.copy() + np.max(t2e) + 1
+        mid = range(self.t.shape[1]) + np.max(t2f) + 1
+
+        doflocs = np.hstack((
+            p,
+            .5 * np.sum(p[:, self.edges], axis=1),
+            .25 * np.sum(p[:, self.facets], axis=1),
+            .125 * np.sum(p[:, t], axis=1),
+        ))
+        t = np.hstack((
+            np.vstack((
+                t[0], t2e[0], t2e[1], t2e[2], t2f[0], t2f[2], t2f[1], mid
+            )),
+            np.vstack((
+                t2e[0], t[1], t2f[0], t2f[2], t2e[3],t2e[4], mid, t2f[4]
+            )),
+            np.vstack((
+                t2e[1], t2f[0], t[2], t2f[1], t2e[5], mid, t2e[6], t2f[3]
+            )),
+            np.vstack((
+                t2e[2], t2f[2], t2f[1], t[3], mid, t2e[7], t2e[8], t2f[5]
+            )),
+            np.vstack((
+                t2f[0], t2e[3], t2e[5], mid, t[4], t2f[4], t2f[3], t2e[9]
+            )),
+            np.vstack((
+                t2f[2], t2e[4], mid, t2e[7], t2f[4], t[5], t2f[5], t2e[10]
+            )),
+            np.vstack((
+                t2f[1], mid, t2e[6], t2e[8], t2f[3], t2f[5], t[6], t2e[11]
+            )),
+            np.vstack((
+                mid, t2f[4], t2f[3], t2f[5], t2e[9], t2e[10], t2e[11], t[7]
+            ))
+        ))
+
+        return replace(self, doflocs=doflocs, t=t)
