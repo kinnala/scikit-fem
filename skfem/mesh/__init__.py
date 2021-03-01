@@ -36,6 +36,7 @@ from .base_mesh import (MeshTri1, MeshTri2, MeshQuad1, MeshQuad2, MeshTet1,
 __all__ = [
     "Mesh",
     "MeshLine",
+    "MeshLine1",
     "Mesh2D",
     "MeshTri",
     "MeshTri1",
