@@ -31,8 +31,11 @@ class RefLine(Refdom):
 
     p = np.array([[0., 1.]], dtype=np.float_)
     t = np.array([[0], [1]], dtype=np.int64)
+    facets = [[0],
+              [1]]
     brefdom = RefPoint
     nnodes = 2
+    nfacets = 2
 
 
 class RefTri(Refdom):

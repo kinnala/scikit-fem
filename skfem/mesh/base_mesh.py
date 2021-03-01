@@ -8,7 +8,7 @@ from numpy import ndarray
 from scipy.spatial import cKDTree
 
 from ..element import (Element, ElementHex1, ElementQuad1, ElementQuad2,
-                       ElementTetP1, ElementTriP1, ElementTriP2,
+                       ElementTetP1, ElementTriP1, ElementTriP2, ElementLineP1,
                        BOUNDARY_ELEMENT_MAP)
 
 
@@ -1044,6 +1044,83 @@ class MeshTri2(MeshTri1):
 class MeshQuad2(MeshQuad1):
 
     elem: Type[Element] = ElementQuad2
+
+
+@dataclass
+class MeshLine1(BaseMesh):
+
+    doflocs: ndarray = np.array([[0., 1.]], dtype=np.float64)
+    t: Optional[ndarray] = None
+    elem: Type[Element] = ElementLineP1
+    affine: bool = True
+
+    def __post_init__(self):
+
+        if len(self.doflocs.shape) == 1:
+            # support flat arrays
+            self.doflocs = np.array([self.doflocs])
+
+        if self.t is None:
+            # fill self.t assuming ascending self.doflocs if not provided
+            tmp = np.arange(self.doflocs.shape[1] - 1, dtype=np.int64)
+            self.t = np.vstack((tmp, tmp + 1))
+
+        super().__post_init__()
+
+    def __mul__(self, other):
+        return MeshQuad1.init_tensor(self.p[0], other.p[0])
+
+    def _uniform(self):
+        p, t = self.doflocs, self.t
+
+        newp = np.hstack((p, p[:, t].mean(axis=1)))
+        newt = np.empty((t.shape[0], 2 * t.shape[1]),
+                        dtype=t.dtype)
+        newt[0, ::2] = t[0]
+        newt[0, 1::2] = p.shape[1] + np.arange(t.shape[1])
+        newt[1, ::2] = newt[0, 1::2]
+        newt[1, 1::2] = t[1]
+
+        return replace(
+            self,
+            doflocs=newp,
+            t=newt,
+        )
+
+    def _adaptive(self, marked):
+        p, t = self.doflocs, self.t
+
+        mid = range(len(marked)) + np.max(t) + 1
+        nonmarked = np.setdiff1d(np.arange(t.shape[1]), marked)
+        newp = np.hstack((p, p[:, t[:, marked]].mean(1)))
+        newt = np.vstack((t[0, marked], mid))
+        newt = np.hstack((t[:, nonmarked],
+                          newt,
+                          np.vstack((mid, t[1, marked]))))
+
+        return replace(
+            self,
+            doflocs=newp,
+            t=newt,
+        )
+
+    def param(self):
+        return np.max(np.abs(self.p[0, self.t[1]] - self.p[0, self.t[0]]))
+
+    def element_finder(self, mapping=None):
+        ix = np.argsort(self.p)
+
+        def finder(x):
+            maxix = (x == np.max(self.p))
+            x[maxix] = x[maxix] - 1e-10  # special case in np.digitize
+            return np.argmax(np.digitize(x, self.p[0, ix[0]])[:, None]
+                             == self.t[0], axis=1)
+
+        return finder
+
+    @staticmethod
+    def strip_extra_coordinates(p: ndarray) -> ndarray:
+        return p[:, :1]
 
 
 @dataclass
