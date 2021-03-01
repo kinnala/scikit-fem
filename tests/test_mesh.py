@@ -24,10 +24,7 @@ class MeshTests(unittest.TestCase):
         m.define_boundary('bar', lambda x: x[0] == 1./2, boundaries_only=False)
         self.assertEqual(m.boundaries['bar'].size, 2)
 
-        # Mesh.scale, Mesh.translate
-        m = MeshHex()
-        m.scale(0.5)
-        m.translate((0.5, 0.5, 0.5))
+        m = MeshHex().scaled(0.5).translated((0.5, 0.5, 0.5))
         self.assertGreater(np.min(m.p), 0.4999)
 
         # Mesh3D.facets_satisfying
