@@ -134,6 +134,13 @@ class BaseMesh:
                               np.ravel_multi_index(B.T, dims)))[0]
         return edge_candidates[ix]
 
+    def define_boundary(self, name: str, test: Callable[[ndarray], ndarray],
+                        boundaries_only: bool = True):
+        """For backwards compatibility."""
+        if self.named_facets is None:
+            self.named_facets = {}
+        self.named_facets[name] = self.facets_satisfying(test, boundaries_only)
+
     def boundary_nodes(self) -> ndarray:
         """Return an array of boundary node indices."""
         return np.unique(self.facets[:, self.boundary_facets()])
