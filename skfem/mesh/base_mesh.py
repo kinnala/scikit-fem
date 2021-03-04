@@ -308,6 +308,21 @@ class BaseMesh:
             self.doflocs = _p
 
 
+    def __add__(self, other):
+        """Join two meshes."""
+        if not isinstance(other, type(self)):
+            raise TypeError("Can only join meshes with same type.")
+        p = np.hstack((self.p, other.p))
+        t = np.hstack((self.t, other.t + self.p.shape[1]))
+        tmp = np.ascontiguousarray(p.T)
+        tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]),
+                                  return_index=True, return_inverse=True)
+        p = p[:, ixa]
+        t = ixb[t]
+        cls = type(self)
+        return cls(p, t)
+
+
     def save(self,
              filename: str,
              point_data: Optional[Dict[str, ndarray]] = None,
