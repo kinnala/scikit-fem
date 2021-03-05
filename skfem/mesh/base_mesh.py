@@ -427,6 +427,9 @@ class BaseMesh:
             Scale each dimension by a factor.
 
         """
+        if isinstance(factors, float):
+            # for backwards compatibility
+            factors = [factors]
         return replace(
             self,
             doflocs=np.array([self.doflocs[itr] * factors[itr]
