@@ -1,5 +1,5 @@
 from dataclasses import dataclass, replace
-from typing import Tuple, Type, Union, Optional, Dict, Callable
+from typing import Tuple, Type, Union, Optional, Dict, Callable, List
 from collections import namedtuple
 from itertools import dropwhile
 from warnings import warn
@@ -14,22 +14,12 @@ from ..element import (Element, ElementHex1, ElementQuad1, ElementQuad2,
 
 
 @dataclass
-class NamedSubsets:
-    """Named subsets of topological entities."""
-
-    doflocs: Optional[Dict[str, ndarray]] = None
-    t: Optional[Dict[str, ndarray]] = None  # former subdomains
-    facets: Optional[Dict[str, ndarray]] = None  # former boundaries
-    edges: Optional[Dict[str, ndarray]] = None
-
-
-@dataclass
 class BaseMesh:
 
     doflocs: ndarray
     t: ndarray
-    subsets: Optional[NamedSubsets] = None
-    _dummy: Optional[Dict[str, ndarray]] = None  # for backwards compatibility
+    _boundaries: Optional[Dict[str, ndarray]] = None
+    _subdomains: Optional[Dict[str, ndarray]] = None
     elem: Type[Element] = Element
     affine: bool = False
     validate: bool = False  # unused; for backwards compatibility
@@ -86,17 +76,11 @@ class BaseMesh:
 
     @property
     def subdomains(self):
-        # for backwards compatibility
-        if self.subsets:
-            return self.subsets.t
-        return None
+        return self._subdomains
 
     @property
     def boundaries(self):
-        # for backwards compatibility
-        if self.subsets:
-            return self.subsets.facets
-        return None
+        return self._boundaries
 
     @property
     def facets(self):
@@ -154,11 +138,10 @@ class BaseMesh:
     def define_boundary(self, name: str, test: Callable[[ndarray], ndarray],
                         boundaries_only: bool = True):
         """For backwards compatibility."""
-        if self.subsets is None:
-            self.subsets = NamedSubsets(facets={})
+        if self._boundaries is None:
+            self._boundaries = {}
         warn("TODO", DeprecationWarning)
-        self.subsets.facets[name] = self.facets_satisfying(test,
-                                                           boundaries_only)
+        self._boundaries[name] = self.facets_satisfying(test, boundaries_only)
 
     def boundary_nodes(self) -> ndarray:
         """Return an array of boundary node indices."""
@@ -302,16 +285,6 @@ class BaseMesh:
         if self.sort_t:
             self.t = np.sort(self.t, axis=0)
 
-        # for backwards compatibility: support boundaries & subdomains init
-        subsets_reinit = {}
-        if isinstance(self.subsets, dict):
-            subsets_reinit['facets'] = self.subsets
-        if self._dummy:
-            subsets_reinit['t'] = self._dummy
-            self._dummy = None
-        if len(subsets_reinit) > 0:
-            self.subsets = NamedSubsets(**subsets_reinit)
-
         if not isinstance(self.doflocs, ndarray):
             # for backwards compatibility: support standard lists
             self.doflocs = np.array(self.doflocs, dtype=np.float64)
@@ -391,11 +364,24 @@ class BaseMesh:
             data['subdomains'] = {k: np.array(v)
                                   for k, v in data['subdomains'].items()}
         data['doflocs'] = data.pop('p')
-        data['subsets'] = NamedSubsets(
-            t=data.pop('subdomains'),
-            facets=data.pop('boundaries'),
-        )
+        data['_subdomains'] = data.pop('subdomains')
+        data['_boundaries'] = data.pop('boundaries')
         return cls(**data)
+
+    def to_dict(self) -> Dict[str, Optional[Dict[str, List[float]]]]:
+        """For backwards compatibility."""
+        boundaries: Optional[Dict[str, List[float]]] = None
+        subdomains: Optional[Dict[str, List[float]]] = None
+        if self.boundaries is not None:
+            boundaries = {k: v.tolist() for k, v in self.boundaries.items()}
+        if self.subdomains is not None:
+            subdomains = {k: v.tolist() for k, v in self.subdomains.items()}
+        return {
+            'p': self.p.T.tolist(),
+            't': self.t.T.tolist(),
+            'boundaries': boundaries,
+            'subdomains': subdomains,
+        }
 
     @classmethod
     def from_mesh(cls, mesh):
@@ -460,7 +446,7 @@ class BaseMesh:
         """
         if isinstance(factors, float):
             # for backwards compatibility
-            factors = [factors]
+            factors = self.doflocs.shape[0] * [factors]
         return replace(
             self,
             doflocs=np.array([self.doflocs[itr] * factors[itr]
@@ -1048,31 +1034,29 @@ class MeshQuad1(BaseMesh2D):
         """Split each quadrilateral into two triangles."""
         t = np.hstack((self.t[[0, 1, 3]], self.t[[1, 2, 3]]))
 
-        named_t = None
-        if self.subsets and self.subsets.t:
-            named_t = {k: np.concatenate((v, v + self.t.shape[1]))
-                       for k, v in self.subsets.t.items()}
+        subdomains = None
+        if self.subdomains:
+            subdomains = {k: np.concatenate((v, v + self.t.shape[1]))
+                          for k, v in self.subdomains.items()}
 
         mesh = MeshTri1(self.doflocs, t)
 
-        named_facets = None
-        if self.subsets and self.subsets.facets:
-            named_facets = {}
-            for k in self.subsets.facets:
+        boundaries = None
+        if self.boundaries:
+            boundaries = {}
+            for k in self.boundaries:
                 slots = enumerate(mesh.facets.T)
-                named_facets[k] = np.array([
+                boundaries[k] = np.array([
                     next(dropwhile(lambda slot: not(np.array_equal(f,
                                                                    slot[1])),
                                    slots))[0]
-                    for f in self.facets.T[np.sort(self.subsets.facets[k])]])
+                    for f in self.facets.T[np.sort(self.boundaries[k])]])
 
-        if self.subsets and (self.subsets.t or self.subsets.facets):
+        if self._subdomains or self._boundaries:
             mesh = replace(
                 mesh,
-                subsets=NamedSubsets(
-                    t=named_t,
-                    facets=named_facets,
-                ),
+                _boundaries=boundaries,
+                _subdomains=subdomains,
             )
 
         if x is not None:
