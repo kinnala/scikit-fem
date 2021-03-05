@@ -21,9 +21,9 @@ class TestCompositeSplitting(TestCase):
         """Solve Stokes problem, try splitting and other small things."""
 
         m = MeshTri().refined()
+        m = m.refined(3)
         m.define_boundary('centreline', lambda x: x[0] == .5,
                           boundaries_only=False)
-        m = m.refined(3)
 
         e = ElementVectorH1(ElementTriP2()) * ElementTriP1()
 
