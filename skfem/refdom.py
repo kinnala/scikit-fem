@@ -22,14 +22,14 @@ class Refdom:
 
 class RefPoint(Refdom):
 
-    p = np.array([[0.]], dtype=np.float_)
+    p = np.array([[0.]], dtype=np.float64)
     t = np.array([[0]], dtype=np.int64)
     brefdom = None
 
 
 class RefLine(Refdom):
 
-    p = np.array([[0., 1.]], dtype=np.float_)
+    p = np.array([[0., 1.]], dtype=np.float64)
     t = np.array([[0], [1]], dtype=np.int64)
     facets = [[0],
               [1]]
@@ -41,7 +41,7 @@ class RefLine(Refdom):
 class RefTri(Refdom):
 
     p = np.array([[0., 1., 0.],
-                  [0., 0., 1.]], dtype=np.float_)
+                  [0., 0., 1.]], dtype=np.float64)
     t = np.array([[0], [1], [2]], dtype=np.int64)
     facets = [[0, 1],
               [1, 2],
@@ -55,7 +55,7 @@ class RefTet(Refdom):
 
     p = np.array([[0., 1., 0., 0.],
                   [0., 0., 1., 0.],
-                  [0., 0., 0., 1.]], dtype=np.float_)
+                  [0., 0., 0., 1.]], dtype=np.float64)
     t = np.array([[0], [1], [2], [3]], dtype=np.int64)
     facets = [[0, 1, 2],
               [0, 1, 3],
@@ -76,7 +76,7 @@ class RefTet(Refdom):
 class RefQuad(Refdom):
 
     p = np.array([[0., 1., 1., 0.],
-                  [0., 0., 1., 1.]], dtype=np.float_)
+                  [0., 0., 1., 1.]], dtype=np.float64)
     t = np.array([[0], [1], [2], [3]], dtype=np.int64)
     facets = [[0, 1],
               [1, 2],
@@ -91,7 +91,7 @@ class RefHex(Refdom):
 
     p = np.array([[0., 0., 0., 1., 0., 1., 1., 1.],
                   [0., 0., 1., 0., 1., 0., 1., 1.],
-                  [0., 1., 0., 0., 1., 1., 0., 1.]], dtype=np.float_)
+                  [0., 1., 0., 0., 1., 1., 0., 1.]], dtype=np.float64)
     t = np.array([[0], [1], [2], [3], [4], [5], [6], [7]], dtype=np.int64)
     facets = [[0, 1, 4, 2],
               [0, 2, 6, 3],

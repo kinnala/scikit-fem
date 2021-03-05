@@ -886,30 +886,30 @@ class MeshTri1(BaseMesh2D):
                            + m.p.shape[1])
         ix = ix[m.t2f]
 
-        red =   (ix[0] >= 0) * (ix[1] >= 0) * (ix[2] >= 0)  # noqa
-        blue1 = (ix[0] ==-1) * (ix[1] >= 0) * (ix[2] >= 0)  # noqa
-        blue2 = (ix[0] >= 0) * (ix[1] ==-1) * (ix[2] >= 0)  # noqa
-        green = (ix[0] ==-1) * (ix[1] ==-1) * (ix[2] >= 0)  # noqa
-        rest =  (ix[0] ==-1) * (ix[1] ==-1) * (ix[2] ==-1)  # noqa
+        red =   (ix[0] >= 0) * (ix[1] >= 0) * (ix[2] >= 0)
+        blue1 = (ix[0] == -1) * (ix[1] >= 0) * (ix[2] >= 0)
+        blue2 = (ix[0] >= 0) * (ix[1] == -1) * (ix[2] >= 0)
+        green = (ix[0] == -1) * (ix[1] == -1) * (ix[2] >= 0)
+        rest =  (ix[0] == -1) * (ix[1] == -1) * (ix[2] == -1)
 
         # new red elements
         t_red = np.hstack((
             np.vstack((m.t[0, red], ix[0, red], ix[2, red])),
             np.vstack((m.t[1, red], ix[0, red], ix[1, red])),
             np.vstack((m.t[2, red], ix[1, red], ix[2, red])),
-            np.vstack(( ix[1, red], ix[2, red], ix[0, red])),  # noqa
+            np.vstack((ix[1, red], ix[2, red], ix[0, red])),
         ))
 
         # new blue elements
         t_blue1 = np.hstack((
             np.vstack((m.t[1, blue1], m.t[0, blue1], ix[2, blue1])),
-            np.vstack((m.t[1, blue1],  ix[1, blue1], ix[2, blue1])),  # noqa
-            np.vstack((m.t[2, blue1],  ix[2, blue1], ix[1, blue1])),  # noqa
+            np.vstack((m.t[1, blue1], ix[1, blue1], ix[2, blue1])),
+            np.vstack((m.t[2, blue1], ix[2, blue1], ix[1, blue1])),
         ))
 
         t_blue2 = np.hstack((
-            np.vstack((m.t[0, blue2], ix[0, blue2],  ix[2, blue2])),  # noqa
-            np.vstack(( ix[2, blue2], ix[0, blue2], m.t[1, blue2])),  # noqa
+            np.vstack((m.t[0, blue2], ix[0, blue2], ix[2, blue2])),
+            np.vstack((ix[2, blue2], ix[0, blue2], m.t[1, blue2])),
             np.vstack((m.t[2, blue2], ix[2, blue2], m.t[1, blue2])),
         ))
 
