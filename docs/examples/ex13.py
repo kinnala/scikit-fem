@@ -30,7 +30,8 @@ mesh = MeshTri.init_tensor(np.linspace(*radii, 1 + int(np.diff(radii) / lcar)),
                            np.linspace(0, np.pi/2, 1 + int(3*np.pi/4 / lcar)))
 mesh.define_boundary('ground', lambda xi: xi[1] == 0.)
 mesh.define_boundary('positive', lambda xi: xi[1] == np.pi/2)
-mesh.p = mesh.p[0] * np.stack([np.cos(mesh.p[1]), np.sin(mesh.p[1])])
+mesh = mesh.translated(mesh.p[0] * np.stack([np.cos(mesh.p[1]),
+                                             np.sin(mesh.p[1])]) - mesh.p)
 
 elements = ElementTriP2()
 basis = InteriorBasis(mesh, elements)

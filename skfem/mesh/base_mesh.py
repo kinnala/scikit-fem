@@ -143,6 +143,13 @@ class BaseMesh:
         warn("TODO", DeprecationWarning)
         self._boundaries[name] = self.facets_satisfying(test, boundaries_only)
 
+    def define_subdomain(self, name: str, test: Callable[[ndarray], ndarray]):
+        """For backwards compatibility."""
+        if self._subdomains is None:
+            self._subdomains = {}
+        warn("TODO", DeprecationWarning)
+        self._subdomains[name] = self.elements_satisfying(test)
+
     def boundary_nodes(self) -> ndarray:
         """Return an array of boundary node indices."""
         return np.unique(self.facets[:, self.boundary_facets()])
@@ -876,7 +883,7 @@ class MeshTri1(BaseMesh2D):
             t2facets[2, t2facets[0] + t2facets[1] > 0] = 1
             facets[m.t2f[t2facets == 1]] = 1
 
-            return facets
+        return facets
 
     @staticmethod
     def _adaptive_split_elements(m, facets):
@@ -942,6 +949,8 @@ class MeshTri1(BaseMesh2D):
             self,
             doflocs=doflocs,
             t=t,
+            _boundaries=None,
+            _subdomains=None,
         )
 
     def element_finder(self, mapping=None):
