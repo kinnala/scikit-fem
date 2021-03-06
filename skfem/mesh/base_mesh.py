@@ -316,7 +316,6 @@ class BaseMesh:
                 p[:, t[M:].flatten('F')]
             self.doflocs = _p
 
-
     def __add__(self, other):
         """Join two meshes."""
         if not isinstance(other, type(self)):
@@ -330,7 +329,6 @@ class BaseMesh:
         t = ixb[t]
         cls = type(self)
         return cls(p, t)
-
 
     def save(self,
              filename: str,
@@ -349,7 +347,6 @@ class BaseMesh:
         """
         from skfem.io.meshio import to_file
         return to_file(self, filename, point_data, **kwargs)
-
 
     @classmethod
     def load(cls, filename):
@@ -438,7 +435,7 @@ class BaseMesh:
         if isinstance(times_or_ix, int):
             for _ in range(times_or_ix):
                 m = m._uniform()
-        else:    
+        else:
             m = m._adaptive(times_or_ix)
         return m
 
@@ -893,11 +890,11 @@ class MeshTri1(BaseMesh2D):
                            + m.p.shape[1])
         ix = ix[m.t2f]
 
-        red =   (ix[0] >= 0) * (ix[1] >= 0) * (ix[2] >= 0)
+        red = (ix[0] >= 0) * (ix[1] >= 0) * (ix[2] >= 0)
         blue1 = (ix[0] == -1) * (ix[1] >= 0) * (ix[2] >= 0)
         blue2 = (ix[0] >= 0) * (ix[1] == -1) * (ix[2] >= 0)
         green = (ix[0] == -1) * (ix[1] == -1) * (ix[2] >= 0)
-        rest =  (ix[0] == -1) * (ix[1] == -1) * (ix[2] == -1)
+        rest = (ix[0] == -1) * (ix[1] == -1) * (ix[2] == -1)
 
         # new red elements
         t_red = np.hstack((
@@ -1227,7 +1224,6 @@ class MeshTet1(BaseMesh3D):
     def _uniform(self):
         t = self.t
         p = self.p
-        e = self.edges
         sz = p.shape[1]
         t2e = self.t2e.copy() + sz
 
@@ -1420,7 +1416,7 @@ class MeshHex1(BaseMesh3D):
             np.vstack((t[0], t2e[0], t2e[1], t2e[2],
                        t2f[0], t2f[2], t2f[1], mid)),
             np.vstack((t2e[0], t[1], t2f[0], t2f[2],
-                       t2e[3],t2e[4], mid, t2f[4])),
+                       t2e[3], t2e[4], mid, t2f[4])),
             np.vstack((t2e[1], t2f[0], t[2], t2f[1],
                        t2e[5], mid, t2e[6], t2f[3])),
             np.vstack((t2e[2], t2f[2], t2f[1], t[3],
