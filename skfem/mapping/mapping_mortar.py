@@ -1,7 +1,7 @@
 import numpy as np
 from numpy import ndarray
 
-from ..mesh.mesh2d import Mesh2D
+from ..mesh import Mesh2D
 from .mapping import Mapping
 
 
