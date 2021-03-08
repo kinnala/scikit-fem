@@ -581,6 +581,9 @@ class BaseMesh:
             t=t,
         )
 
+    def element_finder(self, mapping=None):
+        raise NotImplementedError
+
 
 @dataclass
 class BaseMesh2D(BaseMesh):
@@ -1106,7 +1109,7 @@ class MeshQuad2(MeshQuad1):
 class MeshLine1(BaseMesh):
 
     doflocs: ndarray = np.array([[0., 1.]], dtype=np.float64)
-    t: Optional[ndarray] = None
+    t: ndarray = np.array([[0], [1]], dtype=np.int64)
     elem: Type[Element] = ElementLineP1
     affine: bool = True
 
@@ -1116,7 +1119,7 @@ class MeshLine1(BaseMesh):
             # support flat arrays
             self.doflocs = np.array([self.doflocs])
 
-        if self.t is None:
+        if self.t.shape[1] != self.doflocs.shape[1] - 1:
             # fill self.t assuming ascending self.doflocs if not provided
             tmp = np.arange(self.doflocs.shape[1] - 1, dtype=np.int64)
             self.t = np.vstack((tmp, tmp + 1))
