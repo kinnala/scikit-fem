@@ -73,10 +73,10 @@ M = (
 
 # define elements and bases
 e1 = ElementTriP2()
-e = ElementVectorH1(e1)
+e = ElementVector(e1)
 
 E1 = ElementQuad2()
-E = ElementVectorH1(E1)
+E = ElementVector(E1)
 
 ib = InteriorBasis(m, e, intorder=4)
 Ib = InteriorBasis(M, E, intorder=4)
@@ -166,11 +166,8 @@ x = solve(*condense(K, f, I=I, x=x))
 # create a displaced mesh
 sf = 1
 
-m.p[0, :] = m.p[0, :] + sf * x[i1][ib.nodal_dofs[0, :]]
-m.p[1, :] = m.p[1, :] + sf * x[i1][ib.nodal_dofs[1, :]]
-
-M.p[0, :] = M.p[0, :] + sf * x[i2][Ib.nodal_dofs[0, :]]
-M.p[1, :] = M.p[1, :] + sf * x[i2][Ib.nodal_dofs[1, :]]
+mdefo = m.translated(sf * x[i1][ib.nodal_dofs])
+Mdefo = M.translated(sf * x[i2][Ib.nodal_dofs])
 
 
 # post processing
@@ -189,8 +186,8 @@ for itr in range(2):
         def mass(u, v, w):
             return u * v
 
-        ib_dg = InteriorBasis(m, e_dg, intorder=4)
-        Ib_dg = InteriorBasis(M, E_dg, intorder=4)
+        ib_dg = InteriorBasis(mdefo, e_dg, intorder=4)
+        Ib_dg = InteriorBasis(Mdefo, E_dg, intorder=4)
 
         s[itr, jtr] = solve(asm(mass, ib_dg),
                             asm(proj_cauchy, ib, ib_dg) @ x[i1])
@@ -217,7 +214,7 @@ if __name__ == "__main__":
     from skfem.visuals.matplotlib import *
 
     ax = plot(ib_dg, vonmises1, shading='gouraud')
-    draw(m, ax=ax)
+    draw(mdefo, ax=ax)
     plot(Ib_dg, vonmises2, ax=ax, Nrefs=3, shading='gouraud')
-    draw(M, ax=ax)
+    draw(Mdefo, ax=ax)
     savefig(splitext(argv[0])[0] + '_solution.png')

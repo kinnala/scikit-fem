@@ -1,3 +1,5 @@
+from dataclasses import replace
+
 import numpy as np
 from numpy import ndarray
 
@@ -116,7 +118,9 @@ class MappingMortar(Mapping):
                                      tind=ix1),
                          find=boundary1[sort_boundary1][ix1])
         ix1_flip = np.unique(ix1[param(z1[:, :, 1]) < param(z1[:, :, 0])])
-        m1.t[:, ix1_flip] = np.flipud(m1.t[:, ix1_flip])
+        m1t = m1.t.copy()
+        m1t[:, ix1_flip] = np.flipud(m1t[:, ix1_flip])
+        m1 = replace(m1, t=m1t)
 
         f2mps = .5 * (mesh2.p[:, mesh2.facets[0, boundary2]] +
                       mesh2.p[:, mesh2.facets[1, boundary2]])
@@ -125,7 +129,9 @@ class MappingMortar(Mapping):
                                      tind=ix2),
                          find=boundary2[sort_boundary2][ix2])
         ix2_flip = np.unique(ix2[param(z2[:, :, 1]) < param(z2[:, :, 0])])
-        m2.t[:, ix2_flip] = np.flipud(m2.t[:, ix2_flip])
+        m2t = m2.t.copy()
+        m2t[:, ix2_flip] = np.flipud(m2t[:, ix2_flip])
+        m2 = replace(m2, t=m2t)
 
         # construct normals by rotating 'tangent'
         normal = np.array([tangent[1], -tangent[0]])
@@ -142,27 +148,6 @@ class MappingMortar(Mapping):
         mps = map_super.F(np.array([[.5]]))
         ix1 = np.digitize(mps[0, :, 0], m1.p[0]) - 1
         ix2 = np.digitize(mps[0, :, 0], m2.p[0]) - 1
-
-        # for each element, map two points to global coordinates, reparametrize
-        # the points, and flip corresponding helper mesh element indices if
-        # sorting is wrong
-        f1mps = .5 * (mesh1.p[:, mesh1.facets[0, boundary1]] +
-                      mesh1.p[:, mesh1.facets[1, boundary1]])
-        sort_boundary1 = np.argsort(param(f1mps))
-        z1 = map_mesh1.G(map_m1.invF(map_super.F(np.array([[.25, .75]])),
-                                     tind=ix1),
-                         find=boundary1[sort_boundary1][ix1])
-        ix1_flip = np.unique(ix1[param(z1[:, :, 1]) < param(z1[:, :, 0])])
-        m1.t[:, ix1_flip] = np.flipud(m1.t[:, ix1_flip])
-
-        f2mps = .5 * (mesh2.p[:, mesh2.facets[0, boundary2]] +
-                      mesh2.p[:, mesh2.facets[1, boundary2]])
-        sort_boundary2 = np.argsort(param(f2mps))
-        z2 = map_mesh2.G(map_m2.invF(map_super.F(np.array([[.25, .75]])),
-                                     tind=ix2),
-                         find=boundary2[sort_boundary2][ix2])
-        ix2_flip = np.unique(ix2[param(z2[:, :, 1]) < param(z2[:, :, 0])])
-        m2.t[:, ix2_flip] = np.flipud(m2.t[:, ix2_flip])
 
         return cls((map_mesh1, map_mesh2),
                    (boundary1[sort_boundary1][ix1],
