@@ -68,7 +68,7 @@ class Mesh:
             if self.p.flags['F_CONTIGUOUS']:
                 if self.p.shape[1] > 1000:
                     warnings.warn("Mesh.__init__(): Transforming "
-                                  "over 100 vertices to C_CONTIGUOUS.")
+                                  "over 1000 vertices to C_CONTIGUOUS.")
                 self.p = np.ascontiguousarray(self.p)
         if self.t is not None:
             if not isinstance(self.t, ndarray):
@@ -76,7 +76,7 @@ class Mesh:
             if self.t.flags['F_CONTIGUOUS']:
                 if self.t.shape[1] > 1000:
                     warnings.warn("Mesh.__init__(): Transforming "
-                                  "over 100 elements to C_CONTIGUOUS.")
+                                  "over 1000 elements to C_CONTIGUOUS.")
                 self.t = np.ascontiguousarray(self.t)
         # transform lists to ndarrays
         if self.boundaries is not None:
