@@ -89,7 +89,7 @@ class Element:
 
         Returns
         -------
-        DiscreteField
+        Tuple[DiscreteField, ...]]
             The global basis function evaluted at the quadrature points.
 
         """
