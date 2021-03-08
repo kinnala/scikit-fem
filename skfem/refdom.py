@@ -36,6 +36,7 @@ class RefLine(Refdom):
     brefdom = RefPoint
     nnodes = 2
     nfacets = 2
+    name = "One-dimensional"
 
 
 class RefTri(Refdom):
@@ -49,6 +50,7 @@ class RefTri(Refdom):
     brefdom = RefLine
     nnodes = 3
     nfacets = 3
+    name = "Triangular"
 
 
 class RefTet(Refdom):
@@ -71,6 +73,7 @@ class RefTet(Refdom):
     nnodes = 4
     nfacets = 4
     nedges = 6
+    name = "Tetrahedral"
 
 
 class RefQuad(Refdom):
@@ -85,6 +88,7 @@ class RefQuad(Refdom):
     brefdom = RefLine
     nnodes = 4
     nfacets = 4
+    name = "Quadrilateral"
 
 
 class RefHex(Refdom):
@@ -115,3 +119,4 @@ class RefHex(Refdom):
     nnodes = 8
     nfacets = 6
     nedges = 12
+    name = "Hexahedral"

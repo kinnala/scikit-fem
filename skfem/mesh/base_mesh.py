@@ -13,7 +13,7 @@ from ..element import (Element, ElementHex1, ElementQuad1, ElementQuad2,
                        BOUNDARY_ELEMENT_MAP)
 
 
-@dataclass
+@dataclass(repr=False)
 class BaseMesh:
 
     doflocs: ndarray
@@ -330,6 +330,16 @@ class BaseMesh:
         cls = type(self)
         return cls(p, t)
 
+    def __repr__(self):
+        return "{} mesh with {} vertices and {} elements.".format(
+            self.elem.refdom.name,
+            self.nvertices,
+            self.nelements,
+        )
+
+    def __str__(self):
+        return self.__repr__()
+
     def save(self,
              filename: str,
              point_data: Optional[Dict[str, ndarray]] = None,
@@ -585,7 +595,7 @@ class BaseMesh:
         raise NotImplementedError
 
 
-@dataclass
+@dataclass(repr=False)
 class BaseMesh2D(BaseMesh):
 
     def param(self) -> float:
@@ -603,7 +613,7 @@ class BaseMesh2D(BaseMesh):
         return draw(self, nrefs=2, boundaries_only=True)
 
 
-@dataclass
+@dataclass(repr=False)
 class BaseMesh3D(BaseMesh):
 
     def param(self) -> float:
@@ -645,7 +655,7 @@ class BaseMesh3D(BaseMesh):
                             self.boundary_edges())
 
 
-@dataclass
+@dataclass(repr=False)
 class MeshTri1(BaseMesh2D):
 
     doflocs: ndarray = np.array([[0., 0.],
@@ -963,7 +973,7 @@ class MeshTri1(BaseMesh2D):
                              self.t.T).get_trifinder()
 
 
-@dataclass
+@dataclass(repr=False)
 class MeshQuad1(BaseMesh2D):
 
     doflocs: ndarray = np.array([[0., 0.],
@@ -1091,7 +1101,7 @@ class MeshQuad1(BaseMesh2D):
         return finder
 
 
-@dataclass
+@dataclass(repr=False)
 class MeshTri2(MeshTri1):
 
     elem: Type[Element] = ElementTriP2
@@ -1099,13 +1109,13 @@ class MeshTri2(MeshTri1):
     sort_t: bool = False
 
 
-@dataclass
+@dataclass(repr=False)
 class MeshQuad2(MeshQuad1):
 
     elem: Type[Element] = ElementQuad2
 
 
-@dataclass
+@dataclass(repr=False)
 class MeshLine1(BaseMesh):
 
     doflocs: ndarray = np.array([[0., 1.]], dtype=np.float64)
@@ -1184,7 +1194,7 @@ class MeshLine1(BaseMesh):
         return p[:, :1]
 
 
-@dataclass
+@dataclass(repr=False)
 class MeshTet1(BaseMesh3D):
 
     doflocs: ndarray = np.array([[0., 0., 0.],
@@ -1387,7 +1397,7 @@ class MeshTet1(BaseMesh3D):
         return m
 
 
-@dataclass
+@dataclass(repr=False)
 class MeshHex1(BaseMesh3D):
 
     doflocs: ndarray = np.array([[0., 0., 0.],
