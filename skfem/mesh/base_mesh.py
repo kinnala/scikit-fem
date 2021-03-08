@@ -844,6 +844,8 @@ class MeshTri1(BaseMesh2D):
                 np.vstack((t[2], t2f[2], t2f[1])),
                 np.vstack((t2f[0], t2f[1], t2f[2])),
             )),
+            _boundaries=None,
+            _subdomains=None,
         )
 
     @staticmethod
@@ -988,6 +990,8 @@ class MeshQuad1(BaseMesh2D):
                 np.vstack((mid, t2f[1], t[2], t2f[2])),
                 np.vstack((t2f[3], mid, t2f[2], t[3])),
             )),
+            _boundaries=None,
+            _subdomains=None,
         )
 
     @classmethod
@@ -1137,6 +1141,8 @@ class MeshLine1(BaseMesh):
             self,
             doflocs=newp,
             t=newt,
+            _boundaries=None,
+            _subdomains=None,
         )
 
     def _adaptive(self, marked):
@@ -1269,6 +1275,8 @@ class MeshTet1(BaseMesh3D):
             self,
             doflocs=newp,
             t=newt,
+            _boundaries=None,
+            _subdomains=None,
         )
 
     @classmethod
@@ -1430,7 +1438,13 @@ class MeshHex1(BaseMesh3D):
             np.vstack((mid, t2f[4], t2f[3], t2f[5],
                        t2e[9], t2e[10], t2e[11], t[7]))
         ))
-        return replace(self, doflocs=doflocs, t=t)
+        return replace(
+            self,
+            doflocs=doflocs,
+            t=t,
+            _boundaries=None,
+            _subdomains=None,
+        )
 
     @classmethod
     def init_tensor(cls: Type,
