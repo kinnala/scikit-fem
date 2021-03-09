@@ -73,7 +73,13 @@ constructors:
 import numpy as np
 from skfem import MeshLine, MeshTri, MeshTet
 
-mesh = MeshLine(np.array([0.0, 0.5, 1.0]))
+mesh = MeshLine(np.array([0., .5, 1.]))
+mesh = MeshTri(
+    np.array([[0., 0.],
+              [1., 0.],
+              [0., 1.]]).T,
+    np.array([[0, 1, 2]]).T,
+)
 mesh = MeshTri.load("docs/examples/square.msh")
 mesh = MeshTet.init_tensor(*((np.linspace(0, 1, 60),) * 3))
 ```
@@ -85,7 +91,7 @@ Below the stiffness matrix is assembled using second-order tetrahedra:
 ```python
 from skfem import InteriorBasis, ElementTetP2
 
-basis = InteriorBasis(mesh, ElementTetP2())
+basis = InteriorBasis(mesh, ElementTetP2())  # quadratic tetrahedron
 A = laplace.assemble(basis)  # type: scipy.sparse.csr_matrix
 ```
 
