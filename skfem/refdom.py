@@ -1,15 +1,21 @@
+from typing import Type, Optional, List
+
 import numpy as np
 
 from numpy import ndarray
 
 
 class Refdom:
+    """A finite element reference domain."""
 
     p: ndarray
     t: ndarray
+    facets: Optional[List[List[int]]] = None
+    brefdom: Optional[Type] = None
     nnodes: int = 0
     nfacets: int = 0
     nedges: int = 0
+    name: str = "Unknown"
 
     @classmethod
     def init_refdom(cls):
@@ -24,7 +30,7 @@ class RefPoint(Refdom):
 
     p = np.array([[0.]], dtype=np.float64)
     t = np.array([[0]], dtype=np.int64)
-    brefdom = None
+    name = "Zero-dimensional"
 
 
 class RefLine(Refdom):
