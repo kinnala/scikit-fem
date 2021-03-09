@@ -39,12 +39,12 @@ class Basis:
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
                  refdom: Type[Refdom] = Refdom):
 
+        if mesh.refdom != elem.refdom:
+            raise ValueError("Incompatible Mesh and Element.")
+
         self.mapping = mesh._mapping() if mapping is None else mapping
 
         self.dofs = Dofs(mesh, elem)
-
-        if mesh.refdom != elem.refdom:
-            raise ValueError("Incompatible Mesh and Element.")
 
         # global degree-of-freedom location
         try:

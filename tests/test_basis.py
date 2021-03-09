@@ -181,6 +181,16 @@ class TestInterpolatorLine2(TestInterpolatorTet):
     nrefs = 5
 
 
+class TestIncompatibleMeshElement(TestCase):
+
+    def runTest(self):
+
+        with self.assertRaises(ValueError):
+            m = MeshTri()
+            e = ElementTetP2()
+            basis = InteriorBasis(m, e)
+
+
 @pytest.mark.parametrize(
     "mtype,e1,e2",
     [
