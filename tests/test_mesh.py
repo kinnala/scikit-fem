@@ -16,13 +16,11 @@ class MeshTests(unittest.TestCase):
         M = m.remove_elements(np.array([0]))
         self.assertEqual(M.t.shape[1], 7)
 
-        # Mesh.define_boundary
-        m.define_boundary('foo', lambda x: x[0] == 0.)
-        self.assertEqual(m.boundaries['foo'].size, 2)
-
-        # Mesh.define_boundary (internal)
-        m.define_boundary('bar', lambda x: x[0] == 1./2, boundaries_only=False)
-        self.assertEqual(m.boundaries['bar'].size, 2)
+        # boundaries
+        M = m.with_boundaries({
+            'foo': lambda x: x[0] == 0.,
+        })
+        self.assertEqual(M.boundaries['foo'].size, 2)
 
         m = MeshHex().scaled(0.5).translated((0.5, 0.5, 0.5))
         self.assertGreater(np.min(m.p), 0.4999)
@@ -75,28 +73,6 @@ class Loading(unittest.TestCase):
                          == m.facets_satisfying(lambda x: x[0] == 1)).all())
 
 
-class RefinePreserveSubsets(unittest.TestCase):
-    """Check that uniform refinement preserves named boundaries."""
-
-    def _runTest(self):  # disabled
-        for mtype in (MeshLine, MeshTri, MeshQuad):
-            m = mtype().refined(2)
-            boundaries = [('external', lambda x: x[0] * (1. - x[0]) == 0.0),
-                          ('internal', lambda x: x[0] == 0.5)]
-            for name, handle in boundaries:
-                m.define_boundary(name, handle, boundaries_only=False)
-            m = m.refined()
-            for name, handle in boundaries:
-                A = np.sort(m.boundaries[name])
-                B = np.sort(m.facets_satisfying(handle))
-                self.assertTrue((A == B).all())
-            m = m.refined(2)
-            for name, handle in boundaries:
-                A = np.sort(m.boundaries[name])
-                B = np.sort(m.facets_satisfying(handle))
-                self.assertTrue((A == B).all())
-
-
 class SaveLoadCycle(unittest.TestCase):
     """Save to temporary file and check import/export cycles."""
     cls = MeshTet
@@ -126,9 +102,10 @@ class SerializeUnserializeCycle(unittest.TestCase):
 
     def runTest(self):
         for cls in self.clss:
-            m = cls().refined(2)
-            m.define_boundary('down', lambda x: x[0] == 0)
-            m.define_subdomain('up', lambda x: x[0] > 0.5)
+            m = (cls()
+                 .refined(2)
+                 .with_boundaries({'down': lambda x: x[0] == 0,})
+                 .with_subdomains({'up': lambda x: x[0] > 0.5}))
             M = cls.from_dict(m.to_dict())
             self.assertTrue(np.sum(m.p - M.p) < 1e-13)
             self.assertTrue(np.sum(m.t - M.t) < 1e-13)
@@ -190,9 +167,9 @@ class TestMeshQuadSplit(unittest.TestCase):
                                             for m in [mesh, mesh_tri]])
 
     def runRefineTest(self):
-        mesh = MeshQuad()
-        mesh.define_boundary('left', lambda x: x[0] == 0)
-        mesh = mesh.refined()
+        mesh = MeshQuad().refined().with_boundaries({
+            'left': lambda x: x[0] == 0,
+        })
         mesh_tri = mesh.to_meshtri()
 
         for b in mesh.boundaries:

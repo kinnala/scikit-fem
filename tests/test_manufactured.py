@@ -67,10 +67,11 @@ class LineNegative1D(unittest.TestCase):
     e = ElementLineP1()
 
     def runTest(self):
-        m = MeshLine(np.linspace(0., 1.)).refined(2)
+        m = MeshLine(np.linspace(0., 1.)).refined(2).with_boundaries({
+            'left': lambda x: x[0] == 0.0,
+            'right': lambda x: x[0] == 1.0,
+        })
         ib = InteriorBasis(m, self.e)
-        m.define_boundary('left' ,lambda x: x[0] == 0.0)
-        m.define_boundary('right', lambda x: x[0] == 1.0)
         fb = FacetBasis(m, self.e, facets=m.boundaries['right'])
 
         @LinearForm

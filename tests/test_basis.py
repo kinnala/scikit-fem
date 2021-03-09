@@ -21,21 +21,14 @@ class TestCompositeSplitting(TestCase):
         """Solve Stokes problem, try splitting and other small things."""
 
         m = MeshTri().refined()
-        m = m.refined(3)
-        m.define_boundary('centreline', lambda x: x[0] == .5,
-                          boundaries_only=False)
+        m = m.refined(3).with_boundaries({
+            'up': lambda x: x[1] == 1.,
+            'rest': lambda x: x[1] != 1.,
+        })
 
         e = ElementVectorH1(ElementTriP2()) * ElementTriP1()
 
-        m.define_boundary('up', lambda x: x[1] == 1.)
-        m.define_boundary('rest', lambda x: x[1] != 1.)
-
         basis = InteriorBasis(m, e)
-        self.assertEqual(
-            basis.get_dofs(m.boundaries['centreline']).all().size,
-            (2 + 1) * (2**(1 + 3) + 1) + 2 * 2**(1 + 3))
-        self.assertEqual(basis.find_dofs()['centreline'].all().size,
-                         (2 + 1) * (2**(1 + 3) + 1) + 2 * 2**(1 + 3))
 
         @BilinearForm
         def bilinf(u, p, v, q, w):

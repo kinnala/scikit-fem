@@ -2,7 +2,6 @@ from dataclasses import dataclass, replace
 from typing import Tuple, Type, Union, Optional, Dict, Callable, List
 from collections import namedtuple
 from itertools import dropwhile
-from warnings import warn
 
 import numpy as np
 from numpy import ndarray
@@ -135,20 +134,29 @@ class BaseMesh:
                               np.ravel_multi_index(B.T, dims)))[0]
         return edge_candidates[ix]
 
-    def define_boundary(self, name: str, test: Callable[[ndarray], ndarray],
-                        boundaries_only: bool = True):
-        """For backwards compatibility."""
-        if self._boundaries is None:
-            self._boundaries = {}
-        warn("TODO", DeprecationWarning)
-        self._boundaries[name] = self.facets_satisfying(test, boundaries_only)
+    def with_boundaries(self,
+                        boundaries: Dict[str, Callable[[ndarray], ndarray]]):
 
-    def define_subdomain(self, name: str, test: Callable[[ndarray], ndarray]):
-        """For backwards compatibility."""
-        if self._subdomains is None:
-            self._subdomains = {}
-        warn("TODO", DeprecationWarning)
-        self._subdomains[name] = self.elements_satisfying(test)
+        return replace(
+            self,
+            _boundaries={
+                **({} if self._boundaries is None else self._boundaries),
+                **{name: self.facets_satisfying(test, True)
+                   for name, test in boundaries.items()}
+            },
+        )
+
+    def with_subdomains(self,
+                        subdomains: Dict[str, Callable[[ndarray], ndarray]]):
+
+        return replace(
+            self,
+            _subdomains={
+                **({} if self._subdomains is None else self._subdomains),
+                **{name: self.elements_satisfying(test)
+                   for name, test in subdomains.items()},
+            }
+        )
 
     def boundary_nodes(self) -> ndarray:
         """Return an array of boundary node indices."""

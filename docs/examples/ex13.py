@@ -8,7 +8,7 @@ The example is :math:`\Delta u = 0` in
 :math:`\Omega=\{(x,y):1<x^2+y^2<4,~0<\theta<\pi/2\}`, where :math:`\tan \theta =
 y/x`, with :math:`u = 0` on :math:`y = 0` and :math:`u = 1` on :math:`x =
 0`.  The mesh is first constructed as a rectangle in the :math:`r\theta`-plane,
-where the isopotential parts are conveniently tagged using `skfem.Mesh.define_boundary`;
+where the isopotential parts are conveniently tagged using `skfem.Mesh.with_boundaries`;
 then the mesh is mapped to the :math:`xy`-plane.
 
 The exact solution is :math:`u = 2 \theta / \pi`. The field strength is :math:`|\nabla u|^2 = 4 / \pi^2 (x^2 + y^2)`
@@ -26,10 +26,13 @@ import numpy as np
 radii = [1., 2.]
 lcar = .1
 
-mesh = MeshTri.init_tensor(np.linspace(*radii, 1 + int(np.diff(radii) / lcar)),
-                           np.linspace(0, np.pi/2, 1 + int(3*np.pi/4 / lcar)))
-mesh.define_boundary('ground', lambda xi: xi[1] == 0.)
-mesh.define_boundary('positive', lambda xi: xi[1] == np.pi/2)
+mesh = (MeshTri
+        .init_tensor(np.linspace(*radii, 1 + int(np.diff(radii) / lcar)),
+                     np.linspace(0, np.pi/2, 1 + int(3*np.pi/4 / lcar)))
+        .with_boundaries({
+            'ground': lambda xi: xi[1] == 0.,
+            'positive': lambda xi: xi[1] == np.pi/2,
+        }))
 mesh = mesh.translated(mesh.p[0] * np.stack([np.cos(mesh.p[1]),
                                              np.sin(mesh.p[1])]) - mesh.p)
 
