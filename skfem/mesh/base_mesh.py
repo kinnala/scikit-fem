@@ -1122,7 +1122,7 @@ class MeshQuad1(BaseMesh2D):
 
     def element_finder(self, mapping=None):
         """Transform to :class:`skfem.MeshTri` and return its finder."""
-        tri_finder = self.to_meshtri().element_finder(mapping=mapping)
+        tri_finder = self.to_meshtri().element_finder()
 
         def finder(*args):
             return tri_finder(*args) % self.t.shape[1]
@@ -1565,3 +1565,12 @@ class MeshHex1(BaseMesh3D):
         ))
 
         return MeshTet1(self.doflocs, t)
+
+    def element_finder(self, mapping=None):
+        """Transform to :class:`skfem.MeshTet` and return its finder."""
+        tet_finder = self.to_meshtet().element_finder()
+
+        def finder(*args):
+            return tet_finder(*args) % self.t.shape[1]
+
+        return finder

@@ -161,6 +161,12 @@ class TestInterpolatorQuad(TestInterpolatorTet):
     element_type = ElementQuad2
 
 
+class TestInterpolatorHex(TestInterpolatorTet):
+
+    mesh_type = MeshHex
+    element_type = ElementHex2
+
+
 class TestInterpolatorLine(TestInterpolatorTet):
 
     mesh_type = MeshLine
