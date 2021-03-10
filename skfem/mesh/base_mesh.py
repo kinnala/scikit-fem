@@ -600,6 +600,14 @@ class BaseMesh:
         )
 
     def element_finder(self, mapping=None):
+        """Return a function handle from location to element index.
+
+        Parameters
+        ----------
+        mapping
+            The affine mapping for the mesh.
+
+        """
         raise NotImplementedError
 
 
@@ -974,11 +982,23 @@ class MeshTri1(BaseMesh2D):
         )
 
     def element_finder(self, mapping=None):
-        from matplotlib.tri import Triangulation  # TODO replace with ckdtree
 
-        return Triangulation(self.p[0],
-                             self.p[1],
-                             self.t.T).get_trifinder()
+        if mapping is None:
+            mapping = self._mapping()
+
+        tree = cKDTree(np.mean(self.p[:, self.t], axis=1).T)
+
+        def finder(x, y):
+            ix = tree.query(np.array([x, y]).T, 5)[1].flatten()
+            X = mapping.invF(np.array([x, y])[:, None], ix)
+            inside = (
+                (X[0] >= 0) *
+                (X[1] >= 0) *
+                (1 - X[0] - X[1] >= 0)
+            )
+            return np.array([ix[np.argmax(inside, axis=0)]]).flatten()
+
+        return finder
 
 
 @dataclass(repr=False)
@@ -1101,7 +1121,8 @@ class MeshQuad1(BaseMesh2D):
         return mesh
 
     def element_finder(self, mapping=None):
-        tri_finder = self.to_meshtri().element_finder()
+        """Transform to :class:`skfem.MeshTri` and return its finder."""
+        tri_finder = self.to_meshtri().element_finder(mapping=mapping)
 
         def finder(*args):
             return tri_finder(*args) % self.t.shape[1]
@@ -1222,16 +1243,9 @@ class MeshTet1(BaseMesh3D):
     affine: bool = True
 
     def element_finder(self, mapping=None):
-        """Return a function handle from location to element index.
 
-        Parameters
-        ----------
-        mapping
-            The affine mapping for the mesh.
-
-        """
         if mapping is None:
-            raise NotImplementedError("Mapping must be provided.")
+            mapping = self._mapping()
 
         tree = cKDTree(np.mean(self.p[:, self.t], axis=1).T)
 
@@ -1407,6 +1421,18 @@ class MeshTet1(BaseMesh3D):
 
 @dataclass(repr=False)
 class MeshHex1(BaseMesh3D):
+    """Hexahedral mesh.
+
+    If `t` is provided, order of vertices in each element should match the
+    numbering::
+
+            2---6
+           /   /|
+          4---7 3
+          |   |/
+          1---5
+
+    """
 
     doflocs: ndarray = np.array([[0., 0., 0.],
                                  [0., 0., 1.],
@@ -1526,3 +1552,16 @@ class MeshHex1(BaseMesh3D):
                 .copy()
                 .flatten())
         return cls(p, t.astype(np.int64))
+
+    def to_meshtet(self):
+        """Split each hexahedron into six tetrahedra."""
+        t = np.hstack((
+            self.t[[0, 1, 3, 4]],
+            self.t[[0, 3, 2, 4]],
+            self.t[[2, 3, 4, 6]],
+            self.t[[3, 4, 6, 7]],
+            self.t[[3, 4, 5, 7]],
+            self.t[[1, 3, 4, 5]],
+        ))
+
+        return MeshTet1(self.doflocs, t)
