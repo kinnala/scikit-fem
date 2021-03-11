@@ -13,7 +13,7 @@ from ..element import (Element, ElementHex1, ElementQuad1, ElementQuad2,
 
 
 @dataclass(repr=False)
-class BaseMesh:
+class Mesh:
 
     doflocs: ndarray
     t: ndarray
@@ -612,7 +612,7 @@ class BaseMesh:
 
 
 @dataclass(repr=False)
-class BaseMesh2D(BaseMesh):
+class Mesh2D(Mesh):
 
     def param(self) -> float:
         return np.max(
@@ -630,7 +630,7 @@ class BaseMesh2D(BaseMesh):
 
 
 @dataclass(repr=False)
-class BaseMesh3D(BaseMesh):
+class Mesh3D(Mesh):
 
     def param(self) -> float:
         return np.max(
@@ -672,7 +672,7 @@ class BaseMesh3D(BaseMesh):
 
 
 @dataclass(repr=False)
-class MeshTri1(BaseMesh2D):
+class MeshTri1(Mesh2D):
 
     doflocs: ndarray = np.array([[0., 0.],
                                  [1., 0.],
@@ -736,7 +736,7 @@ class MeshTri1(BaseMesh2D):
         return cls(p, t.astype(np.int64))
 
     @classmethod
-    def init_symmetric(cls: Type) -> BaseMesh2D:
+    def init_symmetric(cls: Type) -> Mesh2D:
         r"""Initialize a symmetric mesh of the unit square.
 
         The mesh topology is as follows::
@@ -761,7 +761,7 @@ class MeshTri1(BaseMesh2D):
         return cls(p, t)
 
     @classmethod
-    def init_sqsymmetric(cls: Type) -> BaseMesh2D:
+    def init_sqsymmetric(cls: Type) -> Mesh2D:
         r"""Initialize a symmetric mesh of the unit square.
 
         The mesh topology is as follows::
@@ -790,7 +790,7 @@ class MeshTri1(BaseMesh2D):
         return cls(p, t)
 
     @classmethod
-    def init_lshaped(cls: Type) -> BaseMesh2D:
+    def init_lshaped(cls: Type) -> Mesh2D:
         r"""Initialize a mesh for the L-shaped domain.
 
         The mesh topology is as follows::
@@ -818,7 +818,7 @@ class MeshTri1(BaseMesh2D):
 
     @classmethod
     def init_circle(cls: Type,
-                    nrefs: int = 3) -> BaseMesh2D:
+                    nrefs: int = 3) -> Mesh2D:
         r"""Initialize a circle mesh.
 
         Works by repeatedly refining the following mesh and moving
@@ -1002,7 +1002,7 @@ class MeshTri1(BaseMesh2D):
 
 
 @dataclass(repr=False)
-class MeshQuad1(BaseMesh2D):
+class MeshQuad1(Mesh2D):
 
     doflocs: ndarray = np.array([[0., 0.],
                                  [1., 0.],
@@ -1145,7 +1145,7 @@ class MeshQuad2(MeshQuad1):
 
 
 @dataclass(repr=False)
-class MeshLine1(BaseMesh):
+class MeshLine1(Mesh):
 
     doflocs: ndarray = np.array([[0., 1.]], dtype=np.float64)
     t: ndarray = np.array([[0], [1]], dtype=np.int64)
@@ -1224,7 +1224,7 @@ class MeshLine1(BaseMesh):
 
 
 @dataclass(repr=False)
-class MeshTet1(BaseMesh3D):
+class MeshTet1(Mesh3D):
 
     doflocs: ndarray = np.array([[0., 0., 0.],
                                  [0., 0., 1.],
@@ -1420,7 +1420,7 @@ class MeshTet1(BaseMesh3D):
 
 
 @dataclass(repr=False)
-class MeshHex1(BaseMesh3D):
+class MeshHex1(Mesh3D):
     """Hexahedral mesh.
 
     If `t` is provided, order of vertices in each element should match the
