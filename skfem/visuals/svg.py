@@ -4,9 +4,8 @@ from functools import singledispatch
 
 import numpy as np
 
-from ..mesh import Mesh2D
 from ..assembly import InteriorBasis
-from ..mesh.base_mesh import BaseMesh2D
+from ..mesh import Mesh2D
 
 
 @singledispatch
@@ -27,7 +26,6 @@ def draw(m, **kwargs) -> str:
     raise NotImplementedError("Type {} not supported.".format(type(m)))
 
 
-@draw.register(Mesh2D)
 def draw_mesh2d(m: Mesh2D, **kwargs) -> str:
     """Support for two-dimensional meshes."""
     if "boundaries_only" in kwargs:
@@ -61,8 +59,8 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> str:
             """width="{}" height="{}">{}</svg>""").format(width, height, lines)
 
 
-@draw.register(BaseMesh2D)
-def draw_geometry2d(m: BaseMesh2D, **kwargs) -> str:
+@draw.register(Mesh2D)
+def draw_geometry2d(m: Mesh2D, **kwargs) -> str:
     nrefs = kwargs["nrefs"] if "nrefs" in kwargs else 1
     m = m._splitref(nrefs)
     return draw_mesh2d(m, **kwargs)
