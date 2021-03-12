@@ -207,50 +207,17 @@ class Basis:
                 """Global discrete function at quadrature points."""
                 out = 0. * refn.copy()
                 for i in range(self.Nbfun):
-                    values = w[self.element_dofs[i]][:, None]
-                    if len(refn.shape) == 2:  # values
-                        out += values * self.basis[i][c][n]
-                    elif len(refn.shape) == 3:  # derivatives
-                        for j in range(out.shape[0]):
-                            out[j, :, :] += values * self.basis[i][c][n][j]
-                    elif len(refn.shape) == 4:  # second derivatives
-                        for j in range(out.shape[0]):
-                            for k in range(out.shape[1]):
-                                out[j, k, :, :] += \
-                                    values * self.basis[i][c][n][j, k]
-                    elif len(refn.shape) == 5:  # third derivatives
-                        for j in range(out.shape[0]):
-                            for k in range(out.shape[1]):
-                                for l in range(out.shape[2]):
-                                    out[j, k, l, :, :] += \
-                                        values * \
-                                        self.basis[i][c][-1][n][j, k, l]
-                    elif len(refn.shape) == 6:  # fourth derivatives
-                        for j in range(out.shape[0]):
-                            for k in range(out.shape[1]):
-                                for l in range(out.shape[2]):
-                                    for m in range(out.shape[3]):
-                                        out[j, k, l, m, :, :] += \
-                                            values *\
-                                            self.basis[i][c][-1][n][j, k, l, m]
-                    else:
-                        raise ValueError("The requested order of "
-                                         "derivatives not supported.")
+                    values = w[self.element_dofs[i]]
+                    out += np.einsum('...,...j->...j', values,
+                                     self.basis[i][c][n])
                 return out
 
-            # interpolate first and second derivatives
-            for n in range(len(ref) - 1):
+            # interpolate DiscreteField
+            for n in range(len(ref)):
                 if ref[n] is not None:
                     fs.append(linear_combination(n, ref[n]))
                 else:
                     fs.append(None)
-
-            # interpolate high-order derivatives
-            fs.append([])
-
-            if ref[-1] is not None:
-                for n in range(len(ref[-1])):
-                    fs[-1].append(linear_combination(n, ref[-1][n]))
 
             dfs.append(DiscreteField(*fs))
 
