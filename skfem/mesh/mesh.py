@@ -313,16 +313,17 @@ class Mesh:
         if self.nnodes > M:  # TODO check that works for 3D quadratic
             # reorder DOFs to the expected format: vertex DOFs are first
             p, t = self.doflocs, self.t
-            _t = t[:M]
-            uniq, ix = np.unique(_t, return_inverse=True)
-            self.t = np.arange(len(uniq), dtype=np.int64)[ix].reshape(_t.shape)
-            _p = np.hstack((
+            t_nodes = t[:M]
+            uniq, ix = np.unique(t_nodes, return_inverse=True)
+            self.t = (np.arange(len(uniq), dtype=np.int64)[ix]
+                      .reshape(t_nodes.shape))
+            doflocs = np.hstack((
                 p[:, uniq],
                 np.zeros((p.shape[0], np.max(t) + 1 - len(uniq))),
             ))
-            _p[:, self.dofs.element_dofs[M:].flatten('F')] =\
+            doflocs[:, self.dofs.element_dofs[M:].flatten('F')] =\
                 p[:, t[M:].flatten('F')]
-            self.doflocs = _p
+            self.doflocs = doflocs
 
     def __add__(self, other):
         """Join two meshes."""
@@ -1136,6 +1137,16 @@ class MeshTri2(MeshTri1):
     elem: Type[Element] = ElementTriP2
     affine: bool = False
     sort_t: bool = False
+
+    @classmethod
+    def init_circle(cls: Type,
+                    nrefs: int = 3) -> Mesh2D:
+        m = MeshTri1.init_circle(nrefs=nrefs)
+        M = cls.from_mesh(m)
+        D = M.dofs.get_facet_dofs(M.boundary_facets()).flatten()
+        doflocs = M.doflocs.copy()
+        doflocs[:, D] /= np.linalg.norm(doflocs[:, D], axis=0)
+        return replace(M, doflocs=doflocs)
 
 
 @dataclass(repr=False)
