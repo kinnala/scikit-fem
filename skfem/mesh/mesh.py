@@ -9,7 +9,7 @@ from scipy.spatial import cKDTree
 
 from ..element import (Element, ElementHex1, ElementQuad1, ElementQuad2,
                        ElementTetP1, ElementTriP1, ElementTriP2, ElementLineP1,
-                       BOUNDARY_ELEMENT_MAP)
+                       ElementTetP2, ElementHex2, BOUNDARY_ELEMENT_MAP)
 
 
 @dataclass(repr=False)
@@ -1604,3 +1604,15 @@ class MeshHex1(Mesh3D):
             return tet_finder(*args) % self.t.shape[1]
 
         return finder
+
+
+@dataclass(repr=False)
+class MeshTet2(MeshTet1):
+
+    elem: Type[Element] = ElementTetP2
+
+
+@dataclass(repr=False)
+class MeshHex2(MeshHex1):
+
+    elem: Type[Element] = ElementHex2

@@ -7,11 +7,12 @@ import numpy as np
 
 from skfem.models.poisson import laplace, mass, unit_load
 from skfem.mesh import (MeshHex, MeshLine, MeshQuad, MeshTet,
-                        MeshTri, MeshTri2, MeshQuad2)
+                        MeshTri, MeshTri2, MeshQuad2, MeshTet2)
 from skfem.element import (ElementHex1, ElementHexS2,
                            ElementLineP1, ElementLineP2, ElementLineMini, 
                            ElementQuad1, ElementQuad2, ElementTetP1,
-                           ElementTriP2, ElementHex2, ElementTriP1)
+                           ElementTriP2, ElementHex2, ElementTriP1,
+                           ElementTetP2)
 from skfem.assembly import FacetBasis, InteriorBasis
 from skfem import asm, condense, solve, LinearForm
 
@@ -229,6 +230,7 @@ class SolveCirclePoisson(unittest.TestCase):
     mesh_type = MeshTri2
     element_type = ElementTriP1
     filename = "quadratic_tri.msh"
+    maxval = 0.06243516822727334
 
     def init_mesh(self):
         path = Path(__file__).parents[1] / 'docs' / 'examples' / 'meshes'
@@ -242,7 +244,7 @@ class SolveCirclePoisson(unittest.TestCase):
         b = unit_load.assemble(basis)
         x = solve(*condense(A, b, D=basis.get_dofs()))
 
-        self.assertAlmostEqual(np.max(x), 0.06243516822727334, places=3)
+        self.assertAlmostEqual(np.max(x), self.maxval, places=3)
 
 
 class SolveCirclePoissonQuad(SolveCirclePoisson):
@@ -270,6 +272,24 @@ class SolveCirclePoissonTri2Init(SolveCirclePoissonTri2):
 
     def init_mesh(self):
         return self.mesh_type.init_circle().scaled(0.5)
+
+
+class SolveCirclePoissonTet(SolveCirclePoisson):
+
+    mesh_type = MeshTet
+    element_type = ElementTetP1
+    maxval = 0.0405901240018571
+
+    def init_mesh(self):
+        return self.mesh_type.init_ball().scaled(0.5)
+
+
+class SolveCirclePoissonTet2(SolveCirclePoisson):
+
+    mesh_type = MeshTet2
+    element_type = ElementTetP2
+    filename = "quadratic_sphere_tet.msh"
+    maxval = 0.0405901240018571
 
 
 

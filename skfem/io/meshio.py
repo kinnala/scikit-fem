@@ -14,6 +14,7 @@ MESH_TYPE_MAPPING = {
     'triangle': skfem.MeshTri,
     'quad': skfem.MeshQuad,
     'line': skfem.MeshLine,
+    'tetra10': skfem.MeshTet2,
     'triangle6': skfem.MeshTri2,
     'quad9': skfem.MeshQuad2,
 }

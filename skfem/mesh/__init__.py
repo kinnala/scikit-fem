@@ -29,7 +29,7 @@ from .mesh import MeshTri1 as MeshTri
 from .mesh import MeshQuad1 as MeshQuad
 from .mesh import MeshTet1 as MeshTet
 from .mesh import MeshHex1 as MeshHex
-from .mesh import MeshTri2, MeshQuad2
+from .mesh import MeshTri2, MeshQuad2, MeshTet2, MeshHex2
 
 
 __all__ = [
@@ -42,5 +42,7 @@ __all__ = [
     "MeshQuad2",
     "Mesh3D",
     "MeshTet",
+    "MeshTet2",
     "MeshHex",
+    "MeshHex2",
 ]
