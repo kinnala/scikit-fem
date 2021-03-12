@@ -511,7 +511,9 @@ class Mesh:
                               for itr in range(len(diffs))]),
         )
 
-    def mirrored(self, normal, point: Optional[Tuple[float, ...]] = None):
+    def mirrored(self,
+                 normal: Tuple[float, ...],
+                 point: Optional[Tuple[float, ...]] = None):
         """Return a mesh mirrored with respect to a normal.
 
         Meant to be combined with the other methods to build more general
