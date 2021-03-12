@@ -212,5 +212,19 @@ class TestAdaptiveSplitting2D(unittest.TestCase):
             self.assertEqual(prev_p_size, m.p.shape[1] - 3)
 
 
+class TestMirrored(unittest.TestCase):
+
+    def runTest(self):
+
+        m1 = MeshTet()
+        m2 = m1.mirrored((1, 0, 0))
+        m3 = m1.mirrored((0, 1, 0))
+        m4 = m1.mirrored((0, 0, 1))
+        m = m1 + m2 + m3 + m4
+
+        self.assertEqual(m.nvertices, 20)
+        self.assertEqual(m.nelements, 20)
+
+
 if __name__ == '__main__':
     unittest.main()
