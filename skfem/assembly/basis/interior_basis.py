@@ -135,7 +135,10 @@ class InteriorBasis(Basis):
         finder = self.mesh.element_finder(mapping=self.mapping)
         cells = finder(*x)
         pts = self.mapping.invF(x[:, :, np.newaxis], tind=cells)
-        phis = [self.elem.gbasis(self.mapping, pts, k, tind=cells)[0][0].flatten() for k in range(self.Nbfun)]
+        phis = [
+            self.elem.gbasis(self.mapping, pts, k, tind=cells)[0][0].flatten()
+            for k in range(self.Nbfun)
+        ]
 
         def interpolator(y: np.ndarray) -> np.ndarray:
             w = np.zeros(x.shape[1])
