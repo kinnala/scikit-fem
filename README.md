@@ -225,6 +225,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added: `Mesh.with_subdomains`
 - Removed: `Mesh.refine`, `Mesh.scale`, and `Mesh.translate`
 - Removed: `Mesh.define_boundary`
+- Removed: Python 3.6 support
 - Changed: `Mesh.refined` no more attempts to fix the indexing of
   `Mesh.boundaries` on refine
 
