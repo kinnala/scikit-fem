@@ -136,7 +136,16 @@ class Mesh:
 
     def with_boundaries(self,
                         boundaries: Dict[str, Callable[[ndarray], ndarray]]):
+        """Return a copy of the mesh with named boundaries.
 
+        Parameters
+        ----------
+        boundaries
+            A dictionary of lambda functions with the names of the boundaries
+            as keys.  The midpoint of the facet should return ``True`` for the
+            corresponding lambda function if the facet belongs to the boundary.
+
+        """
         return replace(
             self,
             _boundaries={
@@ -148,7 +157,17 @@ class Mesh:
 
     def with_subdomains(self,
                         subdomains: Dict[str, Callable[[ndarray], ndarray]]):
+        """Return a copy of the mesh with named subdomains.
 
+        Parameters
+        ----------
+        boundaries
+            A dictionary of lambda functions with the names of the subdomains
+            as keys.  The midpoint of the element should return ``True`` for
+            the corresponding lambda function if the element belongs to the
+            subdomain.
+
+        """
         return replace(
             self,
             _subdomains={
@@ -175,10 +194,10 @@ class Mesh:
         Parameters
         ----------
         test
-            A function which returns True for the set of nodes that are to be
-            included in the return set.
+            A function which returns ``True`` for the set of nodes that are to
+            be included in the return set.
         boundaries_only
-            If True, include only boundary facets.
+            If ``True``, include only boundary facets.
 
         """
         nodes = np.nonzero(test(self.p))[0]
