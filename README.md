@@ -212,8 +212,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
-- Added: New shorthands for higher order derivatives when using `ElementGlobal`:
-  `u.grad3` for third order derivatives, `u.grad4` for fourth order derivatices, etc.
+- Added: Rewritten `Mesh` base class which is 'immutable' and uses `Element`
+  classes to define the ordering of nodes
+- Added: New names for higher order derivatives in `DiscreteField` when using
+  `ElementGlobal`: `u.grad3` for third order derivatives, `u.grad4` for fourth
+  order derivatices, etc.
+- Added: New quadratic mesh types `MeshTet2` and `MeshHex2`
+- Added: `MeshHex.to_meshtet` to split hexahedral mesh into tets
+- Added: `MeshHex.element_finder` for interpolating finite element functions
+  using `InteriorBasis.interpolator`
+- Added: `Mesh.with_boundaries` to replace `Mesh.define_boundary`
+- Added: `Mesh.with_subdomains`
+- Removed: `Mesh.refine`, `Mesh.scale`, and `Mesh.translate`
+- Removed: `Mesh.define_boundary`
+- Changed: `Mesh.refined` no more attempts to fix the indexing of
+  `Mesh.boundaries` on refine
 
 ### [2.5.0] - 2021-02-13
 
