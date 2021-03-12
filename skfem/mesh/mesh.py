@@ -1611,6 +1611,15 @@ class MeshTet2(MeshTet1):
 
     elem: Type[Element] = ElementTetP2
 
+    @classmethod
+    def init_ball(cls: Type, nrefs: int = 3) -> Mesh3D:
+        m = MeshTet1.init_ball(nrefs=nrefs)
+        M = cls.from_mesh(m)
+        D = M.dofs.get_facet_dofs(M.boundary_facets()).flatten()
+        doflocs = M.doflocs.copy()
+        doflocs[:, D] /= np.linalg.norm(doflocs[:, D], axis=0)
+        return replace(M, doflocs=doflocs)
+
 
 @dataclass(repr=False)
 class MeshHex2(MeshHex1):

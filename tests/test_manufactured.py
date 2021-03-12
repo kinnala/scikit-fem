@@ -4,17 +4,15 @@ import unittest
 from pathlib import Path
 
 import numpy as np
-
-from skfem.models.poisson import laplace, mass, unit_load
-from skfem.mesh import (MeshHex, MeshLine, MeshQuad, MeshTet,
-                        MeshTri, MeshTri2, MeshQuad2, MeshTet2)
-from skfem.element import (ElementHex1, ElementHexS2,
-                           ElementLineP1, ElementLineP2, ElementLineMini, 
-                           ElementQuad1, ElementQuad2, ElementTetP1,
-                           ElementTriP2, ElementHex2, ElementTriP1,
-                           ElementTetP2)
+from skfem import LinearForm, asm, condense, solve
 from skfem.assembly import FacetBasis, InteriorBasis
-from skfem import asm, condense, solve, LinearForm
+from skfem.element import (ElementHex1, ElementHex2, ElementHexS2,
+                           ElementLineMini, ElementLineP1, ElementLineP2,
+                           ElementQuad1, ElementQuad2, ElementTetP1,
+                           ElementTetP2, ElementTriP1, ElementTriP2)
+from skfem.mesh import (MeshHex, MeshLine, MeshQuad, MeshQuad2, MeshTet,
+                        MeshTet2, MeshTri, MeshTri2)
+from skfem.models.poisson import laplace, mass, unit_load
 
 
 class Line1D(unittest.TestCase):
@@ -282,6 +280,12 @@ class SolveCirclePoissonTet(SolveCirclePoisson):
 
     def init_mesh(self):
         return self.mesh_type.init_ball().scaled(0.5)
+
+
+class SolveCirclePoissonTet2(SolveCirclePoissonTet):
+
+    mesh_type = MeshTet2
+    element_type = ElementTetP2
 
 
 class SolveCirclePoissonTet2(SolveCirclePoisson):
