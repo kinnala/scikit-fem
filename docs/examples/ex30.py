@@ -115,7 +115,7 @@ basis['psi'] = basis['u'].with_element(ElementQuad2())
 psi = np.zeros(A.shape[0])
 vorticity = asm(rot, basis['psi'], w=basis['u'].interpolate(velocity))
 psi = solve(*condense(asm(laplace, basis['psi']), vorticity, D=basis['psi'].find_dofs()))
-psi0 = basis['psi'].interpolator(psi)(np.zeros((2, 1)))[0]
+psi0 = basis['psi'].probes(np.zeros((2, 1)))(psi)[0]
 
 
 if __name__ == '__main__':

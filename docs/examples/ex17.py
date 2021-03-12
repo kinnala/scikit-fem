@@ -73,7 +73,7 @@ if __name__ == '__main__':
     from sys import argv
     from skfem.visuals.matplotlib import draw, plot, savefig
 
-    T0 = {'skfem': basis.interpolator(temperature)(np.zeros((2, 1)))[0],
+    T0 = {'skfem': basis.probes(np.zeros((2, 1)))(temperature)[0],
           'exact':
           (joule_heating * radii[0]**2 / 4 / thermal_conductivity['core'] *
            (2 * thermal_conductivity['core'] / radii[1]
