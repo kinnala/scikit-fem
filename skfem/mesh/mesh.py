@@ -2,6 +2,7 @@ from dataclasses import dataclass, replace
 from typing import Tuple, Type, Union, Optional, Dict, Callable, List
 from collections import namedtuple
 from itertools import dropwhile
+from warnings import warn
 
 import numpy as np
 from numpy import ndarray
@@ -329,7 +330,7 @@ class Mesh:
 
         M = self.elem.refdom.nnodes
 
-        if self.nnodes > M:  # TODO check that works for 3D quadratic
+        if self.nnodes > M:
             # reorder DOFs to the expected format: vertex DOFs are first
             p, t = self.doflocs, self.t
             t_nodes = t[:M]
@@ -343,6 +344,17 @@ class Mesh:
             doflocs[:, self.dofs.element_dofs[M:].flatten('F')] =\
                 p[:, t[M:].flatten('F')]
             self.doflocs = doflocs
+
+        # C_CONTIGUOUS is more performant in dimension-based slices
+        if self.doflocs.flags['F_CONTIGUOUS']:
+            if self.doflocs.shape[1] > 1000:
+                warn("Transforming over 1000 vertices to C_CONTIGUOUS.")
+            self.doflocs = np.ascontiguousarray(self.doflocs)
+
+        if self.t.flags['F_CONTIGUOUS']:
+            if self.t.shape[1] > 1000:
+                warn("Transforming over 1000 elements to C_CONTIGUOUS.")
+            self.t = np.ascontiguousarray(self.t)
 
     def __add__(self, other):
         """Join two meshes."""
@@ -397,8 +409,8 @@ class Mesh:
         if 'p' not in data or 't' not in data:
             raise ValueError("Dictionary must contain keys 'p' and 't'.")
         else:
-            data['p'] = np.array(data['p']).T
-            data['t'] = np.array(data['t']).T
+            data['p'] = np.ascontiguousarray(np.array(data['p']).T)
+            data['t'] = np.ascontiguousarray(np.array(data['t']).T)
         if 'boundaries' in data and data['boundaries'] is not None:
             data['boundaries'] = {k: np.array(v)
                                   for k, v in data['boundaries'].items()}
