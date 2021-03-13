@@ -52,10 +52,9 @@ This is a nonlinear problem since we do not know a priori which subset
 """
 
 from skfem import *
-from skfem.models.elasticity import linear_elasticity,\
-    lame_parameters, linear_stress
-from skfem.models.helpers import dot, ddot,\
-    prod, sym_grad
+from skfem.models.elasticity import (linear_elasticity, lame_parameters,
+                                     linear_stress)
+from skfem.helpers import dot, ddot, prod, sym_grad
 import numpy as np
 from skfem.io import from_meshio
 from skfem.io.json import from_file, to_file

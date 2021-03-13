@@ -229,6 +229,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added: `Mesh.with_subdomains`
 - Removed: `Mesh.refine`, `Mesh.scale`, `Mesh.translate` and
   `Mesh.define_boundary`
+- Removed: `skfem.models.helpers`; renamed to `skfem.helpers` since 1.0.0
 - Removed: Python 3.6 support
 - Changed: `Mesh.refined` no more attempts to fix the indexing of
   `Mesh.boundaries` upon refine
