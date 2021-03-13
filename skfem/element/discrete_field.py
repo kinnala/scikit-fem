@@ -1,4 +1,3 @@
-import warnings
 from typing import NamedTuple, Optional
 
 import numpy as np

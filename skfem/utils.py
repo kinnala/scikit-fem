@@ -3,7 +3,6 @@ SciPy linear solvers."""
 
 import warnings
 from typing import Optional, Union, Tuple, Callable, Dict
-from inspect import signature
 
 import numpy as np
 import scipy.sparse as sp
