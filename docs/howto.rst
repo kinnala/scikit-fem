@@ -211,9 +211,9 @@ Below we solve explicitly the above variational problem:
    >>> import skfem as fem
    >>> m = fem.MeshQuad()
    >>> basis = fem.FacetBasis(m, fem.ElementQuadP(3))
-   >>> u_0 = lambda x, y: (x * y) ** 3
+   >>> u_0 = lambda x: (x[0] * x[1]) ** 3
    >>> M = fem.BilinearForm(lambda u, v, w: u * v).assemble(basis)
-   >>> f = fem.LinearForm(lambda v, w: u_0(*w.x) * v).assemble(basis)
+   >>> f = fem.LinearForm(lambda v, w: u_0(w.x) * v).assemble(basis)
    >>> x = fem.solve(*fem.condense(M, f, I=basis.get_dofs()))
    >>> x
    array([ 2.87802132e-16,  1.62145397e-16,  1.00000000e+00,  1.66533454e-16,
@@ -226,7 +226,7 @@ the same thing:
 
 .. doctest::
 
-   >>> fem.projection(u_0, basis_to=basis, I=basis.get_dofs(), expand=True)
+   >>> fem.projection(u_0, basis, I=basis.get_dofs(), expand=True)
    array([ 2.87802132e-16,  1.62145397e-16,  1.00000000e+00,  1.66533454e-16,
            4.59225774e-16, -4.41713127e-16,  4.63704316e-16,  1.25333771e-16,
            6.12372436e-01,  1.58113883e-01,  6.12372436e-01,  1.58113883e-01,
