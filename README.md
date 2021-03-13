@@ -212,8 +212,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
-- Added: Completely rewritten `Mesh` base class which is immutable and uses
-  `Element` classes to define the ordering of nodes; future proof for
+- Added: Completely rewritten `Mesh` base class which is "immutable" and uses
+  `Element` classes to define the ordering of nodes; better support for
   high-order and other more general mesh types
 - Added: New names for higher order derivatives in `DiscreteField` when using
   `ElementGlobal`: `u.grad3` for third order derivatives, `u.grad4` for fourth
@@ -227,9 +227,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added: `Mesh.with_boundaries`, a functional replacement to
   `Mesh.define_boundary`
 - Added: `Mesh.with_subdomains`
+- Added: `skfem.utils.projection`, a variant of `skfem.utils.project`
+  with a more intuitive order of arguments
+- Deprecated: `skfem.utils.project`
 - Removed: `Mesh.refine`, `Mesh.scale`, `Mesh.translate` and
   `Mesh.define_boundary`
 - Removed: `skfem.models.helpers`; renamed to `skfem.helpers` since 1.0.0
+- Removed: `DiscreteField.{f,df,ddf,hod}`
 - Removed: Python 3.6 support
 - Changed: `Mesh.refined` no more attempts to fix the indexing of
   `Mesh.boundaries` upon refine

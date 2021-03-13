@@ -4,7 +4,7 @@ import pytest
 import numpy as np
 from numpy.testing import assert_allclose, assert_almost_equal
 
-from skfem import BilinearForm, asm, solve, condense, project
+from skfem import BilinearForm, asm, solve, condense, projection
 from skfem.mesh import MeshTri, MeshTet, MeshHex, MeshQuad, MeshLine
 from skfem.assembly import InteriorBasis, FacetBasis, Dofs, Functional
 from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
@@ -129,7 +129,7 @@ class TestInterpolatorTet(TestCase):
     def runTest(self):
         m = self.mesh_type().refined(self.nrefs)
         basis = InteriorBasis(m, self.element_type())
-        x = project(lambda x: x[0] ** 2, basis_to=basis)
+        x = projection(lambda x: x[0] ** 2, basis)
         fun = basis.interpolator(x)
         X = np.linspace(0, 1, 10)
         dim = m.dim()
@@ -215,7 +215,7 @@ def test_trace(mtype, e1, e2):
     # use the boundary where last coordinate is zero
     basis = FacetBasis(m, e1,
                        facets=m.facets_satisfying(lambda x: x[x.shape[0] - 1] == 0.0))
-    xfun = project(lambda x: x[0], basis_to=InteriorBasis(m, e1))
+    xfun = projection(lambda x: x[0], InteriorBasis(m, e1))
     nbasis, y = basis.trace(xfun, lambda p: p[0:(p.shape[0] - 1)], target_elem=e2)
 
     @Functional

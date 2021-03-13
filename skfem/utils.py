@@ -395,22 +395,22 @@ def adaptive_theta(est, theta=0.5, max=None):
         return np.nonzero(theta * max < est)[0]
 
 
-def project(fun,
-            basis_from: Optional[Basis] = None,
-            basis_to: Optional[Basis] = None,
-            diff: Optional[int] = None,
-            I: Optional[ndarray] = None,
-            expand: bool = False) -> ndarray:
-    """Projection from one basis to another.
+def projection(fun,
+               basis_to: Optional[Basis] = None,
+               basis_from: Optional[Basis] = None,
+               diff: Optional[int] = None,
+               I: Optional[ndarray] = None,
+               expand: bool = False) -> ndarray:
+    """Perform projections onto a finite element basis.
 
     Parameters
     ----------
     fun
         A solution vector or a function handle.
-    basis_from
-        The finite element basis to project from.
     basis_to
         The finite element basis to project to.
+    basis_from
+        The finite element basis to project from.
     diff
         Differentiate with respect to the given dimension.
     I
@@ -432,13 +432,7 @@ def project(fun,
 
     @LinearForm
     def funv(v, w):
-        if len(signature(fun).parameters) == 1:
-            p = fun(w.x) * v
-        else:
-            warnings.warn("The function provided to 'project' should "
-                          "take only one argument in the future.",
-                          DeprecationWarning)
-            p = fun(*w.x) * v
+        p = fun(w.x) * v
         return sum(p) if isinstance(basis_to.elem, ElementVector) else p
 
     @BilinearForm
@@ -463,15 +457,19 @@ def project(fun,
     return solve_linear(M, f)
 
 
-def L2_projection(a, b, c=None):
-    """For backwards compatibility."""
-    warnings.warn("'L2_projection' is superseded by 'project'.",
+def project(fun,
+            basis_from: Optional[Basis] = None,
+            basis_to: Optional[Basis] = None,
+            diff: Optional[int] = None,
+            I: Optional[ndarray] = None,
+            expand: bool = False) -> ndarray:
+    warnings.warn("project is deprecated in favor of projection.",
                   DeprecationWarning)
-    return project(a, basis_to=b, I=c)
-
-
-def derivative(a, b, c, d=0):
-    """For backwards compatibility."""
-    warnings.warn("'derivative' is superseded by 'project'.",
-                  DeprecationWarning)
-    return project(a, basis_from=b, basis_to=c, diff=d)
+    return projection(
+        fun,
+        basis_to=basis_to,
+        basis_from=basis_from,
+        diff=diff,
+        I=I,
+        expand=expand,
+    )

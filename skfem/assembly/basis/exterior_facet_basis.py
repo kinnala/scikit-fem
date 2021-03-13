@@ -102,7 +102,7 @@ class ExteriorFacetBasis(Basis):
                        elem: Element) -> ndarray:
         """Trace mesh basis projection."""
 
-        from skfem.utils import project
+        from skfem.utils import projection
 
         fbasis = ExteriorFacetBasis(self.mesh,
                                     elem,
@@ -118,7 +118,7 @@ class ExteriorFacetBasis(Basis):
                 I = fbasis.dofs.interior_dofs[:, self.tind].flatten()
             else:
                 raise ValueError
-        return project(x, self, fbasis, I=I)
+        return projection(x, fbasis, self, I=I)
 
     def trace(self,
               x: ndarray,
