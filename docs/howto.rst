@@ -221,12 +221,12 @@ Below we solve explicitly the above variational problem:
            6.12372436e-01,  1.58113883e-01,  6.12372436e-01,  1.58113883e-01,
            0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00])
 
-Alternatively, you can use :func:`skfem.utils.project` which does exactly the
-same thing:
+Alternatively, you can use :func:`skfem.utils.projection` which does exactly
+the same thing:
 
 .. doctest::
 
-   >>> fem.project(u_0, basis_to=basis, I=basis.get_dofs(), expand=True)
+   >>> fem.projection(u_0, basis_to=basis, I=basis.get_dofs(), expand=True)
    array([ 2.87802132e-16,  1.62145397e-16,  1.00000000e+00,  1.66533454e-16,
            4.59225774e-16, -4.41713127e-16,  4.63704316e-16,  1.25333771e-16,
            6.12372436e-01,  1.58113883e-01,  6.12372436e-01,  1.58113883e-01,
