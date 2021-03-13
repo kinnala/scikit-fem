@@ -1,20 +1,19 @@
 import numpy as np
 
 from ..element_h1 import ElementH1
-from ...mesh.mesh3d import MeshTet
+from ...refdom import RefTet
 
 
 class ElementTetP1(ElementH1):
 
     nodal_dofs = 1
-    dim = 3
     maxdeg = 1
     dofnames = ['u']
     doflocs = np.array([[0., 0., 0.],
                         [1., 0., 0.],
                         [0., 1., 0.],
                         [0., 0., 1.]])
-    mesh_type = MeshTet
+    refdom = RefTet
 
     def lbasis(self, X, i):
         x, y, z = X

@@ -22,10 +22,9 @@ class ElementComposite(Element):
         self.facet_dofs = sum([e.facet_dofs for e in self.elems])
         self.interior_dofs = sum([e.interior_dofs for e in self.elems])
         self.maxdeg = sum([e.maxdeg for e in self.elems])
-        self.dim = self.elems[0].dim
 
         for e in self.elems:
-            if e.mesh_type is not self.elems[0].mesh_type:
+            if e.refdom is not self.elems[0].refdom:
                 raise ValueError("Elements are incompatible.")
 
         dofnames = []
@@ -54,7 +53,11 @@ class ElementComposite(Element):
             doflocs.append(self.elems[n].doflocs[ind])
         self.doflocs = np.array(doflocs)
 
-        self.mesh_type = elems[0].mesh_type
+        self.refdom = elems[0].refdom
+
+    @property
+    def dim(self):
+        return self.elems[0].dim
 
     def _deduce_bfun(self, i: int):
         """Deduce component and basis function for i'th index."""

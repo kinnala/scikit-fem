@@ -30,7 +30,7 @@ I = ib.complement_dofs(dofs)
 u = solve(*condense(K, 0*u, I=I, x=u))
 
 sf = 1.0
-m.p += sf * u[ib.nodal_dofs]
+m = m.translated(sf * u[ib.nodal_dofs])
 
 if __name__ == "__main__":
     from os.path import splitext

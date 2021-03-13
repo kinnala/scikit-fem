@@ -1,11 +1,10 @@
 from ..element_h1 import ElementH1
-from ...mesh.mesh2d import MeshQuad
+from ...refdom import RefQuad
 
 
 class ElementQuadDG(ElementH1):
 
-    dim = 2
-    mesh_type = MeshQuad
+    refdom = RefQuad
 
     def __init__(self, elem):
         # change all dofs to interior dofs

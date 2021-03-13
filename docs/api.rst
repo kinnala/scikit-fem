@@ -14,7 +14,7 @@ Abstract class: Mesh
 --------------------
 
 .. autoclass:: skfem.mesh.Mesh
-   :members: load, save, refine
+   :members: load, save, refined
 
 Class: MeshTri
 **************

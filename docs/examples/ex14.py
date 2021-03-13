@@ -42,7 +42,7 @@ boundary_basis = FacetBasis(m, e)
 boundary_dofs = boundary_basis.find_dofs()['all'].all()
 
 u = np.zeros(basis.N)
-u[boundary_dofs] = project(dirichlet, basis_to=boundary_basis, I=boundary_dofs)
+u[boundary_dofs] = projection(dirichlet, boundary_basis, I=boundary_dofs)
 u = solve(*condense(A, np.zeros_like(u), u, D=boundary_dofs))
 
 

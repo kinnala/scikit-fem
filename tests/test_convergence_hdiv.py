@@ -19,7 +19,7 @@ class ConvergenceRaviartThomas(unittest.TestCase):
 
         @BilinearForm
         def bilinf_A(sigma, tau, w):
-            from skfem.models.helpers import dot
+            from skfem.helpers import dot
             return dot(sigma, tau)
 
         @BilinearForm

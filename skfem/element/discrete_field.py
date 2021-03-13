@@ -1,4 +1,3 @@
-import warnings
 from typing import NamedTuple, Optional
 
 import numpy as np
@@ -78,40 +77,3 @@ class DiscreteField(NamedTuple):
             return np.zeros_like(x)
 
         return DiscreteField(*[zero_or_none(field) for field in self])
-
-    @property
-    def hod(self):
-        """For backwards compatibility."""
-        return np.array([
-            self.grad3,
-            self.grad4,
-            self.grad5,
-            self.grad6,
-        ], dtype=object)
-
-    @property
-    def f(self):
-        """For backwards compatibility."""
-        warnings.warn("The field 'f' is renamed to 'value'.",
-                      DeprecationWarning)
-        return self.value
-
-    @property
-    def df(self):
-        """For backwards compatibility."""
-        warnings.warn("The field 'df' is renamed to 'grad/div/curl'.",
-                      DeprecationWarning)
-        if self.grad is not None:
-            return self.grad
-        elif self.div is not None:
-            return self.div
-        elif self.curl is not None:
-            return self.curl
-        return None
-
-    @property
-    def ddf(self):
-        """For backwards compatibility."""
-        warnings.warn("The field 'ddf' is renamed to 'hess'.",
-                      DeprecationWarning)
-        return self.hess

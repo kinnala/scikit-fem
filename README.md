@@ -12,7 +12,7 @@
 </p>
 
 
-`scikit-fem` is a lightweight Python 3.6+ library for performing [finite element
+`scikit-fem` is a lightweight Python 3.7+ library for performing [finite element
 assembly](https://en.wikipedia.org/wiki/Finite_element_method). Its main purpose
 is the transformation of bilinear forms into sparse matrices and linear forms
 into vectors.  The library supports triangular, quadrilateral, tetrahedral and
@@ -212,8 +212,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
-- Added: New shorthands for higher order derivatives when using `ElementGlobal`:
-  `u.grad3` for third order derivatives, `u.grad4` for fourth order derivatices, etc.
+- Added: Completely rewritten `Mesh` base class which is "immutable" and uses
+  `Element` classes to define the ordering of nodes; better support for
+  high-order and other more general mesh types
+- Added: New names for higher order derivatives in `DiscreteField` when using
+  `ElementGlobal`: `u.grad3` for third order derivatives, `u.grad4` for fourth
+  order derivatices, and so on
+- Added: More overloads for `DiscreteField`, e.g., multiplication, summation
+  and subtraction are now explicitly supported inside the form definitions
+- Added: New quadratic mesh types; `MeshTet2` and `MeshHex2`
+- Added: `MeshHex.to_meshtet` to split hex mesh into tets
+- Added: `MeshHex.element_finder` for interpolating finite element solutions
+  on hexahedral meshes via `InteriorBasis.interpolator`
+- Added: `Mesh.with_boundaries`, a functional replacement to
+  `Mesh.define_boundary`
+- Added: `Mesh.with_subdomains`
+- Added: `skfem.utils.projection`, a variant of `skfem.utils.project`
+  with a more intuitive order of arguments
+- Deprecated: `skfem.utils.project`
+- Removed: `Mesh.refine`, `Mesh.scale`, `Mesh.translate` and
+  `Mesh.define_boundary`
+- Removed: `skfem.models.helpers`; renamed to `skfem.helpers` since 1.0.0
+- Removed: `DiscreteField.{f,df,ddf,hod}`
+- Removed: Python 3.6 support
+- Changed: `Mesh.refined` no more attempts to fix the indexing of
+  `Mesh.boundaries` upon refine
 
 ### [2.5.0] - 2021-02-13
 

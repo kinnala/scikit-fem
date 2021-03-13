@@ -244,10 +244,10 @@ if __name__ == '__main__':
                                    ('solid', 'red', '+')]:
             color = saturation + hue
             label = f'{phase}-{port}'
-            ax.plot(temperature[dofs[label][ii[label]]], y[label][ii[label]],
+            ax.plot(temperature[dofs[label].nodal_ix[ii[label]]], y[label][ii[label]],
                     marker=marker, color=color, linestyle='none',
                     label=f'{label}, skfem')
-        ax.plot(exact(mesh.p[0, dofs[label][0]], y['exact']), y['exact'],
+        ax.plot(exact(mesh.p[0, dofs[label].nodal_ix[0]], y['exact']), y['exact'],
                 color='k', linestyle=linestyle, label=f'{port}, exact')
 
     ax.set_xlabel('temperature')

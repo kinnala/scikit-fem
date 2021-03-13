@@ -1,7 +1,6 @@
 """Import any formats supported by meshio."""
 
 import warnings
-from collections import OrderedDict
 
 import meshio
 import numpy as np
@@ -9,15 +8,16 @@ import numpy as np
 import skfem
 
 
-MESH_TYPE_MAPPING = OrderedDict([
-    ('tetra', skfem.MeshTet),
-    ('hexahedron', skfem.MeshHex),
-    ('triangle', skfem.MeshTri),
-    ('quad', skfem.MeshQuad),
-    ('line', skfem.MeshLine),
-    ('triangle6', skfem.MeshTri2),
-    ('quad9', skfem.MeshQuad2),
-])
+MESH_TYPE_MAPPING = {
+    'tetra': skfem.MeshTet,
+    'hexahedron': skfem.MeshHex,
+    'triangle': skfem.MeshTri,
+    'quad': skfem.MeshQuad,
+    'line': skfem.MeshLine,
+    'tetra10': skfem.MeshTet2,
+    'triangle6': skfem.MeshTri2,
+    'quad9': skfem.MeshQuad2,
+}
 
 TYPE_MESH_MAPPING = {v: k for k, v in MESH_TYPE_MAPPING.items()}
 
@@ -127,11 +127,11 @@ def from_meshio(m, force_mesh_type=None):
                 tagindex = np.nonzero(tags == tag)[0]
                 boundaries[find_tagname(tag)] = index[tagindex, 1]
 
-        mtmp.boundaries = boundaries
-        mtmp.subdomains = subdomains
+        mtmp = mesh_type(p, t, boundaries, subdomains)
 
-    except Exception:
+    except Exception as e:
         warnings.warn("Unable to load tagged boundaries/subdomains.")
+        print(e)
 
     return mtmp
 
@@ -141,7 +141,12 @@ def from_file(filename):
 
 
 def to_meshio(mesh, point_data=None):
-    cells = {TYPE_MESH_MAPPING[type(mesh)]: mesh.t.T}
+
+    t = mesh.t.copy()
+    if isinstance(mesh, skfem.MeshHex):
+        t = t[[0, 3, 6, 2, 1, 5, 7, 4]]
+
+    cells = {TYPE_MESH_MAPPING[type(mesh)]: t.T}
     return meshio.Mesh(mesh.p.T, cells, point_data)
 
 

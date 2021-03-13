@@ -132,7 +132,7 @@ class BackwardFacingStep:
         """prepopulate solution vector with Dirichlet conditions"""
         uvp = np.zeros(self.basis['u'].N + self.basis['p'].N)
         I = self.inlet_dofs()
-        uvp[I] = project(self.parabolic, basis_to=self.basis['inlet'], I=I)
+        uvp[I] = projection(self.parabolic, self.basis['inlet'], I=I)
         return uvp
 
     def split(self, solution: np.ndarray) -> Tuple[np.ndarray,

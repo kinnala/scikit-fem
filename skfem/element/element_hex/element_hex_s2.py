@@ -1,13 +1,13 @@
 import numpy as np
 
 from ..element_h1 import ElementH1
-from ...mesh.mesh3d import MeshHex
+from ...refdom import RefHex
 
 
 class ElementHexS2(ElementH1):
+
     nodal_dofs = 1
     edge_dofs = 1
-    dim = 3
     maxdeg = 4
     dofnames = ['u', 'u']
     doflocs = np.array([[1., 1., 1.],
@@ -30,7 +30,7 @@ class ElementHexS2(ElementH1):
                         [.5, 0., 0.],
                         [0., .5, 0.],
                         [0., 0., .5]])
-    mesh_type = MeshHex
+    refdom = RefHex
 
     def lbasis(self, X, i):
         x, y, z = 2 * X - 1

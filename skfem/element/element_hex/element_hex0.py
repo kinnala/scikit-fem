@@ -1,17 +1,16 @@
 import numpy as np
 
 from ..element_h1 import ElementH1
-from ...mesh.mesh3d import MeshHex
+from ...refdom import RefHex
 
 
 class ElementHex0(ElementH1):
 
     interior_dofs = 1
-    dim = 3
     maxdeg = 0
     dofnames = ['u']
     doflocs = np.array([[.5, .5, .5]])
-    mesh_type = MeshHex
+    refdom = RefHex
 
     def lbasis(self, X, i):
         if i == 0:

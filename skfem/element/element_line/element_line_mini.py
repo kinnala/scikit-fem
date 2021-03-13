@@ -1,20 +1,19 @@
 import numpy as np
 
 from ..element_h1 import ElementH1
-from ...mesh.mesh_line import MeshLine
+from ...refdom import RefLine
 
 
 class ElementLineMini(ElementH1):
 
     nodal_dofs = 1
     interior_dofs = 1
-    dim = 1
-    maxdeg = 1 + dim
+    maxdeg = 2
     dofnames = ['u', 'NA']
     doflocs = np.array([[0.],
                         [1.],
-                        [np.nan] * dim])
-    mesh_type = MeshLine
+                        [np.nan]])
+    refdom = RefLine
 
     def lbasis(self, X, i):
         x = X[0]

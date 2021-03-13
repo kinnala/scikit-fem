@@ -10,7 +10,7 @@ from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementHex2)
 from skfem.mesh import MeshQuad, MeshHex, MeshTet, MeshTri
 from skfem.assembly import FacetBasis, InteriorBasis
-from skfem.utils import project
+from skfem.utils import projection
 
 
 class IntegrateOneOverBoundaryQ1(unittest.TestCase):
@@ -220,10 +220,10 @@ class NormalVectorTestTri(unittest.TestCase):
             return np.sum(w.n ** 2, axis=0) * v
 
         b = asm(linf, basis)
-        ones = project(lambda x: 1.0 + x[0] * 0.,
-                       basis_to=basis,
-                       I=basis.get_dofs().flatten(),
-                       expand=True)
+        ones = projection(lambda x: 1.0 + x[0] * 0.,
+                          basis,
+                          I=basis.get_dofs().flatten(),
+                          expand=True)
 
         self.assertAlmostEqual(b @ ones,
                                2 * m.p.shape[0],

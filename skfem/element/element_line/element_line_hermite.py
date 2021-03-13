@@ -1,20 +1,19 @@
 import numpy as np
 
 from ..element_global import ElementGlobal
-from ...mesh.mesh_line import MeshLine
+from ...refdom import RefLine
 
 
 class ElementLineHermite(ElementGlobal):
 
     nodal_dofs = 2
-    dim = 1
     maxdeg = 3
     dofnames = ['u', 'u_x']
     doflocs = np.array([[0.],
                         [0.],
                         [1.],
                         [1.]])
-    mesh_type = MeshLine
+    refdom = RefLine
 
     def gdof(self, F, w, i):
         if i == 0:

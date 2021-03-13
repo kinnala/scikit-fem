@@ -1,7 +1,7 @@
 """Bilinear and linear forms too general to put into a specific model."""
 
 from skfem.assembly import BilinearForm, LinearForm
-from .helpers import dot, div, curl
+from skfem.helpers import dot, div, curl
 
 
 @BilinearForm

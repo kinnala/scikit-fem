@@ -4,16 +4,15 @@ import unittest
 from pathlib import Path
 
 import numpy as np
-
-from skfem.models.poisson import laplace, mass, unit_load
-from skfem.mesh import (MeshHex, MeshLine, MeshQuad, MeshTet,
-                        MeshTri, MeshTri2, MeshQuad2)
-from skfem.element import (ElementHex1, ElementHexS2,
-                           ElementLineP1, ElementLineP2, ElementLineMini, 
-                           ElementQuad1, ElementQuad2, ElementTetP1,
-                           ElementTriP2, ElementHex2, ElementTriP1)
+from skfem import LinearForm, asm, condense, solve
 from skfem.assembly import FacetBasis, InteriorBasis
-from skfem import asm, condense, solve, LinearForm
+from skfem.element import (ElementHex1, ElementHex2, ElementHexS2,
+                           ElementLineMini, ElementLineP1, ElementLineP2,
+                           ElementQuad1, ElementQuad2, ElementTetP1,
+                           ElementTetP2, ElementTriP1, ElementTriP2)
+from skfem.mesh import (MeshHex, MeshLine, MeshQuad, MeshQuad2, MeshTet,
+                        MeshTet2, MeshTri, MeshTri2)
+from skfem.models.poisson import laplace, mass, unit_load
 
 
 class Line1D(unittest.TestCase):
@@ -67,10 +66,11 @@ class LineNegative1D(unittest.TestCase):
     e = ElementLineP1()
 
     def runTest(self):
-        m = MeshLine(np.linspace(0., 1.)).refined(2)
+        m = MeshLine(np.linspace(0., 1.)).refined(2).with_boundaries({
+            'left': lambda x: x[0] == 0.0,
+            'right': lambda x: x[0] == 1.0,
+        })
         ib = InteriorBasis(m, self.e)
-        m.define_boundary('left' ,lambda x: x[0] == 0.0)
-        m.define_boundary('right', lambda x: x[0] == 1.0)
         fb = FacetBasis(m, self.e, facets=m.boundaries['right'])
 
         @LinearForm
@@ -228,17 +228,21 @@ class SolveCirclePoisson(unittest.TestCase):
     mesh_type = MeshTri2
     element_type = ElementTriP1
     filename = "quadratic_tri.msh"
+    maxval = 0.06243516822727334
+
+    def init_mesh(self):
+        path = Path(__file__).parents[1] / 'docs' / 'examples' / 'meshes'
+        return self.mesh_type.load(path / self.filename)
 
     def runTest(self):
-        path = Path(__file__).parents[1] / 'docs' / 'examples' / 'meshes'
-        m = self.mesh_type.load(path / self.filename)
+        m = self.init_mesh()
         basis = InteriorBasis(m, self.element_type())
 
         A = laplace.assemble(basis)
         b = unit_load.assemble(basis)
         x = solve(*condense(A, b, D=basis.get_dofs()))
 
-        self.assertAlmostEqual(np.max(x), 0.06261690318912218, places=3)
+        self.assertAlmostEqual(np.max(x), self.maxval, places=3)
 
 
 class SolveCirclePoissonQuad(SolveCirclePoisson):
@@ -260,6 +264,36 @@ class SolveCirclePoissonTri2(SolveCirclePoisson):
     mesh_type = MeshTri2
     element_type = ElementTriP2
     filename = "quadratic_tri.msh"
+
+
+class SolveCirclePoissonTri2Init(SolveCirclePoissonTri2):
+
+    def init_mesh(self):
+        return self.mesh_type.init_circle().scaled(0.5)
+
+
+class SolveCirclePoissonTet(SolveCirclePoisson):
+
+    mesh_type = MeshTet
+    element_type = ElementTetP1
+    maxval = 0.0405901240018571
+
+    def init_mesh(self):
+        return self.mesh_type.init_ball().scaled(0.5)
+
+
+class SolveCirclePoissonTet2(SolveCirclePoissonTet):
+
+    mesh_type = MeshTet2
+    element_type = ElementTetP2
+
+
+class SolveCirclePoissonTet2(SolveCirclePoisson):
+
+    mesh_type = MeshTet2
+    element_type = ElementTetP2
+    filename = "quadratic_sphere_tet.msh"
+    maxval = 0.0405901240018571
 
 
 

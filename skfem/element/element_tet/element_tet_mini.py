@@ -1,23 +1,21 @@
 import numpy as np
 
 from ..element_h1 import ElementH1
-from ...mesh.mesh3d import MeshTet
+from ...refdom import RefTet
 
 
 class ElementTetMini(ElementH1):
 
     nodal_dofs = 1
     interior_dofs = 1
-    dim = 3
-    maxdeg = 1 + dim
+    maxdeg = 4
     dofnames = ['u', 'NA']
     doflocs = np.array([[0., 0., 0.],
                         [1., 0., 0.],
                         [0., 1., 0.],
                         [0., 0., 1.],
-                        [np.nan] * dim])
-
-    mesh_type = MeshTet
+                        [np.nan, np.nan, np.nan]])
+    refdom = RefTet
 
     def lbasis(self, X, i):
         x, y, z = X
