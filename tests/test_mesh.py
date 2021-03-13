@@ -84,7 +84,8 @@ class SaveLoadCycle(unittest.TestCase):
         m.save(f.name + ".vtk")
         with self.assertWarnsRegex(UserWarning, '^Unable to load tagged'):
             m2 = Mesh.load(f.name + ".vtk")
-        self.assertTrue(((m.p[0, :] - m2.p[0, :]) < 1e-6).all())
+        self.assertTrue(((m.p - m2.p) < 1e-6).all())
+        self.assertTrue(((m.t - m2.t) < 1e-6).all())
 
 
 class SaveLoadCycleHex(SaveLoadCycle):

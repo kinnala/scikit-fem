@@ -141,7 +141,12 @@ def from_file(filename):
 
 
 def to_meshio(mesh, point_data=None):
-    cells = {TYPE_MESH_MAPPING[type(mesh)]: mesh.t.T}
+
+    t = mesh.t.copy()
+    if isinstance(mesh, skfem.MeshHex):
+        t = t[[0, 3, 6, 2, 1, 5, 7, 4]]
+
+    cells = {TYPE_MESH_MAPPING[type(mesh)]: t.T}
     return meshio.Mesh(mesh.p.T, cells, point_data)
 
 
