@@ -80,7 +80,7 @@ mesh = MeshTri(
               [0., 1.]]).T,
     np.array([[0, 1, 2]]).T,
 )
-mesh = MeshTri.load("docs/examples/square.msh")
+mesh = MeshTri.load("docs/examples/meshes/square.msh")
 mesh = MeshTet.init_tensor(*((np.linspace(0, 1, 60),) * 3))
 ```
 
