@@ -28,7 +28,7 @@ from skfem.models.poisson import laplace, unit_load
 
 import numpy as np
 
-from docs.examples.ex17 import mesh, basis, radii,\
+from .ex17 import mesh, basis, radii,\
     joule_heating, thermal_conductivity
 
 
