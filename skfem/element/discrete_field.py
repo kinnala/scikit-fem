@@ -7,7 +7,7 @@ from numpy import ndarray
 class DiscreteField(NamedTuple):
     """A function defined at the global quadrature points."""
 
-    value: Optional[ndarray] = None
+    value: ndarray
     grad: Optional[ndarray] = None
     div: Optional[ndarray] = None
     curl: Optional[ndarray] = None
