@@ -1,7 +1,7 @@
 import numpy as np
 
 from ..element_h1 import ElementH1
-from ...mesh.mesh2d import MeshQuad
+from ...refdom import RefQuad
 
 
 class ElementQuad2(ElementH1):
@@ -9,7 +9,6 @@ class ElementQuad2(ElementH1):
     nodal_dofs = 1
     facet_dofs = 1
     interior_dofs = 1
-    dim = 2
     maxdeg = 4
     dofnames = ["u", "u", "u"]
     doflocs = np.array([[0.0, 0.0],
@@ -21,7 +20,7 @@ class ElementQuad2(ElementH1):
                         [0.5, 1.0],
                         [0.0, 0.5],
                         [0.5, 0.5]])
-    mesh_type = MeshQuad
+    refdom = RefQuad
 
     def lbasis(self, X, i):
         X = 2 * X - 1

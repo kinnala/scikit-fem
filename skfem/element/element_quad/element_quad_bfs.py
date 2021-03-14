@@ -1,13 +1,12 @@
 import numpy as np
 
 from ..element_global import ElementGlobal
-from ...mesh.mesh2d import MeshQuad
+from ...refdom import RefQuad
 
 
 class ElementQuadBFS(ElementGlobal):
 
     nodal_dofs = 4
-    dim = 2
     maxdeg = 6
     tensorial_basis = True
     dofnames = ['u', 'u_x', 'u_y', 'u_xy']
@@ -27,7 +26,7 @@ class ElementQuadBFS(ElementGlobal):
                         [0., 1.],
                         [0., 1.],
                         [0., 1.]])
-    mesh_type = MeshQuad
+    refdom = RefQuad
 
     def gdof(self, F, w, i):
         if i >= 16 or i < 0:

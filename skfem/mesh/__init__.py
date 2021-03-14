@@ -21,16 +21,19 @@ constructor :meth:`~skfem.mesh.Mesh.load`.
 
 """
 
-from .mesh import Mesh, MeshType
-from .mesh_line import MeshLine
-from .mesh2d import (Mesh2D, MeshTri, MeshQuad,
-                     MeshTri2, MeshQuad2)
-from .mesh3d import Mesh3D, MeshTet, MeshHex
+from .mesh import Mesh
+from .mesh import Mesh2D
+from .mesh import Mesh3D
+from .mesh import MeshLine1 as MeshLine
+from .mesh import MeshTri1 as MeshTri
+from .mesh import MeshQuad1 as MeshQuad
+from .mesh import MeshTet1 as MeshTet
+from .mesh import MeshHex1 as MeshHex
+from .mesh import MeshTri2, MeshQuad2, MeshTet2, MeshHex2
 
 
 __all__ = [
     "Mesh",
-    "MeshType",
     "MeshLine",
     "Mesh2D",
     "MeshTri",
@@ -39,4 +42,7 @@ __all__ = [
     "MeshQuad2",
     "Mesh3D",
     "MeshTet",
-    "MeshHex"]
+    "MeshTet2",
+    "MeshHex",
+    "MeshHex2",
+]

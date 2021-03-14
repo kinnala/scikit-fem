@@ -2,7 +2,7 @@ import numpy as np
 from numpy.linalg import inv
 
 from ..element_h1 import ElementH1
-from ...mesh.mesh3d import MeshHex
+from ...refdom import RefHex
 
 
 class ElementHex2(ElementH1):
@@ -11,7 +11,6 @@ class ElementHex2(ElementH1):
     facet_dofs = 1
     edge_dofs = 1
     interior_dofs = 1
-    dim = 3
     maxdeg = 6
     dofnames = ['u', 'u', 'u', 'u']
     doflocs = np.array([[1., 1., 1.],
@@ -41,7 +40,7 @@ class ElementHex2(ElementH1):
                         [.5, .5, 0.],
                         [0., .5, .5],
                         [.5, .5, .5]])
-    mesh_type = MeshHex
+    refdom = RefHex
 
     def __init__(self):
         X = self.doflocs.T

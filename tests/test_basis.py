@@ -4,7 +4,7 @@ import pytest
 import numpy as np
 from numpy.testing import assert_allclose, assert_almost_equal
 
-from skfem import BilinearForm, asm, solve, condense, project
+from skfem import BilinearForm, asm, solve, condense, projection
 from skfem.mesh import MeshTri, MeshTet, MeshHex, MeshQuad, MeshLine
 from skfem.assembly import InteriorBasis, FacetBasis, Dofs, Functional
 from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
@@ -21,21 +21,14 @@ class TestCompositeSplitting(TestCase):
         """Solve Stokes problem, try splitting and other small things."""
 
         m = MeshTri().refined()
-        m.define_boundary('centreline', lambda x: x[0] == .5,
-                          boundaries_only=False)
-        m = m.refined(3)
+        m = m.refined(3).with_boundaries({
+            'up': lambda x: x[1] == 1.,
+            'rest': lambda x: x[1] != 1.,
+        })
 
         e = ElementVectorH1(ElementTriP2()) * ElementTriP1()
 
-        m.define_boundary('up', lambda x: x[1] == 1.)
-        m.define_boundary('rest', lambda x: x[1] != 1.)
-
         basis = InteriorBasis(m, e)
-        self.assertEqual(
-            basis.get_dofs(m.boundaries['centreline']).all().size,
-            (2 + 1) * (2**(1 + 3) + 1) + 2 * 2**(1 + 3))
-        self.assertEqual(basis.find_dofs()['centreline'].all().size,
-                         (2 + 1) * (2**(1 + 3) + 1) + 2 * 2**(1 + 3))
 
         @BilinearForm
         def bilinf(u, p, v, q, w):
@@ -136,7 +129,7 @@ class TestInterpolatorTet(TestCase):
     def runTest(self):
         m = self.mesh_type().refined(self.nrefs)
         basis = InteriorBasis(m, self.element_type())
-        x = project(lambda x: x[0] ** 2, basis_to=basis)
+        x = projection(lambda x: x[0] ** 2, basis)
         fun = basis.interpolator(x)
         X = np.linspace(0, 1, 10)
         dim = m.dim()
@@ -168,6 +161,12 @@ class TestInterpolatorQuad(TestInterpolatorTet):
     element_type = ElementQuad2
 
 
+class TestInterpolatorHex(TestInterpolatorTet):
+
+    mesh_type = MeshHex
+    element_type = ElementHex2
+
+
 class TestInterpolatorLine(TestInterpolatorTet):
 
     mesh_type = MeshLine
@@ -194,19 +193,19 @@ class TestIncompatibleMeshElement(TestCase):
 @pytest.mark.parametrize(
     "mtype,e1,e2",
     [
-        (MeshTri, ElementTriP1(), ElementLineP0()),
-        (MeshTri, ElementTriP1(), ElementLineP1()),
-        (MeshTri, ElementTriP2(), ElementLineP1()),
-        (MeshTri, ElementTriP2(), ElementLineP2()),
+        (MeshTri, ElementTriP1(), ElementTriP0()),
+        (MeshTri, ElementTriP1(), ElementTriP1()),
+        (MeshTri, ElementTriP2(), ElementTriP1()),
+        (MeshTri, ElementTriP2(), ElementTriP2()),
         (MeshTri, ElementTriP2(), None),
-        (MeshQuad, ElementQuad1(), ElementLineP0()),
-        (MeshQuad, ElementQuad1(), ElementLineP1()),
-        (MeshQuad, ElementQuad2(), ElementLineP2()),
-        (MeshTet, ElementTetP1(), ElementTriP0()),
-        (MeshTet, ElementTetP2(), ElementTriP2()),
-        (MeshHex, ElementHex1(), ElementQuad0()),
-        (MeshHex, ElementHex1(), ElementQuad1()),
-        (MeshHex, ElementHex2(), ElementQuad2()),
+        (MeshQuad, ElementQuad1(), ElementQuad0()),
+        (MeshQuad, ElementQuad1(), ElementQuad1()),
+        (MeshQuad, ElementQuad2(), ElementQuad2()),
+        (MeshTet, ElementTetP1(), ElementTetP0()),
+        (MeshTet, ElementTetP2(), ElementTetP2()),
+        (MeshHex, ElementHex1(), ElementHex0()),
+        (MeshHex, ElementHex1(), ElementHex1()),
+        (MeshHex, ElementHex2(), ElementHex2()),
     ]
 )
 def test_trace(mtype, e1, e2):
@@ -216,7 +215,7 @@ def test_trace(mtype, e1, e2):
     # use the boundary where last coordinate is zero
     basis = FacetBasis(m, e1,
                        facets=m.facets_satisfying(lambda x: x[x.shape[0] - 1] == 0.0))
-    xfun = project(lambda x: x[0], basis_to=InteriorBasis(m, e1))
+    xfun = projection(lambda x: x[0], InteriorBasis(m, e1))
     nbasis, y = basis.trace(xfun, lambda p: p[0:(p.shape[0] - 1)], target_elem=e2)
 
     @Functional

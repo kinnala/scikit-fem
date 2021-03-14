@@ -1,4 +1,3 @@
-import warnings
 from typing import NamedTuple, Optional
 
 import numpy as np
@@ -21,13 +20,48 @@ class DiscreteField(NamedTuple):
     def __array__(self):
         return self.value
 
+    def __add__(self, other):
+        if isinstance(other, DiscreteField):
+            return self.value + other.value
+        return self.value + other
+
+    def __sub__(self, other):
+        if isinstance(other, DiscreteField):
+            return self.value - other.value
+        return self.value - other
+
     def __mul__(self, other):
         if isinstance(other, DiscreteField):
             return self.value * other.value
         return self.value * other
 
+    def __truediv__(self, other):
+        if isinstance(other, DiscreteField):
+            return self.value / other.value
+        return self.value / other
+
+    def __pow__(self, other):
+        if isinstance(other, DiscreteField):
+            return self.value ** other.value
+        return self.value ** other
+
+    def __neg__(self):
+        return -self.value
+
+    def __radd__(self, other):
+        return self.__add__(other)
+
+    def __rsub__(self, other):
+        return other - self.value
+
     def __rmul__(self, other):
         return self.__mul__(other)
+
+    def __rtruediv__(self, other):
+        return other / self.value
+
+    def __rpow__(self, other):
+        return other ** self.value
 
     def _split(self):
         """Split all components based on their first dimension."""
@@ -43,40 +77,3 @@ class DiscreteField(NamedTuple):
             return np.zeros_like(x)
 
         return DiscreteField(*[zero_or_none(field) for field in self])
-
-    @property
-    def hod(self):
-        """For backwards compatibility."""
-        return np.array([
-            self.grad3,
-            self.grad4,
-            self.grad5,
-            self.grad6,
-        ], dtype=object)
-
-    @property
-    def f(self):
-        """For backwards compatibility."""
-        warnings.warn("The field 'f' is renamed to 'value'.",
-                      DeprecationWarning)
-        return self.value
-
-    @property
-    def df(self):
-        """For backwards compatibility."""
-        warnings.warn("The field 'df' is renamed to 'grad/div/curl'.",
-                      DeprecationWarning)
-        if self.grad is not None:
-            return self.grad
-        elif self.div is not None:
-            return self.div
-        elif self.curl is not None:
-            return self.curl
-        return None
-
-    @property
-    def ddf(self):
-        """For backwards compatibility."""
-        warnings.warn("The field 'ddf' is renamed to 'hess'.",
-                      DeprecationWarning)
-        return self.hess

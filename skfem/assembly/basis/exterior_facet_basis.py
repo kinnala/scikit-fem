@@ -1,15 +1,12 @@
-from typing import Callable, Dict, Optional, Tuple, Type
+from typing import Callable, Optional, Tuple
 
 import numpy as np
 from numpy import ndarray
-from skfem.element import (DiscreteField, Element, ElementHex0, ElementHex1,
-                           ElementHex2, ElementLineP0, ElementLineP1,
-                           ElementLineP2, ElementQuad0, ElementQuad1,
-                           ElementQuad2, ElementTetP0, ElementTetP1,
-                           ElementTetP2, ElementTriP0, ElementTriP1,
-                           ElementTriP2)
+from skfem.element import (BOUNDARY_ELEMENT_MAP, DiscreteField, Element,
+                           ElementHex0, ElementQuad0, ElementTetP0,
+                           ElementTriP0)
 from skfem.mapping import Mapping
-from skfem.mesh import Mesh, MeshHex, MeshQuad, MeshTet, MeshTri
+from skfem.mesh import Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 
 from .basis import Basis
 from .interior_basis import InteriorBasis
@@ -105,7 +102,7 @@ class ExteriorFacetBasis(Basis):
                        elem: Element) -> ndarray:
         """Trace mesh basis projection."""
 
-        from skfem.utils import project
+        from skfem.utils import projection
 
         fbasis = ExteriorFacetBasis(self.mesh,
                                     elem,
@@ -121,7 +118,7 @@ class ExteriorFacetBasis(Basis):
                 I = fbasis.dofs.interior_dofs[:, self.tind].flatten()
             else:
                 raise ValueError
-        return project(x, self, fbasis, I=I)
+        return projection(x, fbasis, self, I=I)
 
     def trace(self,
               x: ndarray,
@@ -145,7 +142,7 @@ class ExteriorFacetBasis(Basis):
             A function defining the projection of the boundary points.  See
             above for an example.
         target_elem
-            Optional lower-dimensional finite element to project to.  If not
+            Optional finite element to project to before restriction.  If not
             given, a piecewise constant element is used.
 
         Returns
@@ -157,10 +154,10 @@ class ExteriorFacetBasis(Basis):
 
         """
         DEFAULT_TARGET = {
-            MeshTri: ElementLineP0,
-            MeshQuad: ElementLineP0,
-            MeshTet: ElementTriP0,
-            MeshHex: ElementQuad0,
+            MeshTri: ElementTriP0,
+            MeshQuad: ElementQuad0,
+            MeshTet: ElementTetP0,
+            MeshHex: ElementHex0,
         }
 
         meshcls = type(self.mesh)
@@ -169,29 +166,19 @@ class ExteriorFacetBasis(Basis):
         if target_elem is None:
             target_elem = DEFAULT_TARGET[meshcls]()
 
-        ELEMENT_MAP: Dict[Tuple[Type[Element], Type[Mesh]], Type[Element]] = {
-            (ElementLineP0, MeshTri): ElementTriP0,
-            (ElementLineP1, MeshTri): ElementTriP1,
-            (ElementLineP2, MeshTri): ElementTriP2,
-            (ElementLineP0, MeshQuad): ElementQuad0,
-            (ElementLineP1, MeshQuad): ElementQuad1,
-            (ElementLineP2, MeshQuad): ElementQuad2,
-            (ElementTriP0, MeshTet): ElementTetP0,
-            (ElementTriP1, MeshTet): ElementTetP1,
-            (ElementTriP2, MeshTet): ElementTetP2,
-            (ElementQuad0, MeshHex): ElementHex0,
-            (ElementQuad1, MeshHex): ElementHex1,
-            (ElementQuad2, MeshHex): ElementHex2,
-        }
-
-        if (type(target_elem), meshcls) not in ELEMENT_MAP:
-            raise Exception("The specified 'elem' not supported.")
-        elemcls = ELEMENT_MAP[(type(target_elem), meshcls)]
-        target_meshcls = type(target_elem).mesh_type
+        if type(target_elem) not in BOUNDARY_ELEMENT_MAP:
+            raise Exception("The specified element not supported.")
+        elemcls = BOUNDARY_ELEMENT_MAP[type(target_elem)]
+        target_meshcls = {
+            MeshTri: MeshLine,
+            MeshQuad: MeshLine,
+            MeshTet: MeshTri,
+            MeshHex: MeshQuad,
+        }[meshcls]
 
         p, t = self.mesh._reix(self.mesh.facets[:, self.find])
 
         return (
-            InteriorBasis(target_meshcls(projection(p), t), target_elem),
-            self._trace_project(x, elemcls())
+            InteriorBasis(target_meshcls(projection(p), t), elemcls()),
+            self._trace_project(x, target_elem)
         )

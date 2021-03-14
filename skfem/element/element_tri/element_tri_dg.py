@@ -1,11 +1,10 @@
 from ..element_h1 import ElementH1
-from ...mesh.mesh2d import MeshTri
+from ...refdom import RefTri
 
 
 class ElementTriDG(ElementH1):
 
-    dim = 2
-    mesh_type = MeshTri
+    refdom = RefTri
 
     def __init__(self, elem):
         # change all dofs to interior dofs

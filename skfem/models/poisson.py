@@ -1,7 +1,7 @@
 """Poisson equation."""
 
 from skfem.assembly import BilinearForm, LinearForm
-from .helpers import grad, dot, ddot
+from skfem.helpers import grad, dot, ddot
 
 
 @BilinearForm

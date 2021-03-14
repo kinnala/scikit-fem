@@ -1,14 +1,13 @@
 import numpy as np
 
 from ..element_h1 import ElementH1
-from ...mesh.mesh2d import MeshTri
+from ...refdom import RefTri
 
 
 class ElementTriP2(ElementH1):
 
     nodal_dofs = 1
     facet_dofs = 1
-    dim = 2
     maxdeg = 2
     dofnames = ['u', 'u']
     doflocs = np.array([[0., 0.],
@@ -17,7 +16,7 @@ class ElementTriP2(ElementH1):
                         [.5, 0.],
                         [.5, .5],
                         [0., .5]])
-    mesh_type = MeshTri
+    refdom = RefTri
 
     def lbasis(self, X, i):
         x, y = X

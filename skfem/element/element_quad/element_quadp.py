@@ -1,14 +1,13 @@
 import numpy as np
 
-from ...mesh import MeshQuad
+from ...refdom import RefQuad
 from ..element_line import ElementLinePp
 
 
 class ElementQuadP(ElementLinePp):
 
     nodal_dofs = 1
-    dim = 2
-    mesh_type = MeshQuad
+    refdom = RefQuad
 
     def __init__(self, p):
 

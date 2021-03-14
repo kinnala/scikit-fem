@@ -241,6 +241,20 @@ class ConvergenceHex1(ConvergenceQ1):
         self.mesh = MeshHex().refined(2)
 
 
+class ConvergenceHexSplitTet1(ConvergenceQ1):
+
+    rateL2 = 2.0
+    rateH1 = 1.0
+    eps = 0.18
+
+    def create_basis(self, m):
+        e = ElementTetP1()
+        return InteriorBasis(m, e)
+
+    def setUp(self):
+        self.mesh = MeshHex().refined(2).to_meshtet()
+
+
 class ConvergenceHexS2(ConvergenceQ1):
 
     rateL2 = 3.05

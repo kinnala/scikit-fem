@@ -1,19 +1,18 @@
 import numpy as np
 
 from ..element_hdiv import ElementHdiv
-from ...mesh.mesh2d import MeshTri
+from ...refdom import RefTri
 
 
 class ElementTriRT0(ElementHdiv):
 
     facet_dofs = 1
-    dim = 2
     maxdeg = 1
     dofnames = ['u^n']
     doflocs = np.array([[.5, .0],
                         [.5, .5],
                         [.0, .5]])
-    mesh_type = MeshTri
+    refdom = RefTri
 
     def lbasis(self, X, i):
         x, y = X

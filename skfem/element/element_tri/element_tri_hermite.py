@@ -1,14 +1,13 @@
 import numpy as np
 
 from ..element_global import ElementGlobal
-from ...mesh.mesh2d import MeshTri
+from ...refdom import RefTri
 
 
 class ElementTriHermite(ElementGlobal):
 
     nodal_dofs = 3
     interior_dofs = 1
-    dim = 2
     maxdeg = 3
     dofnames = ['u', 'u_x', 'u_y', 'u']
     doflocs = np.array([[0., 0.],
@@ -21,7 +20,7 @@ class ElementTriHermite(ElementGlobal):
                         [0., 1.],
                         [0., 1.],
                         [1 / 3, 1 / 3]])
-    mesh_type = MeshTri
+    refdom = RefTri
 
     def gdof(self, F, w, i):
         if i < 9:

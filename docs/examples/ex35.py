@@ -223,7 +223,7 @@ from pathlib import Path
 
 from skfem.mesh import MeshTri
 from skfem.assembly import InteriorBasis, FacetBasis
-from skfem.utils import solve, asm, condense, project
+from skfem.utils import solve, asm, condense, projection
 from skfem.element import ElementTriP1
 from skfem.models.poisson import laplace, unit_load, mass
 from skfem.io.json import from_file
@@ -318,11 +318,11 @@ voltage = 1
 
 # initialize the non-homogeneous Dirichlet conditions on the conductor surfaces
 U = np.zeros(K_elec.shape[0])
-U[dofs['inner_conductor_outer_surface'].all()] = project(
-    lambda x: voltage/2, basis_to=inner_conductor_outer_surface_basis,
+U[dofs['inner_conductor_outer_surface'].all()] = projection(
+    lambda x: voltage/2, inner_conductor_outer_surface_basis,
     I=dofs['inner_conductor_outer_surface'])
-U[dofs['outer_conductor_inner_surface'].all()] = project(
-    lambda x: -voltage/2, basis_to=outer_conductor_inner_surface_basis,
+U[dofs['outer_conductor_inner_surface'].all()] = projection(
+    lambda x: -voltage/2, outer_conductor_inner_surface_basis,
     I=dofs['outer_conductor_inner_surface'])
 
 U = solve(*condense(
@@ -353,11 +353,11 @@ if __name__ == '__main__':
     from skfem.visuals.matplotlib import plot, savefig
     import matplotlib.pyplot as plt
 
-    B_x = project(A, global_basis, global_basis, 1)
-    B_y = -project(A, global_basis, global_basis, 0)
+    B_x = projection(A, global_basis, global_basis, 1)
+    B_y = -projection(A, global_basis, global_basis, 0)
 
-    E_x = -project(U, global_basis, global_basis, 0)
-    E_y = -project(U, global_basis, global_basis, 1)
+    E_x = -projection(U, global_basis, global_basis, 0)
+    E_y = -projection(U, global_basis, global_basis, 1)
 
     fig = plt.figure(figsize=(11.52, 5.12))
 

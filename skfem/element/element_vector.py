@@ -6,7 +6,6 @@ from .discrete_field import DiscreteField
 class ElementVector(Element):
 
     def __init__(self, elem):
-        self.dim = elem.dim
         self.elem = elem
 
         # multiplicate number of dofs
@@ -20,13 +19,17 @@ class ElementVector(Element):
                          for i in elem.dofnames
                          for j in range(self.dim)]
         self.maxdeg = elem.maxdeg
-        self.mesh_type = elem.mesh_type
+        self.refdom = elem.refdom
 
         if hasattr(elem, 'doflocs'):
             self.doflocs = np.array([
                 elem.doflocs[int(np.floor(float(i) / float(self.dim)))]
                 for i in range(self.dim * elem.doflocs.shape[0])
             ])
+
+    @property
+    def dim(self):
+        return self.elem.dim
 
     def gbasis(self, mapping, X, i, tind=None):
         """Set correct components to zero based on ``i``."""

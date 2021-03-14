@@ -21,8 +21,13 @@ def draw(m, **kwargs) -> Axes:
 
 @draw.register(InteriorBasis)
 def draw_basis(ib: InteriorBasis, **kwargs) -> Axes:
-    Nrefs = kwargs["Nrefs"] if "Nrefs" in kwargs else 1
-    m, _ = ib.refinterp(ib.mesh.p[0], Nrefs=Nrefs)
+    if "nrefs" in kwargs:
+        nrefs = kwargs["nrefs"]
+    elif "Nrefs" in kwargs:
+        nrefs = kwargs["Nrefs"]
+    else:
+        nrefs = 1
+    m, _ = ib.refinterp(ib.mesh.p[0], nrefs=nrefs)
     return draw(m, boundaries_only=True, **kwargs)
 
 
@@ -225,8 +230,13 @@ def plot_meshquad(m: MeshQuad, z, **kwargs):
 @plot.register(InteriorBasis)
 def plot_basis(basis: InteriorBasis, z: ndarray, **kwargs) -> Axes:
     """Plot on a refined mesh via :meth:`InteriorBasis.refinterp`."""
-    Nrefs = kwargs["Nrefs"] if "Nrefs" in kwargs else 1
-    return plot(*basis.refinterp(z, Nrefs=Nrefs), **kwargs)
+    if "nrefs" in kwargs:
+        nrefs = kwargs["nrefs"]
+    elif "Nrefs" in kwargs:
+        nrefs = kwargs["Nrefs"]
+    else:
+        nrefs = 1
+    return plot(*basis.refinterp(z, nrefs=nrefs), **kwargs)
 
 
 @singledispatch
@@ -269,8 +279,13 @@ def plot3_meshtri(m: MeshTri, z: ndarray, **kwargs) -> Axes:
 @plot3.register(InteriorBasis)
 def plot3_basis(basis: InteriorBasis, z: ndarray, **kwargs) -> Axes:
     """Plot on a refined mesh via :meth:`InteriorBasis.refinterp`."""
-    Nrefs = kwargs["Nrefs"] if "Nrefs" in kwargs else 1
-    return plot3(*basis.refinterp(z, Nrefs=Nrefs), **kwargs)
+    if "nrefs" in kwargs:
+        nrefs = kwargs["nrefs"]
+    elif "Nrefs" in kwargs:
+        nrefs = kwargs["Nrefs"]
+    else:
+        nrefs = 1
+    return plot3(*basis.refinterp(z, nrefs=nrefs), **kwargs)
 
 
 def savefig(*args, **kwargs):
