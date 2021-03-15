@@ -117,7 +117,7 @@ if __name__ == '__main__':
     def update(event):
         t, u = event
 
-        u0 = {'skfem': basis.interpolator(u)(np.zeros((2, 1)))[0],
+        u0 = {'skfem': basis.probes(np.zeros((2, 1)))(u)[0],
               'exact': np.exp(-diffusivity * np.pi**2 * t / 4 *
                               sum(halfwidth**-2))}
         print('{:4.2f}, {:5.3f}, {:+7.4f}'.format(

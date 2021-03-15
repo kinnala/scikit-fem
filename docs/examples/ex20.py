@@ -50,7 +50,7 @@ stokes = asm(biharmonic, ib)
 rotf = asm(unit_load, ib)
 
 psi = solve(*condense(stokes, rotf, D=ib.find_dofs()))
-(psi0,) = ib.interpolator(psi)(np.zeros((2, 1)))
+(psi0,) = ib.probes(np.zeros((2, 1)))(psi)
 
 velocity = asm(
     LinearForm(curluv).partial(ib.interpolate(psi)),

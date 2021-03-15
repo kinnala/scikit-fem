@@ -131,20 +131,30 @@ class InteriorBasis(Basis):
 
         return M, w.flatten()
 
-    def interpolator(self, y: ndarray) -> Callable[[ndarray], ndarray]:
+    def probes(self, x: np.ndarray) -> Callable[[np.ndarray], np.ndarray]:
         """Return a function handle, which can be used for finding
-        pointwise values of the given solution vector."""
+        the values on points `x` of a given solution vector."""
 
         finder = self.mesh.element_finder(mapping=self.mapping)
+        cells = finder(*x)
+        pts = self.mapping.invF(x[:, :, np.newaxis], tind=cells)
+        phis = np.array([
+            self.elem.gbasis(self.mapping, pts, k, tind=cells)[0][0].flatten()
+            for k in range(self.Nbfun)
+        ])
+        indices = self.element_dofs[:, cells]
 
-        def interpfun(x):
-            tris = finder(*x)
-            pts = self.mapping.invF(x[:, :, np.newaxis], tind=tris)
-            w = np.zeros(x.shape[1])
-            for k in range(self.Nbfun):
-                phi = self.elem.gbasis(self.mapping, pts, k, tind=tris)[0]
-                w += y[self.element_dofs[k, tris]] * phi[0].flatten()
-            return w
+        def interpolator(y: np.ndarray) -> np.ndarray:
+            return np.sum(phis * y[indices], 0)
+
+        return interpolator
+
+    def interpolator(self, y: ndarray) -> Callable[[ndarray], ndarray]:
+        """Return a function handle, which can be used for finding
+        values of the given solution vector `y` on given points."""
+
+        def interpfun(x: np.ndarray) -> np.ndarray:
+            return self.probes(x)(y)
 
         return interpfun
 

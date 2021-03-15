@@ -36,7 +36,7 @@ x = solve(*condense(A, b, D=basis.find_dofs()))
 
 area = sum(b)
 k = b @ x / area**2
-k1, = basis.interpolator(x)(np.zeros((2, 1))) / area
+k1, = basis.probes(np.zeros((2, 1)))(x) / area
 
 if __name__ == '__main__':
     from skfem.visuals.matplotlib import plot, show
