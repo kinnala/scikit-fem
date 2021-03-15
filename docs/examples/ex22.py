@@ -65,17 +65,19 @@ if __name__ == "__main__":
     from skfem.visuals.matplotlib import draw, plot, show
     draw(m)
 
-for itr in range(9): # 9 adaptive refinements
-    if itr > 0:
-        m = m.refined(adaptive_theta(eval_estimator(m, u)))
+for itr in reversed(range(9)):
         
     basis = InteriorBasis(m, e)
     
     K = asm(laplace, basis)
     f = asm(load, basis)
-    
+
     I = m.interior_nodes()
     u = solve(*condense(K, f, I=I))
+        
+    if itr > 0:
+        m = m.refined(adaptive_theta(eval_estimator(m, u)))
+
 
 if __name__ == "__main__":
     draw(m)
