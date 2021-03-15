@@ -1,13 +1,14 @@
 """Import mesh from JSON as defined by :class:`skfem.mesh.to_dict`."""
 
 import json
+from os import PathLike
 from typing import Type
 
 from skfem.mesh import (MeshLine, MeshTri, MeshQuad,
                         MeshTet, MeshHex, Mesh)
 
 
-def from_file(filename: str) -> Mesh:
+def from_file(filename: PathLike) -> Mesh:
     with open(filename, 'r') as handle:
         d = json.load(handle)
 

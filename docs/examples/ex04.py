@@ -105,7 +105,7 @@ limit = 0.3
 # assemble the stiffness matrices
 K1 = asm(weakform1, ib)
 K2 = asm(weakform2, Ib)
-K = [[K1, 0.], [0., K2]]
+K_blocks = [[K1, 0.], [0., K2]]
 f = [None] * 2
 
 
@@ -127,7 +127,7 @@ for i in range(2):
             return ((1. / (alpha * w.h) * ju * jv - mu * jv - mv * ju)
                     * (np.abs(w.x[1]) <= limit))
 
-        K[i][j] += asm(bilin_mortar, mb[j], mb[i])
+        K_blocks[i][j] += asm(bilin_mortar, mb[j], mb[i])
 
     @LinearForm
     def lin_mortar(v, w):
@@ -139,7 +139,7 @@ for i in range(2):
     f[i] = asm(lin_mortar, mb[i])
 
 import scipy.sparse
-K = (scipy.sparse.bmat(K)).tocsr()
+K = (scipy.sparse.bmat(K_blocks)).tocsr()
 
 # set boundary conditions and solve
 i1 = np.arange(K1.shape[0])
