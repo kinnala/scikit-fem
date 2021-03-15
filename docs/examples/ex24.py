@@ -83,7 +83,7 @@ if __name__ == '__main__':
             color='k')
 
     n_streamlines = 11
-    plot = partial(ax.tricontour,
+    contour = partial(ax.tricontour,
                    Triangulation(*mesh.p, mesh.t.T),
                    psi[basis['psi'].nodal_dofs.flatten()],
                    linewidths=1.)
@@ -95,7 +95,7 @@ if __name__ == '__main__':
              'r', 'solid'),
             (np.linspace(min(psi), 0, n_streamlines)[:-1],
              'g', 'solid')]:
-        plot(levels=levels, colors=color, linestyles=style)
+        contour(levels=levels, colors=color, linestyles=style)
 
     ax.set_aspect(1.)
     ax.axis('off')
