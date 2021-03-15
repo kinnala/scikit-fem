@@ -138,16 +138,14 @@ class InteriorBasis(Basis):
         finder = self.mesh.element_finder(mapping=self.mapping)
         cells = finder(*x)
         pts = self.mapping.invF(x[:, :, np.newaxis], tind=cells)
-        phis = [
-            self.elem.gbasis(self.mapping, pts, k, tind=cells)[0][0]
+        phis = np.array([
+            self.elem.gbasis(self.mapping, pts, k, tind=cells)[0][0].flatten()
             for k in range(self.Nbfun)
-        ]
+        ])
+        indices = self.element_dofs[:, cells]
 
         def interpolator(y: np.ndarray) -> np.ndarray:
-            w = np.zeros(x.shape[1])
-            for k, phi in enumerate(phis):
-                w += y[self.element_dofs[k, cells]] * phi.flatten()
-            return w
+            return np.sum(phis * y[indices], 0)
 
         return interpolator
 
