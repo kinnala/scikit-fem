@@ -84,9 +84,9 @@ if __name__ == '__main__':
 
     n_streamlines = 11
     contour = partial(ax.tricontour,
-                   Triangulation(*mesh.p, mesh.t.T),
-                   psi[basis['psi'].nodal_dofs.flatten()],
-                   linewidths=1.)
+                      Triangulation(*mesh.p, mesh.t.T),
+                      psi[basis['psi'].nodal_dofs.flatten()],
+                      linewidths=1.)
     for levels, color, style in [
             (np.linspace(0, 2/3, n_streamlines),
              'k',
