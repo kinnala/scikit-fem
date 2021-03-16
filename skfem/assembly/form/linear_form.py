@@ -1,10 +1,12 @@
 from typing import Optional
+from functools import lru_cache
 
 import numpy as np
 from numpy import ndarray
 
 from .form import Form, FormDict
 from ..basis import Basis
+from skfem.generic_utils import HashableNdArray
 
 
 class LinearForm(Form):
@@ -34,7 +36,7 @@ class LinearForm(Form):
         vbasis = ubasis
 
         nt = vbasis.nelems
-        dx = vbasis.dx
+        dx = HashableNdArray(ubasis.dx)
         w = FormDict({**vbasis.default_parameters(), **self.dictify(kwargs)})
 
         # initialize COO data structures
@@ -43,13 +45,24 @@ class LinearForm(Form):
         rows = np.zeros(sz)
         cols = np.zeros(sz)
 
+        ixs = 0  # Track index in the (data, rows, cols) triplets.
         for i in range(vbasis.Nbfun):
-            ixs = slice(nt * i, nt * (i + 1))
-            rows[ixs] = vbasis.element_dofs[i]
-            cols[ixs] = np.zeros(nt)
-            data[ixs] = self._kernel(vbasis.basis[i], w, dx)
+            d = self._kernel(vbasis.basis[i], w, dx)
+            if (d != np.zeros_like(d)).any():
+                r = vbasis.element_dofs[i]
+                ix_slice = slice(ixs, ixs + len(r))
+                rows[ix_slice] = r
+                cols[ix_slice] = np.zeros(nt)
+                data[ix_slice] = d
+                ixs += len(r)
 
-        return self._assemble_numpy_vector(data, rows, cols, (vbasis.N, 1))
+        return self._assemble_numpy_vector(
+            data[0:ixs],
+            rows[0:ixs],
+            cols[0:ixs],
+            (vbasis.N, 1)
+        )
 
+    @lru_cache(maxsize=128)
     def _kernel(self, v, w, dx):
         return np.sum(self.form(*v, w) * dx, axis=1)

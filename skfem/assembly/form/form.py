@@ -14,12 +14,31 @@ from ...element import DiscreteField
 class FormDict(dict):
     """Passed to forms as 'w'."""
 
+    # Immutable and hashable for caching of other functions as Python default
+    # caching requires hashability of function arguments.
+    def __init__(self, *args, **kwargs):
+        super(FormDict, self).__init__(*args, **kwargs)
+        self._hash = None
+
     def __getattr__(self, attr):
         return self[attr].value
 
+    def __hash__(self):
+        if self._hash is None:
+            sorted_keys = tuple(sorted(self.keys()))
+            self._hash = hash((sorted_keys, (self[k] for k in sorted_keys)))
+        return self._hash
+
+    def __setattr__(self, key, value):
+        if key != '_hash':
+            raise Exception('FormDict is immutable.')
+        super(FormDict, self).__setattr__('_hash', value)
+
+    def __setitem__(self, key, value):
+        raise Exception('FormDict is immutable.')
+
 
 class Form:
-
     form: Optional[Callable] = None
 
     def __init__(self,
