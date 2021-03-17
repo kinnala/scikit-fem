@@ -399,6 +399,12 @@ class Mesh:
         return to_file(self, filename, point_data, **kwargs)
 
     @classmethod
+    @property
+    def meshio_type(cls) -> str:
+        from skfem.io.meshio import TYPE_MESH_MAPPING
+        return TYPE_MESH_MAPPING[cls]
+
+    @classmethod
     def load(cls, filename):
         from skfem.io.meshio import from_file
         return from_file(filename)
