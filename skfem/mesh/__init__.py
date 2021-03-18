@@ -24,25 +24,25 @@ constructor :meth:`~skfem.mesh.Mesh.load`.
 from .mesh import Mesh
 from .mesh import Mesh2D
 from .mesh import Mesh3D
-from .mesh import MeshLine1 as MeshLine
-from .mesh import MeshTri1 as MeshTri
-from .mesh import MeshQuad1 as MeshQuad
+from .mesh import MeshTri2, MeshQuad2, MeshTet2, MeshHex2
 from .mesh import MeshTet1 as MeshTet
 from .mesh import MeshHex1 as MeshHex
-from .mesh import MeshTri2, MeshQuad2, MeshTet2, MeshHex2
+from .mesh import MeshTri1 as MeshTri
+from .mesh import MeshQuad1 as MeshQuad
+from .mesh import MeshLine1 as MeshLine
 
 
 __all__ = [
     "Mesh",
-    "MeshLine",
     "Mesh2D",
-    "MeshTri",
-    "MeshTri2",
-    "MeshQuad",
-    "MeshQuad2",
     "Mesh3D",
-    "MeshTet",
     "MeshTet2",
-    "MeshHex",
+    "MeshTet",
     "MeshHex2",
+    "MeshHex",
+    "MeshTri2",
+    "MeshTri",
+    "MeshQuad2",
+    "MeshQuad",
+    "MeshLine",
 ]

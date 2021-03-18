@@ -9,7 +9,7 @@ import skfem
 
 MESH_TYPE_MAPPING = {
     t().meshio_type: t
-    for t in (getattr(skfem.mesh, e) for e in dir(skfem.mesh))
+    for t in (getattr(skfem.mesh, e) for e in skfem.mesh.__all__)
     if hasattr(t, "meshio_type")
 }
 
