@@ -8,7 +8,7 @@ import numpy as np
 import skfem
 
 MESH_TYPE_MAPPING = {
-    t.meshio_type: t
+    t().meshio_type: t
     for t in (getattr(skfem.mesh, e) for e in dir(skfem.mesh))
     if hasattr(t, "meshio_type")
 }
