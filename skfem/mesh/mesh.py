@@ -755,7 +755,10 @@ class MeshTri1(Mesh2D):
     elem: Type[Element] = ElementTriP1
     affine: bool = True
     sort_t: bool = True
-    meshio_type: str = 'triangle'
+
+    @property
+    def meshio_type(self) -> str:
+        return 'triangle'
 
     @classmethod
     def init_tensor(cls: Type, x: ndarray, y: ndarray):
@@ -1083,7 +1086,10 @@ class MeshQuad1(Mesh2D):
                                  [0., 1.]], dtype=np.float64).T
     t: ndarray = np.array([[0, 1, 2, 3]], dtype=np.int64).T
     elem: Type[Element] = ElementQuad1
-    meshio_type: str = 'quad'
+
+    @property
+    def meshio_type(self) -> str:
+        return 'quad'
 
     def _uniform(self):
 
@@ -1210,7 +1216,10 @@ class MeshTri2(MeshTri1):
     elem: Type[Element] = ElementTriP2
     affine: bool = False
     sort_t: bool = False
-    meshio_type: str = 'triangle6'
+
+    @property
+    def meshio_type(self) -> str:
+        return 'triangle6'
 
     @classmethod
     def init_circle(cls: Type,
@@ -1227,7 +1236,10 @@ class MeshTri2(MeshTri1):
 class MeshQuad2(MeshQuad1):
 
     elem: Type[Element] = ElementQuad2
-    meshio_type: str = 'quad9'
+
+    @property
+    def meshio_type(self) -> str:
+        return 'quad9'
 
 
 @dataclass(repr=False)
@@ -1237,7 +1249,10 @@ class MeshLine1(Mesh):
     t: ndarray = np.array([[0], [1]], dtype=np.int64)
     elem: Type[Element] = ElementLineP1
     affine: bool = True
-    meshio_type: str = 'line'
+
+    @property
+    def meshio_type(self) -> str:
+        return 'line'
 
     def __post_init__(self):
 
@@ -1328,7 +1343,10 @@ class MeshTet1(Mesh3D):
                            [1, 2, 4, 7]], dtype=np.int64).T
     elem: Type[Element] = ElementTetP1
     affine: bool = True
-    meshio_type: str = 'tetra'
+
+    @property
+    def meshio_type(self) -> str:
+        return 'tetra'
 
     def element_finder(self, mapping=None):
 
@@ -1532,7 +1550,10 @@ class MeshHex1(Mesh3D):
                                  [1., 1., 1.]], dtype=np.float64).T
     t: ndarray = np.array([[0, 1, 2, 3, 4, 5, 6, 7]], dtype=np.int64).T
     elem: Type[Element] = ElementHex1
-    meshio_type: str = 'hexahedron'
+
+    @property
+    def meshio_type(self) -> str:
+        return 'hexahedron'
 
     def _init_facets(self):
         """Initialize ``self.facets`` without sorting"""
@@ -1669,7 +1690,10 @@ class MeshHex1(Mesh3D):
 class MeshTet2(MeshTet1):
 
     elem: Type[Element] = ElementTetP2
-    meshio_type: str = 'tetra10'
+
+    @property
+    def meshio_type(self) -> str:
+        return 'tetra10'
 
     @classmethod
     def init_ball(cls: Type, nrefs: int = 3) -> Mesh3D:
