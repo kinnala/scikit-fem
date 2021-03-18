@@ -7,16 +7,10 @@ import numpy as np
 
 import skfem
 
-
 MESH_TYPE_MAPPING = {
-    'tetra': skfem.MeshTet,
-    'hexahedron': skfem.MeshHex,
-    'triangle': skfem.MeshTri,
-    'quad': skfem.MeshQuad,
-    'line': skfem.MeshLine,
-    'tetra10': skfem.MeshTet2,
-    'triangle6': skfem.MeshTri2,
-    'quad9': skfem.MeshQuad2,
+    e.meshio_type: getattr(skfem.mesh, e)
+    for e in dir(skfem.mesh)
+    if hasattr(e, "meshio_type")
 }
 
 TYPE_MESH_MAPPING = {v: k for k, v in MESH_TYPE_MAPPING.items()}
