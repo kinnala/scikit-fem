@@ -250,12 +250,8 @@ for itr in range(12):
         break
 
 
-if __name__ == "__main":
-    from meshio import xdmf, Mesh
-    xdmf.write("example36_results.xdmf",
-        Mesh(mesh.p, cells={"tetra": mesh.t.T},
-        point_data={
-            "u": du[basis["u"].nodal_dofs].T,
-            "p": dp[basis["p"].nodal_dofs].T
-        })
+if __name__ == "__main__":
+    mesh.save(
+        "example36_results.xdmf",
+        {"u": du[basis["u"].nodal_dofs].T, "p": dp[basis["p"].nodal_dofs[0]]},
     )
