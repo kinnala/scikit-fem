@@ -2,7 +2,7 @@ import numpy as np
 
 
 class HashableNdArray(np.ndarray):
-    """Immutable ndarray with hasing support.
+    """Immutable ndarray with hashing support.
 
     Intended for enabling caching in other functions as default Python caching
     requires hashability of function arguments.  Note that if HashableNdArray
