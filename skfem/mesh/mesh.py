@@ -275,6 +275,7 @@ class Mesh:
             if self.affine:
                 self._cached_mapping = MappingAffine(self)
             else:
+                # TODO make MappingIsoparametric compatible with self
                 FakeMesh = namedtuple('FakeMesh',
                                       ['p', 't', 'facets', 't2f', 'f2t', 'dim'])
                 fakemesh = FakeMesh(
