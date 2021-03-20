@@ -158,7 +158,7 @@ class InteriorBasis(Basis):
         return interpfun
 
     def with_element(self, elem: Element) -> 'InteriorBasis':
-
+        """Return a similar basis using a different element."""
         return type(self)(
             self.mesh,
             elem,
