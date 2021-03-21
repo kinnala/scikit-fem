@@ -182,7 +182,7 @@ class Dofs:
         offset = element.nodal_dofs * topo.nvertices
 
         # edge dofs
-        if element.dim == 3:
+        if element.dim == 3 and element.edge_dofs > 0:
             self.edge_dofs = np.reshape(
                 np.arange(element.edge_dofs * topo.nedges,
                           dtype=np.int64),
@@ -193,12 +193,15 @@ class Dofs:
             self.edge_dofs = np.empty((0, 0), dtype=np.int64)
 
         # facet dofs
-        self.facet_dofs = np.reshape(
-            np.arange(element.facet_dofs * topo.nfacets,
-                      dtype=np.int64),
-            (element.facet_dofs, topo.nfacets),
-            order='F') + offset
-        offset += element.facet_dofs * topo.nfacets
+        if element.facet_dofs > 0:
+            self.facet_dofs = np.reshape(
+                np.arange(element.facet_dofs * topo.nfacets,
+                          dtype=np.int64),
+                (element.facet_dofs, topo.nfacets),
+                order='F') + offset
+            offset += element.facet_dofs * topo.nfacets
+        else:
+            self.facet_dofs = np.empty((0, 0), dtype=np.int64)
 
         # interior dofs
         self.interior_dofs = np.reshape(
@@ -217,7 +220,7 @@ class Dofs:
             ))
 
         # edge dofs
-        if element.dim == 3:
+        if element.dim == 3 and element.edge_dofs > 0:
             for itr in range(topo.t2e.shape[0]):
                 self.element_dofs = np.vstack((
                     self.element_dofs,
@@ -225,7 +228,7 @@ class Dofs:
                 ))
 
         # facet dofs
-        if element.dim >= 2:
+        if element.dim >= 2 and element.facet_dofs > 0:
             for itr in range(topo.t2f.shape[0]):
                 self.element_dofs = np.vstack((
                     self.element_dofs,

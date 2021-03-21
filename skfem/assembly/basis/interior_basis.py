@@ -68,11 +68,10 @@ class InteriorBasis(Basis):
                       for j in range(self.Nbfun)]
 
         if elements is None:
-            self.nelems = mesh.t.shape[1]
-            self.tind = np.arange(self.nelems, dtype=np.int64)
+            self.nelems = mesh.nelements
         else:
             self.nelems = len(elements)
-            self.tind = elements
+        self.tind = elements
 
         self.dx = (np.abs(self.mapping.detDF(self.X, tind=elements))
                    * np.tile(self.W, (self.nelems, 1)))
@@ -159,7 +158,7 @@ class InteriorBasis(Basis):
         return interpfun
 
     def with_element(self, elem: Element) -> 'InteriorBasis':
-
+        """Return a similar basis using a different element."""
         return type(self)(
             self.mesh,
             elem,

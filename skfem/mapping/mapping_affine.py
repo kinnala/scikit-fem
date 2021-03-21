@@ -68,35 +68,55 @@ class MappingAffine(Mapping):
             else:
                 raise Exception("Not implemented for the given dimension.")
 
-        if hasattr(mesh, 'facets'):
-            nf = mesh.facets.shape[1]
-            # initialize the boundary mapping
-            self.B = np.empty((dim, dim - 1, nf))
-            self.c = np.empty((dim, nf))
-
-            for i in range(dim):
-                self.c[i] = mesh.p[i, mesh.facets[0]]
-                for j in range(dim-1):
-                    self.B[i, j] = (mesh.p[i, mesh.facets[j + 1]] -
-                                    mesh.p[i, mesh.facets[0]])
-
-            # area scaling
-            if dim == 1:
-                self.detB = np.ones(nf)
-            elif dim == 2:
-                self.detB = np.sqrt(self.B[0, 0] ** 2 + self.B[1, 0] ** 2)
-            elif dim == 3:
-                self.detB = np.sqrt((self.B[1, 0] * self.B[2, 1] -
-                                     self.B[2, 0] * self.B[1, 1]) ** 2 +
-                                    (-self.B[0, 0] * self.B[2, 1] +
-                                     self.B[2, 0] * self.B[0, 1]) ** 2 +
-                                    (self.B[0, 0] * self.B[1, 1] -
-                                     self.B[1, 0] * self.B[0, 1]) ** 2)
-            else:
-                raise Exception("Not implemented for the given dimension.")
-
         self.dim = dim
         self.mesh = mesh  # this is required in ElementH2
+
+    def _init_boundary_mapping(self):
+        """For lazy evaluation of boundary mapping."""
+        dim = self.dim
+        nf = self.mesh.facets.shape[1]
+        # initialize the boundary mapping
+        self._B = np.empty((dim, dim - 1, nf))
+        self._c = np.empty((dim, nf))
+
+        for i in range(dim):
+            self._c[i] = self.mesh.p[i, self.mesh.facets[0]]
+            for j in range(dim - 1):
+                self._B[i, j] = (self.mesh.p[i, self.mesh.facets[j + 1]] -
+                                 self.mesh.p[i, self.mesh.facets[0]])
+
+        # area scaling
+        if dim == 1:
+            self._detB = np.ones(nf)
+        elif dim == 2:
+            self._detB = np.sqrt(self._B[0, 0] ** 2 + self._B[1, 0] ** 2)
+        elif dim == 3:
+            self._detB = np.sqrt((self._B[1, 0] * self._B[2, 1] -
+                                  self._B[2, 0] * self._B[1, 1]) ** 2 +
+                                 (-self._B[0, 0] * self._B[2, 1] +
+                                  self._B[2, 0] * self._B[0, 1]) ** 2 +
+                                 (self._B[0, 0] * self._B[1, 1] -
+                                  self._B[1, 0] * self._B[0, 1]) ** 2)
+        else:
+            raise Exception("Not implemented for the given dimension.")
+
+    @property
+    def B(self):
+        if not hasattr(self, '_B'):
+            self._init_boundary_mapping()
+        return self._B
+
+    @property
+    def c(self):
+        if not hasattr(self, '_c'):
+            self._init_boundary_mapping()
+        return self._c
+
+    @property
+    def detB(self):
+        if not hasattr(self, '_detB'):
+            self._init_boundary_mapping()
+        return self._detB
 
     def F(self, X, tind=None):
         if tind is None:
@@ -108,8 +128,8 @@ class MappingAffine(Mapping):
             return (np.einsum('ijk,jl', A, X).T + b.T).T
         elif len(X.shape) == 3:
             return (np.einsum('ijk,jkl->ikl', A, X).T + b.T).T
-        else:
-            raise Exception("Wrong dimension of input.")
+
+        raise Exception("Wrong dimension of input.")
 
     def invF(self, x, tind=None):
         if tind is None:
@@ -156,8 +176,8 @@ class MappingAffine(Mapping):
             return (np.einsum('ijk,jl', B, X).T + c.T).T
         elif len(X.shape) == 3:
             return (np.einsum('ijk,jkl->ikl', B, X).T + c.T).T
-        else:
-            raise Exception("Wrong dimension of input.")
+
+        raise Exception("Wrong dimension of input.")
 
     def detDG(self, X, find=None):
         if find is None:

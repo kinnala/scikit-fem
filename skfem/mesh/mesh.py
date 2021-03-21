@@ -272,19 +272,22 @@ class Mesh:
         """Return a default reference mapping for the mesh."""
         from skfem.mapping import MappingAffine, MappingIsoparametric
         if not hasattr(self, '_cached_mapping'):
-            FakeMesh = namedtuple('FakeMesh',
-                                  ['p', 't', 'facets', 't2f', 'f2t', 'dim'])
-            fakemesh = FakeMesh(
-                self.doflocs,
-                self.dofs.element_dofs,
-                self.facets,
-                self.t2f,
-                self.f2t,
-                lambda: self.dim(),
-            )
             if self.affine:
-                self._cached_mapping = MappingAffine(fakemesh)
+                self._cached_mapping = MappingAffine(self)
             else:
+                # TODO make MappingIsoparametric compatible with self
+                FakeMesh = namedtuple(
+                    'FakeMesh',
+                    ['p', 't', 'facets', 't2f', 'f2t', 'dim']
+                )
+                fakemesh = FakeMesh(
+                    self.doflocs,
+                    self.dofs.element_dofs,
+                    self.facets,
+                    self.t2f,
+                    self.f2t,
+                    lambda: self.dim(),
+                )
                 self._cached_mapping = MappingIsoparametric(
                     fakemesh,
                     self.elem(),
