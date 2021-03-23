@@ -1,19 +1,22 @@
-import unittest
+from unittest import TestCase, main
 
+import pytest
 import numpy as np
+from numpy.testing import assert_equal, assert_almost_equal
 
 from skfem import BilinearForm, LinearForm, Functional, asm, solve
 from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementHexS2, ElementTetP0, ElementTetP1,
                            ElementTetP2, ElementTriP1, ElementQuad2,
                            ElementTriMorley, ElementVectorH1, ElementQuadP,
-                           ElementHex2)
-from skfem.mesh import MeshQuad, MeshHex, MeshTet, MeshTri
+                           ElementHex2, ElementTriArgyris)
+from skfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
+                        MeshTri2, MeshTet2, MeshHex2)
 from skfem.assembly import FacetBasis, InteriorBasis
 from skfem.utils import projection
 
 
-class IntegrateOneOverBoundaryQ1(unittest.TestCase):
+class IntegrateOneOverBoundaryQ1(TestCase):
 
     elem = ElementQuad1()
 
@@ -72,7 +75,7 @@ class IntegrateOneOverBoundaryHex2(IntegrateOneOverBoundaryQ1):
         self.boundary_area = 6.000
 
 
-class IntegrateFuncOverBoundary(unittest.TestCase):
+class IntegrateFuncOverBoundary(TestCase):
 
     def runTest(self):
         cases = [(MeshHex, ElementHex1),
@@ -95,7 +98,7 @@ class IntegrateFuncOverBoundary(unittest.TestCase):
             self.assertAlmostEqual(ones @ (B @ ones), 0.3333333333, places=5)
 
 
-class IntegrateFuncOverBoundaryPart(unittest.TestCase):
+class IntegrateFuncOverBoundaryPart(TestCase):
 
     case = (MeshHex, ElementHex1)
 
@@ -141,7 +144,7 @@ class IntegrateFuncOverBoundaryPartTetP0(IntegrateFuncOverBoundaryPart):
     case = (MeshTet, ElementTetP0)
 
 
-class BasisInterpolator(unittest.TestCase):
+class BasisInterpolator(TestCase):
 
     case = (MeshTri, ElementTriP1)
 
@@ -201,7 +204,7 @@ class BasisInterpolatorMorley(BasisInterpolator):
         return solve(M, f)
 
 
-class NormalVectorTestTri(unittest.TestCase):
+class NormalVectorTestTri(TestCase):
 
     case = (MeshTri(), ElementTriP1())
     test_integrate_volume = True
@@ -282,11 +285,24 @@ class NormalVectorTestHex2(NormalVectorTestTri):
     test_integrate_volume = False
 
 
-class EvaluateFunctional(unittest.TestCase):
-
-    def runTest(self):
-        m = MeshQuad().refined(3)
-        e = ElementQuad1()
+@pytest.mark.parametrize(
+    "mtype,e,mtype2",
+    [
+        (MeshTri, ElementTriP1(), None),
+        (MeshTri, ElementTriArgyris(), None),
+        (MeshHex, ElementHex1(), None),
+        (MeshQuad, ElementQuad1(), None),
+        (MeshQuad, ElementQuad2(), None),
+        (MeshQuad, ElementQuad2(), MeshQuad2),
+        (MeshTri, ElementTriP1(), MeshTri2),
+        (MeshTet, ElementTetP1(), MeshTet2),
+        (MeshHex, ElementHex1(), MeshHex2),
+    ]
+)
+def test_evaluate_functional(mtype, e, mtype2):
+        m = mtype().refined(3)
+        if mtype2 is not None:
+            m = mtype2.from_mesh(m)
         basis = InteriorBasis(m, e)
 
         @Functional
@@ -295,12 +311,12 @@ class EvaluateFunctional(unittest.TestCase):
 
         y = asm(x_squared, basis)
 
-        self.assertAlmostEqual(y, 1. / 3.)
-        self.assertEqual(len(x_squared.elemental(basis)),
-                         m.t.shape[1])
+        assert_almost_equal(y, 1. / 3.)
+        assert_equal(len(x_squared.elemental(basis)),
+                     m.t.shape[1])
 
 
-class TestRefinterp(unittest.TestCase):
+class TestRefinterp(TestCase):
 
     def runTest(self):
         m = MeshQuad().refined(2)
@@ -312,7 +328,7 @@ class TestRefinterp(unittest.TestCase):
         self.assertEqual(M.p.shape[1], len(X))
 
 
-class TestCompositeAssembly(unittest.TestCase):
+class TestCompositeAssembly(TestCase):
 
     def runTest(self):
 
@@ -338,7 +354,7 @@ class TestCompositeAssembly(unittest.TestCase):
         self.assertAlmostEqual(np.sum(np.sum((Kv - Kc).todense())), 0.)
 
 
-class TestFieldInterpolation(unittest.TestCase):
+class TestFieldInterpolation(TestCase):
 
     def runTest(self):
 
@@ -358,7 +374,7 @@ class TestFieldInterpolation(unittest.TestCase):
         self.assertAlmostEqual(feqx.assemble(basis, func=func), 1.)
 
 
-class TestFieldInterpolation_2(unittest.TestCase):
+class TestFieldInterpolation_2(TestCase):
 
     def runTest(self):
 
@@ -379,7 +395,7 @@ class TestFieldInterpolation_2(unittest.TestCase):
         self.assertAlmostEqual(feqx.assemble(basis, func=func, gunc=gunc), 2.)
 
 
-class VectorialFunctional(unittest.TestCase):
+class VectorialFunctional(TestCase):
 
     def runTest(self):
 
@@ -392,7 +408,7 @@ class VectorialFunctional(unittest.TestCase):
         )
 
 
-class TestComplexValuedAssembly(unittest.TestCase):
+class TestComplexValuedAssembly(TestCase):
 
     def runTest(self):
 
@@ -418,4 +434,4 @@ class TestComplexValuedAssembly(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    main()
