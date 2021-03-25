@@ -72,11 +72,9 @@ deformation gradient would be given by :math:`\mathbf{F} =
 form solution :math:`p=-\mu/\ell` where :math:`\ell` is the applied stretch.
 
 """
-from numpy import (einsum, linalg as nla, zeros,
-                   zeros_like, concatenate, split as npsplit,
-                   hstack, abs as npabs, arange, sqrt)
+import numpy as np
 from scipy.sparse import bmat
-from skfem.helpers import grad, transpose, det, inv
+from skfem.helpers import grad, transpose, det, inv, identity
 from skfem import *
 
 
@@ -86,10 +84,7 @@ mu, lmbda = 1., 1.e3
 def F1(w):
     u = w["disp"]
     p = w["press"]
-    F = zeros_like(grad(u))
-    for i in range(3):
-        F[i, i] += 1.
-    F += grad(u)
+    F = grad(u) + identity(u)
     J = det(F)
     Finv = inv(F)
     return p * J * transpose(Finv) + mu * F
@@ -98,40 +93,30 @@ def F1(w):
 def F2(w):
     u = w["disp"]
     p = w["press"].value
-    F = zeros_like(grad(u))
-    for i in range(3):
-        F[i, i] += 1.
-    F += grad(u)
+    F = grad(u) + identity(u)
     J = det(F)
-    Js = .5 * (lmbda + p + 2. * sqrt(lmbda * mu + .25 * (lmbda + p) ** 2)) / lmbda
-    dJsdp = ((.25 * lmbda + .25 * p + .5 * sqrt(lmbda * mu + .25 * (lmbda + p) ** 2))
-             / (lmbda * sqrt(lmbda * mu + .25 * (lmbda + p) ** 2)))
+    Js = .5 * (lmbda + p + 2. * np.sqrt(lmbda * mu + .25 * (lmbda + p) ** 2)) / lmbda
+    dJsdp = ((.25 * lmbda + .25 * p + .5 * np.sqrt(lmbda * mu + .25 * (lmbda + p) ** 2))
+             / (lmbda * np.sqrt(lmbda * mu + .25 * (lmbda + p) ** 2)))
     return J - (Js + (p + mu / Js - lmbda * (Js - 1)) * dJsdp)
 
 
 def A11(w):
     u = w["disp"]
     p = w["press"]
-    F = zeros_like(grad(u))
-    eye = zeros_like(grad(u))
-    for i in range(3):
-        F[i, i] += 1.
-        eye[i, i] += 1.
-    F += grad(u)
+    eye = identity(u)
+    F = grad(u) + eye
     J = det(F)
-    Finv= inv(F)
-    L = (p * J * einsum("lk...,ji...->ijkl...", Finv, Finv)
-         - p * J * einsum("jk...,li...->ijkl...", Finv, Finv)
-         + mu * einsum("ik...,jl...->ijkl...", eye, eye))
+    Finv = inv(F)
+    L = (p * J * np.einsum("lk...,ji...->ijkl...", Finv, Finv)
+         - p * J * np.einsum("jk...,li...->ijkl...", Finv, Finv)
+         + mu * np.einsum("ik...,jl...->ijkl...", eye, eye))
     return L
 
 
 def A12(w):
     u = w["disp"]
-    F = zeros_like(grad(u))
-    for i in range(3):
-        F[i, i] += 1.
-    F += grad(u)
+    F = grad(u) + identity(u)
     J = det(F)
     Finv = inv(F)
     return J * transpose(Finv)
@@ -140,9 +125,9 @@ def A12(w):
 def A22(w):
     u = w["disp"]
     p = w["press"].value
-    Js = .5 * (lmbda + p + 2. * sqrt(lmbda * mu + .25 * (lmbda + p) ** 2)) / lmbda
-    dJsdp = ((.25 * lmbda + .25 * p + .5 * sqrt(lmbda * mu + .25 * (lmbda + p) ** 2))
-             / (lmbda * sqrt(lmbda * mu + .25 * (lmbda + p) ** 2)))
+    Js = .5 * (lmbda + p + 2. * np.sqrt(lmbda * mu + .25 * (lmbda + p) ** 2)) / lmbda
+    dJsdp = ((.25 * lmbda + .25 * p + .5 * np.sqrt(lmbda * mu + .25 * (lmbda + p) ** 2))
+             / (lmbda * np.sqrt(lmbda * mu + .25 * (lmbda + p) ** 2)))
     d2Jdp2 = .25 * mu / (lmbda * mu + .25 * (lmbda + p) ** 2) ** (3/2)
     L = (-2. * dJsdp - p * d2Jdp2 + mu / Js ** 2 * dJsdp ** 2 - mu / Js * d2Jdp2
          + lmbda * (Js - 1.) * d2Jdp2 + lmbda * dJsdp ** 2)
@@ -161,8 +146,8 @@ basis = {
     for field, e in elems.items()
 }
 
-du = zeros(basis["u"].N)
-dp = zeros(basis["p"].N)
+du = np.zeros(basis["u"].N)
+dp = np.zeros(basis["p"].N)
 stretch_ = 1.
 
 ddofs = [
@@ -179,7 +164,7 @@ ddofs = [
         skip=["u^1", "u^2"]
     ),
     basis["u"].find_dofs(
-        {"front": mesh.facets_satisfying(lambda x: npabs(x[2] - 1.) < 1e-6)},
+        {"front": mesh.facets_satisfying(lambda x: np.abs(x[2] - 1.) < 1e-6)},
         skip=["u^1", "u^2"]
     )
 ]
@@ -193,15 +178,15 @@ du[dofs["bottom"].all()] = 0.
 du[dofs["back"].all()] = 0.
 du[dofs["front"].all()] = stretch_
 
-I = hstack((
+I = np.hstack((
     basis["u"].complement_dofs(dofs),
-    basis["u"].N + arange(basis["p"].N)
+    basis["u"].N + np.arange(basis["p"].N)
 ))
 
 
 @LinearForm
 def a1(v, w):
-    return einsum("ij...,ij...", F1(w), grad(v))
+    return np.einsum("ij...,ij...", F1(w), grad(v))
 
 
 @LinearForm
@@ -211,12 +196,12 @@ def a2(v, w):
 
 @BilinearForm
 def b11(u, v, w):
-    return einsum("ijkl...,ij...,kl...", A11(w), grad(u), grad(v))
+    return np.einsum("ijkl...,ij...,kl...", A11(w), grad(u), grad(v))
 
 
 @BilinearForm
 def b12(u, v, w):
-    return einsum("ij...,ij...", A12(w), grad(v)) * u
+    return np.einsum("ij...,ij...", A12(w), grad(v)) * u
 
 
 @BilinearForm
@@ -231,7 +216,7 @@ for itr in range(12):
     K11 = asm(b11, basis["u"], basis["u"], disp=uv, press=pv)
     K12 = asm(b12, basis["p"], basis["u"], disp=uv, press=pv)
     K22 = asm(b22, basis["p"], basis["p"], disp=uv, press=pv)
-    f = concatenate((
+    f = np.concatenate((
         asm(a1, basis["u"], disp=uv, press=pv),
         asm(a2, basis["p"], disp=uv, press=pv)
     ))
@@ -240,11 +225,11 @@ for itr in range(12):
          [K12.T, K22]], "csr"
     )
     uvp = solve(*condense(K, -f, I=I), use_umfpack=True)
-    delu, delp = npsplit(uvp, [du.shape[0]])
+    delu, delp = np.split(uvp, [du.shape[0]])
     du += delu
     dp += delp
-    normu = nla.norm(delu)
-    normp = nla.norm(delp)
+    normu = np.linalg.norm(delu)
+    normp = np.linalg.norm(delp)
     print(f"{itr+1}, norm_du: {normu}, norm_dp: {normp}")
     if normu < 1.e-8 and normp < 1.e-8:
         break
