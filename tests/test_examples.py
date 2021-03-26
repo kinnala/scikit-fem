@@ -277,11 +277,14 @@ class TestEx35(TestCase):
         # tolerance is low, but might still break if mesh is slightly different
         self.assertAlmostEqual(Z, 52.563390368494424, delta=1e-1)
 
+
 class TestEx36(TestCase):
 
     def runTest(self):
-        from docs.examples.ex36 import dp
-        # make test more robust or this is fine?
+        from docs.examples.ex36 import du, dp
+        self.assertAlmostEqual(np.linalg.norm(du),
+                               16.529402115680444,
+                               delta=1e-5)
         self.assertAlmostEqual(dp[0], -0.5, delta=1.e-8)
 
 

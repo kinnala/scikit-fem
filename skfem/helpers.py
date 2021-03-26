@@ -105,6 +105,25 @@ def eye(w, n):
                      for j in range(n)])
 
 
+def identity(w, N=None):
+    """Create identity matrix."""
+    if isinstance(w, DiscreteField):
+        proto = w.value
+    elif isinstance(w, ndarray):
+        proto = w
+    else:
+        raise NotImplementedError
+
+    if N is None:
+        if len(proto.shape) > 2:
+            N = proto.shape[-3]
+        else:
+            raise ValueError("Cannot deduce the size of the identity matrix. "
+                             "Give an explicit keyword argument N.")
+
+    return eye(np.ones(proto.shape[-2:]), N)
+
+
 def det(A):
     """
     Determinant of an array `A` over trailing axis (if any).
