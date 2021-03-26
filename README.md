@@ -212,6 +212,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
+- Added: `skfem.InteriorBasis.probes`, like `interpolator` but with order of
+  arguments flipped for repeated sampling of changing fields at given points
 - Added: Completely rewritten `Mesh` base class which is "immutable" and uses
   `Element` classes to define the ordering of nodes; better support for
   high-order and other more general mesh types
