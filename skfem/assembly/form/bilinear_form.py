@@ -4,6 +4,7 @@ import numpy as np
 
 from .form import Form, FormDict
 from ..basis import Basis
+from .unassembled_matrix import UnassembledMatrix
 
 
 class BilinearForm(Form):
@@ -50,6 +51,7 @@ class BilinearForm(Form):
     def assemble(self,
                  ubasis: Basis,
                  vbasis: Optional[Basis] = None,
+                 coo: bool = False,
                  **kwargs) -> Any:
         """Assemble the bilinear form into a sparse matrix.
 
@@ -81,8 +83,8 @@ class BilinearForm(Form):
         # initialize COO data structures
         sz = ubasis.Nbfun * vbasis.Nbfun * nt
         data = np.zeros(sz, dtype=self.dtype)
-        rows = np.zeros(sz)
-        cols = np.zeros(sz)
+        rows = np.zeros(sz, dtype=np.int64)
+        cols = np.zeros(sz, dtype=np.int64)
 
         # loop over the indices of local stiffness matrix
         for j in range(ubasis.Nbfun):
@@ -95,16 +97,18 @@ class BilinearForm(Form):
                     ubasis.basis[j],
                     vbasis.basis[i],
                     wdict,
-                    dx
+                    dx,
                 )
 
-        # TODO: allow user to change, e.g. cuda or petsc
-        return self._assemble_scipy_matrix(
+        out = UnassembledMatrix(
             data,
             rows,
             cols,
-            (vbasis.N, ubasis.N)
+            (vbasis.N, ubasis.N),
         )
+        if coo:
+            return out
+        return out.tocsr()
 
     def _kernel(self, u, v, w, dx):
         return np.sum(self.form(*u, *v, w) * dx, axis=1)
