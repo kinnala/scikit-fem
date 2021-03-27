@@ -1,6 +1,6 @@
 """Solve problems that have manufactured solutions."""
 
-import unittest
+from unittest import TestCase
 from pathlib import Path
 
 import numpy as np
@@ -15,7 +15,7 @@ from skfem.mesh import (MeshHex, MeshLine, MeshQuad, MeshQuad2, MeshTet,
 from skfem.models.poisson import laplace, mass, unit_load
 
 
-class Line1D(unittest.TestCase):
+class Line1D(TestCase):
     """Solve the following problem:
 
     u'' = 0
@@ -53,7 +53,7 @@ class Line1DMini(Line1D):
     e = ElementLineMini()
 
 
-class LineNegative1D(unittest.TestCase):
+class LineNegative1D(TestCase):
     """Solve the following problem:
 
     u'' = 0
@@ -94,7 +94,7 @@ class LineNegative1DMini(LineNegative1D):
     e = ElementLineMini()
 
 
-class LineNeumann1D(unittest.TestCase):
+class LineNeumann1D(TestCase):
     """Solve the following problem:
 
     -u'' + eps*u = 0
@@ -131,7 +131,7 @@ class LineNeumann1DMini(LineNeumann1D):
     e = ElementLineMini()
     
 
-class TestExactHexElement(unittest.TestCase):
+class TestExactHexElement(TestCase):
 
     mesh = MeshHex
     elem = ElementHex1
@@ -223,7 +223,7 @@ class TestExactQuadElement2(TestExactTriElementP2):
     elem = ElementQuad2
 
 
-class SolveCirclePoisson(unittest.TestCase):
+class SolveCirclePoisson(TestCase):
 
     mesh_type = MeshTri2
     element_type = ElementTriP1
@@ -298,4 +298,4 @@ class SolveCirclePoissonTet2(SolveCirclePoisson):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    main()
