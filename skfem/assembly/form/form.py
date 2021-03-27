@@ -73,12 +73,6 @@ class Form:
         return w
 
     @staticmethod
-    def _assemble_scipy_matrix(data, rows, cols, shape=None):
-        K = coo_matrix((data, (rows, cols)), shape=shape)
-        K.eliminate_zeros()
-        return K.tocsr()
-
-    @staticmethod
     def _assemble_numpy_vector(data, rows, cols, shape=None):
         return coo_matrix((data, (rows, cols)),
                           shape=shape).toarray().T[0]

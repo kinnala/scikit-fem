@@ -1,10 +1,12 @@
-from typing import Optional, Any
+from typing import Optional, Tuple
 
 import numpy as np
+from numpy import ndarray
+from scipy.sparse import csr_matrix
 
-from .form import Form, FormDict
 from ..basis import Basis
 from .coo_data import COOData
+from .form import Form, FormDict
 
 
 class BilinearForm(Form):
@@ -51,7 +53,10 @@ class BilinearForm(Form):
     def _assembly(self,
                   ubasis: Basis,
                   vbasis: Optional[Basis] = None,
-                  **kwargs) -> Any:
+                  **kwargs) -> Tuple[ndarray,
+                                     ndarray,
+                                     ndarray,
+                                     Tuple[int, int]]:
         """Assemble the bilinear form into a sparse matrix.
 
         Parameters
@@ -101,10 +106,10 @@ class BilinearForm(Form):
 
         return data, rows, cols, (vbasis.N, ubasis.N)
 
-    def coo_data(self, *args, **kwargs) -> Any:
+    def coo_data(self, *args, **kwargs) -> COOData:
         return COOData(*self._assembly(*args, **kwargs))
 
-    def assemble(self, *args, **kwargs) -> Any:
+    def assemble(self, *args, **kwargs) -> csr_matrix:
         """Assemble the bilinear form into a sparse matrix.
 
         Parameters
