@@ -4,7 +4,7 @@ from unittest import TestCase
 from pathlib import Path
 
 import numpy as np
-from skfem import LinearForm, asm, condense, solve
+from skfem import LinearForm, Functional, asm, condense, solve, projection
 from skfem.assembly import FacetBasis, InteriorBasis
 from skfem.element import (ElementHex1, ElementHex2, ElementHexS2,
                            ElementLineMini, ElementLineP1, ElementLineP2,
@@ -13,6 +13,7 @@ from skfem.element import (ElementHex1, ElementHex2, ElementHexS2,
 from skfem.mesh import (MeshHex, MeshLine, MeshQuad, MeshQuad2, MeshTet,
                         MeshTet2, MeshTri, MeshTri2)
 from skfem.models.poisson import laplace, mass, unit_load
+from skfem.helpers import dot
 
 
 class Line1D(TestCase):
@@ -25,7 +26,6 @@ class Line1D(TestCase):
     Solution is u(x) = x.
 
     """
-
     e = ElementLineP1()
 
     def runTest(self):
@@ -295,6 +295,47 @@ class SolveCirclePoissonTet2(SolveCirclePoisson):
     filename = "quadratic_sphere_tet.msh"
     maxval = 0.0405901240018571
 
+
+class SolveInhomogeneousLaplace(TestCase):
+    """Adapted from example 14."""
+
+    mesh = MeshTri
+    elem = ElementTriP2()
+
+    def runTest(self):
+        m = self.mesh().refined(4)
+        basis = InteriorBasis(m, self.elem)
+        boundary_basis = FacetBasis(m, self.elem)
+        boundary_dofs = boundary_basis.get_dofs().flatten()
+
+
+        def dirichlet(x):
+            """return a harmonic function"""
+            return ((x[0] + 1.j * x[1]) ** 2).real
+
+
+        u = basis.zeros()
+        A = laplace.coo_data(basis).enforce(boundary_dofs).tocsr()
+        u[boundary_dofs] = projection(dirichlet, boundary_basis, I=boundary_dofs)
+        u = solve(A, u)
+
+
+        @Functional
+        def gradu(w):
+            gradu = w['sol'].grad
+            return dot(gradu, gradu)
+
+        self.assertAlmostEqual(
+            gradu.assemble(basis, sol=basis.interpolate(u)),
+            8 / 3,
+            delta=1e-10,
+        )
+
+
+class SolveInhomogeneousLaplaceQuad(SolveInhomogeneousLaplace):
+
+    mesh = MeshQuad
+    elem = ElementQuad2()
 
 
 if __name__ == '__main__':
