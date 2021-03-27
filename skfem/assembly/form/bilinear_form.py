@@ -4,7 +4,7 @@ import numpy as np
 
 from .form import Form, FormDict
 from ..basis import Basis
-from .unassembled_matrix import UnassembledMatrix
+from .coo_data import COOData
 
 
 class BilinearForm(Form):
@@ -48,11 +48,10 @@ class BilinearForm(Form):
 
     """
 
-    def assemble(self,
-                 ubasis: Basis,
-                 vbasis: Optional[Basis] = None,
-                 coo: bool = False,
-                 **kwargs) -> Any:
+    def _assembly(self,
+                  ubasis: Basis,
+                  vbasis: Optional[Basis] = None,
+                  **kwargs) -> Any:
         """Assemble the bilinear form into a sparse matrix.
 
         Parameters
@@ -100,15 +99,26 @@ class BilinearForm(Form):
                     dx,
                 )
 
-        out = UnassembledMatrix(
-            data,
-            rows,
-            cols,
-            (vbasis.N, ubasis.N),
-        )
-        if coo:
-            return out
-        return out.tocsr()
+        return data, rows, cols, (vbasis.N, ubasis.N)
+
+    def coo_data(self, *args, **kwargs) -> Any:
+        return COOData(*self._assembly(*args, **kwargs))
+
+    def assemble(self, *args, **kwargs) -> Any:
+        """Assemble the bilinear form into a sparse matrix.
+
+        Parameters
+        ----------
+        ubasis
+            The :class:`~skfem.assembly.Basis` for ``u``.
+        vbasis
+            Optionally, specify a different :class:`~skfem.assembly.Basis`
+            for ``v``.
+        **kwargs
+            Any additional keyword arguments are appended to ``w``.
+
+        """
+        return COOData._assemble_scipy_csr(*self._assembly(*args, **kwargs))
 
     def _kernel(self, u, v, w, dx):
         return np.sum(self.form(*u, *v, w) * dx, axis=1)
