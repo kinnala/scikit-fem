@@ -25,7 +25,7 @@ class COOData:
         return K.tocsr()
 
     def tocsr(self) -> csr_matrix:
-
+        """Return a sparse SciPy CSR matrix."""
         return self._assemble_scipy_csr(
             self.data,
             self.rows,
@@ -33,22 +33,32 @@ class COOData:
             self.shape,
         )
 
-    def enforce(self, D):
+    def todense(self) -> ndarray:
+        """Return a dense NumPy array."""
+        return coo_matrix((self.data, (self.rows, self.cols)),
+                          shape=self.shape).todense()
+
+    def enforce(self, D: ndarray, diag: float = 1.):
         """Enforce an essential BC by setting rows and diagonals to 0 and 1.
 
         Parameters
         ----------
         D
-            A list of (Dirichlet) degrees-of-freedom to enforce.
+            An array of (Dirichlet) degrees-of-freedom to enforce.
+        diag
+            The value at the diagonals which is by default 1.
 
         """
         rows_mapping = np.ones(self.shape[0])
         rows_mapping[D] = 0
 
-        return replace(
-            self,
-            data=np.concatenate((rows_mapping[self.rows] * self.data,
-                                 np.ones(len(D)))),
-            rows=np.concatenate((self.rows, D)),
-            cols=np.concatenate((self.cols, D)),
-        )
+        data = rows_mapping[self.rows] * self.data
+        rows = self.rows
+        cols = self.cols
+
+        if diag != 0:
+            data = np.concatenate((data, np.zeros(len(D)) + diag))
+            rows = np.concatenate((rows, D))
+            cols = np.concatenate((cols, D))
+
+        return replace(self, data=data, rows=rows, cols=cols)
