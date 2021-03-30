@@ -37,28 +37,3 @@ class COOData:
         """Return a dense NumPy array."""
         return coo_matrix((self.data, (self.rows, self.cols)),
                           shape=self.shape).todense()
-
-    def enforce(self, D: ndarray, diag: float = 1.):
-        """Enforce an essential BC by setting rows and diagonals to 0 and 1.
-
-        Parameters
-        ----------
-        D
-            An array of (Dirichlet) degrees-of-freedom to enforce.
-        diag
-            The value at the diagonals which is by default 1.
-
-        """
-        rows_mapping = np.ones(self.shape[0])
-        rows_mapping[D] = 0
-
-        data = rows_mapping[self.rows] * self.data
-        rows = self.rows
-        cols = self.cols
-
-        if diag != 0:
-            data = np.concatenate((data, np.zeros(len(D)) + diag))
-            rows = np.concatenate((rows, D))
-            cols = np.concatenate((cols, D))
-
-        return replace(self, data=data, rows=rows, cols=cols)

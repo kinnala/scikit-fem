@@ -19,6 +19,7 @@ __all__ = all_mesh + all_assembly + all_element + [  # noqa
     'build_pc_ilu',
     'build_pc_diag',
     'condense',
+    'enforce',
     'project',
     'projection',
     'solve',

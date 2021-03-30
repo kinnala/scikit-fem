@@ -219,11 +219,64 @@ def _flatten_dofs(S: Optional[DofsCollection]) -> Optional[ndarray]:
     raise NotImplementedError("Unable to flatten the given set of DOFs.")
 
 
+def enforce(A: spmatrix,
+            b: Optional[ndarray] = None,
+            x: Optional[ndarray] = None,
+            I: Optional[DofsCollection] = None,
+            D: Optional[DofsCollection] = None,
+            diag: float = 1.) -> CondensedSystem:
+    r"""Enforce degrees-of-freedom of a linear system.
+
+    .. note::
+
+        The original system is modified and returned for compatibility with
+        :func:`skfem.utils.solve`.
+
+    """
+    D = _flatten_dofs(D)
+    I = _flatten_dofs(I)
+
+    if I is None and D is None:
+        raise Exception("Either I or D must be given!")
+    elif I is None and D is not None:
+        I = np.setdiff1d(np.arange(A.shape[0]), D)
+    elif D is None and I is not None:
+        D = np.setdiff1d(np.arange(A.shape[0]), I)
+    else:
+        raise Exception("Give only I or only D!")
+
+    if x is None:
+        x = np.zeros(A.shape[0])
+    elif b is None:
+        b = np.zeros_like(x)
+
+    # set rows on lhs to zero
+    starts = A.indptr[D]
+    ends = A.indptr[D + 1]
+    counts = ends - starts
+    idx = np.ones(counts.sum(), dtype=np.int64)
+    idx[np.cumsum(counts)[:-1]] -= counts[:-1]
+    idx = np.cumsum(idx) - 1 + np.repeat(starts, counts)
+    A.data[idx] = 0.
+
+    # set diagonal value
+    d = A.diagonal()
+    d[D] = diag
+    A.setdiag(d)
+
+    if b is not None:
+        # set rhs to the given value
+        b[D] = x[D]
+        return A, b
+
+    return A
+
+
 def condense(A: spmatrix,
-             b: Union[ndarray, spmatrix] = None,
-             x: ndarray = None,
-             I: DofsCollection = None,
-             D: DofsCollection = None,
+             b: Optional[Union[ndarray, spmatrix]] = None,
+             x: Optional[ndarray] = None,
+             I: Optional[DofsCollection] = None,
+             D: Optional[DofsCollection] = None,
              expand: bool = True) -> CondensedSystem:
     r"""Eliminate degrees-of-freedom from a linear system.
 
@@ -324,7 +377,7 @@ def condense(A: spmatrix,
         The values of the condensed degrees-of-freedom. If not given, assumed
         to be zero.
     I
-        The set of degree-of-freedom indices to keep.
+        The set of degree-of-freedom indices to include.
     D
         The set of degree-of-freedom indices to dismiss.
     expand

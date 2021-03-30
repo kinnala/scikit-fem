@@ -4,7 +4,8 @@ from unittest import TestCase
 from pathlib import Path
 
 import numpy as np
-from skfem import LinearForm, Functional, asm, condense, solve, projection
+from skfem import (LinearForm, Functional, asm, condense, solve, projection,
+                   enforce)
 from skfem.assembly import FacetBasis, InteriorBasis
 from skfem.element import (ElementHex1, ElementHex2, ElementHexS2,
                            ElementLineMini, ElementLineP1, ElementLineP2,
@@ -315,9 +316,11 @@ class SolveInhomogeneousLaplace(TestCase):
 
 
         u = basis.zeros()
-        A = laplace.coo_data(basis).enforce(boundary_dofs).tocsr()
-        u[boundary_dofs] = projection(dirichlet, boundary_basis, I=boundary_dofs)
-        u = solve(A, u)
+        A = laplace.assemble(basis)
+        u[boundary_dofs] = projection(dirichlet,
+                                      boundary_basis,
+                                      I=boundary_dofs)
+        u = solve(*enforce(A, x=u, D=boundary_dofs))
 
 
         @Functional

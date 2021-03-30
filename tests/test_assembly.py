@@ -434,23 +434,5 @@ class TestComplexValuedAssembly(TestCase):
         self.assertAlmostEqual(np.dot(ones, f), 1j * self.interior_area)
 
 
-class TestCOODataEnforce(TestCase):
-
-    mesh = MeshTri()
-
-    def runTest(self):
-
-        m = self.mesh
-        e = ElementTriP1()
-        basis = InteriorBasis(m, e)
-
-        coo = laplace.coo_data(basis)
-        A = coo.enforce(m.boundary_nodes()).todense()
-        M = coo.enforce(m.boundary_nodes(), diag=0).todense()
-
-        assert_almost_equal(A, np.eye(A.shape[0]))
-        assert_almost_equal(M, np.zeros(M.shape))
-
-
 if __name__ == '__main__':
     main()
