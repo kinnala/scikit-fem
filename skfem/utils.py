@@ -231,8 +231,8 @@ def enforce(A: spmatrix,
 
     .. note::
 
-        The original system is modified and returned for compatibility with
-        :func:`skfem.utils.solve`.
+        The original system is both modified (for performance) and returned
+        (for compatibility with :func:`skfem.utils.solve`).
 
     Parameters
     ----------
@@ -241,18 +241,19 @@ def enforce(A: spmatrix,
     b
         Optionally, the right hand side vector.
     x
-        The values of the condensed degrees-of-freedom. If not given, assumed
+        The values of the enforced degrees-of-freedom. If not given, assumed
         to be zero.
     I
-        The set of degree-of-freedom indices to include.
+        Specify either this or ``D``: The set of degree-of-freedom indices to
+        solve for.
     D
-        The set of degree-of-freedom indices to dismiss.
+        Specify either this or ``I``: The set of degree-of-freedom indices to
+        enforce (rows/diagonal set to zero/one).
 
     Returns
     -------
-    CondensedSystem
-        The condensed linear system and (optionally) information about
-        the boundary values.
+    EnforcedSystem
+        A linear system with the enforced rows/diagonals set to zero/one.
 
     """
     D = _flatten_dofs(D)
