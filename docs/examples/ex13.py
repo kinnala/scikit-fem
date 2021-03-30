@@ -41,11 +41,10 @@ basis = InteriorBasis(mesh, elements)
 A = asm(laplace, basis)
 
 boundary_dofs = basis.find_dofs()
-interior_dofs = basis.complement_dofs(boundary_dofs)
 
 u = np.zeros(basis.N)
 u[boundary_dofs['positive'].all()] = 1.
-u = solve(*condense(A, 0.*u, u, interior_dofs))
+u = solve(*condense(A, x=u, D=boundary_dofs))
 
 M = asm(mass, basis)
 u_exact = 2 * np.arctan2(*basis.doflocs[::-1]) / np.pi

@@ -27,7 +27,7 @@ u[dofs['right'].nodal['u^1']] = 0.3
 
 I = ib.complement_dofs(dofs)
 
-u = solve(*condense(K, 0*u, I=I, x=u))
+u = solve(*condense(K, x=u, I=I))
 
 sf = 1.0
 m = m.translated(sf * u[ib.nodal_dofs])

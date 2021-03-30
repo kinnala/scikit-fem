@@ -96,9 +96,7 @@ class Bratu1d:
         """Solver for the Jacobian problem."""
         A = self.lap - lmbda * dia_matrix((self.mass @ np.exp(u), 0),
                                           self.mass.shape)
-        du = np.zeros_like(u)
-        du = solve(*condense(A, rhs, D=self.D))
-        return du
+        return solve(*condense(A, rhs, D=self.D))
 
 
 problem = Bratu1d(2**8)
