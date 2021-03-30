@@ -22,6 +22,8 @@ from skfem.element import ElementVector
 Solution = Union[ndarray, Tuple[ndarray, ndarray]]
 LinearSolver = Callable[..., ndarray]
 EigenSolver = Callable[..., Tuple[ndarray, ndarray]]
+EnforcedSystem = Union[spmatrix,
+                       Tuple[spmatrix, ndarray]]
 CondensedSystem = Union[spmatrix,
                         Tuple[spmatrix, ndarray],
                         Tuple[spmatrix, spmatrix],
@@ -224,13 +226,33 @@ def enforce(A: spmatrix,
             x: Optional[ndarray] = None,
             I: Optional[DofsCollection] = None,
             D: Optional[DofsCollection] = None,
-            diag: float = 1.) -> CondensedSystem:
+            diag: float = 1.) -> EnforcedSystem:
     r"""Enforce degrees-of-freedom of a linear system.
 
     .. note::
 
         The original system is modified and returned for compatibility with
         :func:`skfem.utils.solve`.
+
+    Parameters
+    ----------
+    A
+        The system matrix
+    b
+        Optionally, the right hand side vector.
+    x
+        The values of the condensed degrees-of-freedom. If not given, assumed
+        to be zero.
+    I
+        The set of degree-of-freedom indices to include.
+    D
+        The set of degree-of-freedom indices to dismiss.
+
+    Returns
+    -------
+    CondensedSystem
+        The condensed linear system and (optionally) information about
+        the boundary values.
 
     """
     D = _flatten_dofs(D)
@@ -250,13 +272,15 @@ def enforce(A: spmatrix,
     elif b is None:
         b = np.zeros_like(x)
 
+    assert isinstance(D, ndarray)
+
     # set rows on lhs to zero
-    starts = A.indptr[D]
-    ends = A.indptr[D + 1]
-    counts = ends - starts
-    idx = np.ones(counts.sum(), dtype=np.int64)
-    idx[np.cumsum(counts)[:-1]] -= counts[:-1]
-    idx = np.cumsum(idx) - 1 + np.repeat(starts, counts)
+    start = A.indptr[D]
+    stop = A.indptr[D + 1]
+    count = stop - start
+    idx = np.ones(count.sum(), dtype=np.int64)
+    idx[np.cumsum(count)[:-1]] -= count[:-1]
+    idx = np.repeat(start, count) + np.cumsum(idx) - 1
     A.data[idx] = 0.
 
     # set diagonal value

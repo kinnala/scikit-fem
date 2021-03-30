@@ -1,7 +1,6 @@
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from typing import Tuple
 
-import numpy as np
 from numpy import ndarray
 from scipy.sparse import coo_matrix, csr_matrix
 
