@@ -326,7 +326,7 @@ U[dofs['outer_conductor_inner_surface'].all()] = projection(
     I=dofs['outer_conductor_inner_surface'])
 
 U = solve(*condense(
-    K_elec, np.zeros(K_elec.shape[1]), U,
+    K_elec, x=U,
     D=dofs['inner_conductor_outer_surface'] |
     dofs['outer_conductor_inner_surface']))
 

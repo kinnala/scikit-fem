@@ -42,7 +42,7 @@ class TestCompositeSplitting(TestCase):
         x = basis.zeros()
         x[D['up'].all('u^1^1')] = .1
 
-        x = solve(*condense(S, basis.zeros(), x=x, D=D))
+        x = solve(*condense(S, x=x, D=D))
 
         (u, u_basis), (p, p_basis) = basis.split(x)
 

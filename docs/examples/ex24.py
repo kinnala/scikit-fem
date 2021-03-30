@@ -48,7 +48,7 @@ def parabolic(x):
 
 
 uvp[inlet_dofs] = projection(parabolic, inlet_basis, I=inlet_dofs)
-uvp = solve(*condense(K, np.zeros_like(uvp), uvp, D=D))
+uvp = solve(*condense(K, x=uvp, D=D))
 
 velocity, pressure = np.split(uvp, [A.shape[0]])
 
