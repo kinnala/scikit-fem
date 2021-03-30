@@ -2,6 +2,7 @@ from typing import Callable, Optional, Tuple
 
 import numpy as np
 from numpy import ndarray
+from scipy.sparse import coo_matrix
 from skfem.element import DiscreteField, Element
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh
@@ -130,9 +131,9 @@ class InteriorBasis(Basis):
 
         return M, w.flatten()
 
-    def probes(self, x: np.ndarray) -> Callable[[np.ndarray], np.ndarray]:
-        """Return a function handle, which can be used for finding
-        the values on points `x` of a given solution vector."""
+    def probes_data(self, x: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        """Return a values of basis functions and relevant indices
+        for interpolating a solution at the given points `x`."""
 
         finder = self.mesh.element_finder(mapping=self.mapping)
         cells = finder(*x)
@@ -142,6 +143,25 @@ class InteriorBasis(Basis):
             for k in range(self.Nbfun)
         ])
         indices = self.element_dofs[:, cells]
+        return phis, indices
+
+    def probes_matrix(self, x: np.ndarray) -> coo_matrix:
+        """Return a coo_matrix which acts on a solution to probe its values
+        at the given points `x`"""
+        phis, indices = self.probes_data(x)
+        return coo_matrix(
+            (
+                phis.flatten(),
+                (np.tile(np.arange(x.shape[1]), self.Nbfun), indices.flatten()),
+            ),
+            shape=(x.shape[1], self.N),
+        )
+
+    def probes(self, x: np.ndarray) -> Callable[[np.ndarray], np.ndarray]:
+        """Return a function handle, which can be used for finding
+        the values on points `x` of a given solution vector."""
+
+        phis, indices = self.probes_data(x)
 
         def interpolator(y: np.ndarray) -> np.ndarray:
             return np.sum(phis * y[indices], 0)
