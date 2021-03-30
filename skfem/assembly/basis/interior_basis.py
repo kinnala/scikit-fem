@@ -152,7 +152,8 @@ class InteriorBasis(Basis):
         return coo_matrix(
             (
                 phis.flatten(),
-                (np.tile(np.arange(x.shape[1]), self.Nbfun), indices.flatten()),
+                (np.tile(np.arange(x.shape[1]), self.Nbfun),
+                 indices.flatten()),
             ),
             shape=(x.shape[1], self.N),
         )
