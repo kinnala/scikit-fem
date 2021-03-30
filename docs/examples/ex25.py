@@ -48,7 +48,7 @@ interior = basis.complement_dofs(dofs)
 A = asm(laplace, basis) + peclet * asm(advection, basis)
 t = np.zeros(basis.N)
 t[dofs['floor'].all()] = 1.
-t = solve(*condense(A, np.zeros_like(t), t, I=interior))
+t = solve(*condense(A, x=t, I=interior))
 
 basis0 = basis.with_element(ElementQuad0())
 t0 = solve(asm(mass, basis0),

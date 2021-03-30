@@ -318,8 +318,8 @@ def condense(A: spmatrix,
     A
         The system matrix
     b
-        The right hand side vector or the mass matrix for generalized
-        eigenvalue problems.
+        The right hand side vector, or zero if x is given, or the mass matrix
+        for generalized eigenvalue problems.
     x
         The values of the condensed degrees-of-freedom. If not given, assumed
         to be zero.
@@ -342,9 +342,6 @@ def condense(A: spmatrix,
     D = _flatten_dofs(D)
     I = _flatten_dofs(I)
 
-    if x is None:
-        x = np.zeros(A.shape[0])
-
     if I is None and D is None:
         raise Exception("Either I or D must be given!")
     elif I is None and D is not None:
@@ -355,6 +352,11 @@ def condense(A: spmatrix,
         raise Exception("Give only I or only D!")
 
     ret_value: CondensedSystem = (None,)
+
+    if x is None:
+        x = np.zeros(A.shape[0])
+    elif b is None:
+        b = np.zeros_like(x)
 
     if b is None:
         ret_value = (A[I].T[I].T,)

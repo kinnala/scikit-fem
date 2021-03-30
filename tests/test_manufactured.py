@@ -157,7 +157,7 @@ class TestExactHexElement(TestCase):
         for X in self.funs:
             x = self.set_bc(X, ib)
             Xh = x.copy()
-            x = solve(*condense(A, 0 * x, x=x, I=I))
+            x = solve(*condense(A, x=x, I=I))
             self.assertLessEqual(np.sum(x - Xh), 1e-10)
 
 
