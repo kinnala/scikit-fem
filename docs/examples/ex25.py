@@ -46,7 +46,7 @@ dofs = basis.find_dofs({'inlet': mesh.facets_satisfying(lambda x: x[0] == 0.),
 interior = basis.complement_dofs(dofs)
 
 A = asm(laplace, basis) + peclet * asm(advection, basis)
-t = np.zeros(basis.N)
+t = basis.zeros()
 t[dofs['floor'].all()] = 1.
 t = solve(*condense(A, x=t, I=interior))
 

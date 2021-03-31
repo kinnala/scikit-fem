@@ -142,7 +142,7 @@ class BackwardFacingStep:
 
     def streamfunction(self, velocity: np.ndarray) -> np.ndarray:
         A = asm(laplace, self.basis['psi'])
-        psi = np.zeros(self.basis['psi'].N)
+        psi = self.basis['psi'].zeros()
         vorticity = asm(rot, self.basis['psi'],
                         w=self.basis['u'].interpolate(velocity))
         psi = solve(*condense(A, vorticity, D=self.basis['psi'].find_dofs()['floor'].all()))
@@ -195,7 +195,7 @@ class BackwardFacingStep:
     def N(self, uvp: np.ndarray) -> np.ndarray:
         u = self.basis['u'].interpolate(self.split(uvp)[0])
         return np.hstack([asm(acceleration, self.basis['u'], wind=u),
-                          np.zeros(self.basis['p'].N)])
+                          self.basis['p'].zeros()])
 
     def f(self, uvp: np.ndarray, reynolds: float) -> np.ndarray:
         """Return the residual of a given velocity-pressure solution"""

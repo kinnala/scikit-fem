@@ -206,7 +206,7 @@ def exact(x: np.ndarray, y: np.ndarray) -> np.ndarray:
                     1 / 2 - (1 + y) / kratio) + longitudinal_gradient * x
 
 
-temperature = np.zeros(basis['heat'].N)
+temperature = basis['heat'].zeros()
 inlet_dofs = basis['heat'].complement_dofs(I)
 temperature[inlet_dofs] = exact(*mesh.p[:, inlet_dofs])
 

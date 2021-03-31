@@ -54,7 +54,7 @@ velocity, pressure = np.split(uvp, [A.shape[0]])
 
 basis['psi'] = basis['u'].with_element(ElementTriP2())
 A = asm(laplace, basis['psi'])
-psi = np.zeros(basis['psi'].N)
+psi = basis['psi'].zeros()
 vorticity = asm(rot, basis['psi'], w=basis['u'].interpolate(velocity))
 psi = solve(*condense(A, vorticity, D=basis['psi'].find_dofs()['floor'].all()))
 
