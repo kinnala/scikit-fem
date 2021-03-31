@@ -131,7 +131,7 @@ class InteriorBasis(Basis):
 
         return M, w.flatten()
 
-    def probes_data(self, x: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def _probes_data(self, x: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """Return a values of basis functions and relevant indices
         for interpolating a solution at the given points `x`."""
 
@@ -148,7 +148,7 @@ class InteriorBasis(Basis):
     def probes_matrix(self, x: np.ndarray) -> coo_matrix:
         """Return a coo_matrix which acts on a solution to probe its values
         at the given points `x`"""
-        phis, indices = self.probes_data(x)
+        phis, indices = self._probes_data(x)
         return coo_matrix(
             (
                 phis.flatten(),
@@ -162,7 +162,7 @@ class InteriorBasis(Basis):
         """Return a function handle, which can be used for finding
         the values on points `x` of a given solution vector."""
 
-        phis, indices = self.probes_data(x)
+        phis, indices = self._probes_data(x)
 
         def interpolator(y: np.ndarray) -> np.ndarray:
             return np.sum(phis * y[indices], 0)
