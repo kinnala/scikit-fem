@@ -131,50 +131,35 @@ class InteriorBasis(Basis):
 
         return M, w.flatten()
 
-    def _probes_data(self, x: ndarray) -> Tuple[ndarray, ndarray]:
-        """Return a values of basis functions and relevant indices
-        for interpolating a solution at the given points `x`."""
+    def probes(self, x: ndarray) -> coo_matrix:
+        """Return matrix which acts on a solution vector to find its values
+        on points `x`."""
 
-        finder = self.mesh.element_finder(mapping=self.mapping)
-        cells = finder(*x)
+        cells = self.mesh.element_finder(mapping=self.mapping)(*x)
         pts = self.mapping.invF(x[:, :, np.newaxis], tind=cells)
-        phis = np.array([
-            self.elem.gbasis(self.mapping, pts, k, tind=cells)[0][0].flatten()
-            for k in range(self.Nbfun)
-        ])
-        indices = self.element_dofs[:, cells]
-        return phis, indices
-
-    def probes_matrix(self, x: ndarray) -> coo_matrix:
-        """Return a coo_matrix which acts on a solution to probe its values
-        at the given points `x`"""
-        phis, indices = self._probes_data(x)
+        phis = np.array(
+            [
+                self.elem.gbasis(self.mapping, pts, k, tind=cells)[0][0]
+                for k in range(self.Nbfun)
+            ]
+        ).flatten()
         return coo_matrix(
             (
-                phis.flatten(),
-                (np.tile(np.arange(x.shape[1]), self.Nbfun),
-                 indices.flatten()),
+                phis,
+                (
+                    np.tile(np.arange(x.shape[1]), self.Nbfun),
+                    self.element_dofs[:, cells].flatten(),
+                ),
             ),
             shape=(x.shape[1], self.N),
         )
-
-    def probes(self, x: ndarray) -> Callable[[ndarray], ndarray]:
-        """Return a function handle, which can be used for finding
-        the values on points `x` of a given solution vector."""
-
-        phis, indices = self._probes_data(x)
-
-        def interpolator(y: ndarray) -> ndarray:
-            return np.sum(phis * y[indices], 0)
-
-        return interpolator
 
     def interpolator(self, y: ndarray) -> Callable[[ndarray], ndarray]:
         """Return a function handle, which can be used for finding
         values of the given solution vector `y` on given points."""
 
         def interpfun(x: ndarray) -> ndarray:
-            return self.probes(x)(y)
+            return self.probes(x) @ y
 
         return interpfun
 
