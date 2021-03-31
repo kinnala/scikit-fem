@@ -42,7 +42,7 @@ A = asm(laplace, basis)
 
 boundary_dofs = basis.find_dofs()
 
-u = np.zeros(basis.N)
+u = basis.zeros()
 u[boundary_dofs['positive'].all()] = 1.
 u = solve(*condense(A, x=u, D=boundary_dofs))
 

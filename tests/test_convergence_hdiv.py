@@ -53,7 +53,7 @@ class ConvergenceRaviartThomas(unittest.TestCase):
             A = asm(bilinf_A, ib1)
             B = asm(bilinf_B, ib1, ib2)
             b = np.concatenate((
-                np.zeros(A.shape[0]),
+                ib1.zeros(),
                 -asm(load, ib2)
             ))
 

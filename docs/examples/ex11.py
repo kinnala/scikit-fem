@@ -22,7 +22,7 @@ dofs = {
     'right': ib.get_dofs(lambda x: x[0] == 1.0),
 }
 
-u = np.zeros(K.shape[0])
+u = ib.zeros()
 u[dofs['right'].nodal['u^1']] = 0.3
 
 I = ib.complement_dofs(dofs)

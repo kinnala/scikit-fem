@@ -85,7 +85,7 @@ I = basis['u'].complement_dofs(D)
 
 def flow(pressure: np.ndarray) -> np.ndarray:
     """compute the velocity corresponding to a guessed pressure"""
-    velocity = np.zeros(basis['u'].N)
+    velocity = basis['u'].zeros()
     velocity[I] = solve(Aint,
                         condense(csr_matrix(A.shape),
                                  f - B.T @ pressure, I=I)[1],
@@ -98,12 +98,11 @@ def dilatation(pressure: np.ndarray) -> np.ndarray:
     return -B @ flow(pressure)
 
 
-pressure = np.zeros(basis['p'].N)
-dilatation0 = dilatation(pressure)
+dilatation0 = dilatation(basis['p'].zeros())
 
 K = LinearOperator((basis['p'].N,) * 2,
                    lambda p: dilatation(p) - dilatation0,
-                   dtype=pressure.dtype)
+                   dtype=dilatation0.dtype)
 
 pressure = solve(K, -dilatation0,
                  solver=solver_iter_krylov(minres),
@@ -112,7 +111,6 @@ pressure = solve(K, -dilatation0,
 velocity = flow(pressure)
 
 basis['psi'] = basis['u'].with_element(ElementQuad2())
-psi = np.zeros(A.shape[0])
 vorticity = asm(rot, basis['psi'], w=basis['u'].interpolate(velocity))
 psi = solve(*condense(asm(laplace, basis['psi']), vorticity, D=basis['psi'].find_dofs()))
 psi0 = basis['psi'].probes(np.zeros((2, 1)))(psi)[0]

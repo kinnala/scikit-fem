@@ -100,7 +100,7 @@ class Bratu1d:
 
 
 problem = Bratu1d(2**8)
-u0 = np.zeros(problem.basis.N)
+u0 = problem.basis.zeros()
 lmbda0 = 0.0
 
 lmbda_list = []

@@ -146,8 +146,8 @@ basis = {
     for field, e in elems.items()
 }
 
-du = np.zeros(basis["u"].N)
-dp = np.zeros(basis["p"].N)
+du = basis["u"].zeros()
+dp = basis["p"].zeros()
 stretch_ = 1.
 
 ddofs = [

@@ -55,7 +55,7 @@ b = scipy.sparse.csr_matrix(b)
 K = scipy.sparse.bmat([[A+B, b.T], [b, None]], 'csr')
 
 import numpy as np
-f = np.concatenate((np.zeros(A.shape[0]), -1.0*np.ones(1)))
+f = np.concatenate((ib.zeros(), -1.0*np.ones(1)))
 
 I = np.append(I, K.shape[0] - 1)
 

@@ -126,7 +126,7 @@ K = bmat([[A, B.T],
           [B, None]], 'csr')    # no pressure block required for minres
 
 f = np.concatenate([asm(body_force, basis['u']),
-                    np.zeros(B.shape[0])])
+                    basis['p'].zeros()])
 
 D = basis['u'].find_dofs()
 Kint, fint, u, I = condense(K, f, D=D)
