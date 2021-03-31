@@ -131,7 +131,7 @@ class InteriorBasis(Basis):
 
         return M, w.flatten()
 
-    def _probes_data(self, x: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def _probes_data(self, x: ndarray) -> Tuple[ndarray, ndarray]:
         """Return a values of basis functions and relevant indices
         for interpolating a solution at the given points `x`."""
 
@@ -145,7 +145,7 @@ class InteriorBasis(Basis):
         indices = self.element_dofs[:, cells]
         return phis, indices
 
-    def probes_matrix(self, x: np.ndarray) -> coo_matrix:
+    def probes_matrix(self, x: ndarray) -> coo_matrix:
         """Return a coo_matrix which acts on a solution to probe its values
         at the given points `x`"""
         phis, indices = self._probes_data(x)
@@ -158,13 +158,13 @@ class InteriorBasis(Basis):
             shape=(x.shape[1], self.N),
         )
 
-    def probes(self, x: np.ndarray) -> Callable[[np.ndarray], np.ndarray]:
+    def probes(self, x: ndarray) -> Callable[[ndarray], ndarray]:
         """Return a function handle, which can be used for finding
         the values on points `x` of a given solution vector."""
 
         phis, indices = self._probes_data(x)
 
-        def interpolator(y: np.ndarray) -> np.ndarray:
+        def interpolator(y: ndarray) -> ndarray:
             return np.sum(phis * y[indices], 0)
 
         return interpolator
@@ -173,7 +173,7 @@ class InteriorBasis(Basis):
         """Return a function handle, which can be used for finding
         values of the given solution vector `y` on given points."""
 
-        def interpfun(x: np.ndarray) -> np.ndarray:
+        def interpfun(x: ndarray) -> ndarray:
             return self.probes(x)(y)
 
         return interpfun
