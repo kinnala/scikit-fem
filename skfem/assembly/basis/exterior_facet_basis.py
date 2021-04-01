@@ -182,3 +182,13 @@ class ExteriorFacetBasis(Basis):
             InteriorBasis(target_meshcls(projection(p), t), elemcls()),
             self._trace_project(x, target_elem)
         )
+
+    def with_element(self, elem: Element) -> 'ExteriorFacetBasis':
+        """Return a similar basis using a different element."""
+        return type(self)(
+            self.mesh,
+            elem,
+            mapping=self.mapping,
+            quadrature=self.quadrature,
+            facets=self.find,
+        )

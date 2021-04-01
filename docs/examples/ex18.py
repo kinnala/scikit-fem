@@ -72,7 +72,7 @@ K = bmat([[A, -B.T],
           [-B, 1e-6 * C]], 'csr')
 
 f = np.concatenate([asm(body_force, basis['u']),
-                    np.zeros(B.shape[0])])
+                    basis['p'].zeros()])
 
 uvp = solve(*condense(K, f, D=basis['u'].find_dofs()))
 
@@ -98,12 +98,12 @@ if __name__ == '__main__':
     mesh.save(f'{name}_velocity.vtk',
               {'velocity': velocity[basis['u'].nodal_dofs].T})
 
-    print(basis['psi'].probes(np.zeros((2, 1)))(psi)[0],
+    print((basis['psi'].probes(np.zeros((2, 1))) @ psi)[0],
           '(cf. exact 1/64)')
 
-    print(basis['p'].probes(np.array([[-0.5, 0.5],
-                                      [0.5, 0.5]]))(pressure),
-          '(cf. exact -/+ 1/8)')
+    print(basis['p'].probes(np.array([[-0.5, 0.0, 0.5],
+                                      [0.5, 0.5, 0.5]])) @ pressure,
+          '(cf. exact -1/8, 0, +1/8)')
 
     ax = draw(mesh)
     plot(basis['p'], pressure, ax=ax)

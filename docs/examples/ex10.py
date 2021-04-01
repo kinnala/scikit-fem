@@ -25,7 +25,7 @@ def rhs(v, w):
 
 basis = InteriorBasis(m, ElementTriP1())
 
-x = np.zeros(basis.N)
+x = basis.zeros()
 
 I = m.interior_nodes()
 D = m.boundary_nodes()

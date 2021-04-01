@@ -33,7 +33,7 @@ from .ex17 import mesh, basis, radii,\
 
 
 annulus = np.unique(basis.element_dofs[:, mesh.subdomains['annulus']])
-temperature = np.zeros(basis.N)
+temperature = basis.zeros()
 core = basis.complement_dofs(annulus)
 core_basis = InteriorBasis(mesh, basis.elem, elements=mesh.subdomains['core'])
 L = asm(laplace, core_basis)
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     from sys import argv
     from skfem.visuals.matplotlib import draw, plot
 
-    T0 = {'skfem': basis.probes(np.zeros((2, 1)))(temperature)[0],
+    T0 = {'skfem': (basis.probes(np.zeros((2, 1))) @ temperature)[0],
           'exact':
           joule_heating * radii[0]**2 / 4 / thermal_conductivity['core']}
     print('Central temperature:', T0)
