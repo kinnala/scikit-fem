@@ -72,7 +72,7 @@ K = bmat([[A, -B.T],
           [-B, 1e-6 * C]], 'csr')
 
 f = np.concatenate([asm(body_force, basis['u']),
-                    np.zeros(B.shape[0])])
+                    basis['p'].zeros()])
 
 uvp = solve(*condense(K, f, D=basis['u'].find_dofs()))
 

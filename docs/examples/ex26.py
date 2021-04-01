@@ -33,7 +33,7 @@ from .ex17 import mesh, basis, radii,\
 
 
 annulus = np.unique(basis.element_dofs[:, mesh.subdomains['annulus']])
-temperature = np.zeros(basis.N)
+temperature = basis.zeros()
 core = basis.complement_dofs(annulus)
 core_basis = InteriorBasis(mesh, basis.elem, elements=mesh.subdomains['core'])
 L = asm(laplace, core_basis)
