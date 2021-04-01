@@ -2,6 +2,7 @@ from typing import Callable, Optional, Tuple
 
 import numpy as np
 from numpy import ndarray
+from scipy.sparse import coo_matrix
 from skfem.element import DiscreteField, Element
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh
@@ -130,30 +131,35 @@ class InteriorBasis(Basis):
 
         return M, w.flatten()
 
-    def probes(self, x: np.ndarray) -> Callable[[np.ndarray], np.ndarray]:
-        """Return a function handle, which can be used for finding
-        the values on points `x` of a given solution vector."""
+    def probes(self, x: ndarray) -> coo_matrix:
+        """Return matrix which acts on a solution vector to find its values
+        on points `x`."""
 
-        finder = self.mesh.element_finder(mapping=self.mapping)
-        cells = finder(*x)
+        cells = self.mesh.element_finder(mapping=self.mapping)(*x)
         pts = self.mapping.invF(x[:, :, np.newaxis], tind=cells)
-        phis = np.array([
-            self.elem.gbasis(self.mapping, pts, k, tind=cells)[0][0].flatten()
-            for k in range(self.Nbfun)
-        ])
-        indices = self.element_dofs[:, cells]
-
-        def interpolator(y: np.ndarray) -> np.ndarray:
-            return np.sum(phis * y[indices], 0)
-
-        return interpolator
+        phis = np.array(
+            [
+                self.elem.gbasis(self.mapping, pts, k, tind=cells)[0][0]
+                for k in range(self.Nbfun)
+            ]
+        ).flatten()
+        return coo_matrix(
+            (
+                phis,
+                (
+                    np.tile(np.arange(x.shape[1]), self.Nbfun),
+                    self.element_dofs[:, cells].flatten(),
+                ),
+            ),
+            shape=(x.shape[1], self.N),
+        )
 
     def interpolator(self, y: ndarray) -> Callable[[ndarray], ndarray]:
         """Return a function handle, which can be used for finding
         values of the given solution vector `y` on given points."""
 
-        def interpfun(x: np.ndarray) -> np.ndarray:
-            return self.probes(x)(y)
+        def interpfun(x: ndarray) -> ndarray:
+            return self.probes(x) @ y
 
         return interpfun
 
