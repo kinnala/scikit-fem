@@ -397,7 +397,7 @@ def adaptive_theta(est, theta=0.5, max=None):
 
 
 def projection(fun,
-               basis_to: Optional[Basis] = None,
+               basis_to: Basis,
                basis_from: Optional[Basis] = None,
                diff: Optional[int] = None,
                I: Optional[ndarray] = None,
