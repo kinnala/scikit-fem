@@ -164,7 +164,7 @@ class TestEx21(TestCase):
         x = ex.x
         K = ex.K
         L = ex.L[0]
-        self.assertAlmostEqual(L, 50194.94436851986, 4)
+        self.assertAlmostEqual(L, 50194.51136114997, 4)
         self.assertAlmostEqual(L, x[:, 0].T @ K @ x[:, 0], 4)
 
 

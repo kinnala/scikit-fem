@@ -32,7 +32,7 @@ class COOData:
             self.shape,
         )
 
-    def todense(self) -> ndarray:
+    def toarray(self) -> ndarray:
         """Return a dense NumPy array."""
         return coo_matrix((self.data, (self.rows, self.cols)),
-                          shape=self.shape).todense()
+                          shape=self.shape).toarray()

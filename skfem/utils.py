@@ -65,6 +65,29 @@ def solver_eigen_scipy(**kwargs) -> EigenSolver:
     params = {
         'sigma': 10,
         'k': 5,
+    }
+    params.update(kwargs)
+
+    def solver(K, M, **solve_time_kwargs):
+        params.update(solve_time_kwargs)
+        from scipy.sparse.linalg import eigs
+        return eigs(K, M=M, **params)
+
+    return solver
+
+
+def solver_eigen_scipy_sym(**kwargs) -> EigenSolver:
+    """Solve symmetric generalized eigenproblem using SciPy (ARPACK).
+
+    Returns
+    -------
+    EigenSolver
+        A solver function that can be passed to :func:`solve`.
+
+    """
+    params = {
+        'sigma': 10,
+        'k': 5,
         'mode': 'normal',
     }
     params.update(kwargs)
@@ -79,9 +102,11 @@ def solver_eigen_scipy(**kwargs) -> EigenSolver:
 
 def solver_direct_scipy(**kwargs) -> LinearSolver:
     """The default linear solver of SciPy."""
+
     def solver(A, b, **solve_time_kwargs):
         kwargs.update(solve_time_kwargs)
         return spl.spsolve(A, b, **kwargs)
+
     return solver
 
 
@@ -221,6 +246,32 @@ def _flatten_dofs(S: Optional[DofsCollection]) -> Optional[ndarray]:
     raise NotImplementedError("Unable to flatten the given set of DOFs.")
 
 
+def _init_bc(A: spmatrix,
+             b: Optional[ndarray] = None,
+             x: Optional[ndarray] = None,
+             I: Optional[DofsCollection] = None,
+             D: Optional[DofsCollection] = None):
+
+    D = _flatten_dofs(D)
+    I = _flatten_dofs(I)
+
+    if I is None and D is None:
+        raise Exception("Either I or D must be given!")
+    elif I is None and D is not None:
+        I = np.setdiff1d(np.arange(A.shape[0]), D)
+    elif D is None and I is not None:
+        D = np.setdiff1d(np.arange(A.shape[0]), I)
+    else:
+        raise Exception("Give only I or only D!")
+
+    if x is None:
+        x = np.zeros(A.shape[0])
+    elif b is None:
+        b = np.zeros_like(x)
+
+    return b, x, I, D
+
+
 def enforce(A: spmatrix,
             b: Optional[ndarray] = None,
             x: Optional[ndarray] = None,
@@ -256,22 +307,7 @@ def enforce(A: spmatrix,
         A linear system with the enforced rows/diagonals set to zero/one.
 
     """
-    D = _flatten_dofs(D)
-    I = _flatten_dofs(I)
-
-    if I is None and D is None:
-        raise Exception("Either I or D must be given!")
-    elif I is None and D is not None:
-        I = np.setdiff1d(np.arange(A.shape[0]), D)
-    elif D is None and I is not None:
-        D = np.setdiff1d(np.arange(A.shape[0]), I)
-    else:
-        raise Exception("Give only I or only D!")
-
-    if x is None:
-        x = np.zeros(A.shape[0])
-    elif b is None:
-        b = np.zeros_like(x)
+    b, x, I, D = _init_bc(A, b, x, I, D)
 
     assert isinstance(D, ndarray)
 
@@ -290,8 +326,12 @@ def enforce(A: spmatrix,
     A.setdiag(d)
 
     if b is not None:
-        # set rhs to the given value
-        b[D] = x[D]
+        if isinstance(b, spmatrix):
+            # eigenvalue problem
+            b = enforce(b, D=D, diag=0.)
+        else:
+            # set rhs to the given value
+            b[D] = x[D]
         return A, b
 
     return A
@@ -417,24 +457,9 @@ def condense(A: spmatrix,
         the boundary values.
 
     """
-    D = _flatten_dofs(D)
-    I = _flatten_dofs(I)
-
-    if I is None and D is None:
-        raise Exception("Either I or D must be given!")
-    elif I is None and D is not None:
-        I = np.setdiff1d(np.arange(A.shape[0]), D)
-    elif D is None and I is not None:
-        D = np.setdiff1d(np.arange(A.shape[0]), I)
-    else:
-        raise Exception("Give only I or only D!")
+    b, x, I, D = _init_bc(A, b, x, I, D)
 
     ret_value: CondensedSystem = (None,)
-
-    if x is None:
-        x = np.zeros(A.shape[0])
-    elif b is None:
-        b = np.zeros_like(x)
 
     if b is None:
         ret_value = (A[I].T[I].T,)
