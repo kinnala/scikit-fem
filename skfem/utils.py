@@ -23,7 +23,8 @@ Solution = Union[ndarray, Tuple[ndarray, ndarray]]
 LinearSolver = Callable[..., ndarray]
 EigenSolver = Callable[..., Tuple[ndarray, ndarray]]
 EnforcedSystem = Union[spmatrix,
-                       Tuple[spmatrix, ndarray]]
+                       Tuple[spmatrix, ndarray],
+                       Tuple[spmatrix, spmatrix]]
 CondensedSystem = Union[spmatrix,
                         Tuple[spmatrix, ndarray],
                         Tuple[spmatrix, spmatrix],
@@ -250,7 +251,10 @@ def _init_bc(A: spmatrix,
              b: Optional[ndarray] = None,
              x: Optional[ndarray] = None,
              I: Optional[DofsCollection] = None,
-             D: Optional[DofsCollection] = None):
+             D: Optional[DofsCollection] = None) -> Tuple[Optional[ndarray],
+                                                          ndarray,
+                                                          ndarray,
+                                                          ndarray]:
 
     D = _flatten_dofs(D)
     I = _flatten_dofs(I)
@@ -264,6 +268,9 @@ def _init_bc(A: spmatrix,
     else:
         raise Exception("Give only I or only D!")
 
+    assert isinstance(I, ndarray)
+    assert isinstance(D, ndarray)
+
     if x is None:
         x = np.zeros(A.shape[0])
     elif b is None:
@@ -273,7 +280,7 @@ def _init_bc(A: spmatrix,
 
 
 def enforce(A: spmatrix,
-            b: Optional[ndarray] = None,
+            b: Optional[Union[ndarray, spmatrix]] = None,
             x: Optional[ndarray] = None,
             I: Optional[DofsCollection] = None,
             D: Optional[DofsCollection] = None,
@@ -308,8 +315,6 @@ def enforce(A: spmatrix,
 
     """
     b, x, I, D = _init_bc(A, b, x, I, D)
-
-    assert isinstance(D, ndarray)
 
     # set rows on lhs to zero
     start = A.indptr[D]
