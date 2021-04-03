@@ -2,7 +2,7 @@ from typing import Dict, Optional, Any
 
 from numpy import ndarray
 
-from .form import Form, FormDict
+from .form import Form, FormExtraParams
 from ..basis import Basis
 from ...element import DiscreteField
 
@@ -26,7 +26,10 @@ class Functional(Form):
                   v: Basis,
                   **kwargs) -> ndarray:
         """Evaluate the functional elementwise."""
-        w = FormDict({**v.default_parameters(), **self.dictify(kwargs)})
+        w = FormExtraParams({
+            **v.default_parameters(),
+            **self.dictify(kwargs),
+        })
         return self._kernel(w, v.dx)
 
     def assemble(self,

@@ -11,7 +11,7 @@ from ..basis import Basis
 from ...element import DiscreteField
 
 
-class FormDict(dict):
+class FormExtraParams(dict):
     """Passed to forms as 'w'."""
 
     def __getattr__(self, attr):
@@ -71,8 +71,3 @@ class Form:
                                  "form parameters w cannot be converted to "
                                  "DiscreteField.".format(type(w)))
         return w
-
-    @staticmethod
-    def _assemble_numpy_vector(data, rows, cols, shape=None):
-        return coo_matrix((data, (rows, cols)),
-                          shape=shape).toarray().T[0]

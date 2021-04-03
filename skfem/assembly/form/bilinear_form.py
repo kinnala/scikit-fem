@@ -6,7 +6,7 @@ from scipy.sparse import csr_matrix
 
 from ..basis import Basis
 from .coo_data import COOData
-from .form import Form, FormDict
+from .form import Form, FormExtraParams
 
 
 class BilinearForm(Form):
@@ -50,26 +50,13 @@ class BilinearForm(Form):
 
     """
 
-    def _assembly(self,
+    def _assemble(self,
                   ubasis: Basis,
                   vbasis: Optional[Basis] = None,
                   **kwargs) -> Tuple[ndarray,
                                      ndarray,
                                      ndarray,
                                      Tuple[int, int]]:
-        """Assemble the bilinear form into a sparse matrix.
-
-        Parameters
-        ----------
-        ubasis
-            The :class:`~skfem.assembly.Basis` for ``u``.
-        vbasis
-            Optionally, specify a different :class:`~skfem.assembly.Basis`
-            for ``v``.
-        **kwargs
-            Any additional keyword arguments are appended to ``w``.
-
-        """
 
         if vbasis is None:
             vbasis = ubasis
@@ -79,9 +66,9 @@ class BilinearForm(Form):
 
         nt = ubasis.nelems
         dx = ubasis.dx
-        wdict = FormDict({
+        wdict = FormExtraParams({
             **ubasis.default_parameters(),
-            **self.dictify(kwargs)
+            **self.dictify(kwargs),
         })
 
         # initialize COO data structures
@@ -107,7 +94,7 @@ class BilinearForm(Form):
         return data, rows, cols, (vbasis.N, ubasis.N)
 
     def coo_data(self, *args, **kwargs) -> COOData:
-        return COOData(*self._assembly(*args, **kwargs))
+        return COOData(*self._assemble(*args, **kwargs))
 
     def assemble(self, *args, **kwargs) -> csr_matrix:
         """Assemble the bilinear form into a sparse matrix.
@@ -123,7 +110,7 @@ class BilinearForm(Form):
             Any additional keyword arguments are appended to ``w``.
 
         """
-        return COOData._assemble_scipy_csr(*self._assembly(*args, **kwargs))
+        return COOData._assemble_scipy_csr(*self._assemble(*args, **kwargs))
 
     def _kernel(self, u, v, w, dx):
         return np.sum(self.form(*u, *v, w) * dx, axis=1)
