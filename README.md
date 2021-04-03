@@ -231,6 +231,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added: `Mesh.with_subdomains`
 - Added: `skfem.utils.projection`, a variant of `skfem.utils.project`
   with a more intuitive order of arguments
+- Added: `skfem.utils.enforce` for setting essential boundary conditions via
+  setting matrix rows to zero and diagonals to one.
 - Deprecated: `skfem.utils.project`
 - Removed: `Mesh.refine`, `Mesh.scale`, `Mesh.translate` and
   `Mesh.define_boundary`
@@ -239,6 +241,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed: Python 3.6 support
 - Changed: `Mesh.refined` no more attempts to fix the indexing of
   `Mesh.boundaries` upon refine
+- Changed: `skfem.utils.solve` now uses `scipy.sparse.eigs` by default instead
+  of `scipy.sparse.eigsh`
 
 ### [2.5.0] - 2021-02-13
 
