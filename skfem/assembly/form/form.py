@@ -1,14 +1,13 @@
 import warnings
-from typing import Callable, Any, Optional
-from functools import partial
 from copy import deepcopy
+from functools import partial
+from typing import Any, Callable, Optional
 
 import numpy as np
 from numpy import ndarray
-from scipy.sparse import coo_matrix
 
-from ..basis import Basis
 from ...element import DiscreteField
+from ..basis import Basis
 
 
 class FormExtraParams(dict):
