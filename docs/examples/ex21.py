@@ -85,7 +85,7 @@ def mass(u, v, w):
 
 M = asm(mass, ib)
 
-L, x = solve(*condense(K, M, D=ib.find_dofs()['fixed']))
+L, x = solve(*enforce(K, M, D=ib.find_dofs()['fixed']))
 
 if __name__ == "__main__":
     from skfem.visuals.matplotlib import draw, show

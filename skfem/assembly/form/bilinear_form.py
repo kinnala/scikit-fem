@@ -1,9 +1,12 @@
-from typing import Optional, Any
+from typing import Optional, Tuple
 
 import numpy as np
+from numpy import ndarray
+from scipy.sparse import csr_matrix
 
-from .form import Form, FormDict
 from ..basis import Basis
+from .coo_data import COOData
+from .form import Form, FormExtraParams
 
 
 class BilinearForm(Form):
@@ -47,10 +50,53 @@ class BilinearForm(Form):
 
     """
 
-    def assemble(self,
-                 ubasis: Basis,
-                 vbasis: Optional[Basis] = None,
-                 **kwargs) -> Any:
+    def _assemble(self,
+                  ubasis: Basis,
+                  vbasis: Optional[Basis] = None,
+                  **kwargs) -> Tuple[ndarray,
+                                     ndarray,
+                                     ndarray,
+                                     Tuple[int, int]]:
+
+        if vbasis is None:
+            vbasis = ubasis
+        elif ubasis.X.shape[1] != vbasis.X.shape[1]:
+            raise ValueError("Quadrature mismatch: trial and test functions "
+                             "should have same number of integration points.")
+
+        nt = ubasis.nelems
+        dx = ubasis.dx
+        wdict = FormExtraParams({
+            **ubasis.default_parameters(),
+            **self.dictify(kwargs),
+        })
+
+        # initialize COO data structures
+        sz = ubasis.Nbfun * vbasis.Nbfun * nt
+        data = np.zeros(sz, dtype=self.dtype)
+        rows = np.zeros(sz, dtype=np.int64)
+        cols = np.zeros(sz, dtype=np.int64)
+
+        # loop over the indices of local stiffness matrix
+        for j in range(ubasis.Nbfun):
+            for i in range(vbasis.Nbfun):
+                ixs = slice(nt * (vbasis.Nbfun * j + i),
+                            nt * (vbasis.Nbfun * j + i + 1))
+                rows[ixs] = vbasis.element_dofs[i]
+                cols[ixs] = ubasis.element_dofs[j]
+                data[ixs] = self._kernel(
+                    ubasis.basis[j],
+                    vbasis.basis[i],
+                    wdict,
+                    dx,
+                )
+
+        return data, rows, cols, (vbasis.N, ubasis.N)
+
+    def coo_data(self, *args, **kwargs) -> COOData:
+        return COOData(*self._assemble(*args, **kwargs))
+
+    def assemble(self, *args, **kwargs) -> csr_matrix:
         """Assemble the bilinear form into a sparse matrix.
 
         Parameters
@@ -64,47 +110,7 @@ class BilinearForm(Form):
             Any additional keyword arguments are appended to ``w``.
 
         """
-
-        if vbasis is None:
-            vbasis = ubasis
-        elif ubasis.X.shape[1] != vbasis.X.shape[1]:
-            raise ValueError("Quadrature mismatch: trial and test functions "
-                             "should have same number of integration points.")
-
-        nt = ubasis.nelems
-        dx = ubasis.dx
-        wdict = FormDict({
-            **ubasis.default_parameters(),
-            **self.dictify(kwargs)
-        })
-
-        # initialize COO data structures
-        sz = ubasis.Nbfun * vbasis.Nbfun * nt
-        data = np.zeros(sz, dtype=self.dtype)
-        rows = np.zeros(sz)
-        cols = np.zeros(sz)
-
-        # loop over the indices of local stiffness matrix
-        for j in range(ubasis.Nbfun):
-            for i in range(vbasis.Nbfun):
-                ixs = slice(nt * (vbasis.Nbfun * j + i),
-                            nt * (vbasis.Nbfun * j + i + 1))
-                rows[ixs] = vbasis.element_dofs[i]
-                cols[ixs] = ubasis.element_dofs[j]
-                data[ixs] = self._kernel(
-                    ubasis.basis[j],
-                    vbasis.basis[i],
-                    wdict,
-                    dx
-                )
-
-        # TODO: allow user to change, e.g. cuda or petsc
-        return self._assemble_scipy_matrix(
-            data,
-            rows,
-            cols,
-            (vbasis.N, ubasis.N)
-        )
+        return COOData._assemble_scipy_csr(*self._assemble(*args, **kwargs))
 
     def _kernel(self, u, v, w, dx):
         return np.sum(self.form(*u, *v, w) * dx, axis=1)

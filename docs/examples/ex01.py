@@ -1,5 +1,5 @@
 from skfem import *
-from skfem.models.poisson import laplace, unit_load
+from skfem.models import laplace, unit_load
 
 m = MeshTri().refined(4)
 

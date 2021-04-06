@@ -109,7 +109,7 @@ class TestEx14(TestCase):
         import docs.examples.ex14
         u = docs.examples.ex14.u
         A = docs.examples.ex14.A
-        self.assertTrue(((u @ A @ u) - 8 / 3) < 0.01)
+        self.assertAlmostEqual(u @ A @ u, 8 / 3, delta=1e-2)
 
 
 class TestEx15(TestCase):
@@ -164,7 +164,7 @@ class TestEx21(TestCase):
         x = ex.x
         K = ex.K
         L = ex.L[0]
-        self.assertAlmostEqual(L, 50194.94436851986, 4)
+        self.assertAlmostEqual(L, 50194.51136114997, delta=1)
         self.assertAlmostEqual(L, x[:, 0].T @ K @ x[:, 0], 4)
 
 

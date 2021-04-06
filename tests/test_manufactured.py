@@ -1,10 +1,11 @@
 """Solve problems that have manufactured solutions."""
 
-import unittest
+from unittest import TestCase
 from pathlib import Path
 
 import numpy as np
-from skfem import LinearForm, asm, condense, solve
+from skfem import (LinearForm, Functional, asm, condense, solve, projection,
+                   enforce)
 from skfem.assembly import FacetBasis, InteriorBasis
 from skfem.element import (ElementHex1, ElementHex2, ElementHexS2,
                            ElementLineMini, ElementLineP1, ElementLineP2,
@@ -13,9 +14,10 @@ from skfem.element import (ElementHex1, ElementHex2, ElementHexS2,
 from skfem.mesh import (MeshHex, MeshLine, MeshQuad, MeshQuad2, MeshTet,
                         MeshTet2, MeshTri, MeshTri2)
 from skfem.models.poisson import laplace, mass, unit_load
+from skfem.helpers import dot
 
 
-class Line1D(unittest.TestCase):
+class Line1D(TestCase):
     """Solve the following problem:
 
     u'' = 0
@@ -25,7 +27,6 @@ class Line1D(unittest.TestCase):
     Solution is u(x) = x.
 
     """
-
     e = ElementLineP1()
 
     def runTest(self):
@@ -53,7 +54,7 @@ class Line1DMini(Line1D):
     e = ElementLineMini()
 
 
-class LineNegative1D(unittest.TestCase):
+class LineNegative1D(TestCase):
     """Solve the following problem:
 
     u'' = 0
@@ -94,7 +95,7 @@ class LineNegative1DMini(LineNegative1D):
     e = ElementLineMini()
 
 
-class LineNeumann1D(unittest.TestCase):
+class LineNeumann1D(TestCase):
     """Solve the following problem:
 
     -u'' + eps*u = 0
@@ -131,7 +132,7 @@ class LineNeumann1DMini(LineNeumann1D):
     e = ElementLineMini()
     
 
-class TestExactHexElement(unittest.TestCase):
+class TestExactHexElement(TestCase):
 
     mesh = MeshHex
     elem = ElementHex1
@@ -223,7 +224,7 @@ class TestExactQuadElement2(TestExactTriElementP2):
     elem = ElementQuad2
 
 
-class SolveCirclePoisson(unittest.TestCase):
+class SolveCirclePoisson(TestCase):
 
     mesh_type = MeshTri2
     element_type = ElementTriP1
@@ -296,6 +297,49 @@ class SolveCirclePoissonTet2(SolveCirclePoisson):
     maxval = 0.0405901240018571
 
 
+class SolveInhomogeneousLaplace(TestCase):
+    """Adapted from example 14."""
+
+    mesh = MeshTri
+    elem = ElementTriP2()
+
+    def runTest(self):
+        m = self.mesh().refined(4)
+        basis = InteriorBasis(m, self.elem)
+        boundary_basis = FacetBasis(m, self.elem)
+        boundary_dofs = boundary_basis.get_dofs().flatten()
+
+
+        def dirichlet(x):
+            """return a harmonic function"""
+            return ((x[0] + 1.j * x[1]) ** 2).real
+
+
+        u = basis.zeros()
+        A = laplace.assemble(basis)
+        u[boundary_dofs] = projection(dirichlet,
+                                      boundary_basis,
+                                      I=boundary_dofs)
+        u = solve(*enforce(A, x=u, D=boundary_dofs))
+
+
+        @Functional
+        def gradu(w):
+            gradu = w['sol'].grad
+            return dot(gradu, gradu)
+
+        self.assertAlmostEqual(
+            gradu.assemble(basis, sol=basis.interpolate(u)),
+            8 / 3,
+            delta=1e-10,
+        )
+
+
+class SolveInhomogeneousLaplaceQuad(SolveInhomogeneousLaplace):
+
+    mesh = MeshQuad
+    elem = ElementQuad2()
+
 
 if __name__ == '__main__':
-    unittest.main()
+    main()

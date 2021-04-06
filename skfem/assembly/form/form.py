@@ -1,17 +1,16 @@
 import warnings
-from typing import Callable, Any, Optional
-from functools import partial
 from copy import deepcopy
+from functools import partial
+from typing import Any, Callable, Optional
 
 import numpy as np
 from numpy import ndarray
-from scipy.sparse import coo_matrix
 
-from ..basis import Basis
 from ...element import DiscreteField
+from ..basis import Basis
 
 
-class FormDict(dict):
+class FormExtraParams(dict):
     """Passed to forms as 'w'."""
 
     def __getattr__(self, attr):
@@ -71,14 +70,3 @@ class Form:
                                  "form parameters w cannot be converted to "
                                  "DiscreteField.".format(type(w)))
         return w
-
-    @staticmethod
-    def _assemble_scipy_matrix(data, rows, cols, shape=None):
-        K = coo_matrix((data, (rows, cols)), shape=shape)
-        K.eliminate_zeros()
-        return K.tocsr()
-
-    @staticmethod
-    def _assemble_numpy_vector(data, rows, cols, shape=None):
-        return coo_matrix((data, (rows, cols)),
-                          shape=shape).toarray().T[0]

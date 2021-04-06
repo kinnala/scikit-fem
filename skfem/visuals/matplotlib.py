@@ -152,7 +152,8 @@ def plot_meshline(m: MeshLine, z: ndarray, **kwargs):
         ys.append(y1)
         ys.append(y2)
         ys.append(None)
-        ax.plot(xs, ys, color)
+
+    ax.plot(xs, ys, color)
 
     return ax
 
