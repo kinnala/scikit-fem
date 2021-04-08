@@ -215,7 +215,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added: Completely rewritten `Mesh` base class which is "immutable" and uses
   `Element` classes to define the ordering of nodes; better support for
   high-order and other more general mesh types
-- Added: `skfem.InteriorBasis.probes`, like `interpolator` but returning a matrix
+- Added: `InteriorBasis.probes`; like `InteriorBasis.interpolator` but returns a matrix
   that operates on solution vectors to interpolate them at the given points
 - Added: More overloads for `DiscreteField`, e.g., multiplication, summation
   and subtraction are now explicitly supported inside the form definitions
@@ -226,12 +226,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added: `Mesh.with_boundaries`, a functional replacement to
   `Mesh.define_boundary`, i.e. defining boundaries via Boolean lambda function
 - Added: `Mesh.with_subdomains` for defining subdomains via Boolean lambda function
-- Added: `skfem.utils.projection`, a variant of `skfem.utils.project`
-  with different order of arguments
-- Added: `skfem.utils.enforce` for setting essential boundary conditions via
-  setting matrix rows to zero and diagonals to one.
+- Added: `skfem.utils.projection`, a replacement of `skfem.utils.project`
+  with a different, more intuitive order of arguments
+- Added: `skfem.utils.enforce` for setting essential boundary conditions by
+  changing matrix rows to zero and diagonals to one.
 - Deprecated: `skfem.utils.project` in favor of `skfem.utils.projection`
-- Removed: `Mesh.{refine, scale, translate, define_boundary}`; the replacements
+- Removed: `Mesh.{refine,scale,translate,define_boundary}`; the replacements
   are `Mesh.{refined,scaled,translated,with_boundaries}`
 - Removed: `skfem.models.helpers`; available as `skfem.helpers`
 - Removed: `DiscreteField.{f,df,ddf,hod}`; available as `DiscreteField.{value,grad,hess,grad3,...}`
