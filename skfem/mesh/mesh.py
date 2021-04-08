@@ -135,6 +135,28 @@ class Mesh:
                               np.ravel_multi_index(B.T, dims)))[0]
         return edge_candidates[ix]
 
+    def define_boundary(self, name: str,
+                        test: Callable[[ndarray], ndarray],
+                        boundaries_only: bool = True):
+        """Define a named boundary via function handle.
+
+        Parameters
+        ----------
+        name
+            Name of the boundary.
+        test
+            A function which returns True for facet midpoints belonging to the
+            boundary.
+        boundaries_only
+            If True, include only facets on the boundary of the mesh.
+
+        """
+        warn("Mesh.define_boundary is deprecated and will be removed in the "
+             "next major release.", DeprecationWarning)
+        if self._boundaries is None:
+            self._boundaries = {}
+        self._boundaries[name] = self.facets_satisfying(test, boundaries_only)
+
     def with_boundaries(self,
                         boundaries: Dict[str, Callable[[ndarray], ndarray]]):
         """Return a copy of the mesh with named boundaries.

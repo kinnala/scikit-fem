@@ -231,8 +231,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added: `skfem.utils.enforce` for setting essential boundary conditions by
   changing matrix rows to zero and diagonals to one.
 - Deprecated: `skfem.utils.project` in favor of `skfem.utils.projection`
-- Removed: `Mesh.{refine,scale,translate,define_boundary}`; the replacements
-  are `Mesh.{refined,scaled,translated,with_boundaries}`
+- Deprecated: `Mesh.define_boundary` in favor of `Mesh.with_boundaries`
+- Removed: `Mesh.{refine,scale,translate}`; the replacements are `Mesh.{refined,scaled,translated}`
 - Removed: `skfem.models.helpers`; available as `skfem.helpers`
 - Removed: `DiscreteField.{f,df,ddf,hod}`; available as `DiscreteField.{value,grad,hess,grad3,...}`
 - Removed: Python 3.6 support
