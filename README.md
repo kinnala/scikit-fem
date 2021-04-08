@@ -212,37 +212,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
-- Added: `skfem.InteriorBasis.probes`, like `interpolator` but returning a matrix
-  that operates on solution vectors to interpolate them at the given points
 - Added: Completely rewritten `Mesh` base class which is "immutable" and uses
   `Element` classes to define the ordering of nodes; better support for
   high-order and other more general mesh types
-- Added: New names for higher order derivatives in `DiscreteField` when using
-  `ElementGlobal`: `u.grad3` for third order derivatives, `u.grad4` for fourth
-  order derivatices, and so on
+- Added: `skfem.InteriorBasis.probes`, like `interpolator` but returning a matrix
+  that operates on solution vectors to interpolate them at the given points
 - Added: More overloads for `DiscreteField`, e.g., multiplication, summation
   and subtraction are now explicitly supported inside the form definitions
-- Added: New quadratic mesh types; `MeshTet2` and `MeshHex2`
-- Added: `MeshHex.to_meshtet` to split hex mesh into tets
+- Added: New quadratic mesh types: `MeshTri2`, `MeshQuad2`, `MeshTet2` and `MeshHex2`
+- Added: `MeshHex.to_meshtet` for splitting hexahedra into tetrahedra
 - Added: `MeshHex.element_finder` for interpolating finite element solutions
   on hexahedral meshes via `InteriorBasis.interpolator`
 - Added: `Mesh.with_boundaries`, a functional replacement to
-  `Mesh.define_boundary`
-- Added: `Mesh.with_subdomains`
+  `Mesh.define_boundary`, i.e. defining boundaries via Boolean lambda function
+- Added: `Mesh.with_subdomains` for defining subdomains via Boolean lambda function
 - Added: `skfem.utils.projection`, a variant of `skfem.utils.project`
-  with a more intuitive order of arguments
+  with different order of arguments
 - Added: `skfem.utils.enforce` for setting essential boundary conditions via
   setting matrix rows to zero and diagonals to one.
-- Deprecated: `skfem.utils.project`
-- Removed: `Mesh.refine`, `Mesh.scale`, `Mesh.translate` and
-  `Mesh.define_boundary`
-- Removed: `skfem.models.helpers`; renamed to `skfem.helpers` since 1.0.0
-- Removed: `DiscreteField.{f,df,ddf,hod}`
+- Deprecated: `skfem.utils.project` in favor of `skfem.utils.projection`
+- Removed: `Mesh.{refine, scale, translate, define_boundary}`; the replacements
+  are `Mesh.{refined,scaled,translated,with_boundaries}`
+- Removed: `skfem.models.helpers`; available as `skfem.helpers`
+- Removed: `DiscreteField.{f,df,ddf,hod}`; available as `DiscreteField.{value,grad,hess,grad3,...}`
 - Removed: Python 3.6 support
-- Changed: `Mesh.refined` no more attempts to fix the indexing of
-  `Mesh.boundaries` upon refine
-- Changed: `skfem.utils.solve` now uses `scipy.sparse.eigs` by default instead
-  of `scipy.sparse.eigsh`
+- Changed: `Mesh.refined` no more attempts to fix the indexing of `Mesh.boundaries` after refine
+- Changed: `skfem.utils.solve` now uses `scipy.sparse.eigs` instead of `scipy.sparse.eigsh` by default;
+  the old behavior can be retained by explicitly passing `solver=solver_scipy_eigs_sym()`
 
 ### [2.5.0] - 2021-02-13
 
