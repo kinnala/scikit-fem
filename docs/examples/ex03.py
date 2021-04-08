@@ -3,7 +3,6 @@
 from skfem import *
 from skfem.helpers import dot
 from skfem.models.elasticity import linear_elasticity
-from scipy.sparse.linalg import eigsh
 import numpy as np
 
 m1 = MeshLine(np.linspace(0, 5, 50))
@@ -31,9 +30,9 @@ y = gb.zeros()
 
 I = gb.complement_dofs(D)
 
-L, x = eigsh(K[I].T[I].T, k=6, M=M[I].T[I].T, which='SM')
+L, x = solve(*condense(K, M, I=I), solver=solver_eigen_scipy_sym(k=6, sigma=0.0))
 
-y[I] = x[:, 4]
+y = x[:, 4]
 
 if __name__ == "__main__":
     from skfem.visuals.matplotlib import draw, show
