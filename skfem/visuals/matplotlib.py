@@ -35,8 +35,7 @@ def draw_basis(ib: InteriorBasis, **kwargs) -> Axes:
 def draw_meshtet(m: MeshTet, **kwargs) -> Axes:
     """Visualize a tetrahedral mesh by drawing the boundary facets."""
     bnd_facets = m.boundary_facets()
-    fig = plt.figure()
-    ax = Axes3D(fig)
+    ax = plt.figure().add_subplot(1, 1, 1, projection='3d')
     indexing = m.facets[:, bnd_facets].T
     ax.plot_trisurf(m.p[0], m.p[1], m.p[2],
                     triangles=indexing, cmap=plt.cm.viridis, edgecolor='k')
@@ -263,11 +262,7 @@ def plot3_meshtri(m: MeshTri, z: ndarray, **kwargs) -> Axes:
         The Matplotlib axes onto which the mesh was plotted.
 
     """
-    if "ax" not in kwargs:
-        fig = plt.figure()
-        ax = Axes3D(fig)
-    else:
-        ax = kwargs["ax"]
+    ax = kwargs.get("ax", plt.figure().add_subplot(1, 1, 1, projection='3d'))
 
     ax.plot_trisurf(m.p[0], m.p[1], z,
                     triangles=m.t.T,
