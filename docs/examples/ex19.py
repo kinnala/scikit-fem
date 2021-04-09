@@ -61,7 +61,7 @@ L = diffusivity * asm(laplace, basis)
 M = asm(mass, basis)
 
 dt = .01
-print(f'dt = {dt} µs')
+print('dt =', dt)
 theta = 0.5                     # Crank–Nicolson
 A = M + theta * L * dt
 B = M - (1 - theta) * L * dt
