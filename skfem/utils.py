@@ -22,12 +22,10 @@ from skfem.element import ElementVector
 Solution = Union[ndarray, Tuple[ndarray, ndarray]]
 LinearSolver = Callable[..., ndarray]
 EigenSolver = Callable[..., Tuple[ndarray, ndarray]]
-EnforcedSystem = Union[spmatrix,
-                       Tuple[spmatrix, ndarray],
-                       Tuple[spmatrix, spmatrix]]
-CondensedSystem = Union[spmatrix,
-                        Tuple[spmatrix, ndarray],
-                        Tuple[spmatrix, spmatrix],
+LinearSystem = Union[spmatrix,
+                     Tuple[spmatrix, ndarray],
+                     Tuple[spmatrix, spmatrix]]
+CondensedSystem = Union[LinearSystem,
                         Tuple[spmatrix, ndarray, ndarray],
                         Tuple[spmatrix, ndarray, ndarray, ndarray],
                         Tuple[spmatrix, spmatrix, ndarray, ndarray]]
@@ -285,7 +283,7 @@ def enforce(A: spmatrix,
             I: Optional[DofsCollection] = None,
             D: Optional[DofsCollection] = None,
             diag: float = 1.,
-            overwrite: bool = False) -> EnforcedSystem:
+            overwrite: bool = False) -> LinearSystem:
     r"""Enforce degrees-of-freedom of a linear system.
 
     .. note::
@@ -315,14 +313,15 @@ def enforce(A: spmatrix,
 
     Returns
     -------
-    EnforcedSystem
+    LinearSystem
         A linear system with the enforced rows/diagonals set to zero/one.
 
     """
     b, x, I, D = _init_bc(A, b, x, I, D)
 
     Aout = A if overwrite else A.copy()
-    bout = b if b is None or overwrite else b.copy()
+    bout: Optional[Union[ndarray, spmatrix]] =\
+        None if b is None or overwrite else b.copy()
 
     # set rows on lhs to zero
     start = Aout.indptr[D]
