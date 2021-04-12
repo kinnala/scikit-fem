@@ -284,7 +284,8 @@ def enforce(A: spmatrix,
             x: Optional[ndarray] = None,
             I: Optional[DofsCollection] = None,
             D: Optional[DofsCollection] = None,
-            diag: float = 1.) -> EnforcedSystem:
+            diag: float = 1.,
+            overwrite: bool = False) -> EnforcedSystem:
     r"""Enforce degrees-of-freedom of a linear system.
 
     .. note::
@@ -307,6 +308,10 @@ def enforce(A: spmatrix,
     D
         Specify either this or ``I``: The set of degree-of-freedom indices to
         enforce (rows/diagonal set to zero/one).
+    overwrite
+        Optionally, the original system is both modified (for performance) and
+        returned (for compatibility with :func:`skfem.utils.solve`).  By
+        default, ``False``.
 
     Returns
     -------
@@ -316,30 +321,33 @@ def enforce(A: spmatrix,
     """
     b, x, I, D = _init_bc(A, b, x, I, D)
 
+    Aout = A if overwrite else A.copy()
+    bout = b if b is None or overwrite else b.copy()
+
     # set rows on lhs to zero
-    start = A.indptr[D]
-    stop = A.indptr[D + 1]
+    start = Aout.indptr[D]
+    stop = Aout.indptr[D + 1]
     count = stop - start
     idx = np.ones(count.sum(), dtype=np.int64)
     idx[np.cumsum(count)[:-1]] -= count[:-1]
     idx = np.repeat(start, count) + np.cumsum(idx) - 1
-    A.data[idx] = 0.
+    Aout.data[idx] = 0.
 
     # set diagonal value
-    d = A.diagonal()
+    d = Aout.diagonal()
     d[D] = diag
-    A.setdiag(d)
+    Aout.setdiag(d)
 
-    if b is not None:
-        if isinstance(b, spmatrix):
+    if bout is not None:
+        if isinstance(bout, spmatrix):
             # eigenvalue problem
-            b = enforce(b, D=D, diag=0.)
+            bout = enforce(bout, D=D, diag=0.)
         else:
             # set rhs to the given value
-            b[D] = x[D]
-        return A, b
+            bout[D] = x[D]
+        return Aout, bout
 
-    return A
+    return Aout
 
 
 def condense(A: spmatrix,

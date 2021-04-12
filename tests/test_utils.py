@@ -44,9 +44,12 @@ class TestEnforce(TestCase):
         M = mass.assemble(basis)
         D = m.boundary_nodes()
 
-        assert_almost_equal(enforce(A, D=D).todense(), np.eye(A.shape[0]))
-        assert_almost_equal(enforce(M, D=D, diag=0.).todense(),
+        assert_almost_equal(enforce(A, D=D).toarray(), np.eye(A.shape[0]))
+        assert_almost_equal(enforce(M, D=D, diag=0.).toarray(),
                             np.zeros(M.shape))
+
+        enforce(A, D=D, overwrite=True)
+        assert_almost_equal(A.toarray(), np.eye(A.shape[0]))
 
 
 if __name__ == '__main__':
