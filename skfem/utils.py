@@ -22,12 +22,10 @@ from skfem.element import ElementVector
 Solution = Union[ndarray, Tuple[ndarray, ndarray]]
 LinearSolver = Callable[..., ndarray]
 EigenSolver = Callable[..., Tuple[ndarray, ndarray]]
-EnforcedSystem = Union[spmatrix,
-                       Tuple[spmatrix, ndarray],
-                       Tuple[spmatrix, spmatrix]]
-CondensedSystem = Union[spmatrix,
-                        Tuple[spmatrix, ndarray],
-                        Tuple[spmatrix, spmatrix],
+LinearSystem = Union[spmatrix,
+                     Tuple[spmatrix, ndarray],
+                     Tuple[spmatrix, spmatrix]]
+CondensedSystem = Union[LinearSystem,
                         Tuple[spmatrix, ndarray, ndarray],
                         Tuple[spmatrix, ndarray, ndarray, ndarray],
                         Tuple[spmatrix, spmatrix, ndarray, ndarray]]
@@ -248,7 +246,7 @@ def _flatten_dofs(S: Optional[DofsCollection]) -> Optional[ndarray]:
 
 
 def _init_bc(A: spmatrix,
-             b: Optional[ndarray] = None,
+             b: Optional[Union[ndarray, spmatrix]] = None,
              x: Optional[ndarray] = None,
              I: Optional[DofsCollection] = None,
              D: Optional[DofsCollection] = None) -> Tuple[Optional[ndarray],
@@ -284,7 +282,8 @@ def enforce(A: spmatrix,
             x: Optional[ndarray] = None,
             I: Optional[DofsCollection] = None,
             D: Optional[DofsCollection] = None,
-            diag: float = 1.) -> EnforcedSystem:
+            diag: float = 1.,
+            overwrite: bool = False) -> LinearSystem:
     r"""Enforce degrees-of-freedom of a linear system.
 
     .. note::
@@ -307,39 +306,46 @@ def enforce(A: spmatrix,
     D
         Specify either this or ``I``: The set of degree-of-freedom indices to
         enforce (rows/diagonal set to zero/one).
+    overwrite
+        Optionally, the original system is both modified (for performance) and
+        returned (for compatibility with :func:`skfem.utils.solve`).  By
+        default, ``False``.
 
     Returns
     -------
-    EnforcedSystem
+    LinearSystem
         A linear system with the enforced rows/diagonals set to zero/one.
 
     """
     b, x, I, D = _init_bc(A, b, x, I, D)
 
+    Aout = A if overwrite else A.copy()
+
     # set rows on lhs to zero
-    start = A.indptr[D]
-    stop = A.indptr[D + 1]
+    start = Aout.indptr[D]
+    stop = Aout.indptr[D + 1]
     count = stop - start
     idx = np.ones(count.sum(), dtype=np.int64)
     idx[np.cumsum(count)[:-1]] -= count[:-1]
     idx = np.repeat(start, count) + np.cumsum(idx) - 1
-    A.data[idx] = 0.
+    Aout.data[idx] = 0.
 
     # set diagonal value
-    d = A.diagonal()
+    d = Aout.diagonal()
     d[D] = diag
-    A.setdiag(d)
+    Aout.setdiag(d)
 
     if b is not None:
         if isinstance(b, spmatrix):
-            # eigenvalue problem
-            b = enforce(b, D=D, diag=0.)
+            # mass matrix (eigen- or initial value problem)
+            bout = enforce(b, D=D, diag=0., overwrite=overwrite)
         else:
             # set rhs to the given value
-            b[D] = x[D]
-        return A, b
+            bout = b if overwrite else b.copy()
+            bout[D] = x[D]
+        return Aout, bout
 
-    return A
+    return Aout
 
 
 def condense(A: spmatrix,
