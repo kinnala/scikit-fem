@@ -320,8 +320,6 @@ def enforce(A: spmatrix,
     b, x, I, D = _init_bc(A, b, x, I, D)
 
     Aout = A if overwrite else A.copy()
-    bout: Optional[Union[ndarray, spmatrix]] =\
-        None if b is None or overwrite else b.copy()
 
     # set rows on lhs to zero
     start = Aout.indptr[D]
@@ -337,12 +335,13 @@ def enforce(A: spmatrix,
     d[D] = diag
     Aout.setdiag(d)
 
-    if bout is not None:
-        if isinstance(bout, spmatrix):
-            # eigenvalue problem
-            bout = enforce(bout, D=D, diag=0.)
-        else:
+    if b is not None:
+        if isinstance(b, spmatrix):  
+            # mass matrix (eigen- or initial value problem)
+            bout = enforce(b, D=D, diag=0., overwrite=overwrite)
+        else:  
             # set rhs to the given value
+            bout = b if overwrite else b.copy()
             bout[D] = x[D]
         return Aout, bout
 
