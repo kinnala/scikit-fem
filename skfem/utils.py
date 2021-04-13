@@ -336,10 +336,10 @@ def enforce(A: spmatrix,
     Aout.setdiag(d)
 
     if b is not None:
-        if isinstance(b, spmatrix):  
+        if isinstance(b, spmatrix):
             # mass matrix (eigen- or initial value problem)
             bout = enforce(b, D=D, diag=0., overwrite=overwrite)
-        else:  
+        else:
             # set rhs to the given value
             bout = b if overwrite else b.copy()
             bout[D] = x[D]
