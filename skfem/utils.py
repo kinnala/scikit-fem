@@ -246,7 +246,7 @@ def _flatten_dofs(S: Optional[DofsCollection]) -> Optional[ndarray]:
 
 
 def _init_bc(A: spmatrix,
-             b: Optional[ndarray] = None,
+             b: Optional[Union[ndarray, spmatrix]] = None,
              x: Optional[ndarray] = None,
              I: Optional[DofsCollection] = None,
              D: Optional[DofsCollection] = None) -> Tuple[Optional[ndarray],
