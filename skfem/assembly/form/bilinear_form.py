@@ -1,4 +1,6 @@
 from typing import Optional, Tuple
+from threading import Thread
+from itertools import product
 
 import numpy as np
 from numpy import ndarray
@@ -73,7 +75,10 @@ class BilinearForm(Form):
 
         # initialize COO data structures
         sz = ubasis.Nbfun * vbasis.Nbfun * nt
-        data = np.zeros(sz, dtype=self.dtype)
+        if self.nthreads > 0:
+            data = np.zeros((vbasis.Nbfun, ubasis.Nbfun, nt), dtype=self.dtype)
+        else:
+            data = np.zeros(sz, dtype=self.dtype)
         rows = np.zeros(sz, dtype=np.int64)
         cols = np.zeros(sz, dtype=np.int64)
 
@@ -84,12 +89,36 @@ class BilinearForm(Form):
                             nt * (vbasis.Nbfun * j + i + 1))
                 rows[ixs] = vbasis.element_dofs[i]
                 cols[ixs] = ubasis.element_dofs[j]
-                data[ixs] = self._kernel(
-                    ubasis.basis[j],
-                    vbasis.basis[i],
-                    wdict,
-                    dx,
-                )
+                if self.nthreads <= 0:
+                    data[ixs] = self._kernel(
+                        ubasis.basis[j],
+                        vbasis.basis[i],
+                        wdict,
+                        dx,
+                    )
+
+        if self.nthreads > 0:
+            # create indices for linear loop over local stiffness matrix
+            indices = np.array(
+                [[i, j] for j, i in product(range(ubasis.Nbfun),
+                                            range(vbasis.Nbfun))]
+            )
+
+            # split local stiffness matrix elements to threads
+            threads = [
+                Thread(
+                    target=self._threaded_kernel,
+                    args=(data, ij, ubasis.basis, vbasis.basis, wdict, dx)
+                ) for ij in np.array_split(indices, self.nthreads, axis=0)
+            ]
+
+            # start threads and wait for finishing
+            for t in threads:
+                t.start()
+            for t in threads:
+                t.join()
+
+            data = np.transpose(data, (1, 0, 2)).flatten('C')
 
         return data, rows, cols, (vbasis.N, ubasis.N)
 
@@ -114,3 +143,13 @@ class BilinearForm(Form):
 
     def _kernel(self, u, v, w, dx):
         return np.sum(self.form(*u, *v, w) * dx, axis=1)
+
+    def _threaded_kernel(self, data, ix, ubasis, vbasis, wdict, dx):
+        for ij in ix:
+            i, j = ij
+            data[i, j] = self._kernel(
+                ubasis[j],
+                vbasis[i],
+                wdict,
+                dx,
+            )
