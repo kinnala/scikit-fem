@@ -76,7 +76,7 @@ class BilinearForm(Form):
         # initialize COO data structures
         sz = ubasis.Nbfun * vbasis.Nbfun * nt
         if self.nthreads > 0:
-            data = np.zeros((vbasis.Nbfun, ubasis.Nbfun, nt), dtype=self.dtype)
+            data = np.zeros((ubasis.Nbfun, vbasis.Nbfun, nt), dtype=self.dtype)
         else:
             data = np.zeros(sz, dtype=self.dtype)
         rows = np.zeros(sz, dtype=np.int64)
@@ -108,8 +108,8 @@ class BilinearForm(Form):
             threads = [
                 Thread(
                     target=self._threaded_kernel,
-                    args=(data, ij, ubasis.basis, vbasis.basis, wdict, dx)
-                ) for ij in np.array_split(indices, self.nthreads, axis=0)
+                    args=(data, ix, ubasis.basis, vbasis.basis, wdict, dx)
+                ) for ix in np.array_split(indices, self.nthreads, axis=0)
             ]
 
             # start threads and wait for finishing
@@ -118,7 +118,7 @@ class BilinearForm(Form):
             for t in threads:
                 t.join()
 
-            data = np.transpose(data, (1, 0, 2)).flatten('C')
+            data = data.flatten('C')
 
         return data, rows, cols, (vbasis.N, ubasis.N)
 
@@ -147,7 +147,7 @@ class BilinearForm(Form):
     def _threaded_kernel(self, data, ix, ubasis, vbasis, wdict, dx):
         for ij in ix:
             i, j = ij
-            data[i, j] = self._kernel(
+            data[j, i] = self._kernel(
                 ubasis[j],
                 vbasis[i],
                 wdict,
