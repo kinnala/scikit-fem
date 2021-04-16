@@ -136,7 +136,7 @@ def plot_meshline(m: MeshLine, z: ndarray, **kwargs):
         ax = fig.add_subplot(111)
     else:
         ax = kwargs["ax"]
-        
+
     xs = []
     ys = []
 
