@@ -134,10 +134,11 @@ def plot_meshline(m: MeshLine, z: ndarray, **kwargs):
         # create new figure
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        xs = []
-        ys = []
     else:
         ax = kwargs["ax"]
+
+    xs = []
+    ys = []
 
     color = kwargs["color"] if "color" in kwargs else 'ko-'
     for y1, y2, s, t in zip(z[m.t[0]],
