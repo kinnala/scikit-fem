@@ -23,9 +23,11 @@ class Form:
 
     def __init__(self,
                  form: Optional[Callable] = None,
-                 dtype: type = np.float64):
+                 dtype: type = np.float64,
+                 nthreads: int = 0):
         self.form = form.form if isinstance(form, Form) else form
         self.dtype = dtype
+        self.nthreads = nthreads
 
     def partial(self, *args, **kwargs):
         form = deepcopy(self)
@@ -34,7 +36,9 @@ class Form:
 
     def __call__(self, *args):
         if self.form is None:  # decorate
-            return type(self)(form=args[0], dtype=self.dtype)
+            return type(self)(form=args[0],
+                              dtype=self.dtype,
+                              nthreads=self.nthreads)
         return self.assemble(self.kernel(*args))
 
     def assemble(self,

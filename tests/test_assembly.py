@@ -2,7 +2,8 @@ from unittest import TestCase, main
 
 import pytest
 import numpy as np
-from numpy.testing import assert_equal, assert_almost_equal
+from numpy.testing import (assert_equal, assert_almost_equal,
+                           assert_array_almost_equal)
 
 from skfem import BilinearForm, LinearForm, Functional, asm, solve
 from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
@@ -35,6 +36,13 @@ class IntegrateOneOverBoundaryQ1(TestCase):
 
         B = asm(uv, self.fbasis)
 
+        # assemble the same matrix using multiple threads
+        @BilinearForm(nthreads=2)
+        def uvt(u, v, w):
+            return u * v
+
+        Bt = asm(uvt, self.fbasis)
+
         @LinearForm
         def gv(v, w):
             return 1.0 * v
@@ -45,6 +53,7 @@ class IntegrateOneOverBoundaryQ1(TestCase):
 
         self.assertAlmostEqual(ones @ g, self.boundary_area, places=4)
         self.assertAlmostEqual(ones @ (B @ ones), self.boundary_area, places=4)
+        self.assertAlmostEqual(ones @ (Bt @ ones), self.boundary_area, places=4)
 
 
 class IntegrateOneOverBoundaryS2(IntegrateOneOverBoundaryQ1):
@@ -432,6 +441,28 @@ class TestComplexValuedAssembly(TestCase):
 
         self.assertAlmostEqual(np.dot(ones, M @ ones), 1j * self.interior_area)
         self.assertAlmostEqual(np.dot(ones, f), 1j * self.interior_area)
+
+
+class TestThreadedAssembly(TestCase):
+
+    def runTest(self):
+
+        m = MeshTri().refined()
+        e = ElementTriP1()
+        basis = InteriorBasis(m, e)
+
+        @BilinearForm
+        def nonsym(u, v, w):
+            return u.grad[0] * v
+
+        @BilinearForm(nthreads=2)
+        def threaded_nonsym(u, v, w):
+            return u.grad[0] * v
+
+        assert_almost_equal(
+            nonsym.assemble(basis).toarray(),
+            threaded_nonsym.assemble(basis).toarray(),
+        )
 
 
 if __name__ == '__main__':
