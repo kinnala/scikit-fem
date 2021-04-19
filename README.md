@@ -212,14 +212,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
+### [3.0.0] - 2021-04-19
+
 - Added: Completely rewritten `Mesh` base class which is "immutable" and uses
   `Element` classes to define the ordering of nodes; better support for
-  high-order and other more general mesh types
+  high-order and other more general mesh types in the future
+- Added: New quadratic mesh types: `MeshTri2`, `MeshQuad2`, `MeshTet2` and `MeshHex2`
 - Added: `InteriorBasis.probes`; like `InteriorBasis.interpolator` but returns a matrix
   that operates on solution vectors to interpolate them at the given points
 - Added: More overloads for `DiscreteField`, e.g., multiplication, summation
   and subtraction are now explicitly supported inside the form definitions
-- Added: New quadratic mesh types: `MeshTri2`, `MeshQuad2`, `MeshTet2` and `MeshHex2`
 - Added: `MeshHex.to_meshtet` for splitting hexahedra into tetrahedra
 - Added: `MeshHex.element_finder` for interpolating finite element solutions
   on hexahedral meshes via `InteriorBasis.interpolator`
@@ -239,6 +241,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed: `Mesh.refined` no more attempts to fix the indexing of `Mesh.boundaries` after refine
 - Changed: `skfem.utils.solve` now uses `scipy.sparse.eigs` instead of `scipy.sparse.eigsh` by default;
   the old behavior can be retained by explicitly passing `solver=solver_scipy_eigs_sym()`
+- Fixed: High memory usage and other small fixes in `skfem.visuals.matplotlib` related to 1D plotting
 
 ### [2.5.0] - 2021-02-13
 
