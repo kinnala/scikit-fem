@@ -212,6 +212,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
+- Fixed: `MeshLine1.element_finder` 
+
 ### [3.0.0] - 2021-04-19
 
 - Added: Completely rewritten `Mesh` base class which is "immutable" and uses
