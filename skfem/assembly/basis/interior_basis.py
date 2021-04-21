@@ -154,6 +154,10 @@ class InteriorBasis(Basis):
             shape=(x.shape[1], self.N),
         )
 
+    def point_source(self, x: ndarray) -> ndarray:
+        """return right-hand side vector for unit source at `x`"""
+        return self.probes(x[:, None]).toarray()[0]
+
     def interpolator(self, y: ndarray) -> Callable[[ndarray], ndarray]:
         """Return a function handle, which can be used for finding
         values of the given solution vector `y` on given points."""
