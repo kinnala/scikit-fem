@@ -155,7 +155,7 @@ class InteriorBasis(Basis):
         )
 
     def point_source(self, x: ndarray) -> ndarray:
-        """return right-hand side vector for unit source at `x`"""
+        """Return right-hand side vector for unit source at `x`"""
         return self.probes(x[:, None]).toarray()[0]
 
     def interpolator(self, y: ndarray) -> Callable[[ndarray], ndarray]:
