@@ -1321,7 +1321,7 @@ class MeshLine1(Mesh):
             maxix = (x == np.max(self.p))
             x[maxix] = x[maxix] - 1e-10  # special case in np.digitize
             return np.argmax(np.digitize(x, self.p[0, ix[0]])[:, None]
-                             == self.t[0], axis=1)
+                             == self.t[1], axis=1)
 
         return finder
 
