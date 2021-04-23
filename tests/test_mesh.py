@@ -227,7 +227,7 @@ class TestMirrored(TestCase):
         self.assertEqual(m.nelements, 20)
 
 
-class TestFinder1D(TestCase):
+class TestFinder1DRefined(TestCase):
 
     def runTest(self):
 
@@ -235,6 +235,18 @@ class TestFinder1D(TestCase):
             finder = MeshLine().refined(itr).element_finder()
             self.assertEqual(finder(np.array([0.001]))[0], 0)
             self.assertEqual(finder(np.array([0.999]))[0], 2 ** itr - 1)
+
+
+class TestFinder1DLinspaced(TestCase):
+
+    def runTest(self):
+
+        for itr in range(5):
+            finder = (
+                MeshLine(np.linspace(0, 1, 2 ** itr + 1)).element_finder()
+            )
+            self.assertEqual(finder(np.array([0.999]))[0], 2 ** itr - 1)
+            self.assertEqual(finder(np.array([0.001]))[0], 0)
 
 
 if __name__ == '__main__':
