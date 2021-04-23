@@ -12,7 +12,7 @@ from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
                            ElementQuad2, ElementLineP2, ElementTriP0,
                            ElementLineP0, ElementQuad1, ElementQuad0,
                            ElementTetP1, ElementTetP0, ElementHex1,
-                           ElementHex0, ElementLineP1)
+                           ElementHex0, ElementLineP1, ElementLineMini)
 
 
 class TestCompositeSplitting(TestCase):
@@ -224,3 +224,19 @@ def test_trace(mtype, e1, e2):
 
     # integrate f(x) = x_1 over trace mesh
     assert_almost_equal(integ.assemble(nbasis, y=nbasis.interpolate(y)), .5)
+
+
+@pytest.mark.parametrize(
+    "etype",
+    [ElementLineP1, ElementLineP2, ElementLineMini]
+)
+def test_point_source(etype):
+
+    from skfem.models.poisson import laplace
+
+    mesh = MeshLine().refined()
+    basis = InteriorBasis(mesh, etype())
+    source = np.array([0.7])
+    u = solve(*condense(asm(laplace, basis), basis.point_source(source), D=basis.find_dofs()))
+    exact = np.stack([(1 - source) * mesh.p, (1 - mesh.p) * source]).min(0)
+    assert_almost_equal(u[basis.nodal_dofs], exact)
