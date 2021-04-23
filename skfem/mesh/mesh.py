@@ -1322,7 +1322,7 @@ class MeshLine1(Mesh):
         def finder(x):
             xin = x.copy()  # bring endpoint inside for np.digitize
             xin[x == self.p[0, ix[-1]]] = self.p[0, ix[-2:]].mean()
-            return np.nonzero(ix[np.digitize(xin, self.p[0, ix])][:, None] 
+            return np.nonzero(ix[np.digitize(xin, self.p[0, ix])][:, None]
                               == maxt)[1]
 
         return finder
