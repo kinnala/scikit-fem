@@ -1315,13 +1315,15 @@ class MeshLine1(Mesh):
         return np.max(np.abs(self.p[0, self.t[1]] - self.p[0, self.t[0]]))
 
     def element_finder(self, mapping=None):
-        ix = np.argsort(self.p)
+        ix = np.argsort(self.p[0])
+        maxt = self.t[np.argmax(self.p[0, self.t], 0),
+                      np.arange(self.t.shape[1])]
 
         def finder(x):
-            maxix = (x == np.max(self.p))
-            x[maxix] = x[maxix] - 1e-10  # special case in np.digitize
-            return np.argmax(np.digitize(x, self.p[0, ix[0]])[:, None]
-                             == self.t[1], axis=1)
+            xin = x.copy()  # bring endpoint inside for np.digitize
+            xin[x == self.p[0, ix[-1]]] = self.p[0, ix[-2:]].mean()
+            return np.nonzero(ix[np.digitize(xin, self.p[0, ix])][:, None]
+                              == maxt)[1]
 
         return finder
 

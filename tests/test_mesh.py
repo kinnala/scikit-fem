@@ -1,4 +1,4 @@
-import unittest
+from unittest import TestCase
 from pathlib import Path
 
 import numpy as np
@@ -6,7 +6,7 @@ import numpy as np
 from skfem.mesh import Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 
 
-class MeshTests(unittest.TestCase):
+class MeshTests(TestCase):
     """Test some of the methods in mesh classes
     that are not tested elsewhere."""
 
@@ -29,7 +29,7 @@ class MeshTests(unittest.TestCase):
         self.assertEqual(len(m.facets_satisfying(lambda x: x[0] == 0.5)), 1)
 
 
-class FaultyInputs(unittest.TestCase):
+class FaultyInputs(TestCase):
     """Check that faulty meshes are detected by the constructors."""
 
     def _runTest(self):  # disabled
@@ -51,7 +51,7 @@ class FaultyInputs(unittest.TestCase):
                     np.array([[0.0, 1.0, 2.0], [1.0, 2.0, 3.0]]).T)
 
 
-class Loading(unittest.TestCase):
+class Loading(TestCase):
     """Check that Mesh.load works properly."""
 
     def runTest(self):
@@ -73,7 +73,7 @@ class Loading(unittest.TestCase):
                          == m.facets_satisfying(lambda x: x[0] == 1)).all())
 
 
-class SaveLoadCycle(unittest.TestCase):
+class SaveLoadCycle(TestCase):
     """Save to temporary file and check import/export cycles."""
     cls = MeshTet
 
@@ -93,7 +93,7 @@ class SaveLoadCycleHex(SaveLoadCycle):
     cls = MeshHex
 
 
-class SerializeUnserializeCycle(unittest.TestCase):
+class SerializeUnserializeCycle(TestCase):
     """Check to_dict/initialize cycles."""
 
     clss = [MeshTet,
@@ -116,7 +116,7 @@ class SerializeUnserializeCycle(unittest.TestCase):
                 self.assertTrue((m.subdomains[k] == M.subdomains[k]).all())
 
 
-class TestBoundaryEdges(unittest.TestCase):
+class TestBoundaryEdges(TestCase):
 
     def runTest(self):
         m = MeshTet()
@@ -129,7 +129,7 @@ class TestBoundaryEdges(unittest.TestCase):
         self.assertTrue(len(m.refined().boundary_edges()) == 72)
 
 
-class TestBoundaryEdges2(unittest.TestCase):
+class TestBoundaryEdges2(TestCase):
 
     def runTest(self):
         m = MeshHex()
@@ -142,7 +142,7 @@ class TestBoundaryEdges2(unittest.TestCase):
         self.assertEqual(len(m.refined().boundary_edges()), 48)
 
 
-class TestMeshAddition(unittest.TestCase):
+class TestMeshAddition(TestCase):
 
     def runTest(self):
         m = MeshTri()
@@ -152,7 +152,7 @@ class TestMeshAddition(unittest.TestCase):
         self.assertTrue(mesh.t.shape[1] == 4)
 
 
-class TestMeshQuadSplit(unittest.TestCase):
+class TestMeshQuadSplit(TestCase):
 
     def runTest(self):
         from docs.examples.ex17 import mesh
@@ -178,7 +178,7 @@ class TestMeshQuadSplit(unittest.TestCase):
                                             for m in [mesh, mesh_tri]])
 
 
-class TestAdaptiveSplitting1D(unittest.TestCase):
+class TestAdaptiveSplitting1D(TestCase):
 
     def runTest(self):
 
@@ -194,7 +194,7 @@ class TestAdaptiveSplitting1D(unittest.TestCase):
             self.assertEqual(prev_p_size, m.p.shape[1] - 1)
 
 
-class TestAdaptiveSplitting2D(unittest.TestCase):
+class TestAdaptiveSplitting2D(TestCase):
 
     def runTest(self):
 
@@ -213,7 +213,7 @@ class TestAdaptiveSplitting2D(unittest.TestCase):
             self.assertEqual(prev_p_size, m.p.shape[1] - 3)
 
 
-class TestMirrored(unittest.TestCase):
+class TestMirrored(TestCase):
 
     def runTest(self):
 
@@ -227,5 +227,27 @@ class TestMirrored(unittest.TestCase):
         self.assertEqual(m.nelements, 20)
 
 
+class TestFinder1DRefined(TestCase):
+
+    def runTest(self):
+
+        for itr in range(5):
+            finder = MeshLine().refined(itr).element_finder()
+            self.assertEqual(finder(np.array([0.001]))[0], 0)
+            self.assertEqual(finder(np.array([0.999]))[0], 2 ** itr - 1)
+
+
+class TestFinder1DLinspaced(TestCase):
+
+    def runTest(self):
+
+        for itr in range(5):
+            finder = (
+                MeshLine(np.linspace(0, 1, 2 ** itr + 1)).element_finder()
+            )
+            self.assertEqual(finder(np.array([0.999]))[0], 2 ** itr - 1)
+            self.assertEqual(finder(np.array([0.001]))[0], 0)
+
+
 if __name__ == '__main__':
-    unittest.main()
+    main()
