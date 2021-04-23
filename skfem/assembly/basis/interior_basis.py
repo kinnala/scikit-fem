@@ -134,7 +134,7 @@ class InteriorBasis(Basis):
     def probes(self, x: ndarray) -> coo_matrix:
         """Return matrix which acts on a solution vector to find its values
         on points `x`.
-        
+
         The product of this with a finite element function vector is like the
         result of assembling a `Functional` and it can be thought of as the
         matrix of inner products of the test functions of the basis with Dirac
@@ -168,7 +168,7 @@ class InteriorBasis(Basis):
         i.e. the vector of inner products of a Dirac delta at `x`
         with the test functions of the basis.
 
-        This is like what is obtained by assembling a `LinearForm` 
+        This is like what is obtained by assembling a `LinearForm`
         but because its action is concentrated at points it is not
         assembled with the usual quadratures.
 
