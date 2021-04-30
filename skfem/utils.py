@@ -288,8 +288,9 @@ def enforce(A: spmatrix,
 
     .. note::
 
-        The original system is both modified (for performance) and returned
-        (for compatibility with :func:`skfem.utils.solve`).
+        The original system is both returned
+        (for compatibility with :func:`skfem.utils.solve`) and optionally (if
+        `overwrite`) modified (for performance).
 
     Parameters
     ----------
