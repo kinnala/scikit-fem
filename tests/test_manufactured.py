@@ -3,16 +3,44 @@
 from unittest import TestCase
 from pathlib import Path
 
+import pytest
+
 import numpy as np
-from skfem import (LinearForm, Functional, asm, condense, solve, projection,
-                   enforce)
+from skfem import (
+    LinearForm,
+    Functional,
+    asm,
+    condense,
+    solve,
+    projection,
+    enforce,
+    penalize,
+)
 from skfem.assembly import FacetBasis, InteriorBasis
-from skfem.element import (ElementHex1, ElementHex2, ElementHexS2,
-                           ElementLineMini, ElementLineP1, ElementLineP2,
-                           ElementQuad1, ElementQuad2, ElementTetP1,
-                           ElementTetP2, ElementTriP1, ElementTriP2)
-from skfem.mesh import (MeshHex, MeshLine, MeshQuad, MeshQuad2, MeshTet,
-                        MeshTet2, MeshTri, MeshTri2)
+from skfem.element import (
+    ElementHex1,
+    ElementHex2,
+    ElementHexS2,
+    ElementLineMini,
+    ElementLineP1,
+    ElementLineP2,
+    ElementQuad1,
+    ElementQuad2,
+    ElementTetP1,
+    ElementTetP2,
+    ElementTriP1,
+    ElementTriP2,
+)
+from skfem.mesh import (
+    MeshHex,
+    MeshLine,
+    MeshQuad,
+    MeshQuad2,
+    MeshTet,
+    MeshTet2,
+    MeshTri,
+    MeshTri2,
+)
 from skfem.models.poisson import laplace, mass, unit_load
 from skfem.helpers import dot
 
@@ -27,16 +55,17 @@ class Line1D(TestCase):
     Solution is u(x) = x.
 
     """
+
     e = ElementLineP1()
 
     def runTest(self):
-        m = MeshLine(np.linspace(0., 1.)).refined(2)
+        m = MeshLine(np.linspace(0.0, 1.0)).refined(2)
         ib = InteriorBasis(m, self.e)
         fb = FacetBasis(m, self.e)
 
         @LinearForm
         def boundary_flux(v, w):
-            return v * (w.x[0] == 1.)
+            return v * (w.x[0] == 1.0)
 
         L = asm(laplace, ib)
         b = asm(boundary_flux, fb)
@@ -45,6 +74,7 @@ class Line1D(TestCase):
         u = solve(*condense(L, b, I=I))  # noqa E741
 
         np.testing.assert_array_almost_equal(u[ib.nodal_dofs[0]], m.p[0], -10)
+
 
 class Line1DP2(Line1D):
     e = ElementLineP2()
@@ -64,15 +94,22 @@ class LineNegative1D(TestCase):
     Solution is u(x) = -x.
 
     """
+
     e = ElementLineP1()
 
     def runTest(self):
-        m = MeshLine(np.linspace(0., 1.)).refined(2).with_boundaries({
-            'left': lambda x: x[0] == 0.0,
-            'right': lambda x: x[0] == 1.0,
-        })
+        m = (
+            MeshLine(np.linspace(0.0, 1.0))
+            .refined(2)
+            .with_boundaries(
+                {
+                    "left": lambda x: x[0] == 0.0,
+                    "right": lambda x: x[0] == 1.0,
+                }
+            )
+        )
         ib = InteriorBasis(m, self.e)
-        fb = FacetBasis(m, self.e, facets=m.boundaries['right'])
+        fb = FacetBasis(m, self.e, facets=m.boundaries["right"])
 
         @LinearForm
         def boundary_flux(v, w):
@@ -80,7 +117,7 @@ class LineNegative1D(TestCase):
 
         L = asm(laplace, ib)
         b = asm(boundary_flux, fb)
-        D = ib.find_dofs()['left'].all()
+        D = ib.find_dofs()["left"].all()
         I = ib.complement_dofs(D)  # noqa E741
         u = solve(*condense(L, b, I=I))  # noqa E741
 
@@ -105,10 +142,11 @@ class LineNeumann1D(TestCase):
     Solution is u(x) = x-0.5.
 
     """
+
     e = ElementLineP1()
 
     def runTest(self):
-        m = MeshLine(np.linspace(0., 1.)).refined(2)
+        m = MeshLine(np.linspace(0.0, 1.0)).refined(2)
         ib = InteriorBasis(m, self.e)
         fb = FacetBasis(m, self.e)
 
@@ -121,7 +159,7 @@ class LineNeumann1D(TestCase):
         b = asm(boundary_flux, fb)
         u = solve(L + 1e-6 * M, b)
 
-        np.testing.assert_array_almost_equal(u[ib.nodal_dofs[0]], m.p[0] - .5, -4)
+        np.testing.assert_array_almost_equal(u[ib.nodal_dofs[0]], m.p[0] - 0.5, -4)
 
 
 class LineNeumann1DP2(LineNeumann1D):
@@ -130,7 +168,7 @@ class LineNeumann1DP2(LineNeumann1D):
 
 class LineNeumann1DMini(LineNeumann1D):
     e = ElementLineMini()
-    
+
 
 class TestExactHexElement(TestCase):
 
@@ -232,7 +270,7 @@ class SolveCirclePoisson(TestCase):
     maxval = 0.06243516822727334
 
     def init_mesh(self):
-        path = Path(__file__).parents[1] / 'docs' / 'examples' / 'meshes'
+        path = Path(__file__).parents[1] / "docs" / "examples" / "meshes"
         return self.mesh_type.load(path / self.filename)
 
     def runTest(self):
@@ -268,7 +306,6 @@ class SolveCirclePoissonTri2(SolveCirclePoisson):
 
 
 class SolveCirclePoissonTri2Init(SolveCirclePoissonTri2):
-
     def init_mesh(self):
         return self.mesh_type.init_circle().scaled(0.5)
 
@@ -297,49 +334,45 @@ class SolveCirclePoissonTet2(SolveCirclePoisson):
     maxval = 0.0405901240018571
 
 
-class SolveInhomogeneousLaplace(TestCase):
+@pytest.mark.parametrize(
+    "mesh,elem,impose",
+    [
+        (MeshTri, ElementTriP2, enforce),
+        (MeshTri, ElementTriP2, penalize),
+        (MeshQuad, ElementQuad2, enforce),
+        (MeshQuad, ElementQuad2, penalize),
+    ],
+)
+def test_solving_inhomogeneous_laplace(mesh, elem, impose):
+    # class SolveInhomogeneousLaplace(TestCase):
     """Adapted from example 14."""
 
-    mesh = MeshTri
-    elem = ElementTriP2()
+    m = mesh().refined(4)
+    basis = InteriorBasis(m, elem())
+    boundary_basis = FacetBasis(m, elem())
+    boundary_dofs = boundary_basis.get_dofs().flatten()
 
-    def runTest(self):
-        m = self.mesh().refined(4)
-        basis = InteriorBasis(m, self.elem)
-        boundary_basis = FacetBasis(m, self.elem)
-        boundary_dofs = boundary_basis.get_dofs().flatten()
+    def dirichlet(x):
+        """return a harmonic function"""
+        return ((x[0] + 1.0j * x[1]) ** 2).real
 
+    u = basis.zeros()
+    A = laplace.assemble(basis)
+    u[boundary_dofs] = projection(dirichlet, boundary_basis, I=boundary_dofs)
+    u = solve(*impose(A, x=u, D=boundary_dofs))
 
-        def dirichlet(x):
-            """return a harmonic function"""
-            return ((x[0] + 1.j * x[1]) ** 2).real
+    @Functional
+    def gradu(w):
+        gradu = w["sol"].grad
+        return dot(gradu, gradu)
 
-
-        u = basis.zeros()
-        A = laplace.assemble(basis)
-        u[boundary_dofs] = projection(dirichlet,
-                                      boundary_basis,
-                                      I=boundary_dofs)
-        u = solve(*enforce(A, x=u, D=boundary_dofs))
-
-
-        @Functional
-        def gradu(w):
-            gradu = w['sol'].grad
-            return dot(gradu, gradu)
-
-        self.assertAlmostEqual(
-            gradu.assemble(basis, sol=basis.interpolate(u)),
-            8 / 3,
-            delta=1e-10,
-        )
+    np.testing.assert_almost_equal(
+        gradu.assemble(basis, sol=basis.interpolate(u)),
+        8 / 3,
+        decimal=5 if impose is penalize else 10,
+    )
 
 
-class SolveInhomogeneousLaplaceQuad(SolveInhomogeneousLaplace):
 
-    mesh = MeshQuad
-    elem = ElementQuad2()
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
