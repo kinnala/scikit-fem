@@ -16,26 +16,47 @@ Turmetov, & Torebek 2015).
 
 
 """
+from functools import partial
 from pathlib import Path
 
 from skfem import *
-from skfem.models.poisson import laplace, unit_load
+from skfem.models.poisson import laplace, mass, unit_load
 from skfem.io.json import from_file
 
 import numpy as np
 
 
-m = MeshTri.init_circle(4)
+def greens(a: float, s: np.ndarray, x: np.ndarray) -> np.ndarray:
+    """Return the Green's function for a disk of radius `a`
 
-basis = InteriorBasis(m, ElementTriP2())
+    with source at point `s`, evaluated as points `x`.
+    """
+
+    snorm = np.linalg.norm(s)
+    sfull = s[:, None, None]
+    numerator = np.linalg.norm(snorm ** 2 * x - a ** 2 * sfull, axis=0)
+    denominator = a * snorm * np.linalg.norm(x - sfull, axis=0)
+    return np.log(numerator / denominator) / 2 / np.pi
+
+
+basis = InteriorBasis(MeshTri.init_circle(4), ElementTriP2())
+source = np.array([0.3, 0.2])
 
 A = asm(laplace, basis)
-b = basis.point_source(np.array([0.3, 0.2]))
+b = basis.point_source(source)
 
 x = solve(*condense(A, b, D=basis.find_dofs()))
 
-if __name__ == '__main__':
+exact = projection(
+    partial(greens, np.linalg.norm(basis.mesh.p, axis=0).max(), source), basis
+)
+error = x - exact
+l2error = np.sqrt(error @ mass.assemble(basis) @ error)
+
+if __name__ == "__main__":
     from skfem.visuals.matplotlib import plot, show
+
+    print("L2 error:", l2error)
 
     plot(basis, x)
     show()
