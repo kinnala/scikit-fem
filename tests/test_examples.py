@@ -295,5 +295,12 @@ class TestEx37(TestCase):
         self.assertAlmostEqual(np.max(u), 0.05594193697362236)
 
 
+class TestEx38(TestCase):
+
+    def runTest(self):
+        from docs.examples.ex38 import l2error
+        self.assertLess(l2error, 3e-3)
+
+
 if __name__ == '__main__':
     main()
