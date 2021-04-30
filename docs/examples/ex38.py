@@ -29,7 +29,7 @@ import numpy as np
 def greens(a: float, s: np.ndarray, x: np.ndarray) -> np.ndarray:
     """Return the Green's function for a disk of radius `a`
 
-    with source at point `s`, evaluated as points `x`.
+    with source at point `s`, evaluated at points `x`.
     """
 
     snorm = np.linalg.norm(s)
