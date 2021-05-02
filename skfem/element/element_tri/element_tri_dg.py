@@ -1,8 +1,8 @@
-from ..element_h1 import ElementH1
+from ..element import Element
 from ...refdom import RefTri
 
 
-class ElementTriDG(ElementH1):
+class ElementTriDG(Element):
 
     refdom = RefTri
 
@@ -16,5 +16,5 @@ class ElementTriDG(ElementH1):
         self.dofnames = elem.dofnames
         self.doflocs = elem.doflocs
 
-    def lbasis(self, X, i):
-        return self.elem.lbasis(X, i)
+    def gbasis(self, *args, **kwargs):
+        return self.elem.gbasis(*args, **kwargs)
