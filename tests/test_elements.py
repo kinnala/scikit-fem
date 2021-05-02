@@ -2,6 +2,7 @@ from unittest import TestCase, main
 
 import numpy as np
 from numpy.testing import assert_allclose, assert_array_equal
+import pytest
 
 from skfem.element import (ElementHex1, ElementHexS2, ElementLineP0,
                            ElementLineP1, ElementLineP2, ElementLinePp,
@@ -11,9 +12,10 @@ from skfem.element import (ElementHex1, ElementHexS2, ElementLineP0,
                            ElementTetP2, ElementTriMini, ElementTriP0,
                            ElementTriP1, ElementTriP2, ElementTriRT0,
                            ElementVectorH1, ElementHex2, ElementQuadBFS,
-                           ElementTriCR, ElementTetCR, ElementTriHermite)
+                           ElementTriCR, ElementTetCR, ElementTriHermite,
+                           ElementTriMorley, ElementTriArgyris, ElementTriDG)
 from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
-from skfem.assembly.basis import InteriorBasis
+from skfem.assembly import InteriorBasis, Functional
 from skfem.mapping import MappingAffine
 
 
@@ -270,6 +272,33 @@ class TestElementQuadBFS(TestCase):
             element.gdof(0, 0, -1)
         with self.assertRaises(ValueError):
             element.gdof(0, 0, 16)
+
+
+@pytest.mark.parametrize(
+    "e",
+    [
+        ElementTriP1(),
+        ElementTriArgyris(),
+        ElementTriMorley(),
+        ElementTriHermite(),
+    ]
+)
+def test_dg_element(e):
+
+    m = MeshTri().refined()
+    edg = ElementTriDG(e)
+
+    @Functional
+    def square(w):
+        return w['random'] ** 2
+
+    basis = InteriorBasis(m, e)
+    basisdg = InteriorBasis(m, edg)
+
+    assert_allclose(
+        square.assemble(basis, random=basis.interpolate(basis.zeros() + 1)),
+        square.assemble(basisdg, random=basisdg.interpolate(basisdg.zeros() + 1)),
+    )
 
 
 if __name__ == '__main__':
