@@ -1,7 +1,10 @@
 """Solve problems that have manufactured solutions."""
 
+from skfem.utils import penalize
 from unittest import TestCase
 from pathlib import Path
+
+import pytest
 
 import numpy as np
 from skfem import (LinearForm, Functional, asm, condense, solve, projection,
@@ -283,12 +286,6 @@ class SolveCirclePoissonTet(SolveCirclePoisson):
         return self.mesh_type.init_ball().scaled(0.5)
 
 
-class SolveCirclePoissonTet2(SolveCirclePoissonTet):
-
-    mesh_type = MeshTet2
-    element_type = ElementTetP2
-
-
 class SolveCirclePoissonTet2(SolveCirclePoisson):
 
     mesh_type = MeshTet2
@@ -297,49 +294,47 @@ class SolveCirclePoissonTet2(SolveCirclePoisson):
     maxval = 0.0405901240018571
 
 
-class SolveInhomogeneousLaplace(TestCase):
+@pytest.mark.parametrize(
+    "mesh_elem", [(MeshTri, ElementTriP2()), (MeshQuad, ElementQuad2())]
+)
+@pytest.mark.parametrize("impose", [enforce, penalize])
+def test_solving_inhomogeneous_laplace(mesh_elem, impose):
     """Adapted from example 14."""
 
-    mesh = MeshTri
-    elem = ElementTriP2()
+    mesh, elem = mesh_elem
 
-    def runTest(self):
-        m = self.mesh().refined(4)
-        basis = InteriorBasis(m, self.elem)
-        boundary_basis = FacetBasis(m, self.elem)
-        boundary_dofs = boundary_basis.get_dofs().flatten()
+    m = mesh().refined(4)
+    basis = InteriorBasis(m, elem)
+    boundary_basis = FacetBasis(m, elem)
+    boundary_dofs = boundary_basis.get_dofs().flatten()
 
+    def dirichlet(x):
+        """return a harmonic function"""
+        return ((x[0] + 1.j * x[1]) ** 2).real
 
-        def dirichlet(x):
-            """return a harmonic function"""
-            return ((x[0] + 1.j * x[1]) ** 2).real
-
-
-        u = basis.zeros()
-        A = laplace.assemble(basis)
-        u[boundary_dofs] = projection(dirichlet,
-                                      boundary_basis,
-                                      I=boundary_dofs)
-        u = solve(*enforce(A, x=u, D=boundary_dofs))
+    u = basis.zeros()
+    A = laplace.assemble(basis)
+    u[boundary_dofs] = projection(dirichlet,
+                                  boundary_basis,
+                                  I=boundary_dofs)
+    u = solve(*impose(A, x=u, D=boundary_dofs))
 
 
-        @Functional
-        def gradu(w):
-            gradu = w['sol'].grad
-            return dot(gradu, gradu)
+    @Functional
+    def gradu(w):
+        gradu = w['sol'].grad
+        return dot(gradu, gradu)
 
-        self.assertAlmostEqual(
-            gradu.assemble(basis, sol=basis.interpolate(u)),
-            8 / 3,
-            delta=1e-10,
-        )
-
-
-class SolveInhomogeneousLaplaceQuad(SolveInhomogeneousLaplace):
-
-    mesh = MeshQuad
-    elem = ElementQuad2()
+    np.testing.assert_almost_equal(
+        gradu.assemble(basis, sol=basis.interpolate(u)),
+        8 / 3,
+        decimal=9
+    )
 
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    import pytest
+    import unittest
+
+    unittest.main()
+    pytest.main()    

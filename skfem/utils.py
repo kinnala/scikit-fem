@@ -288,8 +288,9 @@ def enforce(A: spmatrix,
 
     .. note::
 
-        The original system is both modified (for performance) and returned
-        (for compatibility with :func:`skfem.utils.solve`).
+        The original system is both returned
+        (for compatibility with :func:`skfem.utils.solve`) and optionally (if
+        `overwrite`) modified (for performance).
 
     Parameters
     ----------
@@ -346,6 +347,65 @@ def enforce(A: spmatrix,
         return Aout, bout
 
     return Aout
+
+
+def penalize(A: spmatrix,
+             b: Optional[Union[ndarray, spmatrix]] = None,
+             x: Optional[ndarray] = None,
+             I: Optional[DofsCollection] = None,
+             D: Optional[DofsCollection] = None,
+             epsilon: Optional[float] = None,
+             overwrite: bool = False) -> LinearSystem:
+    r"""Penalize degrees-of-freedom of a linear system.
+
+    Parameters
+    ----------
+    A
+        The system matrix
+    b
+        Optionally, the right hand side vector.
+    x
+        The values of the penalized degrees-of-freedom. If not given, assumed
+        to be zero.
+    I
+        Specify either this or ``D``: The set of degree-of-freedom indices to
+        solve for.
+    D
+        Specify either this or ``I``: The set of degree-of-freedom indices to
+        enforce (rows/diagonal set to zero/one).
+    epsilon
+        Very small value, the reciprocal of which penalizes deviations from
+        the Dirichlet condition
+    overwrite
+        Optionally, the original system is both modified (for performance) and
+        returned (for compatibility with :func:`skfem.utils.solve`).  By
+        default, ``False``.
+
+    Returns
+    -------
+    LinearSystem
+        A linear system with the penalized diagonal and RHS entries set to
+        very large values, 1/epsilon and x/epsilon, respectively.
+
+    """
+    b, x, I, D = _init_bc(A, b, x, I, D)
+
+    Aout = A if overwrite else A.copy()
+
+    d = Aout.diagonal()
+    if epsilon is None:
+        epsilon = 1e-10 / np.linalg.norm(d[D], np.inf)
+    d[D] = 1/epsilon
+    Aout.setdiag(d)
+
+    if b is None:
+        return Aout
+
+    bout = b if overwrite else b.copy()
+    # Nothing needs doing for mass matrix, but RHS vector needs penalty factor
+    if not isinstance(b, spmatrix):
+        bout[D] = x[D] / epsilon
+    return Aout, bout
 
 
 def condense(A: spmatrix,

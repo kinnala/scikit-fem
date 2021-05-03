@@ -63,33 +63,21 @@ M = asm(mass, basis)
 dt = .01
 print('dt =', dt)
 theta = 0.5                     # Crank–Nicolson
-A = M + theta * L * dt
-B = M - (1 - theta) * L * dt
+L0, M0 = penalize(L, M, D=basis.find_dofs())
+A = M0 + theta * L0 * dt
+B = M0 - (1 - theta) * L0 * dt
 
-boundary = basis.find_dofs()
-interior = basis.complement_dofs(boundary)
-
-# transpose as splu prefers CSC
-backsolve = splu(condense(A, D=boundary, expand=False).T).solve
+backsolve = splu(A.T).solve  # .T as splu prefers CSC
 
 u_init = (np.cos(np.pi * mesh.p[0, :] / 2 / halfwidth[0])
           * np.cos(np.pi * mesh.p[1, :] / 2 / halfwidth[1]))
-
-
-def step(t: float,
-         u: np.ndarray) -> Tuple[float, np.ndarray]:
-    u_new = np.zeros_like(u)              # zero Dirichlet conditions
-    _, b1 = condense(csr_matrix(A.shape),  # ignore condensed matrix
-                     B @ u, u_new, D=boundary, expand=False)
-    u_new[interior] = backsolve(b1)
-    return t + dt, u_new
 
 
 def evolve(t: float,
            u: np.ndarray) -> Iterator[Tuple[float, np.ndarray]]:
 
     while np.linalg.norm(u, np.inf) > 2**-3:
-        t, u = step(t, u)
+        t, u = t + dt, backsolve(B @ u)
         yield t, u
 
 
