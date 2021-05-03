@@ -1,6 +1,6 @@
 r"""Point source.
 
-Sources concentrated at points cannot be evaluated in the usual way, which 
+Sources concentrated at points cannot be evaluated in the usual way, which
 involves discrete quadrature; instead, it requires direct use of the basis
 functions, as implemented in `InteriorBasis.point_source`.
 
