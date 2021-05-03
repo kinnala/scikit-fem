@@ -396,17 +396,14 @@ def penalize(A: spmatrix,
     d[D] = 1/epsilon
     Aout.setdiag(d)
 
-    if b is not None:
-        if isinstance(b, spmatrix):
-            # mass matrix (eigen- or initial value problem)
-            pass
-        else:
-            # set rhs to the given value
-            bout = b if overwrite else b.copy()
-            bout[D] = x[D] / epsilon
-        return Aout, bout
+    if b is None:
+        return Aout
 
-    return Aout
+    bout = b if overwrite else b.copy()
+    # Nothing needs doing for mass matrix, but RHS vector needs penalty factor
+    if not isinstance(b, spmatrix):
+        bout[D] = x[D] / epsilon
+    return Aout, bout
 
 
 def condense(A: spmatrix,
