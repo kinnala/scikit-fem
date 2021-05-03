@@ -212,6 +212,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 
+- Added: `utils.penalize`, an alternative to `condense` and `enforce` for
+  essential boundary conditions
 - Added: `InteriorBasis.point_source`, with `ex38`
 - Fixed: `MeshLine1.element_finder` 
 
