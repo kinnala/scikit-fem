@@ -328,7 +328,7 @@ def test_solving_inhomogeneous_laplace(mesh_elem, impose):
     np.testing.assert_almost_equal(
         gradu.assemble(basis, sol=basis.interpolate(u)),
         8 / 3,
-        decimal=10
+        decimal=9
     )
 
 

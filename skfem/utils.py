@@ -354,7 +354,7 @@ def penalize(A: spmatrix,
              x: Optional[ndarray] = None,
              I: Optional[DofsCollection] = None,
              D: Optional[DofsCollection] = None,
-             epsilon: float = 1e-12,
+             epsilon: Optional[float] = None,
              overwrite: bool = False) -> LinearSystem:
     r"""Penalize degrees-of-freedom of a linear system.
 
@@ -392,7 +392,10 @@ def penalize(A: spmatrix,
 
     Aout = A if overwrite else A.copy()
 
+        
     d = Aout.diagonal()
+    if epsilon is None:
+        epsilon = 1e-10 / np.linalg.norm(d[D], np.inf)
     d[D] = 1/epsilon
     Aout.setdiag(d)
 
