@@ -15,7 +15,6 @@ from skfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
                         MeshTri2, MeshTet2, MeshHex2)
 from skfem.assembly import FacetBasis, InteriorBasis
 from skfem.utils import projection
-from skfem.models import laplace
 
 
 class IntegrateOneOverBoundaryQ1(TestCase):
