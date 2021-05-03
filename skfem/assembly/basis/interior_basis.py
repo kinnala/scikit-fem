@@ -133,7 +133,15 @@ class InteriorBasis(Basis):
 
     def probes(self, x: ndarray) -> coo_matrix:
         """Return matrix which acts on a solution vector to find its values
-        on points `x`."""
+        on points `x`.
+
+        The product of this with a finite element function vector is like the
+        result of assembling a `Functional` and it can be thought of as the
+        matrix of inner products of the test functions of the basis with Dirac
+        deltas at `x` but because its action is concentrated at points it is
+        not assembled with the usual quadratures.
+
+        """
 
         cells = self.mesh.element_finder(mapping=self.mapping)(*x)
         pts = self.mapping.invF(x[:, :, np.newaxis], tind=cells)
@@ -153,6 +161,19 @@ class InteriorBasis(Basis):
             ),
             shape=(x.shape[1], self.N),
         )
+
+    def point_source(self, x: ndarray) -> ndarray:
+        """Return right-hand side vector for unit source at `x`,
+
+        i.e. the vector of inner products of a Dirac delta at `x`
+        with the test functions of the basis.
+
+        This is like what is obtained by assembling a `LinearForm`
+        but because its action is concentrated at points it is not
+        assembled with the usual quadratures.
+
+        """
+        return self.probes(x[:, None]).toarray()[0]
 
     def interpolator(self, y: ndarray) -> Callable[[ndarray], ndarray]:
         """Return a function handle, which can be used for finding
