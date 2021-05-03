@@ -295,7 +295,7 @@ class SolveCirclePoissonTet2(SolveCirclePoisson):
 
 
 @pytest.mark.parametrize(
-    "mesh_elem", [(MeshTri, ElementTriP2), (MeshQuad, ElementQuad2)]
+    "mesh_elem", [(MeshTri, ElementTriP2()), (MeshQuad, ElementQuad2())]
 )
 @pytest.mark.parametrize("impose", [enforce, penalize])
 def test_solving_inhomogeneous_laplace(mesh_elem, impose):
@@ -303,36 +303,33 @@ def test_solving_inhomogeneous_laplace(mesh_elem, impose):
 
     mesh, elem = mesh_elem
 
-    def runTest():
-        m = mesh().refined(4)
-        basis = InteriorBasis(m, elem)
-        boundary_basis = FacetBasis(m, elem)
-        boundary_dofs = boundary_basis.get_dofs().flatten()
+    m = mesh().refined(4)
+    basis = InteriorBasis(m, elem)
+    boundary_basis = FacetBasis(m, elem)
+    boundary_dofs = boundary_basis.get_dofs().flatten()
+
+    def dirichlet(x):
+        """return a harmonic function"""
+        return ((x[0] + 1.j * x[1]) ** 2).real
+
+    u = basis.zeros()
+    A = laplace.assemble(basis)
+    u[boundary_dofs] = projection(dirichlet,
+                                  boundary_basis,
+                                  I=boundary_dofs)
+    u = solve(*impose(A, x=u, D=boundary_dofs))
 
 
-        def dirichlet(x):
-            """return a harmonic function"""
-            return ((x[0] + 1.j * x[1]) ** 2).real
+    @Functional
+    def gradu(w):
+        gradu = w['sol'].grad
+        return dot(gradu, gradu)
 
-
-        u = basis.zeros()
-        A = laplace.assemble(basis)
-        u[boundary_dofs] = projection(dirichlet,
-                                      boundary_basis,
-                                      I=boundary_dofs)
-        u = solve(*enforce(A, x=u, D=boundary_dofs))
-
-
-        @Functional
-        def gradu(w):
-            gradu = w['sol'].grad
-            return dot(gradu, gradu)
-
-        self.assertAlmostEqual(
-            gradu.assemble(basis, sol=basis.interpolate(u)),
-            8 / 3,
-            delta=1e-10,
-        )
+    np.testing.assert_almost_equal(
+        gradu.assemble(basis, sol=basis.interpolate(u)),
+        8 / 3,
+        decimal=10
+    )
 
 
 if __name__ == "__main__":
