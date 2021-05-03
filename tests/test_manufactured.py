@@ -375,4 +375,9 @@ def test_solving_inhomogeneous_laplace(mesh, elem, impose):
 
 
 if __name__ == "__main__":
-    main()
+    import pytest
+    import unittest
+    
+    unittest.main()
+    pytest.main()    
+
