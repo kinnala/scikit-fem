@@ -283,12 +283,6 @@ class SolveCirclePoissonTet(SolveCirclePoisson):
         return self.mesh_type.init_ball().scaled(0.5)
 
 
-class SolveCirclePoissonTet2(SolveCirclePoissonTet):
-
-    mesh_type = MeshTet2
-    element_type = ElementTetP2
-
-
 class SolveCirclePoissonTet2(SolveCirclePoisson):
 
     mesh_type = MeshTet2
