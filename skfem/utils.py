@@ -354,7 +354,7 @@ def penalize(A: spmatrix,
              x: Optional[ndarray] = None,
              I: Optional[DofsCollection] = None,
              D: Optional[DofsCollection] = None,
-             epsilon: float = 1e-6,
+             epsilon: float = 1e-12,
              overwrite: bool = False) -> LinearSystem:
     r"""Penalize degrees-of-freedom of a linear system.
 
