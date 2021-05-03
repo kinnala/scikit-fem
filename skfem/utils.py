@@ -392,7 +392,6 @@ def penalize(A: spmatrix,
 
     Aout = A if overwrite else A.copy()
 
-        
     d = Aout.diagonal()
     if epsilon is None:
         epsilon = 1e-10 / np.linalg.norm(d[D], np.inf)
