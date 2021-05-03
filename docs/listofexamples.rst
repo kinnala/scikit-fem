@@ -519,3 +519,19 @@ using the lowest order Raviart-Thomas elements.
    The figure was created using `ParaView <https://www.paraview.org/>`__.
 
 See the `source code of Example 37 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex37.py>`_ for more information.
+
+Example 38: Point source
+========================
+
+Point sources require different assembly to other linear forms.
+
+This example computes the Green's function for a disk; i.e. the solution of
+the Dirichlet problem for the Poisson equation with the source term
+concentrated at a single interior point, :math:`\Delta u = \delta (\mathbf x - \mathbf s)`.
+
+.. figure:: https://user-images.githubusercontent.com/1588947/115502511-5cd3d200-a2b8-11eb-9929-92ed9550ced8.png
+
+    The scalar potential in the disk with point source at (0.3, 0.2).
+
+See the `source code of Example 38 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex38.py>`_
+for more information.
