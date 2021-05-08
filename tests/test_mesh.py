@@ -2,8 +2,11 @@ from unittest import TestCase
 from pathlib import Path
 
 import numpy as np
+from numpy.testing import assert_array_equal
+import pytest
 
-from skfem.mesh import Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
+from skfem.mesh import Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri, MeshTri2, MeshQuad2, MeshTet2, MeshHex2
+from skfem.io.meshio import to_meshio, from_meshio
 
 
 class MeshTests(TestCase):
@@ -71,26 +74,6 @@ class Loading(TestCase):
                          == m.facets_satisfying(lambda x: x[0] == 0)).all())
         self.assertTrue((m.boundaries['right']
                          == m.facets_satisfying(lambda x: x[0] == 1)).all())
-
-
-class SaveLoadCycle(TestCase):
-    """Save to temporary file and check import/export cycles."""
-    cls = MeshTet
-
-    def runTest(self):
-        from tempfile import NamedTemporaryFile
-        m = self.cls().refined(2)
-        f = NamedTemporaryFile(delete=False)
-        m.save(f.name + ".vtk")
-        with self.assertWarnsRegex(UserWarning, '^Unable to load tagged'):
-            m2 = Mesh.load(f.name + ".vtk")
-        self.assertTrue(((m.p - m2.p) < 1e-6).all())
-        self.assertTrue(((m.t - m2.t) < 1e-6).all())
-
-
-class SaveLoadCycleHex(SaveLoadCycle):
-
-    cls = MeshHex
 
 
 class SerializeUnserializeCycle(TestCase):
@@ -247,6 +230,46 @@ class TestFinder1DLinspaced(TestCase):
             )
             self.assertEqual(finder(np.array([0.999]))[0], 2 ** itr - 1)
             self.assertEqual(finder(np.array([0.001]))[0], 0)
+
+
+@pytest.mark.parametrize(
+    "m",
+    [
+        MeshTri(),
+        MeshQuad(),
+        MeshTet(),
+        MeshHex(),
+        MeshTri2(),
+        MeshQuad2(),
+        MeshTet2(),
+        MeshHex2(),
+    ]
+)
+def test_meshio_cycle(m):
+
+    M = from_meshio(to_meshio(m))
+    assert_array_equal(M.p, m.p)
+    assert_array_equal(M.t, m.t)
+
+
+@pytest.mark.parametrize(
+    "m",
+    [
+        MeshTet(),
+        MeshHex(),
+    ]
+)
+def test_saveload_cycle(m):
+
+    from tempfile import NamedTemporaryFile
+    m = m.refined(2)
+    f = NamedTemporaryFile(delete=False)
+    m.save(f.name + ".vtk")
+    with pytest.warns(UserWarning):
+       m2 = Mesh.load(f.name + ".vtk")
+
+    assert_array_equal(m.p, m2.p)
+    assert_array_equal(m.t, m2.t)
 
 
 if __name__ == '__main__':

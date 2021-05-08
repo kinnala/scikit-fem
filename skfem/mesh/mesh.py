@@ -1230,6 +1230,15 @@ class MeshQuad1(Mesh2D):
 @dataclass(repr=False)
 class MeshTri2(MeshTri1):
 
+    doflocs: ndarray = np.array([[0., 0.],
+                                 [1., 0.],
+                                 [0., 1.],
+                                 [1., 1.],
+                                 [.5, 0.],
+                                 [0., .5],
+                                 [.5, .5],
+                                 [1., .5],
+                                 [.5, 1.]], dtype=np.float64).T
     elem: Type[Element] = ElementTriP2
     affine: bool = False
     sort_t: bool = False

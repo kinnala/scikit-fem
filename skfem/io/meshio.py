@@ -19,7 +19,7 @@ MESH_TYPE_MAPPING = {
     'quad9': skfem.MeshQuad2,
 }
 
-TYPE_MESH_MAPPING = {v: k for k, v in MESH_TYPE_MAPPING.items()}
+TYPE_MESH_MAPPING = {v: k for k, v in reversed(MESH_TYPE_MAPPING.items())}
 
 
 def from_meshio(m, force_mesh_type=None):
@@ -142,7 +142,7 @@ def from_file(filename):
 
 def to_meshio(mesh, point_data=None):
 
-    t = mesh.t.copy()
+    t = mesh.dofs.element_dofs
     if isinstance(mesh, skfem.MeshHex):
         t = t[[0, 3, 6, 2, 1, 5, 7, 4]]
 
