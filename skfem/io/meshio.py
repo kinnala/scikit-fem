@@ -19,8 +19,9 @@ MESH_TYPE_MAPPING = {
     'quad9': skfem.MeshQuad2,
 }
 
+# mypy fails the following line due to bug in Python 3.7 types
 TYPE_MESH_MAPPING = {MESH_TYPE_MAPPING[k]: k
-                     for k in reversed(MESH_TYPE_MAPPING)}
+                     for k in reversed(MESH_TYPE_MAPPING)}  # type: ignore
 
 
 def from_meshio(m, force_mesh_type=None):
