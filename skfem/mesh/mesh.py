@@ -1259,8 +1259,8 @@ class MeshQuad2(MeshQuad1):
 
     doflocs: ndarray = np.array([[0., 0.],
                                  [1., 0.],
-                                 [0., 1.],
                                  [1., 1.],
+                                 [0., 1.],
                                  [.5, 0.],
                                  [0., .5],
                                  [1., .5],
