@@ -143,7 +143,7 @@ def from_file(filename):
 
 def to_meshio(mesh, point_data=None):
 
-    t = mesh.dofs.element_dofs
+    t = mesh.dofs.element_dofs.copy()
     if isinstance(mesh, skfem.MeshHex):
         t = t[[0, 3, 6, 2, 1, 5, 7, 4]]
 
