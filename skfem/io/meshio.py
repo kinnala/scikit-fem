@@ -19,7 +19,8 @@ MESH_TYPE_MAPPING = {
     'quad9': skfem.MeshQuad2,
 }
 
-TYPE_MESH_MAPPING = {MESH_TYPE_MAPPING[k]: k for k in reversed(MESH_TYPE_MAPPING)}
+TYPE_MESH_MAPPING = {MESH_TYPE_MAPPING[k]: k
+                     for k in reversed(MESH_TYPE_MAPPING)}
 
 
 def from_meshio(m, force_mesh_type=None):
