@@ -242,7 +242,6 @@ class TestFinder1DLinspaced(TestCase):
         MeshTri2(),
         MeshQuad2(),
         MeshTet2(),
-        MeshHex2(),
     ]
 )
 def test_meshio_cycle(m):
@@ -255,6 +254,8 @@ def test_meshio_cycle(m):
 @pytest.mark.parametrize(
     "m",
     [
+        MeshTri(),
+        MeshQuad(),
         MeshTet(),
         MeshHex(),
     ]

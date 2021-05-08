@@ -1257,6 +1257,15 @@ class MeshTri2(MeshTri1):
 @dataclass(repr=False)
 class MeshQuad2(MeshQuad1):
 
+    doflocs: ndarray = np.array([[0., 0.],
+                                 [1., 0.],
+                                 [0., 1.],
+                                 [1., 1.],
+                                 [.5, 0.],
+                                 [0., .5],
+                                 [1., .5],
+                                 [.5, 1.],
+                                 [.5, .5]], dtype=np.float64).T
     elem: Type[Element] = ElementQuad2
 
 
