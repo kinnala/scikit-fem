@@ -69,9 +69,18 @@ class TestEx09(TestCase):
 
 class TestEx10(TestCase):
 
+
     def runTest(self):
         import docs.examples.ex10 as ex10
         self.assertAlmostEqual(np.mean(ex10.x), 0.277931521728906)
+
+
+class TestEx39(TestCase):
+
+
+    def runTest(self):
+        import docs.examples.ex39 as ex39
+        self.assertAlmostEqual(np.mean(ex39.x), 0.277931521728906)
 
 
 class TestEx11(TestCase):
