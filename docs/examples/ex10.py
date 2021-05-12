@@ -27,7 +27,6 @@ basis = InteriorBasis(m, ElementTriP1())
 
 x = basis.zeros()
 
-I = m.interior_nodes()
 D = m.boundary_nodes()
 x[D] = np.sin(np.pi * m.p[0, D])
 
@@ -36,7 +35,7 @@ for itr in range(100):
     J = asm(jacobian, basis, w=w)
     F = asm(rhs, basis, w=w)
     x_prev = x.copy()
-    x += 0.7 * solve(*condense(J, -F, I=I))
+    x += 0.7 * solve(*condense(J, -F, D=D))
     if np.linalg.norm(x - x_prev) < 1e-8:
         break
     if __name__ == "__main__":
