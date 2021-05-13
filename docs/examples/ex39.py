@@ -40,6 +40,7 @@ x = minimize(
     hess=hess,
     method="trust-constr",
     constraints=constraint,
+    options={"verbose": 3}
 ).x
 
 if __name__ == "__main__":
