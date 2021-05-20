@@ -1230,6 +1230,15 @@ class MeshQuad1(Mesh2D):
 @dataclass(repr=False)
 class MeshTri2(MeshTri1):
 
+    doflocs: ndarray = np.array([[0., 0.],
+                                 [1., 0.],
+                                 [0., 1.],
+                                 [1., 1.],
+                                 [.5, 0.],
+                                 [0., .5],
+                                 [.5, .5],
+                                 [1., .5],
+                                 [.5, 1.]], dtype=np.float64).T
     elem: Type[Element] = ElementTriP2
     affine: bool = False
     sort_t: bool = False
@@ -1248,6 +1257,15 @@ class MeshTri2(MeshTri1):
 @dataclass(repr=False)
 class MeshQuad2(MeshQuad1):
 
+    doflocs: ndarray = np.array([[0., 0.],
+                                 [1., 0.],
+                                 [1., 1.],
+                                 [0., 1.],
+                                 [.5, 0.],
+                                 [0., .5],
+                                 [1., .5],
+                                 [.5, 1.],
+                                 [.5, .5]], dtype=np.float64).T
     elem: Type[Element] = ElementQuad2
 
 
@@ -1688,6 +1706,32 @@ class MeshHex1(Mesh3D):
 @dataclass(repr=False)
 class MeshTet2(MeshTet1):
 
+    doflocs: ndarray = np.array([[0., 0., 0.],
+                                 [0., 0., 1.],
+                                 [0., 1., 0.],
+                                 [1., 0., 0.],
+                                 [0., 1., 1.],
+                                 [1., 0., 1.],
+                                 [1., 1., 0.],
+                                 [1., 1., 1.],
+                                 [0., 0., .5],
+                                 [0., .5, 0.],
+                                 [.5, 0., 0.],
+                                 [0., .5, .5],
+                                 [.5, 0., .5],
+                                 [0., .5, 1.],
+                                 [.5, 0., 1.],
+                                 [.5, .5, 1.],
+                                 [.5, .5, 0.],
+                                 [0., 1., .5],
+                                 [.5, 1., 0.],
+                                 [.5, 1., .5],
+                                 [1., 0., .5],
+                                 [1., .5, 0.],
+                                 [1., .5, .5],
+                                 [.5, 1., 1.],
+                                 [1., .5, 1.],
+                                 [1., 1., .5]], dtype=np.float64).T
     elem: Type[Element] = ElementTetP2
 
     @classmethod
