@@ -215,6 +215,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added: `utils.penalize`, an alternative to `condense` and `enforce` for
   essential boundary conditions
 - Added: `InteriorBasis.point_source`, with `ex38`
+- Added: `ElementTetDG`, similar to `ElementTriDG` for tetrahedral meshes
 - Fixed: `MeshLine1.element_finder` 
 
 ### [3.0.0] - 2021-04-19
