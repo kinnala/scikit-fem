@@ -5,3 +5,4 @@ from .element_tet_rt0 import ElementTetRT0  # noqa
 from .element_tet_n0 import ElementTetN0  # noqa
 from .element_tet_mini import ElementTetMini  # noqa
 from .element_tet_cr import ElementTetCR  # noqa
+from .element_tet_dg import ElementTetDG  # noqa
