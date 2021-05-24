@@ -13,7 +13,8 @@ from skfem.element import (ElementHex1, ElementHexS2, ElementLineP0,
                            ElementTriP1, ElementTriP2, ElementTriRT0,
                            ElementVectorH1, ElementHex2, ElementQuadBFS,
                            ElementTriCR, ElementTetCR, ElementTriHermite,
-                           ElementTriMorley, ElementTriArgyris, ElementTriDG)
+                           ElementTriMorley, ElementTriArgyris, ElementTriDG,
+                           ElementTetDG)
 from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 from skfem.assembly import InteriorBasis, Functional
 from skfem.mapping import MappingAffine
@@ -275,18 +276,20 @@ class TestElementQuadBFS(TestCase):
 
 
 @pytest.mark.parametrize(
-    "e",
+    "m,e,edg",
     [
-        ElementTriP1(),
-        ElementTriArgyris(),
-        ElementTriMorley(),
-        ElementTriHermite(),
+        (MeshTri().refined(), ElementTriP1(), ElementTriDG),
+        (MeshTri().refined(), ElementTriP2(), ElementTriDG),
+        (MeshTet().refined(), ElementTetP1(), ElementTetDG),
+        (MeshTet().refined(), ElementTetP2(), ElementTetDG),
+        (MeshTri().refined(), ElementTriArgyris(), ElementTriDG),
+        (MeshTri().refined(), ElementTriMorley(), ElementTriDG),
+        (MeshTri().refined(), ElementTriHermite(), ElementTriDG),
     ]
 )
-def test_dg_element(e):
+def test_dg_element(m, e, edg):
 
-    m = MeshTri().refined()
-    edg = ElementTriDG(e)
+    edg = edg(e)
 
     @Functional
     def square(w):
