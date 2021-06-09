@@ -78,6 +78,9 @@ from skfem.visuals.matplotlib import plot, savefig
 plot(m, x, shading='gouraud', colorbar=True)
 savefig('solution.png')
 ```
+<p align="center">
+<img src="https://user-images.githubusercontent.com/973268/121342616-7d202480-c92a-11eb-965f-c5ef462fbd5c.png" width="65%">
+</p>
 
 Meshes can be initialized manually, loaded from external files using
 [meshio](https://github.com/nschloe/meshio), or created with the help of special
