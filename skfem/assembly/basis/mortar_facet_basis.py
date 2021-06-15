@@ -5,10 +5,10 @@ from skfem.element import Element
 from skfem.mapping import MappingMortar
 from skfem.mesh import Mesh
 
-from .exterior_facet_basis import ExteriorFacetBasis
+from .boundary_facet_basis import BoundaryFacetBasis
 
 
-class MortarFacetBasis(ExteriorFacetBasis):
+class MortarFacetBasis(BoundaryFacetBasis):
 
     def __init__(self,
                  mesh: Mesh,
