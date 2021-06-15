@@ -7,6 +7,7 @@ from .interior_facet_basis import InteriorFacetBasis  # noqa
 from .mortar_facet_basis import MortarFacetBasis  # noqa
 
 
+# backwards compatibility
 InteriorBasis = CellBasis
 ExteriorFacetBasis = BoundaryFacetBasis
 

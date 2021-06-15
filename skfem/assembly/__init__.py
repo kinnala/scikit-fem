@@ -51,7 +51,7 @@ from scipy.sparse import csr_matrix
 
 from .basis import (Basis, CellBasis, FacetBasis, BoundaryFacetBasis,
                     InteriorFacetBasis, MortarFacetBasis)
-from .basis import InteriorBasis, ExteriorFacetBasis  # backwards-compatibility
+from .basis import InteriorBasis, ExteriorFacetBasis  # backwards compatibility
 from .dofs import Dofs, DofsView
 from .form import Form, BilinearForm, LinearForm, Functional
 
@@ -79,6 +79,6 @@ __all__ = [
     "BilinearForm",
     "LinearForm",
     "Functional",
-    "InteriorBasis",
-    "ExteriorFacetBasis",
+    "InteriorBasis",  # backwards compatibility
+    "ExteriorFacetBasis",  # backwards compatibility
 ]
