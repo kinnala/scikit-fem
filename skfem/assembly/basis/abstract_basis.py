@@ -254,19 +254,19 @@ class AbstractBasis:
             return output
         raise ValueError("Basis.elem has only a single component!")
 
-    def split_bases(self) -> List['Basis']:
+    def split_bases(self) -> List['AbstractBasis']:
         """Return Basis objects for the solution components."""
         if isinstance(self.elem, ElementComposite):
             return [type(self)(self.mesh, e, self.mapping,
                                quadrature=self.quadrature)
                     for e in self.elem.elems]
-        raise ValueError("Basis.elem has only a single component!")
+        raise ValueError("AbstractBasis.elem has only a single component!")
 
     @property
     def quadrature(self):
         return self.X, self.W
 
-    def split(self, x: ndarray) -> List[Tuple[ndarray, 'Basis']]:
+    def split(self, x: ndarray) -> List[Tuple[ndarray, 'AbstractBasis']]:
         """Split a solution vector into components."""
         xs = [x[ix] for ix in self.split_indices()]
         return list(zip(xs, self.split_bases()))
@@ -280,6 +280,6 @@ class AbstractBasis:
         """Return a zero array with same dimensions as the solution."""
         return np.zeros(self.N)
 
-    def with_element(self, elem: Element) -> 'Basis':
+    def with_element(self, elem: Element) -> 'AbstractBasis':
         """Create a copy of ``self`` that uses different element."""
         raise NotImplementedError
