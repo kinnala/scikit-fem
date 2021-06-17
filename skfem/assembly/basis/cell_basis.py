@@ -7,10 +7,10 @@ from skfem.element import DiscreteField, Element
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh
 
-from .basis import Basis
+from .abstract_basis import AbstractBasis
 
 
-class CellBasis(Basis):
+class CellBasis(AbstractBasis):
     """Basis functions evaluated at quadrature points inside the elements.
 
     :class:`~skfem.assembly.CellBasis` object is a combination of

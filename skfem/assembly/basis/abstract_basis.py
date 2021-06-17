@@ -13,7 +13,7 @@ from skfem.refdom import Refdom
 from skfem.generic_utils import HashableNdArray
 
 
-class Basis:
+class AbstractBasis:
     """Finite element basis at global quadrature points.
 
     Please see the following implementations:

@@ -8,11 +8,11 @@ from skfem.element import (BOUNDARY_ELEMENT_MAP, DiscreteField, Element,
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 
-from .basis import Basis
+from .abstract_basis import AbstractBasis
 from .cell_basis import CellBasis
 
 
-class BoundaryFacetBasis(Basis):
+class BoundaryFacetBasis(AbstractBasis):
     """Global basis functions at quadrature points on the boundary.
 
     Aliased as ``FacetBasis``.

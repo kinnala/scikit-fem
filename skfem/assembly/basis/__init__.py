@@ -1,15 +1,15 @@
 import warnings
 
-from .basis import Basis  # noqa
+from .abstract_basis import AbstractBasis  # noqa
 from .cell_basis import CellBasis  # noqa
 from .boundary_facet_basis import BoundaryFacetBasis  # noqa
 from .interior_facet_basis import InteriorFacetBasis  # noqa
 from .mortar_facet_basis import MortarFacetBasis  # noqa
 
-
-# backwards compatibility
-InteriorBasis = CellBasis
-ExteriorFacetBasis = BoundaryFacetBasis
+# aliases
+Basis = CellBasis
+InteriorBasis = CellBasis  # backwards compatibility
+ExteriorFacetBasis = BoundaryFacetBasis  # backwards compatibility
 
 
 def FacetBasis(*args, side=None, **kwargs):
