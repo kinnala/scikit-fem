@@ -8,7 +8,7 @@ from skfem.element import (ElementHex1, ElementHex2, ElementHexS2, ElementLineP1
                            ElementLineP2, ElementLineMini, ElementTetCR,
                            ElementQuad1, ElementQuad2,
                            ElementQuadS2, ElementTetMini, ElementTetP1,
-                           ElementTetP2, ElementTriMini, ElementTriP1,
+                           ElementTetP2, ElementTriMini, ElementTriCCR, ElementTriP1,
                            ElementTriP2, ElementTriCR, ElementTriHermite)
 from skfem.assembly import FacetBasis, InteriorBasis
 from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
@@ -217,6 +217,15 @@ class ConvergenceTriCR(ConvergenceTriP1):
 
     def create_basis(self, m):
         e = ElementTriCR()
+        return InteriorBasis(m, e)
+
+class ConvergenceTriCCR(ConvergenceTriP1):
+
+    rateL2 = 2.0
+    rateH1 = 1.0
+
+    def create_basis(self, m):
+        e = ElementTriCCR()
         return InteriorBasis(m, e)
 
 
