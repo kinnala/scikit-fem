@@ -24,17 +24,17 @@ class ElementTriCCR(ElementH1):
     def lbasis(self, X, i):
         x, y = X
 
-        if i == 0: # (0., 0.)
+        if i == 0:  # (0., 0.)
             phi = -(-2*x + y*(3*x - 2) + 1)*(x + y - 1)
             dphi = np.array([-6*x*y + 4*x - 3*y**2 + 7*y - 3,
                              -3*x**2 - 6*x*y + 7*x + 4*y - 3])
-        if i == 1: # (0., 0.)
+        if i == 1:  # (1., 0.)
             phi = -x*(-2*x + 3*y*(x + y - 1) + 1)
             dphi = np.array([
                 -6*x*y + 4*x - 3*y**2 + 3*y - 1,
                 3*x*(-x - 2*y + 1)
             ])
-        elif i == 2:
+        elif i == 2:  # (0., 1.)
             phi = -y*(3*x*(x + y - 1) - 2*y + 1)
             dphi = np.array([
                 3*y*(-2*x - y + 1),
@@ -58,7 +58,7 @@ class ElementTriCCR(ElementH1):
                 4*y*(6*x + 3*y - 4),
                 4*(3*x - 1)*(x + 2*y - 1)
             ])
-        elif i == 6: # centroid
+        elif i == 6:  # centroid
             phi = 27*x*y*(-x - y + 1)
             dphi = np.array([
                 27*y*(-2*x - y + 1),
