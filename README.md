@@ -255,6 +255,8 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+### [3.1.0] - 2021-06-18
+
 - Added: `Basis`, a shorthand for `CellBasis`
 - Added: `CellBasis`, a new preferred name for `InteriorBasis`
 - Added: `BoundaryFacetBasis`, a new preferred name for `ExteriorFacetBasis`
