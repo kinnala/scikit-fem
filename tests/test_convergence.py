@@ -4,12 +4,27 @@ import numpy as np
 
 from skfem import BilinearForm, LinearForm, asm, solve, condense
 from skfem.models.poisson import laplace
-from skfem.element import (ElementHex1, ElementHex2, ElementHexS2, ElementLineP1,
-                           ElementLineP2, ElementLineMini, ElementTetCR,
-                           ElementQuad1, ElementQuad2,
-                           ElementQuadS2, ElementTetMini, ElementTetP1,
-                           ElementTetP2, ElementTriMini, ElementTriCCR, ElementTriP1,
-                           ElementTriP2, ElementTriCR, ElementTriHermite)
+from skfem.element import (
+    ElementHex1,
+    ElementHex2,
+    ElementHexS2,
+    ElementLineP1,
+    ElementLineP2,
+    ElementLineMini,
+    ElementTetCR,
+    ElementQuad1,
+    ElementQuad2,
+    ElementQuadS2,
+    ElementTetMini,
+    ElementTetP1,
+    ElementTetP2,
+    ElementTriMini,
+    ElementTriCCR,
+    ElementTriP1,
+    ElementTriP2,
+    ElementTriCR,
+    ElementTriHermite,
+    ElementTetCCR)
 from skfem.assembly import FacetBasis, InteriorBasis
 from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 
@@ -219,6 +234,7 @@ class ConvergenceTriCR(ConvergenceTriP1):
         e = ElementTriCR()
         return InteriorBasis(m, e)
 
+
 class ConvergenceTriCCR(ConvergenceTriP1):
 
     rateL2 = 3.0
@@ -312,6 +328,16 @@ class ConvergenceTetCR(ConvergenceTetP1):
         return InteriorBasis(m, e)
 
 
+class ConvergenceTetCCR(ConvergenceTetP1):
+
+    rateL2 = 3.0
+    rateH1 = 2.0
+
+    def create_basis(self, m):
+        e = ElementTetCCR()
+        return InteriorBasis(m, e)
+
+
 class ConvergenceTetP2(ConvergenceTetP1):
 
     rateL2 = 3.23
@@ -355,8 +381,9 @@ class ConvergenceLineP2(ConvergenceQ1):
     def setUp(self):
         self.mesh = MeshLine().refined(3)
 
+
 class ConvergenceLineMini(ConvergenceLineP2):
-    
+
     def create_basis(self, m):
         e = ElementLineMini()
         return InteriorBasis(m, e)
