@@ -8,11 +8,11 @@ from skfem.element import (BOUNDARY_ELEMENT_MAP, DiscreteField, Element,
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 
-from .basis import Basis
-from .interior_basis import InteriorBasis
+from .abstract_basis import AbstractBasis
+from .cell_basis import CellBasis
 
 
-class ExteriorFacetBasis(Basis):
+class BoundaryFacetBasis(AbstractBasis):
     """Global basis functions at quadrature points on the boundary.
 
     Aliased as ``FacetBasis``.
@@ -47,7 +47,7 @@ class ExteriorFacetBasis(Basis):
             Optional subset of facet indices.
 
         """
-        super(ExteriorFacetBasis, self).__init__(mesh,
+        super(BoundaryFacetBasis, self).__init__(mesh,
                                                  elem,
                                                  mapping,
                                                  intorder,
@@ -104,7 +104,7 @@ class ExteriorFacetBasis(Basis):
 
         from skfem.utils import projection
 
-        fbasis = ExteriorFacetBasis(self.mesh,
+        fbasis = BoundaryFacetBasis(self.mesh,
                                     elem,
                                     facets=self.find,
                                     quadrature=(self.X, self.W))
@@ -123,7 +123,7 @@ class ExteriorFacetBasis(Basis):
     def trace(self,
               x: ndarray,
               projection: Callable[[ndarray], ndarray],
-              target_elem: Optional[Element] = None) -> Tuple[InteriorBasis,
+              target_elem: Optional[Element] = None) -> Tuple[CellBasis,
                                                               ndarray]:
         """Restrict solution to :math:`d-1` dimensional trace mesh.
 
@@ -147,7 +147,7 @@ class ExteriorFacetBasis(Basis):
 
         Returns
         -------
-        InteriorBasis
+        CellBasis
             An object corresponding to the trace mesh.
         ndarray
             A projected solution vector defined on the trace mesh.
@@ -179,11 +179,11 @@ class ExteriorFacetBasis(Basis):
         p, t = self.mesh._reix(self.mesh.facets[:, self.find])
 
         return (
-            InteriorBasis(target_meshcls(projection(p), t), elemcls()),
+            CellBasis(target_meshcls(projection(p), t), elemcls()),
             self._trace_project(x, target_elem)
         )
 
-    def with_element(self, elem: Element) -> 'ExteriorFacetBasis':
+    def with_element(self, elem: Element) -> 'BoundaryFacetBasis':
         """Return a similar basis using a different element."""
         return type(self)(
             self.mesh,

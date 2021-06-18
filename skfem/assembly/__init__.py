@@ -9,10 +9,10 @@ following:
 >>> m
 Triangular mesh with 4 vertices and 2 elements.
 
-2. Create :class:`~skfem.assembly.InteriorBasis` or
+2. Create :class:`~skfem.assembly.CellBasis` or
    :class:`~skfem.assembly.FacetBasis` objects.
 
->>> basis = fem.InteriorBasis(m, e)
+>>> basis = fem.CellBasis(m, e)
 
 3. Define the forms using :class:`~skfem.assembly.BilinearForm`,
    :class:`~skfem.assembly.LinearForm`, or
@@ -49,8 +49,9 @@ from numpy import ndarray
 
 from scipy.sparse import csr_matrix
 
-from .basis import (Basis, InteriorBasis, FacetBasis, ExteriorFacetBasis,
+from .basis import (Basis, CellBasis, FacetBasis, BoundaryFacetBasis,
                     InteriorFacetBasis, MortarFacetBasis)
+from .basis import InteriorBasis, ExteriorFacetBasis  # backwards compatibility
 from .dofs import Dofs, DofsView
 from .form import Form, BilinearForm, LinearForm, Functional
 
@@ -68,13 +69,16 @@ def asm(form: Form,
 __all__ = [
     "asm",
     "Basis",
-    "InteriorBasis",
+    "CellBasis",
     "FacetBasis",
-    "ExteriorFacetBasis",
+    "BoundaryFacetBasis",
     "InteriorFacetBasis",
     "MortarFacetBasis",
     "Dofs",
     "DofsView",
     "BilinearForm",
     "LinearForm",
-    "Functional"]
+    "Functional",
+    "InteriorBasis",  # backwards compatibility
+    "ExteriorFacetBasis",  # backwards compatibility
+]

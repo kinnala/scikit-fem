@@ -7,19 +7,19 @@ from skfem.element import DiscreteField, Element
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh
 
-from .basis import Basis
+from .abstract_basis import AbstractBasis
 
 
-class InteriorBasis(Basis):
+class CellBasis(AbstractBasis):
     """Basis functions evaluated at quadrature points inside the elements.
 
-    :class:`~skfem.assembly.InteriorBasis` object is a combination of
+    :class:`~skfem.assembly.CellBasis` object is a combination of
     :class:`~skfem.mesh.Mesh` and :class:`~skfem.element.Element`:
 
     >>> from skfem import *
     >>> m = MeshTri.init_symmetric()
     >>> e = ElementTriP1()
-    >>> basis = InteriorBasis(m, e)
+    >>> basis = CellBasis(m, e)
 
     The resulting objects are used in the assembly.
 
@@ -58,12 +58,12 @@ class InteriorBasis(Basis):
             Optional tuple of quadrature points and weights.
 
         """
-        super(InteriorBasis, self).__init__(mesh,
-                                            elem,
-                                            mapping,
-                                            intorder,
-                                            quadrature,
-                                            mesh.refdom)
+        super(CellBasis, self).__init__(mesh,
+                                        elem,
+                                        mapping,
+                                        intorder,
+                                        quadrature,
+                                        mesh.refdom)
 
         self.basis = [self.elem.gbasis(self.mapping, self.X, j, tind=elements)
                       for j in range(self.Nbfun)]
@@ -184,7 +184,7 @@ class InteriorBasis(Basis):
 
         return interpfun
 
-    def with_element(self, elem: Element) -> 'InteriorBasis':
+    def with_element(self, elem: Element) -> 'CellBasis':
         """Return a similar basis using a different element."""
         return type(self)(
             self.mesh,

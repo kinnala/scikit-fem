@@ -12,7 +12,7 @@ from numpy import ndarray
 from scipy.sparse import spmatrix
 
 from skfem.assembly import asm, BilinearForm, LinearForm, DofsView
-from skfem.assembly.basis import Basis
+from skfem.assembly.basis import AbstractBasis
 from skfem.element import ElementVector
 
 
@@ -571,8 +571,8 @@ def adaptive_theta(est, theta=0.5, max=None):
 
 
 def projection(fun,
-               basis_to: Optional[Basis] = None,
-               basis_from: Optional[Basis] = None,
+               basis_to: Optional[AbstractBasis] = None,
+               basis_from: Optional[AbstractBasis] = None,
                diff: Optional[int] = None,
                I: Optional[ndarray] = None,
                expand: bool = False) -> ndarray:
@@ -633,8 +633,8 @@ def projection(fun,
 
 
 def project(fun,
-            basis_from: Optional[Basis] = None,
-            basis_to: Optional[Basis] = None,
+            basis_from: Optional[AbstractBasis] = None,
+            basis_to: Optional[AbstractBasis] = None,
             diff: Optional[int] = None,
             I: Optional[ndarray] = None,
             expand: bool = False) -> ndarray:
