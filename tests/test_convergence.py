@@ -330,8 +330,8 @@ class ConvergenceTetCR(ConvergenceTetP1):
 
 class ConvergenceTetCCR(ConvergenceTetP1):
 
-    rateL2 = 3.0
-    rateH1 = 2.0
+    rateL2 = 4.0
+    rateH1 = 3.0
 
     def create_basis(self, m):
         e = ElementTetCCR()
