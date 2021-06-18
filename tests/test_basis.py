@@ -12,8 +12,7 @@ from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
                            ElementQuad2, ElementLineP2, ElementTriP0,
                            ElementLineP0, ElementQuad1, ElementQuad0,
                            ElementTetP1, ElementTetP0, ElementHex1,
-                           ElementHex0, ElementLineP1, ElementLineMini,
-                           ElementTetCCR, ElementTriCCR)
+                           ElementHex0, ElementLineP1, ElementLineMini)
 
 
 class TestCompositeSplitting(TestCase):
@@ -198,14 +197,12 @@ class TestIncompatibleMeshElement(TestCase):
         (MeshTri, ElementTriP1(), ElementTriP1()),
         (MeshTri, ElementTriP2(), ElementTriP1()),
         (MeshTri, ElementTriP2(), ElementTriP2()),
-        (MeshTri, ElementTriCCR(), ElementTriCCR()),
         (MeshTri, ElementTriP2(), None),
         (MeshQuad, ElementQuad1(), ElementQuad0()),
         (MeshQuad, ElementQuad1(), ElementQuad1()),
         (MeshQuad, ElementQuad2(), ElementQuad2()),
         (MeshTet, ElementTetP1(), ElementTetP0()),
         (MeshTet, ElementTetP2(), ElementTetP2()),
-        (MeshTet, ElementTetCCR(), ElementTetCCR()),
         (MeshHex, ElementHex1(), ElementHex0()),
         (MeshHex, ElementHex1(), ElementHex1()),
         (MeshHex, ElementHex2(), ElementHex2()),

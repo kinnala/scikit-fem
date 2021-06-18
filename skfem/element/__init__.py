@@ -44,8 +44,7 @@ BOUNDARY_ELEMENT_MAP: Dict[Type[Element], Type[Element]] = {
     ElementTetP2: ElementTriP2,
     ElementHex0: ElementQuad0,
     ElementHex1: ElementQuad1,
-    ElementHex2: ElementQuad2,
-    ElementTetCCR: ElementTriCCR,
+    ElementHex2: ElementQuad2
 }
 
 # for backwards compatibility
