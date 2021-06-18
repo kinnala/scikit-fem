@@ -219,7 +219,7 @@ You may use the following BibTeX entry:
   number = {52},
   pages = {2369},
   author = {Tom Gustafsson and G. D. McBain},
-  title = {scikit-fem: A Python package for finite element assembly},
+  title = {scikit-fem: A {P}ython package for finite element assembly},
   journal = {Journal of Open Source Software}
 }
 ```
