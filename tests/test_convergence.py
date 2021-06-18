@@ -221,8 +221,8 @@ class ConvergenceTriCR(ConvergenceTriP1):
 
 class ConvergenceTriCCR(ConvergenceTriP1):
 
-    rateL2 = 3.0
-    rateH1 = 2.0
+    rateL2 = 2.0
+    rateH1 = 1.0
 
     def create_basis(self, m):
         e = ElementTriCCR()

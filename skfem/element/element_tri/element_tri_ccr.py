@@ -28,7 +28,7 @@ class ElementTriCCR(ElementH1):
             phi = -(-2*x + y*(3*x - 2) + 1)*(x + y - 1)
             dphi = np.array([-6*x*y + 4*x - 3*y**2 + 7*y - 3,
                              -3*x**2 - 6*x*y + 7*x + 4*y - 3])
-        if i == 1:  # (1., 0.)
+        elif i == 1:  # (1., 0.)
             phi = -x*(-2*x + 3*y*(x + y - 1) + 1)
             dphi = np.array([
                 -6*x*y + 4*x - 3*y**2 + 3*y - 1,
