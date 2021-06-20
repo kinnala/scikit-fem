@@ -64,10 +64,11 @@ class Element:
                X: ndarray,
                i: int,
                tind: Optional[ndarray] = None) -> Tuple[DiscreteField, ...]:
-        """Evaluate the global basis functions, given local points X.
+        """Evaluate the global basis functions, given local points ``X``.
 
         The global points - at which the global basis is evaluated at - are
-        defined through x = F(X), where F corresponds to the given mapping.
+        defined through the local-to-global mapping given by the parameter
+        ``mapping``.
 
         Parameters
         ----------
