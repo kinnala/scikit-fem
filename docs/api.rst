@@ -14,7 +14,7 @@ Abstract class: Mesh
 --------------------
 
 .. autoclass:: skfem.mesh.Mesh
-   :members: load, save, refined, element_finder
+   :members: load, save, refined, element_finder, doflocs, t
 
 Class: MeshTri
 **************
@@ -24,6 +24,9 @@ Class: MeshTri
 .. autoclass:: skfem.mesh.mesh.MeshTri1
    :members: __init__, init_symmetric, init_sqsymmetric, init_refdom, init_tensor, init_lshaped, init_circle, load
 
+.. autoclass:: skfem.mesh.mesh.MeshTri2
+   :members: init_circle, load
+
 Class: MeshQuad
 ***************
 
@@ -32,22 +35,34 @@ Class: MeshQuad
 .. autoclass:: skfem.mesh.mesh.MeshQuad1
    :members: __init__, init_refdom, init_tensor, to_meshtri, load
 
+.. autoclass:: skfem.mesh.mesh.MeshQuad2
+   :members: load
+
 Class: MeshTet
 **************
 
 .. autoclass:: skfem.mesh.MeshTet
-   :members: __init__, init_refdom, init_tensor
+
+.. autoclass:: skfem.mesh.mesh.MeshTet1
+   :members: __init__, init_refdom, init_tensor, init_ball, load
+
+.. autoclass:: skfem.mesh.mesh.MeshTet2
+   :members: init_ball, load
 
 Class: MeshHex
 **************
 
 .. autoclass:: skfem.mesh.MeshHex
-   :members: __init__, init_tensor
+
+.. autoclass:: skfem.mesh.mesh.MeshHex1
+   :members: __init__, init_tensor, to_meshtet, load
 
 Class: MeshLine
 ***************
 
 .. autoclass:: skfem.mesh.MeshLine
+
+.. autoclass:: skfem.mesh.mesh.MeshLine1
    :members: __init__
 
 Module: skfem.assembly
@@ -64,7 +79,7 @@ finite element basis evaluated at quadrature points.
 Class: CellBasis
 ****************
 
-Can be alternatively initialized via the shorthand :class:`~skfem.assembly.Basis`.
+.. autoclass:: skfem.assembly.Basis
 
 .. autoclass:: skfem.assembly.CellBasis
    :members: __init__
@@ -73,7 +88,7 @@ Can be alternatively initialized via the shorthand :class:`~skfem.assembly.Basis
 Class: BoundaryFacetBasis
 *************************
 
-Can be alternatively initialized via the shorthand :class:`~skfem.assembly.FacetBasis`.
+.. autoclass:: skfem.assembly.FacetBasis
 
 .. autoclass:: skfem.assembly.BoundaryFacetBasis
    :members: __init__, trace

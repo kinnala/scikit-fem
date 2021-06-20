@@ -15,9 +15,15 @@ from ..element import (Element, ElementHex1, ElementQuad1, ElementQuad2,
 
 @dataclass(repr=False)
 class Mesh:
+    """A mesh defined by :class:`~skfem.element.Element` class.
 
-    doflocs: ndarray
-    t: ndarray
+    :class:`~skfem.mesh.Mesh` is defined as a combination of elements/cells by
+    specifying the spatial locations of the finite element nodes.
+
+    """
+
+    doflocs: ndarray  #: The locations of the finite element nodes
+    t: ndarray  #: The connectivity of the elements/cells
     _boundaries: Optional[Dict[str, ndarray]] = None
     _subdomains: Optional[Dict[str, ndarray]] = None
     elem: Type[Element] = Element
@@ -778,7 +784,7 @@ class Mesh3D(Mesh):
 
 @dataclass(repr=False)
 class MeshTri1(Mesh2D):
-    """A standard triangular mesh."""
+    """A standard first-order triangular mesh."""
 
     doflocs: ndarray = np.array([[0., 0.],
                                  [1., 0.],
@@ -1109,9 +1115,14 @@ class MeshTri1(Mesh2D):
 
 @dataclass(repr=False)
 class MeshQuad1(Mesh2D):
-    """The standard quadrilateral mesh.
+    """A standard first-order quadrilateral mesh.
 
-    The nodes should be given in a counterclockwise order.
+    If `t` is provided, order of vertices in each element should match the
+    numbering::
+
+          3---2
+          |   |
+          0---1
 
     """
     doflocs: ndarray = np.array([[0., 0.],
@@ -1242,6 +1253,7 @@ class MeshQuad1(Mesh2D):
 
 @dataclass(repr=False)
 class MeshTri2(MeshTri1):
+    """A quadratic triangular mesh."""
 
     doflocs: ndarray = np.array([[0., 0.],
                                  [1., 0.],
@@ -1269,6 +1281,7 @@ class MeshTri2(MeshTri1):
 
 @dataclass(repr=False)
 class MeshQuad2(MeshQuad1):
+    """A quadratic quadrilateral mesh."""
 
     doflocs: ndarray = np.array([[0., 0.],
                                  [1., 0.],
@@ -1284,6 +1297,7 @@ class MeshQuad2(MeshQuad1):
 
 @dataclass(repr=False)
 class MeshLine1(Mesh):
+    """A one-dimensional mesh."""
 
     doflocs: ndarray = np.array([[0., 1.]], dtype=np.float64)
     t: ndarray = np.array([[0], [1]], dtype=np.int64)
@@ -1365,6 +1379,7 @@ class MeshLine1(Mesh):
 
 @dataclass(repr=False)
 class MeshTet1(Mesh3D):
+    """A standard first-order tetrahedral mesh."""
 
     doflocs: ndarray = np.array([[0., 0., 0.],
                                  [0., 0., 1.],
@@ -1561,7 +1576,7 @@ class MeshTet1(Mesh3D):
 
 @dataclass(repr=False)
 class MeshHex1(Mesh3D):
-    """Hexahedral mesh.
+    """A standard first-order hexahedral mesh.
 
     If `t` is provided, order of vertices in each element should match the
     numbering::
@@ -1718,6 +1733,7 @@ class MeshHex1(Mesh3D):
 
 @dataclass(repr=False)
 class MeshTet2(MeshTet1):
+    """A quadratic tetrahedral mesh."""
 
     doflocs: ndarray = np.array([[0., 0., 0.],
                                  [0., 0., 1.],
