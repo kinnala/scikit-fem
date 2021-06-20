@@ -14,19 +14,23 @@ Abstract class: Mesh
 --------------------
 
 .. autoclass:: skfem.mesh.Mesh
-   :members: load, save, refined
+   :members: load, save, refined, element_finder
 
 Class: MeshTri
 **************
 
 .. autoclass:: skfem.mesh.MeshTri
-   :members: __init__, init_symmetric, init_sqsymmetric, init_refdom, init_tensor, init_lshaped
+
+.. autoclass:: skfem.mesh.mesh.MeshTri1
+   :members: __init__, init_symmetric, init_sqsymmetric, init_refdom, init_tensor, init_lshaped, init_circle, load
 
 Class: MeshQuad
 ***************
 
 .. autoclass:: skfem.mesh.MeshQuad
-   :members: __init__, init_refdom, init_tensor
+
+.. autoclass:: skfem.mesh.mesh.MeshQuad1
+   :members: __init__, init_refdom, init_tensor, to_meshtri, load
 
 Class: MeshTet
 **************
@@ -51,29 +55,34 @@ Module: skfem.assembly
 
 .. automodule:: skfem.assembly
 
-Abstract class: Basis
----------------------
+Abstract class: AbstractBasis
+-----------------------------
 
-.. autoclass:: skfem.assembly.Basis
-   :members: find_dofs, get_dofs, interpolate
+Subclasses of :class:`~skfem.assembly.basis.AbstractBasis` represent a global
+finite element basis evaluated at quadrature points.
 
-Class: InteriorBasis
-********************
+Class: CellBasis
+****************
 
-.. autoclass:: skfem.assembly.InteriorBasis
+Can be alternatively initialized via the shorthand :class:`~skfem.assembly.Basis`.
+
+.. autoclass:: skfem.assembly.CellBasis
    :members: __init__
 
-Class: ExteriorFacetBasis
+
+Class: BoundaryFacetBasis
 *************************
 
-.. autoclass:: skfem.assembly.ExteriorFacetBasis
+Can be alternatively initialized via the shorthand :class:`~skfem.assembly.FacetBasis`.
+
+.. autoclass:: skfem.assembly.BoundaryFacetBasis
    :members: __init__, trace
 
 Class: InteriorFacetBasis
 *************************
 
 .. autoclass:: skfem.assembly.InteriorFacetBasis
-   :members: __init__, trace
+   :members: __init__
 
 
 Abstract class: Form

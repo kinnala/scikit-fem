@@ -10,6 +10,8 @@ from .boundary_facet_basis import BoundaryFacetBasis
 
 
 class InteriorFacetBasis(BoundaryFacetBasis):
+    """For evaluating a posteriori error estimators and implementing interior
+    penalty or discontinuous Galerkin methods."""
 
     def __init__(self,
                  mesh: Mesh,

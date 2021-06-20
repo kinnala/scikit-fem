@@ -5,8 +5,7 @@
 =================
 
 This tutorial introduces you to scikit-fem.
-It assumes that you are familiar with the basics of the finite element method
-and how the method relates to partial differential equations.
+It assumes that you are familiar with the basics of the finite element method.
 
 Step 0: Install scikit-fem
 ==========================
@@ -17,9 +16,8 @@ If you have a supported Python installation on your computer, you can run
 
    pip install scikit-fem
 
-If you do not want to install anything locally, you can try `Google Colab
-<https://colab.research.google.com/>`_ in your web browser and install scikit-fem
-by executing
+You can also try `Google Colab <https://colab.research.google.com/>`_ in your
+web browser and install scikit-fem by executing
 
 .. code-block:: bash
 
@@ -28,7 +26,7 @@ by executing
 Step 1: Clarify the problem
 ===========================
 
-In this tutorial we solve the system
+In this tutorial we solve the Poisson equation
 
 .. math::
    \begin{aligned}
@@ -36,9 +34,9 @@ In this tutorial we solve the system
         u &= 0 \quad && \text{on $\partial \Omega$,}
    \end{aligned}
 
-where :math:`\Omega = [0, 1]^2` is a square domain
+where :math:`\Omega = (0, 1)^2` is a square domain
 and :math:`f(x,y)=\sin \pi x \sin \pi y`.
-The corresponding weak formulation reads:
+The weak formulation reads:
 find :math:`u \in V` satisfying
 
 .. math::
@@ -49,21 +47,21 @@ where :math:`V = H^1_0(\Omega)`.
 Step 2: Express the forms as code
 =================================
 
-Next step is to write the forms
+Next we write the forms
 
 .. math::
 
    a(u, v) = \int_\Omega \nabla u \cdot \nabla v \,\mathrm{d}x \quad \text{and} \quad L(v) = \int_\Omega f v \,\mathrm{d}x
 
-as source code.  We write each form as a function and
-decorate it accordingly:
+as source code.  Each form is written as a function and
+decorated as follows:
 
 .. doctest::
 
    >>> import skfem as fem
    >>> from skfem.helpers import dot, grad  # helpers make forms look nice
    >>> @fem.BilinearForm
-   ... def a(u, v, w):
+   ... def a(u, v, _):
    ...     return dot(grad(u), grad(v))
 
 .. doctest::
@@ -97,7 +95,7 @@ Here we choose the piecewise-linear basis:
 
 .. doctest::
 
-   >>> Vh = fem.InteriorBasis(mesh, fem.ElementTriP1())
+   >>> Vh = fem.Basis(mesh, fem.ElementTriP1())
 
 Step 5: Assemble the linear system
 ==================================
@@ -117,9 +115,9 @@ The resulting matrices have the type ``scipy.sparse.csr_matrix``.
 Step 6: Find boundary DOFs
 ==========================
 
-In order to set boundary conditions, we must find the rows and columns
+Setting boundary conditions requires finding the rows and columns
 of :math:`A` that match the degrees-of-freedom (DOFs) on the boundary.
-By default, :meth:`~skfem.assembly.InteriorBasis.get_dofs` matches all boundary
+By default, :meth:`~skfem.assembly.CellBasis.get_dofs` matches all boundary
 facets and finds the corresponding DOFs.
 
 .. doctest::

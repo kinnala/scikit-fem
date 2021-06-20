@@ -10,7 +10,7 @@ following:
 Triangular mesh with 4 vertices and 2 elements.
 
 2. Create :class:`~skfem.assembly.CellBasis` or
-   :class:`~skfem.assembly.FacetBasis` objects.
+   :class:`~skfem.assembly.BoundaryFacetBasis` objects.
 
 >>> basis = fem.CellBasis(m, e)
 

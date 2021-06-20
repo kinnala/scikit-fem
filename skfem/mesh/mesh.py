@@ -424,7 +424,15 @@ class Mesh:
         return to_file(self, filename, point_data, **kwargs)
 
     @classmethod
-    def load(cls, filename):
+    def load(cls, filename: str):
+        """Load a mesh using meshio.
+
+        Parameters
+        ----------
+        filename
+            The filename of the mesh file.
+
+        """
         from skfem.io.meshio import from_file
         return from_file(filename)
 
@@ -770,6 +778,7 @@ class Mesh3D(Mesh):
 
 @dataclass(repr=False)
 class MeshTri1(Mesh2D):
+    """A standard triangular mesh."""
 
     doflocs: ndarray = np.array([[0., 0.],
                                  [1., 0.],
@@ -1100,7 +1109,11 @@ class MeshTri1(Mesh2D):
 
 @dataclass(repr=False)
 class MeshQuad1(Mesh2D):
+    """The standard quadrilateral mesh.
 
+    The nodes should be given in a counterclockwise order.
+
+    """
     doflocs: ndarray = np.array([[0., 0.],
                                  [1., 0.],
                                  [1., 1.],

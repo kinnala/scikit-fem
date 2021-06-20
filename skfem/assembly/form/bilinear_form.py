@@ -19,7 +19,7 @@ class BilinearForm(Form):
     parameters ``w``.
 
     >>> from skfem import BilinearForm, InteriorBasis, MeshTri, ElementTriP1
-    >>> form = BilinearForm(lambda u, v, w: u * v)
+    >>> form = BilinearForm(lambda u, v, _: u * v)
     >>> form.assemble(InteriorBasis(MeshTri(), ElementTriP1())).todense()
     matrix([[0.08333333, 0.04166667, 0.04166667, 0.        ],
             [0.04166667, 0.16666667, 0.08333333, 0.04166667],
@@ -30,7 +30,7 @@ class BilinearForm(Form):
     decorator:
 
     >>> @BilinearForm
-    ... def form(u, v, w):
+    ... def form(u, v, _):
     ...     return u * v
 
     Inside the form definition, ``u`` and ``v`` are tuples containing the basis
@@ -38,12 +38,12 @@ class BilinearForm(Form):
     the derivatives:
 
     >>> @BilinearForm
-    ... def form(u, v, w):
+    ... def form(u, v, _):
     ...     # u[1][0] is first derivative with respect to x, and so on
     ...     return u[1][0] * v[1][0] + u[1][1] * v[1][1]  # laplacian
 
-    In practice, we suggest you to use helper functions from
-    :mod:`skfem.helpers` to make the forms readable:
+    We suggest you to use helper functions from :mod:`skfem.helpers` to make
+    the forms more readable:
 
     >>> from skfem.helpers import dot, grad
     >>> @BilinearForm

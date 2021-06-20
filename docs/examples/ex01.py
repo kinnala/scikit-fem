@@ -7,7 +7,7 @@ m = MeshTri().refined(4)
 # m = MeshTri(points, cells)
 
 e = ElementTriP1()
-basis = InteriorBasis(m, e)
+basis = CellBasis(m, e)
 
 # this method could also be imported from skfem.models.laplace
 @BilinearForm

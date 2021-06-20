@@ -13,11 +13,8 @@ from .cell_basis import CellBasis
 
 
 class BoundaryFacetBasis(AbstractBasis):
-    """Global basis functions at quadrature points on the boundary.
+    """For fields defined on the boundary of the domain."""
 
-    Aliased as ``FacetBasis``.
-
-    """
     def __init__(self,
                  mesh: Mesh,
                  elem: Element,

@@ -41,6 +41,8 @@ Thirdly, the finite element should use degrees-of-freedom that are relevant
 for the essential boundary conditions that you want to impose.
 See :ref:`finddofs` for more information.
 
+See the documentation of :mod:`skfem.element` for a list of elements.
+
 
 .. _predefined:
 
