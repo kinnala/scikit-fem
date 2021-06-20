@@ -29,10 +29,11 @@ Mathematically the above forms are
     \quad \mathrm{and} \quad
     l(v) = \int_\Omega x^2v \,\mathrm{d}x.
 
-4. Assemble using :func:`~skfem.assembly.asm`.
+4. Create the matrices/vectors using
+   :meth:`~skfem.assembly.BilinearForm.assemble`.
 
->>> A = fem.asm(form_a, basis)
->>> b = fem.asm(form_l, basis)
+>>> A = form_a.assemble(basis)
+>>> b = form_l.assemble(basis)
 >>> A.todense()
 matrix([[0.08333333, 0.04166667, 0.04166667, 0.        ],
         [0.04166667, 0.16666667, 0.08333333, 0.04166667],

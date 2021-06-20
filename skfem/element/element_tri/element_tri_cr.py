@@ -5,6 +5,7 @@ from ...refdom import RefTri
 
 
 class ElementTriCR(ElementH1):
+    """The nonconforming Crouzeix-Raviart element."""
 
     facet_dofs = 1
     maxdeg = 1

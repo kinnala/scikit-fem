@@ -5,6 +5,7 @@ from ...refdom import RefTri
 
 
 class ElementTriHermite(ElementGlobal):
+    """The Hermite element with 3 nodal DOFs and one interior DOF."""
 
     nodal_dofs = 3
     interior_dofs = 1

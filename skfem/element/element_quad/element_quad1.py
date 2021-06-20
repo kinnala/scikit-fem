@@ -5,6 +5,7 @@ from ...refdom import RefQuad
 
 
 class ElementQuad1(ElementH1):
+    """Bilinear element."""
 
     nodal_dofs = 1
     maxdeg = 2

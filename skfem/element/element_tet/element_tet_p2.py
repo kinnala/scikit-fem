@@ -5,6 +5,7 @@ from ...refdom import RefTet
 
 
 class ElementTetP2(ElementH1):
+    """Piecewise quadratic element."""
 
     nodal_dofs = 1
     edge_dofs = 1

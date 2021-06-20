@@ -5,6 +5,7 @@ from ...refdom import RefHex
 
 
 class ElementHexS2(ElementH1):
+    """Serendipity element with 20 DOFs."""
 
     nodal_dofs = 1
     edge_dofs = 1

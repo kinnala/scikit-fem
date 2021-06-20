@@ -5,6 +5,7 @@ from ...refdom import RefTri
 
 
 class ElementTriArgyris(ElementGlobal):
+    """The Argyris element."""
 
     nodal_dofs = 6
     facet_dofs = 1

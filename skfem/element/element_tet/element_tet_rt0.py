@@ -5,6 +5,7 @@ from ...refdom import RefTet
 
 
 class ElementTetRT0(ElementHdiv):
+    """The lowest order Raviart-Thomas element."""
 
     facet_dofs = 1
     maxdeg = 1

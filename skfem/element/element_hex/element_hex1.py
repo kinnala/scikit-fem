@@ -5,6 +5,7 @@ from ...refdom import RefHex
 
 
 class ElementHex1(ElementH1):
+    """Trilinear element."""
 
     nodal_dofs = 1
     maxdeg = 3

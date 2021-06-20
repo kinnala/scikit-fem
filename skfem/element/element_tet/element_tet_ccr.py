@@ -5,6 +5,7 @@ from ...refdom import RefTet
 
 
 class ElementTetCCR(ElementH1):
+    """Conforming Crouzeix-Raviart element."""
 
     nodal_dofs = 1
     facet_dofs = 1

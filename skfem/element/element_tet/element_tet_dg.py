@@ -3,6 +3,8 @@ from ...refdom import RefTet
 
 
 class ElementTetDG(Element):
+    """Turn a tetrahedral finite element discontinuous by cutting the
+    connectivity to the neighbouring elements."""
 
     refdom = RefTet
 
@@ -18,4 +20,5 @@ class ElementTetDG(Element):
         self.doflocs = elem.doflocs
 
     def gbasis(self, *args, **kwargs):
+        """Call :meth:`Element.gbasis` from the original element."""
         return self.elem.gbasis(*args, **kwargs)

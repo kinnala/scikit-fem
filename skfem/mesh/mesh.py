@@ -1117,7 +1117,7 @@ class MeshTri1(Mesh2D):
 class MeshQuad1(Mesh2D):
     """A standard first-order quadrilateral mesh.
 
-    If `t` is provided, order of vertices in each element should match the
+    If ``t`` is provided, order of vertices in each element should match the
     numbering::
 
           3---2
@@ -1578,7 +1578,7 @@ class MeshTet1(Mesh3D):
 class MeshHex1(Mesh3D):
     """A standard first-order hexahedral mesh.
 
-    If `t` is provided, order of vertices in each element should match the
+    If ``t`` is provided, order of vertices in each element should match the
     numbering::
 
             2---6

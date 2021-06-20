@@ -3,6 +3,8 @@ from ...refdom import RefTri
 
 
 class ElementTriDG(Element):
+    """Turn a triangular finite element discontinuous by cutting the
+    connectivity to the neighbouring elements."""
 
     refdom = RefTri
 
@@ -17,4 +19,5 @@ class ElementTriDG(Element):
         self.doflocs = elem.doflocs
 
     def gbasis(self, *args, **kwargs):
+        """Call :meth:`Element.gbasis` from the original element."""
         return self.elem.gbasis(*args, **kwargs)

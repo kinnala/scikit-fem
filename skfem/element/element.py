@@ -66,9 +66,8 @@ class Element:
                tind: Optional[ndarray] = None) -> Tuple[DiscreteField, ...]:
         """Evaluate the global basis functions, given local points ``X``.
 
-        The global points - at which the global basis is evaluated at - are
-        defined through the local-to-global mapping given by the parameter
-        ``mapping``.
+        The global points corresponding to ``X`` are obtained through the
+        local-to-global mapping given by the parameter ``mapping``.
 
         Parameters
         ----------
@@ -76,11 +75,12 @@ class Element:
             Local-to-global mapping, an object of type
             :class:`~skfem.mapping.Mapping`.
         X
-            An array of local points. The following shapes are supported: (Ndim
-            x Npoints) and (Ndim x Nelems x Npoints), i.e. local points shared
-            by all elements or different local points in each element.
+            An array of local points. The following shapes are supported:
+            ``(Ndim, Npoints)`` and ``(Ndim, Nelems, Npoints)``, i.e. local
+            points shared by all elements or different local points in each
+            element.
         i
-            Only the i'th basis function is evaluated.
+            Only the ``i`` th basis function is evaluated.
         tind
             Optionally, choose a subset of elements at which to evaluate the
             basis.
