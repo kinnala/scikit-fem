@@ -17,13 +17,13 @@ from .element_vector import ElementVector
 from .element_tri import (ElementTriP1, ElementTriP2, ElementTriDG,
                           ElementTriP0, ElementTriRT0, ElementTriMorley,
                           ElementTriArgyris, ElementTriMini, ElementTriCR,
-                          ElementTriHermite)
+                          ElementTriHermite, ElementTriCCR)
 from .element_quad import (ElementQuad0, ElementQuad1, ElementQuad2,
                            ElementQuadS2, ElementQuadDG, ElementQuadP,
                            ElementQuadBFS)
 from .element_tet import (ElementTetP0, ElementTetP1, ElementTetP2,
                           ElementTetRT0, ElementTetN0, ElementTetMini,
-                          ElementTetCR, ElementTetDG)
+                          ElementTetCR, ElementTetDG, ElementTetCCR)
 from .element_hex import (ElementHex0, ElementHex1, ElementHex2,
                           ElementHexS2)  # noqa
 from .element_line import (ElementLineP0, ElementLineP1, ElementLineP2,
@@ -44,7 +44,7 @@ BOUNDARY_ELEMENT_MAP: Dict[Type[Element], Type[Element]] = {
     ElementTetP2: ElementTriP2,
     ElementHex0: ElementQuad0,
     ElementHex1: ElementQuad1,
-    ElementHex2: ElementQuad2,
+    ElementHex2: ElementQuad2
 }
 
 # for backwards compatibility
@@ -65,6 +65,7 @@ __all__ = [
     "ElementTriDG",
     "ElementTriP0",
     "ElementTriCR",
+    "ElementTriCCR",
     "ElementTriRT0",
     "ElementTriMorley",
     "ElementTriArgyris",
@@ -84,6 +85,7 @@ __all__ = [
     "ElementTetN0",
     "ElementTetMini",
     "ElementTetCR",
+    "ElementTetCCR",
     "ElementTetDG",
     "ElementHex0",
     "ElementHex1",
