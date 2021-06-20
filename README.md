@@ -223,7 +223,7 @@ You may use the following BibTeX entry:
   journal = {Journal of Open Source Software}
 }
 ```
-Use the Zenodo DOIs only if you want to cite a specific version,
+Use the Zenodo DOIs if you want to cite a specific version,
 e.g., to ensure reproducibility.
 
 ## In literature
@@ -254,6 +254,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 with respect to documented and/or tested features.
 
 ### Unreleased
+
+- Added: `ElementTriCCR` and `ElementTetCCR`, conforming Crouzeix-Raviart finite elements
 
 ### [3.1.0] - 2021-06-18
 
