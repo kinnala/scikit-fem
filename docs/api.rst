@@ -142,10 +142,15 @@ Function: condense
 
 .. autofunction:: skfem.utils.condense
 
-Function: project
+Function: enforce
 -----------------
 
-.. autofunction:: skfem.utils.project
+.. autofunction:: skfem.utils.enforce
+
+Function: projection
+--------------------
+
+.. autofunction:: skfem.utils.projection
 
 Module: skfem.helpers
 =====================
