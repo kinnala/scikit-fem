@@ -13,7 +13,7 @@ ExteriorFacetBasis = BoundaryFacetBasis  # backwards compatibility
 
 
 def FacetBasis(*args, side=None, **kwargs):
-    """For backwards compatibility."""
+    """alias of :class:`~skfem.assembly.BoundaryFacetBasis`"""
     if side is None:
         return BoundaryFacetBasis(*args, **kwargs)
     warnings.warn("Initializing FacetBasis using the keyword argument side "

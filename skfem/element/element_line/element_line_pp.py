@@ -9,6 +9,7 @@ from ...refdom import Refdom, RefLine
 
 
 class ElementLinePp(ElementH1):
+    """Piecewise :math:`p`'th order element."""
 
     nodal_dofs = 1
     refdom: Type[Refdom] = RefLine

@@ -10,7 +10,12 @@ from .boundary_facet_basis import BoundaryFacetBasis
 
 
 class InteriorFacetBasis(BoundaryFacetBasis):
+    """For evaluating integrals over interior facets.
 
+    Useful for, e.g., a posteriori error estimators or implementing interior
+    penalty/discontinuous Galerkin methods.
+
+    """
     def __init__(self,
                  mesh: Mesh,
                  elem: Element,

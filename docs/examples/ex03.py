@@ -15,7 +15,7 @@ mapping = MappingIsoparametric(m, e1)
 
 e = ElementVectorH1(e1)
 
-gb = InteriorBasis(m, e, mapping, 2)
+gb = CellBasis(m, e, mapping, 2)
 
 K = asm(linear_elasticity(1.0, 1.0), gb)
 

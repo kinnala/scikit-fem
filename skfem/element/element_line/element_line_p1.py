@@ -5,6 +5,7 @@ from ...refdom import RefLine
 
 
 class ElementLineP1(ElementH1):
+    """Piecewise linear element."""
 
     nodal_dofs = 1
     maxdeg = 1

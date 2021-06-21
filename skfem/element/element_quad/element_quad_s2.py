@@ -5,6 +5,7 @@ from ...refdom import RefQuad
 
 
 class ElementQuadS2(ElementH1):
+    """Serendipity element with 8 DOFs."""
 
     nodal_dofs = 1
     facet_dofs = 1

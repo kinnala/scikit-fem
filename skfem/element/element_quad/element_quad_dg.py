@@ -3,6 +3,8 @@ from ...refdom import RefQuad
 
 
 class ElementQuadDG(ElementH1):
+    """Turn a quadrilateral finite element discontinuous by cutting the
+    connectivity to the neighbouring elements."""
 
     refdom = RefQuad
 

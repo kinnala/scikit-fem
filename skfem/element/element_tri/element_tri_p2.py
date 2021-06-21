@@ -5,6 +5,7 @@ from ...refdom import RefTri
 
 
 class ElementTriP2(ElementH1):
+    """Piecewise quadratic element."""
 
     nodal_dofs = 1
     facet_dofs = 1

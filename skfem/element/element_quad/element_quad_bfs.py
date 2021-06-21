@@ -5,6 +5,7 @@ from ...refdom import RefQuad
 
 
 class ElementQuadBFS(ElementGlobal):
+    """The Bogner-Fox-Schmit element."""
 
     nodal_dofs = 4
     maxdeg = 6

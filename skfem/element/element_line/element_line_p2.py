@@ -5,6 +5,7 @@ from ...refdom import RefLine
 
 
 class ElementLineP2(ElementH1):
+    """Piecewise quadratic element."""
 
     nodal_dofs = 1
     interior_dofs = 1

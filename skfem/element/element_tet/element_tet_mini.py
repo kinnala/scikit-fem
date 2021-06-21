@@ -5,6 +5,7 @@ from ...refdom import RefTet
 
 
 class ElementTetMini(ElementH1):
+    """The MINI element, i.e. linear element with additional bubble DOF."""
 
     nodal_dofs = 1
     interior_dofs = 1

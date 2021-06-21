@@ -5,6 +5,7 @@ from ...refdom import RefLine
 
 
 class ElementLineP0(ElementH1):
+    """Piecewise constant element."""
 
     interior_dofs = 1
     maxdeg = 0

@@ -286,6 +286,10 @@ def enforce(A: spmatrix,
             overwrite: bool = False) -> LinearSystem:
     r"""Enforce degrees-of-freedom of a linear system.
 
+    An alternative to :func:`~skfem.utils.condense` which sets the matrix
+    diagonals to one and right-hand side vector to the enforced
+    degree-of-freedom value.
+
     .. note::
 
         The original system is both returned
@@ -473,7 +477,7 @@ def condense(A: spmatrix,
        >>> import skfem as fem
        >>> from skfem.models.poisson import laplace, unit_load
        >>> m = fem.MeshTri().refined(2)
-       >>> basis = fem.InteriorBasis(m, fem.ElementTriP1())
+       >>> basis = fem.CellBasis(m, fem.ElementTriP1())
        >>> A = laplace.assemble(basis)
        >>> b = unit_load.assemble(basis)
 

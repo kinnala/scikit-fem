@@ -5,6 +5,7 @@ from ..element_line import ElementLinePp
 
 
 class ElementQuadP(ElementLinePp):
+    """Piecewise :math:`p`'th order element."""
 
     nodal_dofs = 1
     refdom = RefQuad

@@ -1211,6 +1211,7 @@ _generated_basis = [
 
 
 class ElementHex2(ElementH1):
+    """Triquadratic element."""
 
     nodal_dofs = 1
     facet_dofs = 1

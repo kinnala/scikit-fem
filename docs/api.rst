@@ -14,36 +14,55 @@ Abstract class: Mesh
 --------------------
 
 .. autoclass:: skfem.mesh.Mesh
-   :members: load, save, refined
+   :members: load, save, refined, element_finder, doflocs, t
 
 Class: MeshTri
 **************
 
 .. autoclass:: skfem.mesh.MeshTri
-   :members: __init__, init_symmetric, init_sqsymmetric, init_refdom, init_tensor, init_lshaped
+
+.. autoclass:: skfem.mesh.mesh.MeshTri1
+   :members: __init__, init_symmetric, init_sqsymmetric, init_refdom, init_tensor, init_lshaped, init_circle, load
+
+.. autoclass:: skfem.mesh.mesh.MeshTri2
+   :members: init_circle, load
 
 Class: MeshQuad
 ***************
 
 .. autoclass:: skfem.mesh.MeshQuad
-   :members: __init__, init_refdom, init_tensor
+
+.. autoclass:: skfem.mesh.mesh.MeshQuad1
+   :members: __init__, init_refdom, init_tensor, to_meshtri, load
+
+.. autoclass:: skfem.mesh.mesh.MeshQuad2
+   :members: load
 
 Class: MeshTet
 **************
 
 .. autoclass:: skfem.mesh.MeshTet
-   :members: __init__, init_refdom, init_tensor
+
+.. autoclass:: skfem.mesh.mesh.MeshTet1
+   :members: __init__, init_refdom, init_tensor, init_ball, load
+
+.. autoclass:: skfem.mesh.mesh.MeshTet2
+   :members: init_ball, load
 
 Class: MeshHex
 **************
 
 .. autoclass:: skfem.mesh.MeshHex
-   :members: __init__, init_tensor
+
+.. autoclass:: skfem.mesh.mesh.MeshHex1
+   :members: __init__, init_tensor, to_meshtet, load
 
 Class: MeshLine
 ***************
 
 .. autoclass:: skfem.mesh.MeshLine
+
+.. autoclass:: skfem.mesh.mesh.MeshLine1
    :members: __init__
 
 Module: skfem.assembly
@@ -51,29 +70,34 @@ Module: skfem.assembly
 
 .. automodule:: skfem.assembly
 
-Abstract class: Basis
----------------------
+Abstract class: AbstractBasis
+-----------------------------
+
+Subclasses of :class:`~skfem.assembly.basis.AbstractBasis` represent a global
+finite element basis evaluated at quadrature points.
+
+Class: CellBasis
+****************
 
 .. autoclass:: skfem.assembly.Basis
-   :members: find_dofs, get_dofs, interpolate
 
-Class: InteriorBasis
-********************
-
-.. autoclass:: skfem.assembly.InteriorBasis
+.. autoclass:: skfem.assembly.CellBasis
    :members: __init__
 
-Class: ExteriorFacetBasis
+
+Class: BoundaryFacetBasis
 *************************
 
-.. autoclass:: skfem.assembly.ExteriorFacetBasis
+.. autoclass:: skfem.assembly.FacetBasis
+
+.. autoclass:: skfem.assembly.BoundaryFacetBasis
    :members: __init__, trace
 
 Class: InteriorFacetBasis
 *************************
 
 .. autoclass:: skfem.assembly.InteriorFacetBasis
-   :members: __init__, trace
+   :members: __init__
 
 
 Abstract class: Form
@@ -103,7 +127,7 @@ Module: skfem.element
 .. automodule:: skfem.element
    :members:
    :show-inheritance:
-   :exclude-members: DiscreteField
+   :exclude-members: DiscreteField, ElementVectorH1
 
 Module: skfem.utils
 ===================
@@ -118,10 +142,15 @@ Function: condense
 
 .. autofunction:: skfem.utils.condense
 
-Function: project
+Function: enforce
 -----------------
 
-.. autofunction:: skfem.utils.project
+.. autofunction:: skfem.utils.enforce
+
+Function: projection
+--------------------
+
+.. autofunction:: skfem.utils.projection
 
 Module: skfem.helpers
 =====================

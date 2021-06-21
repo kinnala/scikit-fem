@@ -5,6 +5,7 @@ from ...refdom import RefTri
 
 
 class ElementTriMini(ElementH1):
+    """The MINI element, i.e. piecewise linears with one bubble DOF."""
 
     nodal_dofs = 1
     interior_dofs = 1

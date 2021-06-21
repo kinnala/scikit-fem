@@ -5,6 +5,7 @@ from ...refdom import RefQuad
 
 
 class ElementQuad2(ElementH1):
+    """Biquadratic element."""
 
     nodal_dofs = 1
     facet_dofs = 1

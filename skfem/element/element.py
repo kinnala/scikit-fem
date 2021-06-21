@@ -22,22 +22,19 @@ class Element:
     Attributes
     ----------
     nodal_dofs
-        Number of DOFs per node.  Used within :class:`Basis` to define the
-        global DOF numbering.
+        Number of DOFs per node.  Used to define the global DOF numbering.
     facet_dofs
-        Number of DOFs per facet.  Used within :class:`Basis` to define the
-        global DOF numbering.
+        Number of DOFs per facet.  Used to define the global DOF numbering.
     interior_dofs
-        Number of DOFs inside the element.  Used within :class:`Basis` to
-        define the global DOF numbering.
+        Number of DOFs inside the element.  Used to define the global DOF
+        numbering.
     edge_dofs
-        Number of DOFs per edge.  Used within :class:`Basis` to define the
-        global DOF numbering.
+        Number of DOFs per edge.  Used to define the global DOF numbering.
     dim
         The spatial dimension.
     maxdeg
-        Polynomial degree of the basis.  Used within :class:`Basis` to
-        automatically find quadrature rules.
+        Polynomial degree of the basis.  Used to automatically find quadrature
+        rules.
     dofnames
         A list of strings indicating the DOF types. See :ref:`finddofs`.
 
@@ -67,10 +64,10 @@ class Element:
                X: ndarray,
                i: int,
                tind: Optional[ndarray] = None) -> Tuple[DiscreteField, ...]:
-        """Evaluate the global basis functions, given local points X.
+        """Evaluate the global basis functions, given local points ``X``.
 
-        The global points - at which the global basis is evaluated at - are
-        defined through x = F(X), where F corresponds to the given mapping.
+        The global points corresponding to ``X`` are obtained through the
+        local-to-global mapping given by the parameter ``mapping``.
 
         Parameters
         ----------
@@ -78,11 +75,12 @@ class Element:
             Local-to-global mapping, an object of type
             :class:`~skfem.mapping.Mapping`.
         X
-            An array of local points. The following shapes are supported: (Ndim
-            x Npoints) and (Ndim x Nelems x Npoints), i.e. local points shared
-            by all elements or different local points in each element.
+            An array of local points. The following shapes are supported:
+            ``(Ndim, Npoints)`` and ``(Ndim, Nelems, Npoints)``, i.e. local
+            points shared by all elements or different local points in each
+            element.
         i
-            Only the i'th basis function is evaluated.
+            Only the ``i`` th basis function is evaluated.
         tind
             Optionally, choose a subset of elements at which to evaluate the
             basis.

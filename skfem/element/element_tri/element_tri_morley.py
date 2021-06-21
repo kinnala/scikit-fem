@@ -5,6 +5,7 @@ from ...refdom import RefTri
 
 
 class ElementTriMorley(ElementGlobal):
+    """The Morley element."""
 
     nodal_dofs = 1
     facet_dofs = 1

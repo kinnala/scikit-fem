@@ -5,6 +5,7 @@ from ...refdom import RefLine
 
 
 class ElementLineHermite(ElementGlobal):
+    """:math:`H^2`-conforming element with 4 DOFs."""
 
     nodal_dofs = 2
     maxdeg = 3

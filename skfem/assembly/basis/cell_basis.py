@@ -11,10 +11,10 @@ from .abstract_basis import AbstractBasis
 
 
 class CellBasis(AbstractBasis):
-    """Basis functions evaluated at quadrature points inside the elements.
+    """For fields defined inside the domain.
 
     :class:`~skfem.assembly.CellBasis` object is a combination of
-    :class:`~skfem.mesh.Mesh` and :class:`~skfem.element.Element`:
+    :class:`~skfem.mesh.Mesh` and :class:`~skfem.element.Element`.
 
     >>> from skfem import *
     >>> m = MeshTri.init_symmetric()

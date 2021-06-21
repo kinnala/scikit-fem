@@ -5,6 +5,7 @@ from ...refdom import RefTri
 
 
 class ElementTriP1(ElementH1):
+    """Piecewise linear element."""
 
     nodal_dofs = 1
     maxdeg = 1
