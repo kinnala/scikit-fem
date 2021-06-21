@@ -8,5 +8,7 @@
             "orcid": "0000-0002-1904-122X", 
             "name": "Geordie McBain"
         }
-    ]
+    ],
+    "title": "kinnala/scikit-fem",
+    "description": "Simple finite element assemblers."
 }
