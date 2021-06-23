@@ -256,6 +256,7 @@ with respect to documented and/or tested features.
 ### Unreleased
 
 - Added: `ElementTriCCR` and `ElementTetCCR`, conforming Crouzeix-Raviart finite elements
+- Fixed: `Mesh.mirrored` returned a wrong mesh when a point other than the origin was used
 
 ### [3.1.0] - 2021-06-18
 
