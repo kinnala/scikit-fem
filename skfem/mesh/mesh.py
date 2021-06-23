@@ -595,7 +595,7 @@ class Mesh:
         p0 = np.array(point)
         n = np.array(normal)
         n = n / np.linalg.norm(n)
-        p += - 2. * np.dot(n, p - p0[:, None]) * n[:, None] + p0[:, None]
+        p -= 2. * np.dot(n, p - p0[:, None]) * n[:, None]
 
         return replace(
             self,
