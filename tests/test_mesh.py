@@ -209,6 +209,15 @@ class TestMirrored(TestCase):
         self.assertEqual(m.nvertices, 20)
         self.assertEqual(m.nelements, 20)
 
+        m = MeshTri.init_tensor(
+            np.linspace(1,2,2),
+            np.linspace(1,2,2),
+        )
+        m = m + m.mirrored((0, 1), (2, 1))
+
+        self.assertEqual(len(m.boundary_facets()), 6)
+        self.assertEqual(m.nvertices, 6)
+
 
 class TestFinder1DRefined(TestCase):
 

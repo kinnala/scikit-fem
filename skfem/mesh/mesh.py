@@ -137,8 +137,10 @@ class Mesh:
         A = self.edges[:, edge_candidates].T
         B = boundary_edges
         dims = A.max(0) + 1
-        ix = np.where(np.in1d(np.ravel_multi_index(A.T, dims),
-                              np.ravel_multi_index(B.T, dims)))[0]
+        ix = np.where(np.in1d(
+            np.ravel_multi_index(A.T, dims),  # type: ignore
+            np.ravel_multi_index(B.T, dims),  # type: ignore
+        ))[0]
         return edge_candidates[ix]
 
     def define_boundary(self, name: str,
@@ -595,7 +597,7 @@ class Mesh:
         p0 = np.array(point)
         n = np.array(normal)
         n = n / np.linalg.norm(n)
-        p += - 2. * np.dot(n, p - p0[:, None]) * n[:, None] + p0[:, None]
+        p = p - 2. * np.dot(n, p - p0[:, None]) * n[:, None]
 
         return replace(
             self,
@@ -772,8 +774,10 @@ class Mesh3D(Mesh):
         A = self.edges[:, edge_candidates].T
         B = boundary_edges
         dims = A.max(0) + 1
-        ix = np.where(np.in1d(np.ravel_multi_index(A.T, dims),
-                              np.ravel_multi_index(B.T, dims)))[0]
+        ix = np.where(np.in1d(
+            np.ravel_multi_index(A.T, dims),  # type: ignore
+            np.ravel_multi_index(B.T, dims),  # type: ignore
+        ))[0]
         return edge_candidates[ix]
 
     def interior_edges(self) -> ndarray:
