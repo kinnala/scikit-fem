@@ -739,7 +739,7 @@ class Mesh2D(Mesh):
 
     def _repr_svg_(self) -> str:
         from skfem.visuals.svg import draw
-        return draw(self, nrefs=2, boundaries_only=True)
+        return draw(self, nrefs=0, boundaries_only=True)
 
 
 @dataclass(repr=False)
@@ -1282,6 +1282,10 @@ class MeshTri2(MeshTri1):
         doflocs[:, D] /= np.linalg.norm(doflocs[:, D], axis=0)
         return replace(M, doflocs=doflocs)
 
+    def _repr_svg_(self) -> str:
+        from skfem.visuals.svg import draw
+        return draw(self, nrefs=2, boundaries_only=True)
+
 
 @dataclass(repr=False)
 class MeshQuad2(MeshQuad1):
@@ -1297,6 +1301,10 @@ class MeshQuad2(MeshQuad1):
                                  [.5, 1.],
                                  [.5, .5]], dtype=np.float64).T
     elem: Type[Element] = ElementQuad2
+
+    def _repr_svg_(self) -> str:
+        from skfem.visuals.svg import draw
+        return draw(self, nrefs=2, boundaries_only=True)
 
 
 @dataclass(repr=False)
