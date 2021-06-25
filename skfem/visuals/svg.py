@@ -10,6 +10,25 @@ from ..assembly import InteriorBasis
 from ..mesh import Mesh2D
 
 
+def points_to_figure(p, kwargs):
+    """Map points to figure coordinates and find figure size."""
+    maxx = np.max(p[0])
+    minx = np.min(p[0])
+    maxy = np.max(p[1])
+    miny = np.min(p[1])
+    width = kwargs["width"] if "width" in kwargs else 300
+    if "height" in kwargs:
+        height = kwargs["height"]
+    else:
+        height = width * (maxy - miny) / (maxx - minx)
+    stroke = kwargs["stroke"] if "stroke" in kwargs else 1
+    sx = (width - 2 * stroke) / (maxx - minx)
+    sy = (height - 2 * stroke) / (maxy - miny)
+    p[0] = sx * (p[0] - minx) + stroke
+    p[1] = sy * (maxy - p[1]) + stroke
+    return p, width, height, stroke
+
+
 @dataclass
 class SvgPlot:
 
@@ -43,22 +62,8 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> SvgPlot:
         facets = m.facets[:, m.boundary_facets()]
     else:
         facets = m.facets
-    p = m.p.copy()
-    maxx = np.max(p[0])
-    minx = np.min(p[0])
-    maxy = np.max(p[1])
-    miny = np.min(p[1])
-    width = kwargs["width"] if "width" in kwargs else 300
-    if "height" in kwargs:
-        height = kwargs["height"]
-    else:
-        height = width * (maxy - miny) / (maxx - minx)
-    stroke = kwargs["stroke"] if "stroke" in kwargs else 1
+    p, width, height, stroke = points_to_figure(m.p.copy(), kwargs)
     color = kwargs["color"] if "color" in kwargs else "#7856FA"
-    sx = (width - 2 * stroke) / (maxx - minx)
-    sy = (height - 2 * stroke) / (maxy - miny)
-    p[0] = sx * (p[0] - minx) + stroke
-    p[1] = sy * (maxy - p[1]) + stroke
     template = ("""<line x1="{}" y1="{}" x2="{}" y2="{}" """
                 """style="stroke:{};stroke-width:{}"/>""")
     lines = ""
@@ -95,23 +100,9 @@ def plot(m, x: ndarray, **kwargs) -> SvgPlot:
 @plot.register(Mesh2D)
 def plot_mesh2d(m: Mesh2D, x: ndarray, **kwargs) -> SvgPlot:
     t = m.t
-    p = m.p.copy()
-    maxx = np.max(p[0])
-    minx = np.min(p[0])
-    maxy = np.max(p[1])
-    miny = np.min(p[1])
-    maxval = np.max(x)
     minval = np.min(x)
-    width = kwargs["width"] if "width" in kwargs else 300
-    if "height" in kwargs:
-        height = kwargs["height"]
-    else:
-        height = width * (maxy - miny) / (maxx - minx)
-    stroke = kwargs["stroke"] if "stroke" in kwargs else 1
-    sx = (width - 2 * stroke) / (maxx - minx)
-    sy = (height - 2 * stroke) / (maxy - miny)
-    p[0] = sx * (p[0] - minx) + stroke
-    p[1] = sy * (maxy - p[1]) + stroke
+    maxval = np.max(x)
+    p, width, height, stroke = points_to_figure(m.p.copy(), kwargs)
     template = ("""<polygon points=""" +
                 '"' + ("{},{} " * t.shape[0]) + '"' +
                 """style="fill:rgb({}, 150, {});" />""")
