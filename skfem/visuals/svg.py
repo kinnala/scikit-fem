@@ -1,6 +1,7 @@
 """Drawing meshes using svg."""
 
 from functools import singledispatch
+from dataclasses import dataclass
 
 import numpy as np
 from numpy import ndarray
@@ -9,8 +10,17 @@ from ..assembly import InteriorBasis
 from ..mesh import Mesh2D, MeshTri
 
 
+@dataclass
+class SvgPlot:
+
+    svg: str = ""
+
+    def _repr_svg_(self) -> str:
+        return self.svg
+
+
 @singledispatch
-def draw(m, **kwargs) -> str:
+def draw(m, **kwargs) -> SvgPlot:
     """Visualise meshes by drawing the edges.
 
     Parameters
@@ -27,7 +37,7 @@ def draw(m, **kwargs) -> str:
     raise NotImplementedError("Type {} not supported.".format(type(m)))
 
 
-def draw_mesh2d(m: Mesh2D, **kwargs) -> str:
+def draw_mesh2d(m: Mesh2D, **kwargs) -> SvgPlot:
     """Support for two-dimensional meshes."""
     if "boundaries_only" in kwargs:
         facets = m.facets[:, m.boundary_facets()]
@@ -57,31 +67,33 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> str:
                           p[0, facets[1]],
                           p[1, facets[1]]):
         lines += template.format(s, t, u, v, color, stroke)
-    return ("""<svg xmlns="http://www.w3.org/2000/svg" version="1.1" """
-            """width="{}" height="{}">{}</svg>""").format(width, height, lines)
+    return SvgPlot((
+        """<svg xmlns="http://www.w3.org/2000/svg" version="1.1" """
+        """width="{}" height="{}">{}</svg>"""
+    ).format(width, height, lines))
 
 
 @draw.register(Mesh2D)
-def draw_geometry2d(m: Mesh2D, **kwargs) -> str:
+def draw_geometry2d(m: Mesh2D, **kwargs) -> SvgPlot:
     nrefs = kwargs["nrefs"] if "nrefs" in kwargs else 1
     m = m._splitref(nrefs)
     return draw_mesh2d(m, **kwargs)
 
 
 @draw.register(InteriorBasis)
-def draw_basis(ib: InteriorBasis, **kwargs) -> str:
+def draw_basis(ib: InteriorBasis, **kwargs) -> SvgPlot:
     nrefs = kwargs["nrefs"] if "nrefs" in kwargs else 2
     m, _ = ib.refinterp(ib.mesh.p[0], nrefs=nrefs)
     return draw(m, boundaries_only=True, **kwargs)
 
 
 @singledispatch
-def plot(m, x: ndarray, **kwargs) -> None:
+def plot(m, x: ndarray, **kwargs) -> SvgPlot:
     raise NotImplementedError("Type {} not supported.".format(type(m)))
 
 
 @plot.register(MeshTri)
-def plot_mesh_tri(m: MeshTri, x: ndarray, **kwargs) -> None:
+def plot_mesh_tri(m: MeshTri, x: ndarray, **kwargs) -> SvgPlot:
     t = m.t
     p = m.p.copy()
     maxx = np.max(p[0])
@@ -111,34 +123,36 @@ def plot_mesh_tri(m: MeshTri, x: ndarray, **kwargs) -> None:
                                  p[1, t[2]])):
         color = int((x[t[:, ix]].mean() - minval) / (maxval - minval) * 255)
         elems += template.format(*tri, color, 255 - color)
-    elems += draw_mesh2d(m, boundaries_only=True, color='black')
-    return ("""<svg xmlns="http://www.w3.org/2000/svg" version="1.1" """
-            """width="{}" height="{}" shape-rendering="crispEdges">"""
-            """<defs>"""
-            """<linearGradient id="cbar" x1="0%" y1="0%" x2="0%" y2="100%">"""
-            """<stop offset="0%" style="stop-color:rgb(100,255,0);" />"""
-            """<stop offset="100%" style="stop-color:rgb(100,0,255);" />"""
-            """</linearGradient>"""
-            """</defs>"""
-            """{}"""
-            """<polygon points="{},{} {},{} {},{} {},{}" """
-            """fill="url(#cbar)" style="stroke:black;stroke-width:{}" />"""
-            """</svg>""").format(width + 30,
-                                 height,
-                                 elems,
-                                 width + 29,
-                                 height - 1,
-                                 width + 29,
-                                 1,
-                                 width + 10,
-                                 1,
-                                 width + 10,
-                                 height - 1,
-                                 stroke)
+    elems += draw_mesh2d(m, boundaries_only=True, color='black').svg
+    return SvgPlot((
+        """<svg xmlns="http://www.w3.org/2000/svg" version="1.1" """
+        """width="{}" height="{}" shape-rendering="crispEdges">"""
+        """<defs>"""
+        """<linearGradient id="cbar" x1="0%" y1="0%" x2="0%" y2="100%">"""
+        """<stop offset="0%" style="stop-color:rgb(100,255,0);" />"""
+        """<stop offset="100%" style="stop-color:rgb(100,0,255);" />"""
+        """</linearGradient>"""
+        """</defs>"""
+        """{}"""
+        """<polygon points="{},{} {},{} {},{} {},{}" """
+        """fill="url(#cbar)" style="stroke:black;stroke-width:{}" />"""
+        """</svg>"""
+    ).format(width + 30,
+             height,
+             elems,
+             width + 29,
+             height - 1,
+             width + 29,
+             1,
+             width + 10,
+             1,
+             width + 10,
+             height - 1,
+             stroke))
 
 
 @plot.register(InteriorBasis)
-def plot_basis(ib: InteriorBasis, x: ndarray, **kwargs) -> str:
+def plot_basis(ib: InteriorBasis, x: ndarray, **kwargs) -> SvgPlot:
     nrefs = kwargs["nrefs"] if "nrefs" in kwargs else 0
     m, X = ib.refinterp(x, nrefs=nrefs)
     return plot(m, X, **kwargs)
