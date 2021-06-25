@@ -3,9 +3,10 @@
 from functools import singledispatch
 
 import numpy as np
+from numpy import ndarray
 
 from ..assembly import InteriorBasis
-from ..mesh import Mesh2D
+from ..mesh import Mesh2D, MeshTri
 
 
 @singledispatch
@@ -71,3 +72,49 @@ def draw_basis(ib: InteriorBasis, **kwargs) -> str:
     nrefs = kwargs["nrefs"] if "nrefs" in kwargs else 2
     m, _ = ib.refinterp(ib.mesh.p[0], nrefs=nrefs)
     return draw(m, boundaries_only=True, **kwargs)
+
+
+@singledispatch
+def plot(m, x: ndarray, **kwargs) -> None:
+    raise NotImplementedError("Type {} not supported.".format(type(m)))
+
+
+@plot.register(MeshTri)
+def plot_mesh_tri(m: MeshTri, x: ndarray, **kwargs) -> None:
+    t = m.t
+    p = m.p.copy()
+    maxx = np.max(p[0])
+    minx = np.min(p[0])
+    maxy = np.max(p[1])
+    miny = np.min(p[1])
+    maxval = np.max(x)
+    minval = np.min(x)
+    width = kwargs["width"] if "width" in kwargs else 300
+    if "height" in kwargs:
+        height = kwargs["height"]
+    else:
+        height = width * (maxy - miny) / (maxx - minx)
+    stroke = kwargs["stroke"] if "stroke" in kwargs else 1
+    sx = (width - 2 * stroke) / (maxx - minx)
+    sy = (height - 2 * stroke) / (maxy - miny)
+    p[0] = sx * (p[0] - minx) + stroke
+    p[1] = sy * (maxy - p[1]) + stroke
+    template = ("""<polygon points="{},{} {},{} {},{}" """
+                """style="fill:rgb(0, {}, 0);stroke:white;stroke-width:{}" />""")
+    elems = ""
+    for ix, tri in enumerate(zip(p[0, t[0]],
+                                 p[1, t[0]],
+                                 p[0, t[1]],
+                                 p[1, t[1]],
+                                 p[0, t[2]],
+                                 p[1, t[2]])):
+        elems += template.format(*tri, int((x[t[:, ix]].mean() - minval) / (maxval - minval) * 255), 0 * stroke)
+    return ("""<svg xmlns="http://www.w3.org/2000/svg" version="1.1" """
+            """width="{}" height="{}" shape-rendering="crispEdges">{}</svg>""").format(width, height, elems)
+
+
+@plot.register(InteriorBasis)
+def plot_basis(ib: InteriorBasis, x: ndarray, **kwargs) -> str:
+    nrefs = kwargs["nrefs"] if "nrefs" in kwargs else 2
+    m, X = ib.refinterp(x, nrefs=nrefs)
+    return plot(m, X, **kwargs)
