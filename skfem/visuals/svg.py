@@ -7,7 +7,7 @@ import numpy as np
 from numpy import ndarray
 
 from ..assembly import InteriorBasis
-from ..mesh import Mesh2D, MeshTri
+from ..mesh import Mesh2D
 
 
 @dataclass
