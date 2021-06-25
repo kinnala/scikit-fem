@@ -92,8 +92,8 @@ def plot(m, x: ndarray, **kwargs) -> SvgPlot:
     raise NotImplementedError("Type {} not supported.".format(type(m)))
 
 
-@plot.register(MeshTri)
-def plot_mesh_tri(m: MeshTri, x: ndarray, **kwargs) -> SvgPlot:
+@plot.register(Mesh2D)
+def plot_mesh2d(m: Mesh2D, x: ndarray, **kwargs) -> SvgPlot:
     t = m.t
     p = m.p.copy()
     maxx = np.max(p[0])
@@ -112,43 +112,22 @@ def plot_mesh_tri(m: MeshTri, x: ndarray, **kwargs) -> SvgPlot:
     sy = (height - 2 * stroke) / (maxy - miny)
     p[0] = sx * (p[0] - minx) + stroke
     p[1] = sy * (maxy - p[1]) + stroke
-    template = ("""<polygon points="{},{} {},{} {},{}" """
-                """style="fill:rgb(100, {}, {});" />""")
+    template = ("""<polygon points=""" +
+                '"' + ("{},{} " * t.shape[0]) + '"' +
+                """style="fill:rgb({}, 150, {});" />""")
     elems = ""
-    for ix, tri in enumerate(zip(p[0, t[0]],
-                                 p[1, t[0]],
-                                 p[0, t[1]],
-                                 p[1, t[1]],
-                                 p[0, t[2]],
-                                 p[1, t[2]])):
-        color = int((x[t[:, ix]].mean() - minval) / (maxval - minval) * 255)
-        elems += template.format(*tri, color, 255 - color)
+    for ix, e in enumerate(t.T):
+        color = int((x[e].mean() - minval) / (maxval - minval) * 255)
+        elems += template.format(*p[:, e].flatten(order='F'), color, color)
     elems += draw_mesh2d(m, boundaries_only=True, color='black').svg
     return SvgPlot((
         """<svg xmlns="http://www.w3.org/2000/svg" version="1.1" """
         """width="{}" height="{}" shape-rendering="crispEdges">"""
-        """<defs>"""
-        """<linearGradient id="cbar" x1="0%" y1="0%" x2="0%" y2="100%">"""
-        """<stop offset="0%" style="stop-color:rgb(100,255,0);" />"""
-        """<stop offset="100%" style="stop-color:rgb(100,0,255);" />"""
-        """</linearGradient>"""
-        """</defs>"""
         """{}"""
-        """<polygon points="{},{} {},{} {},{} {},{}" """
-        """fill="url(#cbar)" style="stroke:black;stroke-width:{}" />"""
         """</svg>"""
     ).format(width + 30,
              height,
-             elems,
-             width + 29,
-             height - 1,
-             width + 29,
-             1,
-             width + 10,
-             1,
-             width + 10,
-             height - 1,
-             stroke))
+             elems))
 
 
 @plot.register(InteriorBasis)
