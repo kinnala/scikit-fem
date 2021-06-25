@@ -105,12 +105,12 @@ def plot_mesh2d(m: Mesh2D, x: ndarray, **kwargs) -> SvgPlot:
     p, width, height, stroke = points_to_figure(m.p.copy(), kwargs)
     template = ("""<polygon points=""" +
                 '"' + ("{},{} " * t.shape[0]) + '"' +
-                """style="fill:rgb({}, 150, {});" />""")
+                """style="fill:rgb({}, {}, {});" />""")
     elems = ""
     for ix, e in enumerate(t.T):
         color = int((x[e].mean() - minval) / (maxval - minval) * 255)
-        elems += template.format(*p[:, e].flatten(order='F'), color, color)
-    elems += draw_mesh2d(m, boundaries_only=True, color='black').svg
+        elems += template.format(*p[:, e].flatten(order='F'), *(3 * (color,)))
+    elems += draw_mesh2d(m, boundaries_only=True, color="black").svg
     return SvgPlot((
         """<svg xmlns="http://www.w3.org/2000/svg" version="1.1" """
         """width="{}" height="{}" shape-rendering="crispEdges">"""
