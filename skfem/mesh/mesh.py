@@ -739,7 +739,7 @@ class Mesh2D(Mesh):
 
     def _repr_svg_(self) -> str:
         from skfem.visuals.svg import draw
-        return draw(self, nrefs=0, boundaries_only=True)
+        return draw(self, nrefs=0, boundaries_only=True).svg
 
 
 @dataclass(repr=False)
@@ -1284,7 +1284,7 @@ class MeshTri2(MeshTri1):
 
     def _repr_svg_(self) -> str:
         from skfem.visuals.svg import draw
-        return draw(self, nrefs=2, boundaries_only=True)
+        return draw(self, nrefs=2, boundaries_only=True).svg
 
 
 @dataclass(repr=False)
@@ -1304,7 +1304,7 @@ class MeshQuad2(MeshQuad1):
 
     def _repr_svg_(self) -> str:
         from skfem.visuals.svg import draw
-        return draw(self, nrefs=2, boundaries_only=True)
+        return draw(self, nrefs=2, boundaries_only=True).svg
 
 
 @dataclass(repr=False)
