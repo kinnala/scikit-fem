@@ -21,10 +21,10 @@ Class: MeshTri
 
 .. autoclass:: skfem.mesh.MeshTri
 
-.. autoclass:: skfem.mesh.mesh.MeshTri1
+.. autoclass:: skfem.mesh.MeshTri1
    :members: __init__, init_symmetric, init_sqsymmetric, init_refdom, init_tensor, init_lshaped, init_circle, load
 
-.. autoclass:: skfem.mesh.mesh.MeshTri2
+.. autoclass:: skfem.mesh.MeshTri2
    :members: init_circle, load
 
 Class: MeshQuad
@@ -32,10 +32,10 @@ Class: MeshQuad
 
 .. autoclass:: skfem.mesh.MeshQuad
 
-.. autoclass:: skfem.mesh.mesh.MeshQuad1
+.. autoclass:: skfem.mesh.MeshQuad1
    :members: __init__, init_refdom, init_tensor, to_meshtri, load
 
-.. autoclass:: skfem.mesh.mesh.MeshQuad2
+.. autoclass:: skfem.mesh.MeshQuad2
    :members: load
 
 Class: MeshTet
@@ -43,10 +43,10 @@ Class: MeshTet
 
 .. autoclass:: skfem.mesh.MeshTet
 
-.. autoclass:: skfem.mesh.mesh.MeshTet1
+.. autoclass:: skfem.mesh.MeshTet1
    :members: __init__, init_refdom, init_tensor, init_ball, load
 
-.. autoclass:: skfem.mesh.mesh.MeshTet2
+.. autoclass:: skfem.mesh.MeshTet2
    :members: init_ball, load
 
 Class: MeshHex
@@ -54,7 +54,7 @@ Class: MeshHex
 
 .. autoclass:: skfem.mesh.MeshHex
 
-.. autoclass:: skfem.mesh.mesh.MeshHex1
+.. autoclass:: skfem.mesh.MeshHex1
    :members: __init__, init_tensor, to_meshtet, load
 
 Class: MeshLine
@@ -62,7 +62,7 @@ Class: MeshLine
 
 .. autoclass:: skfem.mesh.MeshLine
 
-.. autoclass:: skfem.mesh.mesh.MeshLine1
+.. autoclass:: skfem.mesh.MeshLine1
    :members: __init__
 
 Module: skfem.assembly
