@@ -40,7 +40,7 @@ class SvgPlot:
 
 @singledispatch
 def draw(m, **kwargs) -> SvgPlot:
-    """Visualise meshes by drawing the edges.
+    """Visualize meshes by drawing the edges.
 
     Parameters
     ----------
@@ -49,8 +49,9 @@ def draw(m, **kwargs) -> SvgPlot:
 
     Returns
     -------
-    string
-        The svg xml source as a string.
+    SvgPlot
+        A dataclass with the attribute ``svg``.  Gets automatically visualized
+        in Jupyter via ``_repr_svg_``.
 
     """
     raise NotImplementedError("Type {} not supported.".format(type(m)))
@@ -94,6 +95,22 @@ def draw_basis(ib: InteriorBasis, **kwargs) -> SvgPlot:
 
 @singledispatch
 def plot(m, x: ndarray, **kwargs) -> SvgPlot:
+    """Visualize discrete solutions: one value per node.
+
+    Parameters
+    ----------
+    m
+        A mesh object.
+    x
+        One value per node of the mesh.
+
+    Returns
+    -------
+    SvgPlot
+        A dataclass with the attribute ``svg``.  Gets automatically visualized
+        in Jupyter via ``_repr_svg_``.
+
+    """
     raise NotImplementedError("Type {} not supported.".format(type(m)))
 
 
