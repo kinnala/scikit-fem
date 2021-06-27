@@ -2,7 +2,7 @@ r"""Laplace with inhomogeneous boundary
 
 Another simple modification of `ex01.py`, this time showing how
 to impose coordinate-dependent Dirichlet conditions with
-:func:`~skfem.utils.condense` and :attr:`~skfem.InteriorBasis.doflocs`.
+:func:`~skfem.utils.condense` and :attr:`~skfem.CellBasis.doflocs`.
 The forcing term is suppressed for simplicity. The boundary values are
 set as the real part :math:`x^2 - y^2` of an analytic complex function
 :math:`(x + \mathrm i y)^2` which is harmonic and so that is the exact
@@ -28,7 +28,7 @@ import numpy as np
 m = MeshTri().refined(4)
 
 e = ElementTriP2()
-basis = InteriorBasis(m, e)
+basis = CellBasis(m, e)
 
 A = asm(laplace, basis)
 

@@ -22,7 +22,7 @@ m = MeshTet.init_tensor(
     np.linspace(-1, 1, 15)
 )
 e = ElementTetN0()
-basis = InteriorBasis(m, e)
+basis = CellBasis(m, e)
 
 
 @BilinearForm

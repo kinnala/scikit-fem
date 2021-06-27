@@ -93,7 +93,7 @@ allows experimenting:
 .. code-block:: none
 
    tom@tunkki:~/src/scikit-fem$ python -i test.py
-   >>> asm(integrand, InteriorBasis(MeshTri(), ElementTriP1()))
+   >>> asm(integrand, Basis(MeshTri(), ElementTriP1()))
    > /home/tom/src/scikit-fem/test.py(7)integrand()
    -> return dot(grad(u), grad(v))
    (Pdb) dot(grad(u), grad(v))
@@ -131,7 +131,7 @@ Notice how the shape of ``u[0]`` is what we expect also from the return value as
 .. code-block:: none
 
    tom@tunkki:~/src/scikit-fem$ python -i test.py
-   >>> asm(integrand, InteriorBasis(MeshTri(), ElementTriP1()))
+   >>> asm(integrand, Basis(MeshTri(), ElementTriP1()))
    > /home/tom/src/scikit-fem/test.py(7)integrand()
    -> return dot(grad(u), grad(v))
    (Pdb) !u[0]
@@ -169,7 +169,7 @@ element mesh of the unit square:
    >>> m = MeshTri()
    >>> m
    Triangular mesh with 4 vertices and 2 elements.
-   >>> basis = InteriorBasis(m, ElementTriP2())
+   >>> basis = Basis(m, ElementTriP2())
 
 The DOFs corresponding to the nodes (or vertices) of the mesh are
 

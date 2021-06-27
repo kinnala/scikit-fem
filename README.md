@@ -48,7 +48,7 @@ m = MeshTri().refined(4)
 # m = MeshTri(points, cells)
 
 e = ElementTriP1()
-basis = CellBasis(m, e)
+basis = Basis(m, e)  # shorthand for CellBasis
 
 # this method could also be imported from skfem.models.laplace
 @BilinearForm
@@ -106,9 +106,9 @@ elements](https://github.com/kinnala/scikit-fem/blob/master/skfem/element/__init
 Below the stiffness matrix is assembled using second-order tetrahedra:
 
 ```python
-from skfem import InteriorBasis, ElementTetP2
+from skfem import Basis, ElementTetP2
 
-basis = InteriorBasis(mesh, ElementTetP2())  # quadratic tetrahedron
+basis = Basis(mesh, ElementTetP2())  # quadratic tetrahedron
 A = laplace.assemble(basis)  # type: scipy.sparse.csr_matrix
 ```
 

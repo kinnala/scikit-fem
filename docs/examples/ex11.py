@@ -13,7 +13,7 @@ from skfem.models.elasticity import linear_elasticity, lame_parameters
 m = MeshHex().refined(3)
 e1 = ElementHex1()
 e = ElementVectorH1(e1)
-ib = InteriorBasis(m, e, MappingIsoparametric(m, e1), 3)
+ib = Basis(m, e, MappingIsoparametric(m, e1), 3)
 
 K = asm(linear_elasticity(*lame_parameters(1e3, 0.3)), ib)
 

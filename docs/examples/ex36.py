@@ -142,7 +142,7 @@ elems = {
     "p": pelem
 }
 basis = {
-    field: InteriorBasis(mesh, e, intorder=2)
+    field: CellBasis(mesh, e, intorder=2)
     for field, e in elems.items()
 }
 

@@ -19,7 +19,7 @@ print('| --- | --- | --- |')
 
 
 def assembler(m):
-    basis = InteriorBasis(m, ElementTetP1())
+    basis = Basis(m, ElementTetP1())
     return (
         asm(laplace, basis),
         asm(unit_load, basis),

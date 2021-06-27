@@ -7,7 +7,7 @@ from skfem.models.poisson import laplace, unit_load
 m = MeshLine(np.linspace(0, 1, 10))
 
 e = ElementLineP1()
-basis = InteriorBasis(m, e)
+basis = CellBasis(m, e)
 
 A = asm(laplace, basis)
 b = asm(unit_load, basis)

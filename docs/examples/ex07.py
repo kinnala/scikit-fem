@@ -9,7 +9,7 @@ mapping = MappingAffine(m)
 e = ElementTriDG(ElementTriP1())
 alpha = 1e-1
 
-ib = InteriorBasis(m, e)
+ib = CellBasis(m, e)
 fb = {}
 fb[0] = InteriorFacetBasis(m, e, side=0)
 fb[1] = InteriorFacetBasis(m, e, side=1)

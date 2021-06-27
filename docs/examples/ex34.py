@@ -13,7 +13,7 @@ from skfem import *
 
 m = MeshLine().refined(3)
 e = ElementLineHermite()
-basis = InteriorBasis(m, e)
+basis = CellBasis(m, e)
 
 @BilinearForm
 def bilinf(u, v, w):

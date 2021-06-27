@@ -27,7 +27,7 @@ import numpy as np
 
 m = MeshTri.init_circle(4)
 
-basis = InteriorBasis(m, ElementTriP2())
+basis = CellBasis(m, ElementTriP2())
 
 A = asm(laplace, basis)
 b = asm(unit_load, basis)

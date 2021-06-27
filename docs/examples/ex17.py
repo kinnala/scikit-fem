@@ -51,7 +51,7 @@ def conduction(u, v, w):
 convection = mass
 
 element = ElementQuad1()
-basis = InteriorBasis(mesh, element)
+basis = CellBasis(mesh, element)
 
 conductivity = basis.zero_w()
 for subdomain, elements in mesh.subdomains.items():
@@ -62,7 +62,7 @@ L = asm(conduction, basis, conductivity=conductivity)
 facet_basis = FacetBasis(mesh, element, facets=mesh.boundaries['perimeter'])
 H = heat_transfer_coefficient * asm(convection, facet_basis)
 
-core_basis = InteriorBasis(mesh, basis.elem, elements=mesh.subdomains['core'])
+core_basis = CellBasis(mesh, basis.elem, elements=mesh.subdomains['core'])
 f = joule_heating * asm(unit_load, core_basis)
 
 temperature = solve(L + H, f)

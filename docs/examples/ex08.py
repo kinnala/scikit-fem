@@ -6,7 +6,7 @@ import numpy as np
 m = MeshTri.init_sqsymmetric()
 e = ElementTriArgyris()
 
-ib = InteriorBasis(m, e, intorder=5)
+ib = Basis(m, e, intorder=5)
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt

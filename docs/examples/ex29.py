@@ -92,7 +92,7 @@ def base_shear(u, v, w):
 mesh = MeshLine(np.linspace(0, 1, 2**6))
 element = {'u': getattr(element_line, f'ElementLine{u_element}')(),
            'p': ElementLineP1()}
-basis = {v: InteriorBasis(mesh, e, intorder=4) for v, e in element.items()}
+basis = {v: CellBasis(mesh, e, intorder=4) for v, e in element.items()}
 
 L = asm(laplace, basis['u'])
 M = asm(mass, basis['u'])

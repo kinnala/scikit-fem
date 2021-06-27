@@ -2,7 +2,7 @@ r"""Point source.
 
 Sources concentrated at points cannot be evaluated in the usual way, which
 involves discrete quadrature; instead, it requires direct use of the basis
-functions, as implemented in `InteriorBasis.point_source`.
+functions, as implemented in `CellBasis.point_source`.
 
 Here this is demonstrated for a disk with homogeneous Dirichlet conditions.
 The exact solution is the well-known Green's function (e.g. Sadybekov,
@@ -39,7 +39,7 @@ def greens(a: float, s: np.ndarray, x: np.ndarray) -> np.ndarray:
     return np.log(numerator / denominator) / 2 / np.pi
 
 
-basis = InteriorBasis(MeshTri.init_circle(4), ElementTriP2())
+basis = CellBasis(MeshTri.init_circle(4), ElementTriP2())
 source = np.array([0.3, 0.2])
 
 A = asm(laplace, basis)
