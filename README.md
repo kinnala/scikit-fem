@@ -212,9 +212,7 @@ You may use the following BibTeX entry:
 ```
 @article{skfem2020,
   doi = {10.21105/joss.02369},
-  url = {https://doi.org/10.21105/joss.02369},
   year = {2020},
-  publisher = {The Open Journal},
   volume = {5},
   number = {52},
   pages = {2369},
