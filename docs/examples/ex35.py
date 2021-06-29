@@ -222,7 +222,7 @@ from packaging import version
 from pathlib import Path
 
 from skfem.mesh import MeshTri
-from skfem.assembly import InteriorBasis, FacetBasis
+from skfem.assembly import Basis, FacetBasis
 from skfem.utils import solve, asm, condense, projection
 from skfem.element import ElementTriP1
 from skfem.models.poisson import laplace, unit_load, mass
@@ -246,14 +246,14 @@ eps_ptfe = 2.1
 eps_fep = 2.1
 
 
-global_basis = InteriorBasis(mesh, element)
-inner_conductor_basis = InteriorBasis(
+global_basis = Basis(mesh, element)
+inner_conductor_basis = Basis(
     mesh, element, elements=mesh.subdomains['inner_conductor'])
-outer_conductor_basis = InteriorBasis(
+outer_conductor_basis = Basis(
     mesh, element, elements=mesh.subdomains['outer_conductor'])
-inner_insulator_basis = InteriorBasis(
+inner_insulator_basis = Basis(
     mesh, element, elements=mesh.subdomains['inner_insulator'])
-outer_insulator_basis = InteriorBasis(
+outer_insulator_basis = Basis(
     mesh, element, elements=mesh.subdomains['outer_insulator'])
 
 inner_conductor_outer_surface_basis = FacetBasis(

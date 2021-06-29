@@ -27,7 +27,7 @@ from skfem.models.poisson import mass
 x = np.linspace(-1, 1)
 m = MeshLine(x)
 e = ElementLineP1()
-basis = InteriorBasis(m, e)
+basis = Basis(m, e)
 
 
 @BilinearForm

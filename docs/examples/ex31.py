@@ -35,7 +35,7 @@ m = MeshQuad2(p, t)
 e = ElementQuadP(5)
 
 # create mapping for the finite element approximation and assemble
-basis = InteriorBasis(m, e)
+basis = Basis(m, e)
 
 A = asm(laplace, basis)
 M = asm(mass, basis)

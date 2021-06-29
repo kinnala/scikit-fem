@@ -30,7 +30,7 @@ peclet = 1e2
 mesh = MeshQuad.init_tensor(
     np.linspace(0, length, ceil(mesh_inlet_n / height * length)),
     np.linspace(0, height / 2, mesh_inlet_n))
-basis = InteriorBasis(mesh, ElementQuad2())
+basis = Basis(mesh, ElementQuad2())
 
 
 @BilinearForm

@@ -77,8 +77,8 @@ e = ElementVector(e1)
 E1 = ElementQuad2()
 E = ElementVector(E1)
 
-ib = CellBasis(m, e, intorder=4)
-Ib = CellBasis(M, E, intorder=4)
+ib = Basis(m, e, intorder=4)
+Ib = Basis(M, E, intorder=4)
 
 mapping = MappingMortar.init_2D(m, M,
                                 m.boundaries['contact'],
@@ -185,8 +185,8 @@ for itr in range(2):
         def mass(u, v, w):
             return u * v
 
-        ib_dg = CellBasis(mdefo, e_dg, intorder=4)
-        Ib_dg = CellBasis(Mdefo, E_dg, intorder=4)
+        ib_dg = Basis(mdefo, e_dg, intorder=4)
+        Ib_dg = Basis(Mdefo, E_dg, intorder=4)
 
         s[itr, jtr] = solve(asm(mass, ib_dg),
                             asm(proj_cauchy, ib, ib_dg) @ x[i1])

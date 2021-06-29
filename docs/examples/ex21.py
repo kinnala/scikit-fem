@@ -71,7 +71,7 @@ m = MeshTet.load(Path(__file__).parent / 'meshes' / 'beams.msh')
 e1 = ElementTetP2()
 e = ElementVectorH1(e1)
 
-ib = InteriorBasis(m, e)
+ib = Basis(m, e)
 
 K = asm(linear_elasticity(*lame_parameters(200.0e9, 0.3)), ib)
 

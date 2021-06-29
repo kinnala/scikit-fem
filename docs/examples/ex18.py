@@ -55,7 +55,7 @@ mesh = MeshTri.init_circle(4)
 
 element = {'u': ElementVectorH1(ElementTriP2()),
            'p': ElementTriP1()}
-basis = {variable: InteriorBasis(mesh, e, intorder=3)
+basis = {variable: Basis(mesh, e, intorder=3)
          for variable, e in element.items()}
 
 

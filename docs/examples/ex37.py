@@ -9,7 +9,7 @@ p = np.linspace(0, 1, 10)
 m = MeshTet.init_tensor(*(p,) * 3)
 
 e = ElementTetRT0() * ElementTetP0()
-basis = InteriorBasis(m, e)
+basis = Basis(m, e)
 
 
 @BilinearForm

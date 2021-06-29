@@ -163,8 +163,8 @@ def make_mesh(halfheight: float,  # mm
 mesh = from_file(Path(__file__).parent / 'meshes' / 'ex28.json')
 element = ElementTriP1()
 basis = {
-    'heat': InteriorBasis(mesh, element),
-    'fluid': InteriorBasis(mesh, element, elements=mesh.subdomains['fluid']),
+    'heat': Basis(mesh, element),
+    'fluid': Basis(mesh, element, elements=mesh.subdomains['fluid']),
     **{label: FacetBasis(mesh, element, facets=mesh.boundaries[label])
        for label in ['heated', 'fluid-outlet', 'solid-outlet']}}
 

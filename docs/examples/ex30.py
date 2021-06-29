@@ -65,7 +65,7 @@ mesh = MeshQuad.init_tensor(*(np.linspace(-.5, .5, 2**6),)*2)
 
 element = {'u': ElementVectorH1(ElementQuad2()),
            'p': ElementQuad1()}
-basis = {variable: InteriorBasis(mesh, e, intorder=3)
+basis = {variable: Basis(mesh, e, intorder=3)
          for variable, e in element.items()}
 
 
