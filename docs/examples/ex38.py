@@ -39,7 +39,7 @@ def greens(a: float, s: np.ndarray, x: np.ndarray) -> np.ndarray:
     return np.log(numerator / denominator) / 2 / np.pi
 
 
-basis = CellBasis(MeshTri.init_circle(4), ElementTriP2())
+basis = Basis(MeshTri.init_circle(4), ElementTriP2())
 source = np.array([0.3, 0.2])
 
 A = asm(laplace, basis)

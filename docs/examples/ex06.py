@@ -34,7 +34,7 @@ m = MeshQuad().refined(2)
 e1 = ElementQuad1()
 e = ElementQuad2()
 mapping = MappingIsoparametric(m, e1)
-ib = CellBasis(m, e, mapping, 4)
+ib = Basis(m, e, mapping, 4)
 
 K = asm(laplace, ib)
 

@@ -109,7 +109,7 @@ mesh = ball.mesh()
 
 element = {'u': ElementVectorH1(ElementTetP2()),
            'p': ElementTetP1()}
-basis = {variable: CellBasis(mesh, e, intorder=3)
+basis = {variable: Basis(mesh, e, intorder=3)
          for variable, e in element.items()}
 
 

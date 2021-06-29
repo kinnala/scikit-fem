@@ -23,7 +23,7 @@ def rhs(v, w):
     return dot(grad(w['w']), grad(v)) / np.sqrt(1 + dot(grad(w['w']), grad(w['w'])))
 
 
-basis = CellBasis(m, ElementTriP1())
+basis = Basis(m, ElementTriP1())
 
 x = basis.zeros()
 

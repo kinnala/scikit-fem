@@ -28,7 +28,7 @@ import numpy as np
 m = MeshTri().refined(4)
 
 e = ElementTriP2()
-basis = CellBasis(m, e)
+basis = Basis(m, e)
 
 A = asm(laplace, basis)
 

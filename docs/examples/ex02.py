@@ -72,7 +72,7 @@ import numpy as np
 m = MeshTri.init_symmetric().refined(3)
 
 e = ElementTriMorley()
-ib = CellBasis(m, e)
+ib = Basis(m, e)
 
 
 @BilinearForm

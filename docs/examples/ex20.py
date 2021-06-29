@@ -38,7 +38,7 @@ import numpy as np
 mesh = MeshTri.init_circle(4)
 element = ElementTriMorley()
 mapping = MappingAffine(mesh)
-ib = CellBasis(mesh, element, mapping, 2)
+ib = Basis(mesh, element, mapping, 2)
 
 
 @BilinearForm

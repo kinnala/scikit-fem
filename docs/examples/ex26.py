@@ -34,7 +34,7 @@ from .ex17 import mesh, basis, radii, joule_heating, thermal_conductivity
 annulus = np.unique(basis.element_dofs[:, mesh.subdomains['annulus']])
 temperature = basis.zeros()
 core = basis.complement_dofs(annulus)
-core_basis = CellBasis(mesh, basis.elem, elements=mesh.subdomains['core'])
+core_basis = Basis(mesh, basis.elem, elements=mesh.subdomains['core'])
 L = asm(laplace, core_basis)
 f = asm(unit_load, core_basis)
 temperature = solve(*condense(thermal_conductivity['core'] * L,

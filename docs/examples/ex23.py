@@ -57,8 +57,8 @@ class Bratu1d:
 
     def __init__(self, n: int):
 
-        self.basis = CellBasis(MeshLine(np.linspace(0, 1, n)),
-                               ElementLineP1())
+        self.basis = Basis(MeshLine(np.linspace(0, 1, n)),
+                           ElementLineP1())
         self.lap = asm(laplace, self.basis)
         self.mass = asm(mass, self.basis)
         self.D = self.basis.find_dofs()['all'].nodal['u']

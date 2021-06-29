@@ -37,7 +37,7 @@ mesh = mesh.translated(mesh.p[0] * np.stack([np.cos(mesh.p[1]),
                                              np.sin(mesh.p[1])]) - mesh.p)
 
 elements = ElementTriP2()
-basis = CellBasis(mesh, elements)
+basis = Basis(mesh, elements)
 A = asm(laplace, basis)
 
 boundary_dofs = basis.find_dofs()
