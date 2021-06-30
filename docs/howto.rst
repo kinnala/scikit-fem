@@ -86,7 +86,7 @@ The previous solution :math:`u_k` must be provided to
 .. doctest::
 
    >>> m = fem.MeshTri().refined(3)
-   >>> basis = fem.InteriorBasis(m, fem.ElementTriP1())
+   >>> basis = fem.Basis(m, fem.ElementTriP1())
    >>> b = unit_load.assemble(basis)
    >>> x = 0. * b.copy()
    >>> for itr in range(10):  # fixed point iteration
@@ -124,9 +124,9 @@ the latter with an example.
 
 .. doctest::
 
-   >>> from skfem import MeshTri, InteriorBasis, ElementTriP2
+   >>> from skfem import MeshTri, Basis, ElementTriP2
    >>> m = MeshTri().refined(2)
-   >>> basis = InteriorBasis(m, ElementTriP2())
+   >>> basis = Basis(m, ElementTriP2())
 
 We first find the set of facets belonging to the left boundary.
 

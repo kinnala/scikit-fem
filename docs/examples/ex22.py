@@ -30,7 +30,7 @@ def load(v, w):
 
 def eval_estimator(m, u):    
     # interior residual
-    basis = InteriorBasis(m, e)
+    basis = Basis(m, e)
     
     @Functional
     def interior_residual(w):
@@ -67,7 +67,7 @@ if __name__ == "__main__":
 
 for itr in reversed(range(9)):
         
-    basis = InteriorBasis(m, e)
+    basis = Basis(m, e)
     
     K = asm(laplace, basis)
     f = asm(load, basis)

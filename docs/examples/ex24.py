@@ -26,7 +26,7 @@ mesh = from_file(Path(__file__).parent / 'meshes' / 'backward-facing_step.json')
 
 element = {'u': ElementVectorH1(ElementTriP2()),
            'p': ElementTriP1()}
-basis = {variable: InteriorBasis(mesh, e, intorder=3)
+basis = {variable: Basis(mesh, e, intorder=3)
          for variable, e in element.items()}
 
 D = np.concatenate([b.all() for b in basis['u'].find_dofs().values()])

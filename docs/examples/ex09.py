@@ -46,7 +46,7 @@ p = np.linspace(0, 1, 16)
 m = MeshTet.init_tensor(*(p,) * 3)
 
 e = ElementTetP1()
-basis = InteriorBasis(m, e)
+basis = Basis(m, e)
 
 A = asm(laplace, basis)
 b = asm(unit_load, basis)

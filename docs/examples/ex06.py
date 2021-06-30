@@ -6,8 +6,8 @@ for visualising piecewise-linear triangular fields. Visualisation of
 higher-order basis functions cannot be done directly and the mesh should be
 further refined just for visualisation purposes.
 
-:class:`~skfem.assembly.InteriorBasis` object includes the method
-:meth:`~skfem.assembly.InteriorBasis.refinterp` which refines and simultaneously
+:class:`~skfem.assembly.CellBasis` object includes the method
+:meth:`~skfem.assembly.CellBasis.refinterp` which refines and simultaneously
 interpolates any solution vector. The resulting mesh is non-conforming,
 i.e. the connectivity between neighboring elements is lost, and hence it can
 be used only for visualisation purposes.
@@ -15,8 +15,8 @@ be used only for visualisation purposes.
 .. note::
 
    As of 0.4.0, this functionality is included in :func:`~skfem.visuals.matplotlib.plot`,
-   i.e. inputting :class:`~skfem.assembly.InteriorBasis` instead of :class:`~skfem.mesh.Mesh`
-   uses :meth:`~skfem.assembly.InteriorBasis.refinterp` automatically.
+   i.e. inputting :class:`~skfem.assembly.CellBasis` instead of :class:`~skfem.mesh.Mesh`
+   uses :meth:`~skfem.assembly.CellBasis.refinterp` automatically.
    The steps in this example are still useful when, e.g., exporting to different
    formats for visualization purposes.
 
@@ -34,7 +34,7 @@ m = MeshQuad().refined(2)
 e1 = ElementQuad1()
 e = ElementQuad2()
 mapping = MappingIsoparametric(m, e1)
-ib = InteriorBasis(m, e, mapping, 4)
+ib = Basis(m, e, mapping, 4)
 
 K = asm(laplace, ib)
 

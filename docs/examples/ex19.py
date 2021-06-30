@@ -55,7 +55,7 @@ mesh = MeshQuad.init_tensor(
                                          halfwidth[0])) * halfwidth[1])
 
 element = ElementQuad1()
-basis = InteriorBasis(mesh, element)
+basis = Basis(mesh, element)
 
 L = diffusivity * asm(laplace, basis)
 M = asm(mass, basis)

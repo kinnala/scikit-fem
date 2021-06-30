@@ -24,7 +24,7 @@ m = MeshTri().refined(5)
 
 e = ElementTriP1()
 
-ib = InteriorBasis(m, e)
+ib = Basis(m, e)
 fb = FacetBasis(m, e)
 
 
