@@ -31,7 +31,6 @@ class MeshLine1(Mesh):
             tmp = np.arange(self.doflocs.shape[1] - 1, dtype=np.int64)
             self.t = np.vstack((tmp, tmp + 1))
 
-
     def __mul__(self, other):
         return MeshQuad1.init_tensor(self.p[0], other.p[0])
 
