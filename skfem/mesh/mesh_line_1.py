@@ -20,7 +20,7 @@ class MeshLine1(Mesh):
 
     def __post_init__(self):
 
-        if len(self.doflocs.shape) == 1:
+        if self.doflocs.ndim == 1:
             # support flat arrays
             self.doflocs = np.array([self.doflocs])
 
