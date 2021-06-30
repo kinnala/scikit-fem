@@ -320,8 +320,8 @@ class ConvergenceTetP1(ConvergenceQ1):
 
 class ConvergenceTetCR(ConvergenceTetP1):
 
-    rateL2 = 2.2
-    rateH1 = 1.13
+    rateL2 = 2.1
+    rateH1 = 1.2
 
     def create_basis(self, m):
         e = ElementTetCR()
@@ -330,12 +330,15 @@ class ConvergenceTetCR(ConvergenceTetP1):
 
 class ConvergenceTetCCR(ConvergenceTetP1):
 
-    rateL2 = 3.206
-    rateH1 = 2.08
+    rateL2 = 2.9
+    rateH1 = 1.9
 
     def create_basis(self, m):
         e = ElementTetCCR()
         return InteriorBasis(m, e)
+
+    def setUp(self):
+        self.mesh = MeshTet().refined(1)
 
 
 class ConvergenceTetP2(ConvergenceTetP1):
