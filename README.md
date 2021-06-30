@@ -229,6 +229,7 @@ e.g., to ensure reproducibility.
 The library has been used in the preparation of the following scientific works.
 Feel free to add your publication to the list.
 
+- Gustafsson, T. & Videman, J. (2021). Stabilized finite elements for Tresca friction problem. arXiv preprint [https://arxiv.org/abs/2106.12165](https://arxiv.org/abs/2106.12165).
 - Gustafsson, T. (2020). A simple technique for unstructured mesh generation via adaptive finite elements. arXiv preprint [arXiv:2011.07919](https://arxiv.org/abs/2011.07919).
 - Huang, X., Shi, Y., & Wang, W. (2020). A Morley-Wang-Xu element method for a fourth order elliptic singular perturbation problem. arXiv preprint [arXiv:2011.14064](https://arxiv.org/abs/2011.14064).
 - Gustafsson, T., Stenberg, R., & Videman, J. (2020). Nitsche's method for Kirchhoff plates. arXiv preprint [arXiv:2007.00403](https://arxiv.org/abs/2007.00403).
