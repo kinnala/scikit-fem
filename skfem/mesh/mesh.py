@@ -349,13 +349,8 @@ class Mesh:
         if self.sort_t:
             self.t = np.sort(self.t, axis=0)
 
-        if not isinstance(self.doflocs, ndarray):
-            # for backwards compatibility: support standard lists
-            self.doflocs = np.array(self.doflocs, dtype=np.float64)
-
-        if not isinstance(self.t, ndarray):
-            # for backwards compatibility: support standard lists
-            self.t = np.array(self.t, dtype=np.int64)
+        self.doflocs = np.asarray(self.doflocs, dtype=np.float64)
+        self.t = np.asarray(self.t, dtype=np.int64)
 
         M = self.elem.refdom.nnodes
 
