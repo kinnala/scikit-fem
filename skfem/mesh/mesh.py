@@ -349,7 +349,7 @@ class Mesh:
         if self.sort_t:
             self.t = np.sort(self.t, axis=0)
 
-        self.doflocs = np.asarray(self.doflocs, dtype=np.float64)
+        self.doflocs = np.asfarray(self.doflocs)
         self.t = np.asarray(self.t, dtype=np.int64)
 
         M = self.elem.refdom.nnodes
