@@ -256,6 +256,7 @@ with respect to documented and/or tested features.
 
 - Added: `ElementTriCCR` and `ElementTetCCR`, conforming Crouzeix-Raviart finite elements
 - Fixed: `Mesh.mirrored` returned a wrong mesh when a point other than the origin was used
+- Fixed: `MeshLine` constructor accepted only NumPy arrays and not plain Python lists
 
 ### [3.1.0] - 2021-06-18
 
