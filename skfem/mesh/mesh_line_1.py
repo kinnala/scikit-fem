@@ -20,7 +20,9 @@ class MeshLine1(Mesh):
 
     def __post_init__(self):
 
-        if len(self.doflocs.shape) == 1:
+        super().__post_init__()
+
+        if self.doflocs.ndim == 1:
             # support flat arrays
             self.doflocs = np.array([self.doflocs])
 
@@ -28,8 +30,6 @@ class MeshLine1(Mesh):
             # fill self.t assuming ascending self.doflocs if not provided
             tmp = np.arange(self.doflocs.shape[1] - 1, dtype=np.int64)
             self.t = np.vstack((tmp, tmp + 1))
-
-        super().__post_init__()
 
     def __mul__(self, other):
         return MeshQuad1.init_tensor(self.p[0], other.p[0])
