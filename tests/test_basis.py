@@ -193,7 +193,7 @@ class TestIncompatibleMeshElement(TestCase):
 @pytest.mark.parametrize(
     "mtype,e,nrefs,npoints",
     [
-        # (MeshTri, ElementTriP1(), 1, 10), # fails?
+        (MeshTri, ElementTriP1(), 0, 10),
         (MeshTri, ElementTriP1(), 1, 10),
         (MeshTri, ElementTriP1(), 5, 10),
         (MeshTri, ElementTriP1(), 1, 3e5),
