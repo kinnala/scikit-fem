@@ -199,7 +199,7 @@ class TestIncompatibleMeshElement(TestCase):
         (MeshTri, ElementTriP1(), 1, 3e5),
         (MeshTet, ElementTetP1(), 1, 10),
         (MeshTet, ElementTetP1(), 5, 10),
-        # (MeshTet, ElementTetP1(), 1, 3e5), # fails
+        (MeshTet, ElementTetP1(), 1, 3e5),
         # (MeshQuad, ElementQuad1(), 1, 10), # fails?
     ]
 )

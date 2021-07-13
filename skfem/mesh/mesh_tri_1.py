@@ -328,8 +328,8 @@ class MeshTri1(Mesh2D):
         if not hasattr(self, '_cached_tree'):
             self._cached_tree = cKDTree(np.mean(self.p[:, self.t], axis=1).T)
 
-        nelems = self.t.shape[1]
         tree = self._cached_tree
+        nelems = self.t.shape[1]
 
         def finder(x, y):
 
