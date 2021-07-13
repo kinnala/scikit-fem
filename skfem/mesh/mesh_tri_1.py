@@ -337,7 +337,8 @@ class MeshTri1(Mesh2D):
                 # optimize the case with a large number of points
                 ix = None
             else:
-                ix = tree.query(np.array([x, y]).T, min(5, nelems))[1].flatten()
+                ix = tree.query(np.array([x, y]).T,
+                                min(5, nelems))[1].flatten()
 
             X = mapping.invF(np.array([x, y])[:, None], ix)
             inside = np.argmax((X[0] >= 0) *
