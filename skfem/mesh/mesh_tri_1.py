@@ -339,16 +339,10 @@ class MeshTri1(Mesh2D):
                 ix = tree.query(np.array([x, y]).T, 5)[1].flatten()
 
             X = mapping.invF(np.array([x, y])[:, None], ix)
-            inside = (
-                (X[0] >= 0) *
-                (X[1] >= 0) *
-                (1 - X[0] - X[1] >= 0)
-            )
-            inside_ix = np.argmax(inside, axis=0)
+            inside = np.argmax((X[0] >= 0) *
+                               (X[1] >= 0) *
+                               (1 - X[0] - X[1] >= 0), axis=0)
 
-            if ix is None:
-                return inside_ix
-
-            return np.array([ix[inside_ix]]).flatten()
+            return inside if ix is None else np.array([ix[inside]]).flatten()
 
         return finder
