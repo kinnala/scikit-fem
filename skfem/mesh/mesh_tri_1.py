@@ -329,7 +329,6 @@ class MeshTri1(Mesh2D):
             self._cached_tree = cKDTree(np.mean(self.p[:, self.t], axis=1).T)
 
         tree = self._cached_tree
-        nelems = self.t.shape[1]
 
         def finder(x, y):
 
@@ -345,11 +344,11 @@ class MeshTri1(Mesh2D):
                 (X[1] >= 0) *
                 (1 - X[0] - X[1] >= 0)
             )
-            tmp = np.argmax(inside, axis=0)
+            inside_ix = np.argmax(inside, axis=0)
 
             if ix is None:
-                return tmp
+                return inside_ix
 
-            return np.array([ix[tmp]]).flatten()
+            return np.array([ix[inside_ix]]).flatten()
 
         return finder
