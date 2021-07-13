@@ -325,16 +325,31 @@ class MeshTri1(Mesh2D):
         if mapping is None:
             mapping = self._mapping()
 
-        tree = cKDTree(np.mean(self.p[:, self.t], axis=1).T)
+        if not hasattr(self, '_cached_tree'):
+            self._cached_tree = cKDTree(np.mean(self.p[:, self.t], axis=1).T)
+
+        tree = self._cached_tree
+        nelems = self.t.shape[1]
 
         def finder(x, y):
-            ix = tree.query(np.array([x, y]).T, 5)[1].flatten()
+
+            if x.shape[0] > 1e3:
+                # optimize the case with a large number of points
+                ix = None
+            else:
+                ix = tree.query(np.array([x, y]).T, 5)[1].flatten()
+
             X = mapping.invF(np.array([x, y])[:, None], ix)
             inside = (
                 (X[0] >= 0) *
                 (X[1] >= 0) *
                 (1 - X[0] - X[1] >= 0)
             )
-            return np.array([ix[np.argmax(inside, axis=0)]]).flatten()
+            tmp = np.argmax(inside, axis=0)
+
+            if ix is None:
+                return tmp
+
+            return np.array([ix[tmp]]).flatten()
 
         return finder
