@@ -194,14 +194,15 @@ class TestIncompatibleMeshElement(TestCase):
     "mtype,e,nrefs,npoints",
     [
         (MeshTri, ElementTriP1(), 0, 10),
-        (MeshTri, ElementTriP1(), 1, 10),
+        (MeshTri, ElementTriP2(), 1, 10),
         (MeshTri, ElementTriP1(), 5, 10),
         (MeshTri, ElementTriP1(), 1, 3e5),
-        (MeshTet, ElementTetP1(), 1, 10),
+        (MeshTet, ElementTetP2(), 1, 10),
         (MeshTet, ElementTetP1(), 5, 10),
         (MeshTet, ElementTetP1(), 1, 3e5),
         (MeshQuad, ElementQuad1(), 1, 10),
         (MeshQuad, ElementQuad1(), 1, 3e5),
+        (MeshHex, ElementHex1(), 1, 1e5),
     ]
 )
 def test_interpolator_probes(mtype, e, nrefs, npoints):
