@@ -200,7 +200,8 @@ class TestIncompatibleMeshElement(TestCase):
         (MeshTet, ElementTetP1(), 1, 10),
         (MeshTet, ElementTetP1(), 5, 10),
         (MeshTet, ElementTetP1(), 1, 3e5),
-        # (MeshQuad, ElementQuad1(), 1, 10), # fails?
+        (MeshQuad, ElementQuad1(), 1, 10),
+        (MeshQuad, ElementQuad1(), 1, 3e5),
     ]
 )
 def test_interpolator_probes(mtype, e, nrefs, npoints):
@@ -212,7 +213,7 @@ def test_interpolator_probes(mtype, e, nrefs, npoints):
 
     basis = CellBasis(m, e)
 
-    y = np.random.randn(len(basis.zeros()))
+    y = projection(lambda x: x[0] ** 2, basis)
 
     assert_allclose(basis.probes(X) @ y, basis.interpolator(y)(X))
 
