@@ -253,18 +253,20 @@ class TestFinder1DLinspaced(TestCase):
 )
 def test_finder_simplex(m):
 
-    np.random.seed(0)
     m = m.refined(3)
-    points = np.hstack((m.p, np.random.rand(m.p.shape[0], 100)))
-    tri = Delaunay(points.T)
-    M = type(m)(points, tri.simplices.T)
-    finder = M.element_finder()
 
-    query_pts = np.random.rand(m.p.shape[0], 100)
-    assert_array_equal(
-        tri.find_simplex(query_pts.T),
-        finder(*query_pts)
-    )
+    for seed in range(10):
+        np.random.seed(seed)
+        points = np.hstack((m.p, np.random.rand(m.p.shape[0], 100)))
+        tri = Delaunay(points.T)
+        M = type(m)(points, tri.simplices.T)
+        finder = M.element_finder()
+
+        query_pts = np.random.rand(m.p.shape[0], 500)
+        assert_array_equal(
+            tri.find_simplex(query_pts.T),
+            finder(*query_pts)
+        )
 
 
 @pytest.mark.parametrize(
