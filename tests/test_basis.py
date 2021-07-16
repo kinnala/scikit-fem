@@ -217,7 +217,8 @@ def test_interpolator_probes(mtype, e, nrefs, npoints):
     y = projection(lambda x: x[0] ** 2, basis)
 
     assert_allclose(basis.probes(X) @ y, basis.interpolator(y)(X))
-    assert_allclose(basis.probes(X) @ y, X[0] ** 2, atol=1e-1)
+    atol = 1e-1 if nrefs <= 1 else 1e-3
+    assert_allclose(basis.probes(X) @ y, X[0] ** 2, atol=atol)
 
 
 @pytest.mark.parametrize(

@@ -2,10 +2,12 @@ from unittest import TestCase
 from pathlib import Path
 
 import numpy as np
-from numpy.testing import assert_array_equal
 import pytest
+from scipy.spatial import Delaunay
+from numpy.testing import assert_array_equal
 
-from skfem.mesh import Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri, MeshTri2, MeshQuad2, MeshTet2, MeshHex2
+from skfem.mesh import (Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
+                        MeshTri2, MeshQuad2, MeshTet2, MeshHex2)
 from skfem.io.meshio import to_meshio, from_meshio
 
 
@@ -239,6 +241,30 @@ class TestFinder1DLinspaced(TestCase):
             )
             self.assertEqual(finder(np.array([0.999]))[0], 2 ** itr - 1)
             self.assertEqual(finder(np.array([0.001]))[0], 0)
+
+
+
+@pytest.mark.parametrize(
+    "m",
+    [
+        MeshTri(),
+        MeshTet(),
+    ]
+)
+def test_finder_simplex(m):
+
+    np.random.seed(0)
+    m = m.refined(3)
+    points = np.hstack((m.p, np.random.rand(m.p.shape[0], 100)))
+    tri = Delaunay(points.T)
+    M = type(m)(points, tri.simplices.T)
+    finder = M.element_finder()
+
+    query_pts = np.random.rand(m.p.shape[0], 100)
+    assert_array_equal(
+        tri.find_simplex(query_pts.T),
+        finder(*query_pts)
+    )
 
 
 @pytest.mark.parametrize(

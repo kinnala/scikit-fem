@@ -1,3 +1,4 @@
+import warnings
 from dataclasses import dataclass, replace
 from typing import Type
 
@@ -40,22 +41,30 @@ class MeshTet1(Mesh3D):
         tree = self._cached_tree
         nelems = self.t.shape[1]
 
-        def finder(x, y, z):
+        def finder(x, y, z, _exhaustive=False):
 
-            if x.shape[0] > nelems:
-                # search all elements if there is a large number of points
+            if _exhaustive or x.shape[0] > nelems:
+                # search all elements if forced by the flag or if there is a
+                # large number of points
                 ix = None
             else:
                 ix = tree.query(np.array([x, y, z]).T,
                                 min(5, nelems))[1].flatten()
 
             X = mapping.invF(np.array([x, y, z])[:, None], ix)
-            inside = np.argmax((X[0] >= 0) *
-                               (X[1] >= 0) *
-                               (X[2] >= 0) *
-                               (1 - X[0] - X[1] - X[2] >= 0), axis=0)
+            inside = ((X[0] >= 0) *
+                      (X[1] >= 0) *
+                      (X[2] >= 0) *
+                      (1 - X[0] - X[1] - X[2] >= 0))
+            elems = np.argmax(inside, axis=0)
 
-            return inside if ix is None else np.array([ix[inside]]).flatten()
+            if ix is not None and not inside[elems].any(axis=0).all():
+                warnings.warn("Falling back to exhaustive search because the "
+                              "correct element was not among the nearest "
+                              "candidates.")
+                return finder(x, y, z, _exhaustive=True)
+
+            return elems if ix is None else np.array([ix[elems]]).flatten()
 
         return finder
 
