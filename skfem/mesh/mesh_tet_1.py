@@ -42,8 +42,8 @@ class MeshTet1(Mesh3D):
 
         def finder(x, y, z):
 
-            if x.shape[0] > 1e3:
-                # optimize the case with a large number of points
+            if x.shape[0] > nelems:
+                # search all elements if there is a large number of points
                 ix = None
             else:
                 ix = tree.query(np.array([x, y, z]).T,
