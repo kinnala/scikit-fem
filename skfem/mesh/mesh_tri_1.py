@@ -328,13 +328,23 @@ class MeshTri1(Mesh2D):
         tree = cKDTree(np.mean(self.p[:, self.t], axis=1).T)
 
         def finder(x, y):
-            ix = tree.query(np.array([x, y]).T, 5)[1].flatten()
+            # the 5 nearest neighbours
+            ind = tree.query(np.array([x, y]).T, 5)[1]
+            ix = ind.flatten()
+
+            # drop duplicates keeping order
+            _, ix_ind = np.unique(ix, return_index=True)
+            ix = ix[np.sort(ix_ind)]
+
             X = mapping.invF(np.array([x, y])[:, None], ix)
+
+            # inside.shape = (x.shape[0] * 5, x.shape[0])
             inside = (
                 (X[0] >= 0) *
                 (X[1] >= 0) *
                 (1 - X[0] - X[1] >= 0)
             )
-            return np.array([ix[np.argmax(inside, axis=0)]]).flatten()
+            out = np.argmax(inside, axis=0)
+            return np.array([ix[out]]).flatten()
 
         return finder
