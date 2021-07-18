@@ -88,7 +88,7 @@ import numpy as np
 import pygmsh
 
 
-if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
+if hasattr(pygmsh, '__version__') and version.parse(pygmsh.__version__) < version.parse('7.0.0'):
     class NullContextManager():
         def __enter__(self):
             return None
@@ -111,7 +111,7 @@ def make_mesh(halfheight: float,  # mm
               length: float,
               thickness: float) -> MeshTri:
     with geometrycontext as g:
-        if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
+        if hasattr(pygmsh, '__version__') and version.parse(pygmsh.__version__) < version.parse('7.0.0'):
             geom = pygmsh.built_in.Geometry()
             geom.add_curve_loop = geom.add_line_loop
         else:
@@ -155,7 +155,7 @@ def make_mesh(halfheight: float,  # mm
         geom.add_physical(geom.add_plane_surface(geom.add_curve_loop(
             [*lines[-3:], -lines[1]])), 'solid')
 
-        if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
+        if hasattr(pygmsh.__version__) and version.parse(pygmsh.__version__) < version.parse('7.0.0'):
             return from_meshio(pygmsh.generate_mesh(geom, dim=2))
         else:
             return from_meshio(geom.generate_mesh(dim=2))
