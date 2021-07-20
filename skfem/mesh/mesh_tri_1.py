@@ -332,15 +332,13 @@ class MeshTri1(Mesh2D):
         tree = self._cached_tree
         nelems = self.t.shape[1]
 
-        def finder(x, y, _exhaustive=False):
+        def finder(x, y, ncandidates=5):
 
-            if _exhaustive or x.shape[0] > nelems:
-                # search all elements if forced by the flag or if there is a
-                # large number of points
-                ix = None
-            else:
-                ix = tree.query(np.array([x, y]).T,
-                                min(5, nelems))[1].flatten()
+            ix = tree.query(np.array([x, y]).T,
+                            min(ncandidates, nelems))[1].flatten()
+            if len(ix) > nelems:
+                _, ix_ind = np.unique(ix, return_index=True)
+                ix = ix[np.sort(ix_ind)]
 
             X = mapping.invF(np.array([x, y])[:, None], ix)
             inside = ((X[0] >= 0) *
@@ -348,12 +346,6 @@ class MeshTri1(Mesh2D):
                       (1 - X[0] - X[1] >= 0))
             elems = np.argmax(inside, axis=0)
 
-            if ix is not None and not inside[elems].any(axis=0).all():
-                warnings.warn("Falling back to exhaustive search because the "
-                              "correct element was not among the nearest "
-                              "candidates.")
-                return finder(x, y, _exhaustive=True)
-
-            return elems if ix is None else np.array([ix[elems]]).flatten()
+            return np.array([ix[elems]]).flatten()
 
         return finder

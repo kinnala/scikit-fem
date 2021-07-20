@@ -265,7 +265,7 @@ def test_finder_simplex(m):
         query_pts = np.random.rand(m.p.shape[0], 500)
         assert_array_equal(
             tri.find_simplex(query_pts.T),
-            finder(*query_pts)
+            finder(*query_pts, ncandidates=15)
         )
 
 
