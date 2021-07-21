@@ -258,7 +258,7 @@ with respect to documented and/or tested features.
 - Fixed: `Mesh.mirrored` returned a wrong mesh when a point other than the origin was used
 - Fixed: `MeshLine` constructor accepted only NumPy arrays and not plain Python lists
 - Fixed: `Mesh.element_finder` (and `CellBasis.probes` and `CellBasis.interpolator`) was not working properly for a small number of elements (<5) or a large number of input points (>1000)
-- Fixed: `Mesh.element_finder` is now more robust against degenerate triangles and tetrahedra
+- Fixed: `Mesh.element_finder` is now slightly more robust against degenerate tetrahedra
 
 ### [3.1.0] - 2021-06-18
 
