@@ -245,28 +245,29 @@ class TestFinder1DLinspaced(TestCase):
 
 
 @pytest.mark.parametrize(
-    "m",
+    "m,seed",
     [
-        MeshTri(),
-        MeshTet(),
+        (MeshTri(), 0),
+        (MeshTri(), 1),
+        (MeshTri(), 2),
+        (MeshTet(), 0),
+        (MeshTet(), 1),
+        (MeshTet(), 2),
     ]
 )
-def test_finder_simplex(m):
+def test_finder_simplex(m, seed):
 
-    m = m.refined(3)
-
-    for seed in range(10):
-        np.random.seed(seed)
-        points = np.hstack((m.p, np.random.rand(m.p.shape[0], 100)))
-        tri = Delaunay(points.T)
-        M = type(m)(points, tri.simplices.T)
-        finder = M.element_finder()
-
-        query_pts = np.random.rand(m.p.shape[0], 500)
-        assert_array_equal(
-            tri.find_simplex(query_pts.T),
-            finder(*query_pts, ncandidates=15)
-        )
+    np.random.seed(seed)
+    points = np.hstack((m.p, np.random.rand(m.p.shape[0], 100)))
+    tri = Delaunay(points.T)
+    M = type(m)(points, tri.simplices.T)
+    finder = M.element_finder()
+    
+    query_pts = np.random.rand(m.p.shape[0], 500)
+    assert_array_equal(
+        tri.find_simplex(query_pts.T),
+        finder(*query_pts),
+    )
 
 
 @pytest.mark.parametrize(

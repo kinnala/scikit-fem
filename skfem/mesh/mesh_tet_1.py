@@ -40,10 +40,10 @@ class MeshTet1(Mesh3D):
         tree = self._cached_tree
         nelems = self.t.shape[1]
 
-        def finder(x, y, z, ncandidates=8):
+        def finder(x, y, z):
 
             ix = tree.query(np.array([x, y, z]).T,
-                            min(ncandidates, nelems))[1].flatten()
+                            min(10, nelems))[1].flatten()
             if len(ix) > nelems:
                 _, ix_ind = np.unique(ix, return_index=True)
                 ix = ix[np.sort(ix_ind)]

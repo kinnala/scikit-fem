@@ -331,10 +331,10 @@ class MeshTri1(Mesh2D):
         tree = self._cached_tree
         nelems = self.t.shape[1]
 
-        def finder(x, y, ncandidates=5):
+        def finder(x, y):
 
             ix = tree.query(np.array([x, y]).T,
-                            min(ncandidates, nelems))[1].flatten()
+                            min(5, nelems))[1].flatten()
             if len(ix) > nelems:
                 _, ix_ind = np.unique(ix, return_index=True)
                 ix = ix[np.sort(ix_ind)]
