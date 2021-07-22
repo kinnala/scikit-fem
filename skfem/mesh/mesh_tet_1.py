@@ -44,9 +44,8 @@ class MeshTet1(Mesh3D):
 
             ix = tree.query(np.array([x, y, z]).T,
                             min(10, nelems))[1].flatten()
-            if len(ix) > nelems:
-                _, ix_ind = np.unique(ix, return_index=True)
-                ix = ix[np.sort(ix_ind)]
+            _, ix_ind = np.unique(ix, return_index=True)
+            ix = ix[np.sort(ix_ind)]
 
             X = mapping.invF(np.array([x, y, z])[:, None], ix)
             inside = ((X[0] >= 0) *
