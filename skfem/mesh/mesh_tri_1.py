@@ -1,3 +1,4 @@
+import warnings
 from dataclasses import dataclass, replace
 from typing import Type
 
@@ -342,8 +343,10 @@ class MeshTri1(Mesh2D):
             inside = ((X[0] >= 0) *
                       (X[1] >= 0) *
                       (1 - X[0] - X[1] >= 0))
-            elems = np.argmax(inside, axis=0)
 
-            return np.array([ix[elems]]).flatten()
+            if not inside.max(axis=0).all():
+                warnings.warn("Unable to find elements for all points.")
+
+            return np.array([ix[inside.argmax(axis=0)]]).flatten()
 
         return finder
