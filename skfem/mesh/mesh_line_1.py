@@ -74,6 +74,7 @@ class MeshLine1(Mesh):
         return np.max(np.abs(self.p[0, self.t[1]] - self.p[0, self.t[0]]))
 
     def element_finder(self, mapping=None):
+
         ix = np.argsort(self.p[0])
         maxt = self.t[np.argmax(self.p[0, self.t], 0),
                       np.arange(self.t.shape[1])]
@@ -81,8 +82,11 @@ class MeshLine1(Mesh):
         def finder(x):
             xin = x.copy()  # bring endpoint inside for np.digitize
             xin[x == self.p[0, ix[-1]]] = self.p[0, ix[-2:]].mean()
-            return np.nonzero(ix[np.digitize(xin, self.p[0, ix])][:, None]
-                              == maxt)[1]
+            elems = np.nonzero(ix[np.digitize(xin, self.p[0, ix])][:, None]
+                               == maxt)[1]
+            if len(elems) < len(x):
+                raise ValueError("Point is outside of the mesh.")
+            return elems
 
         return finder
 
