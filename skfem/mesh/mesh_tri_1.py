@@ -1,4 +1,3 @@
-import warnings
 from dataclasses import dataclass, replace
 from typing import Type
 
@@ -332,12 +331,13 @@ class MeshTri1(Mesh2D):
         tree = self._cached_tree
         nelems = self.t.shape[1]
 
-        def finder(x, y):
+        def finder(x, y, ix=None):
 
-            ix = tree.query(np.array([x, y]).T,
-                            min(5, nelems))[1].flatten()
-            _, ix_ind = np.unique(ix, return_index=True)
-            ix = ix[np.sort(ix_ind)]
+            if ix is None:
+                ix = tree.query(np.array([x, y]).T,
+                                min(5, nelems))[1].flatten()
+                _, ix_ind = np.unique(ix, return_index=True)
+                ix = ix[np.sort(ix_ind)]
 
             X = mapping.invF(np.array([x, y])[:, None], ix)
             inside = ((X[0] >= 0) *
@@ -345,7 +345,7 @@ class MeshTri1(Mesh2D):
                       (1 - X[0] - X[1] >= 0))
 
             if not inside.max(axis=0).all():
-                warnings.warn("Unable to find elements for all points.")
+                return finder(x, y, ix=np.arange(nelems, dtype=np.int64))
 
             return np.array([ix[inside.argmax(axis=0)]]).flatten()
 

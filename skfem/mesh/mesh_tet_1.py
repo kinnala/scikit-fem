@@ -1,4 +1,3 @@
-import warnings
 from dataclasses import dataclass, replace
 from typing import Type
 
@@ -41,12 +40,13 @@ class MeshTet1(Mesh3D):
         tree = self._cached_tree
         nelems = self.t.shape[1]
 
-        def finder(x, y, z):
+        def finder(x, y, z, ix=None):
 
-            ix = tree.query(np.array([x, y, z]).T,
-                            min(10, nelems))[1].flatten()
-            _, ix_ind = np.unique(ix, return_index=True)
-            ix = ix[np.sort(ix_ind)]
+            if ix is None:
+                ix = tree.query(np.array([x, y, z]).T,
+                                min(10, nelems))[1].flatten()
+                _, ix_ind = np.unique(ix, return_index=True)
+                ix = ix[np.sort(ix_ind)]
 
             X = mapping.invF(np.array([x, y, z])[:, None], ix)
             inside = ((X[0] >= 0) *
@@ -55,7 +55,7 @@ class MeshTet1(Mesh3D):
                       (1 - X[0] - X[1] - X[2] >= 0))
 
             if not inside.max(axis=0).all():
-                warnings.warn("Unable to find elements for all points.")
+                return finder(x, y, z, ix=np.arange(nelems, dtype=np.int64))
 
             return np.array([ix[inside.argmax(axis=0)]]).flatten()
 

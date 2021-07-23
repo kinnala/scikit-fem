@@ -253,6 +253,7 @@ class TestFinder1DLinspaced(TestCase):
         (MeshTet(), 0),
         (MeshTet(), 1),
         (MeshTet(), 2),
+        (MeshTet(), 10),
     ]
 )
 def test_finder_simplex(m, seed):
