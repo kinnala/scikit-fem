@@ -257,8 +257,9 @@ with respect to documented and/or tested features.
 - Added: `ElementTriCCR` and `ElementTetCCR`, conforming Crouzeix-Raviart finite elements
 - Fixed: `Mesh.mirrored` returned a wrong mesh when a point other than the origin was used
 - Fixed: `MeshLine` constructor accepted only NumPy arrays and not plain Python lists
-- Fixed: `Mesh.element_finder` (and `CellBasis.probes` and `CellBasis.interpolator`) was not working properly for a small number of elements (<5) or a large number of input points (>1000)
-- Fixed: `MeshTet.element_finder` is now slightly more robust against degenerate tetrahedra
+- Fixed: `Mesh.element_finder` (and `CellBasis.probes`, `CellBasis.interpolator`) was not working properly for a small number of elements (<5) or a large number of input points (>1000)
+- Fixed: `MeshTet` and `MeshTri.element_finder` is are now more robust against degenerate elements
+- Fixed: `Mesh.element_finder` (and `CellBasis.probes`, `CellBasis.interpolator`) raises exception if the query point is outside of the domain
 
 ### [3.1.0] - 2021-06-18
 
