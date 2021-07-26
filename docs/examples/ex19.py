@@ -15,13 +15,15 @@ homogeneous Dirichlet boundary conditions, the modes are products of a
 cosine in each direction,
 
 .. math::
-    \exp \left\{
+    \exp \left[
       -\frac{\kappa\pi^2 t}{4}
-      \left(
-        \frac{2n_0 + 1}{w_0^2} + \frac{2n_1 + 1}{w_1^2}
-      \right)
-    \right\}
-    \cos\frac{\pi x}{2w_0}\cos\frac{\pi y}{2w_1}
+      \left\{
+        \left(\frac{2n_0 + 1}{w_0}\right)^2 + 
+        \left(\frac{2n_1 + 1}{w_1}\right)^2
+      \right\}
+    \right]
+    \cos\frac{(2n_0 + 1)\pi x}{2w_0}
+    \cos\frac{(2n_1 + 1)\pi y}{2w_1}
 for :math:`n_0, n_1 = 0, 1, 2, \ldots`.
 
 Here we simulate the decay of the fundamental, :math:`n_0 = n_1 = 0`,
