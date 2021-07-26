@@ -18,7 +18,7 @@ cosine in each direction,
     \exp \left[
       -\frac{\kappa\pi^2 t}{4}
       \left\{
-        \left(\frac{2n_0 + 1}{w_0}\right)^2 + 
+        \left(\frac{2n_0 + 1}{w_0}\right)^2 +
         \left(\frac{2n_1 + 1}{w_1}\right)^2
       \right\}
     \right]
@@ -104,7 +104,7 @@ if __name__ == '__main__':
     fig.colorbar(field)
 
     probe = basis.probes(np.zeros((2, 1)))
-    
+
     def update(event):
         t, u = event
 
