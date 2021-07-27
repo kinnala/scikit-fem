@@ -138,13 +138,7 @@ def plot_meshline(m: MeshLine, z: ndarray, **kwargs):
         ax = kwargs["ax"]
 
     color = kwargs["color"] if "color" in kwargs else 'ko-'
-    ax.plot(
-        *[
-            np.vstack([a[m.t], np.full(m.t.shape[1:], None)]).flatten("F")
-            for a in [m.p[0], z]
-        ],
-        color
-    )
+    ax.plot(*[m.segment_data(a) for a in [m.p[0], z]], color)
 
     return ax
 

@@ -107,9 +107,7 @@ if __name__ == "__main__":
         # skfem.visuals.matplotlib.plot_meshline plots a segment for
         # each cell, separating them with a "None".
 
-        field.set_ydata(
-            np.vstack([u[mesh.t], np.full(mesh.t.shape[1:], None)]).flatten("F")
-        )
+        field.set_ydata(mesh.segment_data(u))
 
     animation = FuncAnimation(fig, update, evolve(0.0, u_init), repeat=False)
     if args.gif:
