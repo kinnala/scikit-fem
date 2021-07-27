@@ -22,7 +22,6 @@ discretizing time using the generalized ('theta method') trapezoidal
 rule.
 
 """
-from skfem.mesh import MeshLine
 from typing import Iterator, Tuple
 
 import numpy as np
@@ -38,7 +37,7 @@ diffusivity = 5.0
 
 mesh = MeshLine(np.linspace(-1, 1, 2 * ncells) * halfwidth)
 
-element = ElementLineP1()
+element = ElementLineP2()  # or ElementLineP1
 basis = Basis(mesh, element)
 
 L = diffusivity * asm(laplace, basis)
@@ -53,7 +52,7 @@ B = M0 - (1 - theta) * L0 * dt
 
 backsolve = splu(A.T).solve  # .T as splu prefers CSC
 
-u_init = np.cos(np.pi * mesh.p[0, :] / 2 / halfwidth)
+u_init = np.cos(np.pi * basis.doflocs[0] / 2 / halfwidth)
 
 
 def evolve(t: float, u: np.ndarray) -> Iterator[Tuple[float, np.ndarray]]:
@@ -79,7 +78,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    ax = plot(mesh, u_init)
+    ax = plot(mesh, u_init[basis.nodal_dofs.flatten()])
     ax.set_xlabel(r"$x/w$")
     ax.set_ylabel(r"reduced temperature, $u(x, t)/u(0, 0)$")
     ax.set_xlim(-halfwidth, halfwidth)
