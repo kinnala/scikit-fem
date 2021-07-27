@@ -114,7 +114,7 @@ if __name__ == '__main__':
             t, u0['skfem'], u0['skfem'] - u0['exact']))
 
         title.set_text(f'$t$ = {t:.2f}')
-        field.set_array(u)
+        field.set_array(u[basis.nodal_dofs.flatten()])
 
     animation = FuncAnimation(fig, update, evolve(0., u_init), repeat=False)
     if args.gif:
