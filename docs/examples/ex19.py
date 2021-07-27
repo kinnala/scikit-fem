@@ -55,7 +55,7 @@ mesh = MeshQuad.init_tensor(
     np.linspace(-1, 1, 2 * ncells * ceil(halfwidth[1] //
                                          halfwidth[0])) * halfwidth[1])
 
-element = ElementQuad1()
+element = ElementQuad2()  # or ElementQuad1
 basis = Basis(mesh, element)
 
 L = diffusivity * asm(laplace, basis)
@@ -70,8 +70,7 @@ B = M0 - (1 - theta) * L0 * dt
 
 backsolve = splu(A.T).solve  # .T as splu prefers CSC
 
-u_init = (np.cos(np.pi * mesh.p[0, :] / 2 / halfwidth[0])
-          * np.cos(np.pi * mesh.p[1, :] / 2 / halfwidth[1]))
+u_init = np.cos(np.pi * basis.doflocs / 2 / halfwidth[:, None]).prod(0)
 
 
 def evolve(t: float,
@@ -97,7 +96,7 @@ if __name__ == '__main__':
                         help='write animated GIF', )
     args = parser.parse_args()
 
-    ax = plot(mesh, u_init, shading='gouraud')
+    ax = plot(mesh, u_init[basis.nodal_dofs.flatten()], shading='gouraud')
     title = ax.set_title('t = 0.00')
     field = ax.get_children()[0]  # vertex-based temperature-colour
     fig = ax.get_figure()
