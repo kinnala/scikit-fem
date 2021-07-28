@@ -89,10 +89,3 @@ class MeshLine1(Mesh):
     @staticmethod
     def strip_extra_coordinates(p: ndarray) -> ndarray:
         return p[:, :1]
-
-    def segment_data(self, u: ndarray) -> ndarray:
-        """return data over termini of cells, separated by None
-        
-        for use with :method:`plot`.
-        """
-        return np.vstack([u[self.t], np.full(self.t.shape[1:], None)]).flatten("F")
