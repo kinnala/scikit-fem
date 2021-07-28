@@ -88,15 +88,7 @@ import numpy as np
 import pygmsh
 
 
-if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
-    class NullContextManager():
-        def __enter__(self):
-            return None
-        def __exit__(self, *args):
-            pass
-    geometrycontext = NullContextManager()
-else:
-    geometrycontext = pygmsh.geo.Geometry()
+geometrycontext = pygmsh.geo.Geometry()
 
 halfheight = 1.
 length = 10.
@@ -110,17 +102,12 @@ peclet = 357.
 def make_mesh(halfheight: float,  # mm
               length: float,
               thickness: float) -> MeshTri:
-    with geometrycontext as g:
-        if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
-            geom = pygmsh.built_in.Geometry()
-            geom.add_curve_loop = geom.add_line_loop
-        else:
-            geom = g
+    with geometrycontext as geom:
 
         points = []
         lines = []
 
-        lcar = halfheight / 2**2
+        lcar = halfheight / 2 ** 2
 
         for xy in [(0., halfheight),
                    (0., -halfheight),
@@ -155,10 +142,7 @@ def make_mesh(halfheight: float,  # mm
         geom.add_physical(geom.add_plane_surface(geom.add_curve_loop(
             [*lines[-3:], -lines[1]])), 'solid')
 
-        if version.parse(pygmsh.__version__) < version.parse('7.0.0'):
-            return from_meshio(pygmsh.generate_mesh(geom, dim=2))
-        else:
-            return from_meshio(geom.generate_mesh(dim=2))
+        return from_meshio(geom.generate_mesh(dim=2))
 
 mesh = from_file(Path(__file__).parent / 'meshes' / 'ex28.json')
 element = ElementTriP1()
