@@ -70,22 +70,20 @@ if __name__ == "__main__":
     from matplotlib.animation import FuncAnimation
     import matplotlib.pyplot as plt
 
-    from skfem.visuals.matplotlib import plot
-
     parser = ArgumentParser(description="heat equation in a slab")
     parser.add_argument(
         "-g", "--gif", action="store_true", help="write animated GIF",
     )
     args = parser.parse_args()
 
-    ax = plot(mesh, u_init[basis.nodal_dofs.flatten()])
+    sorting = np.argsort(basis.doflocs)[0]
+    fig, ax = plt.subplots()
     ax.set_xlabel(r"$x/w$")
     ax.set_ylabel(r"reduced temperature, $u(x, t)/u(0, 0)$")
     ax.set_xlim(-halfwidth, halfwidth)
     ax.set_ylim(0, 1)
     title = ax.set_title("t = 0.00")
-    field = ax.get_children()[0]  # vertex-based temperature-colour
-    fig = ax.get_figure()
+    line = ax.plot(basis.doflocs[0, sorting], u_init[sorting], marker="o")[0]
 
     probe = basis.probes(np.zeros((mesh.dim(), 1)))
 
@@ -103,11 +101,7 @@ if __name__ == "__main__":
         )
 
         title.set_text(f"$t$ = {t:.2f}")
-
-        # skfem.visuals.matplotlib.plot_meshline plots a segment for
-        # each cell, separating them with a "None".
-
-        field.set_ydata(mesh.segment_data(u))
+        line.set_ydata(u[sorting])
 
     animation = FuncAnimation(fig, update, evolve(0.0, u_init), repeat=False)
     if args.gif:
