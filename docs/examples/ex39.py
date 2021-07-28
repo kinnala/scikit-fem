@@ -80,10 +80,10 @@ if __name__ == "__main__":
     fig, ax = plt.subplots()
     ax.set_xlabel(r"$x/w$")
     ax.set_ylabel(r"reduced temperature, $u(x, t)/u(0, 0)$")
-    ax.set_xlim(-halfwidth, halfwidth)
+    ax.set_xlim(-0.5, 0.5)
     ax.set_ylim(0, 1)
     title = ax.set_title("t = 0.00")
-    line = ax.plot(basis.doflocs[0, sorting], u_init[sorting], marker="o")[0]
+    line = ax.plot(basis.doflocs[0, sorting] / 2 / halfwidth, u_init[sorting], marker="o")[0]
 
     probe = basis.probes(np.zeros((mesh.dim(), 1)))
 
