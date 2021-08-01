@@ -325,16 +325,32 @@ class MeshTri1(Mesh2D):
         if mapping is None:
             mapping = self._mapping()
 
-        tree = cKDTree(np.mean(self.p[:, self.t], axis=1).T)
+        if not hasattr(self, '_cached_tree'):
+            self._cached_tree = cKDTree(np.mean(self.p[:, self.t], axis=1).T)
 
-        def finder(x, y):
-            ix = tree.query(np.array([x, y]).T, 5)[1].flatten()
+        tree = self._cached_tree
+        nelems = self.t.shape[1]
+
+        def finder(x, y, _search_all=False):
+
+            if not _search_all:
+                ix = tree.query(np.array([x, y]).T,
+                                min(5, nelems))[1].flatten()
+                _, ix_ind = np.unique(ix, return_index=True)
+                ix = ix[np.sort(ix_ind)]
+            else:
+                ix = np.arange(nelems, dtype=np.int64)
+
             X = mapping.invF(np.array([x, y])[:, None], ix)
-            inside = (
-                (X[0] >= 0) *
-                (X[1] >= 0) *
-                (1 - X[0] - X[1] >= 0)
-            )
-            return np.array([ix[np.argmax(inside, axis=0)]]).flatten()
+            inside = ((X[0] >= 0) *
+                      (X[1] >= 0) *
+                      (1 - X[0] - X[1] >= 0))
+
+            if not inside.max(axis=0).all():
+                if _search_all:
+                    raise ValueError("Point is outside of the mesh.")
+                return finder(x, y, _search_all=True)
+
+            return np.array([ix[inside.argmax(axis=0)]]).flatten()
 
         return finder
