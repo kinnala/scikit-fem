@@ -6,7 +6,7 @@ from numpy.testing import assert_allclose, assert_almost_equal
 
 from skfem import BilinearForm, asm, solve, condense, projection
 from skfem.mesh import MeshTri, MeshTet, MeshHex, MeshQuad, MeshLine
-from skfem.assembly import InteriorBasis, FacetBasis, Dofs, Functional
+from skfem.assembly import CellBasis, FacetBasis, Dofs, Functional
 from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
                            ElementTetP2, ElementHexS2, ElementHex2,
                            ElementQuad2, ElementLineP2, ElementTriP0,
@@ -28,7 +28,7 @@ class TestCompositeSplitting(TestCase):
 
         e = ElementVectorH1(ElementTriP2()) * ElementTriP1()
 
-        basis = InteriorBasis(m, e)
+        basis = CellBasis(m, e)
 
         @BilinearForm
         def bilinf(u, p, v, q, w):
@@ -93,7 +93,7 @@ class TestFacetExpansion(TestCase):
 
         m = self.mesh_type().refined(2)
 
-        basis = InteriorBasis(m, self.elem_type())
+        basis = CellBasis(m, self.elem_type())
 
         for fun in [lambda x: x[0] == 0,
                     lambda x: x[0] == 1,
@@ -128,7 +128,7 @@ class TestInterpolatorTet(TestCase):
 
     def runTest(self):
         m = self.mesh_type().refined(self.nrefs)
-        basis = InteriorBasis(m, self.element_type())
+        basis = CellBasis(m, self.element_type())
         x = projection(lambda x: x[0] ** 2, basis)
         fun = basis.interpolator(x)
         X = np.linspace(0, 1, 10)
@@ -187,7 +187,38 @@ class TestIncompatibleMeshElement(TestCase):
         with self.assertRaises(ValueError):
             m = MeshTri()
             e = ElementTetP2()
-            basis = InteriorBasis(m, e)
+            basis = CellBasis(m, e)
+
+
+@pytest.mark.parametrize(
+    "mtype,e,nrefs,npoints",
+    [
+        (MeshTri, ElementTriP1(), 0, 10),
+        (MeshTri, ElementTriP2(), 1, 10),
+        (MeshTri, ElementTriP1(), 5, 10),
+        (MeshTri, ElementTriP1(), 1, 3e5),
+        (MeshTet, ElementTetP2(), 1, 10),
+        (MeshTet, ElementTetP1(), 5, 10),
+        (MeshTet, ElementTetP1(), 1, 3e5),
+        (MeshQuad, ElementQuad1(), 1, 10),
+        (MeshQuad, ElementQuad1(), 1, 3e5),
+        (MeshHex, ElementHex1(), 1, 1e5),
+    ]
+)
+def test_interpolator_probes(mtype, e, nrefs, npoints):
+
+    m = mtype().refined(nrefs)
+
+    np.random.seed(0)
+    X = np.random.rand(m.p.shape[0], int(npoints))
+
+    basis = CellBasis(m, e)
+
+    y = projection(lambda x: x[0] ** 2, basis)
+
+    assert_allclose(basis.probes(X) @ y, basis.interpolator(y)(X))
+    atol = 1e-1 if nrefs <= 1 else 1e-3
+    assert_allclose(basis.probes(X) @ y, X[0] ** 2, atol=atol)
 
 
 @pytest.mark.parametrize(
@@ -215,7 +246,7 @@ def test_trace(mtype, e1, e2):
     # use the boundary where last coordinate is zero
     basis = FacetBasis(m, e1,
                        facets=m.facets_satisfying(lambda x: x[x.shape[0] - 1] == 0.0))
-    xfun = projection(lambda x: x[0], InteriorBasis(m, e1))
+    xfun = projection(lambda x: x[0], CellBasis(m, e1))
     nbasis, y = basis.trace(xfun, lambda p: p[0:(p.shape[0] - 1)], target_elem=e2)
 
     @Functional
@@ -235,7 +266,7 @@ def test_point_source(etype):
     from skfem.models.poisson import laplace
 
     mesh = MeshLine().refined()
-    basis = InteriorBasis(mesh, etype())
+    basis = CellBasis(mesh, etype())
     source = np.array([0.7])
     u = solve(*condense(asm(laplace, basis), basis.point_source(source), D=basis.find_dofs()))
     exact = np.stack([(1 - source) * mesh.p, (1 - mesh.p) * source]).min(0)
