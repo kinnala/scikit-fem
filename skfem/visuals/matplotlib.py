@@ -141,7 +141,6 @@ def plot_meshline(m: MeshLine, z: ndarray, **kwargs):
     ys = []
 
     color = kwargs["color"] if "color" in kwargs else 'ko-'
-<<<<<<< HEAD
     for y1, y2, s, t in zip(z[m.t[0]],
                             z[m.t[1]],
                             m.p[0, m.t[0]],
@@ -154,15 +153,6 @@ def plot_meshline(m: MeshLine, z: ndarray, **kwargs):
         ys.append(None)
 
     ax.plot(xs, ys, color)
-=======
-    ax.plot(
-        *[
-            np.vstack([a[m.t], np.full(m.t.shape[1:], None)]).flatten("F")
-            for a in [m.p[0], z]
-        ],
-        color
-    )
->>>>>>> parent of ad43d00 (abstract MeshLine1.segment_data for use with plot (& replotting as in #674))
 
     return ax
 
