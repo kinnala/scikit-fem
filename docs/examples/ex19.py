@@ -15,13 +15,15 @@ homogeneous Dirichlet boundary conditions, the modes are products of a
 cosine in each direction,
 
 .. math::
-    \exp \left\{
+    \exp \left[
       -\frac{\kappa\pi^2 t}{4}
-      \left(
-        \frac{2n_0 + 1}{w_0^2} + \frac{2n_1 + 1}{w_1^2}
-      \right)
-    \right\}
-    \cos\frac{\pi x}{2w_0}\cos\frac{\pi y}{2w_1}
+      \left\{
+        \left(\frac{2n_0 + 1}{w_0}\right)^2 +
+        \left(\frac{2n_1 + 1}{w_1}\right)^2
+      \right\}
+    \right]
+    \cos\frac{(2n_0 + 1)\pi x}{2w_0}
+    \cos\frac{(2n_1 + 1)\pi y}{2w_1}
 for :math:`n_0, n_1 = 0, 1, 2, \ldots`.
 
 Here we simulate the decay of the fundamental, :math:`n_0 = n_1 = 0`,
@@ -38,7 +40,6 @@ from math import ceil
 from typing import Iterator, Tuple
 
 import numpy as np
-from scipy.sparse import csr_matrix
 from scipy.sparse.linalg import splu
 
 from skfem import *
@@ -54,7 +55,7 @@ mesh = MeshQuad.init_tensor(
     np.linspace(-1, 1, 2 * ncells * ceil(halfwidth[1] //
                                          halfwidth[0])) * halfwidth[1])
 
-element = ElementQuad1()
+element = ElementQuad2()  # or ElementQuad1
 basis = Basis(mesh, element)
 
 L = diffusivity * asm(laplace, basis)
@@ -69,8 +70,7 @@ B = M0 - (1 - theta) * L0 * dt
 
 backsolve = splu(A.T).solve  # .T as splu prefers CSC
 
-u_init = (np.cos(np.pi * mesh.p[0, :] / 2 / halfwidth[0])
-          * np.cos(np.pi * mesh.p[1, :] / 2 / halfwidth[1]))
+u_init = np.cos(np.pi * basis.doflocs / 2 / halfwidth[:, None]).prod(0)
 
 
 def evolve(t: float,
@@ -96,14 +96,14 @@ if __name__ == '__main__':
                         help='write animated GIF', )
     args = parser.parse_args()
 
-    ax = plot(mesh, u_init, shading='gouraud')
+    ax = plot(mesh, u_init[basis.nodal_dofs.flatten()], shading='gouraud')
     title = ax.set_title('t = 0.00')
     field = ax.get_children()[0]  # vertex-based temperature-colour
     fig = ax.get_figure()
     fig.colorbar(field)
 
     probe = basis.probes(np.zeros((2, 1)))
-    
+
     def update(event):
         t, u = event
 
@@ -114,7 +114,7 @@ if __name__ == '__main__':
             t, u0['skfem'], u0['skfem'] - u0['exact']))
 
         title.set_text(f'$t$ = {t:.2f}')
-        field.set_array(u)
+        field.set_array(u[basis.nodal_dofs.flatten()])
 
     animation = FuncAnimation(fig, update, evolve(0., u_init), repeat=False)
     if args.gif:
