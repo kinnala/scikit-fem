@@ -4,7 +4,6 @@
 
 <p align="center">
 <a href="https://pypi.org/project/scikit-fem/" alt="PyPI"><img src="https://img.shields.io/pypi/v/scikit-fem" /></a>
-<a href="https://anaconda.org/conda-forge/scikit-fem" alt="Conda"><img src="https://img.shields.io/conda/vn/conda-forge/scikit-fem" /></a>
 <a href="https://scikit-fem.readthedocs.io/" alt="Documentation"><img src="https://readthedocs.org/projects/pip/badge/?version=stable" /></a>
 <a href="https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e" alt="status"><img src="https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e/status.svg" /></a>
 <a href="https://github.com/kinnala/scikit-fem/actions" alt="Tests"><img src="https://github.com/kinnala/scikit-fem/workflows/tests/badge.svg" /></a>
@@ -30,14 +29,10 @@ The most recent release can be installed simply by
 ```
 pip install scikit-fem
 ```
-or
-```
-conda install -c conda-forge scikit-fem
-```
 
 ## Examples
 
-Solve the Poisson problem (see also [`ex01.py`](docs/examples/ex01.py)):
+Solve the Poisson problem (see also [`ex01.py`](https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex01.py)):
 ```python
 from skfem import *
 from skfem.helpers import dot, grad
@@ -227,9 +222,8 @@ e.g., to ensure reproducibility.
 ## In literature
 
 The library has been used in the preparation of the following scientific works.
-Feel free to add your publication to the list.
 
-- Gustafsson, T. & Videman, J. (2021). Stabilized finite elements for Tresca friction problem. arXiv preprint [https://arxiv.org/abs/2106.12165](https://arxiv.org/abs/2106.12165).
+- Gustafsson, T. & Videman, J. (2021). Stabilized finite elements for Tresca friction problem. arXiv preprint [arxiv:2106.12165](https://arxiv.org/abs/2106.12165).
 - Gustafsson, T. (2020). A simple technique for unstructured mesh generation via adaptive finite elements. arXiv preprint [arXiv:2011.07919](https://arxiv.org/abs/2011.07919).
 - Huang, X., Shi, Y., & Wang, W. (2020). A Morley-Wang-Xu element method for a fourth order elliptic singular perturbation problem. arXiv preprint [arXiv:2011.14064](https://arxiv.org/abs/2011.14064).
 - Gustafsson, T., Stenberg, R., & Videman, J. (2020). Nitsche's method for Kirchhoff plates. arXiv preprint [arXiv:2007.00403](https://arxiv.org/abs/2007.00403).
@@ -246,6 +240,8 @@ Feel free to add your publication to the list.
 - Gustafsson, T., Stenberg, R., & Videman, J. (2017). Nitsche’s Method for the Obstacle Problem of Clamped Kirchhoff Plates. In European Conference on Numerical Mathematics and Advanced Applications, 407–415. Springer.
 - Gustafsson, T., Stenberg, R., & Videman, J. (2017). A posteriori analysis of classical plate elements. Rakenteiden Mekaniikka, 50(3), 141–145. [Open access](https://rakenteidenmekaniikka.journal.fi/article/view/65004/26450).
 
+Feel free to open a PR to add your publication to the list.
+
 ## Changelog
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -254,11 +250,13 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+### [3.2.0] - 2021-08-02
+
 - Added: `ElementTriCCR` and `ElementTetCCR`, conforming Crouzeix-Raviart finite elements
 - Fixed: `Mesh.mirrored` returned a wrong mesh when a point other than the origin was used
 - Fixed: `MeshLine` constructor accepted only NumPy arrays and not plain Python lists
 - Fixed: `Mesh.element_finder` (and `CellBasis.probes`, `CellBasis.interpolator`) was not working properly for a small number of elements (<5) or a large number of input points (>1000)
-- Fixed: `MeshTet` and `MeshTri.element_finder` is are now more robust against degenerate elements
+- Fixed: `MeshTet` and `MeshTri.element_finder` are now more robust against degenerate elements
 - Fixed: `Mesh.element_finder` (and `CellBasis.probes`, `CellBasis.interpolator`) raises exception if the query point is outside of the domain
 
 ### [3.1.0] - 2021-06-18
