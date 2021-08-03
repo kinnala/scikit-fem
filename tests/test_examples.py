@@ -220,7 +220,8 @@ class TestEx25(TestCase):
 class TestEx26(TestCase):
 
     def runTest(self):
-        import docs.examples.ex26 as ex26  # noqa
+        from docs.examples.ex26 import T0
+        self.assertAlmostEqual(*T0.values(), delta=2e-4)
 
 
 class TestEx27(TestCase):
