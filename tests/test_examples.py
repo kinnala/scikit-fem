@@ -205,6 +205,8 @@ class TestEx24(TestCase):
     def runTest(self):
         import docs.examples.ex24 as ex24  # noqa
 
+        self.assertAlmostEqual(min(ex24.vorticity), -0.05171085161096803)
+
 
 class TestEx25(TestCase):
 
