@@ -55,11 +55,18 @@ backsolve = splu(A.T).solve  # .T as splu prefers CSC
 u_init = np.cos(np.pi * basis.doflocs[0] / 2 / halfwidth)
 
 
+def exact(t: float) -> np.ndarray:
+    return np.exp(-diffusivity * (np.pi / 2 / halfwidth) ** 2 * t) * u_init
+
+
 def evolve(t: float, u: np.ndarray) -> Iterator[Tuple[float, np.ndarray]]:
 
     while np.linalg.norm(u, np.inf) > 2 ** -3:
         t, u = t + dt, backsolve(B @ u)
         yield t, u
+
+
+probe = basis.probes(np.zeros((mesh.dim(), 1)))
 
 
 if __name__ == "__main__":
@@ -85,14 +92,13 @@ if __name__ == "__main__":
     title = ax.set_title("t = 0.00")
     line = ax.plot(basis.doflocs[0, sorting] / 2 / halfwidth, u_init[sorting], marker="o")[0]
 
-    probe = basis.probes(np.zeros((mesh.dim(), 1)))
 
     def update(event):
         t, u = event
 
         u0 = {
             "skfem": (probe @ u)[0],
-            "exact": np.exp(-diffusivity * (np.pi / 2 / halfwidth) ** 2 * t),
+            "exact": (probe @ exact(t))[0],
         }
         print(
             "{:4.2f}, {:5.3f}, {:+7.4f}".format(

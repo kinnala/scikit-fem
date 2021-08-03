@@ -304,5 +304,14 @@ class TestEx38(TestCase):
         self.assertLess(l2error, 3e-3)
 
 
+class TestEx39(TestCase):
+
+    def runTest(self):
+        import docs.examples.ex39 as ex  # noqa
+
+        t, u = next(ex.evolve(0.0, ex.u_init))
+        self.assertAlmostEqual(*[(ex.probe @ s)[0] for s in [ex.exact(t), u]], 5)
+
+
 if __name__ == '__main__':
     main()
