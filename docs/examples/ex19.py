@@ -85,7 +85,7 @@ def evolve(t: float,
         yield t, u
 
 
-probe = basis.probes(np.zeros((2, 1)))
+probe = basis.probes(np.zeros((mesh.dim(), 1)))
 
 
 if __name__ == '__main__':
