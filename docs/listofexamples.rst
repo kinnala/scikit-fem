@@ -535,3 +535,16 @@ concentrated at a single interior point, :math:`\Delta u = \delta (\mathbf x - \
 
 See the `source code of Example 38 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex38.py>`_
 for more information.
+
+Example 39: One-dimensional heat equation
+=========================================
+
+This examples reduces the two-dimensional heat equation of Example 19 to
+demonstrate the special post-processing required.
+
+.. figure:: https://user-images.githubusercontent.com/1588947/127245280-981776b2-5f84-42af-b126-2acbff7a09c6.gif
+
+   The solution of Example 39.
+
+See the `source code of Example 39 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex39.py>`_
+for more information.
