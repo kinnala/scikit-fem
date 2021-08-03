@@ -281,6 +281,7 @@ def test_finder_simplex(m, seed):
         MeshTri2(),
         MeshQuad2(),
         MeshTet2(),
+        MeshLine(),
     ]
 )
 def test_meshio_cycle(m):
@@ -288,6 +289,28 @@ def test_meshio_cycle(m):
     M = from_meshio(to_meshio(m))
     assert_array_equal(M.p, m.p)
     assert_array_equal(M.t, m.t)
+
+
+_test_lambda = {
+    'left': lambda x: x[0] == 0,
+    'right': lambda x: x[0] == 1,
+}
+
+
+@pytest.mark.parametrize(
+    "m",
+    [
+        MeshTri().with_boundaries(_test_lambda),
+        MeshQuad().with_boundaries(_test_lambda),
+    ]
+)
+def test_meshio_cycle_boundaries(m):
+
+    M = from_meshio(to_meshio(m))
+    assert_array_equal(M.p, m.p)
+    assert_array_equal(M.t, m.t)
+    for key in m.boundaries:
+        assert_array_equal(M.boundaries[key], m.boundaries[key])
 
 
 @pytest.mark.parametrize(

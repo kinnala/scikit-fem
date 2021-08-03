@@ -19,6 +19,17 @@ MESH_TYPE_MAPPING = {
     'quad9': skfem.MeshQuad2,
 }
 
+BOUNDARY_TYPE_MAPPING = {
+    'line': 'vertex',
+    'triangle': 'line',
+    'quad': 'line',
+    'tetra': 'triangle',
+    'hexahedron': 'quad',
+    'tetra10': 'triangle',  # TODO support quadratic facets
+    'triangle6': 'line',  # TODO
+    'quad9': 'line',  # TODO
+}
+
 TYPE_MESH_MAPPING = {MESH_TYPE_MAPPING[k]: k
                      for k in dict(reversed(list(MESH_TYPE_MAPPING.items())))}
 
@@ -40,21 +51,36 @@ def from_meshio(m, force_mesh_type=None):
     A :class:`~skfem.mesh.Mesh` object.
 
     """
-
     cells = m.cells_dict
 
     if force_mesh_type is None:
         meshio_type = None
 
-        for k, v in MESH_TYPE_MAPPING.items():
-            # find first if match
-            if k in cells:
-                meshio_type, mesh_type = k, v
+        # detect 3D
+        for k in cells:
+            if k in {'tetra', 'hexahedron', 'tetra10'}:
+                meshio_type = k
                 break
+
+        if meshio_type is None:
+            # detect 2D
+            for k in cells:
+                if k in {'triangle', 'quad', 'triangle6', 'quad9'}:
+                    meshio_type = k
+                    break
+
+        if meshio_type is None:
+            # detect 1D
+            for k in cells:
+                if k == 'line':
+                    meshio_type = k
+                    break
 
         if meshio_type is None:
             raise NotImplementedError("Mesh type(s) not supported "
                                       "in import: {}.".format(cells.keys()))
+
+        mesh_type = MESH_TYPE_MAPPING[meshio_type]
     else:
         meshio_type, mesh_type = (force_mesh_type,
                                   MESH_TYPE_MAPPING[force_mesh_type])
@@ -70,14 +96,7 @@ def from_meshio(m, force_mesh_type=None):
     mtmp = mesh_type(p, t)
 
     try:
-        # element to boundary element type mapping
-        bnd_type = {
-            'line': 'vertex',
-            'triangle': 'line',
-            'quad': 'line',
-            'tetra': 'triangle',
-            'hexahedron': 'quad',
-        }[meshio_type]
+        bnd_type = BOUNDARY_TYPE_MAPPING[meshio_type]
 
         def find_tagname(tag):
             for key in m.field_data:
@@ -141,14 +160,44 @@ def from_file(filename):
     return from_meshio(meshio.read(filename))
 
 
-def to_meshio(mesh, point_data=None):
+def to_meshio(mesh,
+              point_data=None,
+              cell_data=None):
 
     t = mesh.dofs.element_dofs.copy()
     if isinstance(mesh, skfem.MeshHex):
         t = t[[0, 3, 6, 2, 1, 5, 7, 4]]
 
-    cells = {TYPE_MESH_MAPPING[type(mesh)]: t.T}
-    return meshio.Mesh(mesh.p.T, cells, point_data)
+    mtype = TYPE_MESH_MAPPING[type(mesh)]
+    bmtype = BOUNDARY_TYPE_MAPPING[mtype]
+    cells = {
+        mtype: t.T,
+        bmtype: mesh.facets[:, mesh.boundary_facets()].T,
+    }
+
+    # write named subsets
+    cell_sets = {}
+    if mesh.subdomains is not None:
+        for key in mesh.subdomains:
+            cell_sets[key] = [
+                mesh.subdomains[key],
+                np.array([], dtype=np.int64),
+            ]
+
+    if mesh.boundaries is not None:
+        for key in mesh.boundaries:
+            cell_sets[key] = [
+                np.array([], dtype=np.int64),
+                mesh.boundaries[key] + t.shape[1],
+            ]
+
+    return meshio.Mesh(
+        mesh.p.T,
+        cells,
+        point_data=point_data,
+        cell_data=cell_data,
+        cell_sets=cell_sets,
+    )
 
 
 def to_file(mesh, filename, point_data=None, **kwargs):
