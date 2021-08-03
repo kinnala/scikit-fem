@@ -136,10 +136,23 @@ class TestEx17(TestCase):
 
 
 class TestEx18(TestCase):
-
     def runTest(self):
         import docs.examples.ex18 as ex  # noqa
-        # TODO improve
+
+        self.assertAlmostEqual(
+            (ex.basis["psi"].probes(np.zeros((ex.mesh.dim(), 1))) @ ex.psi)[0],
+            1 / 64,
+            3,
+        )
+
+        self.assertLess(
+            np.linalg.norm(
+                ex.basis["p"].probes(np.array([[-0.5, 0.0, 0.5], [0.5, 0.5, 0.5]]))
+                @ ex.pressure
+                - [-1 / 8, 0, +1 / 8]
+            ),
+            1e-3,
+        )
 
 
 class TestEx19(TestCase):
