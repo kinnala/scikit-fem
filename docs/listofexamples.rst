@@ -542,7 +542,7 @@ Example 39: One-dimensional heat equation
 This examples reduces the two-dimensional heat equation of Example 19 to
 demonstrate the special post-processing required.
 
-.. figure:: https://user-images.githubusercontent.com/1588947/127245280-981776b2-5f84-42af-b126-2acbff7a09c6.gif
+.. figure:: https://user-images.githubusercontent.com/1588947/127958860-6454e542-67ba-4e94-8053-5175da201daa.gif
 
    The solution of Example 39.
 
