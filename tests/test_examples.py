@@ -131,8 +131,8 @@ class TestEx16(TestCase):
 class TestEx17(TestCase):
 
     def runTest(self):
-        import docs.examples.ex17 as ex  # noqa
-        # TODO improve
+        from docs.examples.ex17 import T0
+        self.assertAlmostEqual(*T0.values(), 2)
 
 
 class TestEx18(TestCase):
