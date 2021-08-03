@@ -146,7 +146,9 @@ class TestEx19(TestCase):
 
     def runTest(self):
         import docs.examples.ex19 as ex  # noqa
-        # TODO improve
+
+        t, u = next(ex.evolve(0.0, ex.u_init))
+        self.assertAlmostEqual(*[(ex.probe @ s)[0] for s in [ex.exact(t), u]], 4)
 
 
 class TestEx20(TestCase):
