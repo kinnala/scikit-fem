@@ -90,8 +90,10 @@ if __name__ == "__main__":
     ax.set_xlim(-0.5, 0.5)
     ax.set_ylim(0, 1)
     title = ax.set_title("t = 0.00")
-    line = ax.plot(basis.doflocs[0, sorting] / 2 / halfwidth, u_init[sorting], marker="o")[0]
-
+    xi = basis.doflocs[0, sorting] / 2 / halfwidth
+    line = ax.plot(xi, u_init[sorting], "bo", label="skfem")[0]
+    line_exact = ax.plot(xi, exact(0.0)[sorting], "b--", label="exact")[0]
+    ax.legend()
 
     def update(event):
         t, u = event
@@ -108,6 +110,7 @@ if __name__ == "__main__":
 
         title.set_text(f"$t$ = {t:.2f}")
         line.set_ydata(u[sorting])
+        line_exact.set_ydata(exact(t)[sorting])
 
     animation = FuncAnimation(fig, update, evolve(0.0, u_init), repeat=False)
     if args.gif:
