@@ -73,12 +73,19 @@ backsolve = splu(A.T).solve  # .T as splu prefers CSC
 u_init = np.cos(np.pi * basis.doflocs / 2 / halfwidth[:, None]).prod(0)
 
 
-def evolve(t: float,
+def exact(t: float) -> np.ndarray:
+    return np.exp(-diffusivity * np.pi ** 2 * t / 4 * sum(halfwidth ** -2)) * u_init
+
+
+def evolve(t: float, 
            u: np.ndarray) -> Iterator[Tuple[float, np.ndarray]]:
 
     while np.linalg.norm(u, np.inf) > 2**-3:
         t, u = t + dt, backsolve(B @ u)
         yield t, u
+
+
+probe = basis.probes(np.zeros((mesh.dim(), 1)))
 
 
 if __name__ == '__main__':
@@ -92,7 +99,7 @@ if __name__ == '__main__':
     from skfem.visuals.matplotlib import plot
 
     parser = ArgumentParser(description='heat equation in a rectangle')
-    parser.add_argument('-g', '--gif', action='store_true',
+    parser.add_argument('-g', '--gif', action='store_true', 
                         help='write animated GIF', )
     args = parser.parse_args()
 
@@ -102,16 +109,14 @@ if __name__ == '__main__':
     fig = ax.get_figure()
     fig.colorbar(field)
 
-    probe = basis.probes(np.zeros((2, 1)))
 
     def update(event):
         t, u = event
 
-        u0 = {'skfem': (probe @ u)[0],
-              'exact': np.exp(-diffusivity * np.pi**2 * t / 4 *
-                              sum(halfwidth**-2))}
+        u0 = {'skfem': (probe @ u)[0], 
+              'exact': (probe @ exact(t))[0]}
         print('{:4.2f}, {:5.3f}, {:+7.4f}'.format(
-            t, u0['skfem'], u0['skfem'] - u0['exact']))
+                t, u0['skfem'], u0['skfem'] - u0['exact']))
 
         title.set_text(f'$t$ = {t:.2f}')
         field.set_array(u[basis.nodal_dofs.flatten()])

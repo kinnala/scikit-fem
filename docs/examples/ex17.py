@@ -67,21 +67,32 @@ f = joule_heating * asm(unit_load, core_basis)
 
 temperature = solve(L + H, f)
 
+T0 = {
+    "skfem": (basis.probes(np.zeros((2, 1))) @ temperature)[0],
+    "exact": (
+        joule_heating
+        * radii[0] ** 2
+        / 4
+        / thermal_conductivity["core"]
+        * (
+            2 * thermal_conductivity["core"] / radii[1] / heat_transfer_coefficient
+            + (
+                2
+                * thermal_conductivity["core"]
+                / thermal_conductivity["annulus"]
+                * np.log(radii[1] / radii[0])
+            )
+            + 1
+        )
+    ),
+}
+
+
 if __name__ == '__main__':
 
     from os.path import splitext
     from sys import argv
     from skfem.visuals.matplotlib import draw, plot, savefig
-
-    T0 = {'skfem': (basis.probes(np.zeros((2, 1))) @ temperature)[0],
-          'exact':
-          (joule_heating * radii[0]**2 / 4 / thermal_conductivity['core'] *
-           (2 * thermal_conductivity['core'] / radii[1]
-            / heat_transfer_coefficient
-            + (2 * thermal_conductivity['core']
-               / thermal_conductivity['annulus']
-               * np.log(radii[1] / radii[0])) + 1))}
-    print('Central temperature:', T0)
 
     ax = draw(mesh)
     plot(basis, temperature, ax=ax, colorbar=True)

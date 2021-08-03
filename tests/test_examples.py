@@ -131,22 +131,37 @@ class TestEx16(TestCase):
 class TestEx17(TestCase):
 
     def runTest(self):
-        import docs.examples.ex17 as ex  # noqa
-        # TODO improve
+        from docs.examples.ex17 import T0
+        self.assertAlmostEqual(*T0.values(), 2)
 
 
 class TestEx18(TestCase):
-
     def runTest(self):
         import docs.examples.ex18 as ex  # noqa
-        # TODO improve
+
+        self.assertAlmostEqual(
+            (ex.basis["psi"].probes(np.zeros((ex.mesh.dim(), 1))) @ ex.psi)[0],
+            1 / 64,
+            3,
+        )
+
+        self.assertLess(
+            np.linalg.norm(
+                ex.basis["p"].probes(np.array([[-0.5, 0.0, 0.5], [0.5, 0.5, 0.5]]))
+                @ ex.pressure
+                - [-1 / 8, 0, +1 / 8]
+            ),
+            1e-3,
+        )
 
 
 class TestEx19(TestCase):
 
     def runTest(self):
         import docs.examples.ex19 as ex  # noqa
-        # TODO improve
+
+        t, u = next(ex.evolve(0.0, ex.u_init))
+        self.assertAlmostEqual(*[(ex.probe @ s)[0] for s in [ex.exact(t), u]], 4)
 
 
 class TestEx20(TestCase):
@@ -190,6 +205,8 @@ class TestEx24(TestCase):
     def runTest(self):
         import docs.examples.ex24 as ex24  # noqa
 
+        self.assertAlmostEqual(min(ex24.vorticity), -0.05171085161096803)
+
 
 class TestEx25(TestCase):
 
@@ -203,7 +220,8 @@ class TestEx25(TestCase):
 class TestEx26(TestCase):
 
     def runTest(self):
-        import docs.examples.ex26 as ex26  # noqa
+        from docs.examples.ex26 import T0
+        self.assertAlmostEqual(*T0.values(), delta=2e-4)
 
 
 class TestEx27(TestCase):
@@ -300,6 +318,15 @@ class TestEx38(TestCase):
     def runTest(self):
         from docs.examples.ex38 import l2error
         self.assertLess(l2error, 3e-3)
+
+
+class TestEx39(TestCase):
+
+    def runTest(self):
+        import docs.examples.ex39 as ex  # noqa
+
+        t, u = next(ex.evolve(0.0, ex.u_init))
+        self.assertAlmostEqual(*[(ex.probe @ s)[0] for s in [ex.exact(t), u]], 5)
 
 
 if __name__ == '__main__':
