@@ -56,8 +56,6 @@ def from_meshio(m,
 
     """
     cells = m.cells_dict
-
-
     meshio_type = None
 
     # detect 3D
