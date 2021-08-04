@@ -208,6 +208,7 @@ def to_meshio(mesh,
 
     if sets_to_int_data:
         mio.sets_to_int_data()
+        mio.point_data = {}
 
     return mio
 
