@@ -34,17 +34,21 @@ TYPE_MESH_MAPPING = {MESH_TYPE_MAPPING[k]: k
                      for k in dict(reversed(list(MESH_TYPE_MAPPING.items())))}
 
 
-def from_meshio(m, force_mesh_type=None):
+def from_meshio(m,
+                int_data_to_sets=False):
     """Convert meshio mesh into :class:`skfem.mesh.Mesh`.
 
     Parameters
     ----------
     m
         The mesh from meshio.
-    force_mesh_type
-        An optional string forcing the mesh type if automatic detection
-        fails. See :data:`skfem.io.meshio.MESH_TYPE_MAPPING` for possible
-        values.
+    int_data_to_sets
+        We correctly read the so-called "cell sets" from ``meshio``.  However,
+        many mesh formats do not support "cell sets" natively and, instead, use
+        cellwise integer data to distinguish between different subdomains and
+        boundaries.  If ``True``, call ``meshio.Mesh.int_data_to_sets`` to
+        convert between the representations before attempting to read tags from
+        ``meshio``.
 
     Returns
     -------
@@ -53,37 +57,34 @@ def from_meshio(m, force_mesh_type=None):
     """
     cells = m.cells_dict
 
-    if force_mesh_type is None:
-        meshio_type = None
 
-        # detect 3D
+    meshio_type = None
+
+    # detect 3D
+    for k in cells:
+        if k in {'tetra', 'hexahedron', 'tetra10'}:
+            meshio_type = k
+            break
+
+    if meshio_type is None:
+        # detect 2D
         for k in cells:
-            if k in {'tetra', 'hexahedron', 'tetra10'}:
+            if k in {'triangle', 'quad', 'triangle6', 'quad9'}:
                 meshio_type = k
                 break
 
-        if meshio_type is None:
-            # detect 2D
-            for k in cells:
-                if k in {'triangle', 'quad', 'triangle6', 'quad9'}:
-                    meshio_type = k
-                    break
+    if meshio_type is None:
+        # detect 1D
+        for k in cells:
+            if k == 'line':
+                meshio_type = k
+                break
 
-        if meshio_type is None:
-            # detect 1D
-            for k in cells:
-                if k == 'line':
-                    meshio_type = k
-                    break
+    if meshio_type is None:
+        raise NotImplementedError("Mesh type(s) not supported "
+                                  "in import: {}.".format(cells.keys()))
 
-        if meshio_type is None:
-            raise NotImplementedError("Mesh type(s) not supported "
-                                      "in import: {}.".format(cells.keys()))
-
-        mesh_type = MESH_TYPE_MAPPING[meshio_type]
-    else:
-        meshio_type, mesh_type = (force_mesh_type,
-                                  MESH_TYPE_MAPPING[force_mesh_type])
+    mesh_type = MESH_TYPE_MAPPING[meshio_type]
 
     # create p and t
     p = np.ascontiguousarray(mesh_type.strip_extra_coordinates(m.points).T)
@@ -103,6 +104,9 @@ def from_meshio(m, force_mesh_type=None):
                 if m.field_data[key][0] == tag:
                     return key
             return None
+
+        if int_data_to_sets:
+            m.int_data_to_sets()
 
         if m.cell_sets:  # MSH 4.1
             subdomains = {k: v[meshio_type]
@@ -156,13 +160,15 @@ def from_meshio(m, force_mesh_type=None):
     return mtmp
 
 
-def from_file(filename):
-    return from_meshio(meshio.read(filename))
+def from_file(filename, **kwargs):
+    return from_meshio(meshio.read(filename), **kwargs)
 
 
 def to_meshio(mesh,
               point_data=None,
-              cell_data=None):
+              cell_data=None,
+              write_boundaries=False,
+              sets_to_int_data=False):
 
     t = mesh.dofs.element_dofs.copy()
     if isinstance(mesh, skfem.MeshHex):
@@ -170,10 +176,11 @@ def to_meshio(mesh,
 
     mtype = TYPE_MESH_MAPPING[type(mesh)]
     bmtype = BOUNDARY_TYPE_MAPPING[mtype]
-    cells = {
-        mtype: t.T,
-        bmtype: mesh.facets[:, mesh.boundary_facets()].T,
-    }
+    cells = {mtype: t.T}
+
+    if write_boundaries:
+        bfacets = mesh.boundary_facets()
+        cells[bmtype] = mesh.facets[:, bfacets].T
 
     # write named subsets
     cell_sets = {}
@@ -181,17 +188,19 @@ def to_meshio(mesh,
         for key in mesh.subdomains:
             cell_sets[key] = [
                 mesh.subdomains[key],
-                np.array([], dtype=np.int64),
+                *((len(cells) - 1) * (np.array([], dtype=np.int64),)),
             ]
 
-    if mesh.boundaries is not None:
+    if write_boundaries and mesh.boundaries is not None:
+        ix_map = np.zeros(mesh.facets.shape[1], dtype=np.int64) - 1
+        ix_map[bfacets] = np.arange(len(bfacets), dtype=np.int64)
         for key in mesh.boundaries:
             cell_sets[key] = [
                 np.array([], dtype=np.int64),
-                mesh.boundaries[key] + t.shape[1],
+                ix_map[mesh.boundaries[key]],
             ]
 
-    return meshio.Mesh(
+    mio = meshio.Mesh(
         mesh.p.T,
         cells,
         point_data=point_data,
@@ -199,6 +208,23 @@ def to_meshio(mesh,
         cell_sets=cell_sets,
     )
 
+    if sets_to_int_data:
+        mio.sets_to_int_data()
 
-def to_file(mesh, filename, point_data=None, **kwargs):
-    meshio.write(filename, to_meshio(mesh, point_data), **kwargs)
+    return mio
+
+
+def to_file(mesh,
+            filename,
+            point_data=None,
+            cell_data=None,
+            write_boundaries=False,
+            sets_to_int_data=False,
+            **kwargs):
+    meshio.write(filename,
+                 to_meshio(mesh,
+                           point_data,
+                           cell_data,
+                           write_boundaries,
+                           sets_to_int_data),
+                 **kwargs)

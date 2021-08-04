@@ -292,21 +292,24 @@ def test_meshio_cycle(m):
 
 
 _test_lambda = {
-    'left': lambda x: x[0] == 0,
-    'right': lambda x: x[0] == 1,
+    'left': lambda x: x[0] < 0.5,
+    'right': lambda x: x[0] > 0.5,
 }
 
 
 @pytest.mark.parametrize(
     "m",
     [
-        MeshTri().with_boundaries(_test_lambda),
-        MeshQuad().with_boundaries(_test_lambda),
+        MeshTri(),
+        MeshQuad(),
+        # MeshHex(),  # TODO facet order changes?
+        MeshTet(),
     ]
 )
 def test_meshio_cycle_boundaries(m):
 
-    M = from_meshio(to_meshio(m))
+    m = m.with_boundaries(_test_lambda)
+    M = from_meshio(to_meshio(m, write_boundaries=True))
     assert_array_equal(M.p, m.p)
     assert_array_equal(M.t, m.t)
     for key in m.boundaries:
@@ -318,21 +321,68 @@ def test_meshio_cycle_boundaries(m):
     [
         MeshTri(),
         MeshQuad(),
+        MeshHex(),
+        MeshTet(),
+    ]
+)
+def test_meshio_cycle_subdomains(m):
+
+    m = m.refined().with_subdomains(_test_lambda)
+    M = from_meshio(to_meshio(m))
+    assert_array_equal(M.p, m.p)
+    assert_array_equal(M.t, m.t)
+    for key in m.subdomains:
+        assert_array_equal(M.subdomains[key], m.subdomains[key])
+
+
+@pytest.mark.parametrize(
+    "m",
+    [
+        MeshTri(),
+        MeshQuad(),
         MeshTet(),
         MeshHex(),
     ]
 )
-def test_saveload_cycle(m):
+def test_saveload_cycle_vtk(m):
 
     from tempfile import NamedTemporaryFile
     m = m.refined(2)
-    f = NamedTemporaryFile(delete=False)
-    m.save(f.name + ".vtk")
-    with pytest.warns(UserWarning):
-       m2 = Mesh.load(f.name + ".vtk")
+    with NamedTemporaryFile() as f:
+        m.save(f.name + ".vtk")
+        with pytest.warns(UserWarning):
+            m2 = Mesh.load(f.name + ".vtk")
 
     assert_array_equal(m.p, m2.p)
     assert_array_equal(m.t, m2.t)
+
+
+@pytest.mark.parametrize(
+    "m",
+    [
+        MeshTri(),
+        MeshQuad(),
+        # MeshHex(),  # TODO facet order changes?
+        MeshTet(),
+    ]
+)
+def test_saveload_cycle_tags(m):
+
+    m = (m
+         .refined()
+         .with_subdomains(_test_lambda)
+         .with_boundaries({'test': lambda x: x[0] == 0}))
+    from tempfile import NamedTemporaryFile
+    with NamedTemporaryFile() as f:
+        m.save(f.name + ".inp", write_boundaries=True)
+        m2 = Mesh.load(f.name + ".inp")
+
+    assert_array_equal(m.p, m2.p)
+    assert_array_equal(m.t, m2.t)
+    for key in m.subdomains:
+        assert_array_equal(m2.subdomains[key], m.subdomains[key])
+    for key in m.boundaries:
+        assert_array_equal(m2.boundaries[key], m.boundaries[key])
 
 
 if __name__ == '__main__':

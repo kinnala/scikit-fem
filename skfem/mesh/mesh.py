@@ -407,6 +407,9 @@ class Mesh:
     def save(self,
              filename: str,
              point_data: Optional[Dict[str, ndarray]] = None,
+             cell_data: Optional[Dict[str, ndarray]] = None,
+             write_boundaries: bool = False,
+             sets_to_int_data: bool = False,
              **kwargs) -> None:
         """Export the mesh and fields using meshio.
 
@@ -420,10 +423,16 @@ class Mesh:
 
         """
         from skfem.io.meshio import to_file
-        return to_file(self, filename, point_data, **kwargs)
+        return to_file(self,
+                       filename,
+                       point_data,
+                       cell_data,
+                       write_boundaries,
+                       sets_to_int_data,
+                       **kwargs)
 
     @classmethod
-    def load(cls, filename: str):
+    def load(cls, filename: str, **kwargs):
         """Load a mesh using meshio.
 
         Parameters
@@ -433,7 +442,7 @@ class Mesh:
 
         """
         from skfem.io.meshio import from_file
-        return from_file(filename)
+        return from_file(filename, **kwargs)
 
     @classmethod
     def from_dict(cls, data):
