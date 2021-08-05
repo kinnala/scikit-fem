@@ -27,5 +27,9 @@ def to_meshio(mesh: fe.Mesh) -> meshio.Mesh:
     )
 
 
-mesh = from_file(Path(__file__).parent / "meshes" / "disk.json")
-meshio.write(Path(__file__).with_suffix(".vtk"), to_meshio(mesh))
+meshes = Path(__file__).parent / "meshes"
+for name, mesh in [
+    ("disk", from_file(meshes / "disk.json")),
+    ("beams", fe.Mesh.load(meshes / "beams.msh")),
+]:
+    meshio.write(Path(__file__).with_name(f"{name}.vtk"), to_meshio(mesh))
