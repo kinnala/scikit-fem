@@ -374,8 +374,8 @@ def test_saveload_cycle_tags(m):
          .with_boundaries({'test': lambda x: x[0] == 0}))
     from tempfile import NamedTemporaryFile
     with NamedTemporaryFile() as f:
-        m.save(f.name + ".inp", write_boundaries=True)
-        m2 = Mesh.load(f.name + ".inp")
+        m.save(f.name + ".msh", write_boundaries=True, sets_to_int_data=True, file_format='gmsh22')
+        m2 = Mesh.load(f.name + ".msh", int_data_to_sets=True)
 
     assert_array_equal(m.p, m2.p)
     assert_array_equal(m.t, m2.t)

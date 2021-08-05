@@ -92,33 +92,43 @@ def from_meshio(m,
     if meshio_type == 'hexahedron':
         t = t[[0, 4, 3, 1, 7, 5, 2, 6]]
 
-    mtmp = mesh_type(p, t)
+    if int_data_to_sets:
+        m.int_data_to_sets()
 
-    try:
-        bnd_type = BOUNDARY_TYPE_MAPPING[meshio_type]
-
-        def find_tagname(tag):
-            for key in m.field_data:
-                if m.field_data[key][0] == tag:
-                    return key
-            return None
-
-        if int_data_to_sets:
-            m.int_data_to_sets()
-
-        if m.cell_sets:  # MSH 4.1
-            subdomains = {k: v[meshio_type]
-                          for k, v in m.cell_sets_dict.items()
-                          if meshio_type in v}
-            facets = {k: [tuple(f) for f in
-                          np.sort(m.cells_dict[bnd_type][v[bnd_type]])]
+    subdomains = None
+    boundaries = None
+    # parse any subdomains from cell_sets
+    if m.cell_sets:
+        subdomains = {k: v[meshio_type]
                       for k, v in m.cell_sets_dict.items()
-                      if bnd_type in v}
-            boundaries = {k: np.array([i for i, f in
-                                       enumerate(map(tuple, mtmp.facets.T))
-                                       if f in v])
-                          for k, v in facets.items()}
-        else:  # MSH 2.2?
+                      if meshio_type in v}
+
+    # create temporary mesh for matching boundary elements
+    mtmp = mesh_type(p, t)
+    bnd_type = BOUNDARY_TYPE_MAPPING[meshio_type]
+
+    # parse boundaries from cell_sets
+    if m.cell_sets and bnd_type in m.cells_dict:
+        facets = {k: [tuple(f) for f in
+                      np.sort(m.cells_dict[bnd_type][v[bnd_type]])]
+                  for k, v in m.cell_sets_dict.items()
+                  if bnd_type in v}
+        boundaries = {k: np.array([i for i, f in
+                                   enumerate(map(tuple, mtmp.facets.T))
+                                   if f in v])
+                      for k, v in facets.items()}
+
+    # fall back to MSH 2.1 tag parsing
+    if not m.cell_sets:
+
+        try:
+
+            def find_tagname(tag):
+                for key in m.field_data:
+                    if m.field_data[key][0] == tag:
+                        return key
+                return None
+
             elements_tag = m.cell_data_dict['gmsh:physical'][meshio_type]
             subdomains = {}
             tags = np.unique(elements_tag)
@@ -149,11 +159,11 @@ def from_meshio(m,
                 tagindex = np.nonzero(tags == tag)[0]
                 boundaries[find_tagname(tag)] = index[tagindex, 1]
 
-        mtmp = mesh_type(p, t, boundaries, subdomains)
+        except Exception as e:
+            warnings.warn("Unable to load tagged boundaries/subdomains.")
+            print(e)
 
-    except Exception as e:
-        warnings.warn("Unable to load tagged boundaries/subdomains.")
-        print(e)
+    mtmp = mesh_type(p, t, boundaries, subdomains)
 
     return mtmp
 
@@ -182,6 +192,7 @@ def to_meshio(mesh,
 
     # write named subsets
     cell_sets = {}
+
     if mesh.subdomains is not None:
         for key in mesh.subdomains:
             cell_sets[key] = [
@@ -191,12 +202,27 @@ def to_meshio(mesh,
 
     if write_boundaries and mesh.boundaries is not None:
         ix_map = np.zeros(mesh.facets.shape[1], dtype=np.int64) - 1
-        ix_map[bfacets] = np.arange(len(bfacets), dtype=np.int64)
+        ix = np.arange(len(bfacets), dtype=np.int64)
+        ix_map[bfacets] = ix
         for key in mesh.boundaries:
             cell_sets[key] = [
                 np.array([], dtype=np.int64),
                 ix_map[mesh.boundaries[key]],
             ]
+
+    # add remaining elements to a cell set
+    # workaround for https://github.com/nschloe/meshio/issues/1164
+    remaining = []
+    for i, elem in enumerate(cells):
+        ix = np.array([], dtype=np.int64)
+        for key in cell_sets:
+            ix = np.concatenate([ix, cell_sets[key][i]])
+        ix = np.unique(ix)
+        remaining.append(np.setdiff1d(
+            np.arange(len(cells[elem]), dtype=np.int64),
+            ix
+        ))
+    cell_sets['skfem:remaining'] = remaining
 
     mio = meshio.Mesh(
         mesh.p.T,
@@ -208,6 +234,7 @@ def to_meshio(mesh,
 
     if sets_to_int_data:
         mio.sets_to_int_data()
+        # workaround for https://github.com/nschloe/meshio/issues/1160
         mio.point_data = {}
 
     return mio
