@@ -15,16 +15,12 @@ def to_meshio(mesh: fe.Mesh) -> meshio.Mesh:
         ]
         for name, subdomain in mesh.subdomains.items()
     }
-    boundaries = {}
-    for name, boundary in mesh.boundaries.items():
-        name = f"skfem:boundary:{name}"
-        b = np.isin(mesh.t2f, boundary)
-        if b.sum(0).max() > 1:  # a cell has more than one facet on boundary
-            raise NotImplementedError
-        boundaries[name] = [np.full(mesh.t.shape[1:], mesh.t.shape[0])]  # sentinel
-        bmask = np.nonzero(b)
-        boundaries[name][0][bmask[1]] = bmask[0]
-
+    boundaries = {
+        f"skfem:boundary:{name}": [
+            (2 ** np.arange(mesh.t.shape[0])) @ np.isin(mesh.t2f, boundary)
+        ]
+        for name, boundary in mesh.boundaries.items()
+    }
     cell_data = subdomains | boundaries
     return meshio.Mesh(
         mesh.p.T, [(TYPE_MESH_MAPPING[type(mesh)], mesh.t.T)], cell_data=cell_data
