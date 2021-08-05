@@ -23,7 +23,7 @@ def to_meshio(mesh: fe.Mesh) -> meshio.Mesh:
             raise NotImplementedError
         boundaries[name] = [np.full(mesh.t.shape[1:], mesh.t.shape[0])]  # sentinel
         bmask = np.nonzero(b)
-        boundaries[name][0][bmask[1]] = bmask[0][1]
+        boundaries[name][0][bmask[1]] = bmask[0]
 
     cell_data = subdomains | boundaries
     return meshio.Mesh(
