@@ -302,7 +302,7 @@ _test_lambda = {
     [
         MeshTri(),
         MeshQuad(),
-        # MeshHex(),  # TODO facet order changes?
+        MeshHex(),  # TODO facet order changes?
         MeshTet(),
     ]
 )
@@ -363,7 +363,7 @@ def test_saveload_cycle_vtk(m):
         ('.vtk', {}),
         ('.xdmf', {}),
         ('.vtu', {}),
-        # ('.mesh', {}),  # TODO move to another test
+        # ('.mesh', {}),  # TODO move to another test?
     ]
 )
 @pytest.mark.parametrize(
@@ -371,7 +371,7 @@ def test_saveload_cycle_vtk(m):
     [
         MeshTri(),
         MeshQuad(),
-        # MeshHex(),  # TODO facet order changes?
+        MeshHex(),  # TODO facet order changes?
         MeshTet(),
     ]
 )

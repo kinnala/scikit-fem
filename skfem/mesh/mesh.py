@@ -84,6 +84,29 @@ class Mesh:
     def boundaries(self):
         return self._boundaries
 
+    def encode_point_data(self):
+
+        subdomains = {} if self._subdomains is None else self._subdomains
+        boundaries = {} if self._boundaries is None else self._boundaries
+
+        def indicator(ix):
+            ind = np.zeros(self.p.shape[1], dtype=np.int64)
+            ind[ix] = 1
+            return ind
+
+        return {
+            **{
+                'skfem:subdomains:{}'.format(k):\
+                indicator(np.unique(self.t[:, v].flatten()))\
+                for k, v in subdomains.items()
+            },
+            **{
+                'skfem:boundaries:{}'.format(k):\
+                indicator(np.unique(self.facets[:, v].flatten()))\
+                for k, v in boundaries.items()
+            }
+        }
+
     def encode_cell_data(self):
 
         subdomains = {} if self._subdomains is None else self._subdomains

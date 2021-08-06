@@ -97,6 +97,7 @@ def from_meshio(m,
 
     subdomains = None
     boundaries = None
+
     # parse any subdomains from cell_sets
     if m.cell_sets:
         subdomains = {k: v[meshio_type]
@@ -118,8 +119,7 @@ def from_meshio(m,
                                    if f in v])
                       for k, v in facets.items()}
 
-
-    # MSH 2.1 tag parsing
+    # MSH 2.2 tag parsing
     if m.cell_data and m.field_data:
 
         try:
@@ -160,10 +160,10 @@ def from_meshio(m,
                 tagindex = np.nonzero(tags == tag)[0]
                 boundaries[find_tagname(tag)] = index[tagindex, 1]
 
-        except Exception as e:
+        except Exception:
             pass
 
-    # attempt parsing skfem-written tags
+    # attempt parsing tags from cell_data
     if m.cell_data:
 
         try:
@@ -171,12 +171,15 @@ def from_meshio(m,
                 if k.startswith('skfem:'):
                     boundaries, subdomains = mtmp.decode_cell_data(m.cell_data)
                 else:
+                    # some mesh formats cannot preserve tag names
+                    # => invent names for the tags
+                    tags = 'skfem:' + ["set{}".format(i) for i in range(20)]
                     boundaries, subdomains = mtmp.decode_cell_data({
-                        'skfem:set0-set1-set2-set3': m.cell_data[k]
+                        tags: m.cell_data[k]
                     })
                 break
 
-        except Exception as e:
+        except Exception:
             pass
 
     mtmp = mesh_type(p, t, boundaries, subdomains)
@@ -207,6 +210,11 @@ def to_meshio(mesh,
         cell_data = {}
 
     cell_data.update(mesh.encode_cell_data())
+
+    if point_data is None:
+        point_data = {}
+
+    point_data.update(mesh.encode_point_data())
 
     mio = meshio.Mesh(
         mesh.p.T,
