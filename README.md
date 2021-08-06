@@ -250,6 +250,14 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+- Added: `Mesh.save` will now attempt exporting `Mesh.subdomains` and
+  `Mesh.boundaries` by encoding them into a single cellwise constant indicator
+  function
+- Added: `Mesh.load` will also import `Mesh.subdomains` and `Mesh.boundaries`
+  by reading a cellwise constant indicator function written by `Mesh.save`
+- Added: `skfem.io.meshio` will now automatically export `Mesh.boundaries` as
+  vertex data for visualization in tools such as Paraview
+
 ### [3.2.0] - 2021-08-02
 
 - Added: `ElementTriCCR` and `ElementTetCCR`, conforming Crouzeix-Raviart finite elements
