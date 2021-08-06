@@ -96,9 +96,8 @@ class Mesh:
         return self._boundaries
 
     def encode_point_data(self):
-        """Encode subdomains/boundaries as vertex data for visualization."""
+        """Encode boundaries as vertex data for visualization in Paraview."""
 
-        subdomains = {} if self._subdomains is None else self._subdomains
         boundaries = {} if self._boundaries is None else self._boundaries
 
         def indicator(ix):
@@ -107,11 +106,6 @@ class Mesh:
             return ind
 
         return {
-            **{
-                'skfem:subdomains:{}'.format(k):
-                indicator(np.unique(self.t[:, v].flatten()))
-                for k, v in subdomains.items()
-            },
             **{
                 'skfem:boundaries:{}'.format(k):
                 indicator(np.unique(self.facets[:, v].flatten()))
