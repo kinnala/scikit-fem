@@ -118,8 +118,9 @@ def from_meshio(m,
                                    if f in v])
                       for k, v in facets.items()}
 
-    # fall back to MSH 2.1 tag parsing
-    if not m.cell_sets:
+
+    # MSH 2.1 tag parsing
+    if m.cell_data and m.field_data:
 
         try:
 
@@ -160,8 +161,23 @@ def from_meshio(m,
                 boundaries[find_tagname(tag)] = index[tagindex, 1]
 
         except Exception as e:
-            warnings.warn("Unable to load tagged boundaries/subdomains.")
-            print(e)
+            pass
+
+    # attempt parsing skfem-written tags
+    if m.cell_data:
+
+        try:
+            for k in m.cell_data:
+                if k.startswith('skfem:'):
+                    boundaries, subdomains = mtmp.decode_cell_data(m.cell_data)
+                else:
+                    boundaries, subdomains = mtmp.decode_cell_data({
+                        'skfem:set0-set1-set2-set3': m.cell_data[k]
+                    })
+                break
+
+        except Exception as e:
+            pass
 
     mtmp = mesh_type(p, t, boundaries, subdomains)
 
@@ -174,9 +190,7 @@ def from_file(filename, **kwargs):
 
 def to_meshio(mesh,
               point_data=None,
-              cell_data=None,
-              write_boundaries=False,
-              sets_to_int_data=False):
+              cell_data=None):
 
     t = mesh.dofs.element_dofs.copy()
     if isinstance(mesh, skfem.MeshHex):
@@ -184,58 +198,22 @@ def to_meshio(mesh,
 
     mtype = TYPE_MESH_MAPPING[type(mesh)]
     bmtype = BOUNDARY_TYPE_MAPPING[mtype]
-    cells = {mtype: t.T}
+    cells = {
+        mtype: t.T,
+        bmtype: mesh.facets[:, mesh.boundary_facets()].T
+    }
 
-    if write_boundaries:
-        bfacets = mesh.boundary_facets()
-        cells[bmtype] = mesh.facets[:, bfacets].T
+    if cell_data is None:
+        cell_data = {}
 
-    # write named subsets
-    cell_sets = {}
-
-    if mesh.subdomains is not None:
-        for key in mesh.subdomains:
-            cell_sets[key] = [
-                mesh.subdomains[key],
-                *((len(cells) - 1) * (np.array([], dtype=np.int64),)),
-            ]
-
-    if write_boundaries and mesh.boundaries is not None:
-        ix_map = np.zeros(mesh.facets.shape[1], dtype=np.int64) - 1
-        ix = np.arange(len(bfacets), dtype=np.int64)
-        ix_map[bfacets] = ix
-        for key in mesh.boundaries:
-            cell_sets[key] = [
-                np.array([], dtype=np.int64),
-                ix_map[mesh.boundaries[key]],
-            ]
-
-    # add remaining elements to a cell set
-    # workaround for https://github.com/nschloe/meshio/issues/1164
-    remaining = []
-    for i, elem in enumerate(cells):
-        ix = np.array([], dtype=np.int64)
-        for key in cell_sets:
-            ix = np.concatenate([ix, cell_sets[key][i]])
-        ix = np.unique(ix)
-        remaining.append(np.setdiff1d(
-            np.arange(len(cells[elem]), dtype=np.int64),
-            ix
-        ))
-    cell_sets['skfem:remaining'] = remaining
+    cell_data.update(mesh.encode_cell_data())
 
     mio = meshio.Mesh(
         mesh.p.T,
         cells,
         point_data=point_data,
         cell_data=cell_data,
-        cell_sets=cell_sets,
     )
-
-    if sets_to_int_data:
-        mio.sets_to_int_data()
-        # workaround for https://github.com/nschloe/meshio/issues/1160
-        mio.point_data = {}
 
     return mio
 
@@ -244,13 +222,10 @@ def to_file(mesh,
             filename,
             point_data=None,
             cell_data=None,
-            write_boundaries=False,
-            sets_to_int_data=False,
             **kwargs):
+
     meshio.write(filename,
                  to_meshio(mesh,
                            point_data,
-                           cell_data,
-                           write_boundaries,
-                           sets_to_int_data),
+                           cell_data),
                  **kwargs)

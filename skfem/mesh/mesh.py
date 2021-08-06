@@ -84,6 +84,107 @@ class Mesh:
     def boundaries(self):
         return self._boundaries
 
+    def encode_cell_data(self):
+
+        subdomains = {} if self._subdomains is None else self._subdomains
+        boundaries = {} if self._boundaries is None else self._boundaries
+
+        primes = [2, 3, 5, 7, 11]
+
+        data = [
+            np.ones(self.t.shape[1], dtype=np.int64),
+            np.ones(self.facets.shape[1], dtype=np.int64),
+        ]
+
+        for i, k in enumerate(subdomains):
+            data[0][subdomains[k]] *= primes[i]
+
+        for i, k in enumerate(boundaries):
+            data[1][boundaries[k]] *= primes[i]
+
+        # truncate to boundary facets only
+        data[1] = data[1][self.boundary_facets()]
+
+        return {
+            'skfem:' + ('-'.join({**subdomains, **boundaries}.keys())): data
+        }
+
+    def decode_cell_data(self, cell_data):
+
+        for k, v in cell_data.items():
+            keys = k.split(':')[1].split('-')
+            data = v
+            break
+
+        primes = [2, 3, 5, 7, 11]
+
+        subdomains = {}
+
+        def prime_factors(n):
+            i = 2
+            factors = []
+            while i * i <= n:
+                if n % i:
+                    i += 1
+                else:
+                    n //= i
+                    factors.append(i)
+            if n > 1:
+                factors.append(n)
+            return factors
+
+        for ix in np.unique(data[0]):
+            if ix == 1:
+                continue
+            elif ix in primes:
+                n = primes.index(ix)
+                if keys[n] not in subdomains:
+                    subdomains[keys[n]] = np.array([], dtype=np.int64)
+                subdomains[keys[n]] = np.concatenate([
+                    subdomains[keys[n]],
+                    np.nonzero(data[0] == ix)[0],
+                ])
+            else:
+                ns = prime_factors(ix)
+                for n in ns:
+                    n = primes.index(ix)
+                    if keys[n] not in subdomains:
+                        subdomains[keys[n]] = np.array([], dtype=np.int64)
+                    subdomains[keys[n]] = np.concatenate([
+                        subdomains[keys[n]],
+                        np.nonzero(data[0] == ix)[0],
+                    ])
+
+        boundaries = {}
+        bfacets = self.boundary_facets()
+
+        for ix in np.unique(data[1]):
+            if ix == 1:
+                continue
+            elif ix in primes:
+                n = primes.index(ix) + len(subdomains)
+                if keys[n] not in boundaries:
+                    boundaries[keys[n]] = np.array([], dtype=np.int64)
+                boundaries[keys[n]] = np.concatenate([
+                    boundaries[keys[n]],
+                    bfacets[np.nonzero(data[1] == ix)[0]]
+                ])
+            else:
+                ns = prime_factors(ix)
+                for prime in ns:
+                    n = primes.index(prime) + len(subdomains)
+                    if keys[n] not in boundaries:
+                        boundaries[keys[n]] = np.array([], dtype=np.int64)
+                    boundaries[keys[n]] = np.concatenate([
+                        boundaries[keys[n]],
+                        bfacets[np.nonzero(data[1] == ix)[0]],
+                    ])
+
+        return (
+            None if len(boundaries) == 0 else boundaries,
+            None if len(subdomains) == 0 else subdomains,
+        )
+
     @property
     def facets(self):
         if not hasattr(self, '_facets'):
@@ -408,8 +509,6 @@ class Mesh:
              filename: str,
              point_data: Optional[Dict[str, ndarray]] = None,
              cell_data: Optional[Dict[str, ndarray]] = None,
-             write_boundaries: bool = False,
-             sets_to_int_data: bool = False,
              **kwargs) -> None:
         """Export the mesh and fields using meshio.
 
@@ -427,8 +526,6 @@ class Mesh:
                        filename,
                        point_data,
                        cell_data,
-                       write_boundaries,
-                       sets_to_int_data,
                        **kwargs)
 
     @classmethod

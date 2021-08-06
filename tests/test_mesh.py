@@ -309,7 +309,7 @@ _test_lambda = {
 def test_meshio_cycle_boundaries(m):
 
     m = m.with_boundaries(_test_lambda)
-    M = from_meshio(to_meshio(m, write_boundaries=True))
+    M = from_meshio(to_meshio(m))
     assert_array_equal(M.p, m.p)
     assert_array_equal(M.t, m.t)
     for key in m.boundaries:
@@ -350,13 +350,22 @@ def test_saveload_cycle_vtk(m):
     m = m.refined(2)
     with NamedTemporaryFile() as f:
         m.save(f.name + ".vtk")
-        with pytest.warns(UserWarning):
-            m2 = Mesh.load(f.name + ".vtk")
+        m2 = Mesh.load(f.name + ".vtk")
 
     assert_array_equal(m.p, m2.p)
     assert_array_equal(m.t, m2.t)
 
 
+@pytest.mark.parametrize(
+    "fmt, kwargs",
+    [
+        ('.msh', {'file_format': 'gmsh22'}),
+        ('.vtk', {}),
+        ('.xdmf', {}),
+        ('.vtu', {}),
+        # ('.mesh', {}),  # TODO move to another test
+    ]
+)
 @pytest.mark.parametrize(
     "m",
     [
@@ -366,23 +375,26 @@ def test_saveload_cycle_vtk(m):
         MeshTet(),
     ]
 )
-def test_saveload_cycle_tags(m):
+def test_saveload_cycle_tags(fmt, kwargs, m):
 
     m = (m
-         .refined()
+         .refined(2)
          .with_subdomains(_test_lambda)
-         .with_boundaries({'test': lambda x: x[0] == 0}))
+         .with_boundaries({'test': lambda x: (x[0] == 0) * (x[1] < 0.6),
+                           'set': lambda x: (x[0] == 0) * (x[1] > 0.3)}))
     from tempfile import NamedTemporaryFile
     with NamedTemporaryFile() as f:
-        m.save(f.name + ".msh", write_boundaries=True, sets_to_int_data=True, file_format='gmsh22')
-        m2 = Mesh.load(f.name + ".msh", int_data_to_sets=True)
+        m.save(f.name + fmt, **kwargs)
+        m2 = Mesh.load(f.name + fmt)
 
-    assert_array_equal(m.p, m2.p)
-    assert_array_equal(m.t, m2.t)
-    for key in m.subdomains:
-        assert_array_equal(m2.subdomains[key], m.subdomains[key])
-    for key in m.boundaries:
-        assert_array_equal(m2.boundaries[key], m.boundaries[key])
+        assert_array_equal(m.p, m2.p)
+        assert_array_equal(m.t, m2.t)
+        for key in m.subdomains:
+            assert_array_equal(m2.subdomains[key].sort(),
+                               m.subdomains[key].sort())
+        for key in m.boundaries:
+            assert_array_equal(m2.boundaries[key].sort(),
+                               m.boundaries[key].sort())
 
 
 if __name__ == '__main__':
