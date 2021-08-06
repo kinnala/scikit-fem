@@ -13,3 +13,4 @@ flake8
 dmsh
 sphinx
 sphinx_rtd_theme
+h5py
