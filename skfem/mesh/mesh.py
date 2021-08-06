@@ -96,13 +96,13 @@ class Mesh:
 
         return {
             **{
-                'skfem:subdomains:{}'.format(k):\
-                indicator(np.unique(self.t[:, v].flatten()))\
+                'skfem:subdomains:{}'.format(k):
+                indicator(np.unique(self.t[:, v].flatten()))
                 for k, v in subdomains.items()
             },
             **{
-                'skfem:boundaries:{}'.format(k):\
-                indicator(np.unique(self.facets[:, v].flatten()))\
+                'skfem:boundaries:{}'.format(k):
+                indicator(np.unique(self.facets[:, v].flatten()))
                 for k, v in boundaries.items()
             }
         }

@@ -1,6 +1,4 @@
-"""Import any formats supported by meshio."""
-
-import warnings
+"""Import/export any formats supported by meshio."""
 
 import meshio
 import numpy as np
