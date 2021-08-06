@@ -397,5 +397,32 @@ def test_saveload_cycle_tags(fmt, kwargs, m):
                                m.boundaries[key].sort())
 
 
+@pytest.mark.parametrize(
+    "check",
+    [
+        lambda x: x[0] == 0,
+        lambda x: x[1] == 1,
+        lambda x: (x[1] == 1) + (x[0] == 0),
+    ]
+)
+@pytest.mark.parametrize(
+    "m",
+    [
+        MeshTri(),
+        MeshQuad(),
+        MeshHex(),  # TODO facet order changes?
+        MeshTet(),
+    ]
+)
+def test_meshio_point_data(m, check):
+
+    m = m.refined().with_boundaries({'left': check})
+    mio = to_meshio(m)
+
+    assert_array_equal(mio.point_data['skfem:boundaries:left'].nonzero()[0],
+                       m.nodes_satisfying(check,
+                                          boundaries_only=True))
+
+
 if __name__ == '__main__':
     main()
