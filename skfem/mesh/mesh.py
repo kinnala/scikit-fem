@@ -84,7 +84,7 @@ class Mesh:
     def boundaries(self):
         return self._boundaries
 
-    def encode_point_data(self):
+    def _encode_point_data(self):
         """Encode boundaries as vertex data for serialization."""
 
         if self._boundaries is None:
@@ -98,7 +98,7 @@ class Mesh:
 
         return {":".join(boundaries.keys()): data}
 
-    def decode_point_data(self, point_data):
+    def _decode_point_data(self, point_data):
         """Inverse of :meth:`Mesh.encode_point_data`."""
 
         # take first entry
@@ -116,7 +116,7 @@ class Mesh:
 
         return None if len(boundaries) == 0 else boundaries
 
-    def encode_cell_data(self):
+    def _encode_cell_data(self):
         """Encode subdomains as cell data for serialization."""
 
         if self._subdomains is None:
@@ -130,7 +130,7 @@ class Mesh:
 
         return {(':'.join(subdomains.keys())): data}
 
-    def decode_cell_data(self, cell_data):
+    def _decode_cell_data(self, cell_data):
         """Inverse of :meth:`Mesh.encode_cell_data`."""
 
         # read tags from dictionary key

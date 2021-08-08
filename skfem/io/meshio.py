@@ -162,10 +162,10 @@ def from_meshio(m,
 
     # attempt parsing skfem tags
     if m.point_data:
-        boundaries = mtmp.decode_point_data(m.point_data)
+        boundaries = mtmp._decode_point_data(m.point_data)
 
     if m.cell_data:
-        subdomains = mtmp.decode_cell_data(m.cell_data)
+        subdomains = mtmp._decode_cell_data(m.cell_data)
 
     mtmp = mesh_type(p, t, boundaries, subdomains)
 
@@ -190,12 +190,12 @@ def to_meshio(mesh,
     if cell_data is None:
         cell_data = {}
 
-    cell_data.update(mesh.encode_cell_data())
+    cell_data.update(mesh._encode_cell_data())
 
     if point_data is None:
         point_data = {}
 
-    point_data.update(mesh.encode_point_data())
+    point_data.update(mesh._encode_point_data())
 
     mio = meshio.Mesh(
         mesh.p.T,
