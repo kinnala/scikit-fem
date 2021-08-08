@@ -99,6 +99,7 @@ class Mesh:
         return {":".join(boundaries.keys()): data}
 
     def decode_point_data(self, point_data):
+        """Inverse of :meth:`Mesh.encode_point_data`."""
 
         # take first entry
         for k, v in point_data.items():
