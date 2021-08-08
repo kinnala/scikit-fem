@@ -91,12 +91,12 @@ class Mesh:
             return {}
 
         boundaries = self._boundaries
-        point_data = np.zeros(self.p.shape[1], dtype=np.int64)
+        data = np.zeros(self.p.shape[1], dtype=np.int64)
 
         for i, k in enumerate(boundaries):
-            point_data[np.unique(self.facets[:, boundaries[k]].flatten())] += 2 ** i
+            data[np.unique(self.facets[:, boundaries[k]].flatten())] += 2 ** i
 
-        return {":".join(boundaries.keys()): point_data}
+        return {":".join(boundaries.keys()): data}
 
     def decode_point_data(self, point_data):
 
