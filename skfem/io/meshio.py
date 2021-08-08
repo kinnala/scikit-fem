@@ -2,7 +2,6 @@
 
 import meshio
 import numpy as np
-
 import skfem
 
 
@@ -161,24 +160,12 @@ def from_meshio(m,
         except Exception:
             pass
 
-    # attempt parsing tags from cell_data
+    # attempt parsing skfem tags
+    if m.point_data:
+        boundaries = mtmp.decode_point_data(m.point_data)
+
     if m.cell_data:
-
-        try:
-            for k in m.cell_data:
-                if k.startswith('skfem:'):
-                    boundaries, subdomains = mtmp.decode_cell_data(m.cell_data)
-                else:
-                    # some mesh formats cannot preserve tag names
-                    # => invent names for the tags
-                    tags = 'skfem:' + ["set{}".format(i) for i in range(20)]
-                    boundaries, subdomains = mtmp.decode_cell_data({
-                        tags: m.cell_data[k]
-                    })
-                break
-
-        except Exception:
-            pass
+        subdomains = mtmp.decode_cell_data(m.cell_data)
 
     mtmp = mesh_type(p, t, boundaries, subdomains)
 
@@ -198,11 +185,7 @@ def to_meshio(mesh,
         t = t[[0, 3, 6, 2, 1, 5, 7, 4]]
 
     mtype = TYPE_MESH_MAPPING[type(mesh)]
-    bmtype = BOUNDARY_TYPE_MAPPING[mtype]
-    cells = {
-        mtype: t.T,
-        bmtype: mesh.facets[:, mesh.boundary_facets()].T
-    }
+    cells = {mtype: t.T}
 
     if cell_data is None:
         cell_data = {}

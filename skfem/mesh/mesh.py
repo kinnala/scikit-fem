@@ -9,17 +9,6 @@ from numpy import ndarray
 from ..element import BOUNDARY_ELEMENT_MAP, Element
 
 
-PRIMES = [2, 3, 5, 7, 11, 13]
-
-
-def _prime_factors(n):
-    factors = []
-    for p in PRIMES:
-        if not n % p:
-            factors.append(p)
-    return factors
-
-
 @dataclass(repr=False)
 class Mesh:
     """A mesh defined by :class:`~skfem.element.Element` class.
@@ -96,87 +85,66 @@ class Mesh:
         return self._boundaries
 
     def encode_point_data(self):
-        """Encode boundaries as vertex data for visualization in Paraview."""
+        """Encode boundaries as vertex data for serialization."""
 
-        boundaries = {} if self._boundaries is None else self._boundaries
+        if self._boundaries is None:
+            return {}
 
-        def indicator(ix):
-            ind = np.zeros(self.p.shape[1], dtype=np.int64)
-            ind[ix] = 1
-            return ind
-
-        return {
-            **{
-                'skfem:boundaries:{}'.format(k):
-                indicator(np.unique(self.facets[:, v].flatten()))
-                for k, v in boundaries.items()
-            }
-        }
-
-    def encode_cell_data(self):
-        """Encode subdomains/boundaries as cell data for serialization."""
-
-        subdomains = {} if self._subdomains is None else self._subdomains
-        boundaries = {} if self._boundaries is None else self._boundaries
-
-        data = [
-            np.ones(self.t.shape[1], dtype=np.int64),
-            np.ones(self.facets.shape[1], dtype=np.int64),
-        ]
-
-        for i, k in enumerate(subdomains):
-            data[0][subdomains[k]] *= PRIMES[i]
+        boundaries = self._boundaries
+        point_data = np.zeros(self.p.shape[1], dtype=np.int64)
 
         for i, k in enumerate(boundaries):
-            data[1][boundaries[k]] *= PRIMES[i]
+            point_data[np.unique(self.facets[:, boundaries[k]].flatten())] += 2 ** i
 
-        # truncate to boundary facets only
-        data[1] = data[1][self.boundary_facets()]
+        return {":".join(boundaries.keys()): point_data}
 
-        return {
-            'skfem:' + ('-'.join({**subdomains, **boundaries}.keys())): data
-        }
+    def decode_point_data(self, point_data):
+
+        # take first entry
+        for k, v in point_data.items():
+            keys = k.split(':')
+            data = v.astype(np.int64)
+            break
+
+        bfacets = self.boundary_facets()
+        ix = np.bitwise_and.reduce(data[self.facets[:, bfacets]])
+        boundaries = {}
+
+        for i, k in enumerate(keys):
+            boundaries[k] = bfacets[np.nonzero(np.bitwise_and(2 ** i, ix))[0]]
+
+        return None if len(boundaries) == 0 else boundaries
+
+    def encode_cell_data(self):
+        """Encode subdomains as cell data for serialization."""
+
+        if self._subdomains is None:
+            return {}
+
+        subdomains = self._subdomains
+        data = [np.zeros(self.t.shape[1], dtype=np.int64)]
+
+        for i, k in enumerate(subdomains):
+            data[0][subdomains[k]] += 2 ** i
+
+        return {(':'.join(subdomains.keys())): data}
 
     def decode_cell_data(self, cell_data):
         """Inverse of :meth:`Mesh.encode_cell_data`."""
 
         # read tags from dictionary key
         for k, v in cell_data.items():
-            keys = k.split(':')[1].split('-')
+            keys = k.split(':')
             data = v
             break
 
-        # reverse the prime factor encoding of subset unions
+        ix = data[0].astype(np.int64)
         subdomains = {}
-        boundaries = {}
-        bfacets = self.boundary_facets()
 
-        for ix in np.unique(data[0]):
-            ns = _prime_factors(ix)
-            for n in ns:
-                n = PRIMES.index(ix)
-                if keys[n] not in subdomains:
-                    subdomains[keys[n]] = np.array([], dtype=np.int64)
-                subdomains[keys[n]] = np.concatenate([
-                    subdomains[keys[n]],
-                    np.nonzero(data[0] == ix)[0],
-                ])
+        for i, k in enumerate(keys):
+            subdomains[k] = np.nonzero(np.bitwise_and(2 ** i, ix))[0]
 
-        for ix in np.unique(data[1]):
-            ns = _prime_factors(ix)
-            for prime in ns:
-                n = PRIMES.index(prime) + len(subdomains)
-                if keys[n] not in boundaries:
-                    boundaries[keys[n]] = np.array([], dtype=np.int64)
-                boundaries[keys[n]] = np.concatenate([
-                    boundaries[keys[n]],
-                    bfacets[np.nonzero(data[1] == ix)[0]],
-                ])
-
-        return (
-            None if len(boundaries) == 0 else boundaries,
-            None if len(subdomains) == 0 else subdomains,
-        )
+        return None if len(subdomains) == 0 else subdomains
 
     @property
     def facets(self):
