@@ -118,18 +118,16 @@ def from_meshio(m,
 
     # MSH 2.2 tag parsing
     if m.cell_data and m.field_data:
-
         try:
+            elements_tag = m.cell_data_dict['gmsh:physical'][meshio_type]
+            subdomains = {}
+            tags = np.unique(elements_tag)
 
             def find_tagname(tag):
                 for key in m.field_data:
                     if m.field_data[key][0] == tag:
                         return key
                 return None
-
-            elements_tag = m.cell_data_dict['gmsh:physical'][meshio_type]
-            subdomains = {}
-            tags = np.unique(elements_tag)
 
             for tag in tags:
                 t_set = np.nonzero(tag == elements_tag)[0]
@@ -162,10 +160,16 @@ def from_meshio(m,
 
     # attempt parsing skfem tags
     if m.point_data:
-        boundaries = mtmp._decode_point_data(m.point_data)
+        try:
+            boundaries = mtmp._decode_boundaries(m.point_data)
+        except Exception:
+            pass
 
     if m.cell_data:
-        subdomains = mtmp._decode_cell_data(m.cell_data)
+        try:
+            subdomains = mtmp._decode_subdomains(m.cell_data)
+        except Exception:
+            pass
 
     mtmp = mesh_type(p, t, boundaries, subdomains)
 
@@ -190,12 +194,12 @@ def to_meshio(mesh,
     if cell_data is None:
         cell_data = {}
 
-    cell_data.update(mesh._encode_cell_data())
+    cell_data.update(mesh._encode_subdomains())
 
     if point_data is None:
         point_data = {}
 
-    point_data.update(mesh._encode_point_data())
+    point_data.update(mesh._encode_boundaries())
 
     mio = meshio.Mesh(
         mesh.p.T,

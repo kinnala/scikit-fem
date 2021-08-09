@@ -84,8 +84,8 @@ class Mesh:
     def boundaries(self):
         return self._boundaries
 
-    def _encode_point_data(self):
-        """Encode boundaries as vertex data for serialization."""
+    def _encode_boundaries(self):
+        """Encode boundaries as vertex data."""
 
         if self._boundaries is None:
             return {}
@@ -94,30 +94,32 @@ class Mesh:
         data = np.zeros(self.p.shape[1], dtype=np.int64)
 
         for i, k in enumerate(boundaries):
-            data[np.unique(self.facets[:, boundaries[k]].flatten())] += 2 ** i
+            data[np.unique(self.facets[:, boundaries[k]].flatten())] += 1 << i
 
-        return {":".join(boundaries.keys()): data}
+        return {'skfem:' + (':'.join(boundaries.keys())): data}
 
-    def _decode_point_data(self, point_data):
-        """Inverse of :meth:`Mesh.encode_point_data`."""
+    def _decode_boundaries(self, point_data):
+        """Inverse of :meth:`Mesh._encode_boundaries`."""
 
-        # take first entry
+        # find correct entry
         for k, v in point_data.items():
             keys = k.split(':')
-            data = v.astype(np.int64)
-            break
+            if keys[0] == 'skfem':
+                keys = keys[1:]
+                data = v.astype(np.int64)
+                break
 
         bfacets = self.boundary_facets()
         ix = np.bitwise_and.reduce(data[self.facets[:, bfacets]])
         boundaries = {}
 
         for i, k in enumerate(keys):
-            boundaries[k] = bfacets[np.nonzero(np.bitwise_and(2 ** i, ix))[0]]
+            boundaries[k] = bfacets[np.nonzero(np.bitwise_and(1 << i, ix))[0]]
 
         return None if len(boundaries) == 0 else boundaries
 
-    def _encode_cell_data(self):
-        """Encode subdomains as cell data for serialization."""
+    def _encode_subdomains(self):
+        """Encode subdomains as elementwise constant data."""
 
         if self._subdomains is None:
             return {}
@@ -126,24 +128,26 @@ class Mesh:
         data = [np.zeros(self.t.shape[1], dtype=np.int64)]
 
         for i, k in enumerate(subdomains):
-            data[0][subdomains[k]] += 2 ** i
+            data[0][subdomains[k]] += 1 << i
 
-        return {(':'.join(subdomains.keys())): data}
+        return {'skfem:' + (':'.join(subdomains.keys())): data}
 
-    def _decode_cell_data(self, cell_data):
-        """Inverse of :meth:`Mesh.encode_cell_data`."""
+    def _decode_subdomains(self, cell_data):
+        """Inverse of :meth:`Mesh._encode_subdomains`."""
 
-        # read tags from dictionary key
+        # find correct entry
         for k, v in cell_data.items():
             keys = k.split(':')
-            data = v
-            break
+            if keys[0] == 'skfem':
+                keys = keys[1:]
+                data = v
+                break
 
         ix = data[0].astype(np.int64)
         subdomains = {}
 
         for i, k in enumerate(keys):
-            subdomains[k] = np.nonzero(np.bitwise_and(2 ** i, ix))[0]
+            subdomains[k] = np.nonzero(np.bitwise_and(1 << i, ix))[0]
 
         return None if len(subdomains) == 0 else subdomains
 
