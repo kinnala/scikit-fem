@@ -163,7 +163,7 @@ class Mesh:
 
     def with_boundaries(self,
                         boundaries: Dict[str, Callable[[ndarray], ndarray]],
-                        internal_facets: bool = False):
+                        boundaries_only: bool = True):
         """Return a copy of the mesh with named boundaries.
 
         Parameters
@@ -172,15 +172,15 @@ class Mesh:
             A dictionary of lambda functions with the names of the boundaries
             as keys.  The midpoint of the facet should return ``True`` for the
             corresponding lambda function if the facet belongs to the boundary.
-        internal_facets
-            If ``True``, include also facets that are inside of the domain.
+        boundaries_only
+            If ``True``, consider only facets on the boundary of the domain.
 
         """
         return replace(
             self,
             _boundaries={
                 **({} if self._boundaries is None else self._boundaries),
-                **{name: self.facets_satisfying(test, not internal_facets)
+                **{name: self.facets_satisfying(test, boundaries_only)
                    for name, test in boundaries.items()}
             },
         )
@@ -214,13 +214,13 @@ class Mesh:
 
         return {
             **{
-                f"skfem:subdomains:{name}": [
+                f"skfem:s:{name}": [
                     np.isin(np.arange(self.t.shape[1]), subdomain).astype(int)
                 ]
                 for name, subdomain in subdomains.items()
             },
             **{
-                f"skfem:boundaries:{name}": [
+                f"skfem:b:{name}": [
                     ((1 << np.arange(self.t2f.shape[0]))
                      @ np.isin(self.t2f, boundary)).astype(int)
                 ]
@@ -237,9 +237,9 @@ class Mesh:
             subnames = name.split(":")
             if subnames[0] != "skfem":
                 continue
-            if subnames[1] == "subdomains":
+            if subnames[1] == "s":
                 subdomains[subnames[2]] = np.nonzero(data[0])[0]
-            elif subnames[1] == "boundaries":
+            elif subnames[1] == "b":
                 boundaries[subnames[2]] = self.t2f[
                     (1 << np.arange(self.t2f.shape[0]))[:, None]
                     & data[0].astype(np.int64) > 0
