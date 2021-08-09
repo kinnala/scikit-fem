@@ -161,9 +161,11 @@ class Mesh:
             self._boundaries = {}
         self._boundaries[name] = self.facets_satisfying(test, boundaries_only)
 
-    def with_boundaries(self,
-                        boundaries: Dict[str, Callable[[ndarray], ndarray]],
-                        boundaries_only: bool=True):
+    def with_boundaries(
+        self,
+        boundaries: Dict[str, Callable[[ndarray], ndarray]],
+        boundaries_only: bool = True,
+    ):
         """Return a copy of the mesh with named boundaries.
 
         Parameters
