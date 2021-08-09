@@ -1,9 +1,5 @@
 r"""Conjugate heat transfer.
 
-.. note::
-   This example requires the external package
-   `pygmsh <https://pypi.org/project/pygmsh/>`_.
-
 The forced convection example can be extended to conjugate heat transfer by
 giving a finite thickness and thermal conductivity to one of the walls.
 
@@ -54,24 +50,6 @@ restricted to the elements belonging to a particular subdomain.
   14th International Conference on Heat Transfer, Fluid Mechanics and
   Thermodynamics, Wicklow, Ireland.
 
-License
--------
-
-Copyright 2018-2020 scikit-fem developers
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 """
 from packaging import version
 from pathlib import Path
@@ -85,10 +63,6 @@ from skfem.models.poisson import unit_load
 from matplotlib.pyplot import subplots
 import numpy as np
 
-import pygmsh
-
-
-geometrycontext = pygmsh.geo.Geometry()
 
 halfheight = 1.
 length = 10.
@@ -98,53 +72,7 @@ kratio = 80. / (4.181 / 7.14)
 
 peclet = 357.
 
-
-def make_mesh(halfheight: float,  # mm
-              length: float,
-              thickness: float) -> MeshTri:
-    with geometrycontext as geom:
-
-        points = []
-        lines = []
-
-        lcar = halfheight / 2 ** 2
-
-        for xy in [(0., halfheight),
-                   (0., -halfheight),
-                   (length, -halfheight),
-                   (length, halfheight),
-                   (0., -halfheight - thickness),
-                   (length, -halfheight - thickness)]:
-            points.append(geom.add_point([*xy, 0.], lcar))
-
-        lines.append(geom.add_line(*points[:2]))
-        geom.add_physical(lines[-1], 'fluid-inlet')
-
-        lines.append(geom.add_line(*points[1:3]))
-
-        lines.append(geom.add_line(*points[2:4]))
-        geom.add_physical(lines[-1], 'fluid-outlet')
-
-        lines.append(geom.add_line(points[3], points[0]))
-
-        geom.add_physical(geom.add_plane_surface(geom.add_curve_loop(lines)),
-                          'fluid')
-
-        lines.append(geom.add_line(points[1], points[4]))
-        geom.add_physical(lines[-1], 'solid-inlet')
-
-        lines.append(geom.add_line(*points[4:6]))
-        geom.add_physical(lines[-1], 'heated')
-
-        lines.append(geom.add_line(points[5], points[2]))
-        geom.add_physical(lines[-1], 'solid-outlet')
-
-        geom.add_physical(geom.add_plane_surface(geom.add_curve_loop(
-            [*lines[-3:], -lines[1]])), 'solid')
-
-        return from_meshio(geom.generate_mesh(dim=2))
-
-mesh = from_file(Path(__file__).parent / 'meshes' / 'ex28.json')
+mesh = Mesh.load(Path(__file__).parent / 'meshes' / 'ex28.msh')
 element = ElementTriP1()
 basis = {
     'heat': Basis(mesh, element),
