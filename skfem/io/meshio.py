@@ -32,7 +32,8 @@ TYPE_MESH_MAPPING = {MESH_TYPE_MAPPING[k]: k
 
 
 def from_meshio(m,
-                int_data_to_sets=False):
+                int_data_to_sets=False,
+                out=None):
     """Convert meshio mesh into :class:`skfem.mesh.Mesh`.
 
     Parameters
@@ -46,6 +47,8 @@ def from_meshio(m,
         boundaries.  If ``True``, call ``meshio.Mesh.int_data_to_sets`` to
         convert between the representations before attempting to read tags from
         ``meshio``.
+    out
+        Optionally, write ``meshio`` data to the given dictionary.
 
     Returns
     -------
@@ -175,6 +178,14 @@ def from_meshio(m,
                     (1 << np.arange(mtmp.t2f.shape[0]))[:, None]
                     & data[0].astype(np.int64) > 0
                 ]
+
+    # export mesh data
+    if out is not None and isinstance(out, dict):
+        out.update({
+            'point_data': m.point_data,
+            'cell_data': m.cell_data,
+            'field_data': m.field_data,
+        })
 
     return mesh_type(p, t, boundaries, subdomains)
 
