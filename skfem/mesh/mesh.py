@@ -162,7 +162,8 @@ class Mesh:
         self._boundaries[name] = self.facets_satisfying(test, boundaries_only)
 
     def with_boundaries(self,
-                        boundaries: Dict[str, Callable[[ndarray], ndarray]]):
+                        boundaries: Dict[str, Callable[[ndarray], ndarray]],
+                        boundaries_only: bool=True):
         """Return a copy of the mesh with named boundaries.
 
         Parameters
@@ -171,13 +172,15 @@ class Mesh:
             A dictionary of lambda functions with the names of the boundaries
             as keys.  The midpoint of the facet should return ``True`` for the
             corresponding lambda function if the facet belongs to the boundary.
+        boundaries_only
+            Include only facets on the boundary of the mesh.
 
         """
         return replace(
             self,
             _boundaries={
                 **({} if self._boundaries is None else self._boundaries),
-                **{name: self.facets_satisfying(test, True)
+                **{name: self.facets_satisfying(test, boundaries_only)
                    for name, test in boundaries.items()}
             },
         )
