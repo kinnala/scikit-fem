@@ -52,6 +52,10 @@ for name, mesh in [
     ("disk", from_file(meshes / "disk.json")),
     ("beams", fe.Mesh.load(meshes / "beams.msh")),
 ]:
+    if name == "disk":
+        mesh.boundaries["interface"] = np.logical_and(
+            *[np.logical_or(*np.isin(mesh.f2t, s)) for s in mesh.subdomains.values()]
+        )
     mio = to_meshio(mesh)
     meshio.write(Path(__file__).with_name(f"{name}.vtk"), mio)
     mesh2 = from_meshio(mio)
