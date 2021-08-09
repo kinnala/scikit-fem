@@ -56,20 +56,22 @@ class FaultyInputs(TestCase):
                     np.array([[0.0, 1.0, 2.0], [1.0, 2.0, 3.0]]).T)
 
 
+MESH_PATH = Path(__file__).parents[1] / 'docs' / 'examples' / 'meshes'
+
+
 class Loading(TestCase):
     """Check that Mesh.load works properly."""
 
     def runTest(self):
         # submeshes
-        path = Path(__file__).parents[1] / 'docs' / 'examples' / 'meshes'
-        m = MeshTet.load(str(path / 'box.msh'))
+        m = MeshTet.load(str(MESH_PATH / 'box.msh'))
         self.assertTrue((m.boundaries['top']
                          == m.facets_satisfying(lambda x: x[1] == 1)).all())
         self.assertTrue((m.boundaries['back']
                          == m.facets_satisfying(lambda x: x[2] == 0)).all())
         self.assertTrue((m.boundaries['front']
                          == m.facets_satisfying(lambda x: x[2] == 1)).all())
-        m = MeshTri.load(str(path / 'square.msh'))
+        m = MeshTri.load(str(MESH_PATH / 'square.msh'))
         self.assertTrue((m.boundaries['top']
                          == m.facets_satisfying(lambda x: x[1] == 1)).all())
         self.assertTrue((m.boundaries['left']
@@ -289,6 +291,8 @@ def test_meshio_cycle(m):
     M = from_meshio(to_meshio(m))
     assert_array_equal(M.p, m.p)
     assert_array_equal(M.t, m.t)
+    assert m.boundaries == M.boundaries
+    assert m.subdomains == M.subdomains
 
 
 _test_lambda = {
@@ -309,13 +313,16 @@ _test_lambda = {
     [
         MeshTri(),
         MeshQuad(),
-        MeshHex(),  # TODO facet order changes?
+        MeshHex(),
         MeshTet(),
+        MeshHex().refined(),
+        MeshTet.load(str(MESH_PATH / 'box.msh')),
+        MeshTri.load(str(MESH_PATH / 'square.msh')),
     ]
 )
 def test_meshio_cycle_boundaries(internal_facets, m):
 
-    m = m.refined().with_boundaries(_test_lambda, internal_facets)
+    m = m.with_boundaries(_test_lambda, internal_facets)
     M = from_meshio(to_meshio(m))
     assert_array_equal(M.p, m.p)
     assert_array_equal(M.t, m.t)
@@ -373,8 +380,6 @@ def test_saveload_cycle_vtk(m):
         ('.xdmf', {}),
         ('.vtu', {}),
         ('.med', {}),
-        # ('.vol', {}),  # TODO
-        # ('.mesh', {}),  # TODO move to another test?
     ]
 )
 @pytest.mark.parametrize(

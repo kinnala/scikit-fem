@@ -92,8 +92,8 @@ def from_meshio(m,
     if int_data_to_sets:
         m.int_data_to_sets()
 
-    subdomains = {}
-    boundaries = {}
+    subdomains = None
+    boundaries = None
 
     # parse any subdomains from cell_sets
     if m.cell_sets:
@@ -165,8 +165,12 @@ def from_meshio(m,
             if subnames[0] != "skfem":
                 continue
             if subnames[1] == "s":
+                if subdomains is None:
+                    subdomains = {}
                 subdomains[subnames[2]] = np.nonzero(data[0])[0]
             elif subnames[1] == "b":
+                if boundaries is None:
+                    boundaries = {}
                 boundaries[subnames[2]] = mtmp.t2f[
                     (1 << np.arange(mtmp.t2f.shape[0]))[:, None]
                     & data[0].astype(np.int64) > 0

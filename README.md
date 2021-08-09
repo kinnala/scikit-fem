@@ -250,9 +250,8 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
-- Added: `Mesh.save` will now attempt exporting `Mesh.subdomains` and
-  `Mesh.boundaries` function
-- Added: `Mesh.load` will also import `Mesh.subdomains` and `Mesh.boundaries`
+- Added: `Mesh.save`/`Mesh.load` will now export/import `Mesh.subdomains` and
+  `Mesh.boundaries`
 
 ### [3.2.0] - 2021-08-02
 
