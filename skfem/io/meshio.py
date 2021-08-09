@@ -164,17 +164,15 @@ def from_meshio(m,
             subnames = name.split(":")
             if subnames[0] != "skfem":
                 continue
-            if subnames[1] == "subdomain":
+            if subnames[1] == "s":
                 subdomains[subnames[2]] = np.nonzero(data[0])[0]
-            elif subnames[1] == "boundary":
+            elif subnames[1] == "b":
                 boundaries[subnames[2]] = mtmp.t2f[
                     (1 << np.arange(mtmp.t2f.shape[0]))[:, None]
                     & data[0].astype(np.int64) > 0
                 ]
 
-    mtmp = mesh_type(p, t, boundaries, subdomains)
-
-    return mtmp
+    return mesh_type(p, t, boundaries, subdomains)
 
 
 def from_file(filename, **kwargs):
@@ -196,7 +194,7 @@ def to_meshio(mesh,
         if cell_data is None:
             cell_data = {}
         subdomains = {
-            f"skfem:subdomain:{name}": [
+            f"skfem:s:{name}": [
                 np.isin(np.arange(mesh.t.shape[1]), subdomain).astype(int)
             ]
             for name, subdomain in mesh.subdomains.items()
@@ -207,7 +205,7 @@ def to_meshio(mesh,
         if cell_data is None:
             cell_data = {}
         boundaries = {
-            f"skfem:boundary:{name}": [
+            f"skfem:b:{name}": [
                 (1 << np.arange(mesh.t2f.shape[0]))
                 @ np.isin(mesh.t2f, boundary)
             ]

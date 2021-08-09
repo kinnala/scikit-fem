@@ -298,6 +298,13 @@ _test_lambda = {
 
 
 @pytest.mark.parametrize(
+    "internal_facets",
+    [
+        True,
+        False,
+    ]
+)
+@pytest.mark.parametrize(
     "m",
     [
         MeshTri(),
@@ -306,9 +313,9 @@ _test_lambda = {
         MeshTet(),
     ]
 )
-def test_meshio_cycle_boundaries(m):
+def test_meshio_cycle_boundaries(internal_facets, m):
 
-    m = m.refined().with_boundaries(_test_lambda)
+    m = m.refined().with_boundaries(_test_lambda, internal_facets)
     M = from_meshio(to_meshio(m))
     assert_array_equal(M.p, m.p)
     assert_array_equal(M.t, m.t)
