@@ -255,7 +255,7 @@ with respect to documented and/or tested features.
 - Added: `Mesh.load` now optionally writes any mesh data to a dictionary passed
   via the keyword argument `out`
 - Added: `Mesh.with_boundaries` now allows the definition of internal boundaries/interfaces
-  via the flag `internal_facets=True`
+  via the flag `boundaries_only=False`
 
 ### [3.2.0] - 2021-08-02
 
