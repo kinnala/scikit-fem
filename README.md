@@ -252,6 +252,8 @@ with respect to documented and/or tested features.
 
 - Added: `Mesh.save`/`Mesh.load` will now export/import `Mesh.subdomains` and
   `Mesh.boundaries`
+- Added: `Mesh.load` will now optionally write any mesh data to a dictionary
+  passed as a keyword argument `out`.
 
 ### [3.2.0] - 2021-08-02
 
