@@ -207,6 +207,46 @@ class Mesh:
             }
         )
 
+    def _encode_cell_data(self) -> Dict[str, List[ndarray]]:
+
+        subdomains = {} if self._subdomains is None else self._subdomains
+        boundaries = {} if self._boundaries is None else self._boundaries
+
+        return {
+            **{
+                f"skfem:subdomains:{name}": [
+                    np.isin(np.arange(self.t.shape[1]), subdomain).astype(int)
+                ]
+                for name, subdomain in subdomains.items()
+            },
+            **{
+                f"skfem:boundaries:{name}": [
+                    ((1 << np.arange(self.t2f.shape[0]))
+                     @ np.isin(self.t2f, boundary)).astype(int)
+                ]
+                for name, boundary in boundaries.items()
+            },
+        }
+
+    def _decode_cell_data(self, cell_data: Dict[str, List[ndarray]]):
+
+        subdomains = {}
+        boundaries = {}
+
+        for name, data in cell_data.items():
+            subnames = name.split(":")
+            if subnames[0] != "skfem":
+                continue
+            if subnames[1] == "subdomains":
+                subdomains[subnames[2]] = np.nonzero(data[0])[0]
+            elif subnames[1] == "boundaries":
+                boundaries[subnames[2]] = self.t2f[
+                    (1 << np.arange(self.t2f.shape[0]))[:, None]
+                    & data[0].astype(np.int64) > 0
+                ]
+
+        return boundaries, subdomains
+
     def boundary_nodes(self) -> ndarray:
         """Return an array of boundary node indices."""
         return np.unique(self.facets[:, self.boundary_facets()])

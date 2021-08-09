@@ -250,10 +250,12 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
-- Added: `Mesh.save`/`Mesh.load` will now export/import `Mesh.subdomains` and
+- Added: `Mesh.save`/`Mesh.load` now exports/imports `Mesh.subdomains` and
   `Mesh.boundaries`
-- Added: `Mesh.load` will now optionally write any mesh data to a dictionary
-  passed as a keyword argument `out`.
+- Added: `Mesh.load` now optionally writes any mesh data to a dictionary passed
+  via the keyword argument `out`
+- Added: `Mesh.with_boundaries` now allows the definition of internal boundaries/interfaces
+  via the flag `internal_facets=True`
 
 ### [3.2.0] - 2021-08-02
 

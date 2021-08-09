@@ -95,8 +95,8 @@ def from_meshio(m,
     if int_data_to_sets:
         m.int_data_to_sets()
 
-    subdomains = None
-    boundaries = None
+    subdomains = {}
+    boundaries = {}
 
     # parse any subdomains from cell_sets
     if m.cell_sets:
@@ -163,21 +163,9 @@ def from_meshio(m,
 
     # attempt parsing skfem tags
     if m.cell_data:
-        for name, data in m.cell_data.items():
-            subnames = name.split(":")
-            if subnames[0] != "skfem":
-                continue
-            if subnames[1] == "s":
-                if subdomains is None:
-                    subdomains = {}
-                subdomains[subnames[2]] = np.nonzero(data[0])[0]
-            elif subnames[1] == "b":
-                if boundaries is None:
-                    boundaries = {}
-                boundaries[subnames[2]] = mtmp.t2f[
-                    (1 << np.arange(mtmp.t2f.shape[0]))[:, None]
-                    & data[0].astype(np.int64) > 0
-                ]
+        _boundaries, _subdomains = mtmp._decode_cell_data(m.cell_data)
+        boundaries.update(_boundaries)
+        subdomains.update(_subdomains)
 
     # export mesh data
     if out is not None and isinstance(out, dict):
@@ -187,7 +175,12 @@ def from_meshio(m,
             'field_data': m.field_data,
         })
 
-    return mesh_type(p, t, boundaries, subdomains)
+    return mesh_type(
+        p,
+        t,
+        None if len(boundaries) == 0 else boundaries,
+        None if len(subdomains) == 0 else subdomains,
+    )
 
 
 def from_file(filename, **kwargs):
@@ -205,28 +198,10 @@ def to_meshio(mesh,
     mtype = TYPE_MESH_MAPPING[type(mesh)]
     cells = {mtype: t.T}
 
-    if mesh.subdomains is not None:
-        if cell_data is None:
-            cell_data = {}
-        subdomains = {
-            f"skfem:s:{name}": [
-                np.isin(np.arange(mesh.t.shape[1]), subdomain).astype(int)
-            ]
-            for name, subdomain in mesh.subdomains.items()
-        }
-        cell_data.update(subdomains)
+    if cell_data is None:
+        cell_data = {}
 
-    if mesh.boundaries is not None:
-        if cell_data is None:
-            cell_data = {}
-        boundaries = {
-            f"skfem:b:{name}": [
-                (1 << np.arange(mesh.t2f.shape[0]))
-                @ np.isin(mesh.t2f, boundary)
-            ]
-            for name, boundary in mesh.boundaries.items()
-        }
-        cell_data.update(boundaries)
+    cell_data.update(mesh._encode_cell_data())
 
     mio = meshio.Mesh(
         mesh.p.T,
