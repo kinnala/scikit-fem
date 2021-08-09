@@ -292,8 +292,8 @@ def test_meshio_cycle(m):
 
 
 _test_lambda = {
-    'left': lambda x: x[0] < 0.5,
-    'right': lambda x: x[0] > 0.5,
+    'left': lambda x: x[0] < 0.6,
+    'right': lambda x: x[0] > 0.3,
 }
 
 
@@ -308,12 +308,13 @@ _test_lambda = {
 )
 def test_meshio_cycle_boundaries(m):
 
-    m = m.with_boundaries(_test_lambda)
+    m = m.refined().with_boundaries(_test_lambda)
     M = from_meshio(to_meshio(m))
     assert_array_equal(M.p, m.p)
     assert_array_equal(M.t, m.t)
     for key in m.boundaries:
-        assert_array_equal(M.boundaries[key], m.boundaries[key])
+        assert_array_equal(M.boundaries[key].sort(),
+                           m.boundaries[key].sort())
 
 
 @pytest.mark.parametrize(
@@ -327,7 +328,7 @@ def test_meshio_cycle_boundaries(m):
 )
 def test_meshio_cycle_subdomains(m):
 
-    m = m.refined().with_subdomains(_test_lambda)
+    m = m.refined(2).with_subdomains(_test_lambda)
     M = from_meshio(to_meshio(m))
     assert_array_equal(M.p, m.p)
     assert_array_equal(M.t, m.t)

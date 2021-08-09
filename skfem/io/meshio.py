@@ -92,8 +92,8 @@ def from_meshio(m,
     if int_data_to_sets:
         m.int_data_to_sets()
 
-    subdomains = None
-    boundaries = None
+    subdomains = {}
+    boundaries = {}
 
     # parse any subdomains from cell_sets
     if m.cell_sets:
@@ -159,17 +159,18 @@ def from_meshio(m,
             pass
 
     # attempt parsing skfem tags
-    if m.point_data:
-        try:
-            boundaries = mtmp._decode_boundaries(m.point_data)
-        except Exception:
-            pass
-
     if m.cell_data:
-        try:
-            subdomains = mtmp._decode_subdomains(m.cell_data)
-        except Exception:
-            pass
+        for name, data in m.cell_data.items():
+            subnames = name.split(":")
+            if subnames[0] != "skfem":
+                continue
+            if subnames[1] == "subdomain":
+                subdomains[subnames[2]] = np.nonzero(data[0])[0]
+            elif subnames[1] == "boundary":
+                boundaries[subnames[2]] = mtmp.t2f[
+                    (1 << np.arange(mtmp.t2f.shape[0]))[:, None]
+                    & data[0].astype(np.int64) > 0
+                ]
 
     mtmp = mesh_type(p, t, boundaries, subdomains)
 
@@ -191,15 +192,28 @@ def to_meshio(mesh,
     mtype = TYPE_MESH_MAPPING[type(mesh)]
     cells = {mtype: t.T}
 
-    if cell_data is None:
-        cell_data = {}
+    if mesh.subdomains is not None:
+        if cell_data is None:
+            cell_data = {}
+        subdomains = {
+            f"skfem:subdomain:{name}": [
+                np.isin(np.arange(mesh.t.shape[1]), subdomain).astype(int)
+            ]
+            for name, subdomain in mesh.subdomains.items()
+        }
+        cell_data.update(subdomains)
 
-    cell_data.update(mesh._encode_subdomains())
-
-    if point_data is None:
-        point_data = {}
-
-    point_data.update(mesh._encode_boundaries())
+    if mesh.boundaries is not None:
+        if cell_data is None:
+            cell_data = {}
+        boundaries = {
+            f"skfem:boundary:{name}": [
+                (1 << np.arange(mesh.t2f.shape[0]))
+                @ np.isin(mesh.t2f, boundary)
+            ]
+            for name, boundary in mesh.boundaries.items()
+        }
+        cell_data.update(boundaries)
 
     mio = meshio.Mesh(
         mesh.p.T,
