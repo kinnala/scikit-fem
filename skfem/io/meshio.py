@@ -160,8 +160,8 @@ def from_meshio(m,
     )
 
 
-def from_file(filename, **kwargs):
-    return from_meshio(meshio.read(filename), **kwargs)
+def from_file(filename, out, **kwargs):
+    return from_meshio(meshio.read(filename), out, **kwargs)
 
 
 def to_meshio(mesh,
