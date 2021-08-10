@@ -461,6 +461,8 @@ class Mesh:
             e.g. .msh, .vtk, .xdmf
         point_data
             Data related to the vertices of the mesh.
+        cell_data
+            Data related to the elements of the mesh.
 
         """
         from skfem.io.meshio import to_file
@@ -519,7 +521,7 @@ class Mesh:
 
     @classmethod
     def from_mesh(cls, mesh):
-        """Reuse an existing mesh by adding nodes.
+        """Reuse an existing mesh by adding the higher order nodes.
 
         Parameters
         ----------
