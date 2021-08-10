@@ -32,29 +32,9 @@ TYPE_MESH_MAPPING = {MESH_TYPE_MAPPING[k]: k
 
 
 def from_meshio(m,
-                int_data_to_sets=False,
-                out=None):
-    """Convert meshio mesh into :class:`skfem.mesh.Mesh`.
+                out=None,
+                int_data_to_sets=False):
 
-    Parameters
-    ----------
-    m
-        The mesh from meshio.
-    int_data_to_sets
-        We correctly read the so-called "cell sets" from ``meshio``.  However,
-        many mesh formats do not support "cell sets" natively and, instead, use
-        cellwise integer data to distinguish between different subdomains and
-        boundaries.  If ``True``, call ``meshio.Mesh.int_data_to_sets`` to
-        convert between the representations before attempting to read tags from
-        ``meshio``.
-    out
-        Optionally, write ``meshio`` data to the given dictionary.
-
-    Returns
-    -------
-    A :class:`~skfem.mesh.Mesh` object.
-
-    """
     cells = m.cells_dict
     meshio_type = None
 
@@ -168,12 +148,9 @@ def from_meshio(m,
         subdomains.update(_subdomains)
 
     # export mesh data
-    if out is not None and isinstance(out, dict):
-        out.update({
-            'point_data': m.point_data,
-            'cell_data': m.cell_data,
-            'field_data': m.field_data,
-        })
+    if out is not None and isinstance(out, list):
+        for i, field in enumerate(out):
+            out[i] = getattr(m, field)
 
     return mesh_type(
         p,

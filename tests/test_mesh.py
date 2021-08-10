@@ -401,13 +401,13 @@ def test_saveload_cycle_tags(fmt, kwargs, m):
     from tempfile import NamedTemporaryFile
     with NamedTemporaryFile() as f:
         m.save(f.name + fmt, point_data={'foo': m.p[0]}, **kwargs)
-        out = {}
+        out = ['point_data', 'cells_dict']
         m2 = Mesh.load(f.name + fmt, out=out)
 
 
         assert_array_equal(m.p, m2.p)
         assert_array_equal(m.t, m2.t)
-        assert_array_equal(out['point_data']['foo'], m.p[0])
+        assert_array_equal(out[0]['foo'], m.p[0])
         for key in m.subdomains:
             assert_array_equal(m2.subdomains[key].sort(),
                                m.subdomains[key].sort())

@@ -473,17 +473,25 @@ class Mesh:
                        **kwargs)
 
     @classmethod
-    def load(cls, filename: str, **kwargs):
+    def load(cls,
+             filename: str,
+             out: Optional[List[str]] = None,
+             **kwargs):
         """Load a mesh using meshio.
 
         Parameters
         ----------
         filename
             The filename of the mesh file.
+        out
+            Optional list of ``meshio.Mesh`` attribute names, overwrite with
+            the corresponding data.  E.g., ``['point_data', 'cell_data']``.
 
         """
         from skfem.io.meshio import from_file
-        return from_file(filename, **kwargs)
+        return from_file(filename,
+                         out,
+                         **kwargs)
 
     @classmethod
     def from_dict(cls, data):
