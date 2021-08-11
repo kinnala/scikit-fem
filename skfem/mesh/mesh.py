@@ -162,7 +162,8 @@ class Mesh:
         self._boundaries[name] = self.facets_satisfying(test, boundaries_only)
 
     def with_boundaries(self,
-                        boundaries: Dict[str, Callable[[ndarray], ndarray]]):
+                        boundaries: Dict[str, Callable[[ndarray], ndarray]],
+                        boundaries_only: bool = True):
         """Return a copy of the mesh with named boundaries.
 
         Parameters
@@ -171,13 +172,15 @@ class Mesh:
             A dictionary of lambda functions with the names of the boundaries
             as keys.  The midpoint of the facet should return ``True`` for the
             corresponding lambda function if the facet belongs to the boundary.
+        boundaries_only
+            If ``True``, consider only facets on the boundary of the domain.
 
         """
         return replace(
             self,
             _boundaries={
                 **({} if self._boundaries is None else self._boundaries),
-                **{name: self.facets_satisfying(test, True)
+                **{name: self.facets_satisfying(test, boundaries_only)
                    for name, test in boundaries.items()}
             },
         )
@@ -203,6 +206,46 @@ class Mesh:
                    for name, test in subdomains.items()},
             }
         )
+
+    def _encode_cell_data(self) -> Dict[str, List[ndarray]]:
+
+        subdomains = {} if self._subdomains is None else self._subdomains
+        boundaries = {} if self._boundaries is None else self._boundaries
+
+        return {
+            **{
+                f"skfem:s:{name}": [
+                    np.isin(np.arange(self.t.shape[1]), subdomain).astype(int)
+                ]
+                for name, subdomain in subdomains.items()
+            },
+            **{
+                f"skfem:b:{name}": [
+                    ((1 << np.arange(self.t2f.shape[0]))
+                     @ np.isin(self.t2f, boundary)).astype(int)
+                ]
+                for name, boundary in boundaries.items()
+            },
+        }
+
+    def _decode_cell_data(self, cell_data: Dict[str, List[ndarray]]):
+
+        subdomains = {}
+        boundaries = {}
+
+        for name, data in cell_data.items():
+            subnames = name.split(":")
+            if subnames[0] != "skfem":
+                continue
+            if subnames[1] == "s":
+                subdomains[subnames[2]] = np.nonzero(data[0])[0]
+            elif subnames[1] == "b":
+                boundaries[subnames[2]] = self.t2f[
+                    (1 << np.arange(self.t2f.shape[0]))[:, None]
+                    & data[0].astype(np.int64) > 0
+                ]
+
+        return boundaries, subdomains
 
     def boundary_nodes(self) -> ndarray:
         """Return an array of boundary node indices."""
@@ -407,6 +450,7 @@ class Mesh:
     def save(self,
              filename: str,
              point_data: Optional[Dict[str, ndarray]] = None,
+             cell_data: Optional[Dict[str, ndarray]] = None,
              **kwargs) -> None:
         """Export the mesh and fields using meshio.
 
@@ -417,23 +461,37 @@ class Mesh:
             e.g. .msh, .vtk, .xdmf
         point_data
             Data related to the vertices of the mesh.
+        cell_data
+            Data related to the elements of the mesh.
 
         """
         from skfem.io.meshio import to_file
-        return to_file(self, filename, point_data, **kwargs)
+        return to_file(self,
+                       filename,
+                       point_data,
+                       cell_data,
+                       **kwargs)
 
     @classmethod
-    def load(cls, filename: str):
+    def load(cls,
+             filename: str,
+             out: Optional[List[str]] = None,
+             **kwargs):
         """Load a mesh using meshio.
 
         Parameters
         ----------
         filename
             The filename of the mesh file.
+        out
+            Optional list of ``meshio.Mesh`` attribute names, overwrite with
+            the corresponding data.  E.g., ``['point_data', 'cell_data']``.
 
         """
         from skfem.io.meshio import from_file
-        return from_file(filename)
+        return from_file(filename,
+                         out,
+                         **kwargs)
 
     @classmethod
     def from_dict(cls, data):
@@ -471,7 +529,7 @@ class Mesh:
 
     @classmethod
     def from_mesh(cls, mesh):
-        """Reuse an existing mesh by adding nodes.
+        """Reuse an existing mesh by adding the higher order nodes.
 
         Parameters
         ----------

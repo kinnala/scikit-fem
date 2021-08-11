@@ -56,20 +56,22 @@ class FaultyInputs(TestCase):
                     np.array([[0.0, 1.0, 2.0], [1.0, 2.0, 3.0]]).T)
 
 
+MESH_PATH = Path(__file__).parents[1] / 'docs' / 'examples' / 'meshes'
+
+
 class Loading(TestCase):
     """Check that Mesh.load works properly."""
 
     def runTest(self):
         # submeshes
-        path = Path(__file__).parents[1] / 'docs' / 'examples' / 'meshes'
-        m = MeshTet.load(str(path / 'box.msh'))
+        m = MeshTet.load(MESH_PATH / 'box.msh')
         self.assertTrue((m.boundaries['top']
                          == m.facets_satisfying(lambda x: x[1] == 1)).all())
         self.assertTrue((m.boundaries['back']
                          == m.facets_satisfying(lambda x: x[2] == 0)).all())
         self.assertTrue((m.boundaries['front']
                          == m.facets_satisfying(lambda x: x[2] == 1)).all())
-        m = MeshTri.load(str(path / 'square.msh'))
+        m = MeshTri.load(MESH_PATH / 'square.msh')
         self.assertTrue((m.boundaries['top']
                          == m.facets_satisfying(lambda x: x[1] == 1)).all())
         self.assertTrue((m.boundaries['left']
@@ -281,6 +283,7 @@ def test_finder_simplex(m, seed):
         MeshTri2(),
         MeshQuad2(),
         MeshTet2(),
+        MeshLine(),
     ]
 )
 def test_meshio_cycle(m):
@@ -288,6 +291,63 @@ def test_meshio_cycle(m):
     M = from_meshio(to_meshio(m))
     assert_array_equal(M.p, m.p)
     assert_array_equal(M.t, m.t)
+    assert m.boundaries == M.boundaries
+    assert m.subdomains == M.subdomains
+
+
+_test_lambda = {
+    'left': lambda x: x[0] < 0.6,
+    'right': lambda x: x[0] > 0.3,
+}
+
+
+@pytest.mark.parametrize(
+    "internal_facets",
+    [
+        True,
+        False,
+    ]
+)
+@pytest.mark.parametrize(
+    "m",
+    [
+        MeshTri(),
+        MeshQuad(),
+        MeshHex(),
+        MeshTet(),
+        MeshHex().refined(),
+        MeshTet.load(MESH_PATH / 'box.msh'),
+        MeshTri.load(MESH_PATH / 'square.msh'),
+    ]
+)
+def test_meshio_cycle_boundaries(internal_facets, m):
+
+    m = m.with_boundaries(_test_lambda, internal_facets)
+    M = from_meshio(to_meshio(m))
+    assert_array_equal(M.p, m.p)
+    assert_array_equal(M.t, m.t)
+    for key in m.boundaries:
+        assert_array_equal(M.boundaries[key].sort(),
+                           m.boundaries[key].sort())
+
+
+@pytest.mark.parametrize(
+    "m",
+    [
+        MeshTri(),
+        MeshQuad(),
+        MeshHex(),
+        MeshTet(),
+    ]
+)
+def test_meshio_cycle_subdomains(m):
+
+    m = m.refined(2).with_subdomains(_test_lambda)
+    M = from_meshio(to_meshio(m))
+    assert_array_equal(M.p, m.p)
+    assert_array_equal(M.t, m.t)
+    for key in m.subdomains:
+        assert_array_equal(M.subdomains[key], m.subdomains[key])
 
 
 @pytest.mark.parametrize(
@@ -299,18 +359,58 @@ def test_meshio_cycle(m):
         MeshHex(),
     ]
 )
-def test_saveload_cycle(m):
+def test_saveload_cycle_vtk(m):
 
     from tempfile import NamedTemporaryFile
     m = m.refined(2)
-    f = NamedTemporaryFile(delete=False)
-    m.save(f.name + ".vtk")
-    with pytest.warns(UserWarning):
-       m2 = Mesh.load(f.name + ".vtk")
+    with NamedTemporaryFile() as f:
+        m.save(f.name + ".vtk")
+        m2 = Mesh.load(f.name + ".vtk")
 
     assert_array_equal(m.p, m2.p)
     assert_array_equal(m.t, m2.t)
 
 
-if __name__ == '__main__':
-    main()
+@pytest.mark.parametrize(
+    "fmt, kwargs",
+    [
+        ('.msh', {}),
+        ('.msh', {'file_format': 'gmsh22'}),
+        ('.vtk', {}),
+        ('.xdmf', {}),
+        ('.vtu', {}),
+        ('.med', {}),
+    ]
+)
+@pytest.mark.parametrize(
+    "m",
+    [
+        MeshTri(),
+        MeshQuad(),
+        MeshHex(),  # TODO facet order changes?
+        MeshTet(),
+    ]
+)
+def test_saveload_cycle_tags(fmt, kwargs, m):
+
+    m = (m
+         .refined(2)
+         .with_subdomains(_test_lambda)
+         .with_boundaries({'test': lambda x: (x[0] == 0) * (x[1] < 0.6),
+                           'set': lambda x: (x[0] == 0) * (x[1] > 0.3)}))
+    from tempfile import NamedTemporaryFile
+    with NamedTemporaryFile() as f:
+        m.save(f.name + fmt, point_data={'foo': m.p[0]}, **kwargs)
+        out = ['point_data', 'cells_dict']
+        m2 = Mesh.load(f.name + fmt, out=out)
+
+
+        assert_array_equal(m.p, m2.p)
+        assert_array_equal(m.t, m2.t)
+        assert_array_equal(out[0]['foo'], m.p[0])
+        for key in m.subdomains:
+            assert_array_equal(m2.subdomains[key].sort(),
+                               m.subdomains[key].sort())
+        for key in m.boundaries:
+            assert_array_equal(m2.boundaries[key].sort(),
+                               m.boundaries[key].sort())
