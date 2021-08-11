@@ -64,14 +64,14 @@ class Loading(TestCase):
 
     def runTest(self):
         # submeshes
-        m = MeshTet.load(str(MESH_PATH / 'box.msh'))
+        m = MeshTet.load(MESH_PATH / 'box.msh')
         self.assertTrue((m.boundaries['top']
                          == m.facets_satisfying(lambda x: x[1] == 1)).all())
         self.assertTrue((m.boundaries['back']
                          == m.facets_satisfying(lambda x: x[2] == 0)).all())
         self.assertTrue((m.boundaries['front']
                          == m.facets_satisfying(lambda x: x[2] == 1)).all())
-        m = MeshTri.load(str(MESH_PATH / 'square.msh'))
+        m = MeshTri.load(MESH_PATH / 'square.msh')
         self.assertTrue((m.boundaries['top']
                          == m.facets_satisfying(lambda x: x[1] == 1)).all())
         self.assertTrue((m.boundaries['left']
@@ -316,8 +316,8 @@ _test_lambda = {
         MeshHex(),
         MeshTet(),
         MeshHex().refined(),
-        MeshTet.load(str(MESH_PATH / 'box.msh')),
-        MeshTri.load(str(MESH_PATH / 'square.msh')),
+        MeshTet.load(MESH_PATH / 'box.msh'),
+        MeshTri.load(MESH_PATH / 'square.msh'),
     ]
 )
 def test_meshio_cycle_boundaries(internal_facets, m):
