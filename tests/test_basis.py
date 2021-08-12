@@ -222,24 +222,32 @@ def test_interpolator_probes(mtype, e, nrefs, npoints):
 
 
 @pytest.mark.parametrize(
-    "mtype,e1,e2",
+    "mtype,e1,e2,flat",
     [
-        (MeshTri, ElementTriP1(), ElementTriP0()),
-        (MeshTri, ElementTriP1(), ElementTriP1()),
-        (MeshTri, ElementTriP2(), ElementTriP1()),
-        (MeshTri, ElementTriP2(), ElementTriP2()),
-        (MeshTri, ElementTriP2(), None),
-        (MeshQuad, ElementQuad1(), ElementQuad0()),
-        (MeshQuad, ElementQuad1(), ElementQuad1()),
-        (MeshQuad, ElementQuad2(), ElementQuad2()),
-        (MeshTet, ElementTetP1(), ElementTetP0()),
-        (MeshTet, ElementTetP2(), ElementTetP2()),
-        (MeshHex, ElementHex1(), ElementHex0()),
-        (MeshHex, ElementHex1(), ElementHex1()),
-        (MeshHex, ElementHex2(), ElementHex2()),
-    ]
+        (MeshTri, ElementTriP1(), ElementTriP0(), False),
+        (MeshTri, ElementTriP1(), ElementTriP1(), False),
+        (MeshTri, ElementTriP2(), ElementTriP1(), False),
+        (MeshTri, ElementTriP2(), ElementTriP2(), False),
+        (MeshTri, ElementTriP1(), ElementTriP0(), True),
+        (MeshTri, ElementTriP1(), ElementTriP1(), True),
+        (MeshTri, ElementTriP2(), ElementTriP1(), True),
+        (MeshTri, ElementTriP2(), ElementTriP2(), True),
+        (MeshTri, ElementTriP2(), None, False),
+        (MeshTri, ElementTriP2(), None, True),
+        (MeshQuad, ElementQuad1(), ElementQuad0(), False),
+        (MeshQuad, ElementQuad1(), ElementQuad1(), False),
+        (MeshQuad, ElementQuad2(), ElementQuad2(), False),
+        (MeshQuad, ElementQuad1(), ElementQuad0(), True),
+        (MeshQuad, ElementQuad1(), ElementQuad1(), True),
+        (MeshQuad, ElementQuad2(), ElementQuad2(), True),
+        (MeshTet, ElementTetP1(), ElementTetP0(), False),
+        (MeshTet, ElementTetP2(), ElementTetP2(), False),
+        (MeshHex, ElementHex1(), ElementHex0(), False),
+        (MeshHex, ElementHex1(), ElementHex1(), False),
+        (MeshHex, ElementHex2(), ElementHex2(), False),
+    ],
 )
-def test_trace(mtype, e1, e2):
+def test_trace(mtype, e1, e2, flat):
 
     m = mtype().refined(3)
 
@@ -247,7 +255,9 @@ def test_trace(mtype, e1, e2):
     basis = FacetBasis(m, e1,
                        facets=m.facets_satisfying(lambda x: x[x.shape[0] - 1] == 0.0))
     xfun = projection(lambda x: x[0], CellBasis(m, e1))
-    nbasis, y = basis.trace(xfun, lambda p: p[0:(p.shape[0] - 1)], target_elem=e2)
+    nbasis, y = basis.trace(
+        xfun, lambda p: p[0] if flat else p[0 : (p.shape[0] - 1)], target_elem=e2
+    )
 
     @Functional
     def integ(w):
