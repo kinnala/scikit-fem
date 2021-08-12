@@ -255,9 +255,7 @@ def test_trace(mtype, e1, e2, flat):
     basis = FacetBasis(m, e1,
                        facets=m.facets_satisfying(lambda x: x[x.shape[0] - 1] == 0.0))
     xfun = projection(lambda x: x[0], CellBasis(m, e1))
-    nbasis, y = basis.trace(
-        xfun, lambda p: p[0] if flat else p[0 : (p.shape[0] - 1)], target_elem=e2
-    )
+    nbasis, y = basis.trace(xfun, lambda p: p[0] if flat else p[:-1], target_elem=e2)
 
     @Functional
     def integ(w):
