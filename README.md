@@ -32,6 +32,7 @@ pip install scikit-fem
 
 ## Examples
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kinnala/scikit-fem-notebooks/blob/master/ex1.ipynb)
 Solve the Poisson problem (see also [`ex01.py`](https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex01.py)):
 ```python
 from skfem import *
@@ -73,9 +74,6 @@ from skfem.visuals.matplotlib import plot, savefig
 plot(m, x, shading='gouraud', colorbar=True)
 savefig('solution.png')
 ```
-<p align="center">
-<img src="https://user-images.githubusercontent.com/973268/121342616-7d202480-c92a-11eb-965f-c5ef462fbd5c.png" width="65%">
-</p>
 
 Meshes can be initialized manually, loaded from external files using
 [meshio](https://github.com/nschloe/meshio), or created with the help of special
