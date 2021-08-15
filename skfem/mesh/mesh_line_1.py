@@ -20,11 +20,8 @@ class MeshLine1(Mesh):
 
     def __post_init__(self):
 
+        self.doflocs = np.atleast_2d(self.doflocs)
         super().__post_init__()
-
-        if self.doflocs.ndim == 1:
-            # support flat arrays
-            self.doflocs = np.array([self.doflocs])
 
         if self.t.shape[1] != self.doflocs.shape[1] - 1:
             # fill self.t assuming ascending self.doflocs if not provided
