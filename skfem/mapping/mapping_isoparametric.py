@@ -6,6 +6,8 @@ from numpy import ndarray
 from skfem.element import Element
 from skfem.mesh import Mesh2D, Mesh3D
 from .mapping import Mapping
+from functools import lru_cache
+from ..generic_utils import HashableNdArray
 
 
 class MappingIsoparametric(Mapping):
@@ -59,6 +61,7 @@ class MappingIsoparametric(Mapping):
                     out += p[i, t[itr, tind]][:, None] * phi
                 return out
 
+        @lru_cache(maxsize=128)
         def J(i, j, X, tind=None):
             if tind is None:
                 out = np.zeros((t.shape[1], X.shape[1]))
@@ -146,6 +149,8 @@ class MappingIsoparametric(Mapping):
         return np.array([self.map(i, X, tind) for i in range(X.shape[0])])
 
     def detDF(self, X, tind=None, J=None):
+        X = HashableNdArray(X)
+        tind = None if tind is None else HashableNdArray(tind)
         if J is None:
             J = [[self.J(i, j, X, tind=tind) for j in range(self.dim)]
                  for i in range(self.dim)]
@@ -165,6 +170,8 @@ class MappingIsoparametric(Mapping):
         return detDF
 
     def invDF(self, X, tind=None):
+        X = HashableNdArray(X)
+        tind = None if tind is None else HashableNdArray(tind)
         J = [[self.J(i, j, X, tind=tind) for j in range(self.dim)]
              for i in range(self.dim)]
         detDF = self.detDF(X, tind, J=J)
