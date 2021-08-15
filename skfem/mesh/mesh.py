@@ -1,4 +1,3 @@
-from collections import namedtuple
 from dataclasses import dataclass, replace
 from typing import Callable, Dict, List, Optional, Tuple, Type, Union
 from warnings import warn
