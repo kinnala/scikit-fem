@@ -6,6 +6,8 @@ from numpy import ndarray
 from skfem.element import Element
 from skfem.mesh import Mesh2D, Mesh3D
 from .mapping import Mapping
+from functools import lru_cache
+from ..generic_utils import HashableNdArray
 
 
 class MappingIsoparametric(Mapping):
@@ -41,11 +43,11 @@ class MappingIsoparametric(Mapping):
             bndelem is ElementQuad1.
 
         """
-        p = mesh.p
-        t = mesh.t
+        p = mesh.doflocs
+        t = mesh.dofs.element_dofs
         facets = mesh.facets
 
-        def map(i, X, tind=None):
+        def Fmap(i, X, tind=None):
             if tind is None:
                 out = np.zeros((t.shape[1], X.shape[1]))
                 for itr in range(t.shape[0]):
@@ -59,6 +61,7 @@ class MappingIsoparametric(Mapping):
                     out += p[i, t[itr, tind]][:, None] * phi
                 return out
 
+        @lru_cache(maxsize=128)
         def J(i, j, X, tind=None):
             if tind is None:
                 out = np.zeros((t.shape[1], X.shape[1]))
@@ -101,13 +104,13 @@ class MappingIsoparametric(Mapping):
                     out += p[i, facets[itr, find]][:, None] * dphi[j]
                 return out
 
-        self.map = map
+        self.Fmap = Fmap
         self.bndmap = bndmap
         self.J = J
         self.bndJ = bndJ
         self.elem = elem
         self.mesh = mesh
-        self.dim = mesh.p.shape[0]
+        self.dim = p.shape[0]
 
     def G(self, X: ndarray, find: Optional[ndarray] = None) -> ndarray:
         return np.array([self.bndmap(i, X, find=find)
@@ -143,9 +146,11 @@ class MappingIsoparametric(Mapping):
                          "up to TOL={}".format(newton_tol)))
 
     def F(self, X, tind=None):
-        return np.array([self.map(i, X, tind) for i in range(X.shape[0])])
+        return np.array([self.Fmap(i, X, tind) for i in range(X.shape[0])])
 
     def detDF(self, X, tind=None, J=None):
+        X = HashableNdArray(X)
+        tind = None if tind is None else HashableNdArray(tind)
         if J is None:
             J = [[self.J(i, j, X, tind=tind) for j in range(self.dim)]
                  for i in range(self.dim)]
@@ -165,6 +170,8 @@ class MappingIsoparametric(Mapping):
         return detDF
 
     def invDF(self, X, tind=None):
+        X = HashableNdArray(X)
+        tind = None if tind is None else HashableNdArray(tind)
         J = [[self.J(i, j, X, tind=tind) for j in range(self.dim)]
              for i in range(self.dim)]
         detDF = self.detDF(X, tind, J=J)
