@@ -23,7 +23,6 @@ class Mesh:
     _subdomains: Optional[Dict[str, ndarray]] = None
     elem: Type[Element] = Element
     affine: bool = False
-    validate: bool = False  # unused; for backwards compatibility
     # Some parts of the library, most notably the normal vector construction in
     # ElementGlobal._eval_dofs, assume that the element indices are ascending
     # because this leads to consistent normal vectors for both elements sharing
@@ -137,28 +136,6 @@ class Mesh:
             np.ravel_multi_index(B.T, dims),  # type: ignore
         ))[0]
         return edge_candidates[ix]
-
-    def define_boundary(self, name: str,
-                        test: Callable[[ndarray], ndarray],
-                        boundaries_only: bool = True):
-        """Define a named boundary via function handle.
-
-        Parameters
-        ----------
-        name
-            Name of the boundary.
-        test
-            A function which returns True for facet midpoints belonging to the
-            boundary.
-        boundaries_only
-            If True, include only facets on the boundary of the mesh.
-
-        """
-        warn("Mesh.define_boundary is deprecated and will be removed in the "
-             "next major release.", DeprecationWarning)
-        if self._boundaries is None:
-            self._boundaries = {}
-        self._boundaries[name] = self.facets_satisfying(test, boundaries_only)
 
     def with_boundaries(self,
                         boundaries: Dict[str, Callable[[ndarray], ndarray]],
