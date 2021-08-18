@@ -174,8 +174,8 @@ The releases are tested in
 ## Licensing
 
 The contents of `skfem/` and the PyPI package `scikit-fem` are licensed under
-the 3-clause BSD license.  Some examples under `docs/examples/` have a different
-license, see `LICENSE.md` for more information.
+the 3-clause BSD license.  Some examples under `docs/examples/` or snippets
+in the documentation may have a different license.
 
 ## Acknowledgements
 
