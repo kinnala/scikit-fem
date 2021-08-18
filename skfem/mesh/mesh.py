@@ -403,11 +403,25 @@ class Mesh:
         return cls(p, t)
 
     def __repr__(self):
-        return "{} mesh with {} vertices and {} elements.".format(
-            self.elem.refdom.name,
-            self.nvertices,
-            self.nelements,
-        )
+        rep = ""
+        rep += "<skfem {} object>\n".format(type(self).__name__)
+        rep += "  Number of vertices: {}\n".format(self.nvertices)
+        rep += "  Number of elements: {}".format(self.nelements)
+        if self.subdomains is not None:
+            rep += "\n  Named subdomains [# elements]: {}".format(
+                ', '.join(
+                    map(lambda k: '{} [{}]'.format(k, len(self.subdomains[k])),
+                        list(self.subdomains.keys()))
+                )
+            )
+        if self.boundaries is not None:
+            rep += "\n  Named boundaries [# facets]: {}".format(
+                ', '.join(
+                    map(lambda k: '{} [{}]'.format(k, len(self.boundaries[k])),
+                        list(self.boundaries.keys()))
+                )
+            )
+        return rep
 
     def __str__(self):
         return self.__repr__()
