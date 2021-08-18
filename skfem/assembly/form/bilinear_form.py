@@ -70,7 +70,7 @@ class BilinearForm(Form):
         dx = ubasis.dx
         wdict = FormExtraParams({
             **ubasis.default_parameters(),
-            **self.dictify(kwargs),
+            **self.dictify(kwargs, ubasis),
         })
 
         # initialize COO data structures

@@ -28,7 +28,7 @@ class Functional(Form):
         """Evaluate the functional elementwise."""
         w = FormExtraParams({
             **v.default_parameters(),
-            **self.dictify(kwargs),
+            **self.dictify(kwargs, v),
         })
         return self._kernel(w, v.dx)
 

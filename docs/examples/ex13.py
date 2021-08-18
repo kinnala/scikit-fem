@@ -63,7 +63,7 @@ def port_flux(w):
 current = {}
 for port, boundary in mesh.boundaries.items():
     fbasis = FacetBasis(mesh, elements, facets=boundary)
-    current[port] = asm(port_flux, fbasis, u=fbasis.interpolate(u))
+    current[port] = asm(port_flux, fbasis, u=u)
 
 if __name__ == '__main__':
 

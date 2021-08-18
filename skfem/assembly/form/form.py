@@ -48,29 +48,17 @@ class Form:
         raise NotImplementedError
 
     @staticmethod
-    def dictify(w):
+    def dictify(w, basis):
         """Support additional input formats for 'w'."""
         for k in w:
             if isinstance(w[k], DiscreteField):
                 continue
-            elif isinstance(w[k], ndarray):
+            elif isinstance(w[k], ndarray) and len(w[k].shape) == 2:
                 w[k] = DiscreteField(w[k])
-            elif isinstance(w[k], list):
-                warnings.warn("In future, any additional kwargs to "
-                              "asm() must be of type DiscreteField.",
-                              DeprecationWarning)
-                w[k] = DiscreteField(np.array([z.value for z in w[k]]),
-                                     np.array([z.grad for z in w[k]]))
-            elif isinstance(w[k], tuple):
-                warnings.warn("In future, any additional kwargs to "
-                              "asm() must be of type DiscreteField. "
-                              "In most cases this deprecation is "
-                              "fixed replacing asm(..., w=w) "
-                              "by asm(..., w=DiscreteField(*w)).",
-                              DeprecationWarning)
-                w[k] = DiscreteField(*w[k])
+            elif isinstance(w[k], ndarray) and len(w[k].shape) == 1:
+                w[k] = basis.interpolate(w[k])
             else:
                 raise ValueError("The given type '{}' for the list of extra "
                                  "form parameters w cannot be converted to "
-                                 "DiscreteField.".format(type(w)))
+                                 "DiscreteField.".format(type(w[k])))
         return w
