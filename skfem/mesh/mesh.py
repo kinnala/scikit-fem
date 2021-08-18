@@ -22,7 +22,7 @@ class Mesh:
     _boundaries: Optional[Dict[str, ndarray]] = None
     _subdomains: Optional[Dict[str, ndarray]] = None
     elem: Type[Element] = Element
-    affine: bool = False
+    affine: bool = False  #: Use :class:`~skfem.mapping.MappingAffine`?
     # Some parts of the library, most notably the normal vector construction in
     # ElementGlobal._eval_dofs, assume that the element indices are ascending
     # because this leads to consistent normal vectors for both elements sharing
