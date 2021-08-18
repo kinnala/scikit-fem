@@ -9,6 +9,7 @@ from numpy.testing import assert_array_equal
 from skfem.mesh import (Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
                         MeshTri2, MeshQuad2, MeshTet2, MeshHex2)
 from skfem.io.meshio import to_meshio, from_meshio
+from skfem.io.json import to_dict, from_dict
 
 
 class MeshTests(TestCase):
@@ -94,7 +95,7 @@ class SerializeUnserializeCycle(TestCase):
                  .refined(2)
                  .with_boundaries({'down': lambda x: x[0] == 0,})
                  .with_subdomains({'up': lambda x: x[0] > 0.5}))
-            M = cls.from_dict(m.to_dict())
+            M = from_dict(cls, to_dict(m))
             self.assertTrue(np.sum(m.p - M.p) < 1e-13)
             self.assertTrue(np.sum(m.t - M.t) < 1e-13)
             for k in m.boundaries:
