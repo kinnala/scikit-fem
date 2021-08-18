@@ -52,7 +52,9 @@ class Mesh:
 
     @property
     def bndelem(self):
-        return BOUNDARY_ELEMENT_MAP[self.elem]()
+        if self.elem in BOUNDARY_ELEMENT_MAP:
+            return BOUNDARY_ELEMENT_MAP[self.elem]()
+        return None
 
     @property
     def nelements(self):
