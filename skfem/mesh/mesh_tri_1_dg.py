@@ -28,18 +28,15 @@ class MeshTri1DG(MeshTri1):
     affine: bool = False
     sort_t: bool = False
 
-    def periodic(self, ix1, ix2, sort):
+    def periodic(self, ix1, ix2):
         """Turn into a periodic mesh.
 
         Parameters
         ----------
         ix1
         ix2
-        sort
         """
         assert len(ix1) == len(ix2)
-        ix1 = ix1[sort(self.p[:, ix1])]
-        ix2 = ix2[sort(self.p[:, ix2])]
         remap = np.arange(self.doflocs.shape[1], dtype=np.int64)
         remap[ix1] = ix2
         return replace(
