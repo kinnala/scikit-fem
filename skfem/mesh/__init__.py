@@ -33,6 +33,7 @@ from .mesh_tet_1 import MeshTet1
 from .mesh_tet_2 import MeshTet2
 from .mesh_tri_1 import MeshTri1
 from .mesh_tri_2 import MeshTri2
+from .mesh_tri_1_dg import MeshTri1DG
 
 # aliases
 MeshLine = MeshLine1
@@ -49,6 +50,7 @@ __all__ = [
     "MeshTri",
     "MeshTri1",
     "MeshTri2",
+    "MeshTri1DG",
     "MeshQuad",
     "MeshQuad1",
     "MeshQuad2",

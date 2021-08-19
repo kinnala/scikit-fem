@@ -405,8 +405,9 @@ class Mesh:
     def __repr__(self):
         rep = ""
         rep += "<skfem {} object>\n".format(type(self).__name__)
+        rep += "  Number of elements: {}\n".format(self.nelements)
         rep += "  Number of vertices: {}\n".format(self.nvertices)
-        rep += "  Number of elements: {}".format(self.nelements)
+        rep += "  Number of nodes: {}".format(self.p.shape[1])
         if self.subdomains is not None:
             rep += "\n  Named subdomains [# elements]: {}".format(
                 ', '.join(
