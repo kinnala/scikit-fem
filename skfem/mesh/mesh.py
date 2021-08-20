@@ -732,22 +732,24 @@ class Mesh:
         """
         raise NotImplementedError
 
-    def periodic_connectivity(self, *pairs):
+    def reordered(self, ix):
+
+        nix = np.arange(self.nvertices - len(ix),
+                        self.nvertices,
+                        dtype=np.int64)
+        remap = np.zeros(self.nvertices, dtype=np.int64)
+        remap[ix] = nix
+        oix = (remap == 0).nonzero()[0]
+        remap[oix] = np.arange(self.nvertices - len(ix), dtype=np.int64)
+
+        return replace(
+            self,
+            doflocs=np.hstack((self.doflocs[:, oix], self.doflocs[:, ix])),
+            t=remap[self.t],
+        )
+
+    def periodic_connectivity(self, b1, b2):
         """Helper for the creation of periodic meshes.
-
-        Parameters
-        ----------
-        *pairs
-            Variable number of pairs with keys to ``Mesh.boundaries``, e.g.,
-            ``('left', 'right')`` indicates that the vertices belonging to the
-            named boundary ``left`` will be identified with the vertices
-            belonging to ``right``.
-
-        Returns
-        -------
-        ndarray
-            A new connectivity array corresponding to ``Mesh.t`` with the
-            replacements indicated by ``pairs``.
 
         """
         t = self.t.copy()
@@ -755,11 +757,10 @@ class Mesh:
         def _sort(ix):
             return ix[np.argsort(np.sum(self.p[:, ix], axis=0))]
 
-        for pair in pairs:
-            remap = np.arange(self.nvertices, dtype=np.int64)
-            ix1 = _sort(np.unique(self.facets[:, self.boundaries[pair[0]]]))
-            ix2 = _sort(np.unique(self.facets[:, self.boundaries[pair[1]]]))
-            remap[ix1] = ix2
-            t = remap[t]
+        remap = np.arange(self.nvertices, dtype=np.int64)
+        ix1 = _sort(np.unique(self.facets[:, self.boundaries[b1]]))
+        ix2 = _sort(np.unique(self.facets[:, self.boundaries[b2]]))
+        remap[ix1] = ix2
+        t = remap[t]
 
         return t

@@ -10,7 +10,7 @@ from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementHexS2, ElementTetP0, ElementTetP1,
                            ElementTetP2, ElementTriP1, ElementQuad2,
                            ElementTriMorley, ElementVectorH1, ElementQuadP,
-                           ElementHex2, ElementTriArgyris)
+                           ElementHex2, ElementTriArgyris, ElementTriP2)
 from skfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
                         MeshTri2, MeshTet2, MeshHex2, MeshTri1DG, MeshQuad1DG)
 from skfem.assembly import FacetBasis, Basis
@@ -469,8 +469,8 @@ class TestThreadedAssembly(TestCase):
     "m,mdgtype,etype",
     [
         (
-            MeshTri.init_tensor(np.linspace(0, 1, 3),
-                                np.linspace(0, 1, 3)),
+            MeshTri.init_tensor(np.linspace(0, 1, 7),
+                                np.linspace(0, 1, 7)),
             MeshTri1DG,
             ElementTriP1,
         ),
@@ -481,7 +481,7 @@ class TestThreadedAssembly(TestCase):
             ElementTriP1,
         ),
         (
-            MeshTri().refined(),
+            MeshTri().refined(2),
             MeshTri1DG,
             ElementTriP1,
         ),
@@ -491,27 +491,37 @@ class TestThreadedAssembly(TestCase):
             ElementTriP1,
         ),
         (
-            MeshQuad().refined(),
+            MeshQuad().refined(2),
             MeshQuad1DG,
             ElementQuad1,
+        ),
+        (
+            MeshQuad().refined(2),
+            MeshQuad1DG,
+            ElementQuad2,
+        ),
+        (
+            MeshTri().refined(2),
+            MeshTri1DG,
+            ElementTriP2,
         ),
     ]
 )
 def test_periodic_mesh_assembly(m, mdgtype, etype):
+    m = m.reordered(m.nodes_satisfying(lambda x: x[0] == 1))
     m = m.with_boundaries({
         'left': lambda x: x[0] == 0,
         'right': lambda x: x[0] == 1,
     })
-    mp = mdgtype.from_mesh(m, m.periodic_connectivity(('right', 'left')))
+    mp = mdgtype.from_mesh(m, m.periodic_connectivity('right', 'left'))
+    #mp = mdgtype.from_mesh(m.periodic('right', 'left'))
 
     basis = Basis(mp, etype())
     A = laplace.assemble(basis)
     M = mass.assemble(basis)
     f = unit_load.assemble(basis)
-    # D = basis.get_dofs()
-    # TODO get_dofs not working because f2t does not always work
-    I = m.nodes_satisfying(lambda x: (x[0] < 1) * (x[1] < 1) * (x[1] > 0))
-    x = solve(*condense(A, f, I=I))
+    D = basis.get_dofs()
+    x = solve(*condense(A, f, D=D))
 
     assert_almost_equal(x.max(), 0.125)
     assert not np.isnan(x).any()
