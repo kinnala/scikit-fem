@@ -682,6 +682,7 @@ class Mesh:
         inverse = np.zeros((2, np.max(mapping) + 1), dtype=np.int64)
         inverse[0, e_first] = tix[ix_first]
         inverse[1, e_last] = tix[ix_last]
+
         inverse[1, np.nonzero(inverse[0] == inverse[1])[0]] = -1
 
         return inverse
@@ -728,3 +729,35 @@ class Mesh:
 
         """
         raise NotImplementedError
+
+    def periodic_connectivity(self, *pairs):
+        """Helper for the creation of periodic meshes.
+
+        Parameters
+        ----------
+        *pairs
+            Variable number of pairs with keys to ``Mesh.boundaries``, e.g.,
+            ``('left', 'right')`` indicates that the vertices belonging to the
+            named boundary ``left`` will be identified with the vertices
+            belonging to ``right``.
+
+        Returns
+        -------
+        ndarray
+            A new connectivity array corresponding to ``Mesh.t`` with the
+            replacements indicated by ``pairs``.
+        
+        """
+        t = self.t.copy()
+
+        def _sort(ix):
+            return ix[np.argsort(np.sum(self.p[:, ix], axis=0))]
+
+        for pair in pairs:
+            remap = np.arange(self.nvertices, dtype=np.int64)
+            ix1 = _sort(np.unique(self.facets[:, self.boundaries[pair[0]]]))
+            ix2 = _sort(np.unique(self.facets[:, self.boundaries[pair[1]]]))
+            remap[ix1] = ix2
+            t = remap[t]
+
+        return t

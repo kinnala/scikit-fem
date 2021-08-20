@@ -12,7 +12,10 @@ Default constructor creates a mesh for the unit square:
 
 >>> from skfem.mesh import MeshTri
 >>> MeshTri()
-Triangular mesh with 4 vertices and 2 elements.
+<skfem MeshTri1 object>
+  Number of elements: 2
+  Number of vertices: 4
+  Number of nodes: 4
 
 Each mesh type has several constructors; see the docstring, e.g.,
 ``help(MeshTri)`` or click :class:`~skfem.mesh.MeshTri` in the online
@@ -34,6 +37,7 @@ from .mesh_tet_2 import MeshTet2
 from .mesh_tri_1 import MeshTri1
 from .mesh_tri_2 import MeshTri2
 from .mesh_tri_1_dg import MeshTri1DG
+from .mesh_quad_1_dg import MeshQuad1DG
 
 # aliases
 MeshLine = MeshLine1
@@ -54,6 +58,7 @@ __all__ = [
     "MeshQuad",
     "MeshQuad1",
     "MeshQuad2",
+    "MeshQuad1DG",
     "Mesh3D",
     "MeshTet",
     "MeshTet1",

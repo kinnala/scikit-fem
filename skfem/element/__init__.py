@@ -20,7 +20,7 @@ from .element_tri import (ElementTriP1, ElementTriP2, ElementTriDG,
                           ElementTriHermite, ElementTriCCR, ElementTriP1DG)
 from .element_quad import (ElementQuad0, ElementQuad1, ElementQuad2,
                            ElementQuadS2, ElementQuadDG, ElementQuadP,
-                           ElementQuadBFS)
+                           ElementQuadBFS, ElementQuad1DG)
 from .element_tet import (ElementTetP0, ElementTetP1, ElementTetP2,
                           ElementTetRT0, ElementTetN0, ElementTetMini,
                           ElementTetCR, ElementTetDG, ElementTetCCR)
@@ -78,6 +78,7 @@ __all__ = [
     "ElementQuadDG",
     "ElementQuadP",
     "ElementQuadBFS",
+    "ElementQuad1DG",
     "ElementTetP0",
     "ElementTetP1",
     "ElementTetP2",
