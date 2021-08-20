@@ -503,6 +503,8 @@ class Mesh:
         locs = mapping.F(nelem.doflocs.T)
         doflocs = np.zeros((locs.shape[0], dofs.N))
 
+        assert dofs.element_dofs is not None
+
         # match mapped dofs and global dof numbering
         for itr in range(locs.shape[0]):
             for jtr in range(dofs.element_dofs.shape[0]):
@@ -746,7 +748,7 @@ class Mesh:
         ndarray
             A new connectivity array corresponding to ``Mesh.t`` with the
             replacements indicated by ``pairs``.
-        
+
         """
         t = self.t.copy()
 

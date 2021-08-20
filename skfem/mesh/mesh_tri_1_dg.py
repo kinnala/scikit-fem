@@ -1,4 +1,4 @@
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from typing import Type
 
 import numpy as np
@@ -10,14 +10,7 @@ from .mesh_tri_1 import MeshTri1
 
 @dataclass(repr=False)
 class MeshTri1DG(MeshTri1):
-    """A triangular mesh with a discontinuous topology.
-
-    The difference to :class:`~skfem.mesh.MeshTri1` is that the nodes must be
-    repeated for each element.  This allows describing, e.g., periodic meshes
-    while still persisting a consistent interface for visualization and
-    reference mappings.
-
-    """
+    """A triangular mesh with a discontinuous topology."""
     doflocs: ndarray = np.array([[0., 0.],
                                  [1., 0.],
                                  [0., 1.],

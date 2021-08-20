@@ -1,5 +1,3 @@
-import warnings
-
 from .abstract_basis import AbstractBasis  # noqa
 from .cell_basis import CellBasis  # noqa
 from .boundary_facet_basis import BoundaryFacetBasis  # noqa

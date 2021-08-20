@@ -9,7 +9,6 @@ import numpy as np
 from skfem.mesh import MeshLine, MeshTri, MeshQuad, MeshTet, MeshHex, Mesh
 
 
-
 def to_dict(m):
     boundaries = None
     subdomains = None
