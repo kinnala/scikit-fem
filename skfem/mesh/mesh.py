@@ -483,14 +483,16 @@ class Mesh:
         return to_dict(self)
 
     @classmethod
-    def from_mesh(cls, mesh):
+    def from_mesh(cls, mesh, t: Optional[ndarray] = None):
         """Reuse an existing mesh by adding the higher order nodes.
 
         Parameters
         ----------
         mesh
             The mesh used in the initialization.  Connectivity of the new mesh
-            will match ``mesh.t``.
+            will match ``mesh.t`` unless ``t`` is given
+        t
+            Optionally specify new connectivity for the resulting mesh.
 
         """
         from skfem.assembly import Dofs
@@ -508,7 +510,7 @@ class Mesh:
 
         return cls(
             doflocs=doflocs,
-            t=mesh.t,
+            t=t if t is not None else mesh.t,
         )
 
     @classmethod
