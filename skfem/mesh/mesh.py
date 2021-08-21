@@ -732,35 +732,42 @@ class Mesh:
         """
         raise NotImplementedError
 
-    def reordered(self, ix):
+    @classmethod
+    def periodic(cls, mesh, ix, ix0):
 
-        nix = np.arange(self.nvertices - len(ix),
-                        self.nvertices,
+        assert cls.elem.interior_dofs > 0
+        assert cls.elem.refdom == mesh.elem.refdom
+        assert len(ix) == len(ix0)
+
+        # reorder vertices: eliminated nodes must have highest index values
+        nix = np.arange(mesh.nvertices - len(ix),
+                        mesh.nvertices,
                         dtype=np.int64)
-        remap = np.zeros(self.nvertices, dtype=np.int64)
+        remap = np.zeros(mesh.nvertices, dtype=np.int64)
         remap[ix] = nix
         oix = (remap == 0).nonzero()[0]
-        remap[oix] = np.arange(self.nvertices - len(ix), dtype=np.int64)
+        remap[oix] = np.arange(mesh.nvertices - len(ix), dtype=np.int64)
 
-        return replace(
-            self,
-            doflocs=np.hstack((self.doflocs[:, oix], self.doflocs[:, ix])),
-            t=remap[self.t],
+        doflocs = np.hstack((mesh.doflocs[:, oix], mesh.doflocs[:, ix]))
+        t = remap[mesh.t]
+
+        # attempt sorting ix and ix0 so that ix[0] matches ix0[0] etc.
+        def _sort(ind):
+            return ind[np.argsort(np.sum(doflocs[:, ind], axis=0))]
+
+        reremap = np.arange(mesh.nvertices, dtype=np.int64)
+        ix1 = _sort(remap[ix])
+        ix2 = _sort(remap[ix0])
+
+        # make periodic
+        reremap[ix1] = ix2
+
+        return cls.from_mesh(
+            replace(
+                mesh,
+                doflocs=doflocs,
+                t=t,
+                sort_t=False,
+            ),
+            reremap[t],
         )
-
-    def periodic_connectivity(self, b1, b2):
-        """Helper for the creation of periodic meshes.
-
-        """
-        t = self.t.copy()
-
-        def _sort(ix):
-            return ix[np.argsort(np.sum(self.p[:, ix], axis=0))]
-
-        remap = np.arange(self.nvertices, dtype=np.int64)
-        ix1 = _sort(np.unique(self.facets[:, self.boundaries[b1]]))
-        ix2 = _sort(np.unique(self.facets[:, self.boundaries[b2]]))
-        remap[ix1] = ix2
-        t = remap[t]
-
-        return t

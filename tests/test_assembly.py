@@ -466,59 +466,75 @@ class TestThreadedAssembly(TestCase):
 
 
 @pytest.mark.parametrize(
-    "m,mdgtype,etype",
+    "m,mdgtype,etype,check1,check2",
     [
         (
             MeshTri.init_tensor(np.linspace(0, 1, 7),
                                 np.linspace(0, 1, 7)),
             MeshTri1DG,
             ElementTriP1,
+            lambda x: x[0] == 1,
+            lambda x: x[0] == 0,
         ),
         (
             MeshTri.init_tensor(np.linspace(0, 1, 5),
                                 np.linspace(0, 1, 5)),
             MeshTri1DG,
             ElementTriP1,
+            lambda x: x[0] == 1,
+            lambda x: x[0] == 0,
         ),
         (
             MeshTri().refined(2),
             MeshTri1DG,
             ElementTriP1,
+            lambda x: x[0] == 1,
+            lambda x: x[0] == 0,
         ),
         (
             MeshTri().refined(3),
             MeshTri1DG,
             ElementTriP1,
+            lambda x: x[0] == 1,
+            lambda x: x[0] == 0,
         ),
         (
             MeshQuad().refined(2),
             MeshQuad1DG,
             ElementQuad1,
+            lambda x: x[0] == 1,
+            lambda x: x[0] == 0,
         ),
         (
             MeshQuad().refined(2),
             MeshQuad1DG,
             ElementQuad2,
+            lambda x: x[0] == 1,
+            lambda x: x[0] == 0,
         ),
         (
             MeshTri().refined(2),
             MeshTri1DG,
             ElementTriP2,
+            lambda x: x[0] == 0,
+            lambda x: x[0] == 1,
+        ),
+        (
+            MeshTri().refined(2),
+            MeshTri1DG,
+            ElementTriP2,
+            lambda x: x[1] == 0,
+            lambda x: x[1] == 1,
         ),
     ]
 )
-def test_periodic_mesh_assembly(m, mdgtype, etype):
-    m = m.reordered(m.nodes_satisfying(lambda x: x[0] == 1))
-    m = m.with_boundaries({
-        'left': lambda x: x[0] == 0,
-        'right': lambda x: x[0] == 1,
-    })
-    mp = mdgtype.from_mesh(m, m.periodic_connectivity('right', 'left'))
-    #mp = mdgtype.from_mesh(m.periodic('right', 'left'))
+def test_periodic_mesh_assembly(m, mdgtype, etype, check1, check2):
+    mp = mdgtype.periodic(m,
+                          m.nodes_satisfying(check1),
+                          m.nodes_satisfying(check2))
 
     basis = Basis(mp, etype())
     A = laplace.assemble(basis)
-    M = mass.assemble(basis)
     f = unit_load.assemble(basis)
     D = basis.get_dofs()
     x = solve(*condense(A, f, D=D))
