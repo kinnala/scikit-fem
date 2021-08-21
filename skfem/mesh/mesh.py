@@ -734,7 +734,24 @@ class Mesh:
 
     @classmethod
     def periodic(cls, mesh, ix, ix0):
+        """Initialize a periodic mesh from a standard (nonperiodic) mesh.
 
+        The mesh types that can describe a discontinuous topology include:
+
+        - :class:`~skfem.mesh.MeshTri1DG`
+        - :class:`~skfem.mesh.MeshQuad1DG`
+
+        Parameters
+        ----------
+        mesh
+            The mesh to periodify.
+        ix
+            An array of nodes to eliminate.  They are replaced by the nodes in
+            the array ``ix``.
+        ix0
+            An array of nodes left unchanged.
+
+        """
         assert cls.elem.interior_dofs > 0
         assert cls.elem.refdom == mesh.elem.refdom
         assert len(ix) == len(ix0)

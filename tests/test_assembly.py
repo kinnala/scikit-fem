@@ -529,10 +529,10 @@ class TestThreadedAssembly(TestCase):
     ]
 )
 def test_periodic_mesh_assembly(m, mdgtype, etype, check1, check2):
+
     mp = mdgtype.periodic(m,
                           m.nodes_satisfying(check1),
                           m.nodes_satisfying(check2))
-
     basis = Basis(mp, etype())
     A = laplace.assemble(basis)
     f = unit_load.assemble(basis)
