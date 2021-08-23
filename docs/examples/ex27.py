@@ -49,7 +49,6 @@ from skfem import *
 from skfem.helpers import grad, dot
 from skfem.models.poisson import vector_laplace, laplace
 from skfem.models.general import divergence, rot
-import skfem.io.json
 
 from functools import partial
 from pathlib import Path
@@ -106,7 +105,9 @@ class BackwardFacingStep:
     def __init__(self,
                  length: float = 35.):
 
-        self.mesh = skfem.io.json.from_file(Path(__file__).parent / 'meshes' / 'backward-facing_step.json')
+        self.mesh = Mesh.load(
+            Path(__file__).parent / 'meshes' / 'backward-facing_step.msh'
+        )
         self.basis = {variable: Basis(self.mesh, e, intorder=3)
                       for variable, e in self.element.items()}
         self.basis['inlet'] = FacetBasis(self.mesh, self.element['u'],
