@@ -90,10 +90,11 @@ def from_meshio(m,
 
     # parse boundaries from cell_sets
     if m.cell_sets and bnd_type in m.cells_dict:
-        facets = {k: [tuple(f) for f in
-                      np.sort(m.cells_dict[bnd_type][v[bnd_type]])]
-                  for k, v in m.cell_sets_dict.items()
-                  if bnd_type in v}
+        facets = {
+            k: [tuple(f) for f in np.sort(m.cells_dict[bnd_type][v[bnd_type]])]
+            for k, v in m.cell_sets_dict.items()
+            if bnd_type in v and k.split(":")[0] != "gmsh"
+        }
         boundaries = {k: np.array([i for i, f in
                                    enumerate(map(tuple, mtmp.facets.T))
                                    if f in v])
