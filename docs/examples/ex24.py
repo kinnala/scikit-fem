@@ -20,9 +20,8 @@ from scipy.sparse import bmat
 from skfem import *
 from skfem.models.poisson import vector_laplace, laplace
 from skfem.models.general import divergence, rot
-from skfem.io.json import from_file
 
-mesh = from_file(Path(__file__).parent / 'meshes' / 'backward-facing_step.json')
+mesh = Mesh.load(Path(__file__).parent / 'meshes' / 'backward-facing_step.vtu')
 
 element = {'u': ElementVectorH1(ElementTriP2()),
            'p': ElementTriP1()}

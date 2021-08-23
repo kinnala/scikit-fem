@@ -106,7 +106,7 @@ class BackwardFacingStep:
                  length: float = 35.):
 
         self.mesh = Mesh.load(
-            Path(__file__).parent / 'meshes' / 'backward-facing_step.msh'
+            Path(__file__).parent / 'meshes' / 'backward-facing_step.vtu'
         )
         self.basis = {variable: Basis(self.mesh, e, intorder=3)
                       for variable, e in self.element.items()}
