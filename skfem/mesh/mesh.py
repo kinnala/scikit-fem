@@ -768,13 +768,9 @@ class Mesh:
         doflocs = np.hstack((mesh.doflocs[:, oix], mesh.doflocs[:, ix]))
         t = remap[mesh.t]
 
-        # attempt sorting ix and ix0 so that ix[0] matches ix0[0] etc.
-        def _sort(ind):
-            return ind[np.argsort(np.sum(doflocs[:, ind], axis=0))]
-
         reremap = np.arange(mesh.nvertices, dtype=np.int64)
-        ix1 = _sort(remap[ix])
-        ix2 = _sort(remap[ix0])
+        ix1 = remap[ix]
+        ix2 = remap[ix0]
 
         # make periodic
         reremap[ix1] = ix2

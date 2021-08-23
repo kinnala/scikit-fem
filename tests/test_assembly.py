@@ -530,9 +530,13 @@ class TestThreadedAssembly(TestCase):
 )
 def test_periodic_mesh_assembly(m, mdgtype, etype, check1, check2):
 
+    def _sort(ix):
+        # sort index arrays so that ix[0] matches
+        return ix[np.argsort(np.sum(m.p, axis=0)[ix])]
+
     mp = mdgtype.periodic(m,
-                          m.nodes_satisfying(check1),
-                          m.nodes_satisfying(check2))
+                          _sort(m.nodes_satisfying(check1)),
+                          _sort(m.nodes_satisfying(check2)))
     basis = Basis(mp, etype())
     A = laplace.assemble(basis)
     f = unit_load.assemble(basis)
