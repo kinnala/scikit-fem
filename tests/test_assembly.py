@@ -12,7 +12,8 @@ from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementTriMorley, ElementVectorH1, ElementQuadP,
                            ElementHex2, ElementTriArgyris, ElementTriP2)
 from skfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
-                        MeshTri2, MeshTet2, MeshHex2, MeshTri1DG, MeshQuad1DG)
+                        MeshTri2, MeshTet2, MeshHex2, MeshTri1DG, MeshQuad1DG,
+                        MeshHex1DG)
 from skfem.assembly import FacetBasis, Basis
 from skfem.utils import projection
 from skfem.models import laplace, unit_load, mass
@@ -526,6 +527,20 @@ class TestThreadedAssembly(TestCase):
             lambda x: x[1] == 0,
             lambda x: x[1] == 1,
         ),
+        (
+            MeshHex().refined(4),
+            MeshHex1DG,
+            ElementHex1,
+            lambda x: x[1] == 0,
+            lambda x: x[1] == 1,
+        ),
+        (
+            MeshHex().refined(3),
+            MeshHex1DG,
+            ElementHex2,
+            lambda x: x[2] == 0,
+            lambda x: x[2] == 1,
+        ),
     ]
 )
 def test_periodic_mesh_assembly(m, mdgtype, etype, check1, check2):
@@ -543,7 +558,10 @@ def test_periodic_mesh_assembly(m, mdgtype, etype, check1, check2):
     D = basis.get_dofs()
     x = solve(*condense(A, f, D=D))
 
-    assert_almost_equal(x.max(), 0.125)
+    if m.dim() == 2:
+        assert_almost_equal(x.max(), 0.125)
+    else:
+        assert_almost_equal(x.max(), 0.07389930610869411, decimal=3)
     assert not np.isnan(x).any()
 
 

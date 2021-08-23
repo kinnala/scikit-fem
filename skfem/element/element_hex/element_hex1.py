@@ -67,3 +67,10 @@ class ElementHex1(ElementH1):
             self._index_error()
 
         return phi, dphi
+
+
+class ElementHex1DG(ElementHex1):
+
+    nodal_dofs = 0
+    interior_dofs = 8
+    dofnames = ['u'] * 8

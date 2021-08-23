@@ -26,7 +26,7 @@ from .element_tet import (ElementTetP0, ElementTetP1, ElementTetP2,  # noqa
                           ElementTetRT0, ElementTetN0, ElementTetMini,
                           ElementTetCR, ElementTetDG, ElementTetCCR)
 from .element_hex import (ElementHex0, ElementHex1, ElementHex2,  # noqa
-                          ElementHexS2)
+                          ElementHexS2, ElementHex1DG)
 from .element_line import (ElementLineP0, ElementLineP1, ElementLineP2,  # noqa
                            ElementLinePp, ElementLineHermite,
                            ElementLineMini)
@@ -93,6 +93,7 @@ __all__ = [
     "ElementHex1",
     "ElementHex2",
     "ElementHexS2",
+    "ElementHex1DG",
     "ElementLineP0",
     "ElementLineP1",
     "ElementLineP2",

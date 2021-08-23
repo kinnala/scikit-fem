@@ -768,19 +768,23 @@ class Mesh:
         doflocs = np.hstack((mesh.doflocs[:, oix], mesh.doflocs[:, ix]))
         t = remap[mesh.t]
 
+        reordered_mesh = replace(
+            mesh,
+            doflocs=doflocs,
+            t=t,
+            sort_t=False,
+        )
+
+        # make periodic
         reremap = np.arange(mesh.nvertices, dtype=np.int64)
         ix1 = remap[ix]
         ix2 = remap[ix0]
-
-        # make periodic
         reremap[ix1] = ix2
 
-        return cls.from_mesh(
-            replace(
-                mesh,
-                doflocs=doflocs,
-                t=t,
-                sort_t=False,
-            ),
-            reremap[t],
-        )
+        periodic_mesh = cls.from_mesh(reordered_mesh, reremap[t])
+
+        # store reordered mesh and reverse mapping
+        periodic_mesh._unperiodic = reordered_mesh
+        periodic_mesh._nodes = reremap
+
+        return periodic_mesh
