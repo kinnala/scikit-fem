@@ -760,9 +760,9 @@ class Mesh:
         nix = np.arange(mesh.nvertices - len(ix),
                         mesh.nvertices,
                         dtype=np.int64)
-        remap = np.zeros(mesh.nvertices, dtype=np.int64)
+        remap = (-16) * np.ones(mesh.nvertices, dtype=np.int64)
         remap[ix] = nix
-        oix = (remap == 0).nonzero()[0]
+        oix = (remap == -16).nonzero()[0]
         remap[oix] = np.arange(mesh.nvertices - len(ix), dtype=np.int64)
 
         doflocs = np.hstack((mesh.doflocs[:, oix], mesh.doflocs[:, ix]))
