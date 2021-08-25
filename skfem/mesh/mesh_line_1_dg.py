@@ -1,9 +1,6 @@
 from dataclasses import dataclass
 from typing import Type
 
-import numpy as np
-from numpy import ndarray
-
 from ..element import Element, ElementLineP1DG
 from .mesh_line_1 import MeshLine1
 

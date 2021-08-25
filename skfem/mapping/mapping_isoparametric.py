@@ -180,9 +180,8 @@ class MappingIsoparametric(Mapping):
         invDF = np.empty((self.dim, self.dim) + J[0][0].shape)
 
         if self.dim == 1:
-            invDF[0, 0] = 1. / J[0][0]
+            invDF[0, 0] = np.ones(J[0][0].shape)
         elif self.dim == 2:
-            detDF = self.detDF(X, tind)
             invDF[0, 0] =  J[1][1]  # noqa
             invDF[0, 1] = -J[0][1]
             invDF[1, 0] = -J[1][0]

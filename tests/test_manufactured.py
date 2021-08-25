@@ -7,15 +7,18 @@ from pathlib import Path
 import pytest
 
 import numpy as np
+from numpy.testing import assert_almost_equal
+
 from skfem import (LinearForm, Functional, asm, condense, solve, projection,
                    enforce)
-from skfem.assembly import FacetBasis, InteriorBasis
+from skfem.assembly import FacetBasis, Basis
 from skfem.element import (ElementHex1, ElementHex2, ElementHexS2,
                            ElementLineMini, ElementLineP1, ElementLineP2,
                            ElementQuad1, ElementQuad2, ElementTetP1,
                            ElementTetP2, ElementTriP1, ElementTriP2)
 from skfem.mesh import (MeshHex, MeshLine, MeshQuad, MeshQuad2, MeshTet,
-                        MeshTet2, MeshTri, MeshTri2)
+                        MeshTet2, MeshTri, MeshTri2, MeshTri1DG,
+                        MeshHex1DG, MeshLine1DG, MeshQuad1DG)
 from skfem.models.poisson import laplace, mass, unit_load
 from skfem.helpers import dot
 
@@ -34,7 +37,7 @@ class Line1D(TestCase):
 
     def runTest(self):
         m = MeshLine(np.linspace(0., 1.)).refined(2)
-        ib = InteriorBasis(m, self.e)
+        ib = Basis(m, self.e)
         fb = FacetBasis(m, self.e)
 
         @LinearForm
@@ -74,7 +77,7 @@ class LineNegative1D(TestCase):
             'left': lambda x: x[0] == 0.0,
             'right': lambda x: x[0] == 1.0,
         })
-        ib = InteriorBasis(m, self.e)
+        ib = Basis(m, self.e)
         fb = FacetBasis(m, self.e, facets=m.boundaries['right'])
 
         @LinearForm
@@ -112,7 +115,7 @@ class LineNeumann1D(TestCase):
 
     def runTest(self):
         m = MeshLine(np.linspace(0., 1.)).refined(2)
-        ib = InteriorBasis(m, self.e)
+        ib = Basis(m, self.e)
         fb = FacetBasis(m, self.e)
 
         @LinearForm
@@ -151,7 +154,7 @@ class TestExactHexElement(TestCase):
 
         m = self.mesh().refined(3)
 
-        ib = InteriorBasis(m, self.elem())
+        ib = Basis(m, self.elem())
 
         A = asm(laplace, ib)
 
@@ -240,7 +243,7 @@ class SolveCirclePoisson(TestCase):
 
     def runTest(self):
         m = self.init_mesh()
-        basis = InteriorBasis(m, self.element_type())
+        basis = Basis(m, self.element_type())
 
         A = laplace.assemble(basis)
         b = unit_load.assemble(basis)
@@ -304,7 +307,7 @@ def test_solving_inhomogeneous_laplace(mesh_elem, impose):
     mesh, elem = mesh_elem
 
     m = mesh().refined(4)
-    basis = InteriorBasis(m, elem)
+    basis = Basis(m, elem)
     boundary_basis = FacetBasis(m, elem)
     boundary_dofs = boundary_basis.get_dofs().flatten()
 
@@ -330,6 +333,186 @@ def test_solving_inhomogeneous_laplace(mesh_elem, impose):
         8 / 3,
         decimal=9
     )
+
+
+@pytest.mark.parametrize(
+    "m,mdgtype,etype,check1,check2",
+    [
+        (
+            MeshTri.init_tensor(np.linspace(0, 1, 7),
+                                np.linspace(0, 1, 7)),
+            MeshTri1DG,
+            ElementTriP1,
+            lambda x: x[0] == 1,
+            lambda x: x[0] == 0,
+        ),
+        (
+            MeshTri.init_tensor(np.linspace(0, 1, 5),
+                                np.linspace(0, 1, 5)),
+            MeshTri1DG,
+            ElementTriP1,
+            lambda x: x[0] == 1,
+            lambda x: x[0] == 0,
+        ),
+        (
+            MeshTri().refined(2),
+            MeshTri1DG,
+            ElementTriP1,
+            lambda x: x[0] == 1,
+            lambda x: x[0] == 0,
+        ),
+        (
+            MeshTri().refined(3),
+            MeshTri1DG,
+            ElementTriP1,
+            lambda x: x[0] == 1,
+            lambda x: x[0] == 0,
+        ),
+        (
+            MeshQuad().refined(2),
+            MeshQuad1DG,
+            ElementQuad1,
+            lambda x: x[0] == 1,
+            lambda x: x[0] == 0,
+        ),
+        (
+            MeshQuad().refined(2),
+            MeshQuad1DG,
+            ElementQuad2,
+            lambda x: x[0] == 1,
+            lambda x: x[0] == 0,
+        ),
+        (
+            MeshTri().refined(2),
+            MeshTri1DG,
+            ElementTriP2,
+            lambda x: x[0] == 0,
+            lambda x: x[0] == 1,
+        ),
+        (
+            MeshTri().refined(2),
+            MeshTri1DG,
+            ElementTriP2,
+            lambda x: x[1] == 0,
+            lambda x: x[1] == 1,
+        ),
+        (
+            MeshHex().refined(4),
+            MeshHex1DG,
+            ElementHex1,
+            lambda x: x[1] == 0,
+            lambda x: x[1] == 1,
+        ),
+        (
+            MeshHex().refined(3),
+            MeshHex1DG,
+            ElementHex2,
+            lambda x: x[2] == 0,
+            lambda x: x[2] == 1,
+        ),
+    ]
+)
+def test_periodic_mesh_assembly(m, mdgtype, etype, check1, check2):
+
+    def _sort(ix):
+        # sort index arrays so that ix[0] matches
+        return ix[np.argsort(np.sum(m.p, axis=0)[ix])]
+
+    mp = mdgtype.periodic(m,
+                          _sort(m.nodes_satisfying(check1)),
+                          _sort(m.nodes_satisfying(check2)))
+    basis = Basis(mp, etype())
+    A = laplace.assemble(basis)
+
+    f = unit_load.assemble(basis)
+    D = basis.get_dofs()
+    x = solve(*condense(A, f, D=D))
+
+    if m.dim() == 2:
+        assert_almost_equal(x.max(), 0.125)
+    else:
+        assert_almost_equal(x.max(), 0.07389930610869411, decimal=3)
+    assert not np.isnan(x).any()
+
+
+@pytest.mark.parametrize(
+    "m,mdgtype,etype",
+    [
+        (
+            MeshTri.init_tensor(np.linspace(0, 1, 7),
+                                np.linspace(0, 1, 7)),
+            MeshTri1DG,
+            ElementTriP1,
+        ),
+        (
+            MeshTri.init_tensor(np.linspace(0, 1, 5),
+                                np.linspace(0, 1, 5)),
+            MeshTri1DG,
+            ElementTriP1,
+        ),
+        (
+            MeshTri().refined(2),
+            MeshTri1DG,
+            ElementTriP1,
+        ),
+        (
+            MeshTri().refined(3),
+            MeshTri1DG,
+            ElementTriP1,
+        ),
+        (
+            MeshQuad().refined(2),
+            MeshQuad1DG,
+            ElementQuad1,
+        ),
+        (
+            MeshQuad().refined(2),
+            MeshQuad1DG,
+            ElementQuad2,
+        ),
+        (
+            MeshTri().refined(2),
+            MeshTri1DG,
+            ElementTriP2,
+        ),
+        (
+            MeshLine().refined(5),
+            MeshLine1DG,
+            ElementLineP1,
+        ),
+        (
+            MeshHex().refined(3),
+            MeshHex1DG,
+            ElementHex1,
+        ),
+    ]
+)
+def test_periodic_loading(m, mdgtype, etype):
+
+    def _sort(ix):
+        # sort index arrays so that ix[0] matches
+        return ix[np.argsort(np.sum(m.p, axis=0)[ix])]
+
+    mp = mdgtype.periodic(m,
+                          _sort(m.nodes_satisfying(lambda x: x[0] == 0)),
+                          _sort(m.nodes_satisfying(lambda x: x[0] == 1)))
+    basis = Basis(mp, etype())
+    A = laplace.assemble(basis)
+    M = mass.assemble(basis)
+
+    @LinearForm
+    def linf(v, w):
+        return np.sin(2. * np.pi * w.x[0]) * v
+
+    f = linf.assemble(basis)
+    x = solve(A + 1e-6 * M, f)
+
+    @Functional
+    def func(w):
+        uexact = (1. / (2. * np.pi) ** 2) * np.sin(2. * np.pi * w.x[0])
+        return (uexact - w['u']) ** 2
+
+    assert_almost_equal(func.assemble(basis, u=x), 0, decimal=5)
 
 
 if __name__ == "__main__":
