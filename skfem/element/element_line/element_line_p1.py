@@ -27,3 +27,10 @@ class ElementLineP1(ElementH1):
             self._index_error()
 
         return phi, dphi
+
+
+class ElementLineP1DG(ElementLineP1):
+
+    nodal_dofs = 0
+    interior_dofs = 2
+    dofnames = ['u'] * 2

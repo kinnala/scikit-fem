@@ -6,11 +6,11 @@ import skfem
 
 
 MESH_TYPE_MAPPING = {
-    'tetra': skfem.MeshTet,
-    'hexahedron': skfem.MeshHex,
-    'triangle': skfem.MeshTri,
-    'quad': skfem.MeshQuad,
-    'line': skfem.MeshLine,
+    'tetra': skfem.MeshTet1,
+    'hexahedron': skfem.MeshHex1,
+    'triangle': skfem.MeshTri1,
+    'quad': skfem.MeshQuad1,
+    'line': skfem.MeshLine1,
     'tetra10': skfem.MeshTet2,
     'triangle6': skfem.MeshTri2,
     'quad9': skfem.MeshQuad2,

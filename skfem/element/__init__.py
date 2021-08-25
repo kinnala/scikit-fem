@@ -29,7 +29,7 @@ from .element_hex import (ElementHex0, ElementHex1, ElementHex2,  # noqa
                           ElementHexS2, ElementHex1DG)
 from .element_line import (ElementLineP0, ElementLineP1, ElementLineP2,  # noqa
                            ElementLinePp, ElementLineHermite,
-                           ElementLineMini)
+                           ElementLineMini, ElementLineP1DG)
 from .element_composite import ElementComposite  # noqa
 
 
@@ -96,6 +96,7 @@ __all__ = [
     "ElementHex1DG",
     "ElementLineP0",
     "ElementLineP1",
+    "ElementLineP1DG",
     "ElementLineP2",
     "ElementLinePp",
     "ElementLineHermite",

@@ -554,6 +554,7 @@ def test_periodic_mesh_assembly(m, mdgtype, etype, check1, check2):
                           _sort(m.nodes_satisfying(check2)))
     basis = Basis(mp, etype())
     A = laplace.assemble(basis)
+
     f = unit_load.assemble(basis)
     D = basis.get_dofs()
     x = solve(*condense(A, f, D=D))

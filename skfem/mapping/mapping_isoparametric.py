@@ -155,7 +155,9 @@ class MappingIsoparametric(Mapping):
             J = [[self.J(i, j, X, tind=tind) for j in range(self.dim)]
                  for i in range(self.dim)]
 
-        if self.dim == 2:
+        if self.dim == 1:
+            detDF = J[0][0]
+        elif self.dim == 2:
             detDF = J[0][0] * J[1][1] - J[0][1] * J[1][0]
         elif self.dim == 3:
             detDF = (J[0][0] * (J[1][1] * J[2][2] - J[1][2] * J[2][1]) -
@@ -177,7 +179,9 @@ class MappingIsoparametric(Mapping):
         detDF = self.detDF(X, tind, J=J)
         invDF = np.empty((self.dim, self.dim) + J[0][0].shape)
 
-        if self.dim == 2:
+        if self.dim == 1:
+            invDF[0, 0] = 1. / J[0][0]
+        elif self.dim == 2:
             detDF = self.detDF(X, tind)
             invDF[0, 0] =  J[1][1]  # noqa
             invDF[0, 1] = -J[0][1]

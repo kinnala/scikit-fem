@@ -5,7 +5,7 @@ import numpy as np
 from numpy.testing import assert_allclose, assert_almost_equal
 
 from skfem import BilinearForm, asm, solve, condense, projection
-from skfem.mesh import MeshTri, MeshTet, MeshHex, MeshQuad, MeshLine
+from skfem.mesh import MeshTri, MeshTet, MeshHex, MeshQuad, MeshLine1
 from skfem.assembly import CellBasis, FacetBasis, Dofs, Functional
 from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
                            ElementTetP2, ElementHexS2, ElementHex2,
@@ -169,13 +169,13 @@ class TestInterpolatorHex(TestInterpolatorTet):
 
 class TestInterpolatorLine(TestInterpolatorTet):
 
-    mesh_type = MeshLine
+    mesh_type = MeshLine1
     element_type = ElementLineP2
 
 
 class TestInterpolatorLine2(TestInterpolatorTet):
 
-    mesh_type = MeshLine
+    mesh_type = MeshLine1
     element_type = ElementLineP2
     nrefs = 5
 
@@ -272,7 +272,7 @@ def test_point_source(etype):
 
     from skfem.models.poisson import laplace
 
-    mesh = MeshLine().refined()
+    mesh = MeshLine1().refined()
     basis = CellBasis(mesh, etype())
     source = np.array([0.7])
     u = solve(*condense(asm(laplace, basis), basis.point_source(source), D=basis.find_dofs()))

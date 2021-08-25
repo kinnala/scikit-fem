@@ -1,6 +1,6 @@
 import unittest
 
-from skfem.mesh import MeshTri, MeshQuad, MeshTet, MeshLine
+from skfem.mesh import MeshTri, MeshQuad, MeshTet, MeshLine1
 from skfem.visuals.matplotlib import draw, plot, plot3
 
 
@@ -33,7 +33,7 @@ class CallPlotQuad(CallPlot):
 
 
 class CallPlotLine(CallPlot):
-    mesh_type = MeshLine
+    mesh_type = MeshLine1
 
 
 class CallPlot3(unittest.TestCase):
