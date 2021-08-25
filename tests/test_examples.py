@@ -101,8 +101,12 @@ class TestEx13(TestCase):
         u = ex.u
         A = ex.A
         current = ex.current
-        self.assertAlmostEqual(current['ground'], -0.441415756775655)
-        self.assertAlmostEqual(u @ A @ u, 2 * np.log(2) / np.pi, delta=1e-3)
+        self.assertAlmostEqual(current['ground'],
+                               -2 * np.log(2) / np.pi,
+                               delta=1e-3)
+        self.assertAlmostEqual(u @ A @ u,
+                               2 * np.log(2) / np.pi,
+                               delta=1e-3)
 
 
 class TestEx14(TestCase):
