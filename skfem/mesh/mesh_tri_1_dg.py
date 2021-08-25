@@ -6,10 +6,11 @@ from numpy import ndarray
 
 from ..element import Element, ElementTriP1DG
 from .mesh_tri_1 import MeshTri1
+from .mesh_dg import MeshDG
 
 
 @dataclass(repr=False)
-class MeshTri1DG(MeshTri1):
+class MeshTri1DG(MeshTri1, MeshDG):
     """A triangular mesh with a discontinuous topology."""
     doflocs: ndarray = np.array([[0., 0.],
                                  [1., 0.],
