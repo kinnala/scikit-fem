@@ -36,9 +36,9 @@ class MeshDG:
 
         # reorder vertices: eliminated nodes must have highest index values
         remap = np.empty(mesh.nvertices, dtype=np.int64)
-        remap[ix] =  np.arange(mesh.nvertices - len(ix),
-                               mesh.nvertices,
-                               dtype=np.int64)
+        remap[ix] = np.arange(mesh.nvertices - len(ix),
+                              mesh.nvertices,
+                              dtype=np.int64)
         oix = np.setdiff1d(np.arange(mesh.nvertices, dtype=np.int64), ix)
         remap[oix] = np.arange(mesh.nvertices - len(ix), dtype=np.int64)
 
