@@ -71,7 +71,11 @@ try:
         """AMG (smoothed aggregation) preconditioner"""
         return smoothed_aggregation_solver(A, **kwargs).aspreconditioner()
 
+    if not hasattr(np, "float128"):
+        np.float128 = np.longdouble  # #698
+
     preconditioners.append(build_pc_amgsa(Aint))
+
 
 except ImportError:
     print('Skipping PyAMG')

@@ -77,6 +77,9 @@ except ImportError:
     def build_pc_amg(A: spmatrix, **kwargs) -> LinearOperator:
         return smoothed_aggregation_solver(A, **kwargs).aspreconditioner()
 
+    if not hasattr(np, "float128"):
+        np.float128 = np.longdouble  # #698
+
 
 class Sphere(NamedTuple):
 
