@@ -254,18 +254,21 @@ with respect to documented and/or tested features.
   the keyword argument `out`
 - Added: `Mesh.with_boundaries` now allows the definition of internal boundaries/interfaces
   via the flag `boundaries_only=False`
-- Added: `MeshTri1DG`, `MeshQuad1DG`, `MeshHex1DG`; new mesh types for
-  describing meshes with a discontinuous topology, e.g., periodic meshes
-- Added: `ElementTriP1DG`, `ElementQuad1DG`, `ElementHex1DG`; shorthands for
-  `ElementTriDG(ElementTriP1())` etc.
+- Added: `MeshTri1DG`, `MeshQuad1DG`, `MeshHex1DG`, `MeshLine1DG`; new mesh
+  types for describing meshes with a discontinuous topology, e.g., periodic
+  meshes
+- Added: `ElementTriP1DG`, `ElementQuad1DG`, `ElementHex1DG`,
+  `ElementLineP1DG`; shorthands for `ElementTriDG(ElementTriP1())` etc.
 - Fixed: `MappingIsoparametric` is now about 2x faster for large meshes thanks
   to additional caching
 - Changed: `Mesh` string representation is now more informative
 - Changed: `Form.assemble` allows now only `DiscreteField` or 1d/2d `ndarray`
   objects, and will automatically pass 1d `ndarray` objects to
   `Basis.interpolate` for convenience
-- Changed: `FacetBasis` is now only a shorthand for `BoundaryFacetBasis` and no
-  more initializes `InteriorFacetBasis` or `MortarFacetBasis` if the keyword
+- Changed: `MeshLine` is now a function which initializes `MeshLine1` and
+  accepts additional types in comparison to `MeshLine1`
+- Changed: `FacetBasis` is now a shorthand for `BoundaryFacetBasis` and no
+  longer initializes `InteriorFacetBasis` or `MortarFacetBasis` if the keyword
   argument `side` is passed to the constructor
 - Removed: the deprecated `Mesh.define_boundary` method
 - Removed: the unused `Mesh.validate` attribute

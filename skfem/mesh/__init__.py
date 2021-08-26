@@ -49,21 +49,28 @@ MeshTet = MeshTet1
 MeshHex = MeshHex1
 
 
-def MeshLine(p=None, t=None, **kwargs):
-    """Support for alternative default constructor syntax."""
+class MeshLineFactory:
 
-    if p is not None:
-        p = np.atleast_2d(p)
+    def __call__(self, p=None, t=None, **kwargs):
 
-    if p is not None and t is None:
-        tmp = np.arange(p.shape[1] - 1, dtype=np.int64)
-        t = np.vstack((tmp, tmp + 1))
+        if p is not None:
+            p = np.atleast_2d(p)
+
+        if p is not None and t is None:
+            tmp = np.arange(p.shape[1] - 1, dtype=np.int64)
+            t = np.vstack((tmp, tmp + 1))
+            return MeshLine1(p, t, **kwargs)
+
+        if p is None and t is None:
+            return MeshLine1(**kwargs)
+
         return MeshLine1(p, t, **kwargs)
 
-    if p is None and t is None:
-        return MeshLine1(**kwargs)
+    def __getattr__(self, name):
+        return getattr(MeshLine1, name)
 
-    return MeshLine1(p, t, **kwargs)
+
+MeshLine = MeshLineFactory()
 
 
 __all__ = [

@@ -71,7 +71,7 @@ class MeshDG:
         periodic_mesh = cls.from_mesh(reordered_mesh, tp)
 
         # store reordered mesh and reverse mapping
-        periodic_mesh._unperiodic = reordered_mesh
-        periodic_mesh._nodes = reremap
+        periodic_mesh._orig = reordered_mesh
+        periodic_mesh._ix = reremap
 
         return periodic_mesh
