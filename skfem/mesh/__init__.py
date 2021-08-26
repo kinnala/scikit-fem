@@ -49,7 +49,7 @@ MeshTet = MeshTet1
 MeshHex = MeshHex1
 
 
-def MeshLine(p=None, t=None):
+def MeshLine(p=None, t=None, **kwargs):
     """Support for alternative default constructor syntax."""
 
     if p is not None:
@@ -58,12 +58,12 @@ def MeshLine(p=None, t=None):
     if p is not None and t is None:
         tmp = np.arange(p.shape[1] - 1, dtype=np.int64)
         t = np.vstack((tmp, tmp + 1))
-        return MeshLine1(p, t)
+        return MeshLine1(p, t, **kwargs)
 
     if p is None and t is None:
-        return MeshLine1()
+        return MeshLine1(**kwargs)
 
-    return MeshLine1(p, t)
+    return MeshLine1(p, t, **kwargs)
 
 
 __all__ = [

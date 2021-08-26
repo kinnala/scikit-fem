@@ -6,7 +6,7 @@ from skfem.element import (BOUNDARY_ELEMENT_MAP, DiscreteField, Element,
                            ElementHex0, ElementQuad0, ElementTetP0,
                            ElementTriP0)
 from skfem.mapping import Mapping
-from skfem.mesh import Mesh, MeshHex, MeshLine1, MeshQuad, MeshTet, MeshTri
+from skfem.mesh import Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 
 from .abstract_basis import AbstractBasis
 from .cell_basis import CellBasis
@@ -167,11 +167,13 @@ class BoundaryFacetBasis(AbstractBasis):
             raise Exception("The specified element not supported.")
         elemcls = BOUNDARY_ELEMENT_MAP[type(target_elem)]
         target_meshcls = {
-            MeshTri: MeshLine1,
-            MeshQuad: MeshLine1,
+            MeshTri: MeshLine,
+            MeshQuad: MeshLine,
             MeshTet: MeshTri,
             MeshHex: MeshQuad,
         }[meshcls]
+
+        assert callable(target_meshcls)
 
         p, t = self.mesh._reix(self.mesh.facets[:, self.find])
 
