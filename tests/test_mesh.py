@@ -7,7 +7,8 @@ from scipy.spatial import Delaunay
 from numpy.testing import assert_array_equal
 
 from skfem.mesh import (Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
-                        MeshTri2, MeshQuad2, MeshTet2, MeshHex2)
+                        MeshTri2, MeshQuad2, MeshTet2, MeshHex2, MeshLine1DG,
+                        MeshQuad1DG)
 from skfem.io.meshio import to_meshio, from_meshio
 from skfem.io.json import to_dict, from_dict
 
@@ -415,3 +416,17 @@ def test_saveload_cycle_tags(fmt, kwargs, m):
         for key in m.boundaries:
             assert_array_equal(m2.boundaries[key].sort(),
                                m.boundaries[key].sort())
+
+
+def test_periodic_failure():
+
+    # these meshes cannot be made periodic due to insufficient number of
+    # elements
+    with pytest.raises(ValueError):
+        mp = MeshLine1DG.periodic(MeshLine(), [0], [1])
+
+    with pytest.raises(ValueError):
+        mp = MeshQuad1DG.periodic(MeshQuad(), [0], [1])
+
+    with pytest.raises(ValueError):
+        mp = MeshQuad1DG.periodic(MeshQuad().refined(2), [0], [1, 2])

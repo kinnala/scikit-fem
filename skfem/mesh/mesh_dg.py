@@ -29,15 +29,17 @@ class MeshDG:
         """
         assert cls.elem.interior_dofs > 0
         assert cls.elem.refdom == mesh.elem.refdom
-        assert len(ix) == len(ix0)
+
+        if len(ix) != len(ix0):
+            raise ValueError("The length of the index sets used in the "
+                             "creation of a periodic mesh should be equal.")
 
         # reorder vertices: eliminated nodes must have highest index values
-        nix = np.arange(mesh.nvertices - len(ix),
-                        mesh.nvertices,
-                        dtype=np.int64)
-        remap = (-16) * np.ones(mesh.nvertices, dtype=np.int64)
-        remap[ix] = nix
-        oix = (remap == -16).nonzero()[0]
+        remap = np.empty(mesh.nvertices, dtype=np.int64)
+        remap[ix] =  np.arange(mesh.nvertices - len(ix),
+                               mesh.nvertices,
+                               dtype=np.int64)
+        oix = np.setdiff1d(np.arange(mesh.nvertices, dtype=np.int64), ix)
         remap[oix] = np.arange(mesh.nvertices - len(ix), dtype=np.int64)
 
         doflocs = np.hstack((mesh.doflocs[:, oix], mesh.doflocs[:, ix]))
@@ -55,8 +57,18 @@ class MeshDG:
         ix1 = remap[ix]
         ix2 = remap[ix0]
         reremap[ix1] = ix2
+        tp = reremap[t]
 
-        periodic_mesh = cls.from_mesh(reordered_mesh, reremap[t])
+        # check that there are no duplicate indices
+        for i in range(tp.shape[0]):
+            for j in range(i + 1, tp.shape[0]):
+                if (tp[i] == tp[j]).any():
+                    raise ValueError("At least one element has a duplicate "
+                                     "index.  Usually this means that the "
+                                     "element is part of two periodic "
+                                     "boundaries which is not allowed.")
+
+        periodic_mesh = cls.from_mesh(reordered_mesh, tp)
 
         # store reordered mesh and reverse mapping
         periodic_mesh._unperiodic = reordered_mesh

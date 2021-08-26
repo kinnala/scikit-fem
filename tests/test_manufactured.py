@@ -15,7 +15,8 @@ from skfem.assembly import FacetBasis, Basis
 from skfem.element import (ElementHex1, ElementHex2, ElementHexS2,
                            ElementLineMini, ElementLineP1, ElementLineP2,
                            ElementQuad1, ElementQuad2, ElementTetP1,
-                           ElementTetP2, ElementTriP1, ElementTriP2)
+                           ElementTetP2, ElementTriP1, ElementTriP2,
+                           ElementLinePp)
 from skfem.mesh import (MeshHex, MeshLine, MeshQuad, MeshQuad2, MeshTet,
                         MeshTet2, MeshTri, MeshTri2, MeshTri1DG,
                         MeshHex1DG, MeshLine1DG, MeshQuad1DG)
@@ -436,58 +437,63 @@ def test_periodic_mesh_assembly(m, mdgtype, etype, check1, check2):
 
 
 @pytest.mark.parametrize(
-    "m,mdgtype,etype",
+    "m,mdgtype,e",
     [
         (
             MeshTri.init_tensor(np.linspace(0, 1, 7),
                                 np.linspace(0, 1, 7)),
             MeshTri1DG,
-            ElementTriP1,
+            ElementTriP1(),
         ),
         (
             MeshTri.init_tensor(np.linspace(0, 1, 5),
                                 np.linspace(0, 1, 5)),
             MeshTri1DG,
-            ElementTriP1,
+            ElementTriP1(),
         ),
         (
             MeshTri().refined(2),
             MeshTri1DG,
-            ElementTriP1,
+            ElementTriP1(),
         ),
         (
             MeshTri().refined(3),
             MeshTri1DG,
-            ElementTriP1,
+            ElementTriP1(),
         ),
         (
             MeshQuad().refined(2),
             MeshQuad1DG,
-            ElementQuad1,
+            ElementQuad1(),
         ),
         (
             MeshQuad().refined(2),
             MeshQuad1DG,
-            ElementQuad2,
+            ElementQuad2(),
         ),
         (
             MeshTri().refined(2),
             MeshTri1DG,
-            ElementTriP2,
+            ElementTriP2(),
         ),
         (
             MeshLine().refined(5),
             MeshLine1DG,
-            ElementLineP1,
+            ElementLineP1(),
         ),
         (
             MeshHex().refined(3),
             MeshHex1DG,
-            ElementHex1,
+            ElementHex1(),
+        ),
+        (
+            MeshLine().refined(),
+            MeshLine1DG,
+            ElementLinePp(5),
         ),
     ]
 )
-def test_periodic_loading(m, mdgtype, etype):
+def test_periodic_loading(m, mdgtype, e):
 
     def _sort(ix):
         # sort index arrays so that ix[0] matches
@@ -496,7 +502,7 @@ def test_periodic_loading(m, mdgtype, etype):
     mp = mdgtype.periodic(m,
                           _sort(m.nodes_satisfying(lambda x: x[0] == 0)),
                           _sort(m.nodes_satisfying(lambda x: x[0] == 1)))
-    basis = Basis(mp, etype())
+    basis = Basis(mp, e)
     A = laplace.assemble(basis)
     M = mass.assemble(basis)
 
@@ -506,6 +512,9 @@ def test_periodic_loading(m, mdgtype, etype):
 
     f = linf.assemble(basis)
     x = solve(A + 1e-6 * M, f)
+
+    def uexact(x):
+        return (1. / (2. * np.pi) ** 2) * np.sin(2. * np.pi * x[0])
 
     @Functional
     def func(w):
