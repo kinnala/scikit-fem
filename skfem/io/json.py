@@ -6,7 +6,7 @@ from typing import Type
 
 import numpy as np
 
-from skfem.mesh import MeshLine, MeshTri, MeshQuad, MeshTet, MeshHex, Mesh
+from skfem.mesh import MeshLine1, MeshTri, MeshQuad, MeshTet, MeshHex, Mesh
 
 
 def to_dict(m):
@@ -53,7 +53,7 @@ def from_file(filename: PathLike) -> Mesh:
     mesh_type: Type = Mesh
 
     if dim == 1:
-        mesh_type = MeshLine
+        mesh_type = MeshLine1
     elif dim == 2 and nverts == 3:
         mesh_type = MeshTri
     elif dim == 2 and nverts == 4:
