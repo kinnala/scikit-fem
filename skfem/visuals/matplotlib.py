@@ -137,22 +137,9 @@ def plot_meshline(m: MeshLine1, z: ndarray, **kwargs):
     else:
         ax = kwargs["ax"]
 
-    xs = []
-    ys = []
-
     color = kwargs["color"] if "color" in kwargs else 'ko-'
-    for y1, y2, s, t in zip(z[m.t[0]],
-                            z[m.t[1]],
-                            m.p[0, m.t[0]],
-                            m.p[0, m.t[1]]):
-        xs.append(s)
-        xs.append(t)
-        xs.append(None)
-        ys.append(y1)
-        ys.append(y2)
-        ys.append(None)
-
-    ax.plot(xs, ys, color)
+    ix = np.argsort(m.p[0])
+    ax.plot(m.p[0][ix], z[ix], color)
 
     return ax
 
