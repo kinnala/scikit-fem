@@ -320,6 +320,7 @@ _test_lambda = {
         MeshHex().refined(),
         MeshTet.load(MESH_PATH / 'box.msh'),
         MeshTri.load(MESH_PATH / 'square.msh'),
+        MeshTet2.load(MESH_PATH / 'quadraticsphere.msh'),
     ]
 )
 def test_meshio_cycle_boundaries(internal_facets, m):
