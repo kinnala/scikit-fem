@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 from scipy.spatial import Delaunay
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_array_equal, assert_almost_equal
 
 from skfem.mesh import (Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
                         MeshTri2, MeshQuad2, MeshTet2, MeshHex2, MeshLine1DG,
@@ -430,3 +430,21 @@ def test_periodic_failure():
 
     with pytest.raises(ValueError):
         mp = MeshQuad1DG.periodic(MeshQuad().refined(2), [0], [1, 2])
+
+
+@pytest.mark.parametrize(
+    "mtype",
+    [
+        MeshTri,
+        MeshQuad,
+        MeshHex,
+        MeshTet,
+        MeshLine,
+    ]
+)
+def test_init_refdom(mtype):
+
+    m = mtype.init_refdom()
+    mapping = m._mapping()
+    x = mapping.F(m.p)[:, 0, :]
+    assert_array_equal(x, m.p)

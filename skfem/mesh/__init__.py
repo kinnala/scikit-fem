@@ -49,7 +49,7 @@ MeshTet = MeshTet1
 MeshHex = MeshHex1
 
 
-class MeshLineFactory:
+class MeshLineConstructor:
 
     def __call__(self, p=None, t=None, **kwargs):
 
@@ -70,7 +70,7 @@ class MeshLineFactory:
         return getattr(MeshLine1, name)
 
 
-MeshLine = MeshLineFactory()
+MeshLine = MeshLineConstructor()
 
 
 __all__ = [
