@@ -261,6 +261,7 @@ with respect to documented and/or tested features.
   `ElementLineP1DG`; shorthands for `ElementTriDG(ElementTriP1())` etc.
 - Fixed: `MappingIsoparametric` is now about 2x faster for large meshes thanks
   to additional caching
+- Fixed: `MeshHex2.save` did not work properly
 - Changed: `Mesh` string representation is now more informative
 - Changed: `Form.assemble` allows now only `DiscreteField` or 1d/2d `ndarray`
   objects, and will automatically pass 1d `ndarray` objects to
