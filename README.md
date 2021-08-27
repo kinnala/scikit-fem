@@ -266,8 +266,8 @@ with respect to documented and/or tested features.
 - Changed: `Form.assemble` allows now only `DiscreteField` or 1d/2d `ndarray`
   objects, and will automatically pass 1d `ndarray` objects to
   `Basis.interpolate` for convenience
-- Changed: `MeshLine` is now a function which initializes `MeshLine1` and
-  accepts additional types in comparison to `MeshLine1`
+- Changed: `MeshLine` is now a function which initializes `MeshLine1`
+  and not an alias to `MeshLine1`
 - Changed: `FacetBasis` is now a shorthand for `BoundaryFacetBasis` and no
   longer initializes `InteriorFacetBasis` or `MortarFacetBasis` if the keyword
   argument `side` is passed to the constructor
