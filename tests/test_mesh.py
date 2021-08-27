@@ -8,7 +8,7 @@ from numpy.testing import assert_array_equal, assert_almost_equal
 
 from skfem.mesh import (Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
                         MeshTri2, MeshQuad2, MeshTet2, MeshHex2, MeshLine1DG,
-                        MeshQuad1DG)
+                        MeshQuad1DG, MeshHex2)
 from skfem.io.meshio import to_meshio, from_meshio
 from skfem.io.json import to_dict, from_dict
 
@@ -285,6 +285,7 @@ def test_finder_simplex(m, seed):
         MeshTri2(),
         MeshQuad2(),
         MeshTet2(),
+        MeshHex2(),
         MeshLine(),
     ]
 )
