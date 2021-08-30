@@ -144,7 +144,7 @@ Here are direct links to additional resources:
 ## Getting help
 
 If you encounter an issue and cannot find help from the documentation,
-you can use the Github issue tracker to [ask questions using the question label](https://github.com/kinnala/scikit-fem/issues?q=label%3Aquestion).
+you can use the Github Discussions to [ask questions](https://github.com/kinnala/scikit-fem/discussions).
 Try to provide a snippet of code which fails
 and include also the version of the library you are
 using.  The version can be found as follows:
