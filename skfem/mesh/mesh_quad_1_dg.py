@@ -7,6 +7,6 @@ from .mesh_dg import MeshDG
 
 
 @dataclass(repr=False)
-class MeshQuad1DG(MeshQuad1, MeshDG):
+class MeshQuad1DG(MeshDG, MeshQuad1):
     """A quadrilateral mesh with a discontinuous topology."""
     elem: Type[Element] = ElementQuad1DG

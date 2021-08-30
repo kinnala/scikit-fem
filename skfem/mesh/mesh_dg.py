@@ -75,3 +75,13 @@ class MeshDG:
         periodic_mesh._ix = reremap
 
         return periodic_mesh
+
+    def save(self, *args, **kwargs):
+        raise NotImplementedError
+
+    @classmethod
+    def load(cls, *args, **kwargs):
+        raise NotImplementedError
+
+    def element_finder(self, *args, **kwargs):
+        raise NotImplementedError

@@ -10,7 +10,7 @@ from .mesh_dg import MeshDG
 
 
 @dataclass(repr=False)
-class MeshTri1DG(MeshTri1, MeshDG):
+class MeshTri1DG(MeshDG, MeshTri1):
     """A triangular mesh with a discontinuous topology."""
     doflocs: ndarray = np.array([[0., 0.],
                                  [1., 0.],

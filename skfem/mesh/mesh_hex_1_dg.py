@@ -7,6 +7,6 @@ from .mesh_dg import MeshDG
 
 
 @dataclass(repr=False)
-class MeshHex1DG(MeshHex1, MeshDG):
+class MeshHex1DG(MeshDG, MeshHex1):
     """A hexahedral mesh with a discontinuous topology."""
     elem: Type[Element] = ElementHex1DG
