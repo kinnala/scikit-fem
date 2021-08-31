@@ -1,3 +1,17 @@
+def splitmesh(mesh, nsplits):
+
+    from dataclasses import replace
+
+    return [
+        replace(
+            mesh,
+            doflocs=mesh.p,
+            t=mesh.t[:, ix],
+        ) for ix in np.array_split(np.arange(mesh.nelements, dtype=np.int64),
+                                   nsplits)
+    ]
+
+
 def MultiBasis(mesh,
                elem,
                mapping=None,
