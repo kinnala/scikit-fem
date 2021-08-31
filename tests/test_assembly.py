@@ -5,16 +5,18 @@ import numpy as np
 from numpy.testing import (assert_equal, assert_almost_equal,
                            assert_array_almost_equal)
 
-from skfem import BilinearForm, LinearForm, Functional, asm, solve
+from skfem import BilinearForm, LinearForm, Functional, asm, solve, condense
 from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementHexS2, ElementTetP0, ElementTetP1,
                            ElementTetP2, ElementTriP1, ElementQuad2,
                            ElementTriMorley, ElementVectorH1, ElementQuadP,
-                           ElementHex2, ElementTriArgyris)
+                           ElementHex2, ElementTriArgyris, ElementTriP2)
 from skfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
-                        MeshTri2, MeshTet2, MeshHex2)
-from skfem.assembly import FacetBasis, InteriorBasis
+                        MeshTri2, MeshTet2, MeshHex2, MeshTri1DG, MeshQuad1DG,
+                        MeshHex1DG)
+from skfem.assembly import FacetBasis, Basis
 from skfem.utils import projection
+from skfem.models import laplace, unit_load, mass
 
 
 class IntegrateOneOverBoundaryQ1(TestCase):
@@ -164,7 +166,7 @@ class BasisInterpolator(TestCase):
         mtype, etype = self.case
         m = mtype().refined(3)
         e = etype()
-        ib = InteriorBasis(m, e)
+        ib = Basis(m, e)
 
         x = self.initOnes(ib)
         f = ib.interpolator(x)
@@ -312,7 +314,7 @@ def test_evaluate_functional(mtype, e, mtype2):
         m = mtype().refined(3)
         if mtype2 is not None:
             m = mtype2.from_mesh(m)
-        basis = InteriorBasis(m, e)
+        basis = Basis(m, e)
 
         @Functional
         def x_squared(w):
@@ -330,7 +332,7 @@ class TestRefinterp(TestCase):
     def runTest(self):
         m = MeshQuad().refined(2)
         e = ElementQuad1()
-        basis = InteriorBasis(m, e)
+        basis = Basis(m, e)
 
         M, X = basis.refinterp(m.p[0], 3)
 
@@ -345,8 +347,8 @@ class TestCompositeAssembly(TestCase):
         # check that these assemble to the same matrix
         ec = ElementHex1() * ElementHex1() * ElementHex1()
         ev = ElementVectorH1(ElementHex1())
-        basisc = InteriorBasis(m, ec)
-        basisv = InteriorBasis(m, ev)
+        basisc = Basis(m, ec)
+        basisv = Basis(m, ev)
 
         @BilinearForm
         def bilinf_ev(u, v, w):
@@ -369,7 +371,7 @@ class TestFieldInterpolation(TestCase):
 
         m = MeshTri()
         e = ElementTriP1()
-        basis = InteriorBasis(m, e)
+        basis = Basis(m, e)
 
         @Functional
         def feqx(w):
@@ -389,7 +391,7 @@ class TestFieldInterpolation_2(TestCase):
 
         m = MeshTri()
         e = ElementTriP1()
-        basis = InteriorBasis(m, e)
+        basis = Basis(m, e)
 
         @Functional
         def feqx(w):
@@ -423,7 +425,7 @@ class TestComplexValuedAssembly(TestCase):
 
         m = MeshTri()
         e = ElementTriP1()
-        basis = InteriorBasis(m, e)
+        basis = Basis(m, e)
         self.interior_area = 1
 
         @BilinearForm(dtype=np.complex64)
@@ -448,7 +450,7 @@ class TestThreadedAssembly(TestCase):
 
         m = MeshTri().refined()
         e = ElementTriP1()
-        basis = InteriorBasis(m, e)
+        basis = Basis(m, e)
 
         @BilinearForm
         def nonsym(u, v, w):

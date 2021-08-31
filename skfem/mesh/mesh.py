@@ -22,8 +22,7 @@ class Mesh:
     _boundaries: Optional[Dict[str, ndarray]] = None
     _subdomains: Optional[Dict[str, ndarray]] = None
     elem: Type[Element] = Element
-    affine: bool = False
-    validate: bool = False  # unused; for backwards compatibility
+    affine: bool = False  #: Use :class:`~skfem.mapping.MappingAffine`?
     # Some parts of the library, most notably the normal vector construction in
     # ElementGlobal._eval_dofs, assume that the element indices are ascending
     # because this leads to consistent normal vectors for both elements sharing
@@ -53,7 +52,9 @@ class Mesh:
 
     @property
     def bndelem(self):
-        return BOUNDARY_ELEMENT_MAP[self.elem]()
+        if self.elem in BOUNDARY_ELEMENT_MAP:
+            return BOUNDARY_ELEMENT_MAP[self.elem]()
+        return None
 
     @property
     def nelements(self):
@@ -137,28 +138,6 @@ class Mesh:
             np.ravel_multi_index(B.T, dims),  # type: ignore
         ))[0]
         return edge_candidates[ix]
-
-    def define_boundary(self, name: str,
-                        test: Callable[[ndarray], ndarray],
-                        boundaries_only: bool = True):
-        """Define a named boundary via function handle.
-
-        Parameters
-        ----------
-        name
-            Name of the boundary.
-        test
-            A function which returns True for facet midpoints belonging to the
-            boundary.
-        boundaries_only
-            If True, include only facets on the boundary of the mesh.
-
-        """
-        warn("Mesh.define_boundary is deprecated and will be removed in the "
-             "next major release.", DeprecationWarning)
-        if self._boundaries is None:
-            self._boundaries = {}
-        self._boundaries[name] = self.facets_satisfying(test, boundaries_only)
 
     def with_boundaries(self,
                         boundaries: Dict[str, Callable[[ndarray], ndarray]],
@@ -424,11 +403,26 @@ class Mesh:
         return cls(p, t)
 
     def __repr__(self):
-        return "{} mesh with {} vertices and {} elements.".format(
-            self.elem.refdom.name,
-            self.nvertices,
-            self.nelements,
-        )
+        rep = ""
+        rep += "<skfem {} object>\n".format(type(self).__name__)
+        rep += "  Number of elements: {}\n".format(self.nelements)
+        rep += "  Number of vertices: {}\n".format(self.nvertices)
+        rep += "  Number of nodes: {}".format(self.p.shape[1])
+        if self.subdomains is not None:
+            rep += "\n  Named subdomains [# elements]: {}".format(
+                ', '.join(
+                    map(lambda k: '{} [{}]'.format(k, len(self.subdomains[k])),
+                        list(self.subdomains.keys()))
+                )
+            )
+        if self.boundaries is not None:
+            rep += "\n  Named boundaries [# facets]: {}".format(
+                ', '.join(
+                    map(lambda k: '{} [{}]'.format(k, len(self.boundaries[k])),
+                        list(self.boundaries.keys()))
+                )
+            )
+        return rep
 
     def __str__(self):
         return self.__repr__()
@@ -480,48 +474,25 @@ class Mesh:
                          **kwargs)
 
     @classmethod
-    def from_dict(cls, data):
-        """For backwards compatibility."""
-        if 'p' not in data or 't' not in data:
-            raise ValueError("Dictionary must contain keys 'p' and 't'.")
-        else:
-            data['p'] = np.ascontiguousarray(np.array(data['p']).T)
-            data['t'] = np.ascontiguousarray(np.array(data['t']).T)
-        if 'boundaries' in data and data['boundaries'] is not None:
-            data['boundaries'] = {k: np.array(v)
-                                  for k, v in data['boundaries'].items()}
-        if 'subdomains' in data and data['subdomains'] is not None:
-            data['subdomains'] = {k: np.array(v)
-                                  for k, v in data['subdomains'].items()}
-        data['doflocs'] = data.pop('p')
-        data['_subdomains'] = data.pop('subdomains')
-        data['_boundaries'] = data.pop('boundaries')
-        return cls(**data)
+    def from_dict(cls, d):
+        from skfem.io.json import from_dict
+        return from_dict(cls, d)
 
-    def to_dict(self) -> Dict[str, Optional[Dict[str, List[float]]]]:
-        """For backwards compatibility."""
-        boundaries: Optional[Dict[str, List[float]]] = None
-        subdomains: Optional[Dict[str, List[float]]] = None
-        if self.boundaries is not None:
-            boundaries = {k: v.tolist() for k, v in self.boundaries.items()}
-        if self.subdomains is not None:
-            subdomains = {k: v.tolist() for k, v in self.subdomains.items()}
-        return {
-            'p': self.p.T.tolist(),
-            't': self.t.T.tolist(),
-            'boundaries': boundaries,
-            'subdomains': subdomains,
-        }
+    def to_dict(self):
+        from skfem.io.json import to_dict
+        return to_dict(self)
 
     @classmethod
-    def from_mesh(cls, mesh):
+    def from_mesh(cls, mesh, t: Optional[ndarray] = None):
         """Reuse an existing mesh by adding the higher order nodes.
 
         Parameters
         ----------
         mesh
             The mesh used in the initialization.  Connectivity of the new mesh
-            will match ``mesh.t``.
+            will match ``mesh.t`` unless ``t`` is given
+        t
+            Optionally specify new connectivity for the resulting mesh.
 
         """
         from skfem.assembly import Dofs
@@ -532,6 +503,8 @@ class Mesh:
         locs = mapping.F(nelem.doflocs.T)
         doflocs = np.zeros((locs.shape[0], dofs.N))
 
+        assert dofs.element_dofs is not None
+
         # match mapped dofs and global dof numbering
         for itr in range(locs.shape[0]):
             for jtr in range(dofs.element_dofs.shape[0]):
@@ -539,7 +512,7 @@ class Mesh:
 
         return cls(
             doflocs=doflocs,
-            t=mesh.t,
+            t=t if t is not None else mesh.t,
         )
 
     @classmethod
@@ -711,6 +684,7 @@ class Mesh:
         inverse = np.zeros((2, np.max(mapping) + 1), dtype=np.int64)
         inverse[0, e_first] = tix[ix_first]
         inverse[1, e_last] = tix[ix_last]
+
         inverse[1, np.nonzero(inverse[0] == inverse[1])[0]] = -1
 
         return inverse
@@ -757,3 +731,17 @@ class Mesh:
 
         """
         raise NotImplementedError
+
+    def plot(self, *args, **kwargs):
+        """Convenience wrapper for :func:`skfem.visuals.matplotlib.plot`."""
+        from skfem.visuals.matplotlib import plot, show
+        ax = plot(self, *args, **kwargs)
+        ax.show = show
+        return ax
+
+    def draw(self, *args, **kwargs):
+        """Convenience wrapper for :func:`skfem.visuals.matplotlib.draw`."""
+        from skfem.visuals.matplotlib import draw, show
+        ax = draw(self, *args, **kwargs)
+        ax.show = show
+        return ax

@@ -7,7 +7,10 @@ following:
 >>> m = fem.MeshTri()
 >>> e = fem.ElementTriP1()
 >>> m
-Triangular mesh with 4 vertices and 2 elements.
+<skfem MeshTri1 object>
+  Number of elements: 2
+  Number of vertices: 4
+  Number of nodes: 4
 
 2. Create :class:`~skfem.assembly.CellBasis` or
    :class:`~skfem.assembly.BoundaryFacetBasis` objects.

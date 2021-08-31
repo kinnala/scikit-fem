@@ -100,7 +100,13 @@ class TestEx13(TestCase):
         import docs.examples.ex13 as ex
         u = ex.u
         A = ex.A
-        self.assertAlmostEqual(u @ A @ u, 2 * np.log(2) / np.pi, delta=1e-3)
+        current = ex.current
+        self.assertAlmostEqual(current['ground'],
+                               -2 * np.log(2) / np.pi,
+                               delta=1e-3)
+        self.assertAlmostEqual(u @ A @ u,
+                               2 * np.log(2) / np.pi,
+                               delta=1e-3)
 
 
 class TestEx14(TestCase):

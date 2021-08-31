@@ -6,10 +6,11 @@ from numpy import ndarray
 
 from ..element import Element, ElementTriP2
 from .mesh_tri_1 import MeshTri1
+from .mesh_2d_2 import Mesh2D2
 
 
 @dataclass(repr=False)
-class MeshTri2(MeshTri1):
+class MeshTri2(Mesh2D2, MeshTri1):
     """A quadratic triangular mesh."""
 
     doflocs: ndarray = np.array([[0., 0.],
@@ -34,7 +35,3 @@ class MeshTri2(MeshTri1):
         doflocs = M.doflocs.copy()
         doflocs[:, D] /= np.linalg.norm(doflocs[:, D], axis=0)
         return replace(M, doflocs=doflocs)
-
-    def _repr_svg_(self) -> str:
-        from skfem.visuals.svg import draw
-        return draw(self, nrefs=2, boundaries_only=True).svg

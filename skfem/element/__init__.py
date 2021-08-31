@@ -14,21 +14,22 @@ from .element_h1 import ElementH1
 from .element_hdiv import ElementHdiv
 from .element_hcurl import ElementHcurl
 from .element_vector import ElementVector
-from .element_tri import (ElementTriP1, ElementTriP2, ElementTriDG,
+from .element_tri import (ElementTriP1, ElementTriP2, ElementTriDG,  # noqa
                           ElementTriP0, ElementTriRT0, ElementTriMorley,
                           ElementTriArgyris, ElementTriMini, ElementTriCR,
-                          ElementTriHermite, ElementTriCCR)
-from .element_quad import (ElementQuad0, ElementQuad1, ElementQuad2,
+                          ElementTriHermite, ElementTriCCR,
+                          ElementTriP1DG)
+from .element_quad import (ElementQuad0, ElementQuad1, ElementQuad2,  # noqa
                            ElementQuadS2, ElementQuadDG, ElementQuadP,
-                           ElementQuadBFS)
-from .element_tet import (ElementTetP0, ElementTetP1, ElementTetP2,
+                           ElementQuadBFS, ElementQuad1DG)
+from .element_tet import (ElementTetP0, ElementTetP1, ElementTetP2,  # noqa
                           ElementTetRT0, ElementTetN0, ElementTetMini,
                           ElementTetCR, ElementTetDG, ElementTetCCR)
-from .element_hex import (ElementHex0, ElementHex1, ElementHex2,
-                          ElementHexS2)  # noqa
-from .element_line import (ElementLineP0, ElementLineP1, ElementLineP2,
+from .element_hex import (ElementHex0, ElementHex1, ElementHex2,  # noqa
+                          ElementHexS2, ElementHex1DG)
+from .element_line import (ElementLineP0, ElementLineP1, ElementLineP2,  # noqa
                            ElementLinePp, ElementLineHermite,
-                           ElementLineMini)  # noqa
+                           ElementLineMini, ElementLineP1DG)
 from .element_composite import ElementComposite  # noqa
 
 
@@ -78,6 +79,7 @@ __all__ = [
     "ElementQuadDG",
     "ElementQuadP",
     "ElementQuadBFS",
+    "ElementQuad1DG",
     "ElementTetP0",
     "ElementTetP1",
     "ElementTetP2",
@@ -91,8 +93,10 @@ __all__ = [
     "ElementHex1",
     "ElementHex2",
     "ElementHexS2",
+    "ElementHex1DG",
     "ElementLineP0",
     "ElementLineP1",
+    "ElementLineP1DG",
     "ElementLineP2",
     "ElementLinePp",
     "ElementLineHermite",

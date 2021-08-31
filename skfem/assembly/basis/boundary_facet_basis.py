@@ -173,6 +173,8 @@ class BoundaryFacetBasis(AbstractBasis):
             MeshHex: MeshQuad,
         }[meshcls]
 
+        assert callable(target_meshcls)  # to satisfy mypy
+
         p, t = self.mesh._reix(self.mesh.facets[:, self.find])
 
         return (

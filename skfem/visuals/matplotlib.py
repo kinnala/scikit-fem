@@ -8,8 +8,8 @@ from numpy import ndarray
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
-from ..assembly import InteriorBasis
-from ..mesh import Mesh2D, MeshLine, MeshQuad, MeshTet, MeshTri
+from ..assembly import CellBasis
+from ..mesh import Mesh2D, MeshLine1, MeshQuad1, MeshTet1, MeshTri1
 
 
 @singledispatch
@@ -18,8 +18,8 @@ def draw(m, **kwargs) -> Axes:
     raise NotImplementedError("Type {} not supported.".format(type(m)))
 
 
-@draw.register(InteriorBasis)
-def draw_basis(ib: InteriorBasis, **kwargs) -> Axes:
+@draw.register(CellBasis)
+def draw_basis(ib: CellBasis, **kwargs) -> Axes:
     if "nrefs" in kwargs:
         nrefs = kwargs["nrefs"]
     elif "Nrefs" in kwargs:
@@ -30,8 +30,8 @@ def draw_basis(ib: InteriorBasis, **kwargs) -> Axes:
     return draw(m, boundaries_only=True, **kwargs)
 
 
-@draw.register(MeshTet)
-def draw_meshtet(m: MeshTet, **kwargs) -> Axes:
+@draw.register(MeshTet1)
+def draw_meshtet(m: MeshTet1, **kwargs) -> Axes:
     """Visualize a tetrahedral mesh by drawing the boundary facets."""
     bnd_facets = m.boundary_facets()
     ax = plt.figure().add_subplot(1, 1, 1, projection='3d')
@@ -127,8 +127,8 @@ def plot(m, u, **kwargs) -> Axes:
     raise NotImplementedError("Type {} not supported.".format(type(m)))
 
 
-@plot.register(MeshLine)
-def plot_meshline(m: MeshLine, z: ndarray, **kwargs):
+@plot.register(MeshLine1)
+def plot_meshline(m: MeshLine1, z: ndarray, **kwargs):
     """Plot a function defined at the nodes of the 1D mesh."""
     if "ax" not in kwargs:
         # create new figure
@@ -137,28 +137,15 @@ def plot_meshline(m: MeshLine, z: ndarray, **kwargs):
     else:
         ax = kwargs["ax"]
 
-    xs = []
-    ys = []
-
     color = kwargs["color"] if "color" in kwargs else 'ko-'
-    for y1, y2, s, t in zip(z[m.t[0]],
-                            z[m.t[1]],
-                            m.p[0, m.t[0]],
-                            m.p[0, m.t[1]]):
-        xs.append(s)
-        xs.append(t)
-        xs.append(None)
-        ys.append(y1)
-        ys.append(y2)
-        ys.append(None)
-
-    ax.plot(xs, ys, color)
+    ix = np.argsort(m.p[0])
+    ax.plot(m.p[0][ix], z[ix], color)
 
     return ax
 
 
-@plot.register(MeshTri)
-def plot_meshtri(m: MeshTri, z: ndarray, **kwargs) -> Axes:
+@plot.register(MeshTri1)
+def plot_meshtri(m: MeshTri1, z: ndarray, **kwargs) -> Axes:
     """Visualise piecewise-linear function on a triangular mesh.
 
     Parameters
@@ -211,8 +198,8 @@ def plot_meshtri(m: MeshTri, z: ndarray, **kwargs) -> Axes:
     return ax
 
 
-@plot.register(MeshQuad)
-def plot_meshquad(m: MeshQuad, z, **kwargs):
+@plot.register(MeshQuad1)
+def plot_meshquad(m: MeshQuad1, z, **kwargs):
     """Visualise nodal functions on quadrilateral meshes.
 
     The quadrilaterals are split into two triangles
@@ -227,9 +214,9 @@ def plot_meshquad(m: MeshQuad, z, **kwargs):
     return plot(m, z, **kwargs)
 
 
-@plot.register(InteriorBasis)
-def plot_basis(basis: InteriorBasis, z: ndarray, **kwargs) -> Axes:
-    """Plot on a refined mesh via :meth:`InteriorBasis.refinterp`."""
+@plot.register(CellBasis)
+def plot_basis(basis: CellBasis, z: ndarray, **kwargs) -> Axes:
+    """Plot on a refined mesh via :meth:`CellBasis.refinterp`."""
     if "nrefs" in kwargs:
         nrefs = kwargs["nrefs"]
     elif "Nrefs" in kwargs:
@@ -245,8 +232,8 @@ def plot3(m, z: ndarray, **kwargs) -> Axes:
     raise NotImplementedError("Type {} not supported.".format(type(m)))
 
 
-@plot3.register(MeshTri)
-def plot3_meshtri(m: MeshTri, z: ndarray, **kwargs) -> Axes:
+@plot3.register(MeshTri1)
+def plot3_meshtri(m: MeshTri1, z: ndarray, **kwargs) -> Axes:
     """Visualise piecewise-linear function, 3D plot.
 
     Parameters
@@ -272,9 +259,9 @@ def plot3_meshtri(m: MeshTri, z: ndarray, **kwargs) -> Axes:
     return ax
 
 
-@plot3.register(InteriorBasis)
-def plot3_basis(basis: InteriorBasis, z: ndarray, **kwargs) -> Axes:
-    """Plot on a refined mesh via :meth:`InteriorBasis.refinterp`."""
+@plot3.register(CellBasis)
+def plot3_basis(basis: CellBasis, z: ndarray, **kwargs) -> Axes:
+    """Plot on a refined mesh via :meth:`CellBasis.refinterp`."""
     if "nrefs" in kwargs:
         nrefs = kwargs["nrefs"]
     elif "Nrefs" in kwargs:

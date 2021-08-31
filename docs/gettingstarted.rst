@@ -83,7 +83,10 @@ unit square:
 
    >>> mesh = fem.MeshTri().refined(3)  # refine thrice
    >>> mesh
-   Triangular mesh with 81 vertices and 128 elements.
+   <skfem MeshTri1 object>
+     Number of elements: 128
+     Number of vertices: 81
+     Number of nodes: 81
 
 
 Step 4: Define a basis

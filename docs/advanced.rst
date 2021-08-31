@@ -168,7 +168,10 @@ element mesh of the unit square:
    >>> from skfem import *
    >>> m = MeshTri()
    >>> m
-   Triangular mesh with 4 vertices and 2 elements.
+   <skfem MeshTri1 object>
+     Number of elements: 2
+     Number of vertices: 4
+     Number of nodes: 4
    >>> basis = Basis(m, ElementTriP2())
 
 The DOFs corresponding to the nodes (or vertices) of the mesh are

@@ -35,3 +35,10 @@ class ElementQuad1(ElementH1):
             self._index_error()
 
         return phi, dphi
+
+
+class ElementQuad1DG(ElementQuad1):
+
+    nodal_dofs = 0
+    interior_dofs = 4
+    dofnames = ['u'] * 4

@@ -6,14 +6,15 @@ import skfem
 
 
 MESH_TYPE_MAPPING = {
-    'tetra': skfem.MeshTet,
-    'hexahedron': skfem.MeshHex,
-    'triangle': skfem.MeshTri,
-    'quad': skfem.MeshQuad,
-    'line': skfem.MeshLine,
+    'tetra': skfem.MeshTet1,
+    'hexahedron': skfem.MeshHex1,
+    'triangle': skfem.MeshTri1,
+    'quad': skfem.MeshQuad1,
+    'line': skfem.MeshLine1,
     'tetra10': skfem.MeshTet2,
     'triangle6': skfem.MeshTri2,
     'quad9': skfem.MeshQuad2,
+    'hexahedron27': skfem.MeshHex2,
 }
 
 BOUNDARY_TYPE_MAPPING = {
@@ -25,10 +26,19 @@ BOUNDARY_TYPE_MAPPING = {
     'tetra10': 'triangle',  # TODO support quadratic facets
     'triangle6': 'line',  # TODO
     'quad9': 'line',  # TODO
+    'hexahedron27': 'quad',  # TODO
 }
 
 TYPE_MESH_MAPPING = {MESH_TYPE_MAPPING[k]: k
                      for k in dict(reversed(list(MESH_TYPE_MAPPING.items())))}
+
+
+HEX_MAPPING = [0, 3, 6, 2, 1, 5, 7, 4,
+               10, 16, 14, 9, 12, 18, 17, 11, 8, 15, 19, 13,
+               20, 25, 22, 23, 21, 24,
+               26]
+INV_HEX_MAPPING = [HEX_MAPPING.index(i)
+                   for i in range(len(HEX_MAPPING))]
 
 
 def from_meshio(m,
@@ -40,7 +50,7 @@ def from_meshio(m,
 
     # detect 3D
     for k in cells:
-        if k in {'tetra', 'hexahedron', 'tetra10'}:
+        if k in {'tetra', 'hexahedron', 'tetra10', 'hexahedron27'}:
             meshio_type = k
             break
 
@@ -70,7 +80,9 @@ def from_meshio(m,
 
     # reorder t if needed
     if meshio_type == 'hexahedron':
-        t = t[[0, 4, 3, 1, 7, 5, 2, 6]]
+        t = t[INV_HEX_MAPPING[:8]]
+    elif meshio_type == 'hexahedron27':
+        t = t[INV_HEX_MAPPING]
 
     if int_data_to_sets:
         m.int_data_to_sets()
@@ -170,8 +182,10 @@ def to_meshio(mesh,
               cell_data=None):
 
     t = mesh.dofs.element_dofs.copy()
-    if isinstance(mesh, skfem.MeshHex):
-        t = t[[0, 3, 6, 2, 1, 5, 7, 4]]
+    if isinstance(mesh, skfem.MeshHex2):
+        t = t[HEX_MAPPING]
+    elif isinstance(mesh, skfem.MeshHex):
+        t = t[HEX_MAPPING[:8]]
 
     mtype = TYPE_MESH_MAPPING[type(mesh)]
     cells = {mtype: t.T}

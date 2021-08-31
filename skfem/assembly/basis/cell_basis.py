@@ -127,7 +127,7 @@ class CellBasis(AbstractBasis):
             for itr in range(len(x) - 1):
                 p = np.vstack((p, x[itr + 1].flatten()))
 
-        M = meshclass(p, t, validate=False)
+        M = meshclass(p, t)
 
         return M, w.flatten()
 

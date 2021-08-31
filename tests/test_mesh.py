@@ -4,11 +4,13 @@ from pathlib import Path
 import numpy as np
 import pytest
 from scipy.spatial import Delaunay
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_array_equal, assert_almost_equal
 
 from skfem.mesh import (Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
-                        MeshTri2, MeshQuad2, MeshTet2, MeshHex2)
+                        MeshTri2, MeshQuad2, MeshTet2, MeshHex2, MeshLine1DG,
+                        MeshQuad1DG, MeshHex2, MeshTri1DG)
 from skfem.io.meshio import to_meshio, from_meshio
+from skfem.io.json import to_dict, from_dict
 
 
 class MeshTests(TestCase):
@@ -94,7 +96,7 @@ class SerializeUnserializeCycle(TestCase):
                  .refined(2)
                  .with_boundaries({'down': lambda x: x[0] == 0,})
                  .with_subdomains({'up': lambda x: x[0] > 0.5}))
-            M = cls.from_dict(m.to_dict())
+            M = from_dict(cls, to_dict(m))
             self.assertTrue(np.sum(m.p - M.p) < 1e-13)
             self.assertTrue(np.sum(m.t - M.t) < 1e-13)
             for k in m.boundaries:
@@ -251,11 +253,11 @@ class TestFinder1DLinspaced(TestCase):
     [
         (MeshTri(), 0),
         (MeshTri(), 1),
-        (MeshTri(), 2),
+        (MeshTri().refined(), 2),
         (MeshTet(), 0),
         (MeshTet(), 1),
         (MeshTet(), 2),
-        (MeshTet(), 10),
+        (MeshTet().refined(), 10),
     ]
 )
 def test_finder_simplex(m, seed):
@@ -283,6 +285,7 @@ def test_finder_simplex(m, seed):
         MeshTri2(),
         MeshQuad2(),
         MeshTet2(),
+        MeshHex2(),
         MeshLine(),
     ]
 )
@@ -318,6 +321,7 @@ _test_lambda = {
         MeshHex().refined(),
         MeshTet.load(MESH_PATH / 'box.msh'),
         MeshTri.load(MESH_PATH / 'square.msh'),
+        MeshTet2.load(MESH_PATH / 'quadraticsphere.msh'),
     ]
 )
 def test_meshio_cycle_boundaries(internal_facets, m):
@@ -414,3 +418,35 @@ def test_saveload_cycle_tags(fmt, kwargs, m):
         for key in m.boundaries:
             assert_array_equal(m2.boundaries[key].sort(),
                                m.boundaries[key].sort())
+
+
+def test_periodic_failure():
+
+    # these meshes cannot be made periodic due to insufficient number of
+    # elements
+    with pytest.raises(ValueError):
+        mp = MeshLine1DG.periodic(MeshLine(), [0], [1])
+
+    with pytest.raises(ValueError):
+        mp = MeshQuad1DG.periodic(MeshQuad(), [0], [1])
+
+    with pytest.raises(ValueError):
+        mp = MeshQuad1DG.periodic(MeshQuad().refined(2), [0], [1, 2])
+
+
+@pytest.mark.parametrize(
+    "mtype",
+    [
+        MeshTri,
+        MeshQuad,
+        MeshHex,
+        MeshTet,
+        MeshLine,
+    ]
+)
+def test_init_refdom(mtype):
+
+    m = mtype.init_refdom()
+    mapping = m._mapping()
+    x = mapping.F(m.p)[:, 0, :]
+    assert_array_equal(x, m.p)

@@ -18,16 +18,6 @@ class MeshLine1(Mesh):
     elem: Type[Element] = ElementLineP1
     affine: bool = True
 
-    def __post_init__(self):
-
-        self.doflocs = np.atleast_2d(self.doflocs)
-        super().__post_init__()
-
-        if self.t.shape[1] != self.doflocs.shape[1] - 1:
-            # fill self.t assuming ascending self.doflocs if not provided
-            tmp = np.arange(self.doflocs.shape[1] - 1, dtype=np.int64)
-            self.t = np.vstack((tmp, tmp + 1))
-
     def __mul__(self, other):
         return MeshQuad1.init_tensor(self.p[0], other.p[0])
 

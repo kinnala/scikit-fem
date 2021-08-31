@@ -31,3 +31,10 @@ class ElementTriP1(ElementH1):
             self._index_error()
 
         return phi, dphi
+
+
+class ElementTriP1DG(ElementTriP1):
+
+    nodal_dofs = 0
+    interior_dofs = 3
+    dofnames = ['u'] * 3
