@@ -1,3 +1,10 @@
+import numpy as np
+
+from .mesh import Mesh
+from .element import Element
+from .assembly import Basis
+
+
 def splitmesh(mesh, nsplits):
 
     from dataclasses import replace
