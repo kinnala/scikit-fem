@@ -2,7 +2,7 @@ import numpy as np
 
 from .mesh import Mesh
 from .element import Element
-from .assembly import Basis
+from .assembly import CellBasis
 
 
 def splitmesh(mesh, nsplits):
@@ -19,12 +19,13 @@ def splitmesh(mesh, nsplits):
     ]
 
 
-def MultiBasis(mesh,
-               elem,
-               mapping=None,
-               intorder=None,
-               elements=None,
-               quadrature=None):
+def Basis(mesh,
+          elem,
+          mapping=None,
+          intorder=None,
+          elements=None,
+          quadrature=None,
+          use_dask=True):
 
     from itertools import cycle
 
@@ -35,38 +36,44 @@ def MultiBasis(mesh,
     assert quadrature is None
 
     if isinstance(mesh, Mesh):
-        mesh = [mesh]
+        mesh = splitmesh(mesh, 4)
 
     if isinstance(elem, Element):
         elem = [elem]
 
     params = [arg for arg in zip(mesh, cycle(elem))]
 
-    try:
-        import dask
-        dask.config.set(scheduler='threading')
-        import dask.bag as db
-        bag = db.from_sequence(params)
-        return bag.map(lambda p: Basis(*p))
-    except Exception:
-        pass
-
-    return [Basis(*p) for p in params]
-
-
-def multiasm(form, bases, compute=True):
-
-    try:
-        if isinstance(bases, list):
+    if use_dask:
+        try:
+            import dask
+            dask.config.set(scheduler='threading')
             import dask.bag as db
-            bases = db.from_sequence(bases)
+            bag = db.from_sequence(params)
+            return bag.map(lambda p: CellBasis(*p))
+        except Exception as e:
+            print(e)
 
-        c = bases.map(lambda basis: form.coo_data(basis)).sum()
-        if not compute:
-            return c
-        out = c.compute(scheduler='threading')
-        return out.tocsr()
-    except Exception:
-        pass
+    return [CellBasis(*p) for p in params]
+
+
+def asm(form,
+        bases,
+        compute=True,
+        use_dask=True):
+
+    if use_dask:
+        try:
+            if isinstance(bases, list):
+                import dask.bag as db
+                bases = db.from_sequence(bases)
+
+            c = bases.map(lambda basis: form.coo_data(basis)).sum()
+
+            if not compute:
+                return c
+            out = c.compute(scheduler='threading')
+            return out.tocsr()
+        except Exception as e:
+            print(e)
 
     return sum(map(lambda basis: form.coo_data(basis), bases)).tocsr()
