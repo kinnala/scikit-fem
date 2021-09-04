@@ -25,7 +25,8 @@ def Basis(mesh,
           intorder=None,
           elements=None,
           quadrature=None,
-          use_dask=True):
+          use_dask=True,
+          nsplits=4):
 
     from itertools import cycle
 
@@ -36,7 +37,7 @@ def Basis(mesh,
     assert quadrature is None
 
     if isinstance(mesh, Mesh):
-        mesh = splitmesh(mesh, 4)
+        mesh = splitmesh(mesh, nsplits)
 
     if isinstance(elem, Element):
         elem = [elem]
