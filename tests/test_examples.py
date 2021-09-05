@@ -305,11 +305,14 @@ class TestEx35(TestCase):
 class TestEx36(TestCase):
 
     def runTest(self):
-        from docs.examples.ex36 import du, dp
+        from docs.examples.ex36 import du, dp, volume_deformed, norm_res
         self.assertAlmostEqual(np.linalg.norm(du),
-                               16.529402115680444,
+                               16.530715141106377,
                                delta=1e-5)
         self.assertAlmostEqual(dp[0], -0.5, delta=1.e-8)
+        self.assertAlmostEqual(volume_deformed, 1., delta=1.e-4)
+        self.assertAlmostEqual(norm_res, 0., delta=1.e-8)
+
 
 
 class TestEx37(TestCase):

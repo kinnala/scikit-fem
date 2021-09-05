@@ -65,11 +65,14 @@ dofs.
 
 The following demonstrates uniaxial tension in one direction, and the lateral
 edges allowed to remain free. The geometry is a homogeneous unit cube made up
-of a Neo-Hookean solid with :math:`\lambda/\mu = 1000`. For this loading and
+of a Neo-Hookean solid with :math:`\lambda/\mu = 10000`. For this loading and
 geometry, in the limit of :math:`\lambda/\mu\rightarrow +\infty`, the
 deformation gradient would be given by :math:`\mathbf{F} =
 \text{diag}(\lambda,1/\sqrt{\lambda})` and the pressure field admits a closed
 form solution :math:`p=-\mu/\ell` where :math:`\ell` is the applied stretch.
+
+As another check, we can also compute the final volume of the deformed solid which,
+for a nearly incompressible solid, should be close to the initial undeformed volume.
 
 """
 import numpy as np
@@ -78,7 +81,7 @@ from skfem.helpers import grad, transpose, det, inv, identity
 from skfem import *
 
 
-mu, lmbda = 1., 1.e3
+mu, lmbda = 1., 1.e4
 
 
 def F1(w):
@@ -132,6 +135,13 @@ def A22(w):
     L = (-2. * dJsdp - p * d2Jdp2 + mu / Js ** 2 * dJsdp ** 2 - mu / Js * d2Jdp2
          + lmbda * (Js - 1.) * d2Jdp2 + lmbda * dJsdp ** 2)
     return L
+
+
+def volume(w):
+    dw = w["disp"].grad
+    F = dw + identity(dw)
+    J = det(F)
+    return J
 
 
 mesh = MeshTet().refined(2)
@@ -209,6 +219,11 @@ def b22(u, v, w):
     return A22(w) * u * v
 
 
+@Functional
+def vol(w):
+    return volume(w)
+
+
 for itr in range(12):
     uv = basis["u"].interpolate(du)
     pv = basis["p"].interpolate(dp) 
@@ -230,9 +245,13 @@ for itr in range(12):
     dp += delp
     normu = np.linalg.norm(delu)
     normp = np.linalg.norm(delp)
-    print(f"{itr+1}, norm_du: {normu}, norm_dp: {normp}")
-    if normu < 1.e-8 and normp < 1.e-8:
+    norm_res = np.linalg.norm(f[I])
+    print(f"{itr+1}, norm_du: {normu}, norm_dp: {normp}, norm_res: {norm_res}")
+    if normu < 1.e-8 and normp < 1.e-8 and norm_res < 1.e-8:
         break
+
+
+volume_deformed = vol.assemble(basis["u"], disp=basis["u"].interpolate(du))
 
 
 if __name__ == "__main__":
