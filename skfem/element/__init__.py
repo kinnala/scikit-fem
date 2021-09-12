@@ -72,6 +72,7 @@ __all__ = [
     "ElementTriArgyris",
     "ElementTriMini",
     "ElementTriHermite",
+    "ElementTriP1DG",
     "ElementQuad0",
     "ElementQuad1",
     "ElementQuad2",
