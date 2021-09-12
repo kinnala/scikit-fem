@@ -329,7 +329,6 @@ class MeshTri1(Mesh2D):
 
     def oriented(self):
 
-        mapping = self._mapping()
         flip = np.nonzero(self.orientation())[0]
         t = self.t.copy()
         t0 = t[0, flip]
