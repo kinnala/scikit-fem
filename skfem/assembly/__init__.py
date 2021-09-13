@@ -58,7 +58,7 @@ from .basis import (Basis, CellBasis, FacetBasis, BoundaryFacetBasis,
                     InteriorFacetBasis, MortarFacetBasis)
 from .basis import InteriorBasis, ExteriorFacetBasis  # backwards compatibility
 from .dofs import Dofs, DofsView
-from .form import Form, BilinearForm, LinearForm, Functional
+from .form import Form, TrilinearForm, BilinearForm, LinearForm, Functional
 
 
 def asm(form: Form,
@@ -84,6 +84,7 @@ __all__ = [
     "MortarFacetBasis",
     "Dofs",
     "DofsView",
+    "TrilinearForm",
     "BilinearForm",
     "LinearForm",
     "Functional",

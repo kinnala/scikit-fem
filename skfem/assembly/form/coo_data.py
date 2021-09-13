@@ -52,8 +52,11 @@ class COOData:
             shape=self.shape + (1,),
         ).toarray().T[0]
 
-    def todefault(self) -> Any:
+    def astuple(self):
+        return self.indices, self.data, self.shape
 
+    def todefault(self) -> Any:
+        """Return the default data type."""
         if len(self.shape) == 0:
             return self.data[0]
         elif len(self.shape) == 1:

@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Any
+from typing import Dict, Optional, Any, Tuple
 
 import numpy as np
 from numpy import ndarray
@@ -36,7 +36,9 @@ class Functional(Form):
     def _assemble(self,
                   ubasis: Basis,
                   vbasis: Optional[Basis] = None,
-                  **kwargs) -> Any:
+                  **kwargs) -> Tuple[ndarray,
+                                     ndarray,
+                                     Tuple[()]]:
         """Evaluate the functional to a scalar.
 
         Parameters

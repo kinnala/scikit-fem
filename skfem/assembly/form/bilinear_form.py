@@ -57,7 +57,6 @@ class BilinearForm(Form):
                   vbasis: Optional[Basis] = None,
                   **kwargs) -> Tuple[ndarray,
                                      ndarray,
-                                     ndarray,
                                      Tuple[int, int]]:
 
         if vbasis is None:

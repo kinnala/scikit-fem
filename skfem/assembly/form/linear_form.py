@@ -21,7 +21,6 @@ class LinearForm(Form):
                   vbasis: Optional[Basis] = None,
                   **kwargs) -> Tuple[ndarray,
                                      ndarray,
-                                     ndarray,
                                      Tuple[int, int]]:
 
         assert vbasis is None
