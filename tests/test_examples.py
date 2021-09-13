@@ -338,5 +338,16 @@ class TestEx39(TestCase):
         self.assertAlmostEqual(*[(ex.probe @ s)[0] for s in [ex.exact(t), u]], 5)
 
 
+class TestEx40(TestCase):
+
+    def runTest(self):
+        import docs.examples.ex40 as ex
+
+        self.assertAlmostEqual(ex.u1.max(), 0.0748, delta=1e-3)
+        self.assertAlmostEqual(ex.u2.max(), 0.0748, delta=1e-3)
+        self.assertAlmostEqual(ex.u1.min(), 0.0, delta=3e-3)
+        self.assertAlmostEqual(ex.u2.min(), 0.0, delta=3e-3)
+
+
 if __name__ == '__main__':
     main()

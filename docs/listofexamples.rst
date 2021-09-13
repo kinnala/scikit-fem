@@ -558,9 +558,9 @@ then the continuity is recovered with the help of Lagrange multipliers defined
 on the mesh skeleton (i.e. a "skeleton mesh" consisting only of the edges of
 the original mesh).
 
-.. figure:: https://user-images.githubusercontent.com/973268/133040624-0745603d-5fe2-40c9-a98c-8dd863d95f6f.png
+.. figure:: https://user-images.githubusercontent.com/973268/133050898-68f1127f-a2fa-40e9-8fb2-0189f7e920d0.png
 
-   The solutoin of Example 40 on the skeleton mesh.
+   The solutionn of Example 40 on the skeleton mesh.
 
 See the `source code of Example 40 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex40.py>`_
 for more information.
