@@ -1,5 +1,6 @@
 from typing import Dict, Optional, Any
 
+import numpy as np
 from numpy import ndarray
 
 from .form import Form, FormExtraParams
@@ -32,10 +33,10 @@ class Functional(Form):
         })
         return self._kernel(w, v.dx)
 
-    def assemble(self,
-                 ubasis: Basis,
-                 vbasis: Optional[Basis] = None,
-                 **kwargs) -> Any:
+    def _assemble(self,
+                  ubasis: Basis,
+                  vbasis: Optional[Basis] = None,
+                  **kwargs) -> Any:
         """Evaluate the functional to a scalar.
 
         Parameters
@@ -49,7 +50,4 @@ class Functional(Form):
         """
         assert vbasis is None
         vbasis = ubasis
-        return self.elemental(vbasis, **kwargs).sum(-1)
-
-    def coo_data(self, *args, **kwargs):
-        return self.assemble(*args, **kwargs)
+        return np.array([]), np.array([self.elemental(vbasis, **kwargs).sum(-1)]), tuple()

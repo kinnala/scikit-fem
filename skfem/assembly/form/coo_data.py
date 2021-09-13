@@ -32,11 +32,9 @@ class COOData:
 
         return replace(
             self,
-            data=np.concatenate((self.data, other.data)),
-            rows=np.concatenate((self.rows, other.rows)),
-            cols=np.concatenate((self.cols, other.cols)),
-            shape=(max(self.shape[0], other.shape[0]),
-                   max(self.shape[1], other.shape[1])),
+            indices=np.hstack((self.indices, other.indices)),
+            data=np.hstack((self.data, other.data)),
+            shape=tuple(max(self.shape[i], other.shape[i]) for i in range(len(self.shape))),
         )
 
     def tocsr(self) -> csr_matrix:
@@ -56,7 +54,9 @@ class COOData:
 
     def todefault(self) -> Any:
 
-        if len(self.shape) == 1:
+        if len(self.shape) == 0:
+            return self.data[0]
+        elif len(self.shape) == 1:
             return self.toarray()
         elif len(self.shape) == 2:
             return self.tocsr()

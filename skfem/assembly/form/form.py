@@ -44,6 +44,9 @@ class Form:
     def assemble(self, *args, **kwargs) -> Any:
         return COOData(*self._assemble(*args, **kwargs)).todefault()
 
+    def coo_data(self, *args, **kwargs) -> COOData:
+        return COOData(*self._assemble(*args, **kwargs))
+
     @staticmethod
     def dictify(w, basis):
         """Support additional input formats for 'w'."""

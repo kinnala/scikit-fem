@@ -120,10 +120,7 @@ class BilinearForm(Form):
 
             data = data.flatten('C')
 
-        return data, rows, cols, (vbasis.N, ubasis.N)
-
-    def coo_data(self, *args, **kwargs) -> COOData:
-        return COOData(*self._assemble(*args, **kwargs))
+        return np.array([rows, cols]), data, (vbasis.N, ubasis.N)
 
     def assemble(self, *args, **kwargs) -> csr_matrix:
         """Assemble the bilinear form into a sparse matrix.

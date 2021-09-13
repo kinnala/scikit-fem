@@ -46,8 +46,5 @@ class LinearForm(Form):
 
         return np.array([rows]), data, (vbasis.N,)
 
-    def coo_data(self, *args, **kwargs) -> COOData:
-        return COOData(*self._assemble(*args, **kwargs))
-
     def _kernel(self, v, w, dx):
         return np.sum(self.form(*v, w) * dx, axis=1)

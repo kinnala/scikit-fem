@@ -70,12 +70,8 @@ def asm(form: Form,
 
     """
     nargs = [[arg] if not isinstance(arg, list) else arg for arg in args]
-    out = sum(map(lambda bases: form.coo_data(*bases, **kwargs),
-                  product(*nargs)))
-    # TODO support TrilinearForm
-    if isinstance(out, float):
-        return out
-    return out.todefault()
+    return sum(map(lambda bases: form.coo_data(*bases, **kwargs),
+                   product(*nargs))).todefault()
 
 
 __all__ = [
