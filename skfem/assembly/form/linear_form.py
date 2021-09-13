@@ -38,31 +38,16 @@ class LinearForm(Form):
         sz = vbasis.Nbfun * nt
         data = np.zeros(sz, dtype=self.dtype)
         rows = np.zeros(sz, dtype=np.int64)
-        cols = np.zeros(sz, dtype=np.int64)
 
         for i in range(vbasis.Nbfun):
             ixs = slice(nt * i, nt * (i + 1))
             rows[ixs] = vbasis.element_dofs[i]
-            cols[ixs] = np.zeros(nt)
             data[ixs] = self._kernel(vbasis.basis[i], w, dx)
 
-        return data, rows, cols, (vbasis.N, 1)
+        return np.array([rows]), data, (vbasis.N,)
 
     def coo_data(self, *args, **kwargs) -> COOData:
         return COOData(*self._assemble(*args, **kwargs))
-
-    def assemble(self, *args, **kwargs) -> ndarray:
-        """Assemble the linear form into a vector.
-
-        Parameters
-        ----------
-        ubasis
-            The :class:`~skfem.assembly.Basis` for ``v``.
-        **kwargs
-            Any additional keyword arguments are appended to ``w``.
-
-        """
-        return COOData(*self._assemble(*args, **kwargs)).toarray().T[0]
 
     def _kernel(self, v, w, dx):
         return np.sum(self.form(*v, w) * dx, axis=1)

@@ -75,9 +75,7 @@ def asm(form: Form,
     # TODO support TrilinearForm
     if isinstance(out, float):
         return out
-    if out.shape[-1] == 1:
-        return out.toarray().T[0]
-    return out.tocsr()
+    return out.todefault()
 
 
 __all__ = [

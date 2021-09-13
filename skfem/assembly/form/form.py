@@ -7,6 +7,7 @@ from numpy import ndarray
 
 from ...element import DiscreteField
 from ..basis import Basis
+from .coo_data import COOData
 
 
 class FormExtraParams(dict):
@@ -40,11 +41,8 @@ class Form:
                               nthreads=self.nthreads)
         return self.assemble(self.kernel(*args))
 
-    def assemble(self,
-                 ubasis: Basis,
-                 vbasis: Optional[Basis] = None,
-                 **kwargs) -> Any:
-        raise NotImplementedError
+    def assemble(self, *args, **kwargs) -> Any:
+        return COOData(*self._assemble(*args, **kwargs)).todefault()
 
     @staticmethod
     def dictify(w, basis):
