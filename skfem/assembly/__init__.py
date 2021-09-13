@@ -48,6 +48,7 @@ array([0.0162037 , 0.15046296, 0.06712963, 0.09953704])
 """
 
 from typing import Union
+from itertools import product
 
 from numpy import ndarray
 
@@ -64,10 +65,13 @@ def asm(form: Form,
         *args, **kwargs) -> Union[ndarray, csr_matrix]:
     """Perform finite element assembly.
 
-    A shorthand for :meth:`skfem.assembly.Form.assemble`.
+    A shorthand for :meth:`skfem.assembly.Form.assemble` which, in addition,
+    supports assembling multiple bases at once and summing the result.
 
     """
-    return form.assemble(*args, **kwargs)
+    nargs = [[arg] if not isinstance(arg, list) else arg for arg in args]
+    return sum(map(lambda bases: form.assemble(*bases, **kwargs),
+                   product(*nargs)))
 
 
 __all__ = [
