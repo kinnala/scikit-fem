@@ -548,3 +548,19 @@ demonstrate the special post-processing required.
 
 See the `source code of Example 39 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex39.py>`_
 for more information.
+
+Example 40: Hybridizable discontinuous Galerkin method
+======================================================
+
+This examples solves the Poisson equation with unit load using a technique
+where the finite element basis is first discontinous across element edges and
+then the continuity is recovered with the help of Lagrange multipliers defined
+on the mesh skeleton (i.e. a "skeleton mesh" consisting only of the edges of
+the original mesh).
+
+.. figure:: https://user-images.githubusercontent.com/973268/133040624-0745603d-5fe2-40c9-a98c-8dd863d95f6f.png
+
+   The solutoin of Example 40 on the skeleton mesh.
+
+See the `source code of Example 40 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex40.py>`_
+for more information.

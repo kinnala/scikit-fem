@@ -25,6 +25,10 @@ class Refdom:
     def dim(cls):
         return cls.p.shape[0]
 
+    @classmethod
+    def on_facet(cls, i, X):
+        raise NotImplementedError
+
 
 class RefPoint(Refdom):
 
@@ -57,6 +61,25 @@ class RefTri(Refdom):
     nnodes = 3
     nfacets = 3
     name = "Triangular"
+
+    @classmethod
+    def on_facet(cls, i, X):
+        if i == 0:
+            return ((X[0] > 0)
+                    * (X[0] < 1)
+                    * (X[1] < 1e-4)
+                    * (X[1] > -1e-4))
+        elif i == 1:
+            return ((X[0] > 0)
+                    * (X[0] < 1)
+                    * (X[0] + X[1] - 1 < 1e-4)
+                    * (X[0] + X[1] - 1 > -1e-4))
+        elif i == 2:
+            return ((X[1] > 0)
+                    * (X[1] < 1)
+                    * (X[0] < 1e-4)
+                    * (X[0] > -1e-4))
+        raise ValueError
 
 
 class RefTet(Refdom):
