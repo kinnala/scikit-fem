@@ -18,7 +18,7 @@ class AbstractBasis:
 
     Please see the following implementations:
 
-    - :class:`~skfem.assembly.InteriorBasis`, basis functions inside elements
+    - :class:`~skfem.assembly.CellBasis`, basis functions inside elements
     - :class:`~skfem.assembly.ExteriorFacetBasis`, basis functions on boundary
     - :class:`~skfem.assembly.InteriorFacetBasis`, basis functions on facets
       inside the domain
@@ -129,8 +129,8 @@ class AbstractBasis:
         This corresponds to a list of facet indices that can be passed over:
 
         >>> import numpy as np
-        >>> from skfem import InteriorBasis, ElementTriP1
-        >>> basis = InteriorBasis(m, ElementTriP1())
+        >>> from skfem import Basis, ElementTriP1
+        >>> basis = Basis(m, ElementTriP1())
         >>> basis.find_dofs({'left': np.array([1, 5])})['left'].all()
         array([0, 2, 5])
 

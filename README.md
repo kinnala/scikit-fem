@@ -259,9 +259,12 @@ with respect to documented and/or tested features.
   meshes
 - Added: `ElementTriP1DG`, `ElementQuad1DG`, `ElementHex1DG`,
   `ElementLineP1DG`; shorthands for `ElementTriDG(ElementTriP1())` etc.
+- Added: `ElementTriSkeletonP0` and `ElementTriSkeletonP1` for defining
+  Lagrange multipliers on the skeleton mesh
 - Fixed: `MappingIsoparametric` is now about 2x faster for large meshes thanks
   to additional caching
 - Fixed: `MeshHex2.save` did not work properly
+- Fixed: `Mesh.load` ignores unparseable `cell_sets` inserted by `meshio` in MSH 4.1
 - Changed: `Mesh` string representation is now more informative
 - Changed: `Form.assemble` allows now only `DiscreteField` or 1d/2d `ndarray`
   objects, and will automatically pass 1d `ndarray` objects to
@@ -271,6 +274,8 @@ with respect to documented and/or tested features.
 - Changed: `FacetBasis` is now a shorthand for `BoundaryFacetBasis` and no
   longer initializes `InteriorFacetBasis` or `MortarFacetBasis` if the keyword
   argument `side` is passed to the constructor
+- Changed: `asm` will now accept a list of bases, assemble the same form using
+  all of the bases and sum the result
 - Removed: the deprecated `Mesh.define_boundary` method
 - Removed: the unused `Mesh.validate` attribute
 

@@ -18,9 +18,9 @@ class BilinearForm(Form):
     trial function ``u``, test function ``v``, and a dictionary of additional
     parameters ``w``.
 
-    >>> from skfem import BilinearForm, InteriorBasis, MeshTri, ElementTriP1
+    >>> from skfem import BilinearForm, Basis, MeshTri, ElementTriP1
     >>> form = BilinearForm(lambda u, v, _: u * v)
-    >>> form.assemble(InteriorBasis(MeshTri(), ElementTriP1())).todense()
+    >>> form.assemble(Basis(MeshTri(), ElementTriP1())).todense()
     matrix([[0.08333333, 0.04166667, 0.04166667, 0.        ],
             [0.04166667, 0.16666667, 0.08333333, 0.04166667],
             [0.04166667, 0.08333333, 0.16666667, 0.04166667],

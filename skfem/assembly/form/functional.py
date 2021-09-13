@@ -50,3 +50,6 @@ class Functional(Form):
         assert vbasis is None
         vbasis = ubasis
         return self.elemental(vbasis, **kwargs).sum(-1)
+
+    def coo_data(self, *args, **kwargs):
+        return self.assemble(*args, **kwargs)
