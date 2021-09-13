@@ -16,7 +16,7 @@ class COOData:
     @staticmethod
     def _assemble_scipy_csr(indices: ndarray,
                             data: ndarray,
-                            shape: Tuple[int, int]) -> csr_matrix:
+                            shape: Tuple[int, ...]) -> csr_matrix:
 
         K = coo_matrix((data, (indices[0], indices[1])), shape=shape)
         K.eliminate_zeros()
@@ -34,7 +34,8 @@ class COOData:
             self,
             indices=np.hstack((self.indices, other.indices)),
             data=np.hstack((self.data, other.data)),
-            shape=tuple(max(self.shape[i], other.shape[i]) for i in range(len(self.shape))),
+            shape=tuple(max(self.shape[i],
+                            other.shape[i]) for i in range(len(self.shape))),
         )
 
     def tocsr(self) -> csr_matrix:

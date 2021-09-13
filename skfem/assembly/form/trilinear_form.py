@@ -1,18 +1,18 @@
-from typing import Dict, Optional, Any, Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 from numpy import ndarray
 
 from .form import Form, FormExtraParams
-from ..basis import Basis
+from ..basis import AbstractBasis
 
 
 class TrilinearForm(Form):
 
     def _assemble(self,
-                  ubasis: Basis,
-                  vbasis: Optional[Basis] = None,
-                  wbasis: Optional[Basis] = None,
+                  ubasis: AbstractBasis,
+                  vbasis: Optional[AbstractBasis] = None,
+                  wbasis: Optional[AbstractBasis] = None,
                   **kwargs) -> Tuple[ndarray,
                                      ndarray,
                                      Tuple[int, int, int]]:

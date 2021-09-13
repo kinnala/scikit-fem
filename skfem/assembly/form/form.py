@@ -6,7 +6,6 @@ import numpy as np
 from numpy import ndarray
 
 from ...element import DiscreteField
-from ..basis import Basis
 from .coo_data import COOData
 
 
@@ -42,10 +41,11 @@ class Form:
         return self.assemble(self.kernel(*args))
 
     def assemble(self, *args, **kwargs) -> Any:
-        return COOData(*self._assemble(*args, **kwargs)).todefault()
+        return (COOData(*self._assemble(*args, **kwargs))  # type: ignore
+                .todefault())
 
     def coo_data(self, *args, **kwargs) -> COOData:
-        return COOData(*self._assemble(*args, **kwargs))
+        return COOData(*self._assemble(*args, **kwargs))  # type: ignore
 
     @staticmethod
     def dictify(w, basis):

@@ -4,8 +4,7 @@ import numpy as np
 from numpy import ndarray
 
 from .form import Form, FormExtraParams
-from ..basis import Basis
-from .coo_data import COOData
+from ..basis import AbstractBasis
 
 
 class LinearForm(Form):
@@ -17,11 +16,11 @@ class LinearForm(Form):
     """
 
     def _assemble(self,
-                  ubasis: Basis,
-                  vbasis: Optional[Basis] = None,
+                  ubasis: AbstractBasis,
+                  vbasis: Optional[AbstractBasis] = None,
                   **kwargs) -> Tuple[ndarray,
                                      ndarray,
-                                     Tuple[int, int]]:
+                                     Tuple[int]]:
 
         assert vbasis is None
         vbasis = ubasis
