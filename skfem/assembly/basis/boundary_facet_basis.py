@@ -87,7 +87,6 @@ class BoundaryFacetBasis(AbstractBasis):
             'x': self.global_coordinates(),
             'h': self.mesh_parameters(),
             'n': self.normals,
-            'sign': DiscreteField(self.zero_w() + self._sign),
         }
 
     def global_coordinates(self) -> DiscreteField:

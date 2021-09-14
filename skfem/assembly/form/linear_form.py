@@ -30,6 +30,7 @@ class LinearForm(Form):
         w = FormExtraParams({
             **vbasis.default_parameters(),
             **self.dictify(kwargs, ubasis),
+            'sign': ubasis._sign,
         })
 
         # initialize COO data structures

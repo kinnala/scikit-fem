@@ -32,6 +32,7 @@ class AbstractBasis:
     basis: List[Tuple[DiscreteField, ...]] = []
     X: ndarray
     W: ndarray
+    _sign: int = 1
 
     def __init__(self,
                  mesh: Mesh,

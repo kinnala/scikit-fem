@@ -13,7 +13,11 @@ class FormExtraParams(dict):
     """Passed to forms as 'w'."""
 
     def __getattr__(self, attr):
-        return self[attr].value
+        if attr in self:
+            if hasattr(self[attr], 'value'):
+                return self[attr].value
+            return self[attr]
+        raise ValueError
 
 
 class Form:
