@@ -21,7 +21,7 @@ m = MeshTri.init_lshaped().refined(2)
 e = ElementTriP1()
 
 def load_func(x, y):
-    return 1.0
+    return 1.
 
 @LinearForm
 def load(v, w):
@@ -50,14 +50,14 @@ def eval_estimator(m, u):
         n = w.n
         dw1 = grad(w['u1'])
         dw2 = grad(w['u2'])
-        return h * ((dw1[0] - dw2[0]) * n[0] +\
+        return h * ((dw1[0] - dw2[0]) * n[0] +
                     (dw1[1] - dw2[1]) * n[1]) ** 2
 
     eta_E = edge_jump.elemental(fbasis[0], **w)
     
     tmp = np.zeros(m.facets.shape[1])
     np.add.at(tmp, fbasis[0].find, eta_E)
-    eta_E = np.sum(0.5*tmp[m.t2f], axis=0)
+    eta_E = np.sum(.5 * tmp[m.t2f], axis=0)
     
     return eta_K + eta_E
 
