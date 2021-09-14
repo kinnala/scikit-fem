@@ -6,7 +6,7 @@ from skfem.models.poisson import laplace, unit_load
 
 m = MeshTri.init_sqsymmetric().refined()
 e = ElementTriDG(ElementTriP1())
-alpha = 1e-1
+alpha = 1e-3
 
 ib = Basis(m, e)
 bb = FacetBasis(m, e)
@@ -18,9 +18,7 @@ def dgform(u, v, p):
     jv = p.sign2 * v
     h = p.h
     n = p.n
-    return (ju * jv) / (alpha * h)\
-        - dot(grad(u), n) * jv / 2\
-        - dot(grad(v), n) * ju / 2
+    return ju * jv / (alpha * h) - dot(grad(u), n) * jv - dot(grad(v), n) * ju
 
 A = asm(laplace, ib)
 B = asm(dgform, fb, fb)
