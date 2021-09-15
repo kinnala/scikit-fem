@@ -560,7 +560,23 @@ the original mesh).
 
 .. figure:: https://user-images.githubusercontent.com/973268/133050898-68f1127f-a2fa-40e9-8fb2-0189f7e920d0.png
 
-   The solutionn of Example 40 on the skeleton mesh.
+   The solution of Example 40 on the skeleton mesh.
 
 See the `source code of Example 40 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex40.py>`_
+for more information.
+
+Example 41: Mixed meshes
+========================
+
+This examples solves the Poisson equation with unit load on a mesh consisting
+of both triangles and quadrilaterals.  The support for mixed meshes is
+preliminary and works only for elements with nodal or internal
+degrees-of-freedom (sharing face and edge DOFs between mesh types is
+work-in-progress).
+
+.. figure:: https://user-images.githubusercontent.com/973268/133418196-4008b78c-2a1f-4abd-9338-fd55690db98c.png
+
+   The solution of Example 41 on the mixed mesh.
+
+See the `source code of Example 41 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex41.py>`_
 for more information.
