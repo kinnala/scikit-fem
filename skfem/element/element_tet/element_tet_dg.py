@@ -16,7 +16,16 @@ class ElementTetDG(Element):
                               4 * elem.facet_dofs +
                               6 * elem.edge_dofs +
                               elem.interior_dofs)
-        self.dofnames = elem.dofnames
+        self.dofnames = (
+            4 * elem.dofnames[:(elem.nodal_dofs + elem.facet_dofs)] +
+            6 * elem.dofnames[(elem.nodal_dofs
+                               + elem.facet_dofs):(elem.nodal_dofs
+                                                   + elem.facet_dofs
+                                                   + elem.edge_dofs)] +
+            elem.dofnames[(elem.nodal_dofs
+                           + elem.facet_dofs
+                           + elem.edge_dofs):]
+        )
         self.doflocs = elem.doflocs
 
     def gbasis(self, *args, **kwargs):

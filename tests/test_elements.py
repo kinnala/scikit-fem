@@ -37,7 +37,11 @@ from skfem.element import (
     ElementTriMorley,
     ElementTriArgyris,
     ElementTriDG,
-    ElementTetDG)
+    ElementTetDG,
+    ElementQuadDG,
+    ElementQuadP,
+    ElementHexDG,
+)
 from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 from skfem.assembly import InteriorBasis, Functional
 from skfem.mapping import MappingAffine
@@ -314,6 +318,8 @@ class TestElementQuadBFS(TestCase):
         (MeshTri().refined(), ElementTriArgyris(), ElementTriDG),
         (MeshTri().refined(), ElementTriMorley(), ElementTriDG),
         (MeshTri().refined(), ElementTriHermite(), ElementTriDG),
+        (MeshHex().refined(), ElementHex1(), ElementHexDG),
+        (MeshQuad().refined(), ElementQuad1(), ElementQuadDG),
     ]
 )
 def test_dg_element(m, e, edg):
@@ -337,6 +343,26 @@ def test_dg_element(m, e, edg):
                 random=basisdg.interpolate(
                     basisdg.zeros() + 1)),
                      )
+
+
+@pytest.mark.parametrize(
+    "e,edg",
+    [
+        (ElementTriP1(), ElementTriDG),
+        (ElementTriP2(), ElementTriDG),
+        (ElementTetP1(), ElementTetDG),
+        (ElementTetP2(), ElementTetDG),
+        (ElementTriArgyris(), ElementTriDG),
+        (ElementTriMorley(), ElementTriDG),
+        (ElementTriHermite(), ElementTriDG),
+        (ElementQuad1(), ElementQuadDG),
+        (ElementQuad2(), ElementQuadDG),
+        (ElementQuadP(4), ElementQuadDG),
+        (ElementHex2(), ElementHexDG),
+    ]
+)
+def test_initialize_dg_composite_elements(e, edg):
+    E = edg(e) * e
 
 
 if __name__ == '__main__':

@@ -15,7 +15,10 @@ class ElementQuadDG(ElementH1):
         self.interior_dofs = (4 * elem.nodal_dofs +
                               4 * elem.facet_dofs +
                               elem.interior_dofs)
-        self.dofnames = elem.dofnames
+        self.dofnames = (
+            4 * elem.dofnames[:(elem.nodal_dofs + elem.facet_dofs)] +
+            elem.dofnames[(elem.nodal_dofs + elem.facet_dofs):]
+        )
         self.doflocs = elem.doflocs
 
     def lbasis(self, X, i):
