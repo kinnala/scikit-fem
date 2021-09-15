@@ -263,6 +263,7 @@ with respect to documented and/or tested features.
 - Added: `MeshTri1DG`, `MeshQuad1DG`, `MeshHex1DG`, `MeshLine1DG`; new mesh
   types for describing meshes with a discontinuous topology, e.g., periodic
   meshes
+- Added: `ElementHexDG` for transforming hexahedral H1 elements to DG/L2 elements.
 - Added: `ElementTriP1DG`, `ElementQuad1DG`, `ElementHex1DG`,
   `ElementLineP1DG`; shorthands for `ElementTriDG(ElementTriP1())` etc.
 - Added: `ElementTriSkeletonP0` and `ElementTriSkeletonP1` for defining
