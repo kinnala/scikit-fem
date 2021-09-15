@@ -43,30 +43,34 @@ INV_HEX_MAPPING = [HEX_MAPPING.index(i)
 
 def from_meshio(m,
                 out=None,
-                int_data_to_sets=False):
+                int_data_to_sets=False,
+                force_meshio_type=None):
 
     cells = m.cells_dict
     meshio_type = None
 
-    # detect 3D
-    for k in cells:
-        if k in {'tetra', 'hexahedron', 'tetra10', 'hexahedron27'}:
-            meshio_type = k
-            break
-
-    if meshio_type is None:
-        # detect 2D
+    if force_meshio_type is None:
+        # detect 3D
         for k in cells:
-            if k in {'triangle', 'quad', 'triangle6', 'quad9'}:
+            if k in {'tetra', 'hexahedron', 'tetra10', 'hexahedron27'}:
                 meshio_type = k
                 break
 
-    if meshio_type is None:
-        # detect 1D
-        for k in cells:
-            if k == 'line':
-                meshio_type = k
-                break
+        if meshio_type is None:
+            # detect 2D
+            for k in cells:
+                if k in {'triangle', 'quad', 'triangle6', 'quad9'}:
+                    meshio_type = k
+                    break
+
+        if meshio_type is None:
+            # detect 1D
+            for k in cells:
+                if k == 'line':
+                    meshio_type = k
+                    break
+    else:
+        meshio_type = force_meshio_type
 
     if meshio_type is None:
         raise NotImplementedError("Mesh type(s) not supported "

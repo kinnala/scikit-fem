@@ -399,9 +399,9 @@ class Mesh:
             other = [other]
         if isinstance(other, list):
             p = np.hstack((self.p,) + tuple([mesh.p for mesh in other]))
-            tmp = np.ascontiguousarray(p.T)
-            tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]),
-                                      return_index=True, return_inverse=True)
+            pT = np.ascontiguousarray(p.T)
+            _, ixa, ixb = np.unique(pT.view([('', pT.dtype)] * pT.shape[1]),
+                                    return_index=True, return_inverse=True)
             p = p[:, ixa]
             return [
                 cls(p, ixb[self.t]),

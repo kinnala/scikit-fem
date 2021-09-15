@@ -349,5 +349,14 @@ class TestEx40(TestCase):
         self.assertAlmostEqual(ex.u2.min(), 0.0, delta=3e-3)
 
 
+class TestEx41(TestCase):
+
+    def runTest(self):
+        import docs.examples.ex41 as ex
+
+        self.assertAlmostEqual(ex.y.max(), 0.025183404207706196)
+        self.assertAlmostEqual(ex.y.min(), 0.0)
+
+
 if __name__ == '__main__':
     main()
