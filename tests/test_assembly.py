@@ -496,5 +496,22 @@ def test_coodata_inverse(m, e, edg):
     )
 
 
+def test_multimesh():
+
+    m1 = MeshTri().refined()
+    m2 = MeshQuad().refined().translated((1., 0.))
+    m3 = MeshTri().refined().translated((2., 0.))
+    M = m1 @ m2 @ m3
+
+    assert len(M) == 3
+
+    E = [ElementTriP1(), ElementQuad1(), ElementTriP1()]
+    basis = list(map(Basis, M, E))
+
+    Mm = asm(mass, basis)
+
+    assert Mm.shape[0] == 3 * 7
+
+
 if __name__ == '__main__':
     main()
