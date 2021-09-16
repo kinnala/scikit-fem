@@ -57,6 +57,7 @@ class BilinearForm(Form):
                   vbasis: Optional[Basis] = None,
                   **kwargs) -> Tuple[ndarray,
                                      ndarray,
+                                     Tuple[int, int],
                                      Tuple[int, int]]:
 
         if vbasis is None:
@@ -77,10 +78,7 @@ class BilinearForm(Form):
 
         # initialize COO data structures
         sz = ubasis.Nbfun * vbasis.Nbfun * nt
-        if self.nthreads > 0:
-            data = np.zeros((ubasis.Nbfun, vbasis.Nbfun, nt), dtype=self.dtype)
-        else:
-            data = np.zeros(sz, dtype=self.dtype)
+        data = np.zeros((ubasis.Nbfun, vbasis.Nbfun, nt), dtype=self.dtype)
         rows = np.zeros(sz, dtype=np.int64)
         cols = np.zeros(sz, dtype=np.int64)
 
@@ -92,7 +90,7 @@ class BilinearForm(Form):
                 rows[ixs] = vbasis.element_dofs[i]
                 cols[ixs] = ubasis.element_dofs[j]
                 if self.nthreads <= 0:
-                    data[ixs] = self._kernel(
+                    data[j, i, :] = self._kernel(
                         ubasis.basis[j],
                         vbasis.basis[i],
                         wdict,
@@ -120,9 +118,14 @@ class BilinearForm(Form):
             for t in threads:
                 t.join()
 
-            data = data.flatten('C')
+        data = data.flatten('C')
 
-        return np.array([rows, cols]), data, (vbasis.N, ubasis.N)
+        return (
+            np.array([rows, cols]),
+            data,
+            (vbasis.N, ubasis.N),
+            (vbasis.Nbfun, ubasis.Nbfun),
+        )
 
     def assemble(self, *args, **kwargs) -> csr_matrix:
         """Assemble the bilinear form into a sparse matrix.

@@ -27,7 +27,8 @@ class Form:
     def __init__(self,
                  form: Optional[Callable] = None,
                  dtype: type = np.float64,
-                 nthreads: int = 0):
+                 nthreads: int = 0,
+                 inverse: bool = False):
         self.form = form.form if isinstance(form, Form) else form
         self.dtype = dtype
         self.nthreads = nthreads

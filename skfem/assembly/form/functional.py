@@ -39,6 +39,7 @@ class Functional(Form):
                   vbasis: Optional[AbstractBasis] = None,
                   **kwargs) -> Tuple[ndarray,
                                      ndarray,
+                                     Tuple[()],
                                      Tuple[()]]:
         """Evaluate the functional to a scalar.
 
@@ -56,5 +57,6 @@ class Functional(Form):
         return (
             np.array([]),
             np.array([self.elemental(vbasis, **kwargs).sum(-1)]),
+            (),
             (),
         )

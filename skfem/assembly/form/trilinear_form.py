@@ -15,6 +15,7 @@ class TrilinearForm(Form):
                   wbasis: Optional[AbstractBasis] = None,
                   **kwargs) -> Tuple[ndarray,
                                      ndarray,
+                                     Tuple[int, int, int],
                                      Tuple[int, int, int]]:
 
         if vbasis is None:
@@ -55,11 +56,16 @@ class TrilinearForm(Form):
                         dx,
                     )
 
-        return np.array([
-            mats.flatten(),
-            rows.flatten(),
-            cols.flatten(),
-        ]), data.flatten(), (wbasis.N, vbasis.N, ubasis.N)
+        return (
+            np.array([
+                mats.flatten(),
+                rows.flatten(),
+                cols.flatten(),
+            ]),
+            data.flatten(),
+            (wbasis.N, vbasis.N, ubasis.N),
+            (ubasis.Nbfun, vbasis.Nbfun, wbasis.Nbfun),
+        )
 
     def _kernel(self, u, v, w, params, dx):
         return np.sum(self.form(*u, *v, *w, params) * dx, axis=1)

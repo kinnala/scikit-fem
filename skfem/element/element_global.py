@@ -14,6 +14,7 @@ class ElementGlobal(Element):
     tensorial_basis = False
 
     def gbasis(self, mapping, X, i, tind=None):
+
         if tind is None:
             tind = np.arange(mapping.mesh.t.shape[1])
 

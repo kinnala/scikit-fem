@@ -20,6 +20,7 @@ class LinearForm(Form):
                   vbasis: Optional[AbstractBasis] = None,
                   **kwargs) -> Tuple[ndarray,
                                      ndarray,
+                                     Tuple[int],
                                      Tuple[int]]:
 
         assert vbasis is None
@@ -43,7 +44,7 @@ class LinearForm(Form):
             rows[ixs] = vbasis.element_dofs[i]
             data[ixs] = self._kernel(vbasis.basis[i], w, dx)
 
-        return np.array([rows]), data, (vbasis.N,)
+        return np.array([rows]), data, (vbasis.N,), (vbasis.Nbfun,)
 
     def _kernel(self, v, w, dx):
         return np.sum(self.form(*v, w) * dx, axis=1)

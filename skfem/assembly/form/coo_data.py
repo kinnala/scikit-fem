@@ -1,5 +1,5 @@
 from dataclasses import dataclass, replace
-from typing import Tuple, Any
+from typing import Tuple, Any, Optional
 
 import numpy as np
 from numpy import ndarray
@@ -12,11 +12,15 @@ class COOData:
     indices: ndarray
     data: ndarray
     shape: Tuple[int, ...]
+    local_shape: Optional[Tuple[int, ...]]
 
     @staticmethod
-    def _assemble_scipy_csr(indices: ndarray,
-                            data: ndarray,
-                            shape: Tuple[int, ...]) -> csr_matrix:
+    def _assemble_scipy_csr(
+            indices: ndarray,
+            data: ndarray,
+            shape: Tuple[int, ...],
+            local_shape: Optional[Tuple[int, ...]]
+    ) -> csr_matrix:
 
         K = coo_matrix((data, (indices[0], indices[1])), shape=shape)
         K.eliminate_zeros()
@@ -24,6 +28,16 @@ class COOData:
 
     def __radd__(self, other):
         return self.__add__(other)
+
+    def inverse(self):
+
+        data = self.data.reshape(self.local_shape + (-1,), order='C')
+        data = np.moveaxis(np.linalg.inv(np.moveaxis(data, -1, 0)), 0, -1)
+
+        return replace(
+            self,
+            data=data.flatten('C'),
+        )
 
     def __add__(self, other):
 
@@ -36,6 +50,7 @@ class COOData:
             data=np.hstack((self.data, other.data)),
             shape=tuple(max(self.shape[i],
                             other.shape[i]) for i in range(len(self.shape))),
+            local_shape=None,
         )
 
     def tocsr(self) -> csr_matrix:
@@ -44,6 +59,7 @@ class COOData:
             self.indices,
             self.data,
             self.shape,
+            self.local_shape,
         )
 
     def toarray(self) -> ndarray:

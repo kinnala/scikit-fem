@@ -10,7 +10,9 @@ from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementHexS2, ElementTetP0, ElementTetP1,
                            ElementTetP2, ElementTriP1, ElementQuad2,
                            ElementTriMorley, ElementVectorH1, ElementQuadP,
-                           ElementHex2, ElementTriArgyris, ElementTriP2)
+                           ElementHex2, ElementTriArgyris, ElementTriP2,
+                           ElementTriDG, ElementQuadDG, ElementHexDG,
+                           ElementTetDG, ElementTriHermite)
 from skfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
                         MeshTri2, MeshTet2, MeshHex2, MeshTri1DG, MeshQuad1DG,
                         MeshHex1DG)
@@ -464,6 +466,34 @@ class TestThreadedAssembly(TestCase):
             nonsym.assemble(basis).toarray(),
             threaded_nonsym.assemble(basis).toarray(),
         )
+
+
+@pytest.mark.parametrize(
+    "m,e,edg",
+    [
+        (MeshTri().refined(), ElementTriP1(), ElementTriDG),
+        (MeshTri().refined(), ElementTriP2(), ElementTriDG),
+        (MeshTet().refined(), ElementTetP1(), ElementTetDG),
+        (MeshTet().refined(), ElementTetP2(), ElementTetDG),
+        (MeshTri().refined(), ElementTriMorley(), ElementTriDG),
+        (MeshTri().refined(), ElementTriHermite(), ElementTriDG),
+        (MeshQuad().refined(), ElementQuad1(), ElementQuadDG),
+        (MeshQuad().refined(), ElementQuad2(), ElementQuadDG),
+        (MeshQuad().refined(), ElementQuadP(4), ElementQuadDG),
+        (MeshHex().refined(), ElementHex2(), ElementHexDG),
+    ]
+)
+def test_coodata_inverse(m, e, edg):
+
+    E = edg(e)
+    basis = Basis(m, E)
+    basisdg = Basis(m, E)
+    M1 = mass.assemble(basis)
+    M2 = mass.coo_data(basisdg)
+    assert_array_almost_equal(
+        np.linalg.inv(M1.toarray()),
+        M2.inverse().tocsr().toarray(),
+    )
 
 
 if __name__ == '__main__':
