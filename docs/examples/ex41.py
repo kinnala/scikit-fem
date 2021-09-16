@@ -29,7 +29,7 @@ m = [
     Mesh.load(fname, force_meshio_type='quad', out=out),
 ]
 e = [ElementTriP1(), ElementQuad1()]
-basis = [Basis(*me) for me in zip(m, e)]
+basis = list(map(Basis, m, e))
 
 A = asm(laplace, basis)
 f = asm(unit_load, basis)
