@@ -20,11 +20,11 @@ class BilinearForm(Form):
 
     >>> from skfem import BilinearForm, Basis, MeshTri, ElementTriP1
     >>> form = BilinearForm(lambda u, v, _: u * v)
-    >>> form.assemble(Basis(MeshTri(), ElementTriP1())).todense()
-    matrix([[0.08333333, 0.04166667, 0.04166667, 0.        ],
-            [0.04166667, 0.16666667, 0.08333333, 0.04166667],
-            [0.04166667, 0.08333333, 0.16666667, 0.04166667],
-            [0.        , 0.04166667, 0.04166667, 0.08333333]])
+    >>> form.assemble(Basis(MeshTri(), ElementTriP1())).toarray()
+    array([[0.08333333, 0.04166667, 0.04166667, 0.        ],
+           [0.04166667, 0.16666667, 0.08333333, 0.04166667],
+           [0.04166667, 0.08333333, 0.16666667, 0.04166667],
+           [0.        , 0.04166667, 0.04166667, 0.08333333]])
 
     Alternatively, you can use :class:`~skfem.assembly.BilinearForm` as a
     decorator:
