@@ -30,7 +30,9 @@ class COOData:
         return self.__add__(other)
 
     def inverse(self):
+        """Invert each elemental matrix."""
 
+        assert len(self.local_shape) == 2
         data = self.data.reshape(self.local_shape + (-1,), order='C')
         data = np.moveaxis(np.linalg.inv(np.moveaxis(data, -1, 0)), 0, -1)
 
@@ -64,16 +66,30 @@ class COOData:
 
     def toarray(self) -> ndarray:
         """Return a dense NumPy array."""
-        return coo_matrix(
-            (self.data, (self.indices[0], np.zeros_like(self.indices[0]))),
-            shape=self.shape + (1,),
-        ).toarray().T[0]
+        if len(self.shape) == 1:
+            return coo_matrix(
+                (self.data, (self.indices[0], np.zeros_like(self.indices[0]))),
+                shape=self.shape + (1,),
+            ).toarray().T[0]
+        elif len(self.shape) == 2:
+            return self.tocsr().toarray()
+
+        # slow implementation for testing N-tensors
+        out = np.zeros(self.shape)
+        for itr in range(self.indices.shape[1]):
+            out[tuple(self.indices[:, itr])] += self.data[itr]
+        return out
 
     def astuple(self):
         return self.indices, self.data, self.shape
 
     def todefault(self) -> Any:
-        """Return the default data type."""
+        """Return the default data type.
+
+        Scalar for 0-tensor, numpy array for 1-tensor, scipy csr matrix for
+        2-tensor, self otherwise.
+
+        """
         if len(self.shape) == 0:
             return self.data[0]
         elif len(self.shape) == 1:

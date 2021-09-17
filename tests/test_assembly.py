@@ -5,7 +5,8 @@ import numpy as np
 from numpy.testing import (assert_equal, assert_almost_equal,
                            assert_array_almost_equal)
 
-from skfem import BilinearForm, LinearForm, Functional, asm, solve, condense
+from skfem import (TrilinearForm, BilinearForm, LinearForm, Functional, asm,
+                   solve, condense)
 from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementHexS2, ElementTetP0, ElementTetP1,
                            ElementTetP2, ElementTriP1, ElementQuad2,
@@ -19,6 +20,7 @@ from skfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
 from skfem.assembly import FacetBasis, Basis
 from skfem.utils import projection
 from skfem.models import laplace, unit_load, mass
+from skfem.helpers import grad, dot
 
 
 class IntegrateOneOverBoundaryQ1(TestCase):
@@ -511,6 +513,39 @@ def test_multimesh():
     Mm = asm(mass, basis)
 
     assert Mm.shape[0] == 3 * 7
+
+
+@pytest.mark.parametrize(
+    "m,e",
+    [
+        (MeshTri().refined(), ElementTriP1()),
+        (MeshTri(), ElementTriP2()),
+        (MeshTet(), ElementTetP1()),
+        (MeshQuad().refined(), ElementQuad1()),
+        (MeshHex(), ElementHex2()),
+    ]
+)
+def test_trilinear_form(m, e):
+
+    basis = Basis(m, e)
+    out = (TrilinearForm(lambda u, v, w, p: dot(w * grad(u), grad(v)))
+           .assemble(basis))
+    kp = np.random.rand(100, basis.N)
+
+    # transform to a dense 3-tensor (slow)
+    A = out.toarray()
+    # # initialize a sparse tensor instead
+    # import sparse
+    # arr = sparse.COO(*out.astuple(), has_duplicates=True)
+
+    opt1 = np.einsum('ijk,li->ljk', A, kp)
+
+    for i in range(kp.shape[0]):
+        opt2 = (BilinearForm(lambda u, v, p: dot(p['kp'] * grad(u), grad(v)))
+                .assemble(basis, kp=kp[i]))
+        assert abs((opt1[i] - opt2).min()) < 1e-10
+        assert abs((opt1[i] - opt2).max()) < 1e-10
+
 
 
 if __name__ == '__main__':
