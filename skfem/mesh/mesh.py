@@ -388,9 +388,32 @@ class Mesh:
                 warn("Transforming over 1000 elements to C_CONTIGUOUS.")
             self.t = np.ascontiguousarray(self.t)
 
+    def __rmatmul__(self, other):
+        out = self.__matmul__(other)
+        return out[1:] + out[0:1]
+
+    def __matmul__(self, other):
+        """Join meshes with different types; return a list of meshes."""
+        cls = type(self)
+        if isinstance(other, Mesh):
+            other = [other]
+        if isinstance(other, list):
+            p = np.hstack((self.p,) + tuple([mesh.p for mesh in other]))
+            pT = np.ascontiguousarray(p.T)
+            _, ixa, ixb = np.unique(pT.view([('', pT.dtype)] * pT.shape[1]),
+                                    return_index=True, return_inverse=True)
+            p = p[:, ixa]
+            return [
+                cls(p, ixb[self.t]),
+                *[type(m)(p, ixb[m.t + self.p.shape[1]])
+                  for i, m in enumerate(other)],
+            ]
+        raise NotImplementedError
+
     def __add__(self, other):
         """Join two meshes."""
-        if not isinstance(other, type(self)):
+        cls = type(self)
+        if not isinstance(other, cls):
             raise TypeError("Can only join meshes with same type.")
         p = np.hstack((self.p, other.p))
         t = np.hstack((self.t, other.t + self.p.shape[1]))
@@ -399,7 +422,6 @@ class Mesh:
                                   return_index=True, return_inverse=True)
         p = p[:, ixa]
         t = ixb[t]
-        cls = type(self)
         return cls(p, t)
 
     def __repr__(self):

@@ -15,7 +15,10 @@ class ElementTriDG(Element):
         self.interior_dofs = (3 * elem.nodal_dofs +
                               3 * elem.facet_dofs +
                               elem.interior_dofs)
-        self.dofnames = elem.dofnames
+        self.dofnames = (
+            3 * elem.dofnames[:(elem.nodal_dofs + elem.facet_dofs)] +
+            elem.dofnames[(elem.nodal_dofs + elem.facet_dofs):]
+        )
         self.doflocs = elem.doflocs
 
     def gbasis(self, *args, **kwargs):

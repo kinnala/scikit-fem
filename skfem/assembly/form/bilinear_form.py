@@ -18,13 +18,13 @@ class BilinearForm(Form):
     trial function ``u``, test function ``v``, and a dictionary of additional
     parameters ``w``.
 
-    >>> from skfem import BilinearForm, InteriorBasis, MeshTri, ElementTriP1
+    >>> from skfem import BilinearForm, Basis, MeshTri, ElementTriP1
     >>> form = BilinearForm(lambda u, v, _: u * v)
-    >>> form.assemble(InteriorBasis(MeshTri(), ElementTriP1())).todense()
-    matrix([[0.08333333, 0.04166667, 0.04166667, 0.        ],
-            [0.04166667, 0.16666667, 0.08333333, 0.04166667],
-            [0.04166667, 0.08333333, 0.16666667, 0.04166667],
-            [0.        , 0.04166667, 0.04166667, 0.08333333]])
+    >>> form.assemble(Basis(MeshTri(), ElementTriP1())).toarray()
+    array([[0.08333333, 0.04166667, 0.04166667, 0.        ],
+           [0.04166667, 0.16666667, 0.08333333, 0.04166667],
+           [0.04166667, 0.08333333, 0.16666667, 0.04166667],
+           [0.        , 0.04166667, 0.04166667, 0.08333333]])
 
     Alternatively, you can use :class:`~skfem.assembly.BilinearForm` as a
     decorator:
@@ -57,7 +57,7 @@ class BilinearForm(Form):
                   vbasis: Optional[Basis] = None,
                   **kwargs) -> Tuple[ndarray,
                                      ndarray,
-                                     ndarray,
+                                     Tuple[int, int],
                                      Tuple[int, int]]:
 
         if vbasis is None:
@@ -71,14 +71,14 @@ class BilinearForm(Form):
         wdict = FormExtraParams({
             **ubasis.default_parameters(),
             **self.dictify(kwargs, ubasis),
+            'sign': ubasis._sign,
+            'sign1': ubasis._sign,
+            'sign2': vbasis._sign,
         })
 
         # initialize COO data structures
         sz = ubasis.Nbfun * vbasis.Nbfun * nt
-        if self.nthreads > 0:
-            data = np.zeros((ubasis.Nbfun, vbasis.Nbfun, nt), dtype=self.dtype)
-        else:
-            data = np.zeros(sz, dtype=self.dtype)
+        data = np.zeros((ubasis.Nbfun, vbasis.Nbfun, nt), dtype=self.dtype)
         rows = np.zeros(sz, dtype=np.int64)
         cols = np.zeros(sz, dtype=np.int64)
 
@@ -90,7 +90,7 @@ class BilinearForm(Form):
                 rows[ixs] = vbasis.element_dofs[i]
                 cols[ixs] = ubasis.element_dofs[j]
                 if self.nthreads <= 0:
-                    data[ixs] = self._kernel(
+                    data[j, i, :] = self._kernel(
                         ubasis.basis[j],
                         vbasis.basis[i],
                         wdict,
@@ -118,12 +118,14 @@ class BilinearForm(Form):
             for t in threads:
                 t.join()
 
-            data = data.flatten('C')
+        data = data.flatten('C')
 
-        return data, rows, cols, (vbasis.N, ubasis.N)
-
-    def coo_data(self, *args, **kwargs) -> COOData:
-        return COOData(*self._assemble(*args, **kwargs))
+        return (
+            np.array([rows, cols]),
+            data,
+            (vbasis.N, ubasis.N),
+            (vbasis.Nbfun, ubasis.Nbfun),
+        )
 
     def assemble(self, *args, **kwargs) -> csr_matrix:
         """Assemble the bilinear form into a sparse matrix.

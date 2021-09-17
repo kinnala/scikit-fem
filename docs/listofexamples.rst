@@ -548,3 +548,48 @@ demonstrate the special post-processing required.
 
 See the `source code of Example 39 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex39.py>`_
 for more information.
+
+Example 40: Hybridizable discontinuous Galerkin method
+======================================================
+
+This examples solves the Poisson equation with unit load using a technique
+where the finite element basis is first discontinous across element edges and
+then the continuity is recovered with the help of Lagrange multipliers defined
+on the mesh skeleton (i.e. a "skeleton mesh" consisting only of the edges of
+the original mesh).
+
+.. figure:: https://user-images.githubusercontent.com/973268/133050898-68f1127f-a2fa-40e9-8fb2-0189f7e920d0.png
+
+   The solution of Example 40 on the skeleton mesh.
+
+See the `source code of Example 40 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex40.py>`_
+for more information.
+
+Example 41: Mixed meshes
+========================
+
+This example solves the Poisson equation with unit load on a mesh consisting
+of both triangles and quadrilaterals.  The support for mixed meshes is
+preliminary and works only for elements with nodal or internal
+degrees-of-freedom (sharing face and edge DOFs between mesh types is
+work-in-progress).
+
+.. figure:: https://user-images.githubusercontent.com/973268/133418196-4008b78c-2a1f-4abd-9338-fd55690db98c.png
+
+   The solution of Example 41 on the mixed mesh.
+
+See the `source code of Example 41 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex41.py>`_
+for more information.
+
+
+Example 42: Periodic meshes
+===========================
+
+This example solves the advection equation on a periodic square mesh.
+
+.. figure:: https://user-images.githubusercontent.com/973268/133767233-a5d78ec4-ffe7-4d49-bc93-9d9a0faae5a1.png
+
+   The solution of Example 42 on a periodic mesh.
+
+See the `source code of Example 42 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex42.py>`_
+for more information.

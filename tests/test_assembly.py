@@ -5,18 +5,22 @@ import numpy as np
 from numpy.testing import (assert_equal, assert_almost_equal,
                            assert_array_almost_equal)
 
-from skfem import BilinearForm, LinearForm, Functional, asm, solve, condense
+from skfem import (TrilinearForm, BilinearForm, LinearForm, Functional, asm,
+                   solve, condense)
 from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementHexS2, ElementTetP0, ElementTetP1,
                            ElementTetP2, ElementTriP1, ElementQuad2,
                            ElementTriMorley, ElementVectorH1, ElementQuadP,
-                           ElementHex2, ElementTriArgyris, ElementTriP2)
+                           ElementHex2, ElementTriArgyris, ElementTriP2,
+                           ElementTriDG, ElementQuadDG, ElementHexDG,
+                           ElementTetDG, ElementTriHermite)
 from skfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
                         MeshTri2, MeshTet2, MeshHex2, MeshTri1DG, MeshQuad1DG,
                         MeshHex1DG)
 from skfem.assembly import FacetBasis, Basis
 from skfem.utils import projection
 from skfem.models import laplace, unit_load, mass
+from skfem.helpers import grad, dot
 
 
 class IntegrateOneOverBoundaryQ1(TestCase):
@@ -464,6 +468,101 @@ class TestThreadedAssembly(TestCase):
             nonsym.assemble(basis).toarray(),
             threaded_nonsym.assemble(basis).toarray(),
         )
+
+
+@pytest.mark.parametrize(
+    "m,e,edg",
+    [
+        (MeshTri().refined(), ElementTriP1(), ElementTriDG),
+        (MeshTri().refined(), ElementTriP2(), ElementTriDG),
+        (MeshTet().refined(), ElementTetP1(), ElementTetDG),
+        (MeshTet().refined(), ElementTetP2(), ElementTetDG),
+        (MeshTri().refined(), ElementTriMorley(), ElementTriDG),
+        (MeshTri().refined(), ElementTriHermite(), ElementTriDG),
+        (MeshQuad().refined(), ElementQuad1(), ElementQuadDG),
+        (MeshQuad().refined(), ElementQuad2(), ElementQuadDG),
+        (MeshQuad().refined(), ElementQuadP(4), ElementQuadDG),
+        (MeshHex().refined(), ElementHex2(), ElementHexDG),
+    ]
+)
+def test_coodata_inverse(m, e, edg):
+
+    E = edg(e)
+    basis = Basis(m, E)
+    basisdg = Basis(m, E)
+    M1 = mass.assemble(basis)
+    M2 = mass.coo_data(basisdg)
+    assert_array_almost_equal(
+        np.linalg.inv(M1.toarray()),
+        M2.inverse().tocsr().toarray(),
+    )
+
+
+def test_multimesh():
+
+    m1 = MeshTri().refined()
+    m2 = MeshQuad().refined().translated((1., 0.))
+    m3 = MeshTri().refined().translated((2., 0.))
+    M = m1 @ m2 @ m3
+
+    assert len(M) == 3
+
+    E = [ElementTriP1(), ElementQuad1(), ElementTriP1()]
+    basis = list(map(Basis, M, E))
+
+    Mm = asm(mass, basis)
+
+    assert Mm.shape[0] == 3 * 7
+
+
+def test_multimesh_2():
+
+    m = MeshTri()
+    m1 = MeshTri.init_refdom()
+    m2 = MeshTri.init_refdom().scaled((-1., -1.)).translated((1., 1.,))
+    M = m1 @ m2
+
+    E = [ElementTriP1(), ElementTriP1()]
+    basis1 = list(map(Basis, M, E))
+    basis2 = Basis(m, ElementTriP1())
+
+    M1 = asm(mass, basis1)
+    M2 = asm(mass, basis2)
+
+    assert_array_almost_equal(M1.toarray(), M2.toarray())
+
+
+@pytest.mark.parametrize(
+    "m,e",
+    [
+        (MeshTri().refined(), ElementTriP1()),
+        (MeshTri(), ElementTriP2()),
+        (MeshTet(), ElementTetP1()),
+        (MeshQuad().refined(), ElementQuad1()),
+        (MeshHex(), ElementHex2()),
+    ]
+)
+def test_trilinear_form(m, e):
+
+    basis = Basis(m, e)
+    out = (TrilinearForm(lambda u, v, w, p: dot(w * grad(u), grad(v)))
+           .assemble(basis))
+    kp = np.random.rand(100, basis.N)
+
+    # transform to a dense 3-tensor (slow)
+    A = out.toarray()
+    # # initialize a sparse tensor instead
+    # import sparse
+    # arr = sparse.COO(*out.astuple(), has_duplicates=True)
+
+    opt1 = np.einsum('ijk,li->ljk', A, kp)
+
+    for i in range(kp.shape[0]):
+        opt2 = (BilinearForm(lambda u, v, p: dot(p['kp'] * grad(u), grad(v)))
+                .assemble(basis, kp=kp[i]))
+        assert abs((opt1[i] - opt2).min()) < 1e-10
+        assert abs((opt1[i] - opt2).max()) < 1e-10
+
 
 
 if __name__ == '__main__':

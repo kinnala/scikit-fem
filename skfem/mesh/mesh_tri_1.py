@@ -320,6 +320,28 @@ class MeshTri1(Mesh2D):
             _subdomains=None,
         )
 
+    def orientation(self):
+
+        mapping = self._mapping()
+        return ((mapping.detDF(np.array([[0], [0]])) < 0)
+                .flatten()
+                .astype(np.int64))
+
+    def oriented(self):
+
+        flip = np.nonzero(self.orientation())[0]
+        t = self.t.copy()
+        t0 = t[0, flip]
+        t1 = t[1, flip]
+        t[0, flip] = t1
+        t[1, flip] = t0
+
+        return replace(
+            self,
+            t=t,
+            sort_t=False,
+        )
+
     def element_finder(self, mapping=None):
 
         if mapping is None:

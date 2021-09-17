@@ -1,9 +1,10 @@
-from typing import Dict, Optional, Any
+from typing import Dict, Optional, Tuple
 
+import numpy as np
 from numpy import ndarray
 
 from .form import Form, FormExtraParams
-from ..basis import Basis
+from ..basis import AbstractBasis
 from ...element import DiscreteField
 
 
@@ -23,19 +24,23 @@ class Functional(Form):
         return (self.form(w) * dx).sum(-1)
 
     def elemental(self,
-                  v: Basis,
+                  v: AbstractBasis,
                   **kwargs) -> ndarray:
         """Evaluate the functional elementwise."""
         w = FormExtraParams({
             **v.default_parameters(),
             **self.dictify(kwargs, v),
+            'sign': v._sign,
         })
         return self._kernel(w, v.dx)
 
-    def assemble(self,
-                 ubasis: Basis,
-                 vbasis: Optional[Basis] = None,
-                 **kwargs) -> Any:
+    def _assemble(self,
+                  ubasis: AbstractBasis,
+                  vbasis: Optional[AbstractBasis] = None,
+                  **kwargs) -> Tuple[ndarray,
+                                     ndarray,
+                                     Tuple[()],
+                                     Tuple[()]]:
         """Evaluate the functional to a scalar.
 
         Parameters
@@ -49,4 +54,9 @@ class Functional(Form):
         """
         assert vbasis is None
         vbasis = ubasis
-        return self.elemental(vbasis, **kwargs).sum(-1)
+        return (
+            np.array([]),
+            np.array([self.elemental(vbasis, **kwargs).sum(-1)]),
+            (),
+            (),
+        )

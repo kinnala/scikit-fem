@@ -6,14 +6,18 @@ import numpy as np
 from numpy import ndarray
 
 from ...element import DiscreteField
-from ..basis import Basis
+from .coo_data import COOData
 
 
 class FormExtraParams(dict):
     """Passed to forms as 'w'."""
 
     def __getattr__(self, attr):
-        return self[attr].value
+        if attr in self:
+            if hasattr(self[attr], 'value'):
+                return self[attr].value
+            return self[attr]
+        raise ValueError
 
 
 class Form:
@@ -23,7 +27,8 @@ class Form:
     def __init__(self,
                  form: Optional[Callable] = None,
                  dtype: type = np.float64,
-                 nthreads: int = 0):
+                 nthreads: int = 0,
+                 inverse: bool = False):
         self.form = form.form if isinstance(form, Form) else form
         self.dtype = dtype
         self.nthreads = nthreads
@@ -40,11 +45,12 @@ class Form:
                               nthreads=self.nthreads)
         return self.assemble(self.kernel(*args))
 
-    def assemble(self,
-                 ubasis: Basis,
-                 vbasis: Optional[Basis] = None,
-                 **kwargs) -> Any:
-        raise NotImplementedError
+    def assemble(self, *args, **kwargs) -> Any:
+        return (COOData(*self._assemble(*args, **kwargs))  # type: ignore
+                .todefault())
+
+    def coo_data(self, *args, **kwargs) -> COOData:
+        return COOData(*self._assemble(*args, **kwargs))  # type: ignore
 
     @staticmethod
     def dictify(w, basis):

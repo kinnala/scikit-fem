@@ -252,20 +252,35 @@ with respect to documented and/or tested features.
   `Mesh.boundaries`
 - Added: `Mesh.load` now optionally writes any mesh data to a list passed via
   the keyword argument `out`
+- Added: `Mesh.save` (and `skfem.io.meshio.from_file`) now supports the
+  additional keyword argument `force_meshio_type` for loading mesh files that
+  have multiple element types written in the same file, one element type at
+  a time
+- Added: `asm` will now accept a list of bases, assemble the same form using
+  all of the bases and sum the result (useful for jump terms and mixed meshes)
 - Added: `Mesh.with_boundaries` now allows the definition of internal boundaries/interfaces
   via the flag `boundaries_only=False`
 - Added: `MeshTri1DG`, `MeshQuad1DG`, `MeshHex1DG`, `MeshLine1DG`; new mesh
   types for describing meshes with a discontinuous topology, e.g., periodic
   meshes
+- Added: `ElementHexDG` for transforming hexahedral H1 elements to DG/L2 elements.
 - Added: `ElementTriP1DG`, `ElementQuad1DG`, `ElementHex1DG`,
   `ElementLineP1DG`; shorthands for `ElementTriDG(ElementTriP1())` etc.
+- Added: `ElementTriSkeletonP0` and `ElementTriSkeletonP1` for defining
+  Lagrange multipliers on the skeleton mesh
+- Added: `TrilinearForm` for assembling a sparse 3-tensor, e.g., when dealing
+  with unknown material data
+- Added: `MeshTri.oriented` for CCW oriented triangular meshes which can be
+  useful for debugging or interfacing to external tools
 - Fixed: `MappingIsoparametric` is now about 2x faster for large meshes thanks
   to additional caching
 - Fixed: `MeshHex2.save` did not work properly
+- Fixed: `Mesh.load` ignores unparseable `cell_sets` inserted by `meshio` in MSH 4.1
 - Changed: `Mesh` string representation is now more informative
-- Changed: `Form.assemble` allows now only `DiscreteField` or 1d/2d `ndarray`
-  objects, and will automatically pass 1d `ndarray` objects to
-  `Basis.interpolate` for convenience
+- Changed: `Form.assemble` no more allows keyword arguments with `list` or
+  `dict` type: from now on only `DiscreteField` or 1d/2d `ndarray` objects are
+  allowed and 1d `ndarray` is passed automatically to `Basis.interpolate` for
+  convenience
 - Changed: `MeshLine` is now a function which initializes `MeshLine1`
   and not an alias to `MeshLine1`
 - Changed: `FacetBasis` is now a shorthand for `BoundaryFacetBasis` and no

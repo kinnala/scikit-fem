@@ -57,6 +57,7 @@ class BoundaryFacetBasis(AbstractBasis):
         else:
             self.find = facets
         self.tind = self.mesh.f2t[_side, self.find]
+        self._sign = 1 - 2. * _side
 
         # boundary refdom to global facet
         x = self.mapping.G(self.X, find=self.find)
@@ -82,9 +83,11 @@ class BoundaryFacetBasis(AbstractBasis):
 
     def default_parameters(self):
         """Return default parameters for `~skfem.assembly.asm`."""
-        return {'x': self.global_coordinates(),
-                'h': self.mesh_parameters(),
-                'n': self.normals}
+        return {
+            'x': self.global_coordinates(),
+            'h': self.mesh_parameters(),
+            'n': self.normals,
+        }
 
     def global_coordinates(self) -> DiscreteField:
         return DiscreteField(self.mapping.G(self.X, find=self.find))

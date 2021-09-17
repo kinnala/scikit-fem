@@ -18,7 +18,7 @@ class AbstractBasis:
 
     Please see the following implementations:
 
-    - :class:`~skfem.assembly.InteriorBasis`, basis functions inside elements
+    - :class:`~skfem.assembly.CellBasis`, basis functions inside elements
     - :class:`~skfem.assembly.ExteriorFacetBasis`, basis functions on boundary
     - :class:`~skfem.assembly.InteriorFacetBasis`, basis functions on facets
       inside the domain
@@ -32,6 +32,7 @@ class AbstractBasis:
     basis: List[Tuple[DiscreteField, ...]] = []
     X: ndarray
     W: ndarray
+    _sign: float = 1.
 
     def __init__(self,
                  mesh: Mesh,
@@ -129,8 +130,8 @@ class AbstractBasis:
         This corresponds to a list of facet indices that can be passed over:
 
         >>> import numpy as np
-        >>> from skfem import InteriorBasis, ElementTriP1
-        >>> basis = InteriorBasis(m, ElementTriP1())
+        >>> from skfem import Basis, ElementTriP1
+        >>> basis = Basis(m, ElementTriP1())
         >>> basis.find_dofs({'left': np.array([1, 5])})['left'].all()
         array([0, 2, 5])
 
@@ -237,16 +238,17 @@ class AbstractBasis:
     def split_indices(self) -> List[ndarray]:
         """Return indices for the solution components."""
         if isinstance(self.elem, ElementComposite):
-            o = np.zeros(4, dtype=np.int_)
+            o = np.zeros(4, dtype=np.int64)
             output: List[ndarray] = []
             for k in range(len(self.elem.elems)):
                 e = self.elem.elems[k]
                 output.append(np.concatenate((
-                    self.nodal_dofs[o[0]:(o[0] + e.nodal_dofs)].flatten(),
-                    self.edge_dofs[o[1]:(o[1] + e.edge_dofs)].flatten(),
-                    self.facet_dofs[o[2]:(o[2] + e.facet_dofs)].flatten(),
-                    self.interior_dofs[o[3]:(o[3] + e.interior_dofs)].flatten()
-                )).astype(np.int_))
+                    self.nodal_dofs[o[0]:(o[0] + e.nodal_dofs)].flatten('F'),
+                    self.edge_dofs[o[1]:(o[1] + e.edge_dofs)].flatten('F'),
+                    self.facet_dofs[o[2]:(o[2] + e.facet_dofs)].flatten('F'),
+                    (self.interior_dofs[o[3]:(o[3] + e.interior_dofs)]
+                     .flatten('F'))
+                )).astype(np.int64))
                 o += np.array([e.nodal_dofs,
                                e.edge_dofs,
                                e.facet_dofs,

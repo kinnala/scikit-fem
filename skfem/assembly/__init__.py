@@ -37,17 +37,18 @@ Mathematically the above forms are
 
 >>> A = form_a.assemble(basis)
 >>> b = form_l.assemble(basis)
->>> A.todense()
-matrix([[0.08333333, 0.04166667, 0.04166667, 0.        ],
-        [0.04166667, 0.16666667, 0.08333333, 0.04166667],
-        [0.04166667, 0.08333333, 0.16666667, 0.04166667],
-        [0.        , 0.04166667, 0.04166667, 0.08333333]])
+>>> A.toarray()
+array([[0.08333333, 0.04166667, 0.04166667, 0.        ],
+       [0.04166667, 0.16666667, 0.08333333, 0.04166667],
+       [0.04166667, 0.08333333, 0.16666667, 0.04166667],
+       [0.        , 0.04166667, 0.04166667, 0.08333333]])
 >>> b
 array([0.0162037 , 0.15046296, 0.06712963, 0.09953704])
 
 """
 
 from typing import Union
+from itertools import product
 
 from numpy import ndarray
 
@@ -57,17 +58,22 @@ from .basis import (Basis, CellBasis, FacetBasis, BoundaryFacetBasis,
                     InteriorFacetBasis, MortarFacetBasis)
 from .basis import InteriorBasis, ExteriorFacetBasis  # backwards compatibility
 from .dofs import Dofs, DofsView
-from .form import Form, BilinearForm, LinearForm, Functional
+from .form import Form, TrilinearForm, BilinearForm, LinearForm, Functional
 
 
 def asm(form: Form,
         *args, **kwargs) -> Union[ndarray, csr_matrix]:
     """Perform finite element assembly.
 
-    A shorthand for :meth:`skfem.assembly.Form.assemble`.
+    A shorthand for :meth:`skfem.assembly.Form.assemble` which, in addition,
+    supports assembling multiple bases at once and summing the result.
 
     """
-    return form.assemble(*args, **kwargs)
+    nargs = [[arg] if not isinstance(arg, list) else arg for arg in args]
+    out = sum(map(lambda bases: form.coo_data(*bases, **kwargs),
+                  product(*nargs)))
+    assert not isinstance(out, int)
+    return out.todefault()
 
 
 __all__ = [
@@ -80,6 +86,7 @@ __all__ = [
     "MortarFacetBasis",
     "Dofs",
     "DofsView",
+    "TrilinearForm",
     "BilinearForm",
     "LinearForm",
     "Functional",
