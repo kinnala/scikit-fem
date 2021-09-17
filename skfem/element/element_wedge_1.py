@@ -1,3 +1,9 @@
+import numpy as np
+
+from .element_h1 import ElementH1
+from ..refdom import RefWedge
+
+
 class ElementWedge1(ElementH1):
 
     nodal_dofs = 1
@@ -6,8 +12,8 @@ class ElementWedge1(ElementH1):
     doflocs = np.array([[0., 0., 0.],
                         [1., 0., 0.],
                         [0., 1., 0.],
-                        [0., 0., 1.]
-                        [1., 0., 1.]
+                        [0., 0., 1.],
+                        [1., 0., 1.],
                         [0., 1., 1.]])
     refdom = RefWedge
 

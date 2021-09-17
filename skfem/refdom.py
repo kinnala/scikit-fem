@@ -11,6 +11,7 @@ class Refdom:
     p: ndarray
     t: ndarray
     facets: Optional[List[List[int]]] = None
+    edges: Optional[List[List[int]]] = None
     brefdom: Optional[Type] = None
     nnodes: int = 0
     nfacets: int = 0
@@ -154,3 +155,21 @@ class RefHex(Refdom):
     nfacets = 6
     nedges = 12
     name = "Hexahedral"
+
+
+class RefWedge(Refdom):
+
+    p = np.array([[0., 0., 0.],
+                  [1., 0., 0.],
+                  [0., 1., 0.],
+                  [0., 0., 1.],
+                  [1., 0., 1.],
+                  [0., 1., 1.]], dtype=np.float64).T
+    t = np.array([[0], [1], [2], [3], [4], [5]], dtype=np.int64)
+    facets = None
+    edges = None
+    brefdom = None
+    nnodes = 6
+    nfacets = 0
+    nedges = 0
+    name = "Wedge"

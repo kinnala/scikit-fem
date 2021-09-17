@@ -4,7 +4,8 @@ from typing import Tuple, Type
 
 import numpy as np
 from numpy.polynomial.legendre import leggauss
-from .refdom import Refdom, RefPoint, RefLine, RefTri, RefQuad, RefTet, RefHex
+from .refdom import (Refdom, RefPoint, RefLine, RefTri, RefQuad, RefTet,
+                     RefHex, RefWedge)
 
 
 def get_quadrature(refdom: Type[Refdom],
@@ -35,6 +36,17 @@ def get_quadrature(refdom: Type[Refdom],
         return get_quadrature_line(norder)
     elif refdom == RefPoint:
         return get_quadrature_point(norder)
+    elif refdom == RefWedge:
+        X1, W1 = get_quadrature_line(norder)
+        X2, W2 = get_quadrature_tri(norder)
+        A, B, C = np.meshgrid(X1, X2[:1], X2[1:])
+        Y = np.vstack((A.flatten(order="F"),
+                       B.flatten(order="F"),
+                       C.flatten(order="F")))
+        A, B, C = np.meshgrid(W1, W2, W2)
+        Z = A * B * C
+        W = Z.flatten(order="F")
+        return Y, W
     elif refdom == RefQuad:
         X, W = get_quadrature_line(norder)
         # generate tensor product rule from 1D rule
