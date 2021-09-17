@@ -395,7 +395,7 @@ class Mesh:
     def __matmul__(self, other):
         """Join meshes with different types; return a list of meshes."""
         cls = type(self)
-        if not isinstance(other, cls) and isinstance(other, Mesh):
+        if isinstance(other, Mesh):
             other = [other]
         if isinstance(other, list):
             p = np.hstack((self.p,) + tuple([mesh.p for mesh in other]))

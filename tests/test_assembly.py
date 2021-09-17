@@ -515,6 +515,23 @@ def test_multimesh():
     assert Mm.shape[0] == 3 * 7
 
 
+def test_multimesh_2():
+
+    m = MeshTri()
+    m1 = MeshTri.init_refdom()
+    m2 = MeshTri.init_refdom().scaled((-1., -1.)).translated((1., 1.,))
+    M = m1 @ m2
+
+    E = [ElementTriP1(), ElementTriP1()]
+    basis1 = list(map(Basis, M, E))
+    basis2 = Basis(m, ElementTriP1())
+
+    M1 = asm(mass, basis1)
+    M2 = asm(mass, basis2)
+
+    assert_array_almost_equal(M1.toarray(), M2.toarray())
+
+
 @pytest.mark.parametrize(
     "m,e",
     [
