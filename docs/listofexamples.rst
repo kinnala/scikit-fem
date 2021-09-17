@@ -568,7 +568,7 @@ for more information.
 Example 41: Mixed meshes
 ========================
 
-This examples solves the Poisson equation with unit load on a mesh consisting
+This example solves the Poisson equation with unit load on a mesh consisting
 of both triangles and quadrilaterals.  The support for mixed meshes is
 preliminary and works only for elements with nodal or internal
 degrees-of-freedom (sharing face and edge DOFs between mesh types is
@@ -579,4 +579,17 @@ work-in-progress).
    The solution of Example 41 on the mixed mesh.
 
 See the `source code of Example 41 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex41.py>`_
+for more information.
+
+
+Example 42: Periodic meshes
+===========================
+
+This example solves the advection equation on a periodic square mesh.
+
+.. figure:: https://user-images.githubusercontent.com/973268/133767233-a5d78ec4-ffe7-4d49-bc93-9d9a0faae5a1.png
+
+   The solution of Example 42 on a periodic mesh.
+
+See the `source code of Example 42 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex42.py>`_
 for more information.
