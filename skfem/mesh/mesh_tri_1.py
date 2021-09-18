@@ -342,6 +342,34 @@ class MeshTri1(Mesh2D):
             sort_t=False,
         )
 
+    def __mul__(self, other):
+
+        from .mesh_wedge_1 import MeshWedge1
+        from .mesh_line_1 import MeshLine1
+
+        if isinstance(other, MeshLine1):
+            points = np.zeros((3, 0), dtype=np.float64)
+            wedges = np.zeros((6, 0), dtype=np.int64)
+            diff = 0
+            for i, p in enumerate(np.sort(other.p[0])):
+                points = np.hstack((
+                    points,
+                    np.vstack((self.p,
+                               np.array(self.p.shape[1] * [p])))
+                ))
+                if i == len(other.p[0]) - 1:
+                    pass
+                else:
+                    wedges = np.hstack((
+                        wedges,
+                        np.vstack((self.t + diff,
+                                   self.t + self.nvertices + diff))
+                    ))
+                diff += self.nvertices
+            return MeshWedge1(points, wedges)
+
+        raise NotImplementedError
+
     def element_finder(self, mapping=None):
 
         if mapping is None:

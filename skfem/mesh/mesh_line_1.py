@@ -19,7 +19,13 @@ class MeshLine1(Mesh):
     affine: bool = True
 
     def __mul__(self, other):
-        return MeshQuad1.init_tensor(self.p[0], other.p[0])
+
+        from .mesh_line_1 import MeshLine1
+
+        if isinstance(other, MeshLine1):
+            return MeshQuad1.init_tensor(self.p[0], other.p[0])
+
+        return other * self
 
     def _uniform(self):
         p, t = self.doflocs, self.t

@@ -31,6 +31,7 @@ from .element_hex import (ElementHex0, ElementHex1, ElementHex2,  # noqa
 from .element_line import (ElementLineP0, ElementLineP1, ElementLineP2,  # noqa
                            ElementLinePp, ElementLineHermite,
                            ElementLineMini, ElementLineP1DG)
+from .element_wedge_1 import ElementWedge1
 from .element_composite import ElementComposite  # noqa
 
 
@@ -106,4 +107,5 @@ __all__ = [
     "ElementLinePp",
     "ElementLineHermite",
     "ElementLineMini",
+    "ElementWedge1",
 ]

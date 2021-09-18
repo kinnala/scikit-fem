@@ -166,10 +166,22 @@ class RefWedge(Refdom):
                   [1., 0., 1.],
                   [0., 1., 1.]], dtype=np.float64).T
     t = np.array([[0], [1], [2], [3], [4], [5]], dtype=np.int64)
-    facets = None
-    edges = None
+    facets = [[0, 1, 4, 3],
+              [1, 2, 5, 4],
+              [0, 2, 5, 3],
+              [0, 1, 2, 0],  # last index repeated
+              [3, 4, 5, 3]]  # last index repeated
+    edges = [[0, 1],
+             [1, 2],
+             [0, 2],
+             [3, 4],
+             [4, 5],
+             [3, 5],
+             [0, 3],
+             [1, 4],
+             [2, 5]]
     brefdom = None
     nnodes = 6
-    nfacets = 0
-    nedges = 0
+    nfacets = 5
+    nedges = 9
     name = "Wedge"
