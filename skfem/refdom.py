@@ -42,6 +42,8 @@ class RefLine(Refdom):
 
     p = np.array([[0., 1.]], dtype=np.float64)
     t = np.array([[0], [1]], dtype=np.int64)
+    normals = np.array([[-1.],
+                        [1.]])
     facets = [[0],
               [1]]
     brefdom = RefPoint
@@ -55,6 +57,9 @@ class RefTri(Refdom):
     p = np.array([[0., 1., 0.],
                   [0., 0., 1.]], dtype=np.float64)
     t = np.array([[0], [1], [2]], dtype=np.int64)
+    normals = np.array([[0., -1.],
+                        [1., 1.],
+                        [-1., 0.]])
     facets = [[0, 1],
               [1, 2],
               [0, 2]]
@@ -111,6 +116,10 @@ class RefQuad(Refdom):
     p = np.array([[0., 1., 1., 0.],
                   [0., 0., 1., 1.]], dtype=np.float64)
     t = np.array([[0], [1], [2], [3]], dtype=np.int64)
+    normals = np.array([[0., -1.],
+                        [1., 0.],
+                        [0., 1.],
+                        [-1., 0.]])
     facets = [[0, 1],
               [1, 2],
               [2, 3],
@@ -132,6 +141,12 @@ class RefHex(Refdom):
                   [0., 0., 1.],
                   [0., 0., 0.]], dtype=np.float64).T
     t = np.array([[0], [1], [2], [3], [4], [5], [6], [7]], dtype=np.int64)
+    normals = np.array([[1., 0., 0.],
+                        [0., 0., 1.],
+                        [0., 1., 0.],
+                        [0., -1., 0.],
+                        [0., 0., -1.],
+                        [-1., 0., 0.]])
     facets = [[0, 1, 4, 2],
               [0, 2, 6, 3],
               [0, 3, 5, 1],
@@ -166,6 +181,11 @@ class RefWedge(Refdom):
                   [1., 0., 1.],
                   [0., 1., 1.]], dtype=np.float64).T
     t = np.array([[0], [1], [2], [3], [4], [5]], dtype=np.int64)
+    normals = np.array([[0., -1., 0.],
+                        [1., 1., 0.],
+                        [-1., 0., 0.],
+                        [0., 0., -1.],
+                        [0., 0., 1.]])
     facets = [[0, 1, 4, 3],
               [1, 2, 5, 4],
               [0, 2, 5, 3],
