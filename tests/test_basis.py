@@ -208,23 +208,24 @@ class TestIncompatibleMeshElement(TestCase):
         (MeshQuad, ElementQuad1(), 1, 10),
         (MeshQuad, ElementQuad1(), 1, 3e5),
         (MeshHex, ElementHex1(), 1, 1e5),
-        (MeshWedge1, ElementWedge1(), 5, 10),
+        (MeshWedge1, ElementWedge1(), 0, 10),
     ]
 )
 def test_interpolator_probes(mtype, e, nrefs, npoints):
 
-    m = mtype().refined(nrefs)
+    m = mtype()
+    if nrefs > 0:
+        m = m.refined(nrefs)
 
     np.random.seed(0)
     X = np.random.rand(m.p.shape[0], int(npoints))
 
     basis = CellBasis(m, e)
 
-    y = projection(lambda x: x[0] ** 2, basis)
+    y = projection(lambda x: x[0] + x[1], basis)
 
     assert_allclose(basis.probes(X) @ y, basis.interpolator(y)(X))
-    atol = 1e-1 if nrefs <= 1 else 1e-3
-    assert_allclose(basis.probes(X) @ y, X[0] ** 2, atol=atol)
+    assert_allclose(basis.probes(X) @ y, X[0] + X[1])
 
 
 @pytest.mark.parametrize(
