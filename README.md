@@ -257,21 +257,23 @@ with respect to documented and/or tested features.
   have multiple element types written in the same file, one element type at
   a time
 - Added: `asm` will now accept a list of bases, assemble the same form using
-  all of the bases and sum the result (useful for jump terms and mixed meshes)
+  all of the bases and sum the result (useful for jump terms and mixed meshes, see Example 41)
 - Added: `Mesh.with_boundaries` now allows the definition of internal boundaries/interfaces
   via the flag `boundaries_only=False`
 - Added: `MeshTri1DG`, `MeshQuad1DG`, `MeshHex1DG`, `MeshLine1DG`; new mesh
   types for describing meshes with a discontinuous topology, e.g., periodic
-  meshes
+  meshes (see Example 42)
 - Added: `ElementHexDG` for transforming hexahedral H1 elements to DG/L2 elements.
 - Added: `ElementTriP1DG`, `ElementQuad1DG`, `ElementHex1DG`,
   `ElementLineP1DG`; shorthands for `ElementTriDG(ElementTriP1())` etc.
 - Added: `ElementTriSkeletonP0` and `ElementTriSkeletonP1` for defining
-  Lagrange multipliers on the skeleton mesh
+  Lagrange multipliers on the skeleton mesh (see Example 40)
 - Added: `TrilinearForm` for assembling a sparse 3-tensor, e.g., when dealing
   with unknown material data
 - Added: `MeshTri.oriented` for CCW oriented triangular meshes which can be
   useful for debugging or interfacing to external tools
+- Added: partial support for `MeshWedge1` and `ElementWedge1`, the lowest order
+  wedge mesh and element
 - Fixed: `MappingIsoparametric` is now about 2x faster for large meshes thanks
   to additional caching
 - Fixed: `MeshHex2.save` did not work properly
