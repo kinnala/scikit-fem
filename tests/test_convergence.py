@@ -24,9 +24,12 @@ from skfem.element import (
     ElementTriP2,
     ElementTriCR,
     ElementTriHermite,
-    ElementTetCCR)
-from skfem.assembly import FacetBasis, InteriorBasis
-from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
+    ElementTetCCR,
+    ElementWedge1
+)
+from skfem.assembly import FacetBasis, Basis
+from skfem.mesh import (MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
+                        MeshWedge1)
 
 
 class ConvergenceQ1(unittest.TestCase):
@@ -34,6 +37,9 @@ class ConvergenceQ1(unittest.TestCase):
     rateL2 = 2.0
     rateH1 = 1.0
     eps = 0.1
+
+    def do_refined(self, m, itr):
+        return m.refined()
 
     def runTest(self):
 
@@ -60,7 +66,7 @@ class ConvergenceQ1(unittest.TestCase):
 
         for itr in range(Nitrs):
             if itr > 0:
-                m = m.refined()
+                m = self.do_refined(m, itr)
             ib = self.create_basis(m)
 
             A = asm(laplace, ib)
@@ -156,7 +162,7 @@ class ConvergenceQ1(unittest.TestCase):
 
     def create_basis(self, m):
         e = ElementQuad1()
-        return InteriorBasis(m, e)
+        return Basis(m, e)
 
     def setUp(self):
         self.mesh = MeshQuad().refined(2)
@@ -169,7 +175,7 @@ class ConvergenceQ2(ConvergenceQ1):
 
     def create_basis(self, m):
         e = ElementQuad2()
-        return InteriorBasis(m, e)
+        return Basis(m, e)
 
     def setUp(self):
         self.mesh = MeshQuad().refined(2)
@@ -179,14 +185,14 @@ class ConvergenceQuadS2(ConvergenceQ2):
 
     def create_basis(self, m):
         e = ElementQuadS2()
-        return InteriorBasis(m, e)
+        return Basis(m, e)
 
 
 class ConvergenceTriP1(ConvergenceQ1):
 
     def create_basis(self, m):
         e = ElementTriP1()
-        return InteriorBasis(m, e)
+        return Basis(m, e)
 
     def setUp(self):
         self.mesh = MeshTri.init_sqsymmetric().refined(2)
@@ -199,7 +205,7 @@ class ConvergenceTriP2(ConvergenceTriP1):
 
     def create_basis(self, m):
         e = ElementTriP2()
-        return InteriorBasis(m, e)
+        return Basis(m, e)
 
 
 class ConvergenceTriHermite(ConvergenceTriP1):
@@ -210,7 +216,7 @@ class ConvergenceTriHermite(ConvergenceTriP1):
 
     def create_basis(self, m):
         e = ElementTriHermite()
-        return InteriorBasis(m, e)
+        return Basis(m, e)
 
     def get_bc_nodes(self, ib):
         return np.concatenate((
@@ -232,7 +238,7 @@ class ConvergenceTriCR(ConvergenceTriP1):
 
     def create_basis(self, m):
         e = ElementTriCR()
-        return InteriorBasis(m, e)
+        return Basis(m, e)
 
 
 class ConvergenceTriCCR(ConvergenceTriP1):
@@ -242,14 +248,31 @@ class ConvergenceTriCCR(ConvergenceTriP1):
 
     def create_basis(self, m):
         e = ElementTriCCR()
-        return InteriorBasis(m, e)
+        return Basis(m, e)
+
+
+class ConvergenceWedge1(ConvergenceTriP1):
+
+    rateL2 = 1.85
+    rateH1 = 1.0
+
+    def do_refined(self, m, itr):
+        return (MeshLine(np.linspace(0, 1, 2 ** (itr + 2)))
+                * MeshTri().refined(itr + 2))
+
+    def create_basis(self, m):
+        e = ElementWedge1()
+        return Basis(m, e)
+
+    def setUp(self):
+        self.mesh = self.do_refined(None, -1)
 
 
 class ConvergenceTriMini(ConvergenceTriP1):
 
     def create_basis(self, m):
         e = ElementTriMini()
-        return InteriorBasis(m, e)
+        return Basis(m, e)
 
 
 class ConvergenceHex1(ConvergenceQ1):
@@ -260,7 +283,7 @@ class ConvergenceHex1(ConvergenceQ1):
 
     def create_basis(self, m):
         e = ElementHex1()
-        return InteriorBasis(m, e)
+        return Basis(m, e)
 
     def setUp(self):
         self.mesh = MeshHex().refined(2)
@@ -274,7 +297,7 @@ class ConvergenceHexSplitTet1(ConvergenceQ1):
 
     def create_basis(self, m):
         e = ElementTetP1()
-        return InteriorBasis(m, e)
+        return Basis(m, e)
 
     def setUp(self):
         self.mesh = MeshHex().refined(2).to_meshtet()
@@ -288,7 +311,7 @@ class ConvergenceHexS2(ConvergenceQ1):
 
     def create_basis(self, m):
         e = ElementHexS2()
-        return InteriorBasis(m, e)
+        return Basis(m, e)
 
     def setUp(self):
         self.mesh = MeshHex().refined(1)
@@ -301,7 +324,7 @@ class ConvergenceHex2(ConvergenceHexS2):
 
     def create_basis(self, m):
         e = ElementHex2()
-        return InteriorBasis(m, e)
+        return Basis(m, e)
 
 
 class ConvergenceTetP1(ConvergenceQ1):
@@ -312,7 +335,7 @@ class ConvergenceTetP1(ConvergenceQ1):
 
     def create_basis(self, m):
         e = ElementTetP1()
-        return InteriorBasis(m, e)
+        return Basis(m, e)
 
     def setUp(self):
         self.mesh = MeshTet().refined(2)
@@ -325,7 +348,7 @@ class ConvergenceTetCR(ConvergenceTetP1):
 
     def create_basis(self, m):
         e = ElementTetCR()
-        return InteriorBasis(m, e)
+        return Basis(m, e)
 
 
 class ConvergenceTetCCR(ConvergenceTetP1):
@@ -335,7 +358,7 @@ class ConvergenceTetCCR(ConvergenceTetP1):
 
     def create_basis(self, m):
         e = ElementTetCCR()
-        return InteriorBasis(m, e)
+        return Basis(m, e)
 
     def setUp(self):
         self.mesh = MeshTet().refined(1)
@@ -349,7 +372,7 @@ class ConvergenceTetP2(ConvergenceTetP1):
 
     def create_basis(self, m):
         e = ElementTetP2()
-        return InteriorBasis(m, e)
+        return Basis(m, e)
 
     def setUp(self):
         self.mesh = MeshTet().refined(1)
@@ -359,14 +382,14 @@ class ConvergenceTetMini(ConvergenceTetP1):
 
     def create_basis(self, m):
         e = ElementTetMini()
-        return InteriorBasis(m, e, intorder=3)
+        return Basis(m, e, intorder=3)
 
 
 class ConvergenceLineP1(ConvergenceQ1):
 
     def create_basis(self, m):
         e = ElementLineP1()
-        return InteriorBasis(m, e)
+        return Basis(m, e)
 
     def setUp(self):
         self.mesh = MeshLine().refined(3)
@@ -379,7 +402,7 @@ class ConvergenceLineP2(ConvergenceQ1):
 
     def create_basis(self, m):
         e = ElementLineP2()
-        return InteriorBasis(m, e)
+        return Basis(m, e)
 
     def setUp(self):
         self.mesh = MeshLine().refined(3)
@@ -389,7 +412,7 @@ class ConvergenceLineMini(ConvergenceLineP2):
 
     def create_basis(self, m):
         e = ElementLineMini()
-        return InteriorBasis(m, e)
+        return Basis(m, e)
 
 
 class FacetConvergenceTetP2(unittest.TestCase):
@@ -441,7 +464,7 @@ class FacetConvergenceTetP2(unittest.TestCase):
         for itr in range(0, 3):
             m = self.case[0]().refined(self.preref + itr)
 
-            ib = InteriorBasis(m, self.case[1]())
+            ib = Basis(m, self.case[1]())
             fb = FacetBasis(m, self.case[1]())
 
             A = asm(dudv, ib)

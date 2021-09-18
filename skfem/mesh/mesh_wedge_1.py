@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Type
 
 import numpy as np
@@ -28,8 +28,8 @@ class MeshWedge1(Mesh3D):
 
         t = np.hstack((
             self.t[[0, 1, 2, 3]],
-            self.t[[3, 4, 5, 0]],
-            self.t[[0, 3, 2, 4]],
+            self.t[[1, 2, 3, 4]],
+            self.t[[2, 3, 4, 5]],
         ))
 
         return MeshTet1(self.doflocs, t)

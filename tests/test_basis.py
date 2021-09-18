@@ -5,14 +5,16 @@ import numpy as np
 from numpy.testing import assert_allclose, assert_almost_equal
 
 from skfem import BilinearForm, asm, solve, condense, projection
-from skfem.mesh import MeshTri, MeshTet, MeshHex, MeshQuad, MeshLine1
+from skfem.mesh import (MeshTri, MeshTet, MeshHex,
+                        MeshQuad, MeshLine1, MeshWedge1)
 from skfem.assembly import CellBasis, FacetBasis, Dofs, Functional
 from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
                            ElementTetP2, ElementHexS2, ElementHex2,
                            ElementQuad2, ElementLineP2, ElementTriP0,
                            ElementLineP0, ElementQuad1, ElementQuad0,
                            ElementTetP1, ElementTetP0, ElementHex1,
-                           ElementHex0, ElementLineP1, ElementLineMini)
+                           ElementHex0, ElementLineP1, ElementLineMini,
+                           ElementWedge1)
 
 
 class TestCompositeSplitting(TestCase):
@@ -126,8 +128,11 @@ class TestInterpolatorTet(TestCase):
     element_type = ElementTetP2
     nrefs = 1
 
+    def prepare_mesh(self):
+        return self.mesh_type().refined(self.nrefs)
+
     def runTest(self):
-        m = self.mesh_type().refined(self.nrefs)
+        m = self.prepare_mesh()
         basis = CellBasis(m, self.element_type())
         x = projection(lambda x: x[0] ** 2, basis)
         fun = basis.interpolator(x)
@@ -198,11 +203,12 @@ class TestIncompatibleMeshElement(TestCase):
         (MeshTri, ElementTriP1(), 5, 10),
         (MeshTri, ElementTriP1(), 1, 3e5),
         (MeshTet, ElementTetP2(), 1, 10),
-        (MeshTet, ElementTetP1(), 5, 10),
-        (MeshTet, ElementTetP1(), 1, 3e5),
+        (MeshTet, ElementTetP1(), 4, 10),
+        (MeshTet, ElementTetP1(), 1, 3e4),
         (MeshQuad, ElementQuad1(), 1, 10),
         (MeshQuad, ElementQuad1(), 1, 3e5),
         (MeshHex, ElementHex1(), 1, 1e5),
+        (MeshWedge1, ElementWedge1(), 5, 10),
     ]
 )
 def test_interpolator_probes(mtype, e, nrefs, npoints):
