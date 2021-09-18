@@ -68,7 +68,8 @@ def get_quadrature(refdom: Type[Refdom],
         W = Z.flatten(order="F")
         return Y, W
     else:
-        raise NotImplementedError("The given mesh type is not supported!")
+        raise NotImplementedError("The given reference domain type '{}' "
+                                  "is not supported!".format(refdom))
 
 
 def get_quadrature_tet(norder: int) -> Tuple[np.ndarray, np.ndarray]:
