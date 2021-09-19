@@ -202,27 +202,7 @@ class MappingIsoparametric(Mapping):
         return invDF / detDF
 
     def normals(self, X, tind, find, t2f):
-        if self.dim == 1:
-            Nref = np.array([[-1.],
-                             [1.]])
-        elif self.dim == 2 and self.mesh.t2f.shape[0] == 3:
-            Nref = np.array([[0., -1.],
-                             [1., 1.],
-                             [-1., 0.]])
-        elif self.dim == 2 and self.mesh.t2f.shape[0] == 4:
-            Nref = np.array([[0., -1.],
-                             [1., 0.],
-                             [0., 1.],
-                             [-1., 0.]])
-        elif self.dim == 3:
-            Nref = np.array([[1., 0., 0.],
-                             [0., 0., 1.],
-                             [0., 1., 0.],
-                             [0., -1., 0.],
-                             [0., 0., -1.],
-                             [-1., 0., 0.]])
-        else:
-            raise Exception("Not implemented for the given dimension.")
+        Nref = self.mesh.elem.refdom.normals
 
         invDF = self.invDF(X, tind)
         N = np.empty((self.dim, len(find)))

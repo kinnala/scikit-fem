@@ -679,6 +679,8 @@ class Mesh:
     @staticmethod
     def build_entities(t, indices, sort=True):
         """Build low dimensional topological entities."""
+        if indices is None:
+            return None, None
         indexing = np.hstack(tuple([t[ix] for ix in indices]))
         sorted_indexing = np.sort(indexing, axis=0)
 

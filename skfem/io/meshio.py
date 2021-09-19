@@ -7,14 +7,15 @@ import skfem
 
 MESH_TYPE_MAPPING = {
     'tetra': skfem.MeshTet1,
-    'hexahedron': skfem.MeshHex1,
-    'triangle': skfem.MeshTri1,
-    'quad': skfem.MeshQuad1,
-    'line': skfem.MeshLine1,
     'tetra10': skfem.MeshTet2,
-    'triangle6': skfem.MeshTri2,
-    'quad9': skfem.MeshQuad2,
+    'hexahedron': skfem.MeshHex1,
     'hexahedron27': skfem.MeshHex2,
+    'wedge': skfem.MeshWedge1,
+    'triangle': skfem.MeshTri1,
+    'triangle6': skfem.MeshTri2,
+    'quad': skfem.MeshQuad1,
+    'quad9': skfem.MeshQuad2,
+    'line': skfem.MeshLine1,
 }
 
 BOUNDARY_TYPE_MAPPING = {
@@ -52,14 +53,21 @@ def from_meshio(m,
     if force_meshio_type is None:
         # detect 3D
         for k in cells:
-            if k in {'tetra', 'hexahedron', 'tetra10', 'hexahedron27'}:
+            if k in {'tetra',
+                     'hexahedron',
+                     'tetra10',
+                     'hexahedron27',
+                     'wedge'}:
                 meshio_type = k
                 break
 
         if meshio_type is None:
             # detect 2D
             for k in cells:
-                if k in {'triangle', 'quad', 'triangle6', 'quad9'}:
+                if k in {'triangle',
+                         'quad',
+                         'triangle6',
+                         'quad9'}:
                     meshio_type = k
                     break
 

@@ -41,6 +41,7 @@ from skfem.element import (
     ElementQuadDG,
     ElementQuadP,
     ElementHexDG,
+    ElementWedge1,
 )
 from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 from skfem.assembly import InteriorBasis, Functional
@@ -78,6 +79,7 @@ class TestNodality(TestCase):
         ElementTetCCR(),
         ElementTriCR(),
         ElementTriCCR(),
+        ElementWedge1(),
     ]
 
     def runTest(self):
@@ -212,6 +214,7 @@ class TestDerivatives(TestCase):
         ElementTriCCR(),
         ElementTetCR(),
         ElementTetCCR(),
+        ElementWedge1(),
     ]
 
     def runTest(self):
@@ -270,6 +273,7 @@ class TestPartitionofUnity(TestCase):
         ElementTetCCR(),
         ElementTriCR(),
         ElementTriCCR(),
+        ElementWedge1(),
     ]
 
     def runTest(self):

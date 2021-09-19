@@ -11,6 +11,7 @@ class Refdom:
     p: ndarray
     t: ndarray
     facets: Optional[List[List[int]]] = None
+    edges: Optional[List[List[int]]] = None
     brefdom: Optional[Type] = None
     nnodes: int = 0
     nfacets: int = 0
@@ -41,6 +42,8 @@ class RefLine(Refdom):
 
     p = np.array([[0., 1.]], dtype=np.float64)
     t = np.array([[0], [1]], dtype=np.int64)
+    normals = np.array([[-1.],
+                        [1.]])
     facets = [[0],
               [1]]
     brefdom = RefPoint
@@ -54,6 +57,9 @@ class RefTri(Refdom):
     p = np.array([[0., 1., 0.],
                   [0., 0., 1.]], dtype=np.float64)
     t = np.array([[0], [1], [2]], dtype=np.int64)
+    normals = np.array([[0., -1.],
+                        [1., 1.],
+                        [-1., 0.]])
     facets = [[0, 1],
               [1, 2],
               [0, 2]]
@@ -110,6 +116,10 @@ class RefQuad(Refdom):
     p = np.array([[0., 1., 1., 0.],
                   [0., 0., 1., 1.]], dtype=np.float64)
     t = np.array([[0], [1], [2], [3]], dtype=np.int64)
+    normals = np.array([[0., -1.],
+                        [1., 0.],
+                        [0., 1.],
+                        [-1., 0.]])
     facets = [[0, 1],
               [1, 2],
               [2, 3],
@@ -131,6 +141,12 @@ class RefHex(Refdom):
                   [0., 0., 1.],
                   [0., 0., 0.]], dtype=np.float64).T
     t = np.array([[0], [1], [2], [3], [4], [5], [6], [7]], dtype=np.int64)
+    normals = np.array([[1., 0., 0.],
+                        [0., 0., 1.],
+                        [0., 1., 0.],
+                        [0., -1., 0.],
+                        [0., 0., -1.],
+                        [-1., 0., 0.]])
     facets = [[0, 1, 4, 2],
               [0, 2, 6, 3],
               [0, 3, 5, 1],
@@ -154,3 +170,38 @@ class RefHex(Refdom):
     nfacets = 6
     nedges = 12
     name = "Hexahedral"
+
+
+class RefWedge(Refdom):
+
+    p = np.array([[0., 0., 0.],
+                  [1., 0., 0.],
+                  [0., 1., 0.],
+                  [0., 0., 1.],
+                  [1., 0., 1.],
+                  [0., 1., 1.]], dtype=np.float64).T
+    t = np.array([[0], [1], [2], [3], [4], [5]], dtype=np.int64)
+    normals = np.array([[0., -1., 0.],
+                        [1., 1., 0.],
+                        [-1., 0., 0.],
+                        [0., 0., -1.],
+                        [0., 0., 1.]])
+    facets = [[0, 1, 4, 3],
+              [1, 2, 5, 4],
+              [0, 2, 5, 3],
+              [0, 1, 2, 0],  # last index repeated
+              [3, 4, 5, 3]]  # last index repeated
+    edges = [[0, 1],
+             [1, 2],
+             [0, 2],
+             [3, 4],
+             [4, 5],
+             [3, 5],
+             [0, 3],
+             [1, 4],
+             [2, 5]]
+    brefdom = None
+    nnodes = 6
+    nfacets = 5
+    nedges = 9
+    name = "Wedge"
