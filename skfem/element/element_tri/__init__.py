@@ -1,5 +1,7 @@
 from .element_tri_p1 import ElementTriP1, ElementTriP1DG  # noqa
 from .element_tri_p2 import ElementTriP2  # noqa
+from .element_tri_p3 import ElementTriP3  # noqa
+from .element_tri_p4 import ElementTriP4  # noqa
 from .element_tri_dg import ElementTriDG  # noqa
 from .element_tri_cr import ElementTriCR  # noqa
 from .element_tri_p0 import ElementTriP0  # noqa
