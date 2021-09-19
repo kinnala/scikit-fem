@@ -274,6 +274,8 @@ with respect to documented and/or tested features.
   useful for debugging or interfacing to external tools
 - Added: partial support for `MeshWedge1` and `ElementWedge1`, the lowest order
   wedge mesh and element
+- Added: `ElementTriP3` cubic triangular Lagrange element
+- Added: `ElementTriP4` quartic triangular Lagrange element
 - Fixed: `MappingIsoparametric` is now about 2x faster for large meshes thanks
   to additional caching
 - Fixed: `MeshHex2.save` did not work properly
