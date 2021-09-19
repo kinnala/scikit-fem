@@ -267,6 +267,8 @@ class TestPartitionofUnity(TestCase):
         ElementLineP2(),
         ElementTriP1(),
         ElementTriP2(),
+        ElementTriP3(),
+        ElementTriP4(),
         ElementQuad1(),
         ElementQuad2(),
         ElementQuadS2(),
