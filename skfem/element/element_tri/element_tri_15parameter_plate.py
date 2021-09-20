@@ -5,7 +5,7 @@ from ...refdom import RefTri
 
 
 class ElementTri15ParameterPlate(ElementGlobal):
-    """15-parameter Triangle Plate Element"""
+    """15-parameter nonconforming plate element."""
 
     nodal_dofs = 3
     facet_dofs = 2
