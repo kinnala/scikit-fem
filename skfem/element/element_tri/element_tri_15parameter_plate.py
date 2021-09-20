@@ -35,21 +35,21 @@ class ElementTri15ParameterPlate(ElementGlobal):
         elif i == 1:
             return F[(0,)](*w['v'][0])
         elif i == 2:
-            return F[(1,)](*w['v'][0]) 
+            return F[(1,)](*w['v'][0])
         elif i == 3:
-            return F[()](*w['v'][1]) 
+            return F[()](*w['v'][1])
         elif i == 4:
-            return F[(0,)](*w['v'][1]) 
+            return F[(0,)](*w['v'][1])
         elif i == 5:
-            return F[(1,)](*w['v'][1]) 
+            return F[(1,)](*w['v'][1])
         elif i == 6:
-            return F[()](*w['v'][2]) 
+            return F[()](*w['v'][2])
         elif i == 7:
             return F[(0,)](*w['v'][2])
         elif i == 8:
             return F[(1,)](*w['v'][2])
         elif i == 9:
-            return F[()](*w['e'][0]) 
+            return F[()](*w['e'][0])
         elif i == 10:
             return (F[(0,)](*w['e'][0]) * w['n'][0, 0]
                     + F[(1,)](*w['e'][0]) * w['n'][0, 1])
