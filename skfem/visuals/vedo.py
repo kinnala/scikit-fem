@@ -1,10 +1,10 @@
 import tempfile
 
 
-def draw(m, **kwargs):
+def draw(m, backend=False, **kwargs):
     """Visualize meshes."""
     import vedo
-    vedo.embedWindow(False)
+    vedo.embedWindow(backend)
     from vedo import Plotter
     vp = Plotter()
     plot = None
