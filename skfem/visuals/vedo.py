@@ -3,6 +3,8 @@ import tempfile
 
 def draw(m, **kwargs):
     """Visualize meshes."""
+    import vedo
+    vedo.embedWindow(False)
     from vedo import Plotter
     vp = Plotter()
     plot = None
