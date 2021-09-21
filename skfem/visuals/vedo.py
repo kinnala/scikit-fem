@@ -1,10 +1,9 @@
 import tempfile
 
-from vedo import Plotter
-
 
 def draw(m, **kwargs):
     """Visualize meshes."""
+    from vedo import Plotter
     vp = Plotter()
     plot = None
     with tempfile.NamedTemporaryFile() as tmp:
