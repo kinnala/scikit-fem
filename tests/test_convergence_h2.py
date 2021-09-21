@@ -6,7 +6,7 @@ from skfem.helpers import dd, ddot
 from skfem.mesh import MeshQuad, MeshTri, MeshLine
 from skfem.element import (ElementQuadBFS, ElementTriArgyris,
                            ElementTriMorley, ElementLineHermite,
-                           ElementTri15ParameterPlate)
+                           ElementTri15ParamPlate)
 from skfem.assembly import InteriorBasis
 
 
@@ -91,7 +91,7 @@ class ConvergenceArgyris(ConvergenceMorley):
 
 class Convergence15Param(ConvergenceMorley):
 
-    case = (MeshTri, ElementTri15ParameterPlate)
+    case = (MeshTri, ElementTri15ParamPlate)
     preref = 1
     limits = (1.9, 2.1)
     abs_limit = 5e-6

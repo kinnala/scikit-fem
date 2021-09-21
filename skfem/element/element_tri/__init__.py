@@ -8,7 +8,7 @@ from .element_tri_p0 import ElementTriP0  # noqa
 from .element_tri_rt0 import ElementTriRT0  # noqa
 from .element_tri_mini import ElementTriMini  # noqa
 from .element_tri_morley import ElementTriMorley  # noqa
-from .element_tri_15parameter_plate import ElementTri15ParameterPlate  # noqa
+from .element_tri_15parameter_plate import ElementTri15ParamPlate  # noqa
 from .element_tri_argyris import ElementTriArgyris  # noqa
 from .element_tri_hermite import ElementTriHermite  # noqa
 from .element_tri_ccr import ElementTriCCR  # noqa

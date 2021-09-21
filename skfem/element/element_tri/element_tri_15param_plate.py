@@ -4,7 +4,7 @@ from ..element_global import ElementGlobal
 from ...refdom import RefTri
 
 
-class ElementTri15ParameterPlate(ElementGlobal):
+class ElementTri15ParamPlate(ElementGlobal):
     """15-parameter nonconforming plate element."""
 
     nodal_dofs = 3
