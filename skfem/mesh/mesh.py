@@ -756,16 +756,7 @@ class Mesh:
         """
         raise NotImplementedError
 
-    def plot(self, *args, **kwargs):
-        """Convenience wrapper for :func:`skfem.visuals.matplotlib.plot`."""
-        from skfem.visuals.matplotlib import plot, show
-        ax = plot(self, *args, **kwargs)
-        ax.show = show
-        return ax
-
     def draw(self, *args, **kwargs):
-        """Convenience wrapper for :func:`skfem.visuals.matplotlib.draw`."""
-        from skfem.visuals.matplotlib import draw, show
-        ax = draw(self, *args, **kwargs)
-        ax.show = show
-        return ax
+        """Convenience wrapper for vedo."""
+        from skfem.visuals.vedo import draw
+        return draw(self, *args, **kwargs)
