@@ -11,7 +11,8 @@ class ElementHdiv(Element):
         if tind is not None:
             # TODO fix
             raise NotImplementedError("TODO: fix tind support in ElementHdiv")
-        return -1 + 2 * (mapping.mesh.f2t[0, mapping.mesh.t2f[i]]
+        ix = int(i / self.facet_dofs)
+        return -1 + 2 * (mapping.mesh.f2t[0, mapping.mesh.t2f[ix]]
                          == np.arange(mapping.mesh.t.shape[1]))
 
     def gbasis(self, mapping, X, i, tind=None):
