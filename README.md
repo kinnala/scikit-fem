@@ -277,6 +277,7 @@ with respect to documented and/or tested features.
 - Added: `ElementTriP3`, cubic triangular Lagrange element
 - Added: `ElementTriP4`, quartic triangular Lagrange element
 - Added: `ElementTri15ParamPlate`, 15-parameter nonconforming triangular element for plates
+- Added: `ElementTriBDM1`, the lowest order Brezzi-Douglas-Marini element
 - Added: `Mesh.draw().show()` will now visualize any mesh interactively (requires [vedo](https://vedo.embl.es/))
 - Fixed: `MappingIsoparametric` is now about 2x faster for large meshes thanks
   to additional caching
