@@ -185,6 +185,29 @@ class Mesh:
             }
         )
 
+    def _encode_point_data(self) -> Dict[str, List[ndarray]]:
+
+        subdomains = {} if self._subdomains is None else self._subdomains
+        boundaries = {} if self._boundaries is None else self._boundaries
+
+        def indicator(ix):
+            ind = np.zeros(self.nvertices)
+            ind[ix] = 1
+            return ind
+
+        return {
+            **{
+                f"skfem:s:{name}": indicator(np.unique(self.t[:, subdomain]
+                                                       .flatten()))
+                for name, subdomain in subdomains.items()
+            },
+            **{
+                f"skfem:b:{name}": indicator(np.unique(self.facets[:, boundary]
+                                                       .flatten()))
+                for name, boundary in boundaries.items()
+            },
+        }
+
     def _encode_cell_data(self) -> Dict[str, List[ndarray]]:
 
         subdomains = {} if self._subdomains is None else self._subdomains
@@ -756,16 +779,7 @@ class Mesh:
         """
         raise NotImplementedError
 
-    def plot(self, *args, **kwargs):
-        """Convenience wrapper for :func:`skfem.visuals.matplotlib.plot`."""
-        from skfem.visuals.matplotlib import plot, show
-        ax = plot(self, *args, **kwargs)
-        ax.show = show
-        return ax
-
     def draw(self, *args, **kwargs):
-        """Convenience wrapper for :func:`skfem.visuals.matplotlib.draw`."""
-        from skfem.visuals.matplotlib import draw, show
-        ax = draw(self, *args, **kwargs)
-        ax.show = show
-        return ax
+        """Convenience wrapper for vedo."""
+        from skfem.visuals.vedo import draw
+        return draw(self, *args, **kwargs)
