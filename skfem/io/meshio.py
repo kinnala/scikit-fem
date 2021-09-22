@@ -191,7 +191,9 @@ def from_file(filename, out, **kwargs):
 
 def to_meshio(mesh,
               point_data=None,
-              cell_data=None):
+              cell_data=None,
+              encode_cell_data=True,
+              encode_point_data=False):
 
     t = mesh.dofs.element_dofs.copy()
     if isinstance(mesh, skfem.MeshHex2):
@@ -202,10 +204,15 @@ def to_meshio(mesh,
     mtype = TYPE_MESH_MAPPING[type(mesh)]
     cells = {mtype: t.T}
 
-    if cell_data is None:
-        cell_data = {}
+    if encode_cell_data:
+        if cell_data is None:
+            cell_data = {}
+        cell_data.update(mesh._encode_cell_data())
 
-    cell_data.update(mesh._encode_cell_data())
+    if encode_point_data:
+        if point_data is None:
+            point_data = {}
+        point_data.update(mesh._encode_point_data())
 
     mio = meshio.Mesh(
         mesh.p.T,
@@ -221,10 +228,14 @@ def to_file(mesh,
             filename,
             point_data=None,
             cell_data=None,
+            encode_cell_data=True,
+            encode_point_data=False,
             **kwargs):
 
     meshio.write(filename,
                  to_meshio(mesh,
                            point_data,
-                           cell_data),
+                           cell_data,
+                           encode_cell_data,
+                           encode_point_data),
                  **kwargs)

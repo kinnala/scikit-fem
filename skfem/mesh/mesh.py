@@ -185,6 +185,29 @@ class Mesh:
             }
         )
 
+    def _encode_point_data(self) -> Dict[str, List[ndarray]]:
+
+        subdomains = {} if self._subdomains is None else self._subdomains
+        boundaries = {} if self._boundaries is None else self._boundaries
+
+        def indicator(ix):
+            ind = np.zeros(self.nvertices)
+            ind[ix] = 1
+            return ind
+
+        return {
+            **{
+                f"skfem:s:{name}": indicator(np.unique(self.t[:, subdomain]
+                                                       .flatten()))
+                for name, subdomain in subdomains.items()
+            },
+            **{
+                f"skfem:b:{name}": indicator(np.unique(self.facets[:, boundary]
+                                                       .flatten()))
+                for name, boundary in boundaries.items()
+            },
+        }
+
     def _encode_cell_data(self) -> Dict[str, List[ndarray]]:
 
         subdomains = {} if self._subdomains is None else self._subdomains
