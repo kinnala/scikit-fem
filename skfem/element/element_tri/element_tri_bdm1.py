@@ -2,7 +2,6 @@ import numpy as np
 
 from ..element_hdiv import ElementHdiv
 from ...refdom import RefTri
-from ..discrete_field import DiscreteField
 
 
 # two Gauss points used in the definition of the basis
@@ -38,11 +37,11 @@ class ElementTriBDM1(ElementHdiv):
             dphi = -1. / (s_2 - s_1) * (2. * s_1 - 1) + 0. * x
         elif i == 2:
             phi = 1. / (s_2 - s_1) * np.array([s_2 * x,
-                                                       (s_2 - 1) * y])
+                                               (s_2 - 1) * y])
             dphi = 1. / (s_2 - s_1) * (2. * s_2 - 1) + 0. * x
         elif i == 3:
             phi = 1. / (s_1 - s_2) * np.array([s_1 * x,
-                                                       (s_1 - 1) * y])
+                                               (s_1 - 1) * y])
             dphi = 1. / (s_1 - s_2) * (2. * s_1 - 1) + 0. * x
         elif i == 4:
             phi = 1. / (s_2 - s_1) * np.array([s_2 * x + y - s_2,
