@@ -13,14 +13,15 @@ from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementTriMorley, ElementVectorH1, ElementQuadP,
                            ElementHex2, ElementTriArgyris, ElementTriP2,
                            ElementTriDG, ElementQuadDG, ElementHexDG,
-                           ElementTetDG, ElementTriHermite)
+                           ElementTetDG, ElementTriHermite, ElementVector)
 from skfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
                         MeshTri2, MeshTet2, MeshHex2, MeshTri1DG, MeshQuad1DG,
                         MeshHex1DG)
 from skfem.assembly import FacetBasis, Basis
 from skfem.utils import projection
 from skfem.models import laplace, unit_load, mass
-from skfem.helpers import grad, dot
+from skfem.helpers import grad, dot, ddot, sym_grad
+from skfem.models import linear_stress
 
 
 class IntegrateOneOverBoundaryQ1(TestCase):
@@ -563,6 +564,30 @@ def test_trilinear_form(m, e):
         assert abs((opt1[i] - opt2).min()) < 1e-10
         assert abs((opt1[i] - opt2).max()) < 1e-10
 
+
+@pytest.mark.parametrize(
+    "m,e",
+    [
+        (MeshTri(), ElementTriP1()),
+        (MeshTri(), ElementTriP2()),
+        (MeshTet(), ElementTetP1()),
+    ]
+)
+def test_matrix_element_projection(m, e):
+
+    E1 = ElementVector(e)
+    E2 = ElementVector(ElementVector(e))
+    basis0 = Basis(m, E1)
+    basis1 = basis0.with_element(E2)
+    C = linear_stress()
+
+    x = basis0.interpolate(np.random.random(basis0.N))
+
+    @LinearForm
+    def proj(v, _):
+        return ddot(C(sym_grad(x)), v)
+
+    y = projection(proj, basis1, basis0)
 
 
 if __name__ == '__main__':

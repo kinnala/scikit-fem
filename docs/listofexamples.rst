@@ -39,7 +39,7 @@ This example solves the linear elastic eigenvalue problem
 :math:`\mathrm{div}\,\sigma(u)= \lambda u` with
 the displacement fixed on the left hand side boundary.
 
-.. figure:: https://user-images.githubusercontent.com/973268/87661134-cbec2b00-c768-11ea-81bc-f5455df7cc33.png
+.. figure:: https://user-images.githubusercontent.com/973268/134467300-f7e635ed-39c4-4a36-9e98-aadb6e51961a.png
 
    The fifth eigenmode of Example 3.
 
