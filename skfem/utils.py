@@ -606,13 +606,23 @@ def projection(fun,
 
     @BilinearForm
     def mass(u, v, w):
-        p = u * v
-        return sum(p) if isinstance(basis_to.elem, ElementVector) else p
+        from skfem.helpers import dot, ddot
+        p = 0
+        if len(u.value.shape) == 2:
+            p = u * v
+        elif len(u.value.shape) == 3:
+            p = dot(u, v)
+        elif len(u.value.shape) == 4:
+            p = ddot(u, v)
+        return p
 
-    @LinearForm
-    def funv(v, w):
-        p = fun(w.x) * v
-        return sum(p) if isinstance(basis_to.elem, ElementVector) else p
+    if isinstance(fun, LinearForm):
+        funv = fun
+    else:
+        @LinearForm
+        def funv(v, w):
+            p = fun(w.x) * v
+            return sum(p) if isinstance(basis_to.elem, ElementVector) else p
 
     @BilinearForm
     def deriv(u, v, w):

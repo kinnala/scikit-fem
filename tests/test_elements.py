@@ -361,14 +361,9 @@ def test_dg_element(m, e, edg):
     "e,edg",
     [
         (ElementTriP1(), ElementTriDG),
-        (ElementTriP2(), ElementTriDG),
-        (ElementTetP1(), ElementTetDG),
         (ElementTetP2(), ElementTetDG),
         (ElementTriArgyris(), ElementTriDG),
-        (ElementTriMorley(), ElementTriDG),
-        (ElementTriHermite(), ElementTriDG),
         (ElementQuad1(), ElementQuadDG),
-        (ElementQuad2(), ElementQuadDG),
         (ElementQuadP(4), ElementQuadDG),
         (ElementHex2(), ElementHexDG),
     ]

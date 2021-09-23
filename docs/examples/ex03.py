@@ -1,23 +1,25 @@
 """Linear elastic eigenvalue problem."""
 
 from skfem import *
-from skfem.helpers import dot
-from skfem.models.elasticity import linear_elasticity
+from skfem.helpers import dot, ddot, sym_grad
+from skfem.models.elasticity import linear_elasticity, linear_stress
 import numpy as np
 
 m1 = MeshLine(np.linspace(0, 5, 50))
 m2 = MeshLine(np.linspace(0, 1, 10))
-m = m1*m2
+m = m1 * m2
 
 e1 = ElementQuad1()
 
 mapping = MappingIsoparametric(m, e1)
 
-e = ElementVectorH1(e1)
+e = ElementVector(e1)
 
 gb = Basis(m, e, mapping, 2)
 
-K = asm(linear_elasticity(1.0, 1.0), gb)
+lam = 1.
+mu = 1.
+K = asm(linear_elasticity(lam, mu), gb)
 
 @BilinearForm
 def mass(u, v, w):
@@ -25,17 +27,30 @@ def mass(u, v, w):
 
 M = asm(mass, gb)
 
-D = gb.find_dofs({'': m.facets_satisfying(lambda x: x[0]==0.0)})
+D = gb.find_dofs({'left': m.facets_satisfying(lambda x: x[0] == 0.)})
 y = gb.zeros()
 
 I = gb.complement_dofs(D)
 
-L, x = solve(*condense(K, M, I=I), solver=solver_eigen_scipy_sym(k=6, sigma=0.0))
+L, x = solve(*condense(K, M, I=I),
+             solver=solver_eigen_scipy_sym(k=6, sigma=0.0))
 
 y = x[:, 4]
 
+# calculate stress
+sgb = gb.with_element(ElementVector(e))
+C = linear_stress(lam, mu)
+yi = gb.interpolate(y)
+
+@LinearForm
+def proj(v, _):
+    return ddot(C(sym_grad(yi)), v)
+
+sigma = projection(proj, sgb, gb)
+
 if __name__ == "__main__":
-    from skfem.visuals.matplotlib import draw, show
+    from skfem.visuals.matplotlib import plot, draw, show
     M = MeshQuad(np.array(m.p + y[gb.nodal_dofs]), m.t)
-    draw(M)
+    ax = draw(M)
+    plot(M, sigma[sgb.nodal_dofs[0]], ax=ax, colorbar=True)
     show()
