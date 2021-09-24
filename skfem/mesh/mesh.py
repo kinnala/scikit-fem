@@ -433,12 +433,30 @@ class Mesh:
             ]
         raise NotImplementedError
 
+    def is_valid(self) -> bool:
+        """Perform some mesh validation checks."""
+        # check that there are no duplicate points
+        tmp = np.ascontiguousarray(self.p.T)
+        if self.p.shape[1] != np.unique(tmp.view([('', tmp.dtype)]
+                                                 * tmp.shape[1])).shape[0]:
+            warn("Mesh contains duplicate vertices.")
+            return False
+
+        # check that all points are at least in some element
+        if len(np.setdiff1d(np.arange(self.p.shape[1]),
+                            np.unique(self.t))) > 0:
+            warn("Mesh contains a vertex not belonging to any element.")
+            return False
+
+        return True
+
     def __add__(self, other):
         """Join two meshes."""
         cls = type(self)
         if not isinstance(other, cls):
             raise TypeError("Can only join meshes with same type.")
-        p = np.hstack((self.p, other.p))
+        p = np.hstack((self.p.round(decimals=8),
+                       other.p.round(decimals=8)))
         t = np.hstack((self.t, other.t + self.p.shape[1]))
         tmp = np.ascontiguousarray(p.T)
         tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]),
