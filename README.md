@@ -279,6 +279,7 @@ with respect to documented and/or tested features.
 - Added: `ElementTri15ParamPlate`, 15-parameter nonconforming triangular element for plates
 - Added: `ElementTriBDM1`, the lowest order Brezzi-Douglas-Marini element
 - Added: `Mesh.draw().show()` will now visualize any mesh interactively (requires [vedo](https://vedo.embl.es/))
+- Added: Adaptive refinement for `MeshTet1`
 - Fixed: `MappingIsoparametric` is now about 2x faster for large meshes thanks
   to additional caching
 - Fixed: `MeshHex2.save` did not work properly
