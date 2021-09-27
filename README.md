@@ -217,29 +217,6 @@ You may use the following BibTeX entry:
 Use the Zenodo DOIs if you want to cite a specific version,
 e.g., to ensure reproducibility.
 
-## In literature
-
-The library has been used in the preparation of the following scientific works.
-
-- Gustafsson, T. & Videman, J. (2021). Stabilized finite elements for Tresca friction problem. arXiv preprint [arxiv:2106.12165](https://arxiv.org/abs/2106.12165).
-- Gustafsson, T. (2020). A simple technique for unstructured mesh generation via adaptive finite elements. arXiv preprint [arXiv:2011.07919](https://arxiv.org/abs/2011.07919).
-- Huang, X., Shi, Y., & Wang, W. (2020). A Morley-Wang-Xu element method for a fourth order elliptic singular perturbation problem. arXiv preprint [arXiv:2011.14064](https://arxiv.org/abs/2011.14064).
-- Gustafsson, T., Stenberg, R., & Videman, J. (2020). Nitsche's method for Kirchhoff plates. arXiv preprint [arXiv:2007.00403](https://arxiv.org/abs/2007.00403).
-- Aquino, A., Mallinson, S., McBain, G. D., Horrocks, G., & Barber, T. (2020). Two-dimensional numerical simulation of inkjet print-zone flows. 22nd Australasian Fluid Mechanics Conference AFMC2020. [Open access](https://doi.org/10.14264/c646e40).
-- Gustafsson, T., & McBain, G. D. (2020). scikit-fem: A Python package for finite element assembly. Journal of Open Source Software, 52(5). [Open access](https://doi.org/10.21105/joss.02369).
-- Gustafsson, T., Stenberg, R., & Videman, J. (2020). On Nitsche's method for elastic contact problems. SIAM Journal on Scientific Computing, 42(2), B425–B446. arXiv preprint [arXiv:1902.09312](https://arxiv.org/abs/1902.09312).
-- Gustafsson, T., Stenberg, R., & Videman, J. (2019). Nitsche's Master-Slave Method for Elastic Contact Problems. [arXiv:1912.08279](https://arxiv.org/abs/1912.08279).
-- McBain, G. D., Mallinson, S. G., Brown, B. R., Gustafsson, T. (2019). Three ways to compute multiport inertance. The ANZIAM Journal, 60, C140–C155.  [Open access](https://doi.org/10.21914/anziamj.v60i0.14058).
-- Gustafsson, T., Stenberg, R., & Videman, J. (2019). Error analysis of Nitsche's mortar method. Numerische Mathematik, 142(4), 973–994. [Open access](https://link.springer.com/article/10.1007/s00211-019-01039-5).
-- Gustafsson, T., Stenberg, R., & Videman, J. (2019). Nitsche's method for unilateral contact problems. Port. Math. 75, 189–204. arXiv preprint [arXiv:1805.04283](https://arxiv.org/abs/1805.04283).
-- Gustafsson, T., Stenberg, R. & Videman, J. (2018). A posteriori estimates for conforming Kirchhoff plate elements. SIAM Journal on Scientific Computing, 40(3), A1386–A1407. arXiv preprint [arXiv:1707.08396](https://arxiv.org/abs/1707.08396).
-- Gustafsson, T., Rajagopal, K. R., Stenberg, R., & Videman, J. (2018). An adaptive finite element method for the inequality-constrained Reynolds equation. Computer Methods in Applied Mechanics and Engineering, 336, 156–170. arXiv preprint [arXiv:1711.04274](https://arxiv.org/abs/1711.04274).
-- Gustafsson, T., Stenberg, R., & Videman, J. (2018). A stabilised finite element method for the plate obstacle problem. BIT Numerical Mathematics, 59(1), 97–124. arXiv preprint [arXiv:1711.04166](https://arxiv.org/abs/1711.04166).
-- Gustafsson, T., Stenberg, R., & Videman, J. (2017). Nitsche’s Method for the Obstacle Problem of Clamped Kirchhoff Plates. In European Conference on Numerical Mathematics and Advanced Applications, 407–415. Springer.
-- Gustafsson, T., Stenberg, R., & Videman, J. (2017). A posteriori analysis of classical plate elements. Rakenteiden Mekaniikka, 50(3), 141–145. [Open access](https://rakenteidenmekaniikka.journal.fi/article/view/65004/26450).
-
-Feel free to open a PR to add your publication to the list.
-
 ## Changelog
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -247,6 +224,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 with respect to documented and/or tested features.
 
 ### Unreleased
+
+### [4.0.0] - 2021-09-27
 
 - Added: `Mesh.save`/`Mesh.load` now exports/imports `Mesh.subdomains` and
   `Mesh.boundaries`
