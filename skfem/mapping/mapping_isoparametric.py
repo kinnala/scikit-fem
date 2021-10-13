@@ -11,6 +11,8 @@ from ..generic_utils import HashableNdArray
 
 
 class MappingIsoparametric(Mapping):
+    cache_size = 128
+
     """An isoparametric mapping, e.g., for quadrilateral and
     hexahedral elements."""
 
@@ -61,7 +63,7 @@ class MappingIsoparametric(Mapping):
                     out += p[i, t[itr, tind]][:, None] * phi
                 return out
 
-        @lru_cache(maxsize=128)
+        @lru_cache(maxsize=MappingIsoparametric.cache_size)
         def J(i, j, X, tind=None):
             if tind is None:
                 out = np.zeros((t.shape[1], X.shape[1]))
@@ -111,6 +113,28 @@ class MappingIsoparametric(Mapping):
         self.elem = elem
         self.mesh = mesh
         self.dim = p.shape[0]
+
+    def __getstate__(self):
+      """
+        Provide a clean state without the memoization on J
+        to picklers like pickle or dill
+      """
+      state = self.__dict__.copy()
+      state['J'] = state['J'].__wrapped__
+
+      return state
+
+    def __setstate__(self, newstate):
+      """
+        Recover the memoization on J when unpickled
+      """
+      # I would like to think there is a cleaner way to do this
+      @lru_cache(maxsize=MappingIsoparametric.cache_size)
+      def Jp(*args, Jo = newstate['J'], **kwargs):
+        return Jo(*args, **kwargs)
+      newstate['J'] = Jp
+
+      self.__dict__.update(newstate)
 
     def G(self, X: ndarray, find: Optional[ndarray] = None) -> ndarray:
         return np.array([self.bndmap(i, X, find=find)
