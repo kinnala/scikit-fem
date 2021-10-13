@@ -1,6 +1,5 @@
 import warnings
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
-from functools import lru_cache
 
 import numpy as np
 from numpy import ndarray
@@ -103,7 +102,6 @@ class AbstractBasis:
             return self.get_element_dofs(None)
         return self.get_element_dofs(HashableNdArray(self.tind))
 
-    @lru_cache(maxsize=128)
     def get_element_dofs(self, tind):
         if tind is None:
             return self.dofs.element_dofs

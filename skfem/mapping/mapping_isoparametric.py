@@ -6,7 +6,6 @@ from numpy import ndarray
 from skfem.element import Element
 from skfem.mesh import Mesh2D, Mesh3D
 from .mapping import Mapping
-from functools import lru_cache
 from ..generic_utils import HashableNdArray
 
 
@@ -61,7 +60,6 @@ class MappingIsoparametric(Mapping):
                     out += p[i, t[itr, tind]][:, None] * phi
                 return out
 
-        @lru_cache(maxsize=128)
         def J(i, j, X, tind=None):
             if tind is None:
                 out = np.zeros((t.shape[1], X.shape[1]))
