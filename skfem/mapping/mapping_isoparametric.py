@@ -65,7 +65,6 @@ class MappingIsoparametric(Mapping):
 
     def bndmap(self, i, X, find=None):
         p = self.mesh.doflocs
-        t = self.mesh.dofs.element_dofs
         facets = self.mesh.facets
         if find is None:
             out = np.zeros((facets.shape[1], X.shape[1]))
@@ -82,7 +81,6 @@ class MappingIsoparametric(Mapping):
 
     def bndJ(self, i, j, X, find=None):
         p = self.mesh.doflocs
-        t = self.mesh.dofs.element_dofs
         facets = self.mesh.facets
         if find is None:
             out = np.zeros((facets.shape[1], X.shape[1]))
