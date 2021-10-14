@@ -9,6 +9,7 @@ from skfem import BilinearForm, asm, solve, condense, projection
 from skfem.mesh import (MeshTri, MeshTet, MeshHex,
                         MeshQuad, MeshLine1, MeshWedge1)
 from skfem.assembly import CellBasis, FacetBasis, Dofs, Functional
+from skfem.mapping import MappingIsoparametric
 from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
                            ElementTetP2, ElementHexS2, ElementHex2,
                            ElementQuad2, ElementLineP2, ElementTriP0,
@@ -288,7 +289,35 @@ def test_point_source(etype):
 
 
 def test_pickling():
-    # check that pickling doesn't crash for CellBasis
+    # some simple checks for pickle
     mesh = MeshQuad()
-    basis = CellBasis(mesh, ElementQuad1())
-    pickle.dumps(basis)
+    elem = ElementQuad1()
+    mapping = MappingIsoparametric(mesh, elem)
+    basis = CellBasis(mesh, elem, mapping)
+
+    pickled_mesh = pickle.dumps(mesh)
+    pickled_elem = pickle.dumps(elem)
+    pickled_mapping = pickle.dumps(mapping)
+    pickled_basis = pickle.dumps(basis)
+
+    mesh1 = pickle.loads(pickled_mesh)
+    elem1 = pickle.loads(pickled_elem)
+    mapping1 = pickle.loads(pickled_mapping)
+    basis1 = pickle.loads(pickled_basis)
+
+    assert_almost_equal(
+        laplace.assemble(basis).toarray(),
+        laplace.assemble(basis1).toarray(),
+    )
+    assert_almost_equal(
+        mesh.doflocs,
+        mesh1.doflocs,
+    )
+    assert_almost_equal(
+        mapping.J(0, 0, np.array([[.3], [.3]])),
+        mapping1.J(0, 0, np.array([[.3], [.3]])),
+    )
+    assert_almost_equal(
+        elem.doflocs,
+        elem1.doflocs,
+    )
