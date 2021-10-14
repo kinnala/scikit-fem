@@ -31,6 +31,7 @@ class AbstractBasis:
     X: ndarray
     W: ndarray
     _sign: float = 1.
+    dofs: Dofs
 
     def __init__(self,
                  mesh: Mesh,
