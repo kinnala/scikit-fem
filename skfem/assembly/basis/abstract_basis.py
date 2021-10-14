@@ -1,6 +1,5 @@
 import warnings
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
-from functools import lru_cache
 
 import numpy as np
 from numpy import ndarray
@@ -10,7 +9,6 @@ from skfem.mapping import Mapping
 from skfem.mesh import Mesh
 from skfem.quadrature import get_quadrature
 from skfem.refdom import Refdom
-from skfem.generic_utils import HashableNdArray
 
 
 class AbstractBasis:
@@ -33,6 +31,7 @@ class AbstractBasis:
     X: ndarray
     W: ndarray
     _sign: float = 1.
+    dofs: Dofs
 
     def __init__(self,
                  mesh: Mesh,
@@ -56,8 +55,8 @@ class AbstractBasis:
 
             # match mapped dofs and global dof numbering
             for itr in range(doflocs.shape[0]):
-                for jtr in range(self.element_dofs.shape[0]):
-                    self.doflocs[itr, self.element_dofs[jtr]] =\
+                for jtr in range(self.dofs.element_dofs.shape[0]):
+                    self.doflocs[itr, self.dofs.element_dofs[jtr]] =\
                         doflocs[itr, :, jtr]
         except Exception:
             warnings.warn("Unable to calculate DOF locations.")
@@ -65,7 +64,7 @@ class AbstractBasis:
         self.mesh = mesh
         self.elem = elem
 
-        self.Nbfun = self.element_dofs.shape[0]
+        self.Nbfun = self.dofs.element_dofs.shape[0]
 
         self.nelems = 0  # subclasses should overwrite
 
@@ -99,15 +98,12 @@ class AbstractBasis:
 
     @property
     def element_dofs(self):
-        if self.tind is None:
-            return self.get_element_dofs(None)
-        return self.get_element_dofs(HashableNdArray(self.tind))
-
-    @lru_cache(maxsize=128)
-    def get_element_dofs(self, tind):
-        if tind is None:
-            return self.dofs.element_dofs
-        return self.dofs.element_dofs[:, tind]
+        if not hasattr(self, '_element_dofs'):
+            if self.tind is None:
+                self._element_dofs = self.dofs.element_dofs
+            else:
+                self._element_dofs = self.dofs.element_dofs[:, self.tind]
+        return self._element_dofs
 
     def complement_dofs(self, *D):
         if type(D[0]) is dict:

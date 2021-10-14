@@ -6,8 +6,7 @@ from numpy import ndarray
 from skfem.element import Element
 from skfem.mesh import Mesh2D, Mesh3D
 from .mapping import Mapping
-from functools import lru_cache
-from ..generic_utils import HashableNdArray
+from ..generic_utils import hash_args
 
 
 class MappingIsoparametric(Mapping):
@@ -43,74 +42,83 @@ class MappingIsoparametric(Mapping):
             bndelem is ElementQuad1.
 
         """
-        p = mesh.doflocs
-        t = mesh.dofs.element_dofs
-        facets = mesh.facets
-
-        def Fmap(i, X, tind=None):
-            if tind is None:
-                out = np.zeros((t.shape[1], X.shape[1]))
-                for itr in range(t.shape[0]):
-                    phi, _ = elem.lbasis(X, itr)
-                    out += p[i, t[itr, :]][:, None] * phi
-                return out
-            else:
-                out = np.zeros((len(tind), X.shape[-1]))
-                for itr in range(t.shape[0]):
-                    phi, _ = elem.lbasis(X, itr)
-                    out += p[i, t[itr, tind]][:, None] * phi
-                return out
-
-        @lru_cache(maxsize=128)
-        def J(i, j, X, tind=None):
-            if tind is None:
-                out = np.zeros((t.shape[1], X.shape[1]))
-                for itr in range(t.shape[0]):
-                    _, dphi = elem.lbasis(X, itr)
-                    out += p[i, t[itr, :]][:, None] * dphi[j]
-                return out
-            else:
-                out = np.zeros((len(tind), X.shape[-1]))
-                for itr in range(t.shape[0]):
-                    _, dphi = elem.lbasis(X, itr)
-                    out += p[i, t[itr, tind]][:, None] * dphi[j]
-                return out
-
-        def bndmap(i, X, find=None):
-            if find is None:
-                out = np.zeros((facets.shape[1], X.shape[1]))
-                for itr in range(facets.shape[0]):
-                    phi, _ = bndelem.lbasis(X, itr)
-                    out += p[i, facets[itr, :]][:, None] * phi
-                return out
-            else:
-                out = np.zeros((len(find), X.shape[-1]))
-                for itr in range(facets.shape[0]):
-                    phi, _ = bndelem.lbasis(X, itr)
-                    out += p[i, facets[itr, find]][:, None] * phi
-                return out
-
-        def bndJ(i, j, X, find=None):
-            if find is None:
-                out = np.zeros((facets.shape[1], X.shape[1]))
-                for itr in range(facets.shape[0]):
-                    _, dphi = bndelem.lbasis(X, itr)
-                    out += p[i, facets[itr, :]][:, None] * dphi[j]
-                return out
-            else:
-                out = np.zeros((len(find), X.shape[-1]))
-                for itr in range(facets.shape[0]):
-                    _, dphi = bndelem.lbasis(X, itr)
-                    out += p[i, facets[itr, find]][:, None] * dphi[j]
-                return out
-
-        self.Fmap = Fmap
-        self.bndmap = bndmap
-        self.J = J
-        self.bndJ = bndJ
         self.elem = elem
+        self.bndelem = bndelem
         self.mesh = mesh
-        self.dim = p.shape[0]
+        self.dim = mesh.dim()
+
+    def Fmap(self, i, X, tind=None):
+        p = self.mesh.doflocs
+        t = self.mesh.dofs.element_dofs
+        if tind is None:
+            out = np.zeros((t.shape[1], X.shape[1]))
+            for itr in range(t.shape[0]):
+                phi, _ = self.elem.lbasis(X, itr)
+                out += p[i, t[itr, :]][:, None] * phi
+            return out
+        else:
+            out = np.zeros((len(tind), X.shape[-1]))
+            for itr in range(t.shape[0]):
+                phi, _ = self.elem.lbasis(X, itr)
+                out += p[i, t[itr, tind]][:, None] * phi
+            return out
+
+    def bndmap(self, i, X, find=None):
+        p = self.mesh.doflocs
+        facets = self.mesh.facets
+        if find is None:
+            out = np.zeros((facets.shape[1], X.shape[1]))
+            for itr in range(facets.shape[0]):
+                phi, _ = self.bndelem.lbasis(X, itr)
+                out += p[i, facets[itr, :]][:, None] * phi
+            return out
+        else:
+            out = np.zeros((len(find), X.shape[-1]))
+            for itr in range(facets.shape[0]):
+                phi, _ = self.bndelem.lbasis(X, itr)
+                out += p[i, facets[itr, find]][:, None] * phi
+            return out
+
+    def bndJ(self, i, j, X, find=None):
+        p = self.mesh.doflocs
+        facets = self.mesh.facets
+        if find is None:
+            out = np.zeros((facets.shape[1], X.shape[1]))
+            for itr in range(facets.shape[0]):
+                _, dphi = self.bndelem.lbasis(X, itr)
+                out += p[i, facets[itr, :]][:, None] * dphi[j]
+            return out
+        else:
+            out = np.zeros((len(find), X.shape[-1]))
+            for itr in range(facets.shape[0]):
+                _, dphi = self.bndelem.lbasis(X, itr)
+                out += p[i, facets[itr, find]][:, None] * dphi[j]
+            return out
+
+    def _J(self, i, j, X, tind=None):
+        p = self.mesh.doflocs
+        t = self.mesh.dofs.element_dofs
+        if tind is None:
+            out = np.zeros((t.shape[1], X.shape[1]))
+            for itr in range(t.shape[0]):
+                _, dphi = self.elem.lbasis(X, itr)
+                out += p[i, t[itr, :]][:, None] * dphi[j]
+            return out
+        else:
+            out = np.zeros((len(tind), X.shape[-1]))
+            for itr in range(t.shape[0]):
+                _, dphi = self.elem.lbasis(X, itr)
+                out += p[i, t[itr, tind]][:, None] * dphi[j]
+            return out
+
+    def J(self, i, j, X, tind=None):
+        # cache the jacobian
+        if not hasattr(self, '_cache'):
+            self._cache = {}
+        h = hash_args(i, j, X, tind)
+        if h not in self._cache:
+            self._cache[h] = self._J(i, j, X, tind)
+        return self._cache[h]
 
     def G(self, X: ndarray, find: Optional[ndarray] = None) -> ndarray:
         return np.array([self.bndmap(i, X, find=find)
@@ -149,8 +157,6 @@ class MappingIsoparametric(Mapping):
         return np.array([self.Fmap(i, X, tind) for i in range(X.shape[0])])
 
     def detDF(self, X, tind=None, J=None):
-        X = HashableNdArray(X)
-        tind = None if tind is None else HashableNdArray(tind)
         if J is None:
             J = [[self.J(i, j, X, tind=tind) for j in range(self.dim)]
                  for i in range(self.dim)]
@@ -172,8 +178,6 @@ class MappingIsoparametric(Mapping):
         return detDF
 
     def invDF(self, X, tind=None):
-        X = HashableNdArray(X)
-        tind = None if tind is None else HashableNdArray(tind)
         J = [[self.J(i, j, X, tind=tind) for j in range(self.dim)]
              for i in range(self.dim)]
         detDF = self.detDF(X, tind, J=J)

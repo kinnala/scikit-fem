@@ -1,3 +1,4 @@
+import pickle
 from unittest import TestCase
 
 import pytest
@@ -8,6 +9,7 @@ from skfem import BilinearForm, asm, solve, condense, projection
 from skfem.mesh import (MeshTri, MeshTet, MeshHex,
                         MeshQuad, MeshLine1, MeshWedge1)
 from skfem.assembly import CellBasis, FacetBasis, Dofs, Functional
+from skfem.mapping import MappingIsoparametric
 from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
                            ElementTetP2, ElementHexS2, ElementHex2,
                            ElementQuad2, ElementLineP2, ElementTriP0,
@@ -15,6 +17,7 @@ from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
                            ElementTetP1, ElementTetP0, ElementHex1,
                            ElementHex0, ElementLineP1, ElementLineMini,
                            ElementWedge1)
+from skfem.models.poisson import laplace
 
 
 class TestCompositeSplitting(TestCase):
@@ -277,11 +280,44 @@ def test_trace(mtype, e1, e2, flat):
 )
 def test_point_source(etype):
 
-    from skfem.models.poisson import laplace
-
     mesh = MeshLine1().refined()
     basis = CellBasis(mesh, etype())
     source = np.array([0.7])
     u = solve(*condense(asm(laplace, basis), basis.point_source(source), D=basis.find_dofs()))
     exact = np.stack([(1 - source) * mesh.p, (1 - mesh.p) * source]).min(0)
     assert_almost_equal(u[basis.nodal_dofs], exact)
+
+
+def test_pickling():
+    # some simple checks for pickle
+    mesh = MeshQuad()
+    elem = ElementQuad1()
+    mapping = MappingIsoparametric(mesh, elem)
+    basis = CellBasis(mesh, elem, mapping)
+
+    pickled_mesh = pickle.dumps(mesh)
+    pickled_elem = pickle.dumps(elem)
+    pickled_mapping = pickle.dumps(mapping)
+    pickled_basis = pickle.dumps(basis)
+
+    mesh1 = pickle.loads(pickled_mesh)
+    elem1 = pickle.loads(pickled_elem)
+    mapping1 = pickle.loads(pickled_mapping)
+    basis1 = pickle.loads(pickled_basis)
+
+    assert_almost_equal(
+        laplace.assemble(basis).toarray(),
+        laplace.assemble(basis1).toarray(),
+    )
+    assert_almost_equal(
+        mesh.doflocs,
+        mesh1.doflocs,
+    )
+    assert_almost_equal(
+        mapping.J(0, 0, np.array([[.3], [.3]])),
+        mapping1.J(0, 0, np.array([[.3], [.3]])),
+    )
+    assert_almost_equal(
+        elem.doflocs,
+        elem1.doflocs,
+    )

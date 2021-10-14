@@ -164,7 +164,7 @@ class Dofs:
     edge_dofs: Optional[ndarray] = None
     interior_dofs: Optional[ndarray] = None
 
-    element_dofs: Optional[ndarray] = None
+    element_dofs: ndarray
     N: int = 0
 
     topo: Mesh
