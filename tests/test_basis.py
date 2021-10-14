@@ -1,3 +1,4 @@
+import pickle
 from unittest import TestCase
 
 import pytest
@@ -15,6 +16,7 @@ from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
                            ElementTetP1, ElementTetP0, ElementHex1,
                            ElementHex0, ElementLineP1, ElementLineMini,
                            ElementWedge1)
+from skfem.models.poisson import laplace
 
 
 class TestCompositeSplitting(TestCase):
@@ -277,11 +279,16 @@ def test_trace(mtype, e1, e2, flat):
 )
 def test_point_source(etype):
 
-    from skfem.models.poisson import laplace
-
     mesh = MeshLine1().refined()
     basis = CellBasis(mesh, etype())
     source = np.array([0.7])
     u = solve(*condense(asm(laplace, basis), basis.point_source(source), D=basis.find_dofs()))
     exact = np.stack([(1 - source) * mesh.p, (1 - mesh.p) * source]).min(0)
     assert_almost_equal(u[basis.nodal_dofs], exact)
+
+
+def test_pickling():
+    # check that pickling doesn't crash for CellBasis
+    mesh = MeshQuad()
+    basis = CellBasis(mesh, ElementQuad1())
+    pickle.dumps(basis)
