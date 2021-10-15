@@ -225,7 +225,9 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
-- Fixed: `AbstractBasis`/`MappingIsoparametric` can now be pickled
+### [4.0.1] - 2021-10-15
+
+- Fixed: `MappingIsoparametric` can now be pickled
 
 ### [4.0.0] - 2021-09-27
 
