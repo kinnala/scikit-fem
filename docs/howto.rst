@@ -233,3 +233,63 @@ the same thing:
            4.59225774e-16, -4.41713127e-16,  4.63704316e-16,  1.25333771e-16,
            6.12372436e-01,  1.58113883e-01,  6.12372436e-01,  1.58113883e-01,
            0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00])
+
+Assembling jump terms
+=====================
+
+The shorthand :func:`skfem.assembly.asm`
+supports special syntax for assembling the same form over a list or lists of
+bases and summing the result.  This can be helpful, e.g., when assembling the
+so-called "jump terms" used in penalty or discontinuous Galerkin methods,
+or when assembling the same form on mixed meshes with different element types.
+
+Consider the form
+
+.. math::
+
+   b(u,v) = \sum_{E \in \mathcal{E}_h} \int_{E} [u][v]\,\mathrm{d}s
+
+where :math:`\mathcal{E}_h` is the set of interior facets of a mesh
+and :math:`[u]` is the jump in the value of :math:`u` over the facet
+:math:`E`.
+We have
+:math:`[u] = u_1 - u_2` and :math:`[v] = v_1 - v_2`
+where the subscript denotes the value of the function restricted to one of the
+elements sharing a facet.  The form can be split as
+
+.. math::
+
+   b(u,v) = \sum_{E \in \mathcal{E}_h} \left(\int_{E} u_1 v_1\,\mathrm{d}s - \int_{E} u_1 v_2\,\mathrm{d}s - \int_{E} u_2 v_1\,\mathrm{d}s + \int_{E} u_2 v_2\,\mathrm{d}s\right)
+
+and normally we would assemble all four forms separately.
+
+Suppose a list of bases is provided during a call to :func:`skfem.assembly.asm`:
+
+.. doctest::
+
+   >>> import skfem as fem
+   >>> m = fem.MeshTri()
+   >>> e = fem.ElementTriP0()
+   >>> bases = [fem.InteriorFacetBasis(m, e, side=k) for k in [0, 1]]
+   >>> jumpform = fem.BilinearForm(lambda u, v, p: (-1) ** sum(p.idx) * u * v)
+   >>> fem.asm(jumpform, bases, bases).toarray()
+   array([[ 1.41421356, -1.41421356],
+          [-1.41421356,  1.41421356]])
+
+This is more or less equivalent to the following nested for-loop:
+
+.. doctest::
+
+   >>> import skfem as fem
+   >>> import numpy as np
+   >>> m = fem.MeshTri()
+   >>> e = fem.ElementTriP0()
+   >>> bases = [fem.InteriorFacetBasis(m, e, side=k) for k in [0, 1]]
+   >>> jumpform = fem.BilinearForm(lambda u, v, p: (-1) ** sum(p._idx) * u * v)
+   >>> A = np.zeros((2, 2))
+   >>> for idx1 in range(2):
+   ...     for idx2 in range(2):
+   ...         A += fem.asm(jumpform, bases[idx1], bases[idx2], _idx=(idx1, idx2)).toarray()
+   >>> A
+   array([[ 1.41421356, -1.41421356],
+          [-1.41421356,  1.41421356]])
