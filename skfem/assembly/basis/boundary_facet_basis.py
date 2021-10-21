@@ -10,6 +10,7 @@ from skfem.mesh import Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 
 from .abstract_basis import AbstractBasis
 from .cell_basis import CellBasis
+from ..dofs import Dofs
 
 
 class BoundaryFacetBasis(AbstractBasis):
@@ -22,7 +23,8 @@ class BoundaryFacetBasis(AbstractBasis):
                  intorder: Optional[int] = None,
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
                  facets: Optional[ndarray] = None,
-                 _side: int = 0):
+                 _side: int = 0,
+                 dofs: Optional[Dofs] = None):
         """Precomputed global basis on boundary facets.
 
         Parameters
@@ -42,6 +44,8 @@ class BoundaryFacetBasis(AbstractBasis):
             Optional tuple of quadrature points and weights.
         facets
             Optional subset of facet indices.
+        dofs
+            Optional :class:`~skfem.assembly.Dofs` object.
 
         """
         super(BoundaryFacetBasis, self).__init__(mesh,
@@ -49,7 +53,8 @@ class BoundaryFacetBasis(AbstractBasis):
                                                  mapping,
                                                  intorder,
                                                  quadrature,
-                                                 mesh.brefdom)
+                                                 mesh.brefdom,
+                                                 dofs)
 
         # facets where the basis is evaluated
         if facets is None:

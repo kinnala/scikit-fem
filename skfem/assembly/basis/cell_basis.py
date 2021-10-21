@@ -8,6 +8,7 @@ from skfem.mapping import Mapping
 from skfem.mesh import Mesh
 
 from .abstract_basis import AbstractBasis
+from ..dofs import Dofs
 
 
 class CellBasis(AbstractBasis):
@@ -35,7 +36,8 @@ class CellBasis(AbstractBasis):
                  mapping: Optional[Mapping] = None,
                  intorder: Optional[int] = None,
                  elements: Optional[ndarray] = None,
-                 quadrature: Optional[Tuple[ndarray, ndarray]] = None):
+                 quadrature: Optional[Tuple[ndarray, ndarray]] = None,
+                 dofs: Optional[Dofs] = None):
         """Combine :class:`~skfem.mesh.Mesh` and :class:`~skfem.element.Element`
         into a set of precomputed global basis functions.
 
@@ -56,6 +58,8 @@ class CellBasis(AbstractBasis):
             Optional subset of element indices.
         quadrature
             Optional tuple of quadrature points and weights.
+        dofs
+            Optional :class:`~skfem.assembly.Dofs` object.
 
         """
         super(CellBasis, self).__init__(mesh,
@@ -63,7 +67,8 @@ class CellBasis(AbstractBasis):
                                         mapping,
                                         intorder,
                                         quadrature,
-                                        mesh.refdom)
+                                        mesh.refdom,
+                                        dofs)
 
         self.basis = [self.elem.gbasis(self.mapping, self.X, j, tind=elements)
                       for j in range(self.Nbfun)]

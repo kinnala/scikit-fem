@@ -39,14 +39,14 @@ class AbstractBasis:
                  mapping: Optional[Mapping] = None,
                  intorder: Optional[int] = None,
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
-                 refdom: Type[Refdom] = Refdom):
+                 refdom: Type[Refdom] = Refdom,
+                 dofs: Optional[Dofs] = None):
 
         if mesh.refdom != elem.refdom:
             raise ValueError("Incompatible Mesh and Element.")
 
         self.mapping = mesh._mapping() if mapping is None else mapping
-
-        self.dofs = Dofs(mesh, elem)
+        self.dofs = Dofs(mesh, elem) if dofs is None else dofs
 
         # global degree-of-freedom location
         try:
