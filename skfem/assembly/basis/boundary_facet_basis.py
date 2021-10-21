@@ -57,7 +57,7 @@ class BoundaryFacetBasis(AbstractBasis):
         else:
             self.find = facets
         self.tind = self.mesh.f2t[_side, self.find]
-        self._sign = 1 - 2. * _side
+        self._side = _side  # for debugging
 
         # boundary refdom to global facet
         x = self.mapping.G(self.X, find=self.find)

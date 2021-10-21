@@ -70,8 +70,9 @@ def asm(form: Form,
 
     """
     nargs = [[arg] if not isinstance(arg, list) else arg for arg in args]
-    out = sum(map(lambda bases: form.coo_data(*bases, **kwargs),
-                  product(*nargs)))
+    out = sum(map(lambda a: form.coo_data(*a[1], idx=a[0], **kwargs),
+                  zip(product(*(range(len(x)) for x in nargs)),
+                      product(*nargs))))
     assert not isinstance(out, int)
     return out.todefault()
 

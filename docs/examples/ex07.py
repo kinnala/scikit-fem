@@ -1,4 +1,4 @@
-"""Interior penalty method."""
+"""Discontinuous Galerkin method."""
 
 from skfem import *
 from skfem.helpers import grad, dot
@@ -14,15 +14,21 @@ fb = [InteriorFacetBasis(m, e, side=i) for i in [0, 1]]
 
 @BilinearForm
 def dgform(u, v, p):
-    ju = p.sign1 * u
-    jv = p.sign2 * v
+    ju = (-1.) ** p.idx[0] * u
+    jv = (-1.) ** p.idx[1] * v
     h = p.h
     n = p.n
     return ju * jv / (alpha * h) - dot(grad(u), n) * jv - dot(grad(v), n) * ju
 
+@BilinearForm
+def nitscheform(u, v, p):
+    h = p.h
+    n = p.n
+    return u * v / (alpha * h) - dot(grad(u), n) * v - dot(grad(v), n) * u
+
 A = asm(laplace, ib)
 B = asm(dgform, fb, fb)
-C = asm(dgform, bb)
+C = asm(nitscheform, bb)
 b = asm(unit_load, ib)
 
 x = solve(A + B + C, b)

@@ -13,6 +13,12 @@ class FormExtraParams(dict):
     """Passed to forms as 'w'."""
 
     def __getattr__(self, attr):
+        if attr[:4] == 'sign':
+            # for backwards compatibility
+            ix = int(attr[4]) - 1 if len(attr) == 5 else 0
+            if hasattr(self, 'idx') and ix < len(self['idx']):
+                return (-1.) ** self['idx'][ix]
+            return 1.
         if attr in self:
             if hasattr(self[attr], 'value'):
                 return self[attr].value
@@ -57,6 +63,9 @@ class Form:
         """Support additional input formats for 'w'."""
         for k in w:
             if isinstance(w[k], DiscreteField):
+                continue
+            elif isinstance(w[k], tuple):
+                # asm() product index is of type tuple
                 continue
             elif isinstance(w[k], ndarray) and len(w[k].shape) == 2:
                 w[k] = DiscreteField(w[k])

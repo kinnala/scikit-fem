@@ -30,7 +30,6 @@ class Functional(Form):
         w = FormExtraParams({
             **v.default_parameters(),
             **self.dictify(kwargs, v),
-            'sign': v._sign,
         })
         return self._kernel(w, v.dx)
 
