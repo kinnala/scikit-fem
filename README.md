@@ -225,6 +225,13 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+- Added: `asm` will now include the extra parameter `idx` in `FormExtraParams`
+  that can be used to identify which basis is being assembled
+- Added: All basis class constructors now accept `dofs` keyword argument for
+  specifying custom `Dofs` object to be used in the assembly
+- Added: `Dofs` constructor accepts the `offset` keyword argument for
+  specifying a nonzero initial index for indexing the DOFs
+
 ### [4.0.1] - 2021-10-15
 
 - Fixed: `MappingIsoparametric` can now be pickled
