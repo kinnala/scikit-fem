@@ -33,7 +33,7 @@ def laplace(u, ut, v, vt, w):
 def hdg(u, ut, v, vt, w):
     from skfem.helpers import grad, dot
     # outwards normal
-    n = w.n * w.sign
+    n = w.n * (-1.) ** w.idx[0]
     return dot(n, grad(u)) * (vt - v) + dot(n, grad(v)) * (ut - u)\
         + 1e1 / w.h * (ut - u) * (vt - v)
 

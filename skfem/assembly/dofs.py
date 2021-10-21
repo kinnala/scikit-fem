@@ -170,7 +170,7 @@ class Dofs:
     topo: Mesh
     element: Element
 
-    def __init__(self, topo, element):
+    def __init__(self, topo, element, offset=0):
 
         self.topo = topo
         self.element = element
@@ -178,8 +178,8 @@ class Dofs:
         self.nodal_dofs = np.reshape(
             np.arange(element.nodal_dofs * topo.nvertices, dtype=np.int64),
             (element.nodal_dofs, topo.nvertices),
-            order='F')
-        offset = element.nodal_dofs * topo.nvertices
+            order='F') + offset
+        offset += element.nodal_dofs * topo.nvertices
 
         # edge dofs
         if element.dim == 3 and element.edge_dofs > 0:

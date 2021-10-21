@@ -7,6 +7,7 @@ from skfem.mapping import Mapping
 from skfem.mesh import Mesh
 
 from .boundary_facet_basis import BoundaryFacetBasis
+from ..dofs import Dofs
 
 
 class InteriorFacetBasis(BoundaryFacetBasis):
@@ -23,7 +24,8 @@ class InteriorFacetBasis(BoundaryFacetBasis):
                  intorder: Optional[int] = None,
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
                  facets: Optional[ndarray] = None,
-                 side: int = 0):
+                 side: int = 0,
+                 dofs: Optional[Dofs] = None):
         """Precomputed global basis on interior facets."""
 
         if side not in (0, 1):
@@ -38,4 +40,5 @@ class InteriorFacetBasis(BoundaryFacetBasis):
                                                  intorder=intorder,
                                                  quadrature=quadrature,
                                                  facets=facets,
-                                                 _side=side)
+                                                 _side=side,
+                                                 dofs=dofs)
