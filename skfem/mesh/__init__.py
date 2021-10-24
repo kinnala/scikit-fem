@@ -43,11 +43,25 @@ from .mesh_hex_1_dg import MeshHex1DG
 from .mesh_line_1_dg import MeshLine1DG
 from .mesh_wedge_1 import MeshWedge1
 
-# aliases
-MeshTri = MeshTri1
-MeshQuad = MeshQuad1
-MeshTet = MeshTet1
-MeshHex = MeshHex1
+
+def create_mesh_constructor(cls):
+
+    class MeshConstructor:
+
+        def __call__(self, *args, **kwargs):
+
+            m = cls(*args, **kwargs)
+            m.is_valid()
+            return m
+
+        def __getattr__(self, name):
+            return getattr(cls, name)
+
+        @classmethod
+        def __instancecheck__(_, instance):
+            return isinstance(instance, cls)
+
+    return MeshConstructor()
 
 
 class MeshLineConstructor:
@@ -60,18 +74,27 @@ class MeshLineConstructor:
         if p is not None and t is None:
             tmp = np.arange(p.shape[1] - 1, dtype=np.int64)
             t = np.vstack((tmp, tmp + 1))
-            return MeshLine1(p, t, **kwargs)
-
-        if p is None and t is None:
-            return MeshLine1(**kwargs)
-
-        return MeshLine1(p, t, **kwargs)
+            m = MeshLine1(p, t, **kwargs)
+        elif p is None and t is None:
+            m = MeshLine1(**kwargs)
+        else:
+            m = MeshLine1(p, t, **kwargs)
+        m.is_valid()
+        return m
 
     def __getattr__(self, name):
         return getattr(MeshLine1, name)
 
+    @classmethod
+    def __instancecheck__(_, instance):
+        return isinstance(instance, MeshLine1)
+
 
 MeshLine = MeshLineConstructor()
+MeshTri = create_mesh_constructor(MeshTri1)
+MeshQuad = create_mesh_constructor(MeshQuad1)
+MeshTet = create_mesh_constructor(MeshTet1)
+MeshHex = create_mesh_constructor(MeshHex1)
 
 
 __all__ = [
