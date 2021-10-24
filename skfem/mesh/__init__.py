@@ -70,6 +70,10 @@ class MeshLineConstructor:
     def __getattr__(self, name):
         return getattr(MeshLine1, name)
 
+    @classmethod
+    def __instancecheck__(_, instance):
+        return isinstance(instance, cls)
+
 
 MeshLine = MeshLineConstructor()
 
