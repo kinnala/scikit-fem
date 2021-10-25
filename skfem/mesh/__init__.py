@@ -72,7 +72,7 @@ class MeshLineConstructor:
 
     @classmethod
     def __instancecheck__(_, instance):
-        return isinstance(instance, cls)
+        return isinstance(instance, MeshLine1)
 
 
 MeshLine = MeshLineConstructor()
