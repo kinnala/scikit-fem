@@ -402,14 +402,18 @@ class Mesh:
 
         # C_CONTIGUOUS is more performant in dimension-based slices
         if not self.doflocs.flags['C_CONTIGUOUS']:
-            if self.doflocs.shape[1] > 1000:
+            if self.doflocs.shape[1] > 1e3:
                 warn("Transforming over 1000 vertices to C_CONTIGUOUS.")
             self.doflocs = np.ascontiguousarray(self.doflocs)
 
         if not self.t.flags['C_CONTIGUOUS']:
-            if self.t.shape[1] > 1000:
+            if self.t.shape[1] > 1e3:
                 warn("Transforming over 1000 elements to C_CONTIGUOUS.")
             self.t = np.ascontiguousarray(self.t)
+
+        # run validation for small meshes
+        if self.doflocs.shape[1] < 1e3:
+            self.is_valid()
 
     def __rmatmul__(self, other):
         out = self.__matmul__(other)
