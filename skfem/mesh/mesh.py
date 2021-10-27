@@ -6,6 +6,7 @@ import numpy as np
 from numpy import ndarray
 
 from ..element import BOUNDARY_ELEMENT_MAP, Element
+from ..generic_utils import log
 
 
 @dataclass(repr=False)
@@ -411,9 +412,8 @@ class Mesh:
                 warn("Transforming over 1000 elements to C_CONTIGUOUS.")
             self.t = np.ascontiguousarray(self.t)
 
-        # run validation for small meshes
-        if self.doflocs.shape[1] < 1e3:
-            self.is_valid()
+        # run validation
+        self.is_valid(debug=False)
 
     def __rmatmul__(self, other):
         out = self.__matmul__(other)
@@ -437,22 +437,25 @@ class Mesh:
             ]
         raise NotImplementedError
 
-    def is_valid(self) -> bool:
+    def is_valid(self, debug=True) -> bool:
         """Perform some mesh validation checks."""
-        # check that there are no duplicate points
-        tmp = np.ascontiguousarray(self.p.T)
-        if self.p.shape[1] != np.unique(tmp.view([('', tmp.dtype)]
-                                                 * tmp.shape[1])).shape[0]:
-            warn("Mesh contains duplicate vertices.")
-            return False
+        valid = True
 
-        # check that all points are at least in some element
-        if len(np.setdiff1d(np.arange(self.p.shape[1]),
-                            np.unique(self.t))) > 0:
-            warn("Mesh contains a vertex not belonging to any element.")
-            return False
+        if debug or log.enabled:
+            # check that there are no duplicate points
+            tmp = np.ascontiguousarray(self.p.T)
+            if self.p.shape[1] != np.unique(tmp.view([('', tmp.dtype)]
+                                                     * tmp.shape[1])).shape[0]:
+                log("Mesh contains duplicate vertices.")
+                valid = False
 
-        return True
+            # check that all points are at least in some element
+            if len(np.setdiff1d(np.arange(self.p.shape[1]),
+                                np.unique(self.t))) > 0:
+                log("Mesh contains a vertex not belonging to any element.")
+                valid = False
+
+        return valid
 
     def __add__(self, other):
         """Join two meshes."""
