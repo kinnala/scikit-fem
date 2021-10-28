@@ -443,8 +443,7 @@ class Mesh:
         raise NotImplementedError
 
     def is_valid(self, debug=True) -> bool:
-        """Perform some mesh validation checks."""
-        valid = True
+        """Perform expensive mesh validation if logging is set to DEBUG."""
 
         if debug or logger.level <= 10:
             # check that there are no duplicate points
@@ -452,16 +451,16 @@ class Mesh:
             if self.p.shape[1] != np.unique(tmp.view([('', tmp.dtype)]
                                                      * tmp.shape[1])).shape[0]:
                 logger.debug("Mesh contains duplicate vertices.")
-                valid = False
+                return False
 
             # check that all points are at least in some element
             if len(np.setdiff1d(np.arange(self.p.shape[1]),
                                 np.unique(self.t))) > 0:
                 logger.debug("Mesh contains a vertex not belonging "
                              "to any element.")
-                valid = False
+                return False
 
-        return valid
+        return True
 
     def __add__(self, other):
         """Join two meshes."""
