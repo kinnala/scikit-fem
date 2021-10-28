@@ -1,7 +1,11 @@
+import logging
 import numpy as np
 
 from ...refdom import RefQuad
 from ..element_line import ElementLinePp
+
+
+logger = logging.getLogger(__name__)
 
 
 class ElementQuadP(ElementLinePp):
@@ -12,6 +16,9 @@ class ElementQuadP(ElementLinePp):
 
     def __init__(self, p):
 
+        if p < 3:
+            logger.warning(("Replace ElementQuadP({}) by ElementQuad{}() for "
+                            "performance.").format(p, p))
         self.facet_dofs = p - 1
         self.interior_dofs = (p + 1) ** 2 - 4 * self.facet_dofs - 4
         self.maxdeg = p ** 2

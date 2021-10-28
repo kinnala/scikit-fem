@@ -1,7 +1,8 @@
 """This module contains utility functions such as convenient access to
 SciPy linear solvers."""
 
-import warnings
+import logging
+from warnings import warn
 from typing import Optional, Union, Tuple, Callable, Dict
 
 import numpy as np
@@ -14,6 +15,9 @@ from scipy.sparse import spmatrix
 from skfem.assembly import asm, BilinearForm, LinearForm, DofsView
 from skfem.assembly.basis import AbstractBasis
 from skfem.element import ElementVector
+
+
+logger = logging.getLogger(__name__)
 
 
 # custom types for describing input and output values
@@ -143,7 +147,7 @@ def solver_iter_krylov(krylov: Optional[LinearSolver] = spl.cg,
             kwargs['M'] = build_pc_diag(A)
         sol, info = krylov(A, b, **{'callback': callback, **kwargs})
         if info > 0:
-            warnings.warn("Convergence not achieved!")
+            logger.warning("Iterative solver did not converge.")
         elif info == 0 and verbose:
             print(f"{krylov.__name__} converged to "
                   + f"tol={kwargs.get('tol', 'default')} and "
@@ -652,8 +656,8 @@ def project(fun,
             diff: Optional[int] = None,
             I: Optional[ndarray] = None,
             expand: bool = False) -> ndarray:
-    warnings.warn("project is deprecated in favor of projection.",
-                  DeprecationWarning)
+    warn("project is deprecated in favor of projection.",
+         DeprecationWarning)
     return projection(
         fun,
         basis_to=basis_to,

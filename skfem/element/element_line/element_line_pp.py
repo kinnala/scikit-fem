@@ -1,4 +1,4 @@
-import warnings
+import logging
 from typing import Type
 
 import numpy as np
@@ -6,6 +6,9 @@ from numpy.polynomial.legendre import Legendre
 
 from ..element_h1 import ElementH1
 from ...refdom import Refdom, RefLine
+
+
+logger = logging.getLogger(__name__)
 
 
 class ElementLinePp(ElementH1):
@@ -18,8 +21,8 @@ class ElementLinePp(ElementH1):
         if p < 1:
             raise ValueError("p < 1 not supported.")
         if p < 3:
-            warnings.warn(("Consider using ElementLineP{} instead "
-                           "of ElementLinePp.").format(p - 1))
+            logger.warning(("Replace ElementLinePp({}) by ElementLineP{}() "
+                            "for performance.").format(p, p))
         self.interior_dofs = p - 1
         self.maxdeg = p
         self.dofnames = ['u'] + (p - 1) * ['u']
