@@ -1,12 +1,15 @@
+import logging
+
 from dataclasses import dataclass, replace
 from typing import Callable, Dict, List, Optional, Tuple, Type, Union
-from warnings import warn
 
 import numpy as np
 from numpy import ndarray
 
 from ..element import BOUNDARY_ELEMENT_MAP, Element
-from ..generic_utils import log
+
+
+_log = logging.getLogger(__name__)
 
 
 @dataclass(repr=False)
@@ -404,12 +407,14 @@ class Mesh:
         # C_CONTIGUOUS is more performant in dimension-based slices
         if not self.doflocs.flags['C_CONTIGUOUS']:
             if self.doflocs.shape[1] > 1e3:
-                warn("Transforming over 1000 vertices to C_CONTIGUOUS.")
+                _log.warning("Transforming over 1000 vertices "
+                             "to C_CONTIGUOUS.")
             self.doflocs = np.ascontiguousarray(self.doflocs)
 
         if not self.t.flags['C_CONTIGUOUS']:
             if self.t.shape[1] > 1e3:
-                warn("Transforming over 1000 elements to C_CONTIGUOUS.")
+                _log.warning("Transforming over 1000 elements "
+                             "to C_CONTIGUOUS.")
             self.t = np.ascontiguousarray(self.t)
 
         # run validation
@@ -441,18 +446,19 @@ class Mesh:
         """Perform some mesh validation checks."""
         valid = True
 
-        if debug or log.enabled:
+        if debug or _log.level <= 10:
             # check that there are no duplicate points
             tmp = np.ascontiguousarray(self.p.T)
             if self.p.shape[1] != np.unique(tmp.view([('', tmp.dtype)]
                                                      * tmp.shape[1])).shape[0]:
-                log("Mesh contains duplicate vertices.")
+                _log.debug("Mesh contains duplicate vertices.")
                 valid = False
 
             # check that all points are at least in some element
             if len(np.setdiff1d(np.arange(self.p.shape[1]),
                                 np.unique(self.t))) > 0:
-                log("Mesh contains a vertex not belonging to any element.")
+                _log.debug("Mesh contains a vertex not belonging "
+                           "to any element.")
                 valid = False
 
         return valid
