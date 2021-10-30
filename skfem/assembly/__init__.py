@@ -72,6 +72,7 @@ def asm(form: Form,
     supports assembling multiple bases at once and summing the result.
 
     """
+    assert form.form is not None
     logger.info("Start assembling '{}'.".format(form.form.__name__))
     nargs = [[arg] if not isinstance(arg, list) else arg for arg in args]
     out = sum(map(lambda a: form.coo_data(*a[1], idx=a[0], **kwargs),

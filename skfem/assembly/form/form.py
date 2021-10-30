@@ -56,6 +56,7 @@ class Form:
         return self.assemble(self.kernel(*args))
 
     def assemble(self, *args, **kwargs) -> Any:
+        assert self.form is not None
         logger.info("Start assembling '{}'.".format(self.form.__name__))
         out = (COOData(*self._assemble(*args, **kwargs))  # type: ignore
                .todefault())
