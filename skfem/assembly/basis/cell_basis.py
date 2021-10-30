@@ -1,3 +1,4 @@
+import logging
 from typing import Callable, Optional, Tuple
 
 import numpy as np
@@ -9,6 +10,9 @@ from skfem.mesh import Mesh
 
 from .abstract_basis import AbstractBasis
 from ..dofs import Dofs
+
+
+logger = logging.getLogger(__name__)
 
 
 class CellBasis(AbstractBasis):
@@ -62,6 +66,9 @@ class CellBasis(AbstractBasis):
             Optional :class:`~skfem.assembly.Dofs` object.
 
         """
+        logger.info("Start creating {}({}, {})".format(type(self).__name__,
+                                                       type(mesh).__name__,
+                                                       type(elem).__name__))
         super(CellBasis, self).__init__(mesh,
                                         elem,
                                         mapping,
@@ -81,6 +88,9 @@ class CellBasis(AbstractBasis):
 
         self.dx = (np.abs(self.mapping.detDF(self.X, tind=elements))
                    * np.tile(self.W, (self.nelems, 1)))
+        logger.info("Done creating {}({}, {})".format(type(self).__name__,
+                                                      type(mesh).__name__,
+                                                      type(elem).__name__))
 
     def default_parameters(self):
         """Return default parameters for `~skfem.assembly.asm`."""

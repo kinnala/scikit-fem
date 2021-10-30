@@ -1,3 +1,4 @@
+import logging
 from copy import deepcopy
 from functools import partial
 from typing import Any, Callable, Optional
@@ -7,6 +8,9 @@ from numpy import ndarray
 
 from ...element import DiscreteField
 from .coo_data import COOData
+
+
+logger = logging.getLogger(__name__)
 
 
 class FormExtraParams(dict):
@@ -52,8 +56,11 @@ class Form:
         return self.assemble(self.kernel(*args))
 
     def assemble(self, *args, **kwargs) -> Any:
-        return (COOData(*self._assemble(*args, **kwargs))  # type: ignore
-                .todefault())
+        logger.info("Start assembling '{}'.".format(self.form.__name__))
+        out = (COOData(*self._assemble(*args, **kwargs))  # type: ignore
+               .todefault())
+        logger.info("Done assembling '{}'.".format(self.form.__name__))
+        return out
 
     def coo_data(self, *args, **kwargs) -> COOData:
         return COOData(*self._assemble(*args, **kwargs))  # type: ignore

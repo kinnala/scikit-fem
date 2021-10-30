@@ -1,6 +1,11 @@
 from skfem import *
 from skfem.helpers import dot, grad
 
+# # enable additional debug checks, sacrificing performance
+# import logging
+# logging.basicConfig(format='%(levelname)s %(asctime)s %(name)s %(message)s')
+# logging.getLogger('skfem').setLevel(logging.DEBUG)
+
 # create the mesh
 m = MeshTri().refined(4)
 # or, with your own points and cells:
