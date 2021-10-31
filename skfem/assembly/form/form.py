@@ -45,7 +45,9 @@ class Form:
 
     def partial(self, *args, **kwargs):
         form = deepcopy(self)
+        name = form.form.__name__
         form.form = partial(form.form, *args, **kwargs)
+        form.form.__name__ = name
         return form
 
     def __call__(self, *args):
