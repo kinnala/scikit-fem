@@ -14,6 +14,9 @@ from .cell_basis import CellBasis
 from ..dofs import Dofs
 
 
+logger = logging.getLogger(__name__)
+
+
 class BoundaryFacetBasis(AbstractBasis):
     """For fields defined on the boundary of the domain."""
 
