@@ -443,9 +443,9 @@ class Mesh:
         raise NotImplementedError
 
     def is_valid(self, debug=True) -> bool:
-        """Perform expensive mesh validation if logging is set to DEBUG."""
+        """Perform expensive mesh validation (if logging set to DEBUG)."""
 
-        if debug or logger.level <= 10:
+        if debug or logger.getEffectiveLevel() <= 10:
             # check that there are no duplicate points
             tmp = np.ascontiguousarray(self.p.T)
             if self.p.shape[1] != np.unique(tmp.view([('', tmp.dtype)]
