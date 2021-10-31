@@ -59,10 +59,10 @@ class Form:
 
     def assemble(self, *args, **kwargs) -> Any:
         assert self.form is not None
-        logger.info("Start assembling '{}'.".format(self.form.__name__))
+        logger.info("Assembling '{}'.".format(self.form.__name__))
         out = (COOData(*self._assemble(*args, **kwargs))  # type: ignore
                .todefault())
-        logger.info("Done assembling '{}'.".format(self.form.__name__))
+        logger.info("Assembling finished.")
         return out
 
     def coo_data(self, *args, **kwargs) -> COOData:

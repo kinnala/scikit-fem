@@ -143,9 +143,9 @@ class BilinearForm(Form):
 
         """
         assert self.form is not None
-        logger.info("Start assembling '{}'.".format(self.form.__name__))
+        logger.info("Assembling '{}'.".format(self.form.__name__))
         mat = COOData._assemble_scipy_csr(*self._assemble(*args, **kwargs))
-        logger.info("Done assembling '{}'.".format(self.form.__name__))
+        logger.info("Assembling finished.")
         return mat
 
     def _kernel(self, u, v, w, dx):

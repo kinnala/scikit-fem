@@ -66,9 +66,9 @@ class CellBasis(AbstractBasis):
             Optional :class:`~skfem.assembly.Dofs` object.
 
         """
-        logger.info("Start creating {}({}, {})".format(type(self).__name__,
-                                                       type(mesh).__name__,
-                                                       type(elem).__name__))
+        logger.info("Initializing {}({}, {})".format(type(self).__name__,
+                                                     type(mesh).__name__,
+                                                     type(elem).__name__))
         super(CellBasis, self).__init__(mesh,
                                         elem,
                                         mapping,
@@ -88,9 +88,7 @@ class CellBasis(AbstractBasis):
 
         self.dx = (np.abs(self.mapping.detDF(self.X, tind=elements))
                    * np.tile(self.W, (self.nelems, 1)))
-        logger.info("Done creating {}({}, {})".format(type(self).__name__,
-                                                      type(mesh).__name__,
-                                                      type(elem).__name__))
+        logger.info("Initializing finished.")
 
     def default_parameters(self):
         """Return default parameters for `~skfem.assembly.asm`."""

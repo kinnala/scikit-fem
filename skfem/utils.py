@@ -224,11 +224,15 @@ def solve(A: spmatrix,
         :func:`skfem.utils.solver_iter_krylov`.
 
     """
+    logger.info("Solving linear system, shape={}.".format(A.shape))
     if isinstance(b, spmatrix):
-        return solve_eigen(A, b, x, I, solver, **kwargs)  # type: ignore
+        out = solve_eigen(A, b, x, I, solver, **kwargs)  # type: ignore
     elif isinstance(b, ndarray):
-        return solve_linear(A, b, x, I, solver, **kwargs)  # type: ignore
-    raise NotImplementedError("Provided argument types not supported")
+        out = solve_linear(A, b, x, I, solver, **kwargs)  # type: ignore
+    else:
+        raise NotImplementedError("Provided argument types not supported")
+    logger.info("Solving done.")
+    return out
 
 
 def _flatten_dofs(S: Optional[DofsCollection]) -> Optional[ndarray]:

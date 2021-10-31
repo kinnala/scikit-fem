@@ -73,14 +73,14 @@ def asm(form: Form,
 
     """
     assert form.form is not None
-    logger.info("Start assembling '{}'.".format(form.form.__name__))
+    logger.info("Assembling '{}'.".format(form.form.__name__))
     nargs = [[arg] if not isinstance(arg, list) else arg for arg in args]
     out = sum(map(lambda a: form.coo_data(*a[1], idx=a[0], **kwargs),
                   zip(product(*(range(len(x)) for x in nargs)),
                       product(*nargs))))
     assert not isinstance(out, int)
     outd = out.todefault()
-    logger.info("Done assembling '{}'.".format(form.form.__name__))
+    logger.info("Assembling finished.")
     return outd
 
 

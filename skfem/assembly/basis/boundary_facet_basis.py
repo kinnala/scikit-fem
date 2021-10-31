@@ -1,3 +1,4 @@
+import logging
 from typing import Callable, Optional, Tuple
 
 import numpy as np
@@ -48,6 +49,9 @@ class BoundaryFacetBasis(AbstractBasis):
             Optional :class:`~skfem.assembly.Dofs` object.
 
         """
+        logger.info("Initializing {}({}, {})".format(type(self).__name__,
+                                                     type(mesh).__name__,
+                                                     type(elem).__name__))
         super(BoundaryFacetBasis, self).__init__(mesh,
                                                  elem,
                                                  mapping,
@@ -85,6 +89,7 @@ class BoundaryFacetBasis(AbstractBasis):
 
         self.dx = (np.abs(self.mapping.detDG(self.X, find=self.find))
                    * np.tile(self.W, (self.nelems, 1)))
+        logger.info("Initializing finished.")
 
     def default_parameters(self):
         """Return default parameters for `~skfem.assembly.asm`."""
