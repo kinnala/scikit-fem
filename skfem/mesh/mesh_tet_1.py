@@ -271,19 +271,10 @@ class MeshTet1(Mesh3D):
             nonconf[check[i]] = 1
             marked = np.unique(j)
 
-        # remove duplicates
-        p = p[:, :nv]
-        t = t[:, :nt]
-        # tmp = np.ascontiguousarray(p.T)
-        # tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]),
-        #                           return_index=True, return_inverse=True)
-        # p = p[:, ixa]
-        # t = ixb[t]
-
         return replace(
             self,
-            doflocs=p,
-            t=t,
+            doflocs=p[:, :nv],
+            t=t[:, :nt],
         )
 
     def orientation(self):
