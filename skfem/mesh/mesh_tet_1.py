@@ -122,7 +122,7 @@ class MeshTet1(Mesh3D):
 
         # add noise so that there are no edges with the same length
         np.random.seed(1337)
-        p = p.copy() + self.minparam() / 10 * np.random.random(p.shape)
+        p = p.copy() + 1e-10 * np.random.random(p.shape)
 
         l01 = np.sqrt(np.sum((p[:, t[0, marked]] - p[:, t[1, marked]]) ** 2,
                              axis=0))
@@ -222,6 +222,11 @@ class MeshTet1(Mesh3D):
                 tnew[i] = j
                 ix = np.nonzero(tnew == -1)[0]
 
+                for k in ix:
+                    if np.equal(split_edge[:2].T, np.sort([t0[k], t1[k]])).all(1).any():
+                        tnew[k] = split_edge[2, np.nonzero(np.equal(split_edge[:2].T, np.sort([t0[k], t1[k]])).all(1))[0][0]]
+                ix = np.array([k for k in ix if not np.equal(split_edge[:2].T, np.sort([t0[k], t1[k]])).all(1).any()])
+
             if len(ix) > 0:
                 i, j = self._find_nz(
                     *np.sort(np.vstack((t0[ix], t1[ix])), axis=0),
@@ -229,8 +234,8 @@ class MeshTet1(Mesh3D):
                 )
                 nn = len(i)
                 nix = slice(ns, ns + nn)
-                split_edge[0, nix] = j
-                split_edge[1, nix] = i
+                split_edge[0, nix] = i
+                split_edge[1, nix] = j
                 split_edge[2, nix] = np.arange(nv, nv + nn, dtype=np.int64)
 
                 # add new points
@@ -269,11 +274,11 @@ class MeshTet1(Mesh3D):
         # remove duplicates
         p = p[:, :nv]
         t = t[:, :nt]
-        tmp = np.ascontiguousarray(p.T)
-        tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]),
-                                  return_index=True, return_inverse=True)
-        p = p[:, ixa]
-        t = ixb[t]
+        # tmp = np.ascontiguousarray(p.T)
+        # tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]),
+        #                           return_index=True, return_inverse=True)
+        # p = p[:, ixa]
+        # t = ixb[t]
 
         return replace(
             self,

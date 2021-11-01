@@ -205,86 +205,88 @@ class TestAdaptiveSplitting2D(TestCase):
             self.assertEqual(prev_p_size, m.p.shape[1] - 3)
 
 
-class TestAdaptiveSplitting3D(TestCase):
+def test_adaptive_splitting_3d():
+    m = MeshTet()
+    for itr in range(10):
+        M = m.refined([itr, itr + 1, itr + 2])
+        assert M.is_valid()
+        m = M
 
-    def runTest(self):
+def test_adaptive_splitting_3d_0():
+    m = MeshTet()
+    for itr in range(10):
+        m = m.refined([itr, itr + 1])
+        assert m.is_valid()
 
-        m = MeshTet()
-        for itr in range(10):
-            m = m.refined([itr, itr + 1, itr + 2])
-            assert m.is_valid()
+def test_adaptive_splitting_3d_1():
+    m = MeshTet()
+    for itr in range(50):
+        m = m.refined([itr])
+        assert m.is_valid()
 
-        m = MeshTet()
-        for itr in range(10):
-            m = m.refined([itr, itr + 1])
-            assert m.is_valid()
+def test_adaptive_splitting_3d_2():
+    m = MeshTet()
+    for itr in range(5):
+        m = m.refined(np.arange(m.nelements, dtype=np.int64))
+        assert m.is_valid()
 
-        m = MeshTet()
-        for itr in range(50):
-            m = m.refined([itr])
-            assert m.is_valid()
+def test_adaptive_splitting_3d_3():
+    # adaptively refine one face of a cube, check that the mesh parameter h
+    # is approximately linear w.r.t to distance from the face
+    m = MeshTet.init_tensor(np.linspace(0, 1, 3),
+                            np.linspace(0, 1, 3),
+                            np.linspace(0, 1, 3))
 
-        m = MeshTet()
-        for itr in range(5):
-            m = m.refined(np.arange(m.nelements, dtype=np.int64))
-            assert m.is_valid()
-
-        # adaptively refine one face of a cube, check that the mesh parameter h
-        # is approximately linear w.r.t to distance from the face
-        m = MeshTet.init_tensor(np.linspace(0, 1, 3),
-                                np.linspace(0, 1, 3),
-                                np.linspace(0, 1, 3))
-
-        for itr in range(15):
-            m = m.refined(m.f2t[0, m.facets_satisfying(lambda x: x[0] == 0)])
-
-        @LinearForm
-        def hproj(v, w):
-            return w.h * v
-
-        basis = Basis(m, ElementTetP1())
-        h = projection(hproj, basis)
-
-        funh = basis.interpolator(h)
-
-        xs = np.vstack((
-            np.linspace(0, .5, 20),
-            np.zeros(20) + .5,
-            np.zeros(20) + .5,
-        ))
-        hs = funh(xs)
-
-        assert np.max(np.abs(hs - xs[0])) < 0.063
-
-        # check that the same mesh is reproduced by any future versions
-        m = MeshTet.init_tensor(np.linspace(0, 1, 2),
-                                np.linspace(0, 1, 2),
-                                np.linspace(0, 1, 2))
-
+    for itr in range(15):
         m = m.refined(m.f2t[0, m.facets_satisfying(lambda x: x[0] == 0)])
 
-        assert_array_equal(
-            m.p,
-            np.array([[0. , 0. , 0. , 0. , 0.5, 1. , 1. , 1. , 1. ],
-                      [0. , 0. , 1. , 1. , 0.5, 0. , 0. , 1. , 1. ],
-                      [0. , 1. , 0. , 1. , 0.5, 0. , 1. , 0. , 1. ]])
-        )
+    @LinearForm
+    def hproj(v, w):
+        return w.h * v
 
-        assert_array_equal(
-            m.t,
-            np.array([[3, 7, 7, 3, 6, 6, 2, 1, 2, 5, 5, 1],
-                      [0, 0, 0, 0, 0, 0, 8, 8, 8, 8, 8, 8],
-                      [2, 2, 5, 1, 5, 1, 3, 3, 7, 7, 6, 6],
-                      [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]])
-        )
+    basis = Basis(m, ElementTetP1())
+    h = projection(hproj, basis)
 
-        # random refine
-        m = MeshTet()
+    funh = basis.interpolator(h)
 
-        np.random.seed(1337)
-        for itr in range(5):
-            m = m.refined(np.unique(np.random.randint(0, m.t.shape[1], size=int(0.7 * m.t.shape[1]))))
-            assert m.is_valid()
+    xs = np.vstack((
+        np.linspace(0, .5, 20),
+        np.zeros(20) + .5,
+        np.zeros(20) + .5,
+    ))
+    hs = funh(xs)
+
+    assert np.max(np.abs(hs - xs[0])) < 0.063
+
+    # check that the same mesh is reproduced by any future versions
+    m = MeshTet.init_tensor(np.linspace(0, 1, 2),
+                            np.linspace(0, 1, 2),
+                            np.linspace(0, 1, 2))
+
+    m = m.refined(m.f2t[0, m.facets_satisfying(lambda x: x[0] == 0)])
+
+    assert_array_equal(
+        m.p,
+        np.array([[0. , 0. , 0. , 0. , 0.5, 1. , 1. , 1. , 1. ],
+                  [0. , 0. , 1. , 1. , 0.5, 0. , 0. , 1. , 1. ],
+                  [0. , 1. , 0. , 1. , 0.5, 0. , 1. , 0. , 1. ]])
+    )
+
+    assert_array_equal(
+        m.t,
+        np.array([[3, 7, 7, 3, 6, 6, 2, 1, 2, 5, 5, 1],
+                  [0, 0, 0, 0, 0, 0, 8, 8, 8, 8, 8, 8],
+                  [2, 2, 5, 1, 5, 1, 3, 3, 7, 7, 6, 6],
+                  [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]])
+    )
+
+    # random refine
+    m = MeshTet()
+
+    np.random.seed(1337)
+    for itr in range(5):
+        m = m.refined(np.unique(np.random.randint(0, m.t.shape[1], size=int(0.7 * m.t.shape[1]))))
+        assert m.is_valid()
 
 
 class TestMirrored(TestCase):
