@@ -123,7 +123,7 @@ class MeshTet1(Mesh3D):
 
         # add noise so that there are no edges with the same length
         np.random.seed(1337)
-        p = p.copy() + 1e-10 * np.random.random(p.shape)
+        p = p.copy() + 1e-4 * np.random.random(p.shape)
 
         l01 = np.sqrt(np.sum((p[:, t[0, marked]] - p[:, t[1, marked]]) ** 2,
                              axis=0))
@@ -211,7 +211,7 @@ class MeshTet1(Mesh3D):
         nt = self.t.shape[1]
         nv = self.p.shape[1]
         p = np.zeros((3, 9 * nv), dtype=np.float64)
-        t = np.zeros((4, 4 * nt), dtype=np.int64)
+        t = np.zeros((4, 8 * nt), dtype=np.int64)
         p[:, :self.p.shape[1]] = self.p.copy()
         t[:, :self.t.shape[1]] = self.t.copy()
 
@@ -220,25 +220,24 @@ class MeshTet1(Mesh3D):
         ns = 0
 
         while len(marked) > 0:
-            print(np.sum(nonconf[:ns]))
-            #print(len(marked))
-            print(len(np.unique(p.T[:nv], axis=0)) - len(p.T[:nv]))
             nm = len(marked)
-            tnew = np.zeros(nm, dtype=np.int64)
-            ix = np.arange(nm, dtype=np.int64)
+            tnew = np.zeros(nm, dtype=np.int64) - 1
             t = self._adaptive_sort_mesh(p, t, marked)
             t0, t1, t2, t3 = t[:, marked]
 
-            if ns > 0:
+            if ns == 0:
+                ix = np.arange(nm, dtype=np.int64)
+            else:
                 nonconf_edge = np.nonzero(nonconf[:ns])[0]
                 i, j = self._find_nz(
-                    split_edge[:2, nonconf_edge],
-                    np.vstack((split_edge[2, nonconf_edge],) * 2),
+                    np.hstack((split_edge[0, nonconf_edge],
+                               split_edge[1, nonconf_edge])),
+                    np.hstack((split_edge[2, nonconf_edge],) * 2),
                     (nv, nv),
                     lambda I: I[t0].multiply(I[t1])
                 )
                 tnew[i] = j
-                ix = np.nonzero(tnew == 0)[0]
+                ix = np.nonzero(tnew == -1)[0]
 
             if len(ix) > 0:
                 i, j = self._find_nz(
@@ -247,8 +246,8 @@ class MeshTet1(Mesh3D):
                 )
                 nn = len(i)
                 nix = slice(ns, ns + nn)
-                split_edge[0, nix] = i
-                split_edge[1, nix] = j
+                split_edge[0, nix] = j
+                split_edge[1, nix] = i
                 split_edge[2, nix] = np.arange(nv, nv + nn, dtype=np.int64)
 
                 # add new points
