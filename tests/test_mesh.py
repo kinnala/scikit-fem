@@ -278,6 +278,16 @@ class TestAdaptiveSplitting3D(TestCase):
                       [8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]])
         )
 
+        # random refine
+        m = MeshTet()
+
+        np.random.seed(1337)
+        for itr in range(5):
+            import pdb; pdb.set_trace()
+            m = m.refined(np.unique(np.random.randint(0, m.t.shape[1], size=int(0.7 * m.t.shape[1]))))
+            assert m.is_valid()
+
+
 class TestMirrored(TestCase):
 
     def runTest(self):

@@ -123,7 +123,7 @@ class MeshTet1(Mesh3D):
 
         # add noise so that there are no edges with the same length
         np.random.seed(1337)
-        p = p.copy() + 1e-5 * np.random.random(p.shape)
+        p = p.copy() + 1e-10 * np.random.random(p.shape)
 
         l01 = np.sqrt(np.sum((p[:, t[0, marked]] - p[:, t[1, marked]]) ** 2,
                              axis=0))
@@ -139,6 +139,11 @@ class MeshTet1(Mesh3D):
                              axis=0))
 
         # indices where (1, 2) is the longest etc.
+        ix01 = ((l01 > l12)
+                * (l01 > l02)
+                * (l01 > l03)
+                * (l01 > l13)
+                * (l01 > l23))
         ix12 = ((l12 > l01)
                 * (l12 > l02)
                 * (l12 > l03)
@@ -164,6 +169,17 @@ class MeshTet1(Mesh3D):
                 * (l23 > l02)
                 * (l23 > l03)
                 * (l23 > l13))
+
+        test = np.zeros(len(marked))
+        test[ix01] += 1
+        test[ix12] += 1
+        test[ix02] += 1
+        test[ix03] += 1
+        test[ix13] += 1
+        test[ix23] += 1
+        assert np.sum(test) == len(test)
+        assert np.sum(test > 1) == 0
+        assert np.sum(test < 1) == 0
 
         # flip edges
         T = t.copy()
@@ -191,6 +207,7 @@ class MeshTet1(Mesh3D):
         """Longest edge bisection."""
         if isinstance(marked, list):
             marked = np.array(marked, dtype=np.int64)
+        marked = np.unique(marked)
         nt = self.t.shape[1]
         nv = self.p.shape[1]
         p = np.zeros((3, 9 * nv), dtype=np.float64)
@@ -198,12 +215,14 @@ class MeshTet1(Mesh3D):
         p[:, :self.p.shape[1]] = self.p.copy()
         t[:, :self.t.shape[1]] = self.t.copy()
 
-        gen = np.zeros(nv + 6 * nt, dtype=np.int8)
         nonconf = np.ones(8 * nv, dtype=np.int8)
         split_edge = np.zeros((3, 8 * nv), dtype=np.int64)
         ns = 0
 
         while len(marked) > 0:
+            print(np.sum(nonconf[:ns]))
+            #print(len(marked))
+            print(len(np.unique(p.T[:nv], axis=0)) - len(p.T[:nv]))
             nm = len(marked)
             tnew = np.zeros(nm, dtype=np.int64)
             ix = np.arange(nm, dtype=np.int64)
@@ -244,9 +263,6 @@ class MeshTet1(Mesh3D):
                 tnew[i] = j
                 ns += nn
 
-            ix = np.nonzero(gen[tnew] == 0)[0]
-            gen[tnew[ix]] = np.max(gen[t[:, marked[ix]]], axis=0) + 1
-
             # add new elements
             t[:, marked] = np.vstack((t3, t0, t2, tnew))
             t[:, nt:(nt + nm)] = np.vstack((t2, t1, t3, tnew))
@@ -273,6 +289,50 @@ class MeshTet1(Mesh3D):
             doflocs=p[:, :nv],
             t=t[:, :nt],
         )
+
+    def orientation(self):
+
+        mapping = self._mapping()
+        return ((mapping.detDF(np.array([[0], [0], [0]])) < 0)
+                .flatten()
+                .astype(np.int64))
+
+    def oriented(self):
+
+        flip = np.nonzero(self.orientation())[0]
+        t = self.t.copy()
+        t0 = t[0, flip]
+        t1 = t[1, flip]
+        t[0, flip] = t1
+        t[1, flip] = t0
+
+        return replace(
+            self,
+            t=t,
+            sort_t=False,
+        )
+
+    def smoothed(self,
+                 weight=0.5,
+                 nodes=None):
+
+        if nodes is None:
+            nodes = self.interior_nodes()
+
+        p = self.doflocs.copy()
+        for itr in nodes:
+            neighbors0 = self.edges[1, self.edges[0] == itr]
+            neighbors1 = self.edges[0, self.edges[1] == itr]
+            neighbors = np.concatenate((neighbors0, neighbors1))
+            assert len(neighbors) > 0
+            p[:, itr] = ((1. - weight) * self.p[:, itr]
+                         + weight * np.mean(self.p[:, neighbors], axis=1))
+
+        return replace(
+            self,
+            doflocs=p,
+        )
+        
 
     @classmethod
     def init_tensor(cls: Type,
