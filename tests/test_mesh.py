@@ -258,6 +258,8 @@ def test_adaptive_splitting_3d_3():
 
     assert np.max(np.abs(hs - xs[0])) < 0.063
 
+
+def test_adaptive_splitting_3d_4():
     # check that the same mesh is reproduced by any future versions
     m = MeshTet.init_tensor(np.linspace(0, 1, 2),
                             np.linspace(0, 1, 2),
@@ -267,26 +269,58 @@ def test_adaptive_splitting_3d_3():
 
     assert_array_equal(
         m.p,
-        np.array([[0. , 0. , 0. , 0. , 0.5, 1. , 1. , 1. , 1. ],
-                  [0. , 0. , 1. , 1. , 0.5, 0. , 0. , 1. , 1. ],
-                  [0. , 1. , 0. , 1. , 0.5, 0. , 1. , 0. , 1. ]])
+        np.array([[0. , 0. , 1. , 1. , 0. , 0. , 1. , 1. , 0.5],
+                  [0. , 1. , 0. , 1. , 0. , 1. , 0. , 1. , 0.5],
+                  [0. , 0. , 0. , 0. , 1. , 1. , 1. , 1. , 0.5]])
     )
 
     assert_array_equal(
         m.t,
-        np.array([[3, 7, 7, 3, 6, 6, 2, 1, 2, 5, 5, 1],
-                  [0, 0, 0, 0, 0, 0, 8, 8, 8, 8, 8, 8],
-                  [2, 2, 5, 1, 5, 1, 3, 3, 7, 7, 6, 6],
-                  [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]])
+        np.array([[5, 3, 3, 5, 6, 6, 1, 4, 1, 2, 2, 4],
+                  [0, 0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7],
+                  [1, 1, 2, 4, 2, 4, 5, 5, 3, 3, 6, 6],
+                  [8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]])
     )
 
+
+def test_adaptive_splitting_3d_5():
     # random refine
     m = MeshTet()
 
     np.random.seed(1337)
-    for itr in range(5):
-        m = m.refined(np.unique(np.random.randint(0, m.t.shape[1], size=int(0.7 * m.t.shape[1]))))
+    for itr in range(10):
+        m = m.refined(
+            np.unique(
+                np.random.randint(0,
+                                  m.t.shape[1],
+                                  size=int(0.3 * m.t.shape[1]))))
         assert m.is_valid()
+
+
+@pytest.mark.parametrize(
+    "m,seed",
+    [
+        (MeshTet(), 0),
+        (MeshTet(), 1),
+        (MeshTet(), 2),
+        (MeshTet().refined(), 10),
+    ]
+)
+def test_adaptive_random_splitting(m, seed):
+
+    np.random.seed(seed)
+    points = np.hstack((m.p, np.random.rand(m.p.shape[0], 100)))
+    tri = Delaunay(points.T)
+    m = type(m)(points, tri.simplices.T)
+    assert m.is_valid()
+
+    for itr in range(3):
+        M = m.refined(np.unique(
+            np.random.randint(0,
+                              m.t.shape[1],
+                              size=int(0.3 * m.t.shape[1]))))
+        assert M.is_valid()
+        m = M
 
 
 class TestMirrored(TestCase):

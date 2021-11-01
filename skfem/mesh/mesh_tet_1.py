@@ -195,8 +195,8 @@ class MeshTet1(Mesh3D):
         nv = self.p.shape[1]
         p = np.zeros((3, 9 * nv), dtype=np.float64)
         t = np.zeros((4, 8 * nt), dtype=np.int64)
-        p[:, :self.p.shape[1]] = self.p.copy()
-        t[:, :self.t.shape[1]] = self.t.copy()
+        p[:, :nv] = self.p.copy()
+        t[:, :nt] = self.t.copy()
 
         nonconf = np.ones(8 * nv, dtype=np.int8)
         split_edge = np.zeros((3, 8 * nv), dtype=np.int64)
@@ -234,13 +234,16 @@ class MeshTet1(Mesh3D):
                 )
                 nn = len(i)
                 nix = slice(ns, ns + nn)
+
                 split_edge[0, nix] = i
                 split_edge[1, nix] = j
                 split_edge[2, nix] = np.arange(nv, nv + nn, dtype=np.int64)
 
                 # add new points
                 p[:, nv:(nv + nn)] = .5 * (p[:, i] + p[:, j])
+
                 nv += nn
+                assert len(np.unique(p[:, :nv].T, axis=0)) == nv
                 i, j = self._find_nz(
                     split_edge[:2, nix],
                     np.vstack((split_edge[2, nix],) * 2),
