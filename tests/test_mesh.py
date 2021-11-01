@@ -265,17 +265,17 @@ class TestAdaptiveSplitting3D(TestCase):
 
         assert_array_equal(
             m.p,
-            np.array([[0. , 0. , 1. , 1. , 0. , 0. , 1. , 1. , 0.5],
-                      [0. , 1. , 0. , 1. , 0. , 1. , 0. , 1. , 0.5],
-                      [0. , 0. , 0. , 0. , 1. , 1. , 1. , 1. , 0.5]])
+            np.array([[0. , 0. , 0. , 0. , 0.5, 1. , 1. , 1. , 1. ],
+                      [0. , 0. , 1. , 1. , 0.5, 0. , 0. , 1. , 1. ],
+                      [0. , 1. , 0. , 1. , 0.5, 0. , 1. , 0. , 1. ]])
         )
 
         assert_array_equal(
             m.t,
-            np.array([[5, 3, 3, 5, 6, 6, 1, 4, 1, 2, 2, 4],
-                      [0, 0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7],
-                      [1, 1, 2, 4, 2, 4, 5, 5, 3, 3, 6, 6],
-                      [8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]])
+            np.array([[3, 7, 7, 3, 6, 6, 2, 1, 2, 5, 5, 1],
+                      [0, 0, 0, 0, 0, 0, 8, 8, 8, 8, 8, 8],
+                      [2, 2, 5, 1, 5, 1, 3, 3, 7, 7, 6, 6],
+                      [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]])
         )
 
         # random refine
@@ -283,7 +283,6 @@ class TestAdaptiveSplitting3D(TestCase):
 
         np.random.seed(1337)
         for itr in range(5):
-            import pdb; pdb.set_trace()
             m = m.refined(np.unique(np.random.randint(0, m.t.shape[1], size=int(0.7 * m.t.shape[1]))))
             assert m.is_valid()
 

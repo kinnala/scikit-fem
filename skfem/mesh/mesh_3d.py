@@ -15,6 +15,11 @@ class Mesh3D(Mesh):
             np.linalg.norm(np.diff(self.p[:, self.edges], axis=1), axis=0)
         )
 
+    def minparam(self) -> float:
+        return np.min(
+            np.linalg.norm(np.diff(self.p[:, self.edges], axis=1), axis=0)
+        )
+
     def edges_satisfying(self, test: Callable[[ndarray], bool]) -> ndarray:
         """Return edges whose midpoints satisfy some condition.
 

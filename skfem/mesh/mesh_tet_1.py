@@ -117,13 +117,12 @@ class MeshTet1(Mesh3D):
             _subdomains=None,
         )
 
-    @staticmethod
-    def _adaptive_sort_mesh(p, t, marked):
+    def _adaptive_sort_mesh(self, p, t, marked):
         """Make (0, 1) the longest edge in t for marked."""
 
         # add noise so that there are no edges with the same length
         np.random.seed(1337)
-        p = p.copy() + 1e-4 * np.random.random(p.shape)
+        p = p.copy() + self.minparam() / 10 * np.random.random(p.shape)
 
         l01 = np.sqrt(np.sum((p[:, t[0, marked]] - p[:, t[1, marked]]) ** 2,
                              axis=0))
@@ -139,11 +138,6 @@ class MeshTet1(Mesh3D):
                              axis=0))
 
         # indices where (1, 2) is the longest etc.
-        ix01 = ((l01 > l12)
-                * (l01 > l02)
-                * (l01 > l03)
-                * (l01 > l13)
-                * (l01 > l23))
         ix12 = ((l12 > l01)
                 * (l12 > l02)
                 * (l12 > l03)
@@ -169,17 +163,6 @@ class MeshTet1(Mesh3D):
                 * (l23 > l02)
                 * (l23 > l03)
                 * (l23 > l13))
-
-        test = np.zeros(len(marked))
-        test[ix01] += 1
-        test[ix12] += 1
-        test[ix02] += 1
-        test[ix03] += 1
-        test[ix13] += 1
-        test[ix23] += 1
-        assert np.sum(test) == len(test)
-        assert np.sum(test > 1) == 0
-        assert np.sum(test < 1) == 0
 
         # flip edges
         T = t.copy()
@@ -283,10 +266,19 @@ class MeshTet1(Mesh3D):
             nonconf[check[i]] = 1
             marked = np.unique(j)
 
+        # remove duplicates
+        p = p[:, :nv]
+        t = t[:, :nt]
+        tmp = np.ascontiguousarray(p.T)
+        tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]),
+                                  return_index=True, return_inverse=True)
+        p = p[:, ixa]
+        t = ixb[t]
+
         return replace(
             self,
-            doflocs=p[:, :nv],
-            t=t[:, :nt],
+            doflocs=p,
+            t=t,
         )
 
     def orientation(self):
