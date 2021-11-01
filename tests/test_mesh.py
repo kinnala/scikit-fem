@@ -301,8 +301,9 @@ def test_adaptive_splitting_3d_5():
     "m,seed",
     [
         (MeshTet(), 0),
-        (MeshTet(), 1),
+        (MeshTet(), 1),  # problems
         (MeshTet(), 2),
+        (MeshTet(), 3),
         (MeshTet().refined(), 10),
     ]
 )

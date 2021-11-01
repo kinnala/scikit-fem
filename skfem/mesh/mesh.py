@@ -448,6 +448,16 @@ class Mesh:
             warn("Mesh contains a vertex not belonging to any element.")
             return False
 
+        # check for hanging nodes
+        if hasattr(self, 'edges'):
+            mid = self.p[:, self.edges].mean(axis=1)
+            tmp = np.isclose(mid[0], self.p[0][:, None])
+            for itr in range(1, mid.shape[0]):
+                tmp *= np.isclose(mid[itr], self.p[itr][:, None])
+            if tmp.any():
+                warn("Mesh contains a hanging node.")
+                return False
+
         return True
 
     def __add__(self, other):
