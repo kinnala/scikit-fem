@@ -222,11 +222,6 @@ class MeshTet1(Mesh3D):
                 tnew[i] = j
                 ix = np.nonzero(tnew == -1)[0]
 
-                for k in ix:
-                    if np.equal(split_edge[:2].T, np.sort([t0[k], t1[k]])).all(1).any():
-                        tnew[k] = split_edge[2, np.nonzero(np.equal(split_edge[:2].T, np.sort([t0[k], t1[k]])).all(1))[0][0]]
-                ix = np.array([k for k in ix if not np.equal(split_edge[:2].T, np.sort([t0[k], t1[k]])).all(1).any()])
-
             if len(ix) > 0:
                 i, j = self._find_nz(
                     *np.sort(np.vstack((t0[ix], t1[ix])), axis=0),
