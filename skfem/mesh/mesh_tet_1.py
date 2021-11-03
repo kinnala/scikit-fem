@@ -316,7 +316,6 @@ class MeshTet1(Mesh3D):
             self,
             doflocs=p,
         )
-        
 
     @classmethod
     def init_tensor(cls: Type,
