@@ -10,15 +10,14 @@ from .mesh import Mesh
 @dataclass(repr=False)
 class Mesh3D(Mesh):
 
-    def param(self) -> float:
-        return np.max(
-            np.linalg.norm(np.diff(self.p[:, self.edges], axis=1), axis=0)
-        )
+    def params(self) -> ndarray:
+        return np.linalg.norm(
+            np.diff(self.p[:, self.edges], axis=1),
+            axis=0
+        )[0, self.t2e].max(axis=0)
 
-    def minparam(self) -> float:
-        return np.min(
-            np.linalg.norm(np.diff(self.p[:, self.edges], axis=1), axis=0)
-        )
+    def param(self) -> float:
+        return np.max(self.params())
 
     def edges_satisfying(self, test: Callable[[ndarray], bool]) -> ndarray:
         """Return edges whose midpoints satisfy some condition.
