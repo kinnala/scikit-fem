@@ -675,6 +675,38 @@ class Mesh:
             doflocs=p,
         )
 
+    def smoothed(self, fixed_nodes=None):
+        """Laplacian smoothing.
+
+        Parameters
+        ----------
+        fixed_nodes
+            A list of node indices that do not move.
+
+        """
+
+        if fixed_nodes is None:
+            fixed_nodes = self.boundary_nodes()
+
+        p = np.zeros(self.doflocs.shape)
+        nv = p.shape[1]
+
+        edges = self.edges if p.shape[0] == 3 else self.facets
+        nneighbors = np.bincount(edges.reshape(-1), minlength=nv)
+
+        p += np.array([np.bincount(edges[0], pi, minlength=nv)
+                       for pi in self.doflocs[:, edges[1]]])
+        p += np.array([np.bincount(edges[1], pi, minlength=nv)
+                       for pi in self.doflocs[:, edges[0]]])
+        p /= nneighbors
+
+        p[:, fixed_nodes] = self.doflocs[:, fixed_nodes]
+
+        return replace(
+            self,
+            doflocs=p,
+        )
+
     def _uniform(self):
         """Perform a single uniform refinement."""
         raise NotImplementedError

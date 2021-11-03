@@ -275,27 +275,6 @@ class MeshTet1(MeshSimplex, Mesh3D):
             t=t[:, :nt],
         )
 
-    def smoothed(self,
-                 weight=0.5,
-                 nodes=None):
-
-        if nodes is None:
-            nodes = self.interior_nodes()
-
-        p = self.doflocs.copy()
-        for itr in nodes:
-            neighbors0 = self.edges[1, self.edges[0] == itr]
-            neighbors1 = self.edges[0, self.edges[1] == itr]
-            neighbors = np.concatenate((neighbors0, neighbors1))
-            assert len(neighbors) > 0
-            p[:, itr] = ((1. - weight) * self.p[:, itr]
-                         + weight * np.mean(self.p[:, neighbors], axis=1))
-
-        return replace(
-            self,
-            doflocs=p,
-        )
-
     @classmethod
     def init_tensor(cls: Type,
                     x: ndarray,

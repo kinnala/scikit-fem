@@ -369,6 +369,36 @@ class TestFinder1DLinspaced(TestCase):
             self.assertEqual(finder(np.array([0.001]))[0], 0)
 
 
+@pytest.mark.parametrize(
+    "m",
+    [
+        MeshTri.init_circle(),
+        MeshQuad.init_tensor([0, 1, 3], [0, 1, 3]),
+        MeshTet().refined(3),
+        MeshHex.init_tensor([0, 1, 3], [0, 1, 3], [0, 1, 3]),
+    ]
+)   
+def test_smoothed(m):
+    M = m.smoothed()
+    assert M.is_valid()
+    # points have moved?
+    assert np.linalg.norm((M.p - m.p) ** 2) > 0
+
+
+@pytest.mark.parametrize(
+    "m",
+    [
+        MeshTri(),
+        MeshTet(),
+    ]
+)
+def test_oriented(m):
+    M = m.oriented()
+    assert np.sum(m.orientation() < 0) > 0
+    assert np.sum(m.orientation() > 0) > 0
+    assert np.sum(M.orientation() > 0) > 0
+    assert np.sum(M.orientation() < 0) == 0
+
 
 @pytest.mark.parametrize(
     "m,seed",

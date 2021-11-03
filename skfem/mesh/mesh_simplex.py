@@ -7,7 +7,7 @@ class MeshSimplex:
     """Mixin for simplical meshes."""
 
     def orientation(self):
-
+        """Return the sign of the Jacobian determinant for each element."""
         mapping = self._mapping()
         return (np.sign(mapping.detDF(np.zeros(self.p.shape[0])[:, None]))
                 .flatten()
@@ -16,7 +16,7 @@ class MeshSimplex:
     def oriented(self):
         """Return a oriented mesh with positive Jacobian determinant.
 
-        For two-dimensional meshes this corresponds to CCW orientation.
+        For triangular meshes this corresponds to CCW orientation.
 
         """
         flip = np.nonzero(self.orientation() == -1)[0]
