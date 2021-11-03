@@ -254,7 +254,6 @@ class MeshTet1(Mesh3D):
             nt += nm
 
             check = np.nonzero(nonconf[:ns])[0]
-            nonconf[check] = 0
             check_node = np.zeros(nv, dtype=np.int64)
             check_node[split_edge[:2, check]] = 1
             check_elem = np.nonzero(check_node[t[:, :nt]].sum(axis=0))[0]
