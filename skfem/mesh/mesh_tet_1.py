@@ -7,10 +7,11 @@ from scipy.spatial import cKDTree
 
 from ..element import Element, ElementTetP1
 from .mesh_3d import Mesh3D
+from .mesh_simplex import MeshSimplex
 
 
 @dataclass(repr=False)
-class MeshTet1(Mesh3D):
+class MeshTet1(MeshSimplex, Mesh3D):
     """A standard first-order tetrahedral mesh."""
 
     doflocs: ndarray = np.array([[0., 0., 0.],
@@ -272,28 +273,6 @@ class MeshTet1(Mesh3D):
             self,
             doflocs=p[:, :nv],
             t=t[:, :nt],
-        )
-
-    def orientation(self):
-
-        mapping = self._mapping()
-        return ((mapping.detDF(np.array([[0], [0], [0]])) < 0)
-                .flatten()
-                .astype(np.int64))
-
-    def oriented(self):
-
-        flip = np.nonzero(self.orientation())[0]
-        t = self.t.copy()
-        t0 = t[0, flip]
-        t1 = t[1, flip]
-        t[0, flip] = t1
-        t[1, flip] = t0
-
-        return replace(
-            self,
-            t=t,
-            sort_t=False,
         )
 
     def smoothed(self,
