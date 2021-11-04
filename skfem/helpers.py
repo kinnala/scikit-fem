@@ -1,21 +1,34 @@
 """Helper functions for defining forms."""
 
-from typing import Union
+from typing import Union, Optional
 import numpy as np
 from numpy import ndarray, zeros_like
 from skfem.element import DiscreteField
+from skfem.assembly.form.form import FormExtraParams
 
 
-FieldOrArray = Union[DiscreteField, ndarray]
+IntOrField = Union[int, DiscreteField]
+IntFieldOrArray = Union[int, DiscreteField, ndarray]
 
 
-def grad(u: DiscreteField):
+def unpack(w: FormExtraParams, k: int, *args):
+    out = []
+    for i, arg in enumerate(args):
+        out.append(tuple(arg if w.idx[i] == j else 0 for j in range(k)))
+    return tuple(out)
+
+
+def grad(u: IntOrField):
     """Gradient."""
+    if isinstance(u, int):
+        return 0
     return u.grad
 
 
-def div(u: DiscreteField):
+def div(u: IntOrField):
     """Divergence."""
+    if isinstance(u, int):
+        return 0
     if u.div is not None:
         return u.div
     elif u.grad is not None:
@@ -26,8 +39,10 @@ def div(u: DiscreteField):
     raise NotImplementedError
 
 
-def curl(u: DiscreteField):
+def curl(u: IntOrField):
     """Curl."""
+    if isinstance(u, int):
+        return 0
     if u.curl is not None:
         return u.curl
     elif u.grad is not None:
@@ -36,8 +51,10 @@ def curl(u: DiscreteField):
     raise NotImplementedError
 
 
-def d(u: DiscreteField):
+def d(u: IntOrField):
     """Gradient, divergence or curl."""
+    if isinstance(u, int):
+        return 0
     if u.grad is not None:
         return u.grad
     elif u.div is not None:
@@ -47,43 +64,61 @@ def d(u: DiscreteField):
     raise NotImplementedError
 
 
-def sym_grad(u: DiscreteField):
+def sym_grad(u: IntOrField):
     """Symmetric gradient."""
+    if isinstance(u, int):
+        return 0
     return .5 * (u.grad + transpose(u.grad))
 
 
-def dd(u: DiscreteField):
+def dd(u: IntOrField):
     """Hessian (if available)."""
+    if isinstance(u, int):
+        return 0
     return u.hess
 
 
 def ddd(u):
     """Third derivative (if available)."""
+    if isinstance(u, int):
+        return 0
     return u.grad3
 
 
 def dddd(u):
     """Fourth derivative (if available)."""
+    if isinstance(u, int):
+        return 0
     return u.grad4
 
 
-def dot(u: FieldOrArray, v: FieldOrArray):
+def dot(u: IntFieldOrArray, v: IntFieldOrArray):
     """Dot product."""
+    if isinstance(u, int) or isinstance(v, int):
+        return 0
     return np.einsum('i...,i...', u, v)
 
 
-def ddot(u: FieldOrArray, v: FieldOrArray):
+def ddot(u: IntFieldOrArray, v: IntFieldOrArray):
     """Double dot product."""
+    if isinstance(u, int) or isinstance(v, int):
+        return 0
     return np.einsum('ij...,ij...', u, v)
 
 
-def dddot(u: FieldOrArray, v: FieldOrArray):
+def dddot(u: IntFieldOrArray, v: IntFieldOrArray):
     """Triple dot product."""
+    if isinstance(u, int) or isinstance(v, int):
+        return 0
     return np.einsum('ijk...,ijk...', u, v)
 
 
-def prod(u: FieldOrArray, v: FieldOrArray, w: FieldOrArray = None):
+def prod(u: IntFieldOrArray,
+         v: IntFieldOrArray,
+         w: Optional[IntFieldOrArray] = None):
     """Tensor product."""
+    if isinstance(u, int) or isinstance(v, int) or isinstance(w, int):
+        return 0
     if w is None:
         return np.einsum('i...,j...->ij...', u, v)
     return np.einsum('i...,j...,k...->ijk...', u, v, w)
@@ -107,7 +142,7 @@ def eye(w, n):
 
 def identity(w, N=None):
     """Create identity matrix."""
-    if isinstance(w, DiscreteField):
+    if isinstance(w, IntOrField):
         proto = w.value
     elif isinstance(w, ndarray):
         proto = w
