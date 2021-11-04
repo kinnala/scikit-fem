@@ -205,78 +205,124 @@ class TestAdaptiveSplitting2D(TestCase):
             self.assertEqual(prev_p_size, m.p.shape[1] - 3)
 
 
-class TestAdaptiveSplitting3D(TestCase):
+def test_adaptive_splitting_3d():
+    m = MeshTet()
+    for itr in range(10):
+        M = m.refined([itr, itr + 1, itr + 2])
+        assert M.is_valid()
+        m = M
 
-    def runTest(self):
+def test_adaptive_splitting_3d_0():
+    m = MeshTet()
+    for itr in range(10):
+        m = m.refined([itr, itr + 1])
+        assert m.is_valid()
 
-        m = MeshTet()
-        for itr in range(10):
-            m = m.refined([itr, itr + 1, itr + 2])
-            assert m.is_valid()
+def test_adaptive_splitting_3d_1():
+    m = MeshTet()
+    for itr in range(50):
+        m = m.refined([itr])
+        assert m.is_valid()
 
-        m = MeshTet()
-        for itr in range(10):
-            m = m.refined([itr, itr + 1])
-            assert m.is_valid()
+def test_adaptive_splitting_3d_2():
+    m = MeshTet()
+    for itr in range(5):
+        m = m.refined(np.arange(m.nelements, dtype=np.int64))
+        assert m.is_valid()
 
-        m = MeshTet()
-        for itr in range(50):
-            m = m.refined([itr])
-            assert m.is_valid()
+def test_adaptive_splitting_3d_3():
+    # adaptively refine one face of a cube, check that the mesh parameter h
+    # is approximately linear w.r.t to distance from the face
+    m = MeshTet.init_tensor(np.linspace(0, 1, 3),
+                            np.linspace(0, 1, 3),
+                            np.linspace(0, 1, 3))
 
-        m = MeshTet()
-        for itr in range(5):
-            m = m.refined(np.arange(m.nelements, dtype=np.int64))
-            assert m.is_valid()
-
-        # adaptively refine one face of a cube, check that the mesh parameter h
-        # is approximately linear w.r.t to distance from the face
-        m = MeshTet.init_tensor(np.linspace(0, 1, 3),
-                                np.linspace(0, 1, 3),
-                                np.linspace(0, 1, 3))
-
-        for itr in range(15):
-            m = m.refined(m.f2t[0, m.facets_satisfying(lambda x: x[0] == 0)])
-
-        @LinearForm
-        def hproj(v, w):
-            return w.h * v
-
-        basis = Basis(m, ElementTetP1())
-        h = projection(hproj, basis)
-
-        funh = basis.interpolator(h)
-
-        xs = np.vstack((
-            np.linspace(0, .5, 20),
-            np.zeros(20) + .5,
-            np.zeros(20) + .5,
-        ))
-        hs = funh(xs)
-
-        assert np.max(np.abs(hs - xs[0])) < 0.063
-
-        # check that the same mesh is reproduced by any future versions
-        m = MeshTet.init_tensor(np.linspace(0, 1, 2),
-                                np.linspace(0, 1, 2),
-                                np.linspace(0, 1, 2))
-
+    for itr in range(15):
         m = m.refined(m.f2t[0, m.facets_satisfying(lambda x: x[0] == 0)])
 
-        assert_array_equal(
-            m.p,
-            np.array([[0. , 0. , 1. , 1. , 0. , 0. , 1. , 1. , 0.5],
-                      [0. , 1. , 0. , 1. , 0. , 1. , 0. , 1. , 0.5],
-                      [0. , 0. , 0. , 0. , 1. , 1. , 1. , 1. , 0.5]])
-        )
+    @LinearForm
+    def hproj(v, w):
+        return w.h * v
 
-        assert_array_equal(
-            m.t,
-            np.array([[5, 3, 3, 5, 6, 6, 1, 4, 1, 2, 2, 4],
-                      [0, 0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7],
-                      [1, 1, 2, 4, 2, 4, 5, 5, 3, 3, 6, 6],
-                      [8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]])
-        )
+    basis = Basis(m, ElementTetP1())
+    h = projection(hproj, basis)
+
+    funh = basis.interpolator(h)
+
+    xs = np.vstack((
+        np.linspace(0, .5, 20),
+        np.zeros(20) + .5,
+        np.zeros(20) + .5,
+    ))
+    hs = funh(xs)
+
+    assert np.max(np.abs(hs - xs[0])) < 0.063
+
+
+def test_adaptive_splitting_3d_4():
+    # check that the same mesh is reproduced by any future versions
+    m = MeshTet.init_tensor(np.linspace(0, 1, 2),
+                            np.linspace(0, 1, 2),
+                            np.linspace(0, 1, 2))
+
+    m = m.refined(m.f2t[0, m.facets_satisfying(lambda x: x[0] == 0)])
+
+    assert_array_equal(
+        m.p,
+        np.array([[0. , 0. , 1. , 1. , 0. , 0. , 1. , 1. , 0.5],
+                  [0. , 1. , 0. , 1. , 0. , 1. , 0. , 1. , 0.5],
+                  [0. , 0. , 0. , 0. , 1. , 1. , 1. , 1. , 0.5]])
+    )
+
+    assert_array_equal(
+        m.t,
+        np.array([[5, 3, 3, 5, 6, 6, 1, 4, 1, 2, 2, 4],
+                  [0, 0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7],
+                  [1, 1, 2, 4, 2, 4, 5, 5, 3, 3, 6, 6],
+                  [8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]])
+    )
+
+
+def test_adaptive_splitting_3d_5():
+    # random refine
+    m = MeshTet()
+
+    np.random.seed(1337)
+    for itr in range(10):
+        m = m.refined(
+            np.unique(
+                np.random.randint(0,
+                                  m.t.shape[1],
+                                  size=int(0.3 * m.t.shape[1]))))
+        assert m.is_valid()
+
+
+@pytest.mark.parametrize(
+    "m,seed",
+    [
+        (MeshTet(), 0),
+        (MeshTet(), 1),  # problems
+        (MeshTet(), 2),
+        (MeshTet(), 3),
+        (MeshTet().refined(), 10),
+    ]
+)
+def test_adaptive_random_splitting(m, seed):
+
+    np.random.seed(seed)
+    points = np.hstack((m.p, np.random.rand(m.p.shape[0], 100)))
+    tri = Delaunay(points.T)
+    m = type(m)(points, tri.simplices.T)
+    assert m.is_valid()
+
+    for itr in range(3):
+        M = m.refined(np.unique(
+            np.random.randint(0,
+                              m.t.shape[1],
+                              size=int(0.3 * m.t.shape[1]))))
+        assert M.is_valid()
+        m = M
+
 
 class TestMirrored(TestCase):
 
@@ -322,6 +368,36 @@ class TestFinder1DLinspaced(TestCase):
             self.assertEqual(finder(np.array([0.999]))[0], 2 ** itr - 1)
             self.assertEqual(finder(np.array([0.001]))[0], 0)
 
+
+@pytest.mark.parametrize(
+    "m",
+    [
+        MeshTri.init_circle(),
+        MeshQuad.init_tensor([0, 1, 3], [0, 1, 3]),
+        MeshTet().refined(3),
+        MeshHex.init_tensor([0, 1, 3], [0, 1, 3], [0, 1, 3]),
+    ]
+)   
+def test_smoothed(m):
+    M = m.smoothed()
+    assert M.is_valid()
+    # points have moved?
+    assert np.linalg.norm((M.p - m.p) ** 2) > 0
+
+
+@pytest.mark.parametrize(
+    "m",
+    [
+        MeshTri(),
+        MeshTet(),
+    ]
+)
+def test_oriented(m):
+    M = m.oriented()
+    assert np.sum(m.orientation() < 0) > 0
+    assert np.sum(m.orientation() > 0) > 0
+    assert np.sum(M.orientation() > 0) > 0
+    assert np.sum(M.orientation() < 0) == 0
 
 
 @pytest.mark.parametrize(

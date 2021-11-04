@@ -7,10 +7,11 @@ from scipy.spatial import cKDTree
 
 from ..element import Element, ElementTetP1
 from .mesh_3d import Mesh3D
+from .mesh_simplex import MeshSimplex
 
 
 @dataclass(repr=False)
-class MeshTet1(Mesh3D):
+class MeshTet1(MeshSimplex, Mesh3D):
     """A standard first-order tetrahedral mesh."""
 
     doflocs: ndarray = np.array([[0., 0., 0.],
@@ -117,13 +118,12 @@ class MeshTet1(Mesh3D):
             _subdomains=None,
         )
 
-    @staticmethod
-    def _adaptive_sort_mesh(p, t, marked):
+    def _adaptive_sort_mesh(self, p, t, marked):
         """Make (0, 1) the longest edge in t for marked."""
 
         # add noise so that there are no edges with the same length
         np.random.seed(1337)
-        p = p.copy() + 1e-5 * np.random.random(p.shape)
+        p = p.copy() + 1e-10 * np.random.random(p.shape)
 
         l01 = np.sqrt(np.sum((p[:, t[0, marked]] - p[:, t[1, marked]]) ** 2,
                              axis=0))
@@ -191,35 +191,37 @@ class MeshTet1(Mesh3D):
         """Longest edge bisection."""
         if isinstance(marked, list):
             marked = np.array(marked, dtype=np.int64)
+        marked = np.unique(marked)
         nt = self.t.shape[1]
         nv = self.p.shape[1]
         p = np.zeros((3, 9 * nv), dtype=np.float64)
-        t = np.zeros((4, 4 * nt), dtype=np.int64)
-        p[:, :self.p.shape[1]] = self.p.copy()
-        t[:, :self.t.shape[1]] = self.t.copy()
+        t = np.zeros((4, 8 * nt), dtype=np.int64)
+        p[:, :nv] = self.p.copy()
+        t[:, :nt] = self.t.copy()
 
-        gen = np.zeros(nv + 6 * nt, dtype=np.int8)
         nonconf = np.ones(8 * nv, dtype=np.int8)
         split_edge = np.zeros((3, 8 * nv), dtype=np.int64)
         ns = 0
 
         while len(marked) > 0:
             nm = len(marked)
-            tnew = np.zeros(nm, dtype=np.int64)
-            ix = np.arange(nm, dtype=np.int64)
+            tnew = np.zeros(nm, dtype=np.int64) - 1
             t = self._adaptive_sort_mesh(p, t, marked)
             t0, t1, t2, t3 = t[:, marked]
 
-            if ns > 0:
+            if ns == 0:
+                ix = np.arange(nm, dtype=np.int64)
+            else:
                 nonconf_edge = np.nonzero(nonconf[:ns])[0]
                 i, j = self._find_nz(
-                    split_edge[:2, nonconf_edge],
-                    np.vstack((split_edge[2, nonconf_edge],) * 2),
+                    np.hstack((split_edge[0, nonconf_edge],
+                               split_edge[1, nonconf_edge])),
+                    np.hstack((split_edge[2, nonconf_edge],) * 2),
                     (nv, nv),
                     lambda I: I[t0].multiply(I[t1])
                 )
                 tnew[i] = j
-                ix = np.nonzero(tnew == 0)[0]
+                ix = np.nonzero(tnew == -1)[0]
 
             if len(ix) > 0:
                 i, j = self._find_nz(
@@ -228,13 +230,16 @@ class MeshTet1(Mesh3D):
                 )
                 nn = len(i)
                 nix = slice(ns, ns + nn)
+
                 split_edge[0, nix] = i
                 split_edge[1, nix] = j
                 split_edge[2, nix] = np.arange(nv, nv + nn, dtype=np.int64)
 
                 # add new points
                 p[:, nv:(nv + nn)] = .5 * (p[:, i] + p[:, j])
+
                 nv += nn
+                assert len(np.unique(p[:, :nv].T, axis=0)) == nv
                 i, j = self._find_nz(
                     split_edge[:2, nix],
                     np.vstack((split_edge[2, nix],) * 2),
@@ -244,16 +249,12 @@ class MeshTet1(Mesh3D):
                 tnew[i] = j
                 ns += nn
 
-            ix = np.nonzero(gen[tnew] == 0)[0]
-            gen[tnew[ix]] = np.max(gen[t[:, marked[ix]]], axis=0) + 1
-
             # add new elements
             t[:, marked] = np.vstack((t3, t0, t2, tnew))
             t[:, nt:(nt + nm)] = np.vstack((t2, t1, t3, tnew))
             nt += nm
 
             check = np.nonzero(nonconf[:ns])[0]
-            nonconf[check] = 0
             check_node = np.zeros(nv, dtype=np.int64)
             check_node[split_edge[:2, check]] = 1
             check_elem = np.nonzero(check_node[t[:, :nt]].sum(axis=0))[0]
