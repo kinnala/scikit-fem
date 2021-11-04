@@ -7,10 +7,11 @@ from scipy.spatial import cKDTree
 
 from ..element import Element, ElementTriP1
 from .mesh_2d import Mesh2D
+from .mesh_simplex import MeshSimplex
 
 
 @dataclass(repr=False)
-class MeshTri1(Mesh2D):
+class MeshTri1(MeshSimplex, Mesh2D):
     """A standard first-order triangular mesh."""
 
     doflocs: ndarray = np.array([[0., 0.],
@@ -318,28 +319,6 @@ class MeshTri1(Mesh2D):
             t=t,
             _boundaries=None,
             _subdomains=None,
-        )
-
-    def orientation(self):
-
-        mapping = self._mapping()
-        return ((mapping.detDF(np.array([[0], [0]])) < 0)
-                .flatten()
-                .astype(np.int64))
-
-    def oriented(self):
-
-        flip = np.nonzero(self.orientation())[0]
-        t = self.t.copy()
-        t0 = t[0, flip]
-        t1 = t[1, flip]
-        t[0, flip] = t1
-        t[1, flip] = t0
-
-        return replace(
-            self,
-            t=t,
-            sort_t=False,
         )
 
     def __mul__(self, other):

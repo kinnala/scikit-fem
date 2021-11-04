@@ -9,10 +9,14 @@ from .mesh import Mesh
 @dataclass(repr=False)
 class Mesh2D(Mesh):
 
+    def params(self) -> ndarray:
+        return np.linalg.norm(
+            np.diff(self.p[:, self.facets], axis=1),
+            axis=0
+        )[0, self.t2f].max(axis=0)
+
     def param(self) -> float:
-        return np.max(
-            np.linalg.norm(np.diff(self.p[:, self.facets], axis=1), axis=0)
-        )
+        return np.max(self.params())
 
     @staticmethod
     def strip_extra_coordinates(p: ndarray) -> ndarray:

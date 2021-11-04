@@ -7,10 +7,11 @@ from numpy import ndarray
 from ..element import Element, ElementLineP1
 from .mesh import Mesh
 from .mesh_quad_1 import MeshQuad1
+from .mesh_simplex import MeshSimplex
 
 
 @dataclass(repr=False)
-class MeshLine1(Mesh):
+class MeshLine1(MeshSimplex, Mesh):
     """A one-dimensional mesh."""
 
     doflocs: ndarray = np.array([[0., 1.]], dtype=np.float64)
