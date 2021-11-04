@@ -212,5 +212,5 @@ class MappingAffine(Mapping):
                 N[jtr, ix] = Nref[itr, jtr]
 
         n = np.einsum('ijkl,ik->jkl', invDF, N)
-        nlength = np.sqrt(np.sum(n**2, axis=0))
+        nlength = np.sqrt(np.sum(n ** 2, axis=0))
         return np.einsum('ijk,jk->ijk', n, 1. / nlength)

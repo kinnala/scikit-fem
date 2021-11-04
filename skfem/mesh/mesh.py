@@ -1,11 +1,15 @@
+import logging
+
 from dataclasses import dataclass, replace
 from typing import Callable, Dict, List, Optional, Tuple, Type, Union
-from warnings import warn
 
 import numpy as np
 from numpy import ndarray
 
 from ..element import BOUNDARY_ELEMENT_MAP, Element
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(repr=False)
@@ -402,14 +406,19 @@ class Mesh:
 
         # C_CONTIGUOUS is more performant in dimension-based slices
         if not self.doflocs.flags['C_CONTIGUOUS']:
-            if self.doflocs.shape[1] > 1000:
-                warn("Transforming over 1000 vertices to C_CONTIGUOUS.")
+            if self.doflocs.shape[1] > 1e3:
+                logger.warning("Transforming over 1000 vertices "
+                               "to C_CONTIGUOUS.")
             self.doflocs = np.ascontiguousarray(self.doflocs)
 
         if not self.t.flags['C_CONTIGUOUS']:
-            if self.t.shape[1] > 1000:
-                warn("Transforming over 1000 elements to C_CONTIGUOUS.")
+            if self.t.shape[1] > 1e3:
+                logger.warning("Transforming over 1000 elements "
+                               "to C_CONTIGUOUS.")
             self.t = np.ascontiguousarray(self.t)
+
+        # run validation
+        self.is_valid(debug=False)
 
     def __rmatmul__(self, other):
         out = self.__matmul__(other)
@@ -433,20 +442,23 @@ class Mesh:
             ]
         raise NotImplementedError
 
-    def is_valid(self) -> bool:
-        """Perform some mesh validation checks."""
-        # check that there are no duplicate points
-        tmp = np.ascontiguousarray(self.p.T)
-        if self.p.shape[1] != np.unique(tmp.view([('', tmp.dtype)]
-                                                 * tmp.shape[1])).shape[0]:
-            warn("Mesh contains duplicate vertices.")
-            return False
+    def is_valid(self, debug=True) -> bool:
+        """Perform expensive mesh validation (if logging set to DEBUG)."""
 
-        # check that all points are at least in some element
-        if len(np.setdiff1d(np.arange(self.p.shape[1]),
-                            np.unique(self.t))) > 0:
-            warn("Mesh contains a vertex not belonging to any element.")
-            return False
+        if debug or logger.getEffectiveLevel() <= 10:
+            # check that there are no duplicate points
+            tmp = np.ascontiguousarray(self.p.T)
+            if self.p.shape[1] != np.unique(tmp.view([('', tmp.dtype)]
+                                                     * tmp.shape[1])).shape[0]:
+                logger.debug("Mesh contains duplicate vertices.")
+                return False
+
+            # check that all points are at least in some element
+            if len(np.setdiff1d(np.arange(self.p.shape[1]),
+                                np.unique(self.t))) > 0:
+                logger.debug("Mesh contains a vertex not belonging "
+                             "to any element.")
+                return False
 
         return True
 

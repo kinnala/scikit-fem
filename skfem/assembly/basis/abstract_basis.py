@@ -1,4 +1,4 @@
-import warnings
+import logging
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
@@ -9,6 +9,9 @@ from skfem.mapping import Mapping
 from skfem.mesh import Mesh
 from skfem.quadrature import get_quadrature
 from skfem.refdom import Refdom
+
+
+logger = logging.getLogger(__name__)
 
 
 class AbstractBasis:
@@ -59,7 +62,7 @@ class AbstractBasis:
                     self.doflocs[itr, self.dofs.element_dofs[jtr]] =\
                         doflocs[itr, :, jtr]
         except Exception:
-            warnings.warn("Unable to calculate DOF locations.")
+            logger.warning("Unable to calculate global DOF locations.")
 
         self.mesh = mesh
         self.elem = elem

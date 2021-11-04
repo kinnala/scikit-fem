@@ -46,7 +46,7 @@ array([[0.08333333, 0.04166667, 0.04166667, 0.        ],
 array([0.0162037 , 0.15046296, 0.06712963, 0.09953704])
 
 """
-
+import logging
 from typing import Union
 from itertools import product
 
@@ -61,6 +61,9 @@ from .dofs import Dofs, DofsView
 from .form import Form, TrilinearForm, BilinearForm, LinearForm, Functional
 
 
+logger = logging.getLogger(__name__)
+
+
 def asm(form: Form,
         *args, **kwargs) -> Union[ndarray, csr_matrix]:
     """Perform finite element assembly.
@@ -69,12 +72,16 @@ def asm(form: Form,
     supports assembling multiple bases at once and summing the result.
 
     """
+    assert form.form is not None
+    logger.info("Assembling '{}'.".format(form.form.__name__))
     nargs = [[arg] if not isinstance(arg, list) else arg for arg in args]
     out = sum(map(lambda a: form.coo_data(*a[1], idx=a[0], **kwargs),
                   zip(product(*(range(len(x)) for x in nargs)),
                       product(*nargs))))
     assert not isinstance(out, int)
-    return out.todefault()
+    outd = out.todefault()
+    logger.info("Assembling finished.")
+    return outd
 
 
 __all__ = [

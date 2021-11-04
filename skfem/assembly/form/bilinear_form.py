@@ -1,3 +1,4 @@
+import logging
 from typing import Optional, Tuple
 from threading import Thread
 from itertools import product
@@ -9,6 +10,9 @@ from scipy.sparse import csr_matrix
 from ..basis import Basis
 from .coo_data import COOData
 from .form import Form, FormExtraParams
+
+
+logger = logging.getLogger(__name__)
 
 
 class BilinearForm(Form):
@@ -138,7 +142,11 @@ class BilinearForm(Form):
             Any additional keyword arguments are appended to ``w``.
 
         """
-        return COOData._assemble_scipy_csr(*self._assemble(*args, **kwargs))
+        assert self.form is not None
+        logger.info("Assembling '{}'.".format(self.form.__name__))
+        mat = COOData._assemble_scipy_csr(*self._assemble(*args, **kwargs))
+        logger.info("Assembling finished.")
+        return mat
 
     def _kernel(self, u, v, w, dx):
         return np.sum(self.form(*u, *v, w) * dx, axis=1)
