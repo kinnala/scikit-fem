@@ -681,7 +681,8 @@ class Mesh:
         Parameters
         ----------
         fixed_nodes
-            A list of node indices that do not move.
+            A list of node indices that do not move.  By default, the boundary
+            nodes are fixed.
 
         """
 
