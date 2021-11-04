@@ -231,6 +231,9 @@ with respect to documented and/or tested features.
   specifying custom `Dofs` object to be used in the assembly
 - Added: `Dofs` constructor accepts the `offset` keyword argument for
   specifying a nonzero initial index for indexing the DOFs
+- Added: `Mesh.smoothed` for simple Laplacian smoothing of the mesh
+- Fixed: Edge cases in the adaptive refine of `MeshTet1` that failed to produce
+  a valid mesh
 
 ### [4.0.1] - 2021-10-15
 
