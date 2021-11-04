@@ -142,7 +142,7 @@ def eye(w, n):
 
 def identity(w, N=None):
     """Create identity matrix."""
-    if isinstance(w, IntOrField):
+    if isinstance(w, DiscreteField):
         proto = w.value
     elif isinstance(w, ndarray):
         proto = w
