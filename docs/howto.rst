@@ -218,10 +218,10 @@ Below we solve explicitly the above variational problem:
    >>> M = fem.BilinearForm(lambda u, v, w: u * v).assemble(basis)
    >>> f = fem.LinearForm(lambda v, w: u_0(w.x) * v).assemble(basis)
    >>> x = fem.solve(*fem.condense(M, f, I=basis.get_dofs()))
-   >>> np.round(x, 5)
-   array([ 0.     ,  0.     ,  1.     ,  0.     ,  0.     , -0.     ,
-           0.     ,  0.     ,  0.61237,  0.15811,  0.61237,  0.15811,
-           0.     ,  0.     ,  0.     ,  0.     ])
+   >>> np.abs(np.round(x, 5))
+   array([0.     , 0.     , 1.     , 0.     , 0.     , 0.     , 0.     ,
+          0.     , 0.61237, 0.15811, 0.61237, 0.15811, 0.     , 0.     ,
+          0.     , 0.     ])
 
 Alternatively, you can use :func:`skfem.utils.projection` which does exactly
 the same thing:
@@ -229,10 +229,10 @@ the same thing:
 .. doctest::
 
    >>> y = fem.projection(u_0, basis, I=basis.get_dofs(), expand=True)
-   >>> np.round(y, 5)
-   array([ 0.     ,  0.     ,  1.     ,  0.     ,  0.     , -0.     ,
-           0.     ,  0.     ,  0.61237,  0.15811,  0.61237,  0.15811,
-           0.     ,  0.     ,  0.     ,  0.     ])
+   >>> np.abs(np.round(y, 5))
+   array([0.     , 0.     , 1.     , 0.     , 0.     , 0.     , 0.     ,
+          0.     , 0.61237, 0.15811, 0.61237, 0.15811, 0.     , 0.     ,
+          0.     , 0.     ])
 
 Assembling jump terms
 =====================
