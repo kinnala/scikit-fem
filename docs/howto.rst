@@ -92,17 +92,17 @@ The previous solution :math:`u_k` must be provided to
    >>> for itr in range(10):  # fixed point iteration
    ...     A = bilinf.assemble(basis, u_k=basis.interpolate(x))
    ...     x = fem.solve(*fem.condense(A, b, I=m.interior_nodes()))
-   ...     print(x.max())
-   0.07278262867647059
-   0.07030433694174187
-   0.07036045457157739
-   0.07035940302769318
-   0.07035942072395032
-   0.07035942044353624
-   0.07035942044783286
-   0.07035942044776827
-   0.07035942044776916
-   0.07035942044776922
+   ...     print(round(x.max(), 10))
+   0.0727826287
+   0.0703043369
+   0.0703604546
+   0.070359403
+   0.0703594207
+   0.0703594204
+   0.0703594204
+   0.0703594204
+   0.0703594204
+   0.0703594204
 
 Inside the form definition, ``w`` is a dictionary of user provided arguments and
 additional default keys.
@@ -210,6 +210,7 @@ Below we solve explicitly the above variational problem:
 
 .. doctest::
 
+   >>> import numpy as np
    >>> import skfem as fem
    >>> m = fem.MeshQuad()
    >>> basis = fem.FacetBasis(m, fem.ElementQuadP(3))
@@ -217,22 +218,21 @@ Below we solve explicitly the above variational problem:
    >>> M = fem.BilinearForm(lambda u, v, w: u * v).assemble(basis)
    >>> f = fem.LinearForm(lambda v, w: u_0(w.x) * v).assemble(basis)
    >>> x = fem.solve(*fem.condense(M, f, I=basis.get_dofs()))
-   >>> x
-   array([ 2.87802132e-16,  1.62145397e-16,  1.00000000e+00,  1.66533454e-16,
-           4.59225774e-16, -4.41713127e-16,  4.63704316e-16,  1.25333771e-16,
-           6.12372436e-01,  1.58113883e-01,  6.12372436e-01,  1.58113883e-01,
-           0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00])
+   >>> np.round(x, 5)
+   array([ 0.     ,  0.     ,  1.     ,  0.     ,  0.     , -0.     ,
+           0.     ,  0.     ,  0.61237,  0.15811,  0.61237,  0.15811,
+           0.     ,  0.     ,  0.     ,  0.     ])
 
 Alternatively, you can use :func:`skfem.utils.projection` which does exactly
 the same thing:
 
 .. doctest::
 
-   >>> fem.projection(u_0, basis, I=basis.get_dofs(), expand=True)
-   array([ 2.87802132e-16,  1.62145397e-16,  1.00000000e+00,  1.66533454e-16,
-           4.59225774e-16, -4.41713127e-16,  4.63704316e-16,  1.25333771e-16,
-           6.12372436e-01,  1.58113883e-01,  6.12372436e-01,  1.58113883e-01,
-           0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00])
+   >>> y = fem.projection(u_0, basis, I=basis.get_dofs(), expand=True)
+   >>> np.round(y, 5)
+   array([ 0.     ,  0.     ,  1.     ,  0.     ,  0.     , -0.     ,
+           0.     ,  0.     ,  0.61237,  0.15811,  0.61237,  0.15811,
+           0.     ,  0.     ,  0.     ,  0.     ])
 
 Assembling jump terms
 =====================
