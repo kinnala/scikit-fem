@@ -99,23 +99,26 @@ class Element:
 
     def condensed(self):
 
-        eo = Element()
-        eo.nodal_dofs = self.nodal_dofs
-        eo.facet_dofs = self.facet_dofs
-        eo.edge_dofs = self.edge_dofs
+        from types import MethodType
+        from copy import deepcopy
+
+        eo = deepcopy(self)
         eo.interior_dofs = 0
-        eo.refdom = self.refdom
-        eo.maxdeg = self.maxdeg
 
-        eo.gbasis = self.gbasis
+        if hasattr(eo, 'elems'):
+            for i in range(len(eo.elems)):
+                eo.elems[i].interior_dofs = 0
 
-        ei = Element()
+        ei = deepcopy(self)
         ei.nodal_dofs = 0
         ei.facet_dofs = 0
         ei.edge_dofs = 0
-        ei.interior_dofs = self.interior_dofs
-        ei.refdom = self.refdom
-        ei.maxdeg = self.maxdeg
+
+        if hasattr(ei, 'elems'):
+            for i in range(len(ei.elems)):
+                ei.elems[i].nodal_dofs = 0
+                ei.elems[i].facet_dofs = 0
+                ei.elems[i].edge_dofs = 0
 
         def gbasis(obj,
                    mapping,
@@ -127,9 +130,7 @@ class Element:
                                i + self._bfun_counts()[:3].sum(),
                                tind)
 
-        import types
-
-        ei.gbasis = types.MethodType(gbasis, ei)
+        ei.gbasis = MethodType(gbasis, ei)
 
         return eo, ei
 
