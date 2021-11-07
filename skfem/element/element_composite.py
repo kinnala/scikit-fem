@@ -100,5 +100,8 @@ class ElementComposite(Element):
             if n == k:
                 output.append(e.gbasis(mapping, X, ind, tind)[0])
             else:
+                # TODO change to something like
+                # output.append(0)
+                # requires changes at least in AbstractBasis
                 output.append(e.gbasis(mapping, X, 0, tind)[0].zeros_like())
         return tuple(output)

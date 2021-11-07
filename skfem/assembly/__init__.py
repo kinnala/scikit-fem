@@ -47,7 +47,7 @@ array([0.0162037 , 0.15046296, 0.06712963, 0.09953704])
 
 """
 import logging
-from typing import Union
+from typing import Any
 from itertools import product
 
 from numpy import ndarray
@@ -64,8 +64,16 @@ from .form import Form, TrilinearForm, BilinearForm, LinearForm, Functional
 logger = logging.getLogger(__name__)
 
 
+def _sum(blocks):
+    out = sum(blocks)
+    assert not isinstance(out, int)
+    return out.todefault()
+
+
 def asm(form: Form,
-        *args, **kwargs) -> Union[ndarray, csr_matrix]:
+        *args,
+        to=_sum,
+        **kwargs) -> Any:
     """Perform finite element assembly.
 
     A shorthand for :meth:`skfem.assembly.Form.assemble` which, in addition,
@@ -75,13 +83,14 @@ def asm(form: Form,
     assert form.form is not None
     logger.info("Assembling '{}'.".format(form.form.__name__))
     nargs = [[arg] if not isinstance(arg, list) else arg for arg in args]
-    out = sum(map(lambda a: form.coo_data(*a[1], idx=a[0], **kwargs),
-                  zip(product(*(range(len(x)) for x in nargs)),
-                      product(*nargs))))
-    assert not isinstance(out, int)
-    outd = out.todefault()
+    retval = to(map(lambda a: form.coo_data(*a[1],
+                                            idx=a[0],
+                                            maxidx=len(a[1]),
+                                            **kwargs),
+                    zip(product(*(range(len(x)) for x in nargs)),
+                        product(*nargs))))
     logger.info("Assembling finished.")
-    return outd
+    return retval
 
 
 __all__ = [

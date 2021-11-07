@@ -11,10 +11,23 @@ IntOrField = Union[int, DiscreteField]
 IntFieldOrArray = Union[int, DiscreteField, ndarray]
 
 
-def unpack(w: FormExtraParams, k: int, *args):
+def jump(w: FormExtraParams, *args):
+    if not hasattr(w, 'idx'):
+        raise NotImplementedError("jump() can be used only if the form is "
+                                  "assembled through asm().")
     out = []
     for i, arg in enumerate(args):
-        out.append(tuple(arg if w.idx[i] == j else 0 for j in range(k)))
+        out.append((-1.) ** w.idx[i] * arg)
+    return out[0] if len(out) == 1 else tuple(out)
+
+
+def unpack(w: FormExtraParams, *args):
+    if not hasattr(w, 'idx'):
+        raise NotImplementedError("split() can be used only if the form is "
+                                  "assembled through asm().")
+    out = []
+    for i, arg in enumerate(args):
+        out.append(tuple(arg if w.idx[i] == j else 0 for j in range(w.maxidx)))
     return tuple(out)
 
 
