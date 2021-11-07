@@ -97,6 +97,43 @@ class Element:
     def _index_error(cls):
         raise ValueError("Index larger than the number of basis functions.")
 
+    def condensed(self):
+
+        eo = Element()
+        eo.nodal_dofs = self.nodal_dofs
+        eo.facet_dofs = self.facet_dofs
+        eo.edge_dofs = self.edge_dofs
+        eo.interior_dofs = 0
+        eo.refdom = self.refdom
+        eo.maxdeg = self.maxdeg
+
+        eo.gbasis = self.gbasis
+
+        ei = Element()
+        ei.nodal_dofs = 0
+        ei.facet_dofs = 0
+        ei.edge_dofs = 0
+        ei.interior_dofs = self.interior_dofs
+        ei.refdom = self.refdom
+        ei.maxdeg = self.maxdeg
+
+        def gbasis(obj,
+                   mapping,
+                   X: ndarray,
+                   i: int,
+                   tind: Optional[ndarray] = None):
+            return self.gbasis(mapping,
+                               X,
+                               i + self._bfun_counts()[:3].sum(),
+                               tind)
+
+        import types
+
+        ei.gbasis = types.MethodType(gbasis, ei)
+
+        return eo, ei
+
+
     def _bfun_counts(self) -> ndarray:
         """Count number of nodal/edge/facet/interior basis functions."""
         return np.array([self.nodal_dofs * self.refdom.nnodes,
