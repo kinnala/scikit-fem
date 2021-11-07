@@ -23,7 +23,7 @@ def jump(w: FormExtraParams, *args):
 
 def unpack(w: FormExtraParams, *args):
     if not hasattr(w, 'idx'):
-        raise NotImplementedError("split() can be used only if the form is "
+        raise NotImplementedError("unpack() can be used only if the form is "
                                   "assembled through asm().")
     out = []
     for i, arg in enumerate(args):
