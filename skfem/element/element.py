@@ -98,6 +98,7 @@ class Element:
         raise ValueError("Index larger than the number of basis functions.")
 
     def condensed(self):
+        """Return two elements: one for interior and one for other DOFs."""
 
         from types import MethodType
         from copy import deepcopy
@@ -132,8 +133,7 @@ class Element:
 
         ei.gbasis = MethodType(gbasis, ei)
 
-        return eo, ei
-
+        return ei, eo
 
     def _bfun_counts(self) -> ndarray:
         """Count number of nodal/edge/facet/interior basis functions."""
