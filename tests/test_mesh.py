@@ -321,6 +321,13 @@ def test_adaptive_random_splitting(m, seed):
                               m.t.shape[1],
                               size=int(0.3 * m.t.shape[1]))))
         assert M.is_valid()
+
+        # test that all boundary facets are on the boundary
+        bfacets = M.facets[:, M.boundary_facets()]
+        bmidp = np.array([np.mean(M.p[itr, bfacets], axis=0)
+                          for itr in range(3)])
+        assert (np.isclose(bmidp, 0) + np.isclose(bmidp, 1)).any(axis=0).all()
+
         m = M
 
 
