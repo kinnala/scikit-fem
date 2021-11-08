@@ -1,4 +1,6 @@
 from typing import Optional, List, Type, Tuple
+from types import MethodType
+from copy import deepcopy
 
 import numpy as np
 from numpy import ndarray
@@ -99,9 +101,6 @@ class Element:
 
     def condensed(self):
         """Return two elements: one for interior and one for other DOFs."""
-
-        from types import MethodType
-        from copy import deepcopy
 
         eo = deepcopy(self)
         eo.interior_dofs = 0
