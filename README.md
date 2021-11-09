@@ -8,20 +8,23 @@
 <a href="https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e" alt="status"><img src="https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e/status.svg" /></a>
 <a href="https://github.com/kinnala/scikit-fem/actions" alt="Tests"><img src="https://github.com/kinnala/scikit-fem/workflows/tests/badge.svg" /></a>
 <a href="https://github.com/kinnala/scikit-fem-release-tests/actions" alt="Release tests"><img src="https://github.com/kinnala/scikit-fem-release-tests/workflows/release%20tests/badge.svg" /></a>
+<a href="https://colab.research.google.com/github/kinnala/scikit-fem-notebooks/blob/master/ex1.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 </p>
 
 
 `scikit-fem` is a lightweight Python 3.7+ library for performing [finite element
 assembly](https://en.wikipedia.org/wiki/Finite_element_method). Its main purpose
 is the transformation of bilinear forms into sparse matrices and linear forms
-into vectors.  The library supports triangular, quadrilateral, tetrahedral and
-hexahedral meshes as well as one-dimensional problems.
+into vectors.
 
-The library fills a gap in the spectrum of finite element codes.
-The library is **lightweight** and has **minimal dependencies**.
-It contains **no compiled code** meaning that it's **easy to install** and
-use on all platforms that support NumPy.  Despite being fully interpreted, the
-code has a **reasonable performance**.
+Features:
+- minimal dependencies, no compiled code
+- one-dimensional, triangular, quadrilateral, tetrahedral and hexahedral meshes
+- one-dimensional and quadrilateral elements of arbitrary order, triangular elements up to order 4
+- vectorial elements, H(div) and H(curl) conforming elements, discontinuous Galerkin methods
+- special elements such as MINI, Crouzeix-Raviart, Argyris, Morley, Hermite
+- support for quadratic and other high-order meshes
+- adaptive mesh refinement for simplical meshes
 
 ## Installation
 
@@ -29,10 +32,10 @@ The most recent release can be installed simply by
 ```
 pip install scikit-fem
 ```
+You can also try the library in browser through [Google Colab](https://colab.research.google.com/github/kinnala/scikit-fem-notebooks/blob/master/ex1.ipynb).
 
 ## Examples
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kinnala/scikit-fem-notebooks/blob/master/ex1.ipynb)
 Solve the Poisson problem (see also [`ex01.py`](https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex01.py)):
 ```python
 from skfem import *
@@ -46,13 +49,13 @@ m = MeshTri().refined(4)
 e = ElementTriP1()
 basis = Basis(m, e)  # shorthand for CellBasis
 
-# this method could also be imported from skfem.models.laplace
+# can also be imported from skfem.models.laplace
 @BilinearForm
 def laplace(u, v, _):
     return dot(grad(u), grad(v))
 
 
-# this method could also be imported from skfem.models.unit_load
+# can also be imported from skfem.models.unit_load
 @LinearForm
 def rhs(v, _):
     return 1.0 * v
@@ -63,10 +66,10 @@ b = asm(rhs, basis)
 # A = laplace.assemble(basis)
 # b = rhs.assemble(basis)
 
-# enforce Dirichlet boundary conditions
+# Dirichlet boundary conditions
 A, b = enforce(A, b, D=m.boundary_nodes())
 
-# solve -- can be anything that takes a sparse matrix and a right-hand side
+# solve the linear system
 x = solve(A, b)
 
 # plot the solution
@@ -143,8 +146,8 @@ Here are direct links to additional resources:
 
 ## Getting help
 
-If you encounter an issue and cannot find help from the documentation,
-you can use the Github Discussions to [ask questions](https://github.com/kinnala/scikit-fem/discussions).
+If you encounter an issue you can use GitHub issue tracker.  If you cannot find help from the documentation,
+you can use the GitHub Discussions to [ask questions](https://github.com/kinnala/scikit-fem/discussions).
 Try to provide a snippet of code which fails
 and include also the version of the library you are
 using.  The version can be found as follows:
@@ -164,7 +167,7 @@ list of test dependencies.
 
 ## Testing
 
-The tests are run by Github Actions.  The `Makefile` in the repository root has
+The tests are run by GitHub Actions.  The `Makefile` in the repository root has
 targets for running the testing container locally using `docker`.  For example,
 `make test_py38` runs the tests using `py38` branch from
 [kinnala/scikit-fem-docker-action](https://github.com/kinnala/scikit-fem-docker-action).
@@ -201,7 +204,7 @@ for first timers include:
 
 ## Citing the library
 
-You may use the following BibTeX entry:
+We appreciate if you cite the following article in your scientific works:
 ```
 @article{skfem2020,
   doi = {10.21105/joss.02369},
@@ -214,8 +217,6 @@ You may use the following BibTeX entry:
   journal = {Journal of Open Source Software}
 }
 ```
-Use the Zenodo DOIs if you want to cite a specific version,
-e.g., to ensure reproducibility.
 
 ## Changelog
 
