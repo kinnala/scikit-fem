@@ -23,7 +23,7 @@ Features:
 - vectorial elements, H(div) and H(curl) conforming elements, discontinuous Galerkin methods
 - special elements such as MINI, Crouzeix-Raviart, Argyris, Morley, Hermite
 - support for quadratic and other high-order meshes
-- adaptive mesh refinement for simplical meshes
+- adaptive mesh refinement
 
 ## Installation
 
