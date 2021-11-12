@@ -177,18 +177,19 @@ class AbstractBasis:
 
         Further reduce the set of DOFs:
 
+        >>> import numpy as np
         >>> from skfem import MeshTri, Basis, ElementTriArgyris
         >>> m = MeshTri().refined()
         >>> basis = Basis(m, ElementTriArgyris())
-        >>> basis.get_dofs().nodal
-        {'u': array([ 0,  6, 12, 18, 24, 30, 42, 48]),
-         'u_x': array([ 1,  7, 13, 19, 25, 31, 43, 49]),
-         'u_y': array([ 2,  8, 14, 20, 26, 32, 44, 50]),
-         'u_xx': array([ 3,  9, 15, 21, 27, 33, 45, 51]),
-         'u_xy': array([ 4, 10, 16, 22, 28, 34, 46, 52]),
-         'u_yy': array([ 5, 11, 17, 23, 29, 35, 47, 53])}
-        >>> basis.get_dofs().all(['u', 'u_x'])
-        array([ 0,  1,  6,  7, 12, 13, 18, 19, 24, 25, 30, 31, 42, 43, 48, 49])
+        >>> basis.get_dofs(lambda x: np.isclose(x[0], 0)).nodal
+        {'u': array([ 0, 12, 30]),
+         'u_x': array([ 1, 13, 31]),
+         'u_y': array([ 2, 14, 32]),
+         'u_xx': array([ 3, 15, 33]),
+         'u_xy': array([ 4, 16, 34]),
+         'u_yy': array([ 5, 17, 35])}
+        >>> basis.get_dofs(lambda x: np.isclose(x[0], 0)).all(['u', 'u_x'])
+        array([ 0,  1, 12, 13, 30, 31])
 
         Skip some DOF names altogether:
 
