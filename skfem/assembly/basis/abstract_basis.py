@@ -117,32 +117,7 @@ class AbstractBasis:
     def find_dofs(self,
                   facets: Dict[str, ndarray] = None,
                   skip: List[str] = None) -> Dict[str, DofsView]:
-        """Return global DOF numbers corresponding to a dictionary of facets.
-
-        Facets can be queried from :class:`~skfem.mesh.Mesh` objects:
-
-        >>> from skfem import MeshTri
-        >>> m = MeshTri().refined()
-        >>> m.facets_satisfying(lambda x: x[0] == 0)
-        array([1, 5])
-
-        This corresponds to a list of facet indices that can be passed over:
-
-        >>> import numpy as np
-        >>> from skfem import Basis, ElementTriP1
-        >>> basis = Basis(m, ElementTriP1())
-        >>> basis.find_dofs({'left': np.array([1, 5])})['left'].all()
-        array([0, 2, 5])
-
-        Parameters
-        ----------
-        facets
-            A dictionary of facets. If ``None``, use ``self.mesh.boundaries``
-            if set or otherwise use ``{'all': self.mesh.boundary_facets()}``.
-        skip
-            List of dofnames to skip.
-
-        """
+        """Deprecated in favor of :meth:`~skfem.AbstractBasis.get_dofs`."""
         if facets is None:
             if self.mesh.boundaries is None:
                 facets = {'all': self.mesh.boundary_facets()}
@@ -152,36 +127,118 @@ class AbstractBasis:
         return {k: self.dofs.get_facet_dofs(facets[k], skip_dofnames=skip)
                 for k in facets}
 
-    def get_dofs(self, facets: Optional[Any] = None) -> Any:
+    def get_dofs(self,
+                 facets: Optional[Any] = None,
+                 elements: Optional[Any] = None,
+                 skip: List[str] = None) -> Any:
         """Find global DOF numbers.
 
-        Accepts a richer set of types than
-        :meth:`skfem.assembly.Basis.find_dofs`.
+        Accepts an array of facet/element indices.  However, various argument
+        types can be turned into an array of facet/element indices.
+
+        Get all boundary DOFs:
+
+        >>> import numpy as np
+        >>> from skfem import MeshTri, Basis, ElementTriP1
+        >>> m = MeshTri().refined()
+        >>> basis = Basis(m, ElementTriP1())
+        >>> basis.get_dofs().flatten()
+        array([0, 1, 2, 3, 4, 5, 7, 8])
+
+        Get DOFs via a function query:
+
+        >>> import numpy as np
+        >>> from skfem import MeshTri, Basis, ElementTriP1
+        >>> m = MeshTri().refined()
+        >>> basis = Basis(m, ElementTriP1())
+        >>> basis.get_dofs(lambda x: np.isclose(x[0], 0)).flatten()
+        array([0, 2, 5])
+
+        Get DOFs via named boundaries:
+
+        >>> import numpy as np
+        >>> from skfem import MeshTri, Basis, ElementTriP1
+        >>> m = (MeshTri()
+        ...      .refined()
+        ...      .with_boundaries({'left': lambda x: np.isclose(x[0], 0)}))
+        >>> basis = Basis(m, ElementTriP1())
+        >>> basis.get_dofs('left').flatten()
+        array([0, 2, 5])
+
+        Get DOFs via named subdomains:
+
+        >>> from skfem import MeshTri, Basis, ElementTriP1
+        >>> m = (MeshTri()
+        ...      .refined()
+        ...      .with_subdomains({'left': lambda x: x[0] < .5}))
+        >>> basis = Basis(m, ElementTriP1())
+        >>> basis.get_dofs(elements='left').flatten()
+        array([0, 2, 4, 5, 6, 8])
+
+        Further reduce the set of DOFs:
+
+        >>> from skfem import MeshTri, Basis, ElementTriArgyris
+        >>> m = MeshTri().refined()
+        >>> basis = Basis(m, ElementTriArgyris())
+        >>> basis.get_dofs().nodal
+        {'u': array([ 0,  6, 12, 18, 24, 30, 42, 48]),
+         'u_x': array([ 1,  7, 13, 19, 25, 31, 43, 49]),
+         'u_y': array([ 2,  8, 14, 20, 26, 32, 44, 50]),
+         'u_xx': array([ 3,  9, 15, 21, 27, 33, 45, 51]),
+         'u_xy': array([ 4, 10, 16, 22, 28, 34, 46, 52]),
+         'u_yy': array([ 5, 11, 17, 23, 29, 35, 47, 53])}
+        >>> basis.get_dofs().all(['u', 'u_x'])
+        array([ 0,  1,  6,  7, 12, 13, 18, 19, 24, 25, 30, 31, 42, 43, 48, 49])
+
+        Skip some DOF names altogether:
+
+        >>> import numpy as np
+        >>> from skfem import MeshTri, Basis, ElementTriArgyris
+        >>> m = MeshTri().refined()
+        >>> basis = Basis(m, ElementTriArgyris())
+        >>> basis.get_dofs(lambda x: np.isclose(x[0], 0),
+        ...                skip=['u_x', 'u_y']).nodal
+        {'u': array([ 0, 12, 30]),
+         'u_xx': array([ 3, 15, 33]),
+         'u_xy': array([ 4, 16, 34]),
+         'u_yy': array([ 5, 17, 35])}
 
         Parameters
         ----------
         facets
-            A list of facet indices. If ``None``, find facets by
+            An array of facet indices.  If ``None``, find facets by
             ``self.mesh.boundary_facets()``.  If callable, call
-            ``self.mesh.facets_satisfying(facets)`` to get the facets.
-            If array, simply find the corresponding DOF's. If a dictionary
-            of arrays, find DOF's for each entry. If a dictionary of
-            callables, call ``self.mesh.facets_satisfying`` for each entry to
-            get facets and then find DOF's for those.
+            ``self.mesh.facets_satisfying(facets)`` to get the facets.  If
+            string, use ``self.mesh.boundaries[facets]`` to get the facets.
+        elements
+            An array of element indices.  See above.
+        skip
+            List of dofnames to skip.
 
         """
+        if elements is not None:
+            if callable(elements):
+                elements = self.mesh.elements_satisfying(elements)
+            elif isinstance(elements, str):
+                elements = self.mesh.subdomains[elements]
+            return self.dofs.get_element_dofs(elements,
+                                              skip_dofnames=skip)
         if facets is None:
             facets = self.mesh.boundary_facets()
         elif callable(facets):
             facets = self.mesh.facets_satisfying(facets)
-        if isinstance(facets, dict):
+        elif isinstance(facets, dict):
             def to_indices(f):
                 if callable(f):
                     return self.mesh.facets_satisfying(f)
                 return f
-            return {k: self.dofs.get_facet_dofs(to_indices(facets[k]))
+            return {k: self.dofs.get_facet_dofs(to_indices(facets[k]),
+                                                skip_dofnames=skip)
                     for k in facets}
-        return self.dofs.get_facet_dofs(facets)
+        elif isinstance(facets, str):
+            facets = self.mesh.boundaries[facets]
+        return self.dofs.get_facet_dofs(facets,
+                                        skip_dofnames=skip)
 
     def default_parameters(self):
         """This is used by :func:`skfem.assembly.asm` to get the default

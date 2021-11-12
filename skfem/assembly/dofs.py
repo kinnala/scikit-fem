@@ -242,6 +242,42 @@ class Dofs:
         # total dofs
         self.N = np.max(self.element_dofs) + 1
 
+    def get_element_dofs(self,
+                         elements: ndarray,
+                         skip_dofnames: List[str] = None) -> DofsView:
+        """Return a subset of DOFs corresponding to the given elements.
+
+        Parameters
+        ----------
+        elements
+            An array of element indices.
+        skip_dofnames
+            An array of dofnames to skip.
+
+        """
+        nodal_ix = (np.empty((0,), dtype=np.int64)
+                    if self.element.nodal_dofs == 0
+                    else np.unique(self.topo.t[:, elements]))
+        edge_ix = (np.empty((0,), dtype=np.int64)
+                   if self.element.edge_dofs == 0
+                   else np.unique(self.topo.t2e[:, elements]))
+        facet_ix = (np.empty((0,), dtype=np.int64)
+                    if self.element.facet_dofs == 0
+                    else np.unique(self.topo.t2f[:, elements]))
+        interior_ix = elements
+
+        if skip_dofnames is None:
+            skip_dofnames = []
+
+        return DofsView(
+            self,
+            nodal_ix,
+            facet_ix,
+            edge_ix,
+            interior_ix,
+            *self._dofnames_to_rows(skip_dofnames, skip=True)
+        )
+
     def get_facet_dofs(self,
                        facets: ndarray,
                        skip_dofnames: List[str] = None) -> DofsView:
