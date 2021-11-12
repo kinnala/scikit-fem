@@ -181,8 +181,8 @@ class AbstractBasis:
         >>> from skfem import MeshTri, Basis, ElementTriArgyris
         >>> m = MeshTri().refined()
         >>> basis = Basis(m, ElementTriArgyris())
-        >>> basis.get_dofs(lambda x: np.isclose(x[0], 0)).nodal
-        {'u': array([ 0, 12, 30]), 'u_x': array([ 1, 13, 31]), 'u_y': array([ 2, 14, 32]), 'u_xx': array([ 3, 15, 33]), 'u_xy': array([ 4, 16, 34]), 'u_yy': array([ 5, 17, 35])}
+        >>> basis.get_dofs(lambda x: np.isclose(x[0], 0)).nodal.keys()
+        dict_keys(['u', 'u_x', 'u_y', 'u_xx', 'u_xy', 'u_yy'])
         >>> basis.get_dofs(lambda x: np.isclose(x[0], 0)).all(['u', 'u_x'])
         array([ 0,  1, 12, 13, 30, 31])
 
@@ -193,8 +193,8 @@ class AbstractBasis:
         >>> m = MeshTri().refined()
         >>> basis = Basis(m, ElementTriArgyris())
         >>> basis.get_dofs(lambda x: np.isclose(x[0], 0),
-        ...                skip=['u_x', 'u_y']).nodal
-        {'u': array([ 0, 12, 30]), 'u_xx': array([ 3, 15, 33]), 'u_xy': array([ 4, 16, 34]), 'u_yy': array([ 5, 17, 35])}
+        ...                skip=['u_x', 'u_y']).nodal.keys()
+        dict_keys(['u', 'u_xx', 'u_xy', 'u_yy'])
 
         Parameters
         ----------
