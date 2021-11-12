@@ -54,7 +54,7 @@ This is a nonlinear problem since we do not know a priori which subset
 from skfem import *
 from skfem.models.elasticity import (linear_elasticity, lame_parameters,
                                      linear_stress)
-from skfem.helpers import dot, ddot, prod, sym_grad
+from skfem.helpers import dot, ddot, prod, sym_grad, jump
 import numpy as np
 from skfem.io import from_meshio
 from skfem.io.json import from_file, to_file
@@ -110,8 +110,7 @@ limit = 0.3
 @BilinearForm
 def bilin_mortar(u, v, w):
     # jumps
-    ju = (-1.) ** w.idx[0] * dot(u, w.n)
-    jv = (-1.) ** w.idx[1] * dot(v, w.n)
+    ju, jv = jump(w, dot(u, w.n), dot(v, w.n))
     nxn = prod(w.n, w.n)
     mu = .5 * ddot(nxn, C(sym_grad(u)))
     mv = .5 * ddot(nxn, C(sym_grad(v)))
@@ -125,7 +124,7 @@ def gap(x):
 
 @LinearForm
 def lin_mortar(v, w):
-    jv = (-1.) ** w.idx[0] * dot(v, w.n)
+    jv = jump(w, dot(v, w.n))
     mv = .5 * ddot(prod(w.n, w.n), C(sym_grad(v)))
     return ((1. / (alpha * w.h) * gap(w.x) * jv - gap(w.x) * mv)
             * (np.abs(w.x[1]) <= limit))

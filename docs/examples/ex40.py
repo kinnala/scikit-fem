@@ -31,9 +31,9 @@ def laplace(u, ut, v, vt, w):
 
 @BilinearForm
 def hdg(u, ut, v, vt, w):
-    from skfem.helpers import grad, dot
+    from skfem.helpers import grad, dot, jump
     # outwards normal
-    n = w.n * (-1.) ** w.idx[0]
+    n = jump(w, w.n)
     return dot(n, grad(u)) * (vt - v) + dot(n, grad(v)) * (ut - u)\
         + 1e1 / w.h * (ut - u) * (vt - v)
 

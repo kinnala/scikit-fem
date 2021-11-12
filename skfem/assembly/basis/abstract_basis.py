@@ -268,6 +268,9 @@ class AbstractBasis:
         # loop over solution components
         for c in range(len(refs)):
             ref = refs[c]
+            if ref.is_zero():
+                dfs.append(ref)
+                continue
             fs = []
 
             def linear_combination(n, refn):
@@ -275,6 +278,8 @@ class AbstractBasis:
                 out = 0. * refn.copy()
                 for i in range(self.Nbfun):
                     values = w[self.element_dofs[i]]
+                    if self.basis[i][c].is_zero():
+                        continue
                     out += np.einsum('...,...j->...j', values,
                                      self.basis[i][c][n])
                 return out

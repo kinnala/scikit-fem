@@ -29,17 +29,40 @@ class COOData:
     def __radd__(self, other):
         return self.__add__(other)
 
-    def inverse(self):
-        """Invert each elemental matrix."""
+    def tolocal(self, basis=None):
+        """Return an array of local finite element matrices.
 
+        Parameters
+        ----------
+        basis
+            Optionally, sum local facet matrices to form elemental matrices if
+            the corresponding :class:`skfem.assembly.FacetBasis` is provided.
+
+        """
+        if self.local_shape is None:
+            raise NotImplementedError("Cannot build local matrices if "
+                                      "local_shape is not specified.")
         assert len(self.local_shape) == 2
-        data = self.data.reshape(self.local_shape + (-1,), order='C')
-        data = np.moveaxis(np.linalg.inv(np.moveaxis(data, -1, 0)), 0, -1)
 
+        local = np.moveaxis(self.data.reshape(self.local_shape + (-1,),
+                                              order='C'), -1, 0)
+        if basis is not None:
+            out = np.zeros((basis.mesh.nfacets,) + local.shape[1:])
+            out[basis.find] = local
+            local = np.sum(out[basis.mesh.t2f], axis=0)
+
+        return local
+
+    def fromlocal(self, local):
+        """Reverse of :meth:`COOData.tolocal`."""
         return replace(
             self,
-            data=data.flatten('C'),
+            data=np.moveaxis(local, 0, -1).flatten('C'),
         )
+
+    def inverse(self):
+        """Invert each elemental matrix."""
+        return self.fromlocal(np.linalg.inv(self.tolocal()))
 
     def __add__(self, other):
 
