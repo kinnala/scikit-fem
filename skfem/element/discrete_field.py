@@ -7,7 +7,7 @@ from numpy import ndarray
 class DiscreteField(NamedTuple):
     """A function defined at the global quadrature points."""
 
-    value: ndarray
+    value: ndarray = np.array([0])  # zero field
     grad: Optional[ndarray] = None
     div: Optional[ndarray] = None
     curl: Optional[ndarray] = None
@@ -67,6 +67,11 @@ class DiscreteField(NamedTuple):
         """Split all components based on their first dimension."""
         return [DiscreteField(*[f[i] for f in self if f is not None])
                 for i in range(self.value.shape[0])]
+
+    def is_zero(self):
+        if self.value.shape == (1,):
+            return True
+        return False
 
     def zeros_like(self) -> 'DiscreteField':
         """Return zero :class:`~skfem.element.DiscreteField` with same size."""

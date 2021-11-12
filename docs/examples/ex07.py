@@ -1,7 +1,7 @@
 """Discontinuous Galerkin method."""
 
 from skfem import *
-from skfem.helpers import grad, dot
+from skfem.helpers import grad, dot, jump
 from skfem.models.poisson import laplace, unit_load
 
 m = MeshTri.init_sqsymmetric().refined()
@@ -14,8 +14,7 @@ fb = [InteriorFacetBasis(m, e, side=i) for i in [0, 1]]
 
 @BilinearForm
 def dgform(u, v, p):
-    ju = (-1.) ** p.idx[0] * u
-    jv = (-1.) ** p.idx[1] * v
+    ju, jv = jump(p, u, v)
     h = p.h
     n = p.n
     return ju * jv / (alpha * h) - dot(grad(u), n) * jv - dot(grad(v), n) * ju

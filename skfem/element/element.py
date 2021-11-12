@@ -1,4 +1,6 @@
 from typing import Optional, List, Type, Tuple
+from types import MethodType
+from copy import deepcopy
 
 import numpy as np
 from numpy import ndarray
@@ -96,6 +98,41 @@ class Element:
     @classmethod
     def _index_error(cls):
         raise ValueError("Index larger than the number of basis functions.")
+
+    def condensed(self):
+        """Return two elements: one for interior and one for other DOFs."""
+
+        eo = deepcopy(self)
+        eo.interior_dofs = 0
+
+        if hasattr(eo, 'elems'):
+            for i in range(len(eo.elems)):
+                eo.elems[i].interior_dofs = 0
+
+        ei = deepcopy(self)
+        ei.nodal_dofs = 0
+        ei.facet_dofs = 0
+        ei.edge_dofs = 0
+
+        if hasattr(ei, 'elems'):
+            for i in range(len(ei.elems)):
+                ei.elems[i].nodal_dofs = 0
+                ei.elems[i].facet_dofs = 0
+                ei.elems[i].edge_dofs = 0
+
+        def gbasis(obj,
+                   mapping,
+                   X: ndarray,
+                   i: int,
+                   tind: Optional[ndarray] = None):
+            return self.gbasis(mapping,
+                               X,
+                               i + self._bfun_counts()[:3].sum(),
+                               tind)
+
+        ei.gbasis = MethodType(gbasis, ei)
+
+        return ei, eo
 
     def _bfun_counts(self) -> ndarray:
         """Count number of nodal/edge/facet/interior basis functions."""
