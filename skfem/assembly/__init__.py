@@ -81,7 +81,6 @@ def asm(form: Form,
     nargs = [[arg] if not isinstance(arg, list) else arg for arg in args]
     retval = to(map(lambda a: form.coo_data(*a[1],
                                             idx=a[0],
-                                            maxidx=len(a[1]),
                                             **kwargs),
                     zip(product(*(range(len(x)) for x in nargs)),
                         product(*nargs))))

@@ -20,19 +20,6 @@ def jump(w: FormExtraParams, *args):
     return out[0] if len(out) == 1 else tuple(out)
 
 
-def unpack(w: FormExtraParams, *args):
-    if not hasattr(w, 'idx'):
-        raise NotImplementedError("unpack() can be used only if the form is "
-                                  "assembled through asm().")
-    out = []
-    for i, arg in enumerate(args):
-        out.append(tuple(arg
-                         if w.idx[i] == j
-                         else DiscreteField()
-                         for j in range(w.maxidx)))
-    return tuple(out)
-
-
 def grad(u: DiscreteField):
     """Gradient."""
     if u.is_zero():
