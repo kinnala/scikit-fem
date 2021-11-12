@@ -21,8 +21,8 @@ print('| --- | --- | --- |')
 def assembler(m):
     basis = Basis(m, ElementTetP1())
     return (
-        asm(laplace, basis),
-        asm(unit_load, basis),
+        laplace.assemble(basis),
+        unit_load.assemble(basis),
     )
 
 
