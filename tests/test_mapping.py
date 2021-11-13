@@ -139,7 +139,3 @@ class TestMortarPairNoMatch2(TestMortarPair):
     mesh1_type = MeshQuad
     mesh2_type = MeshTri
     translate_y = -np.pi / 10.
-
-
-if __name__ == '__main__':
-    unittest.main()
