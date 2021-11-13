@@ -54,5 +54,5 @@ if __name__ == '__main__':
 
     ax = draw(mesh)
     plot(mesh, temperature[basis.nodal_dofs.flatten()],
-         ax=ax, edgecolors='none', colorbar=True)
+         ax=ax, colorbar=True)
     ax.get_figure().savefig(splitext(argv[0])[0] + '_solution.png')
