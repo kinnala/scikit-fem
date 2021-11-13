@@ -79,3 +79,24 @@ class TestDofsSubset(TestCase):
 
         self.assertEqual(len(dofs.nodal['u']), 4)
         self.assertEqual(len(dofs.facet['u']), 4)
+
+
+class TestDofsFromBoundaries(TestCase):
+
+    def runTest(self):
+
+        m = MeshTri().with_boundaries({
+            'left': lambda x: x[0] == 0,
+            'right': lambda x: x[0] == 1,
+            'top': lambda x: x[1] == 1,
+            'bottom': lambda x: x[1] == 0,
+        })
+        basis = InteriorBasis(m, ElementTriArgyris())
+        assert_allclose(
+            basis.get_dofs({'left', 'right'}).all(),
+            (basis.get_dofs('left') | basis.get_dofs('right')).all(),
+        )
+        assert_allclose(
+            basis.get_dofs(('left', 'right', 'top', 'bottom')).all(),
+            basis.get_dofs().all(),
+        )
