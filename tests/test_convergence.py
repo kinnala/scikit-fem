@@ -560,7 +560,3 @@ class FacetConvergenceTetP1(FacetConvergenceTetP2):
     case = (MeshTet, ElementTetP1)
     limits = (0.9, 1.1)
     preref = 2
-
-
-if __name__ == '__main__':
-    unittest.main()

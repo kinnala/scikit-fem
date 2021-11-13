@@ -275,6 +275,22 @@ class AbstractBasis:
             return self.mesh.subdomains[elements]
         raise NotImplementedError
 
+    def __repr__(self):
+        size = sum([sum([y.size if hasattr(y, 'size') else 0
+                         for y in x])
+                    for x in self.basis[0]]) * 8 * len(self.basis)
+        rep = ""
+        rep += "<skfem {}({}, {}) object>\n".format(type(self).__name__,
+                                                    type(self.mesh).__name__,
+                                                    type(self.elem).__name__)
+        rep += "  Number of elements: {}\n".format(self.nelems)
+        rep += "  Number of DOFs: {}\n".format(self.N)
+        rep += "  Size: {} B".format(size)
+        return rep
+
+    def __str__(self):
+        return self.__repr__()
+
     def default_parameters(self):
         """This is used by :func:`skfem.assembly.asm` to get the default
         parameters for 'w'."""

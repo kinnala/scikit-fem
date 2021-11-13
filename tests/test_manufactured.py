@@ -526,7 +526,4 @@ def test_periodic_loading(m, mdgtype, e):
 
 if __name__ == "__main__":
     import pytest
-    import unittest
-
-    unittest.main()
     pytest.main()    

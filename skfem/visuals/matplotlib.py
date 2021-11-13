@@ -164,7 +164,6 @@ def plot_meshtri(m: MeshTri1, z: ndarray, **kwargs) -> Axes:
     figsize (optional)
         Passed on to matplotlib.
     shading (optional)
-    edgecolors (optional)
     vmin (optional)
     vmax (optional)
         Passed on to matplotlib.

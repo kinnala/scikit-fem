@@ -372,7 +372,3 @@ def test_dg_element(m, e, edg):
 )
 def test_initialize_dg_composite_elements(e, edg):
     E = edg(e) * e
-
-
-if __name__ == '__main__':
-    main()
