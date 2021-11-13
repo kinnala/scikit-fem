@@ -87,7 +87,7 @@ class LineNegative1D(TestCase):
 
         L = asm(laplace, ib)
         b = asm(boundary_flux, fb)
-        D = ib.find_dofs()['left'].all()
+        D = ib.get_dofs('left')
         I = ib.complement_dofs(D)  # noqa E741
         u = solve(*condense(L, b, I=I))  # noqa E741
 
