@@ -244,6 +244,8 @@ class AbstractBasis:
                                         skip_dofnames=skip)
 
     def _get_dofs_normalize_facets(self, facets):
+        if isinstance(facets, ndarray):
+            return facets
         if facets is None:
             return self.mesh.boundary_facets()
         elif isinstance(facets, (tuple, list, set)):
@@ -259,6 +261,8 @@ class AbstractBasis:
         raise NotImplementedError
 
     def _get_dofs_normalize_elements(self, elements):
+        if isinstance(elements, ndarray):
+            return elements
         if callable(elements):
             return self.mesh.elements_satisfying(elements)
         elif isinstance(elements, (tuple, list, set)):
