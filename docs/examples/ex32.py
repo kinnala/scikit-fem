@@ -128,7 +128,7 @@ K = bmat([[A, B.T],
 f = np.concatenate([asm(body_force, basis['u']),
                     basis['p'].zeros()])
 
-D = basis['u'].find_dofs()
+D = basis['u'].get_dofs()
 Kint, fint, u, I = condense(K, f, D=D)
 Aint = Kint[:-(basis['p'].N), :-(basis['p'].N)]
 
