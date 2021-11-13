@@ -40,10 +40,10 @@ elements = ElementTriP2()
 basis = Basis(mesh, elements)
 A = asm(laplace, basis)
 
-boundary_dofs = basis.find_dofs()
+boundary_dofs = np.concatenate([basis.get_dofs(b) for b in mesh.boundaries])
 
 u = basis.zeros()
-u[boundary_dofs['positive'].all()] = 1.
+u[basis.get_dofs("positive").all()] = 1.
 u = solve(*condense(A, x=u, D=boundary_dofs))
 
 M = asm(mass, basis)

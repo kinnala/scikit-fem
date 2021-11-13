@@ -86,7 +86,7 @@ def mass(u, v, w):
 M = asm(mass, ib)
 
 L, x = solve(
-    *condense(K, M, D=ib.find_dofs()["fixed"]), solver=solver_eigen_scipy_sym()
+    *condense(K, M, D=ib.get_dofs("fixed")), solver=solver_eigen_scipy_sym()
 )
 
 if __name__ == "__main__":

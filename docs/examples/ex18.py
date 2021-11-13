@@ -74,14 +74,14 @@ K = bmat([[A, -B.T],
 f = np.concatenate([asm(body_force, basis['u']),
                     basis['p'].zeros()])
 
-uvp = solve(*condense(K, f, D=basis['u'].find_dofs()))
+uvp = solve(*condense(K, f, D=basis['u'].get_dofs()))
 
 velocity, pressure = np.split(uvp, [A.shape[0]])
 
 basis['psi'] = basis['u'].with_element(ElementTriP2())
 A = asm(laplace, basis['psi'])
 vorticity = asm(rot, basis['psi'], w=basis['u'].interpolate(velocity))
-psi = solve(*condense(A, vorticity, D=basis['psi'].find_dofs()))
+psi = solve(*condense(A, vorticity, D=basis['psi'].get_dofs()))
 
 
 if __name__ == '__main__':

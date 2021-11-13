@@ -39,7 +39,7 @@ def dirichlet(x):
 
 
 boundary_basis = FacetBasis(m, e)
-boundary_dofs = boundary_basis.find_dofs()['all'].all()
+boundary_dofs = boundary_basis.get_dofs().all()
 
 u = basis.zeros()
 u[boundary_dofs] = projection(dirichlet, boundary_basis, I=boundary_dofs)

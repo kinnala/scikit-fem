@@ -61,7 +61,7 @@ class Bratu1d:
                            ElementLineP1())
         self.lap = asm(laplace, self.basis)
         self.mass = asm(mass, self.basis)
-        self.D = self.basis.find_dofs()['all'].nodal['u']
+        self.D = self.basis.get_dofs().all()
 
     def inner(self, a: np.ndarray, b: np.ndarray) -> float:
         """return the inner product of two solutions"""
