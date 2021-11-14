@@ -29,7 +29,7 @@ element = {'u': ElementVectorH1(ElementTriP2()),
 basis = {variable: Basis(mesh, e, intorder=3)
          for variable, e in element.items()}
 
-D = np.concatenate([b.all() for b in basis['u'].find_dofs().values()])
+D = basis['u'].get_dofs(mesh.boundaries)
 
 A = asm(vector_laplace, basis['u'])
 B = -asm(divergence, basis['u'], basis['p'])
@@ -39,7 +39,7 @@ K = bmat([[A, B.T],
 uvp = np.zeros(K.shape[0])
 
 inlet_basis = FacetBasis(mesh, element['u'], facets=mesh.boundaries['inlet'])
-inlet_dofs = inlet_basis.find_dofs()['inlet'].all()
+inlet_dofs = inlet_basis.get_dofs('inlet').all()
 
 
 def parabolic(x):
