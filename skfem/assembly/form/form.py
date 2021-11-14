@@ -73,7 +73,10 @@ class Form:
         """Support additional input formats for 'w'."""
         for k in w:
             if isinstance(w[k], DiscreteField):
-                continue
+                if w[k][0].shape[-1] != basis.X.shape[1]:
+                    raise ValueError("Quadrature mismatch: '{}' should have "
+                                     "same number of integration points as "
+                                     "the basis object.".format(k))
             elif isinstance(w[k], tuple):
                 # asm() product index is of type tuple
                 continue
