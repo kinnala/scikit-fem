@@ -1,4 +1,5 @@
-from typing import Union, NamedTuple, Any, List, Optional
+from dataclasses import dataclass, replace
+from typing import Union, Any, List, Optional
 from warnings import warn
 
 import numpy as np
@@ -8,7 +9,8 @@ from skfem.element import Element
 from skfem.mesh import Mesh
 
 
-class DofsView(NamedTuple):
+@dataclass(repr=False)
+class DofsView:
     """A subset of :class:`skfem.assembly.Dofs`."""
 
     obj: Any = None
@@ -108,19 +110,21 @@ class DofsView(NamedTuple):
             An array of DOF names, e.g. `["u", "u_n"]`.
 
         """
-        return DofsView(
-            self.obj,
-            self.nodal_ix,
-            self.facet_ix,
-            self.edge_ix,
-            self.interior_ix,
-            *self._intersect_tuples(
-                (self.nodal_rows,
-                 self.facet_rows,
-                 self.edge_rows,
-                 self.interior_rows),
-                self._dofnames_to_rows(dofnames)
-            )
+        nrows = self._intersect_tuples(
+            (
+                self.nodal_rows,
+                self.facet_rows,
+                self.edge_rows,
+                self.interior_rows,
+            ),
+            self._dofnames_to_rows(dofnames)
+        )
+        return replace(
+            self,
+            nodal_rows=nrows[0],
+            facet_rows=nrows[1],
+            edge_rows=nrows[2],
+            interior_rows=nrows[3],
         )
 
     def drop(self, dofnames):
@@ -132,19 +136,21 @@ class DofsView(NamedTuple):
             An array of DOF names, e.g. `["u", "u_n"]`.
 
         """
-        return DofsView(
-            self.obj,
-            self.nodal_ix,
-            self.facet_ix,
-            self.edge_ix,
-            self.interior_ix,
-            *self._intersect_tuples(
-                (self.nodal_rows,
-                 self.facet_rows,
-                 self.edge_rows,
-                 self.interior_rows),
-                self._dofnames_to_rows(dofnames, skip=True)
-            )
+        nrows = self._intersect_tuples(
+            (
+                self.nodal_rows,
+                self.facet_rows,
+                self.edge_rows,
+                self.interior_rows,
+            ),
+            self._dofnames_to_rows(dofnames, skip=True)
+        )
+        return replace(
+            self,
+            nodal_rows=nrows[0],
+            facet_rows=nrows[1],
+            edge_rows=nrows[2],
+            interior_rows=nrows[3],
         )
 
     def all(self, key=None):
@@ -190,12 +196,12 @@ class DofsView(NamedTuple):
 
     def __or__(self, other):
         warn("Use numpy.hstack to combine sets of DOFs", DeprecationWarning)
-        return DofsView(
-            self.obj,
-            np.union1d(self.nodal_ix, other.nodal_ix),
-            np.union1d(self.facet_ix, other.facet_ix),
-            np.union1d(self.edge_ix, other.edge_ix),
-            np.union1d(self.interior_ix, other.interior_ix)
+        return replace(
+            self,
+            nodal_ix=np.union1d(self.nodal_ix, other.nodal_ix),
+            facet_ix=np.union1d(self.facet_ix, other.facet_ix),
+            edge_ix=np.union1d(self.edge_ix, other.edge_ix),
+            interior_ix=np.union1d(self.interior_ix, other.interior_ix),
         )
 
     def __add__(self, other):
