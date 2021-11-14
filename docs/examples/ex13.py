@@ -40,11 +40,9 @@ elements = ElementTriP2()
 basis = Basis(mesh, elements)
 A = asm(laplace, basis)
 
-boundary_dofs = np.concatenate([basis.get_dofs(b) for b in mesh.boundaries])
-
 u = basis.zeros()
 u[basis.get_dofs("positive").all()] = 1.
-u = solve(*condense(A, x=u, D=boundary_dofs))
+u = solve(*condense(A, x=u, D=basis.get_dofs({"positive", "ground"})))
 
 M = asm(mass, basis)
 u_exact = 2 * np.arctan2(*basis.doflocs[::-1]) / np.pi
