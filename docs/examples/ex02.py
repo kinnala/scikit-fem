@@ -101,12 +101,7 @@ def bilinf(u, v, w):
 K = asm(bilinf, ib)
 f = 1e6 * asm(unit_load, ib)
 
-D = np.concatenate(
-    [
-        ib.get_dofs("left").facet["u_n"],
-        *[ib.get_dofs(s).nodal["u"] for s in ["left", "right", "top"]],
-    ]
-)
+D = np.hstack([ib.get_dofs("left"), ib.get_dofs({"right", "top"}).all("u")])
 
 x = solve(*condense(K, f, D=D))
 
