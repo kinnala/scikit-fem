@@ -1,4 +1,5 @@
 from typing import Union, NamedTuple, Any, List, Optional
+from warnings import warn
 
 import numpy as np
 from numpy import ndarray
@@ -19,6 +20,51 @@ class DofsView(NamedTuple):
     facet_rows: Union[ndarray, slice] = slice(None)
     edge_rows: Union[ndarray, slice] = slice(None)
     interior_rows: Union[ndarray, slice] = slice(None)
+
+    def __repr__(self):
+        nnodal = len(np.unique(
+            self.obj.nodal_dofs[self.nodal_rows][:, self.nodal_ix]
+        ))
+        nfacet = len(np.unique(
+            self.obj.facet_dofs[self.facet_rows][:, self.facet_ix]
+        ))
+        nedge = len(np.unique(
+            self.obj.edge_dofs[self.edge_rows][:, self.edge_ix]
+        ))
+        ninterior = len(np.unique(
+            self.obj.interior_dofs[self.interior_rows][:, self.interior_ix]
+        ))
+        dofnames = np.array(self.obj.element.dofnames)
+        rep = ""
+        rep += "<skfem {}({}, {}) object>\n".format(
+            type(self).__name__,
+            type(self.obj.topo).__name__,
+            type(self.obj.element).__name__
+        )
+        rep += "  Number of nodal DOFs: {} {}\n".format(
+            nnodal,
+            dofnames[self.nodal_rows]
+        )
+        rep += "  Number of facet DOFs: {} {}\n".format(
+            nfacet,
+            dofnames[self.obj.nodal_dofs.shape[0]:][self.facet_rows],
+        )
+        if self.obj.topo.dim() > 2:
+            rep += "  Number of edge DOFs: {} {}\n".format(
+                nedge,
+                dofnames[(self.obj.nodal_dofs.shape[0]
+                          + self.obj.facet_dofs.shape[0]):][self.edge_rows],
+            )
+        rep += "  Number of interior DOFs: {} {}\n".format(
+            ninterior,
+            dofnames[(self.obj.nodal_dofs.shape[0]
+                      + self.obj.facet_dofs.shape[0]
+                      + self.obj.edge_dofs.shape[0]):][self.interior_rows],
+        )
+        return rep
+
+    def __str__(self):
+        return self.__repr__()
 
     def flatten(self) -> ndarray:
         """Return all DOF indices as a single array."""
@@ -143,7 +189,7 @@ class DofsView(NamedTuple):
         return getattr(self.obj, attr)
 
     def __or__(self, other):
-        """For merging two sets of DOFs."""
+        warn("Use numpy.hstack to combine sets of DOFs", DeprecationWarning)
         return DofsView(
             self.obj,
             np.union1d(self.nodal_ix, other.nodal_ix),
@@ -380,8 +426,8 @@ class Dofs:
                 interior_rows.append(i)
 
         return (
-            nodal_rows if len(nodal_rows) > 0 else slice(0, 0),
-            facet_rows if len(facet_rows) > 0 else slice(0, 0),
-            edge_rows if len(edge_rows) > 0 else slice(0, 0),
-            interior_rows if len(interior_rows) > 0 else slice(0, 0)
+            np.array(nodal_rows) if len(nodal_rows) > 0 else slice(0, 0),
+            np.array(facet_rows) if len(facet_rows) > 0 else slice(0, 0),
+            np.array(edge_rows) if len(edge_rows) > 0 else slice(0, 0),
+            np.array(interior_rows) if len(interior_rows) > 0 else slice(0, 0)
         )

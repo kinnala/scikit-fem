@@ -364,7 +364,3 @@ class TestEx42(TestCase):
         import docs.examples.ex42 as ex
 
         self.assertAlmostEqual(ex.x.max(), 0.0009824131638261542, delta=1e-5)
-
-
-if __name__ == '__main__':
-    main()

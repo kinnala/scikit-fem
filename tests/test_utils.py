@@ -50,7 +50,3 @@ class TestEnforce(TestCase):
 
         enforce(A, D=D, overwrite=True)
         assert_almost_equal(A.toarray(), np.eye(A.shape[0]))
-
-
-if __name__ == '__main__':
-    unittest.main()

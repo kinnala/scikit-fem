@@ -196,6 +196,17 @@ class AbstractBasis:
         ...                skip=['u_x', 'u_y']).nodal.keys()
         dict_keys(['u', 'u_xx', 'u_xy', 'u_yy'])
 
+        Combine several boundaries into one call:
+
+        >>> import numpy as np
+        >>> from skfem import MeshTri, Basis, ElementTriP1
+        >>> m = (MeshTri()
+        ...      .with_boundaries({'left': lambda x: np.isclose(x[0], 0),
+        ...                        'right': lambda x: np.isclose(x[0], 1)}))
+        >>> basis = Basis(m, ElementTriP1())
+        >>> basis.get_dofs({'left', 'right'}).flatten()
+        array([0, 1, 2, 3])
+
         Parameters
         ----------
         facets
@@ -203,24 +214,15 @@ class AbstractBasis:
             ``self.mesh.boundary_facets()``.  If callable, call
             ``self.mesh.facets_satisfying(facets)`` to get the facets.  If
             string, use ``self.mesh.boundaries[facets]`` to get the facets.
+            If list, tuple or set, use the combined facet indices.
         elements
             An array of element indices.  See above.
         skip
             List of dofnames to skip.
 
         """
-        if elements is not None:
-            if callable(elements):
-                elements = self.mesh.elements_satisfying(elements)
-            elif isinstance(elements, str):
-                elements = self.mesh.subdomains[elements]
-            return self.dofs.get_element_dofs(elements,
-                                              skip_dofnames=skip)
-        if facets is None:
-            facets = self.mesh.boundary_facets()
-        elif callable(facets):
-            facets = self.mesh.facets_satisfying(facets)
-        elif isinstance(facets, dict):
+        if isinstance(facets, dict):
+            # deprecate
             def to_indices(f):
                 if callable(f):
                     return self.mesh.facets_satisfying(f)
@@ -228,10 +230,66 @@ class AbstractBasis:
             return {k: self.dofs.get_facet_dofs(to_indices(facets[k]),
                                                 skip_dofnames=skip)
                     for k in facets}
-        elif isinstance(facets, str):
-            facets = self.mesh.boundaries[facets]
+
+        if elements is not None and facets is not None:
+            raise ValueError
+
+        if elements is not None:
+            elements = self._get_dofs_normalize_elements(elements)
+            return self.dofs.get_element_dofs(elements,
+                                              skip_dofnames=skip)
+
+        facets = self._get_dofs_normalize_facets(facets)
         return self.dofs.get_facet_dofs(facets,
                                         skip_dofnames=skip)
+
+    def _get_dofs_normalize_facets(self, facets):
+        if isinstance(facets, ndarray):
+            return facets
+        if facets is None:
+            return self.mesh.boundary_facets()
+        elif isinstance(facets, (tuple, list, set)):
+            return np.unique(
+                np.concatenate(
+                    [self._get_dofs_normalize_facets(f) for f in facets]
+                )
+            )
+        elif callable(facets):
+            return self.mesh.facets_satisfying(facets)
+        elif isinstance(facets, str):
+            return self.mesh.boundaries[facets]
+        raise NotImplementedError
+
+    def _get_dofs_normalize_elements(self, elements):
+        if isinstance(elements, ndarray):
+            return elements
+        if callable(elements):
+            return self.mesh.elements_satisfying(elements)
+        elif isinstance(elements, (tuple, list, set)):
+            return np.unique(
+                np.concatenate(
+                    [self._get_dofs_normalize_elements(e) for e in elements]
+                )
+            )
+        elif isinstance(elements, str):
+            return self.mesh.subdomains[elements]
+        raise NotImplementedError
+
+    def __repr__(self):
+        size = sum([sum([y.size if hasattr(y, 'size') else 0
+                         for y in x])
+                    for x in self.basis[0]]) * 8 * len(self.basis)
+        rep = ""
+        rep += "<skfem {}({}, {}) object>\n".format(type(self).__name__,
+                                                    type(self.mesh).__name__,
+                                                    type(self.elem).__name__)
+        rep += "  Number of elements: {}\n".format(self.nelems)
+        rep += "  Number of DOFs: {}\n".format(self.N)
+        rep += "  Size: {} B".format(size)
+        return rep
+
+    def __str__(self):
+        return self.__repr__()
 
     def default_parameters(self):
         """This is used by :func:`skfem.assembly.asm` to get the default

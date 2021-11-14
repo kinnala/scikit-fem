@@ -588,7 +588,3 @@ def test_matrix_element_projection(m, e):
         return ddot(C(sym_grad(x)), v)
 
     y = projection(proj, basis1, basis0)
-
-
-if __name__ == '__main__':
-    main()
