@@ -104,10 +104,7 @@ b = (asm(unit_load, basis['heated'])
      * (asm(unit_load, basis['fluid-outlet'])
         + kratio * asm(unit_load, basis['solid-outlet'])))
 
-D = basis['heat'].find_dofs(
-    {label: boundary for
-     label, boundary in mesh.boundaries.items()
-     if label.endswith('-inlet')})
+D = basis["heat"].get_dofs([b for b in mesh.boundaries if b.endswith("-inlet")])
 I = basis['heat'].complement_dofs(D)
 
 
