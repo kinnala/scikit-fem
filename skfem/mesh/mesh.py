@@ -1,5 +1,4 @@
 import logging
-import traceback
 
 from dataclasses import dataclass, replace, InitVar
 from typing import Callable, Dict, List, Optional, Tuple, Type, Union
@@ -435,9 +434,7 @@ class Mesh:
             bool: True if the mesh is valid.
         """
         logger.debug("Running mesh validation.")
-        for line in traceback.format_stack()[21:]:
-            print(line.strip())
-        print()
+
         # check that there are no duplicate points
         tmp = np.ascontiguousarray(self.p.T)
         if self.p.shape[1] != np.unique(tmp.view([('', tmp.dtype)]
