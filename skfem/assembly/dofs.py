@@ -38,31 +38,34 @@ class DofsView:
         ))
         dofnames = np.array(self.obj.element.dofnames)
         rep = ""
-        rep += "<skfem {}({}, {}) object>\n".format(
+        rep += "<skfem {}({}, {}) object>".format(
             type(self).__name__,
             type(self.obj.topo).__name__,
             type(self.obj.element).__name__
         )
-        rep += "  Number of nodal DOFs: {} {}\n".format(
-            nnodal,
-            dofnames[self.nodal_rows]
-        )
-        rep += "  Number of facet DOFs: {} {}\n".format(
-            nfacet,
-            dofnames[self.obj.nodal_dofs.shape[0]:][self.facet_rows],
-        )
-        if self.obj.topo.dim() > 2:
-            rep += "  Number of edge DOFs: {} {}\n".format(
+        if nnodal > 0:
+            rep += "\n  Number of nodal DOFs: {} {}".format(
+                nnodal,
+                dofnames[self.nodal_rows]
+            )
+        if nfacet > 0:
+            rep += "\n  Number of facet DOFs: {} {}".format(
+                nfacet,
+                dofnames[self.obj.nodal_dofs.shape[0]:][self.facet_rows],
+            )
+        if nedge > 0:
+            rep += "\n  Number of edge DOFs: {} {}".format(
                 nedge,
                 dofnames[(self.obj.nodal_dofs.shape[0]
                           + self.obj.facet_dofs.shape[0]):][self.edge_rows],
             )
-        rep += "  Number of interior DOFs: {} {}\n".format(
-            ninterior,
-            dofnames[(self.obj.nodal_dofs.shape[0]
-                      + self.obj.facet_dofs.shape[0]
-                      + self.obj.edge_dofs.shape[0]):][self.interior_rows],
-        )
+        if ninterior > 0:
+            rep += "\n  Number of interior DOFs: {} {}".format(
+                ninterior,
+                dofnames[(self.obj.nodal_dofs.shape[0]
+                          + self.obj.facet_dofs.shape[0]
+                          + self.obj.edge_dofs.shape[0]):][self.interior_rows],
+            )
         return rep
 
     def __str__(self):
