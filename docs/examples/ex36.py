@@ -144,7 +144,18 @@ def volume(w):
     return J
 
 
-mesh = MeshTet().refined(2)
+mesh = (
+    MeshTet()
+    .refined(2)
+    .with_boundaries(
+        {
+            "left": lambda x: x[0] == 0,
+            "bottom": lambda x: x[1] == 0,
+            "back": lambda x: x[2] == 0,
+            "front": lambda x: x[2] == 1,
+        }
+    )
+)
 uelem = ElementVectorH1(ElementTetP2())
 pelem = ElementTetP1()
 elems = {
@@ -160,36 +171,17 @@ du = basis["u"].zeros()
 dp = basis["p"].zeros()
 stretch_ = 1.
 
-ddofs = [
-    basis["u"].find_dofs(
-        {"left": mesh.facets_satisfying(lambda x: x[0] < 1.e-6)},
-        skip=["u^2", "u^3"]
-    ),
-    basis["u"].find_dofs(
-        {"bottom": mesh.facets_satisfying(lambda x: x[1] < 1.e-6)},
-        skip=["u^1", "u^3"]
-    ),
-    basis["u"].find_dofs(
-        {"back": mesh.facets_satisfying(lambda x: x[2] < 1.e-6)},
-        skip=["u^1", "u^2"]
-    ),
-    basis["u"].find_dofs(
-        {"front": mesh.facets_satisfying(lambda x: np.abs(x[2] - 1.) < 1e-6)},
-        skip=["u^1", "u^2"]
-    )
+D = [
+    basis["u"].get_dofs("front").all("u^3"),
+    basis["u"].get_dofs("left").all("u^1"),
+    basis["u"].get_dofs("bottom").all("u^2"),
+    basis["u"].get_dofs("back").all("u^3"),
 ]
 
-dofs = {}
-for dof in ddofs:
-    dofs.update(dof)
-
-du[dofs["left"]] = 0.
-du[dofs["bottom"]] = 0.
-du[dofs["back"]] = 0.
-du[dofs["front"]] = stretch_
+du[D[0]] = stretch_
 
 I = np.hstack((
-    basis["u"].complement_dofs(dofs),
+    basis["u"].complement_dofs(np.hstack(D)),
     basis["u"].N + np.arange(basis["p"].N)
 ))
 
