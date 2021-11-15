@@ -418,24 +418,23 @@ class Mesh:
             self.t = np.ascontiguousarray(self.t)
 
         if ((self._boundaries is None
-             and self.doflocs.shape[1] == 2 ** self.dim()
-             and np.isclose(np.max(self.doflocs), 1)
-             and np.isclose(np.min(self.doflocs), 0))):
-            # default boundaries for the d-cube
-            self._boundaries = {
-                **{
-                    'left': self.facets_satisfying(lambda x: x[0] == 0.),
-                    'right': self.facets_satisfying(lambda x: x[0] == 1.),
-                },
-                **({
-                    'bottom': self.facets_satisfying(lambda x: x[1] == 0.),
-                    'top': self.facets_satisfying(lambda x: x[1] == 1.),
-                } if self.dim() >= 2 else {}),
-                **({
-                    'front': self.facets_satisfying(lambda x: x[2] == 0.),
-                    'back': self.facets_satisfying(lambda x: x[2] == 1.),
-                } if self.dim() >= 3 else {}),
-            }
+             and self.doflocs.shape[1] < 1e3)):
+            # default boundaries along the dimensions
+            boundaries = {}
+            minnames = ['left', 'bottom', 'front']
+            maxnames = ['right', 'top', 'back']
+            for d in range(self.doflocs.shape[0]):
+                dmin = np.min(self.doflocs[d])
+                ix = self.facets_satisfying(lambda x: np.isclose(x[d], dmin))
+                if len(ix) >= 1:
+                    boundaries[minnames[d]] = ix
+            for d in range(self.doflocs.shape[0]):
+                dmax = np.max(self.doflocs[d])
+                ix = self.facets_satisfying(lambda x: np.isclose(x[d], dmax))
+                if len(ix) >= 1:
+                    boundaries[maxnames[d]] = ix
+            if len(boundaries) > 0:
+                self._boundaries = boundaries
 
         # run validation
         self.is_valid(debug=False)
