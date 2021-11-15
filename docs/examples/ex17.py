@@ -57,7 +57,7 @@ basis0 = basis.with_element(ElementQuad0())
 
 conductivity = basis0.zeros()
 for s in mesh.subdomains:
-    conductivity[basis0.get_dofs(elements=s)] = thermal_conductivity(s)
+    conductivity[basis0.get_dofs(elements=s)] = thermal_conductivity[s]
 
 L = asm(conduction, basis, conductivity=basis0.interpolate(conductivity))
 
