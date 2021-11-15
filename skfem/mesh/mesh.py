@@ -34,7 +34,7 @@ class Mesh:
     # However, some algorithms (e.g., adaptive refinement) require switching
     # off this behaviour and, hence, this flag exists.
     sort_t: bool = False
-    validate: InitVar[bool] = True # run validation check if log_level<=DEBUG
+    validate: InitVar[bool] = True  # run validation check if log_level<=DEBUG
 
     @property
     def p(self):
