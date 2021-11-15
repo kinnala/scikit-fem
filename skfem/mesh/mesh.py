@@ -454,6 +454,7 @@ class Mesh:
             logger.debug(msg)
             return False
 
+        logger.debug("Mesh validation completed with no warnings.")
         return True
 
     def __rmatmul__(self, other):
