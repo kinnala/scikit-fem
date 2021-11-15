@@ -1,6 +1,6 @@
 import logging
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, replace, InitVar
 from typing import Callable, Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
@@ -34,6 +34,7 @@ class Mesh:
     # However, some algorithms (e.g., adaptive refinement) require switching
     # off this behaviour and, hence, this flag exists.
     sort_t: bool = False
+    validate: InitVar[bool] = True # run validation check if log_level<=DEBUG
 
     @property
     def p(self):
@@ -370,7 +371,7 @@ class Mesh:
             self.elem.refdom.edges,
         )
 
-    def __post_init__(self):
+    def __post_init__(self, validate):
         """Support node orders used in external formats.
 
         We expect ``self.doflocs`` to be ordered based on the
@@ -418,7 +419,8 @@ class Mesh:
             self.t = np.ascontiguousarray(self.t)
 
         # run validation
-        self.is_valid(debug=False)
+        if validate:
+            self.is_valid()
 
     def __rmatmul__(self, other):
         out = self.__matmul__(other)
@@ -760,7 +762,9 @@ class Mesh:
             for itr in range(len(x) - 1):
                 p = np.vstack((p, x[itr + 1].flatten()))
 
-        return cls(p, t)
+        # Always creates a mesh with duplicate verticies. Use validate=False to
+        # suppress confusing logger DEBUG messages.
+        return cls(p, t, validate=False)
 
     @staticmethod
     def build_entities(t, indices, sort=True):
