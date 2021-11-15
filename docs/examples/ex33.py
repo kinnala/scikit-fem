@@ -46,7 +46,7 @@ def fv(v, w):
 A = asm(dudv, basis)
 f = asm(fv, basis)
 
-D = basis.find_dofs()
+D = basis.get_dofs()
 
 x = solve(*condense(A, f, D=D))
 

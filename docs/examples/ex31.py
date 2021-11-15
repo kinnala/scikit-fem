@@ -40,7 +40,7 @@ basis = Basis(m, e)
 A = asm(laplace, basis)
 M = asm(mass, basis)
 
-L, x = solve(*condense(A, M, D=basis.find_dofs()), solver=solver_eigen_scipy_sym(k=8))
+L, x = solve(*condense(A, M, D=basis.get_dofs()), solver=solver_eigen_scipy_sym(k=8))
 
 if __name__ == '__main__':
 

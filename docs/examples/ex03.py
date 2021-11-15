@@ -7,7 +7,11 @@ import numpy as np
 
 m1 = MeshLine(np.linspace(0, 5, 50))
 m2 = MeshLine(np.linspace(0, 1, 10))
-m = m1 * m2
+m = (m1 * m2).with_boundaries(
+    {
+        "left": lambda x: x[0] == 0.0
+    }
+)
 
 e1 = ElementQuad1()
 
@@ -27,7 +31,7 @@ def mass(u, v, w):
 
 M = asm(mass, gb)
 
-D = gb.find_dofs({'left': m.facets_satisfying(lambda x: x[0] == 0.)})
+D = gb.get_dofs("left")
 y = gb.zeros()
 
 I = gb.complement_dofs(D)

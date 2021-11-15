@@ -69,7 +69,17 @@ from skfem import *
 from skfem.models.poisson import unit_load
 import numpy as np
 
-m = MeshTri.init_symmetric().refined(3)
+m = (
+    MeshTri.init_symmetric()
+    .refined(3)
+    .with_boundaries(
+        {
+            "left": lambda x: x[0] == 0,
+            "right": lambda x: x[0] == 1,
+            "top": lambda x: x[1] == 1,
+        }
+    )
+)
 
 e = ElementTriMorley()
 ib = Basis(m, e)
@@ -91,18 +101,7 @@ def bilinf(u, v, w):
 K = asm(bilinf, ib)
 f = 1e6 * asm(unit_load, ib)
 
-dofs = ib.find_dofs({
-    'left':  m.facets_satisfying(lambda x: x[0] == 0),
-    'right': m.facets_satisfying(lambda x: x[0] == 1),
-    'top':   m.facets_satisfying(lambda x: x[1] == 1),
-})
-
-D = np.concatenate((
-    dofs['left'].nodal['u'],
-    dofs['left'].facet['u_n'],
-    dofs['right'].nodal['u'],
-    dofs['top'].nodal['u'],
-))
+D = np.hstack([ib.get_dofs("left"), ib.get_dofs({"right", "top"}).all("u")])
 
 x = solve(*condense(K, f, D=D))
 

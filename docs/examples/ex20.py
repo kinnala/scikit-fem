@@ -49,7 +49,7 @@ def biharmonic(u, v, w):
 stokes = asm(biharmonic, ib)
 rotf = asm(unit_load, ib)
 
-psi = solve(*condense(stokes, rotf, D=ib.find_dofs()))
+psi = solve(*condense(stokes, rotf, D=ib.get_dofs()))
 (psi0,) = ib.probes(np.zeros((2, 1))) @ psi
 
 velocity = asm(

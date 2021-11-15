@@ -283,7 +283,7 @@ def test_point_source(etype):
     mesh = MeshLine1().refined()
     basis = CellBasis(mesh, etype())
     source = np.array([0.7])
-    u = solve(*condense(asm(laplace, basis), basis.point_source(source), D=basis.find_dofs()))
+    u = solve(*condense(asm(laplace, basis), basis.point_source(source), D=basis.get_dofs()))
     exact = np.stack([(1 - source) * mesh.p, (1 - mesh.p) * source]).min(0)
     assert_almost_equal(u[basis.nodal_dofs], exact)
 

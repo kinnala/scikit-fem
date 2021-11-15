@@ -36,7 +36,7 @@ class ConvergenceLinePp(unittest.TestCase):
             A = asm(laplace, ib)
             b = asm(load, ib)
 
-            D = ib.find_dofs()
+            D = ib.get_dofs()
 
             x = solve(*condense(A, b, D=D))
 
@@ -95,7 +95,7 @@ class ConvergenceQuadP(unittest.TestCase):
             A = asm(laplace, ib)
             b = asm(load, ib)
 
-            D = ib.find_dofs()
+            D = ib.get_dofs()
 
             x = solve(*condense(A, b, D=D))
 
