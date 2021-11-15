@@ -56,7 +56,7 @@ basis['psi'] = basis['u'].with_element(ElementTriP2())
 A = asm(laplace, basis['psi'])
 psi = basis['psi'].zeros()
 vorticity = asm(rot, basis['psi'], w=basis['u'].interpolate(velocity))
-psi = solve(*condense(A, vorticity, D=basis['psi'].find_dofs()['floor'].all()))
+psi = solve(*condense(A, vorticity, D=basis['psi'].get_dofs('floor')))
 
 
 if __name__ == '__main__':
