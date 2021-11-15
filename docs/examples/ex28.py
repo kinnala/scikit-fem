@@ -121,14 +121,17 @@ temperature[inlet_dofs] = exact(*mesh.p[:, inlet_dofs])
 
 temperature = solve(*condense(A, b, temperature, I=I))
 
-dofs = basis['heat'].find_dofs(
-    {label: facets for label, facets in mesh.boundaries.items()
-    if label.endswith('let')})
-
 exit_interface_temperature = {
-    'skfem': temperature[np.intersect1d(dofs['fluid-outlet'].all(),
-                                        dofs['solid-outlet'].all())[0]],
-    'exact': exact(length, -1.)
+    "skfem": temperature[
+        np.intersect1d(
+            *(
+                basis["heat"].get_dofs(b)
+                for b in mesh.boundaries
+                if b.endswith("-outlet")
+            )
+        )
+    ][0],
+    "exact": exact(length, -1.0),
 }
 
 if __name__ == '__main__':
