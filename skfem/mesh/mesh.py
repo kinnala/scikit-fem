@@ -1,4 +1,5 @@
 import logging
+import traceback
 
 from dataclasses import dataclass, replace, InitVar
 from typing import Callable, Dict, List, Optional, Tuple, Type, Union
@@ -419,8 +420,44 @@ class Mesh:
             self.t = np.ascontiguousarray(self.t)
 
         # run validation
-        if validate:
+        if validate and logger.getEffectiveLevel() <= logging.DEBUG:
             self.is_valid()
+
+    def is_valid(self, raise_=False) -> bool:
+        """Perform expensive mesh validation.
+        
+        Parameters
+        ----------
+            raise_: raise an exception if the mesh is invalid.
+        
+        Returns
+        -------
+            bool: True if the mesh is valid.
+        """
+        logger.debug("Running mesh validation.")
+        for line in traceback.format_stack()[21:]:
+            print(line.strip())
+        print()
+        # check that there are no duplicate points
+        tmp = np.ascontiguousarray(self.p.T)
+        if self.p.shape[1] != np.unique(tmp.view([('', tmp.dtype)]
+                                                    * tmp.shape[1])).shape[0]:
+            msg = "Mesh contains duplicate vertices."
+            if raise_:
+                raise ValueError(msg)
+            logger.debug(msg)
+            return False
+
+        # check that all points are at least in some element
+        if len(np.setdiff1d(np.arange(self.p.shape[1]),
+                            np.unique(self.t))) > 0:
+            msg = "Mesh contains a vertex not belonging to any element."
+            if raise_:
+                raise ValueError(msg)
+            logger.debug(msg)
+            return False
+
+        return True
 
     def __rmatmul__(self, other):
         out = self.__matmul__(other)
@@ -443,26 +480,6 @@ class Mesh:
                   for i, m in enumerate(other)],
             ]
         raise NotImplementedError
-
-    def is_valid(self, debug=True) -> bool:
-        """Perform expensive mesh validation (if logging set to DEBUG)."""
-
-        if debug or logger.getEffectiveLevel() <= 10:
-            # check that there are no duplicate points
-            tmp = np.ascontiguousarray(self.p.T)
-            if self.p.shape[1] != np.unique(tmp.view([('', tmp.dtype)]
-                                                     * tmp.shape[1])).shape[0]:
-                logger.debug("Mesh contains duplicate vertices.")
-                return False
-
-            # check that all points are at least in some element
-            if len(np.setdiff1d(np.arange(self.p.shape[1]),
-                                np.unique(self.t))) > 0:
-                logger.debug("Mesh contains a vertex not belonging "
-                             "to any element.")
-                return False
-
-        return True
 
     def __add__(self, other):
         """Join two meshes."""
@@ -595,7 +612,7 @@ class Mesh:
     @classmethod
     def init_refdom(cls):
         """Initialize a mesh corresponding to the reference domain."""
-        return cls(cls.elem.refdom.p, cls.elem.refdom.t)
+        return cls(cls.elem.refdom.p, cls.elem.refdom.t, validate=False)
 
     def refined(self, times_or_ix: Union[int, ndarray] = 1):
         """Return a refined mesh.
