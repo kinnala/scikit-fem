@@ -112,7 +112,7 @@ class BackwardFacingStep:
         self.basis['inlet'] = FacetBasis(self.mesh, self.element['u'],
                                          facets=self.mesh.boundaries['inlet'])
         self.basis['psi'] = self.basis['u'].with_element(ElementTriP2())
-        self.D = np.concatenate([b.all() for b in self.basis['u'].find_dofs().values()])
+        self.D = self.basis['u'].get_dofs([b for b in self.mesh.boundaries])
 
         A = asm(vector_laplace, self.basis['u'])
         B = asm(divergence, self.basis['u'], self.basis['p'])
@@ -121,7 +121,7 @@ class BackwardFacingStep:
         self.I = np.setdiff1d(np.arange(self.S.shape[0]), self.D)
 
     def inlet_dofs(self):
-        return self.basis['inlet'].find_dofs()['inlet'].all()
+        return self.basis["inlet"].get_dofs("inlet")
 
     @staticmethod
     def parabolic(x):
@@ -145,7 +145,7 @@ class BackwardFacingStep:
         psi = self.basis['psi'].zeros()
         vorticity = asm(rot, self.basis['psi'],
                         w=self.basis['u'].interpolate(velocity))
-        psi = solve(*condense(A, vorticity, D=self.basis['psi'].find_dofs()['floor'].all()))
+        psi = solve(*condense(A, vorticity, D=self.basis['psi'].get_dofs('floor')))
         return psi
 
     def mesh_plot(self):

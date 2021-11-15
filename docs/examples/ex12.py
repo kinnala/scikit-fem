@@ -32,7 +32,7 @@ basis = Basis(m, ElementTriP2())
 A = asm(laplace, basis)
 b = asm(unit_load, basis)
 
-x = solve(*condense(A, b, D=basis.find_dofs()))
+x = solve(*condense(A, b, D=basis.get_dofs()))
 
 area = sum(b)
 k = b @ x / area**2

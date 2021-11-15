@@ -65,9 +65,8 @@ mesh_file = Path(__file__).parent / 'meshes' / 'ex04_mesh.json'
 m = from_file(mesh_file)
 
 M = (
-    (MeshLine(np.linspace(0, 1, 6)) * MeshLine(np.linspace(-1, 1, 10)))
-    .translated((1.0, 0.0))
-    .refined()
+    (MeshLine(np.linspace(1, 2, 6)) * MeshLine(np.linspace(-1, 1, 10)))
+    .refined().with_boundaries({"contact": lambda x: x[0] == 1.0})
 )
 
 # define elements and bases
@@ -86,8 +85,8 @@ bases = [
 ]
 
 mapping = MappingMortar.init_2D(m, M,
-                                m.boundaries['contact'],
-                                M.facets_satisfying(lambda x: x[0] == 1.0),
+                                m.boundaries["contact"],
+                                M.boundaries["contact"],
                                 np.array([0.0, 1.0]))
 
 mb = [

@@ -89,7 +89,12 @@ def base_shear(u, v, w):
     return v * U.deriv()(w.x[0]) * u
 
 
-mesh = MeshLine(np.linspace(0, 1, 2**6))
+mesh = MeshLine(np.linspace(0, 1, 2**6)).with_boundaries(
+    {
+        "centre": lambda x: x[0] == 0,
+        "wall": lambda x: x[0] == 1
+    }
+)
 element = {'u': getattr(element_line, f'ElementLine{u_element}')(),
            'p': ElementLineP1()}
 basis = {v: Basis(mesh, e, intorder=4) for v, e in element.items()}
@@ -115,9 +120,8 @@ mass_matrix = block_diag([M, M, csr_matrix((basis['p'].N,)*2)], 'csr')
 # the perturbation to the velocity vanishes on the centre-line z = 0,
 # z here being the sole coordinate.
 
-u_boundaries = basis['u'].find_dofs()['all'].all()
-walls = np.concatenate([u_boundaries,
-                        u_boundaries[1:] + basis['u'].N])
+walls = np.hstack([basis["u"].get_dofs(),
+                   basis["u"].get_dofs("wall").all() + basis['u'].N])
 
 pencil = condense(stiffness, mass_matrix, D=walls, expand=False)
 c = {'Criminale et al': np.loadtxt(Path(__file__).with_suffix('.csv'),
