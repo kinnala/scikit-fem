@@ -41,7 +41,7 @@ basis = Basis(mesh, elements)
 A = asm(laplace, basis)
 
 u = basis.zeros()
-u[basis.get_dofs("positive").all()] = 1.
+u[basis.get_dofs("positive")] = 1.
 u = solve(*condense(A, x=u, D=basis.get_dofs({"positive", "ground"})))
 
 M = asm(mass, basis)

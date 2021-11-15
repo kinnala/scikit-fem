@@ -39,7 +39,7 @@ K = bmat([[A, B.T],
 uvp = np.zeros(K.shape[0])
 
 inlet_basis = FacetBasis(mesh, element['u'], facets=mesh.boundaries['inlet'])
-inlet_dofs = inlet_basis.get_dofs('inlet').all()
+inlet_dofs = inlet_basis.get_dofs('inlet')
 
 
 def parabolic(x):

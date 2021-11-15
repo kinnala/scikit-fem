@@ -183,10 +183,10 @@ dofs = {}
 for dof in ddofs:
     dofs.update(dof)
 
-du[dofs["left"].all()] = 0.
-du[dofs["bottom"].all()] = 0.
-du[dofs["back"].all()] = 0.
-du[dofs["front"].all()] = stretch_
+du[dofs["left"]] = 0.
+du[dofs["bottom"]] = 0.
+du[dofs["back"]] = 0.
+du[dofs["front"]] = stretch_
 
 I = np.hstack((
     basis["u"].complement_dofs(dofs),

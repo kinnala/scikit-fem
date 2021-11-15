@@ -46,7 +46,7 @@ interior = basis.complement_dofs(basis.get_dofs({"inlet", "floor"}))
 
 A = asm(laplace, basis) + peclet * asm(advection, basis)
 t = basis.zeros()
-t[basis.get_dofs("floor").all()] = 1.0
+t[basis.get_dofs("floor")] = 1.0
 t = solve(*condense(A, x=t, I=interior))
 
 basis0 = basis.with_element(ElementQuad0())
