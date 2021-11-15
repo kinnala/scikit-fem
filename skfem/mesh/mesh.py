@@ -417,10 +417,10 @@ class Mesh:
                                "to C_CONTIGUOUS.")
             self.t = np.ascontiguousarray(self.t)
 
-        if (self._boundaries is None
-            and self.doflocs.shape[1] == 2 ** self.dim()
-            and np.isclose(np.max(self.doflocs), 1)
-            and np.isclose(np.min(self.doflocs), 0)):
+        if ((self._boundaries is None
+             and self.doflocs.shape[1] == 2 ** self.dim()
+             and np.isclose(np.max(self.doflocs), 1)
+             and np.isclose(np.min(self.doflocs), 0))):
             # default boundaries for the d-cube
             self._boundaries = {
                 **{
