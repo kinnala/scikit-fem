@@ -112,7 +112,7 @@ class BackwardFacingStep:
         self.basis['inlet'] = FacetBasis(self.mesh, self.element['u'],
                                          facets=self.mesh.boundaries['inlet'])
         self.basis['psi'] = self.basis['u'].with_element(ElementTriP2())
-        self.D = np.concatenate([b.all() for b in self.basis['u'].find_dofs().values()])
+        self.D = self.basis['u'].get_dofs([b for b in self.mesh.boundaries]).all()
 
         A = asm(vector_laplace, self.basis['u'])
         B = asm(divergence, self.basis['u'], self.basis['p'])
