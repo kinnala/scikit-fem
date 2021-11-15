@@ -115,7 +115,7 @@ mass_matrix = block_diag([M, M, csr_matrix((basis['p'].N,)*2)], 'csr')
 # the perturbation to the velocity vanishes on the centre-line z = 0,
 # z here being the sole coordinate.
 
-u_boundaries = basis['u'].find_dofs()['all'].all()
+u_boundaries = basis['u'].get_dofs().all()
 walls = np.concatenate([u_boundaries,
                         u_boundaries[1:] + basis['u'].N])
 
