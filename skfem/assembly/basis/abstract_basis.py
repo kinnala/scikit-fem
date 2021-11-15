@@ -1,4 +1,5 @@
 import logging
+from warnings import warn
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
@@ -117,7 +118,7 @@ class AbstractBasis:
     def find_dofs(self,
                   facets: Dict[str, ndarray] = None,
                   skip: List[str] = None) -> Dict[str, DofsView]:
-        """Deprecated in favor of :meth:`~skfem.AbstractBasis.get_dofs`."""
+        warn("find_dofs deprecated in favor of get_dofs.", DeprecationWarning)
         if facets is None:
             if self.mesh.boundaries is None:
                 facets = {'all': self.mesh.boundary_facets()}
@@ -222,11 +223,13 @@ class AbstractBasis:
 
         """
         if isinstance(facets, dict):
-            # deprecate
+            warn("Passing dict to get_dofs is deprecated.", DeprecationWarning)
+
             def to_indices(f):
                 if callable(f):
                     return self.mesh.facets_satisfying(f)
                 return f
+
             return {k: self.dofs.get_facet_dofs(to_indices(facets[k]),
                                                 skip_dofnames=skip)
                     for k in facets}

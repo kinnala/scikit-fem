@@ -92,12 +92,15 @@ def advection(u, v, w):
     return v * velocity_x * grad(u)[0]
 
 
-conductivity = basis['heat'].zero_w() + 1
+basis0 = basis['heat'].with_element(ElementTriP0())
+conductivity = basis0.zeros() + 1
 conductivity[mesh.subdomains['solid']] = kratio
 
 longitudinal_gradient = 3 / 4 / peclet
 
-A = (asm(conduction, basis['heat'], conductivity=conductivity)
+A = (asm(conduction,
+         basis['heat'],
+         conductivity=basis0.interpolate(conductivity))
      + peclet * asm(advection, basis['fluid']))
 b = (asm(unit_load, basis['heated'])
      + longitudinal_gradient

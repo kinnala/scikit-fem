@@ -53,11 +53,13 @@ convection = mass
 element = ElementQuad1()
 basis = Basis(mesh, element)
 
-conductivity = basis.zero_w()
-for subdomain, elements in mesh.subdomains.items():
-    conductivity[elements] = thermal_conductivity[subdomain]
+basis0 = basis.with_element(ElementQuad0())
 
-L = asm(conduction, basis, conductivity=conductivity)
+conductivity = basis0.zeros()
+conductivity[basis0.get_dofs(elements='core')] = 101.
+conductivity[basis0.get_dofs(elements='annulus')] = 11.
+
+L = asm(conduction, basis, conductivity=basis0.interpolate(conductivity))
 
 facet_basis = FacetBasis(mesh, element, facets=mesh.boundaries['perimeter'])
 H = heat_transfer_coefficient * asm(convection, facet_basis)
