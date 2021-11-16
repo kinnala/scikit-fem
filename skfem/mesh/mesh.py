@@ -1,6 +1,6 @@
 import logging
 
-from dataclasses import dataclass, replace, InitVar
+from dataclasses import dataclass, replace
 from typing import Callable, Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
