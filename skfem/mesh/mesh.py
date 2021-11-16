@@ -424,11 +424,11 @@ class Mesh:
 
     def is_valid(self, raise_=False) -> bool:
         """Perform expensive mesh validation.
-        
+
         Parameters
         ----------
             raise_: raise an exception if the mesh is invalid.
-        
+
         Returns
         -------
             bool: True if the mesh is valid.
