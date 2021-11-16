@@ -437,8 +437,8 @@ class Mesh:
 
         # check that there are no duplicate points
         tmp = np.ascontiguousarray(self.p.T)
-        if self.p.shape[1] != np.unique(tmp.view([('', tmp.dtype)]
-                                                    * tmp.shape[1])).shape[0]:
+        p_unique = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]))
+        if self.p.shape[1] != p_unique.shape[0]:
             msg = "Mesh contains duplicate vertices."
             if raise_:
                 raise ValueError(msg)
