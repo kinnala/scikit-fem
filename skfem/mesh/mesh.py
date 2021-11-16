@@ -34,6 +34,7 @@ class Mesh:
     # However, some algorithms (e.g., adaptive refinement) require switching
     # off this behaviour and, hence, this flag exists.
     sort_t: bool = False
+    validate: bool = True  # run validation check if log_level<=DEBUG
 
     @property
     def p(self):
@@ -186,7 +187,7 @@ class Mesh:
                 **({} if self._subdomains is None else self._subdomains),
                 **{name: self.elements_satisfying(test)
                    for name, test in subdomains.items()},
-            }
+            },
         )
 
     def _encode_point_data(self) -> Dict[str, List[ndarray]]:
@@ -418,7 +419,43 @@ class Mesh:
             self.t = np.ascontiguousarray(self.t)
 
         # run validation
-        self.is_valid(debug=False)
+        if self.validate and logger.getEffectiveLevel() <= logging.DEBUG:
+            self.is_valid()
+
+    def is_valid(self, raise_=False) -> bool:
+        """Perform expensive mesh validation.
+
+        Parameters
+        ----------
+            raise_: raise an exception if the mesh is invalid.
+
+        Returns
+        -------
+            bool: True if the mesh is valid.
+        """
+        logger.debug("Running mesh validation.")
+
+        # check that there are no duplicate points
+        tmp = np.ascontiguousarray(self.p.T)
+        p_unique = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]))
+        if self.p.shape[1] != p_unique.shape[0]:
+            msg = "Mesh contains duplicate vertices."
+            if raise_:
+                raise ValueError(msg)
+            logger.debug(msg)
+            return False
+
+        # check that all points are at least in some element
+        if len(np.setdiff1d(np.arange(self.p.shape[1]),
+                            np.unique(self.t))) > 0:
+            msg = "Mesh contains a vertex not belonging to any element."
+            if raise_:
+                raise ValueError(msg)
+            logger.debug(msg)
+            return False
+
+        logger.debug("Mesh validation completed with no warnings.")
+        return True
 
     def __rmatmul__(self, other):
         out = self.__matmul__(other)
@@ -441,26 +478,6 @@ class Mesh:
                   for i, m in enumerate(other)],
             ]
         raise NotImplementedError
-
-    def is_valid(self, debug=True) -> bool:
-        """Perform expensive mesh validation (if logging set to DEBUG)."""
-
-        if debug or logger.getEffectiveLevel() <= 10:
-            # check that there are no duplicate points
-            tmp = np.ascontiguousarray(self.p.T)
-            if self.p.shape[1] != np.unique(tmp.view([('', tmp.dtype)]
-                                                     * tmp.shape[1])).shape[0]:
-                logger.debug("Mesh contains duplicate vertices.")
-                return False
-
-            # check that all points are at least in some element
-            if len(np.setdiff1d(np.arange(self.p.shape[1]),
-                                np.unique(self.t))) > 0:
-                logger.debug("Mesh contains a vertex not belonging "
-                             "to any element.")
-                return False
-
-        return True
 
     def __add__(self, other):
         """Join two meshes."""
@@ -593,7 +610,7 @@ class Mesh:
     @classmethod
     def init_refdom(cls):
         """Initialize a mesh corresponding to the reference domain."""
-        return cls(cls.elem.refdom.p, cls.elem.refdom.t)
+        return cls(cls.elem.refdom.p, cls.elem.refdom.t, validate=False)
 
     def refined(self, times_or_ix: Union[int, ndarray] = 1):
         """Return a refined mesh.
@@ -760,7 +777,9 @@ class Mesh:
             for itr in range(len(x) - 1):
                 p = np.vstack((p, x[itr + 1].flatten()))
 
-        return cls(p, t)
+        # Always creates a mesh with duplicate verticies. Use validate=False to
+        # suppress confusing logger DEBUG messages.
+        return cls(p, t, validate=False)
 
     @staticmethod
     def build_entities(t, indices, sort=True):
