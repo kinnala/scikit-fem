@@ -34,7 +34,7 @@ class Mesh:
     # However, some algorithms (e.g., adaptive refinement) require switching
     # off this behaviour and, hence, this flag exists.
     sort_t: bool = False
-    validate: InitVar[bool] = True  # run validation check if log_level<=DEBUG
+    validate: bool = True  # run validation check if log_level<=DEBUG
 
     @property
     def p(self):
@@ -166,7 +166,6 @@ class Mesh:
                 **{name: self.facets_satisfying(test, boundaries_only)
                    for name, test in boundaries.items()}
             },
-            validate=False,
         )
 
     def with_subdomains(self,
@@ -189,7 +188,6 @@ class Mesh:
                 **{name: self.elements_satisfying(test)
                    for name, test in subdomains.items()},
             },
-            validate=False,
         )
 
     def _encode_point_data(self) -> Dict[str, List[ndarray]]:
@@ -373,7 +371,7 @@ class Mesh:
             self.elem.refdom.edges,
         )
 
-    def __post_init__(self, validate):
+    def __post_init__(self):
         """Support node orders used in external formats.
 
         We expect ``self.doflocs`` to be ordered based on the
@@ -421,7 +419,7 @@ class Mesh:
             self.t = np.ascontiguousarray(self.t)
 
         # run validation
-        if validate and logger.getEffectiveLevel() <= logging.DEBUG:
+        if self.validate and logger.getEffectiveLevel() <= logging.DEBUG:
             self.is_valid()
 
     def is_valid(self, raise_=False) -> bool:
@@ -648,7 +646,6 @@ class Mesh:
             self,
             doflocs=np.array([self.doflocs[itr] * factors[itr]
                               for itr in range(len(factors))]),
-            validate=False,
         )
 
     def translated(self, diffs):
@@ -665,7 +662,6 @@ class Mesh:
             self,
             doflocs=np.array([self.doflocs[itr] + diffs[itr]
                               for itr in range(len(diffs))]),
-            validate=False,
         )
 
     def mirrored(self,
@@ -706,7 +702,6 @@ class Mesh:
         return replace(
             self,
             doflocs=p,
-            validate=False,
         )
 
     def smoothed(self, fixed_nodes=None):
@@ -740,7 +735,6 @@ class Mesh:
         return replace(
             self,
             doflocs=p,
-            validate=False,
         )
 
     def _uniform(self):
@@ -854,7 +848,6 @@ class Mesh:
             self,
             doflocs=p,
             t=t,
-            validate=False,
         )
 
     def element_finder(self, mapping=None):
