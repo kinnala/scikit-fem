@@ -166,6 +166,7 @@ class Mesh:
                 **{name: self.facets_satisfying(test, boundaries_only)
                    for name, test in boundaries.items()}
             },
+            validate=False,
         )
 
     def with_subdomains(self,
@@ -187,7 +188,8 @@ class Mesh:
                 **({} if self._subdomains is None else self._subdomains),
                 **{name: self.elements_satisfying(test)
                    for name, test in subdomains.items()},
-            }
+            },
+            validate=False,
         )
 
     def _encode_point_data(self) -> Dict[str, List[ndarray]]:
@@ -646,6 +648,7 @@ class Mesh:
             self,
             doflocs=np.array([self.doflocs[itr] * factors[itr]
                               for itr in range(len(factors))]),
+            validate=False,
         )
 
     def translated(self, diffs):
@@ -662,6 +665,7 @@ class Mesh:
             self,
             doflocs=np.array([self.doflocs[itr] + diffs[itr]
                               for itr in range(len(diffs))]),
+            validate=False,
         )
 
     def mirrored(self,
@@ -702,6 +706,7 @@ class Mesh:
         return replace(
             self,
             doflocs=p,
+            validate=False,
         )
 
     def smoothed(self, fixed_nodes=None):
@@ -735,6 +740,7 @@ class Mesh:
         return replace(
             self,
             doflocs=p,
+            validate=False,
         )
 
     def _uniform(self):
@@ -848,6 +854,7 @@ class Mesh:
             self,
             doflocs=p,
             t=t,
+            validate=False,
         )
 
     def element_finder(self, mapping=None):
