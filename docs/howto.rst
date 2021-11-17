@@ -4,46 +4,6 @@ How-to guides
 
 This section contains goal-oriented guides on the features of scikit-fem.
 
-Choosing a finite element
-=========================
-
-Here are some instructions for choosing an
-:class:`~skfem.element.Element` class.  Firstly, the naming of the element
-classes reflects their compatibility with the mesh types:
-
->>> from skfem.element import ElementTriP1
->>> ElementTriP1.refdom
-<class 'skfem.refdom.RefTri'>
-
-Secondly, the chosen finite element should be compatible with the approximated
-partial differential equation.  Here are some general guidelines:
-
-* Use subclasses of :class:`~skfem.element.ElementH1`, e.g.,
-  :class:`~skfem.element.ElementTriP1`, :class:`~skfem.element.ElementTriP2`,
-  :class:`~skfem.element.ElementQuad2`, :class:`~skfem.element.ElementTetP2` or
-  :class:`~skfem.element.ElementHex2`, for standard second-order problems.
-* Discretize vectorial problems either by manually building the block matrices
-  (e.g., using ``scipy.sparse.bmat``) with scalar elements, or by using
-  :class:`~skfem.element.ElementVector` or
-  :class:`~skfem.element.ElementComposite` that abstract out the creation of
-  the block matrices.
-* Pay special attention to constrained problems, e.g., the Stokes system which
-  may require the use of special elements such as :class:`~skfem.element.ElementTriMini`.
-* Use subclasses of :class:`~skfem.element.ElementHdiv` or
-  :class:`~skfem.element.ElementHcurl`, e.g.,
-  :class:`~skfem.element.ElementTriRT0` or :class:`~skfem.element.ElementTetN0`,
-  for mixed problems with less regular solutions.
-* Use subclasses of :class:`ElementGlobal`, e.g., :class:`ElementTriMorley` or
-  :class:`ElementTriArgyris`, for fourth-order problems or if there are
-  postprocessing requirements, e.g., the need for high-order derivatives.
-
-Thirdly, the finite element should use degrees-of-freedom that are relevant
-for the essential boundary conditions that you want to impose.
-See :ref:`finddofs` for more information.
-
-See the documentation of :mod:`skfem.element` for a list of elements.
-
-
 .. _predefined:
 
 Using discrete functions in forms

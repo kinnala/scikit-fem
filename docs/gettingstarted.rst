@@ -87,6 +87,7 @@ unit square:
      Number of elements: 128
      Number of vertices: 81
      Number of nodes: 81
+     Named boundaries [# facets]: left [8], bottom [8], right [8], top [8]
 
 
 Step 4: Define a basis
@@ -118,10 +119,10 @@ The resulting matrices have the type ``scipy.sparse.csr_matrix``.
 Step 6: Find boundary DOFs
 ==========================
 
-Setting boundary conditions requires finding the rows and columns
-of :math:`A` that match the degrees-of-freedom (DOFs) on the boundary.
-By default, :meth:`~skfem.assembly.CellBasis.get_dofs` matches all boundary
-facets and finds the corresponding DOFs.
+Setting boundary conditions requires finding the rows and columns of :math:`A`
+that match the degrees-of-freedom (DOFs) on the boundary.  By default,
+:meth:`~skfem.assembly.CellBasis.get_dofs` with empty parameters matches all
+boundary facets and finds the corresponding DOFs.
 
 .. doctest::
 
