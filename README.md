@@ -18,9 +18,9 @@ into vectors.
 
 Features:
 - minimal dependencies, no compiled code
-- meshes: 1D, tri, quad, tet, hex, wedge, and quadratic
-- elements: 1D and quad (any order), tri (up to order 4), tet (up to order 2), hex (up to order 2)
-- special elements: Raviart-Thomas, Nedelec, MINI, Crouzeix-Raviart, Argyris, Morley, Hermite, ...
+- meshes: 1D, tri, quad, tet, hex
+- elements: 1D and quad (any order), tri (order <= 4), tet, hex (order <= 2)
+- special elements: H(div), H(curl), MINI, Crouzeix-Raviart, Argyris, Morley, ...
 - conforming adaptive mesh refinement
 
 ## Installation
