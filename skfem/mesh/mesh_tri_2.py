@@ -35,3 +35,9 @@ class MeshTri2(Mesh2D2, MeshTri1):
         doflocs = M.doflocs.copy()
         doflocs[:, D] /= np.linalg.norm(doflocs[:, D], axis=0)
         return replace(M, doflocs=doflocs)
+
+    def _uniform(self):
+        return MeshTri2.from_mesh(MeshTri1.from_mesh(self).refined())
+
+    def _adaptive(self, marked):
+        return MeshTri2.from_mesh(MeshTri1.from_mesh(self).refined(marked))

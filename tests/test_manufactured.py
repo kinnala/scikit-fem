@@ -295,7 +295,7 @@ class SolveCirclePoissonTet2(SolveCirclePoisson):
     mesh_type = MeshTet2
     element_type = ElementTetP2
     filename = "quadratic_sphere_tet.msh"
-    maxval = 0.0405901240018571
+    maxval = 0.041655619826791175
 
 
 @pytest.mark.parametrize(
