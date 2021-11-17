@@ -453,8 +453,10 @@ def test_meshio_cycle(m):
     M = from_meshio(to_meshio(m))
     assert_array_equal(M.p, m.p)
     assert_array_equal(M.t, m.t)
-    assert m.boundaries == M.boundaries
-    assert m.subdomains == M.subdomains
+    if m.boundaries is not None:
+        np.testing.assert_equal(m.boundaries, M.boundaries)
+    if m.subdomains is not None:
+        np.testing.assert_equal(m.subdomains, M.subdomains)
 
 
 _test_lambda = {

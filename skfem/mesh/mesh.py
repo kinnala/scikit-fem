@@ -246,10 +246,10 @@ class Mesh:
             if subnames[1] == "s":
                 subdomains[subnames[2]] = np.nonzero(data[0])[0]
             elif subnames[1] == "b":
-                boundaries[subnames[2]] = self.t2f[
+                boundaries[subnames[2]] = np.sort(self.t2f[
                     (1 << np.arange(self.t2f.shape[0]))[:, None]
                     & data[0].astype(np.int64) > 0
-                ]
+                ])
 
         return boundaries, subdomains
 
