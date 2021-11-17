@@ -39,6 +39,7 @@ class MeshTet2(MeshTet1):
                                  [1., .5, 1.],
                                  [1., 1., .5]], dtype=np.float64).T
     elem: Type[Element] = ElementTetP2
+    affine: bool = False
 
     @classmethod
     def init_ball(cls: Type, nrefs: int = 3) -> 'MeshTet2':
@@ -48,3 +49,9 @@ class MeshTet2(MeshTet1):
         doflocs = M.doflocs.copy()
         doflocs[:, D] /= np.linalg.norm(doflocs[:, D], axis=0)
         return replace(M, doflocs=doflocs)
+
+    def _uniform(self):
+        return MeshTet2.from_mesh(MeshTet1.from_mesh(self).refined())
+
+    def _adaptive(self, marked):
+        return MeshTet2.from_mesh(MeshTet1.from_mesh(self).refined(marked))
