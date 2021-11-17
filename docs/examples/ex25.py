@@ -29,7 +29,8 @@ peclet = 1e2
 
 mesh = MeshQuad.init_tensor(
     np.linspace(0, length, ceil(mesh_inlet_n / height * length)),
-    np.linspace(0, height / 2, mesh_inlet_n))
+    np.linspace(0, height / 2, mesh_inlet_n),
+).with_boundaries({"inlet": lambda x: x[0] == 0.0, "floor": lambda x: x[1] == 0.0})
 basis = Basis(mesh, ElementQuad2())
 
 
@@ -41,13 +42,11 @@ def advection(u, v, w):
     return v * velocity_0 * grad(u)[0]
 
 
-dofs = basis.find_dofs({'inlet': mesh.facets_satisfying(lambda x: x[0] == 0.),
-                        'floor': mesh.facets_satisfying(lambda x: x[1] == 0.)})
-interior = basis.complement_dofs(dofs)
+interior = basis.complement_dofs(basis.get_dofs({"inlet", "floor"}))
 
 A = asm(laplace, basis) + peclet * asm(advection, basis)
 t = basis.zeros()
-t[dofs['floor'].all()] = 1.
+t[basis.get_dofs("floor")] = 1.0
 t = solve(*condense(A, x=t, I=interior))
 
 basis0 = basis.with_element(ElementQuad0())

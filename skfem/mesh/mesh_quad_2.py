@@ -23,3 +23,6 @@ class MeshQuad2(Mesh2D2, MeshQuad1):
                                  [.5, 1.],
                                  [.5, .5]], dtype=np.float64).T
     elem: Type[Element] = ElementQuad2
+
+    def _uniform(self):
+        return MeshQuad2.from_mesh(MeshQuad1.from_mesh(self).refined())

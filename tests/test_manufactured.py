@@ -87,7 +87,7 @@ class LineNegative1D(TestCase):
 
         L = asm(laplace, ib)
         b = asm(boundary_flux, fb)
-        D = ib.find_dofs()['left'].all()
+        D = ib.get_dofs('left')
         I = ib.complement_dofs(D)  # noqa E741
         u = solve(*condense(L, b, I=I))  # noqa E741
 
@@ -295,7 +295,7 @@ class SolveCirclePoissonTet2(SolveCirclePoisson):
     mesh_type = MeshTet2
     element_type = ElementTetP2
     filename = "quadratic_sphere_tet.msh"
-    maxval = 0.0405901240018571
+    maxval = 0.041655619826791175
 
 
 @pytest.mark.parametrize(

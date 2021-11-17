@@ -318,10 +318,10 @@ voltage = 1
 
 # initialize the non-homogeneous Dirichlet conditions on the conductor surfaces
 U = np.zeros(K_elec.shape[0])
-U[dofs['inner_conductor_outer_surface'].all()] = projection(
+U[dofs['inner_conductor_outer_surface']] = projection(
     lambda x: voltage/2, inner_conductor_outer_surface_basis,
     I=dofs['inner_conductor_outer_surface'])
-U[dofs['outer_conductor_inner_surface'].all()] = projection(
+U[dofs['outer_conductor_inner_surface']] = projection(
     lambda x: -voltage/2, outer_conductor_inner_surface_basis,
     I=dofs['outer_conductor_inner_surface'])
 

@@ -56,8 +56,8 @@ basis = Basis(mesh, element)
 basis0 = basis.with_element(ElementQuad0())
 
 conductivity = basis0.zeros()
-conductivity[basis0.get_dofs(elements='core')] = 101.
-conductivity[basis0.get_dofs(elements='annulus')] = 11.
+for s in mesh.subdomains:
+    conductivity[basis0.get_dofs(elements=s)] = thermal_conductivity[s]
 
 L = asm(conduction, basis, conductivity=basis0.interpolate(conductivity))
 

@@ -45,7 +45,7 @@ source = np.array([0.3, 0.2])
 A = asm(laplace, basis)
 b = basis.point_source(source)
 
-x = solve(*condense(A, b, D=basis.find_dofs()))
+x = solve(*condense(A, b, D=basis.get_dofs()))
 
 exact = projection(
     partial(greens, np.linalg.norm(basis.mesh.p, axis=0).max(), source), basis

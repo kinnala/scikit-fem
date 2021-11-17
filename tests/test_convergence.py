@@ -31,7 +31,7 @@ from skfem.element import (
 )
 from skfem.assembly import FacetBasis, Basis
 from skfem.mesh import (MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
-                        MeshWedge1)
+                        MeshWedge1, MeshQuad2, MeshTri2, MeshTet2, MeshHex2)
 
 
 class ConvergenceQ1(unittest.TestCase):
@@ -170,6 +170,12 @@ class ConvergenceQ1(unittest.TestCase):
         self.mesh = MeshQuad().refined(2)
 
 
+class ConvergenceQ1QuadraticMesh(ConvergenceQ1):
+
+    def setUp(self):
+        self.mesh = MeshQuad2().refined(2)
+
+
 class ConvergenceQ2(ConvergenceQ1):
 
     rateL2 = 3.0
@@ -198,6 +204,12 @@ class ConvergenceTriP1(ConvergenceQ1):
 
     def setUp(self):
         self.mesh = MeshTri.init_sqsymmetric().refined(2)
+
+
+class ConvergenceTriP1QuadraticMesh(ConvergenceTriP1):
+
+    def setUp(self):
+        self.mesh = MeshTri2.from_mesh(MeshTri.init_sqsymmetric().refined(2))
 
 
 class ConvergenceTriP2(ConvergenceTriP1):
@@ -309,6 +321,12 @@ class ConvergenceHex1(ConvergenceQ1):
 
     def setUp(self):
         self.mesh = MeshHex().refined(2)
+
+
+class ConvergenceHex1QuadraticMesh(ConvergenceHex1):
+
+    def setUp(self):
+        self.mesh = MeshHex2().refined(1)
 
 
 class ConvergenceHexSplitTet1(ConvergenceQ1):

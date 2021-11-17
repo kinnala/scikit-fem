@@ -39,3 +39,6 @@ class MeshHex2(MeshHex1):
                                  [1., .5, .5],
                                  [.5, .5, .5]], dtype=np.float64).T
     elem: Type[Element] = ElementHex2
+
+    def _uniform(self):
+        return MeshHex2.from_mesh(MeshHex1.from_mesh(self).refined())

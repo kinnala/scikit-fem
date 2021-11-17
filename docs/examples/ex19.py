@@ -64,7 +64,7 @@ M = asm(mass, basis)
 dt = .01
 print('dt =', dt)
 theta = 0.5                     # Crank–Nicolson
-L0, M0 = penalize(L, M, D=basis.find_dofs())
+L0, M0 = penalize(L, M, D=basis.get_dofs())
 A = M0 + theta * L0 * dt
 B = M0 - (1 - theta) * L0 * dt
 

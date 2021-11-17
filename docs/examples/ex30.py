@@ -77,7 +77,7 @@ def body_force(v, w):
 A = asm(vector_laplace, basis['u'])
 B = -asm(divergence, basis['u'], basis['p'])
 f = asm(body_force, basis['u'])
-D = basis['u'].find_dofs()['all'].all()
+D = basis['u'].get_dofs()
 Aint = condense(A, D=D, expand=False)
 solver = solver_iter_pcg(M=build_pc_ilu(Aint))
 I = basis['u'].complement_dofs(D)
@@ -112,7 +112,7 @@ velocity = flow(pressure)
 
 basis['psi'] = basis['u'].with_element(ElementQuad2())
 vorticity = asm(rot, basis['psi'], w=basis['u'].interpolate(velocity))
-psi = solve(*condense(asm(laplace, basis['psi']), vorticity, D=basis['psi'].find_dofs()))
+psi = solve(*condense(asm(laplace, basis['psi']), vorticity, D=basis['psi'].get_dofs()))
 psi0 = (basis['psi'].probes(np.zeros((2, 1))) @ psi)[0]
 
 

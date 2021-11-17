@@ -18,12 +18,10 @@ into vectors.
 
 Features:
 - minimal dependencies, no compiled code
-- one-dimensional, triangular, quadrilateral, tetrahedral and hexahedral meshes
-- one-dimensional and quadrilateral elements of arbitrary order, triangular elements up to order 4
-- vectorial elements, H(div) and H(curl) conforming elements, discontinuous Galerkin methods
-- special elements such as MINI, Crouzeix-Raviart, Argyris, Morley, Hermite
-- support for quadratic and other high-order meshes
-- adaptive mesh refinement
+- meshes: 1D, tri, quad, tet, hex
+- elements: 1D and quad (any order), tri (order <= 4), tet, hex (order <= 2)
+- special elements: H(div), H(curl), MINI, Crouzeix-Raviart, Argyris, Morley, ...
+- conforming adaptive mesh refinement
 
 ## Installation
 

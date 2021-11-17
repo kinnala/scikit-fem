@@ -109,7 +109,7 @@ def from_meshio(m,
                       if meshio_type in v}
 
     # create temporary mesh for matching boundary elements
-    mtmp = mesh_type(p, t)
+    mtmp = mesh_type(p, t, validate=False)
     bnd_type = BOUNDARY_TYPE_MAPPING[meshio_type]
 
     # parse boundaries from cell_sets

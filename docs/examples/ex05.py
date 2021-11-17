@@ -20,7 +20,7 @@ from skfem import *
 from skfem.helpers import dot, grad
 from skfem.models.poisson import laplace
 
-m = MeshTri().refined(5)
+m = MeshTri().refined(5).with_boundaries({"plate": lambda x: x[1] == 0.0})
 
 e = ElementTriP1()
 
@@ -47,8 +47,7 @@ B = asm(facetbilinf, fb)
 
 b = asm(facetlinf, fb)
 
-D = ib.find_dofs({'plate': m.facets_satisfying(lambda x: (x[1] == 0.0))})
-I = ib.complement_dofs(D)
+I = ib.complement_dofs(ib.get_dofs("plate"))
 
 import scipy.sparse
 b = scipy.sparse.csr_matrix(b)
