@@ -32,3 +32,7 @@ class ElementDG(Element):
     def gbasis(self, *args, **kwargs):
         """Call :meth:`Element.gbasis` from the original element."""
         return self.elem.gbasis(*args, **kwargs)
+
+    def lbasis(self, *args, **kwargs):
+        """Call :meth:`Element.lbasis` from the original element."""
+        return self.elem.lbasis(*args, **kwargs)

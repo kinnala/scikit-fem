@@ -61,6 +61,9 @@ class Element:
         else:
             return 1 + 0 * tind
 
+    def __call__(self):
+        return self
+
     def gbasis(self,
                mapping,
                X: ndarray,
