@@ -427,12 +427,12 @@ class Mesh:
             maxnames = ['right', 'top', 'back']
             for d in range(self.doflocs.shape[0]):
                 dmin = np.min(self.doflocs[d])
-                ix = self.facets_satisfying(lambda x: np.isclose(x[d], dmin))
+                ix = self.facets_satisfying(lambda x: x[d] == dmin)
                 if len(ix) >= 1:
                     boundaries[minnames[d]] = ix
             for d in range(self.doflocs.shape[0]):
                 dmax = np.max(self.doflocs[d])
-                ix = self.facets_satisfying(lambda x: np.isclose(x[d], dmax))
+                ix = self.facets_satisfying(lambda x: x[d] == dmax)
                 if len(ix) >= 1:
                     boundaries[maxnames[d]] = ix
             if len(boundaries) > 0:
