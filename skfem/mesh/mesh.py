@@ -455,6 +455,21 @@ class Mesh:
         """
         logger.debug("Running mesh validation.")
 
+        # check that the shape of doflocs and t are correct
+        if self.doflocs.shape[0] != self.elem.refdom.dim():
+            msg = "Mesh.doflocs, the point array, has incorrect shape."
+            if raise_:
+                raise ValueError(msg)
+            logger.debug(msg)
+            return False
+
+        if self.t.shape[0] != self.elem.refdom.nnodes:
+            msg = "Mesh.t, the element connectivity, has incorrect shape."
+            if raise_:
+                raise ValueError(msg)
+            logger.debug(msg)
+            return False
+
         # check that there are no duplicate points
         tmp = np.ascontiguousarray(self.p.T)
         p_unique = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]))
