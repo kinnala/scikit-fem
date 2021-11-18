@@ -35,7 +35,7 @@ class MeshQuad1(Mesh2D):
         t = self.t
         sz = p.shape[1]
         t2f = self.t2f.copy()
-        mid = np.arange(t.shape[1], dtype=np.int64) + np.max(t2f) + 1
+        mid = np.arange(t.shape[1], dtype=np.int64) + np.max(t2f) + sz + 1
 
         m = replace(
             self,
