@@ -283,7 +283,7 @@ class AbstractBasis:
                  and elements in self.mesh.subdomains)):
                 return self.mesh.subdomains[elements]
             else:
-                raise ValueError("Subdomain '{}' not found.".format(facets))
+                raise ValueError("Subdomain '{}' not found.".format(elements))
         raise NotImplementedError
 
     def __repr__(self):
