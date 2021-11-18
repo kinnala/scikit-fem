@@ -34,9 +34,10 @@ class MeshQuad1(Mesh2D):
         p = self.doflocs
         t = self.t
         sz = p.shape[1]
-        t2f = self.t2f.copy() + sz
+        t2f = self.t2f.copy()
         mid = np.arange(t.shape[1], dtype=np.int64) + np.max(t2f) + 1
-        return replace(
+
+        m = replace(
             self,
             doflocs=np.hstack((
                 p,
@@ -44,14 +45,42 @@ class MeshQuad1(Mesh2D):
                 p[:, self.t].mean(axis=1),
             )),
             t=np.hstack((
-                np.vstack((t[0], t2f[0], mid, t2f[3])),
-                np.vstack((t2f[0], t[1], t2f[1], mid)),
-                np.vstack((mid, t2f[1], t[2], t2f[2])),
-                np.vstack((t2f[3], mid, t2f[2], t[3])),
+                np.vstack((t[0], t2f[0] + sz, mid, t2f[3] + sz)),
+                np.vstack((t2f[0] + sz, t[1], t2f[1] + sz, mid)),
+                np.vstack((mid, t2f[1] + sz, t[2], t2f[2] + sz)),
+                np.vstack((t2f[3] + sz, mid, t2f[2] + sz, t[3])),
             )),
             _boundaries=None,
             _subdomains=None,
         )
+
+        if self._boundaries is not None:
+            # mapping of indices between old and new facets
+            new_facets = np.zeros((2, self.facets.shape[1]), dtype=np.int64)
+            ix0 = np.arange(t.shape[1], dtype=np.int64)
+            ix1 = ix0 + t.shape[1]
+            ix2 = ix0 + 2 * t.shape[1]
+            ix3 = ix0 + 3 * t.shape[1]
+
+            # finish mapping of indices between old and new facets
+            new_facets[0, t2f[0]] = m.t2f[0, ix0]
+            new_facets[1, t2f[0]] = m.t2f[0, ix1]
+            new_facets[0, t2f[1]] = m.t2f[1, ix1]
+            new_facets[1, t2f[1]] = m.t2f[1, ix2]
+            new_facets[0, t2f[2]] = m.t2f[2, ix2]
+            new_facets[1, t2f[2]] = m.t2f[2, ix3]
+            new_facets[0, t2f[3]] = m.t2f[3, ix3]
+            new_facets[1, t2f[3]] = m.t2f[3, ix0]
+
+            m = replace(
+                m,
+                _boundaries={
+                    name: np.sort(new_facets[:, ixs].flatten())
+                    for name, ixs in self._boundaries.items()
+                },
+            )
+
+        return m
 
     @classmethod
     def init_tensor(cls: Type,

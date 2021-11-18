@@ -202,13 +202,12 @@ class MeshTri1(MeshSimplex, Mesh2D):
 
         p = self.doflocs
         t = self.t
-        facets = self.facets
         sz = p.shape[1]
         t2f = self.t2f.copy()
 
         m = replace(
             self,
-            doflocs=np.hstack((p, p[:, facets].mean(axis=1))),
+            doflocs=np.hstack((p, p[:, self.facets].mean(axis=1))),
             t=np.hstack((
                 np.vstack((t[0], t2f[0] + sz, t2f[2] + sz)),
                 np.vstack((t[1], t2f[0] + sz, t2f[1] + sz)),
@@ -221,7 +220,7 @@ class MeshTri1(MeshSimplex, Mesh2D):
 
         if self._boundaries is not None:
             # mapping of indices between old and new facets
-            new_facets = np.zeros((2, facets.shape[1]), dtype=np.int64)
+            new_facets = np.zeros((2, self.facets.shape[1]), dtype=np.int64)
             ix0 = np.arange(t.shape[1], dtype=np.int64)
             ix1 = ix0 + t.shape[1]
             ix2 = ix0 + 2 * t.shape[1]
@@ -237,7 +236,7 @@ class MeshTri1(MeshSimplex, Mesh2D):
             m = replace(
                 m,
                 _boundaries={
-                    name: new_facets[:, ixs].flatten()
+                    name: np.sort(new_facets[:, ixs].flatten())
                     for name, ixs in self._boundaries.items()
                 },
             )

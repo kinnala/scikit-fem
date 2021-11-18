@@ -611,3 +611,21 @@ def test_init_refdom(mtype):
     mapping = m._mapping()
     x = mapping.F(m.p)[:, 0, :]
     assert_array_equal(x, m.p)
+
+
+@pytest.mark.parametrize(
+    "mtype",
+    [
+        MeshTri,
+        MeshQuad,
+    ]
+)
+def test_refine_boundaries(mtype):
+
+    m = mtype().with_boundaries({'test': lambda x: x[0] == 0})
+    M1 = m.refined()
+    M2 = mtype().refined().with_boundaries({'test': lambda x: x[0] == 0})
+
+    # check that same facets exist no matter the order of with_boundaries
+    # and refined
+    np.testing.assert_equal(M1.boundaries, M2.boundaries)
