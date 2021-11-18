@@ -643,11 +643,18 @@ class Mesh:
 
         """
         m = self
+        has_boundaries = self.boundaries is not None
+        if self.subdomains is not None:
+            logger.warning("Named subdomains invalidated by a call to "
+                           "Mesh.refined()")
         if isinstance(times_or_ix, int):
             for _ in range(times_or_ix):
                 m = m._uniform()
         else:
             m = m._adaptive(times_or_ix)
+        if has_boundaries and m.boundaries is None:
+            logger.warning("Named boundaries invalidated by a call to "
+                           "Mesh.refined()")
         return m
 
     def scaled(self, factors):
