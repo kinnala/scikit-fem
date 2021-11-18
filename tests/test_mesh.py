@@ -618,13 +618,18 @@ def test_init_refdom(mtype):
     [
         MeshTri,
         MeshQuad,
+        MeshLine,
     ]
 )
 def test_refine_boundaries(mtype):
 
-    m = mtype().with_boundaries({'test': lambda x: x[0] == 0})
+    morig = mtype().refined()
+
+    m = morig.with_boundaries({'test1': lambda x: x[0] == 0,
+                               'test2': lambda x: x[0] == 1})
     M1 = m.refined()
-    M2 = mtype().refined().with_boundaries({'test': lambda x: x[0] == 0})
+    M2 = morig.refined().with_boundaries({'test1': lambda x: x[0] == 0,
+                                          'test2': lambda x: x[0] == 1})
 
     # check that same facets exist no matter the order of with_boundaries
     # and refined

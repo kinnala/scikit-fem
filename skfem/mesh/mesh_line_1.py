@@ -43,7 +43,6 @@ class MeshLine1(MeshSimplex, Mesh):
             self,
             doflocs=newp,
             t=newt,
-            _boundaries=None,
             _subdomains=None,
         )
 
