@@ -420,7 +420,8 @@ class Mesh:
 
         # add boundary tags for the default cubes
         if ((self._boundaries is None
-             and self.doflocs.shape[1] == 2 ** self.dim())):
+             and self.doflocs.shape[1] == 2 ** self.dim()
+             and self.dim() <= 2)):
             boundaries = {}
             # default boundary names along the dimensions
             minnames = ['left', 'bottom', 'front']
