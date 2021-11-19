@@ -260,7 +260,11 @@ class AbstractBasis:
         elif callable(facets):
             return self.mesh.facets_satisfying(facets)
         elif isinstance(facets, str):
-            return self.mesh.boundaries[facets]
+            if ((self.mesh.boundaries is not None
+                 and facets in self.mesh.boundaries)):
+                return self.mesh.boundaries[facets]
+            else:
+                raise ValueError("Boundary '{}' not found.".format(facets))
         raise NotImplementedError
 
     def _get_dofs_normalize_elements(self, elements):
@@ -275,7 +279,11 @@ class AbstractBasis:
                 )
             )
         elif isinstance(elements, str):
-            return self.mesh.subdomains[elements]
+            if ((self.mesh.subdomains is not None
+                 and elements in self.mesh.subdomains)):
+                return self.mesh.subdomains[elements]
+            else:
+                raise ValueError("Subdomain '{}' not found.".format(elements))
         raise NotImplementedError
 
     def __repr__(self):

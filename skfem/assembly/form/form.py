@@ -2,6 +2,7 @@ import logging
 from copy import deepcopy
 from functools import partial
 from typing import Any, Callable, Optional
+from inspect import signature
 
 import numpy as np
 from numpy import ndarray
@@ -47,6 +48,20 @@ class Form:
         form = deepcopy(self)
         name = form.form.__name__
         form.form = partial(form.form, *args, **kwargs)
+        form.form.__name__ = name
+        return form
+
+    def block(self, *args):
+        form = deepcopy(self)
+        name = form.form.__name__
+        sig = signature(form.form)
+        nargs = len(sig.parameters)
+        form.form = lambda *arg: self.form(
+            *[arg[k] if args[k] == j else DiscreteField()
+              for k in range(len(arg) - 1)
+              for j in range(int((nargs - 1) / (len(arg) - 1)))],
+            arg[-1]
+        )
         form.form.__name__ = name
         return form
 

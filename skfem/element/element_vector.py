@@ -5,8 +5,9 @@ from .discrete_field import DiscreteField
 
 class ElementVector(Element):
 
-    def __init__(self, elem):
+    def __init__(self, elem, dim=None):
         self.elem = elem
+        self._dim = elem.dim if dim is None else dim
 
         # multiplicate number of dofs
         self.nodal_dofs = self.elem.nodal_dofs * self.dim
@@ -29,7 +30,7 @@ class ElementVector(Element):
 
     @property
     def dim(self):
-        return self.elem.dim
+        return self._dim
 
     def gbasis(self, mapping, X, i, tind=None):
         """Set correct components to zero based on ``i``."""

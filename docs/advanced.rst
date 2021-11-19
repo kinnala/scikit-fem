@@ -5,6 +5,45 @@ Advanced topics
 This section contains advanced discussions around the features of scikit-fem
 with an aim to develop a more detailed understanding of the library.
 
+Choosing a finite element
+=========================
+
+Here are some instructions for choosing an
+:class:`~skfem.element.Element` class.  Firstly, the naming of the element
+classes reflects their compatibility with the mesh types:
+
+>>> from skfem.element import ElementTriP1
+>>> ElementTriP1.refdom
+<class 'skfem.refdom.RefTri'>
+
+Secondly, the chosen finite element should be compatible with the approximated
+partial differential equation.  Here are some general guidelines:
+
+* Use subclasses of :class:`~skfem.element.ElementH1`, e.g.,
+  :class:`~skfem.element.ElementTriP1`, :class:`~skfem.element.ElementTriP2`,
+  :class:`~skfem.element.ElementQuad2`, :class:`~skfem.element.ElementTetP2` or
+  :class:`~skfem.element.ElementHex2`, for standard second-order problems.
+* Discretize vectorial problems either by manually building the block matrices
+  (e.g., using ``scipy.sparse.bmat``) with scalar elements, or by using
+  :class:`~skfem.element.ElementVector` or
+  :class:`~skfem.element.ElementComposite` that abstract out the creation of
+  the block matrices.
+* Pay special attention to constrained problems, e.g., the Stokes system which
+  may require the use of special elements such as :class:`~skfem.element.ElementTriMini`.
+* Use subclasses of :class:`~skfem.element.ElementHdiv` or
+  :class:`~skfem.element.ElementHcurl`, e.g.,
+  :class:`~skfem.element.ElementTriRT0` or :class:`~skfem.element.ElementTetN0`,
+  for mixed problems with less regular solutions.
+* Use subclasses of :class:`ElementGlobal`, e.g., :class:`ElementTriMorley` or
+  :class:`ElementTriArgyris`, for fourth-order problems or if there are
+  postprocessing requirements, e.g., the need for high-order derivatives.
+
+Thirdly, the finite element should use degrees-of-freedom that are relevant
+for the essential boundary conditions that you want to impose.
+See :ref:`finddofs` for more information.
+
+See the documentation of :mod:`skfem.element` for a list of elements.
+
 .. _forms:
 
 Anatomy of forms
@@ -172,6 +211,7 @@ element mesh of the unit square:
      Number of elements: 2
      Number of vertices: 4
      Number of nodes: 4
+     Named boundaries [# facets]: left [1], bottom [1], right [1], top [1]
    >>> basis = Basis(m, ElementTriP2())
 
 The DOFs corresponding to the nodes (or vertices) of the mesh are

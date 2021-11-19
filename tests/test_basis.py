@@ -62,6 +62,12 @@ class TestCompositeSplitting(TestCase):
 
         self.assertTrue((basis.doflocs[:, D['up'].all()][1] == 1.).all())
 
+        # test blocks splitting of forms while at it
+        C1 = asm(bilinf.block(1, 1), CellBasis(m, ElementTriP1()))
+        C2 = S[basis.nodal_dofs[-1]].T[basis.nodal_dofs[-1]].T
+        self.assertTrue(abs((C1 - C2).min()) < 1e-10)
+        self.assertTrue(abs((C1 - C2).max()) < 1e-10)
+
 
 class TestCompositeFacetAssembly(TestCase):
 

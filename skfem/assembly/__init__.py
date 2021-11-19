@@ -11,6 +11,7 @@ following:
   Number of elements: 2
   Number of vertices: 4
   Number of nodes: 4
+  Named boundaries [# facets]: left [1], bottom [1], right [1], top [1]
 
 2. Create :class:`~skfem.assembly.CellBasis` or
    :class:`~skfem.assembly.BoundaryFacetBasis` objects.

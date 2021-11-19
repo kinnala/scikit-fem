@@ -203,19 +203,45 @@ class MeshTri1(MeshSimplex, Mesh2D):
         p = self.doflocs
         t = self.t
         sz = p.shape[1]
-        t2f = self.t2f.copy() + sz
-        return replace(
+        t2f = self.t2f.copy()
+
+        m = replace(
             self,
             doflocs=np.hstack((p, p[:, self.facets].mean(axis=1))),
             t=np.hstack((
-                np.vstack((t[0], t2f[0], t2f[2])),
-                np.vstack((t[1], t2f[0], t2f[1])),
-                np.vstack((t[2], t2f[2], t2f[1])),
-                np.vstack((t2f[0], t2f[1], t2f[2])),
+                np.vstack((t[0], t2f[0] + sz, t2f[2] + sz)),
+                np.vstack((t[1], t2f[0] + sz, t2f[1] + sz)),
+                np.vstack((t[2], t2f[2] + sz, t2f[1] + sz)),
+                np.vstack((t2f[0] + sz, t2f[1] + sz, t2f[2] + sz)),
             )),
             _boundaries=None,
             _subdomains=None,
         )
+
+        if self._boundaries is not None:
+            # mapping of indices between old and new facets
+            new_facets = np.zeros((2, self.facets.shape[1]), dtype=np.int64)
+            ix0 = np.arange(t.shape[1], dtype=np.int64)
+            ix1 = ix0 + t.shape[1]
+            ix2 = ix0 + 2 * t.shape[1]
+
+            # finish mapping of indices between old and new facets
+            new_facets[0, t2f[2]] = m.t2f[2, ix0]
+            new_facets[0, t2f[1]] = m.t2f[2, ix1]
+            new_facets[0, t2f[0]] = m.t2f[0, ix0]
+            new_facets[1, t2f[2]] = m.t2f[0, ix2]
+            new_facets[1, t2f[1]] = m.t2f[2, ix2]
+            new_facets[1, t2f[0]] = m.t2f[0, ix1]
+
+            m = replace(
+                m,
+                _boundaries={
+                    name: np.sort(new_facets[:, ixs].flatten())
+                    for name, ixs in self._boundaries.items()
+                },
+            )
+
+        return m
 
     @staticmethod
     def _adaptive_sort_mesh(p, t):

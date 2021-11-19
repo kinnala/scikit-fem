@@ -14,7 +14,7 @@ from .element_h1 import ElementH1
 from .element_hdiv import ElementHdiv
 from .element_hcurl import ElementHcurl
 from .element_vector import ElementVector
-from .element_tri import (ElementTriP1, ElementTriP2, ElementTriDG,  # noqa
+from .element_tri import (ElementTriP1, ElementTriP2,  # noqa
                           ElementTriP0, ElementTriRT0, ElementTriMorley,
                           ElementTriArgyris, ElementTriMini, ElementTriCR,
                           ElementTriHermite, ElementTriCCR,
@@ -23,18 +23,19 @@ from .element_tri import (ElementTriP1, ElementTriP2, ElementTriDG,  # noqa
                           ElementTriP4, ElementTri15ParamPlate,
                           ElementTriBDM1)
 from .element_quad import (ElementQuad0, ElementQuad1, ElementQuad2,  # noqa
-                           ElementQuadS2, ElementQuadDG, ElementQuadP,
+                           ElementQuadS2, ElementQuadP,
                            ElementQuadBFS, ElementQuad1DG)
 from .element_tet import (ElementTetP0, ElementTetP1, ElementTetP2,  # noqa
                           ElementTetRT0, ElementTetN0, ElementTetMini,
-                          ElementTetCR, ElementTetDG, ElementTetCCR)
+                          ElementTetCR, ElementTetCCR)
 from .element_hex import (ElementHex0, ElementHex1, ElementHex2,  # noqa
-                          ElementHexS2, ElementHex1DG, ElementHexDG)
+                          ElementHexS2, ElementHex1DG)
 from .element_line import (ElementLineP0, ElementLineP1, ElementLineP2,  # noqa
                            ElementLinePp, ElementLineHermite,
                            ElementLineMini, ElementLineP1DG)
 from .element_wedge_1 import ElementWedge1
 from .element_composite import ElementComposite  # noqa
+from .element_dg import ElementDG
 
 
 BOUNDARY_ELEMENT_MAP: Dict[Type[Element], Type[Element]] = {
@@ -54,6 +55,10 @@ BOUNDARY_ELEMENT_MAP: Dict[Type[Element], Type[Element]] = {
 
 # for backwards compatibility
 ElementVectorH1 = ElementVector
+ElementTriDG = ElementDG
+ElementQuadDG = ElementDG
+ElementHexDG = ElementDG
+ElementTetDG = ElementDG
 
 
 __all__ = [

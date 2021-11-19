@@ -246,10 +246,10 @@ class Mesh:
             if subnames[1] == "s":
                 subdomains[subnames[2]] = np.nonzero(data[0])[0]
             elif subnames[1] == "b":
-                boundaries[subnames[2]] = self.t2f[
+                boundaries[subnames[2]] = np.sort(self.t2f[
                     (1 << np.arange(self.t2f.shape[0]))[:, None]
                     & data[0].astype(np.int64) > 0
-                ]
+                ])
 
         return boundaries, subdomains
 
@@ -418,6 +418,27 @@ class Mesh:
                                "to C_CONTIGUOUS.")
             self.t = np.ascontiguousarray(self.t)
 
+        # add boundary tags for the default cubes
+        if ((self._boundaries is None
+             and self.doflocs.shape[1] == 2 ** self.dim()
+             and self.dim() <= 2)):
+            boundaries = {}
+            # default boundary names along the dimensions
+            minnames = ['left', 'bottom', 'front']
+            maxnames = ['right', 'top', 'back']
+            for d in range(self.doflocs.shape[0]):
+                dmin = np.min(self.doflocs[d])
+                ix = self.facets_satisfying(lambda x: x[d] == dmin)
+                if len(ix) >= 1:
+                    boundaries[minnames[d]] = ix
+            for d in range(self.doflocs.shape[0]):
+                dmax = np.max(self.doflocs[d])
+                ix = self.facets_satisfying(lambda x: x[d] == dmax)
+                if len(ix) >= 1:
+                    boundaries[maxnames[d]] = ix
+            if len(boundaries) > 0:
+                self._boundaries = boundaries
+
         # run validation
         if self.validate and logger.getEffectiveLevel() <= logging.DEBUG:
             self.is_valid()
@@ -434,6 +455,21 @@ class Mesh:
             bool: True if the mesh is valid.
         """
         logger.debug("Running mesh validation.")
+
+        # check that the shape of doflocs and t are correct
+        if self.doflocs.shape[0] != self.elem.refdom.dim():
+            msg = "Mesh.doflocs, the point array, has incorrect shape."
+            if raise_:
+                raise ValueError(msg)
+            logger.debug(msg)
+            return False
+
+        if self.t.shape[0] != self.elem.refdom.nnodes:
+            msg = "Mesh.t, the element connectivity, has incorrect shape."
+            if raise_:
+                raise ValueError(msg)
+            logger.debug(msg)
+            return False
 
         # check that there are no duplicate points
         tmp = np.ascontiguousarray(self.p.T)
@@ -623,11 +659,18 @@ class Mesh:
 
         """
         m = self
+        has_boundaries = self.boundaries is not None
+        if self.subdomains is not None:
+            logger.warning("Named subdomains invalidated by a call to "
+                           "Mesh.refined()")
         if isinstance(times_or_ix, int):
             for _ in range(times_or_ix):
                 m = m._uniform()
         else:
             m = m._adaptive(times_or_ix)
+        if has_boundaries and m.boundaries is None:
+            logger.warning("Named boundaries invalidated by a call to "
+                           "Mesh.refined()")
         return m
 
     def scaled(self, factors):

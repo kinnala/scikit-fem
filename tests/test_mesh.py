@@ -453,8 +453,10 @@ def test_meshio_cycle(m):
     M = from_meshio(to_meshio(m))
     assert_array_equal(M.p, m.p)
     assert_array_equal(M.t, m.t)
-    assert m.boundaries == M.boundaries
-    assert m.subdomains == M.subdomains
+    if m.boundaries is not None:
+        np.testing.assert_equal(m.boundaries, M.boundaries)
+    if m.subdomains is not None:
+        np.testing.assert_equal(m.subdomains, M.subdomains)
 
 
 _test_lambda = {
@@ -609,3 +611,26 @@ def test_init_refdom(mtype):
     mapping = m._mapping()
     x = mapping.F(m.p)[:, 0, :]
     assert_array_equal(x, m.p)
+
+
+@pytest.mark.parametrize(
+    "mtype",
+    [
+        MeshTri,
+        MeshQuad,
+        MeshLine,
+    ]
+)
+def test_refine_boundaries(mtype):
+
+    morig = mtype().refined()
+
+    m = morig.with_boundaries({'test1': lambda x: x[0] == 0,
+                               'test2': lambda x: x[0] == 1})
+    M1 = m.refined()
+    M2 = morig.refined().with_boundaries({'test1': lambda x: x[0] == 0,
+                                          'test2': lambda x: x[0] == 1})
+
+    # check that same facets exist no matter the order of with_boundaries
+    # and refined
+    np.testing.assert_equal(M1.boundaries, M2.boundaries)
