@@ -1,3 +1,4 @@
+# mypy: ignore-errors
 legacy = False
 try:
     # Python 3.8+
