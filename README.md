@@ -163,9 +163,9 @@ The minimal dependencies for installing `scikit-fem` are
 many
 [examples](https://scikit-fem.readthedocs.io/en/latest/listofexamples.html) use
 [matplotlib](https://matplotlib.org/) for visualization and
-[meshio](https://github.com/nschloe/meshio) for loading external formats.  Some
-examples demonstrate the use of other external packages; see `requirements.txt`
-for a list of test dependencies.
+[meshio](https://github.com/nschloe/meshio) for loading/saving different mesh
+file formats.  Some examples demonstrate the use of other external packages;
+see `requirements.txt` for a list of test dependencies.
 
 ## Testing
 
