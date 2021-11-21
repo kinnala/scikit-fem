@@ -14,7 +14,7 @@ Abstract class: Mesh
 --------------------
 
 .. autoclass:: skfem.mesh.Mesh
-   :members: load, save, refined, element_finder, doflocs, t
+   :members: load, save, refined, facets_satisfying, nodes_satisfying, elements_satisfying
 
 Class: MeshTri
 **************
@@ -76,6 +76,9 @@ Abstract class: AbstractBasis
 Subclasses of :class:`~skfem.assembly.basis.AbstractBasis` represent a global
 finite element basis evaluated at quadrature points.
 
+.. autoclass:: skfem.assembly.basis.AbstractBasis
+   :members: get_dofs
+
 Class: CellBasis
 ****************
 
@@ -91,7 +94,7 @@ Class: BoundaryFacetBasis
 .. autoclass:: skfem.assembly.FacetBasis
 
 .. autoclass:: skfem.assembly.BoundaryFacetBasis
-   :members: __init__, trace
+   :members: __init__
 
 Class: InteriorFacetBasis
 *************************

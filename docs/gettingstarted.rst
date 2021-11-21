@@ -7,10 +7,8 @@
 This tutorial introduces you to scikit-fem.
 It assumes that you are familiar with the basics of the finite element method.
 
-Step 0: Install scikit-fem
-==========================
-
-If you have a supported Python installation on your computer, you can run
+If you have a supported Python installation on your computer, you can
+install the package via
 
 .. code-block:: bash
 
@@ -76,7 +74,7 @@ decorated as follows:
 Step 3: Create a mesh
 =====================
 
-The default constructors of :class:`~skfem.mesh.Mesh` classes initialize a
+The default constructors of :class:`~skfem.mesh.Mesh` initialize a
 unit square:
 
 .. doctest::
@@ -105,7 +103,8 @@ Step 5: Assemble the linear system
 ==================================
 
 Now everything is in place for the finite element assembly.
-The resulting matrices have the type ``scipy.sparse.csr_matrix``.
+The resulting matrix has the type ``scipy.sparse.csr_matrix``
+and the load vector has the type ``ndarray``.
 
 .. doctest::
 
@@ -119,10 +118,9 @@ The resulting matrices have the type ``scipy.sparse.csr_matrix``.
 Step 6: Find boundary DOFs
 ==========================
 
-Setting boundary conditions requires finding the rows and columns of :math:`A`
-that match the degrees-of-freedom (DOFs) on the boundary.  By default,
-:meth:`~skfem.assembly.CellBasis.get_dofs` with empty parameters matches all
-boundary facets and finds the corresponding DOFs.
+Setting boundary conditions requires finding the degrees-of-freedom (DOFs) on
+the boundary.  Empty call to
+:meth:`~skfem.assembly.basis.AbstractBasis.get_dofs` matches all boundary DOFs.
 
 .. doctest::
 
@@ -131,39 +129,25 @@ boundary facets and finds the corresponding DOFs.
    array([ 0,  1,  2,  3,  4,  5,  7,  8,  9, 10, 11, 13, 14, 16, 17, 18, 25,
           26, 27, 29, 30, 32, 33, 34, 35, 36, 39, 40, 49, 50, 53, 54])
 
-Step 7: Eliminate boundary DOFs
-===============================
+Step 7: Eliminate boundary DOFs and solve
+=========================================
 
 The boundary DOFs must be eliminated from the linear system :math:`Ax=l`
 to set :math:`u=0` on the boundary.
 This can be done using :func:`~skfem.utils.condense`.
+The output can be passed to :func:`~skfem.utils.solve`
+which is a simple wrapper to ``scipy`` sparse solver:
 
 .. doctest::
 
-   >>> system = fem.condense(A, l, D=D)
-   >>> system[0].shape
-   (49, 49)
-   >>> system[1].shape
-   (49,)
-
-Step 8: Solve the linear system
-===============================
-
-The condensed linear system can be solved via a call to :func:`~skfem.utils.solve`
-which is a simple wrapper to routines in ``scipy.sparse.linalg``.
-The result is automatically expanded to match the size of the original system.
-
-.. doctest::
-
-   >>> x = fem.solve(*system)
+   >>> x = fem.solve(*fem.condense(A, l, D=D))
    >>> x.shape
    (81,)
 
-
-Step 9: Calculate error
+Step 8: Calculate error
 =======================
 
-In this case the exact solution is known to be
+The exact solution is known to be
 
 .. math::
 
