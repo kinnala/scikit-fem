@@ -19,26 +19,9 @@ the boundary.  Currently the main tool for finding DOFs is
    >>> m = MeshTri().refined(2)
    >>> basis = Basis(m, ElementTriP2())
 
-We first find the set of facets belonging to the left boundary.
-
-.. doctest::
-
-   >>> m.facets_satisfying(lambda x: x[0] == 0.)
-   array([ 1,  5, 14, 15])
-
-Next we supply the array of facet indices to
-:meth:`~skfem.assembly.basis.AbstractBasis.get_dofs`.
-
-.. doctest::
-
-   >>> dofs = basis.get_dofs(m.facets_satisfying(lambda x: x[0] == 0.))
-   >>> dofs.nodal
-   {'u': array([ 0,  2,  5, 10, 14])}
-   >>> dofs.facet
-   {'u': array([26, 30, 39, 40])}
-
-The function can be provided directly to :meth:`~skfem.assembly.basis.AbstractBasis.get_dofs` and it will call :meth:`~skfem.mesh.Mesh.facets_satisfying`
-for us:
+We can provide an indicator function to
+:meth:`~skfem.assembly.basis.AbstractBasis.get_dofs` and it will call
+:meth:`~skfem.mesh.Mesh.facets_satisfying` and find the corresponding DOFs:
 
 .. doctest::
 
@@ -114,9 +97,8 @@ function :math:`\widetilde{u_0} \in V_h` which satisfies
 
 .. math::
 
-   \int_{\partial \Omega} \widetilde{u_0} v\,\mathrm{d}s = \int_{\partial \Omega} u_0 v\,\mathrm{d}s\quad \forall v \in V_h,
+   \int_{\partial \Omega} \widetilde{u_0} v\,\mathrm{d}s = \int_{\partial \Omega} u_0 v\,\mathrm{d}s\quad \forall v \in V_h.
 
-and which is zero in all DOFs inside the domain.
 Below we solve explicitly the above variational problem:
 
 .. doctest::
@@ -148,7 +130,7 @@ the same thing:
 Assembling jump terms
 =====================
 
-The shorthand :func:`skfem.assembly.asm`
+The shorthand :func:`~skfem.assembly.asm`
 supports special syntax for assembling the same form over a list or lists of
 bases and summing the result.  Consider the form
 
