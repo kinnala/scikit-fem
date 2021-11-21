@@ -1,12 +1,14 @@
 """Drawing meshes using svg."""
 
+import webbrowser
 from functools import singledispatch
 from dataclasses import dataclass
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
 import numpy as np
 from numpy import ndarray
 
-from ..assembly import InteriorBasis
+from ..assembly import CellBasis
 from ..mesh import Mesh2D
 
 
@@ -29,6 +31,15 @@ def points_to_figure(p, kwargs):
     return p, width, height, stroke
 
 
+class Server(BaseHTTPRequestHandler):
+
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.end_headers()
+        self.wfile.write(self.svg.encode("utf8"))
+
+
 @dataclass
 class SvgPlot:
 
@@ -36,6 +47,14 @@ class SvgPlot:
 
     def _repr_svg_(self) -> str:
         return self.svg
+
+    def show(self, port=8000):
+        server = Server
+        server.svg = self.svg
+        url = "http://localhost:{}".format(port)
+        print("Serving the plot at " + url)
+        webbrowser.open_new_tab(url)
+        HTTPServer(("localhost", port), Server).handle_request()
 
 
 @singledispatch
@@ -81,13 +100,13 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> SvgPlot:
 
 @draw.register(Mesh2D)
 def draw_geometry2d(m: Mesh2D, **kwargs) -> SvgPlot:
-    nrefs = kwargs["nrefs"] if "nrefs" in kwargs else 1
+    nrefs = kwargs["nrefs"] if "nrefs" in kwargs else 0
     m = m._splitref(nrefs)
     return draw_mesh2d(m, **kwargs)
 
 
-@draw.register(InteriorBasis)
-def draw_basis(ib: InteriorBasis, **kwargs) -> SvgPlot:
+@draw.register(CellBasis)
+def draw_basis(ib: CellBasis, **kwargs) -> SvgPlot:
     nrefs = kwargs["nrefs"] if "nrefs" in kwargs else 2
     m, _ = ib.refinterp(ib.mesh.p[0], nrefs=nrefs)
     return draw(m, boundaries_only=True, **kwargs)
@@ -138,8 +157,8 @@ def plot_mesh2d(m: Mesh2D, x: ndarray, **kwargs) -> SvgPlot:
              elems))
 
 
-@plot.register(InteriorBasis)
-def plot_basis(ib: InteriorBasis, x: ndarray, **kwargs) -> SvgPlot:
+@plot.register(CellBasis)
+def plot_basis(ib: CellBasis, x: ndarray, **kwargs) -> SvgPlot:
     nrefs = kwargs["nrefs"] if "nrefs" in kwargs else 0
     m, X = ib.refinterp(x, nrefs=nrefs)
     return plot(m, X, **kwargs)

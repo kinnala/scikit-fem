@@ -39,6 +39,7 @@ def draw_meshtet(m: MeshTet1, **kwargs) -> Axes:
     ax.plot_trisurf(m.p[0], m.p[1], m.p[2],
                     triangles=indexing, cmap=plt.cm.viridis, edgecolor='k')
     ax.set_axis_off()
+    ax.show = lambda: plt.show()
     return ax
 
 
@@ -118,6 +119,7 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> Axes:
         for itr in range(m.t.shape[1]):
             ax.text(mx[itr], my[itr], str(itr))
 
+    ax.show = lambda: plt.show()
     return ax
 
 
@@ -141,6 +143,7 @@ def plot_meshline(m: MeshLine1, z: ndarray, **kwargs):
     ix = np.argsort(m.p[0])
     ax.plot(m.p[0][ix], z[ix], color)
 
+    ax.show = lambda: plt.show()
     return ax
 
 
@@ -194,6 +197,8 @@ def plot_meshtri(m: MeshTri1, z: ndarray, **kwargs) -> Axes:
 
     if "colorbar" in kwargs:
         plt.colorbar(im)
+
+    ax.show = lambda: plt.show()
     return ax
 
 
@@ -255,6 +260,7 @@ def plot3_meshtri(m: MeshTri1, z: ndarray, **kwargs) -> Axes:
                     cmap=plt.cm.viridis,
                     antialiased=False)
 
+    ax.show = lambda: plt.show()
     return ax
 
 
