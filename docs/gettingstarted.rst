@@ -12,14 +12,14 @@ install the package via
 
 .. code-block:: bash
 
-   pip install scikit-fem
+   pip install scikit-fem[all]
 
 You can also try `Google Colab <https://colab.research.google.com/>`_ in your
 web browser and install scikit-fem by executing
 
 .. code-block:: bash
 
-   !pip install scikit-fem
+   !pip install scikit-fem[all]
 
 Step 1: Clarify the problem
 ===========================

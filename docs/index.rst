@@ -15,7 +15,7 @@ hexahedral meshes as well as one-dimensional problems.
 
     .. code-block:: bash
 
-        pip install scikit-fem
+        pip install scikit-fem[all]
 
     Examples can be found in the `gallery <listofexamples.html>`_.
 

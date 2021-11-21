@@ -44,19 +44,16 @@ from skfem.helpers import dot, grad
 
 # create the mesh
 m = MeshTri().refined(4)
-# or, with your own points and cells:
-# m = MeshTri(points, cells)
+# or, with your own points and elements:
+# m = MeshTri(points, elements)
 
 e = ElementTriP1()
 basis = Basis(m, e)  # shorthand for CellBasis
 
-# can also be imported from skfem.models.laplace
 @BilinearForm
 def laplace(u, v, _):
     return dot(grad(u), grad(v))
 
-
-# can also be imported from skfem.models.unit_load
 @LinearForm
 def rhs(v, _):
     return 1.0 * v
@@ -94,7 +91,7 @@ mesh = MeshTri(
               [0., 1.]]).T,
     np.array([[0, 1, 2]]).T,
 )
-mesh = MeshTri.load("docs/examples/meshes/square.msh")
+mesh = MeshTri.load("docs/examples/meshes/square.msh")  # requires meshio
 mesh = MeshTet.init_tensor(*((np.linspace(0, 1, 60),) * 3))
 ```
 
@@ -152,8 +149,8 @@ you can use the GitHub Discussions to [ask questions](https://github.com/kinnala
 Try to provide a snippet of code which fails
 and include also the version of the library you are
 using.  The version can be found as follows:
-```
-python -c "import pkg_resources; print(pkg_resources.get_distribution('scikit-fem').version)"
+```python
+import skfem; print(skfem.__version__)
 ```
 
 ## Dependencies
@@ -228,15 +225,22 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
-- Added: `asm` will now include the extra parameter `idx` in `FormExtraParams`
-  that can be used to identify which basis is being assembled
-- Added: All basis class constructors now accept `dofs` keyword argument for
-  specifying custom `Dofs` object to be used in the assembly
-- Added: `Dofs` constructor accepts the `offset` keyword argument for
-  specifying a nonzero initial index for indexing the DOFs
-- Added: `Mesh.smoothed` for simple Laplacian smoothing of the mesh
+### [5.0.0] - 2021-11-21
+
+- Changed: `meshio` is now an optional dependency
+- Changed: `ElementComposite` uses `DiscreteField()` to represent zero
+- Changed: Better string `__repr__` for `Basis` and `DofsView`
+- Added: Support more argument types in `Basis.get_dofs`
+- Added: Version information in `skfem.__version__`
+- Added: Preserve `Mesh.boundaries` during uniform refinement of `MeshLine1`,
+  `MeshTri1` and `MeshQuad1`
+- Fixed: Refinement of quadratic meshes will now fall back to the refinement
+  algorithm of first-order meshes instead of crashing
 - Fixed: Edge cases in the adaptive refine of `MeshTet1` that failed to produce
   a valid mesh
+- Deprecated: `Basis.find_dofs` in favor of `Basis.get_dofs`
+- Deprecated: Merging `DofsView` objects via `+` and `|` in favor of using
+  `np.hstack`
 
 ### [4.0.1] - 2021-10-15
 
@@ -247,13 +251,14 @@ with respect to documented and/or tested features.
 - Added: `Mesh.save`/`Mesh.load` now exports/imports `Mesh.subdomains` and
   `Mesh.boundaries`
 - Added: `Mesh.load` now optionally writes any mesh data to a list passed via
-  the keyword argument `out`
-- Added: `Mesh.save` (and `skfem.io.meshio.from_file`) now supports the
+  the keyword argument `out`, e.g., `out=data` where `data = ['point_data']`
+- Added: `Mesh.load` (and `skfem.io.meshio.from_file`) now supports the
   additional keyword argument `force_meshio_type` for loading mesh files that
   have multiple element types written in the same file, one element type at
   a time
 - Added: `asm` will now accept a list of bases, assemble the same form using
-  all of the bases and sum the result (useful for jump terms and mixed meshes, see Example 41)
+  all of the bases and sum the result (useful for jump terms and mixed meshes,
+  see Example 41)
 - Added: `Mesh.with_boundaries` now allows the definition of internal boundaries/interfaces
   via the flag `boundaries_only=False`
 - Added: `MeshTri1DG`, `MeshQuad1DG`, `MeshHex1DG`, `MeshLine1DG`; new mesh
