@@ -159,12 +159,13 @@ python -c "import pkg_resources; print(pkg_resources.get_distribution('scikit-fe
 ## Dependencies
 
 The minimal dependencies for installing `scikit-fem` are
-[numpy](https://numpy.org/), [scipy](https://www.scipy.org/) and
-[meshio](https://github.com/nschloe/meshio).  In addition, many
+[numpy](https://numpy.org/) and [scipy](https://www.scipy.org/).  In addition,
+many
 [examples](https://scikit-fem.readthedocs.io/en/latest/listofexamples.html) use
-[matplotlib](https://matplotlib.org/) for visualization.  Some examples
-demonstrate the use of other external packages; see `requirements.txt` for a
-list of test dependencies.
+[matplotlib](https://matplotlib.org/) for visualization and
+[meshio](https://github.com/nschloe/meshio) for loading external formats.  Some
+examples demonstrate the use of other external packages; see `requirements.txt`
+for a list of test dependencies.
 
 ## Testing
 
