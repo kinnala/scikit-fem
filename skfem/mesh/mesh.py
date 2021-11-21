@@ -1,4 +1,5 @@
 import logging
+import importlib
 
 from dataclasses import dataclass, replace
 from typing import Callable, Dict, List, Optional, Tuple, Type, Union
@@ -906,5 +907,10 @@ class Mesh:
 
     def draw(self, *args, **kwargs):
         """Convenience wrapper for vedo."""
-        from skfem.visuals.vedo import draw
-        return draw(self, *args, **kwargs)
+        if 'visuals' in kwargs:
+            visuals = kwargs['visuals']
+            del kwargs['visuals']
+        else:
+            visuals = 'vedo'
+        mod = importlib.import_module('skfem.visuals.{}'.format(visuals))
+        return mod.draw(self, *args, **kwargs)
