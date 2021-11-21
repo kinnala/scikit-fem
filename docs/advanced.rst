@@ -5,45 +5,6 @@ Advanced topics
 This section contains advanced discussions around the features of scikit-fem
 with an aim to develop a more detailed understanding of the library.
 
-Choosing a finite element
-=========================
-
-Here are some instructions for choosing an
-:class:`~skfem.element.Element` class.  Firstly, the naming of the element
-classes reflects their compatibility with the mesh types:
-
->>> from skfem.element import ElementTriP1
->>> ElementTriP1.refdom
-<class 'skfem.refdom.RefTri'>
-
-Secondly, the chosen finite element should be compatible with the approximated
-partial differential equation.  Here are some general guidelines:
-
-* Use subclasses of :class:`~skfem.element.ElementH1`, e.g.,
-  :class:`~skfem.element.ElementTriP1`, :class:`~skfem.element.ElementTriP2`,
-  :class:`~skfem.element.ElementQuad2`, :class:`~skfem.element.ElementTetP2` or
-  :class:`~skfem.element.ElementHex2`, for standard second-order problems.
-* Discretize vectorial problems either by manually building the block matrices
-  (e.g., using ``scipy.sparse.bmat``) with scalar elements, or by using
-  :class:`~skfem.element.ElementVector` or
-  :class:`~skfem.element.ElementComposite` that abstract out the creation of
-  the block matrices.
-* Pay special attention to constrained problems, e.g., the Stokes system which
-  may require the use of special elements such as :class:`~skfem.element.ElementTriMini`.
-* Use subclasses of :class:`~skfem.element.ElementHdiv` or
-  :class:`~skfem.element.ElementHcurl`, e.g.,
-  :class:`~skfem.element.ElementTriRT0` or :class:`~skfem.element.ElementTetN0`,
-  for mixed problems with less regular solutions.
-* Use subclasses of :class:`ElementGlobal`, e.g., :class:`ElementTriMorley` or
-  :class:`ElementTriArgyris`, for fourth-order problems or if there are
-  postprocessing requirements, e.g., the need for high-order derivatives.
-
-Thirdly, the finite element should use degrees-of-freedom that are relevant
-for the essential boundary conditions that you want to impose.
-See :ref:`finddofs` for more information.
-
-See the documentation of :mod:`skfem.element` for a list of elements.
-
 .. _forms:
 
 Anatomy of forms
@@ -107,12 +68,8 @@ which can be written as
    ... def loading(v, w):
    ...    return dot(w.n, v)
 
-The helper functions such as ``dot`` are discussed further in :ref:`helpers`.
+The helper functions such as ``dot`` are discussed further below.
 
-.. _formsreturn:
-
-Forms return NumPy arrays
--------------------------
 
 The form definition always returns a two-dimensional NumPy array.  This can be
 verified using the Python debugger:
@@ -143,11 +100,6 @@ Notice how ``dot(grad(u), grad(v))`` is a NumPy array with the shape `number of
 elements` x `number of quadrature points per element`.  The return value should
 always have such shape no matter which mesh or element type is used.
 
-.. _helpers:
-
-Helpers are useful but not necessary
-------------------------------------
-
 The module :mod:`skfem.helpers` contains functions that make the forms more
 readable.  An alternative way to write the above form is
 
@@ -165,7 +117,7 @@ readable.  An alternative way to write the above form is
     some additional magic such as implementing ``__array__`` and ``__mul__`` so
     that expressions such as ``u * v`` work as expected).
 
-Notice how the shape of ``u[0]`` is what we expect also from the return value as discussed in :ref:`formsreturn`:
+Notice how the shape of ``u[0]`` is what we expect also from the return value:
 
 .. code-block:: none
 

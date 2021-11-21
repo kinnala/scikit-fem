@@ -148,6 +148,7 @@ if __name__ == '__main__':
     fig, ax = subplots()
     ax.set_title('transverse temperature profiles')
 
+    dofs = basis['heat'].get_dofs(mesh.boundaries)
     y = {label: mesh.p[1, d.nodal['u']] for label, d in dofs.items()}
     ii = {label: np.argsort(yy) for label, yy in y.items()}
 
