@@ -27,8 +27,12 @@ Features:
 
 The most recent release can be installed simply by
 ```
-pip install scikit-fem
+pip install scikit-fem[all]
 ```
+Specifying `[all]` includes `meshio` for loading
+and saving to external formats,
+and `matplotlib` for visualization.
+The minimal dependencies are `numpy` and `scipy`.
 You can also try the library in browser through [Google Colab](https://colab.research.google.com/github/kinnala/scikit-fem-notebooks/blob/master/ex1.ipynb).
 
 ## Examples
@@ -155,12 +159,13 @@ python -c "import pkg_resources; print(pkg_resources.get_distribution('scikit-fe
 ## Dependencies
 
 The minimal dependencies for installing `scikit-fem` are
-[numpy](https://numpy.org/), [scipy](https://www.scipy.org/) and
-[meshio](https://github.com/nschloe/meshio).  In addition, many
+[numpy](https://numpy.org/) and [scipy](https://www.scipy.org/).  In addition,
+many
 [examples](https://scikit-fem.readthedocs.io/en/latest/listofexamples.html) use
-[matplotlib](https://matplotlib.org/) for visualization.  Some examples
-demonstrate the use of other external packages; see `requirements.txt` for a
-list of test dependencies.
+[matplotlib](https://matplotlib.org/) for visualization and
+[meshio](https://github.com/nschloe/meshio) for loading/saving different mesh
+file formats.  Some examples demonstrate the use of other external packages;
+see `requirements.txt` for a list of test dependencies.
 
 ## Testing
 
