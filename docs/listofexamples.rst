@@ -500,9 +500,9 @@ gradient and a transverse profile.
    This example requires the external package
    `pygmsh <https://pypi.org/project/pygmsh/>`__.
 
-.. figure:: https://user-images.githubusercontent.com/973268/87859005-c0505e00-c93a-11ea-9a78-72603edc242a.png
+.. figure:: https://user-images.githubusercontent.com/973268/142778186-99d8e02e-d02e-4b54-ac09-53bda0591dac.png
 
-   The solution of Example 28.
+   A comparison of inlet and outlet temperature profiles in Example 28.
 
 See the `source code of Example 28 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex28.py>`_ for more information.
 
