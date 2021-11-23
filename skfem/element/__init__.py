@@ -69,6 +69,7 @@ __all__ = [
     "ElementVectorH1",
     "ElementHdiv",
     "ElementHcurl",
+    "ElementDG",
     "ElementComposite",
     "ElementTriP1",
     "ElementTriP2",

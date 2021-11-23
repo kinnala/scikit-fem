@@ -225,6 +225,8 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+- Fixed: `ElementDG` was not included in the wildcard import
+
 ### [5.0.0] - 2021-11-21
 
 - Changed: `meshio` is now an optional dependency
