@@ -142,7 +142,7 @@ def mul(A: FieldOrArray, x: FieldOrArray):
         return A
     if isinstance(x, DiscreteField) and x.is_zero():
         return x
-    return np.einsum('ij...,j...->i...', A, b)
+    return np.einsum('ij...,j...->i...', A, x)
 
 
 def trace(T):
