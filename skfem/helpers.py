@@ -136,6 +136,15 @@ def prod(u: FieldOrArray,
     return np.einsum('i...,j...,k...->ijk...', u, v, w)
 
 
+def mul(A: FieldOrArray, x: FieldOrArray):
+    """Matrix multiplication."""
+    if isinstance(A, DiscreteField) and A.is_zero():
+        return A
+    if isinstance(x, DiscreteField) and x.is_zero():
+        return x
+    return np.einsum('ij...,j...->i...', A, x)
+
+
 def trace(T):
     """Trace of matrix."""
     return np.einsum('ii...', T)

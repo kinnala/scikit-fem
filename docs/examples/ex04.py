@@ -54,7 +54,7 @@ This is a nonlinear problem since we do not know a priori which subset
 from skfem import *
 from skfem.models.elasticity import (linear_elasticity, lame_parameters,
                                      linear_stress)
-from skfem.helpers import dot, ddot, prod, sym_grad, jump
+from skfem.helpers import dot, ddot, prod, sym_grad, jump, mul
 import numpy as np
 from skfem.io import from_meshio
 from skfem.io.json import from_file, to_file
@@ -110,9 +110,8 @@ limit = 0.3
 def bilin_mortar(u, v, w):
     # jumps
     ju, jv = jump(w, dot(u, w.n), dot(v, w.n))
-    nxn = prod(w.n, w.n)
-    mu = .5 * ddot(nxn, C(sym_grad(u)))
-    mv = .5 * ddot(nxn, C(sym_grad(v)))
+    mu = .5 * dot(w.n, mul(C(sym_grad(u)), w.n))
+    mv = .5 * dot(w.n, mul(C(sym_grad(v)), w.n))
     return ((1. / (alpha * w.h) * ju * jv - mu * jv - mv * ju)
             * (np.abs(w.x[1]) <= limit))
 
