@@ -7,3 +7,7 @@ class Mesh2D2:
 
     def element_finder(self, *args, **kwargs):
         raise NotImplementedError
+
+    @classmethod
+    def init_refdom(cls):
+        return cls.__bases__[-1].init_refdom()

@@ -649,6 +649,15 @@ class Mesh:
         """Initialize a mesh corresponding to the reference domain."""
         return cls(cls.elem.refdom.p, cls.elem.refdom.t, validate=False)
 
+    def morphed(self, *args):
+        """Morph the mesh using functions."""
+        p = self.p.copy()
+        for i, arg in enumerate(args):
+            if arg is None:
+                continue
+            p[i] = arg(self.p)
+        return replace(self, doflocs=p)
+
     def refined(self, times_or_ix: Union[int, ndarray] = 1):
         """Return a refined mesh.
 
