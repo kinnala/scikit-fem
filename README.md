@@ -225,6 +225,8 @@ with respect to documented and/or tested features.
 ### Unreleased
 
 - Fixed: `ElementDG` was not included in the wildcard import
+- Fixed: Automatic visualization of `MeshTri2` and `MeshQuad2` in Jupyter
+  notebooks raised exception
 
 ### [5.0.0] - 2021-11-21
 
