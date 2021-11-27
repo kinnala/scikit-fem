@@ -74,6 +74,8 @@ decorated as follows:
    ...     f = np.sin(np.pi * x) * np.sin(np.pi * y)
    ...     return f * v
 
+For more information see :ref:`forms`.
+
 Step 3: Create a mesh
 =====================
 
@@ -101,6 +103,11 @@ Here we choose the piecewise-linear basis:
 .. doctest::
 
    >>> Vh = fem.Basis(mesh, fem.ElementTriP1())
+   >>> Vh
+   <skfem CellBasis(MeshTri1, ElementTriP1) object>
+     Number of elements: 128
+     Number of DOFs: 81
+     Size: 27648 B
 
 Step 5: Assemble the linear system
 ==================================
@@ -128,9 +135,9 @@ the boundary.  Empty call to
 .. doctest::
 
    >>> D = Vh.get_dofs()
-   >>> D.flatten()
-   array([ 0,  1,  2,  3,  4,  5,  7,  8,  9, 10, 11, 13, 14, 16, 17, 18, 25,
-          26, 27, 29, 30, 32, 33, 34, 35, 36, 39, 40, 49, 50, 53, 54])
+   >>> D
+   <skfem DofsView(MeshTri1, ElementTriP1) object>
+     Number of nodal DOFs: 32 ['u']
 
 Step 7: Eliminate boundary DOFs and solve
 =========================================

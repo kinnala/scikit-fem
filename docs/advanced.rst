@@ -143,11 +143,18 @@ Indexing of the degrees-of-freedom
 
 .. warning::
 
-   This section contains lower level details on the order of the DOFs.
+   This section contains details on the order of the DOFs.
    Read this only if you did not find an answer in :ref:`finddofs`.
 
-The DOFs are ordered automatically based on the mesh and the element
-type.  It is possible to investigate manually how the DOFs match the different
+After finite element assembly we have the linear system
+
+.. math::
+
+   Ax = b.
+
+What is the order of the unknowns in the vector :math:`x`?
+The DOFs are ordered automatically based on the mesh and the element type.  It
+is possible to investigate manually how the DOFs match the different
 topological entities (`nodes`, `facets`, `edges`, `elements`) of the mesh.
 
 .. note::
@@ -187,7 +194,8 @@ This means that the first (zeroth) entry in the DOF array corresponds to the
 first node/vertex in the finite element mesh (see ``m.p`` for a list of
 nodes/vertices).
 
-Similarly, the DOFs corresponding to the edges and the facets of the mesh are
+Similarly, the DOFs corresponding to the edges (``m.edges``) and the facets
+(``m.facets``) of the mesh are
 
 .. doctest::
 
@@ -196,9 +204,9 @@ Similarly, the DOFs corresponding to the edges and the facets of the mesh are
    >>> basis.facet_dofs
    array([[20, 21, 22, 23, 24, 25]])
 
-In more refined meshes ``nodal_dofs``, ``edge_dofs`` and ``facet_dofs``
-are possibly shared between neighbouring elements to preserve continuity.
-The remaining DOF is internal to the element and never shared:
+All DOFs in ``nodal_dofs``, ``edge_dofs`` and ``facet_dofs``
+are shared between neighbouring elements to preserve continuity.
+The remaining DOF is internal to the element and not shared:
 
 .. doctest::
 
