@@ -90,11 +90,11 @@ See :ref:`dofindexing` for more detailed information.
 Creating discrete functions via projection
 ==========================================
 
-We can use :math:`L^2` projection to turn functions with an explicit expression
-to finite element functions.  Suppose we have :math:`u_0(x,y) = x^3 y^3`
+We can use :math:`L^2` projection to find discrete counterparts of functions
+with an explicit expression.  Suppose we have :math:`u_0(x,y) = x^3 y^3`
 defined on the boundary of the domain and want to find the corresponding
-discrete function.  We can solve for :math:`\widetilde{u_0} \in
-\mathrm{tr}\,V_h` which satisfies
+discrete function which is extended by zero in the interior of the domain.  We
+can solve for :math:`\widetilde{u_0} \in \mathrm{tr}\,V_h` which satisfies
 
 .. math::
 
@@ -152,7 +152,7 @@ find :math:`u_{k+1} \in H^1_0(\Omega)` which satisfies
    \int_\Omega (u_{k} + 1) \nabla u_{k+1} \cdot \nabla v \,\mathrm{d}x = \int_\Omega v\,\mathrm{d}x
 
 for every :math:`v \in H^1_0(\Omega)`.
-The previous solution :math:`u_k` is used inside the bilinear form.
+Note how the bilinear form depends on the previous solution :math:`u_k`.
 The argument ``w`` is used to define such forms:
 
 .. doctest::

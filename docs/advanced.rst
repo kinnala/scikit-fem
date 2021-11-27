@@ -56,6 +56,13 @@ This can be written as
    ... def loading(v, w):
    ...    return np.sin(np.pi * w.x[0]) * np.sin(np.pi * w.x[1]) * v
 
+.. note::
+
+   The last argument ``w`` is a dictionary of
+   :class:`~skfem.element.DiscreteField` objects.  Its ``_getattr_`` is
+   overridden so that ``w.x`` corresponds to ``w['x'].value``.  Some keys are
+   populated by default, e.g., ``w.x`` are the global quadrature points.
+
 In addition, forms can depend on the local mesh parameter ``w.h`` or other
 finite element functions (see :ref:`predefined`).  Moreover, boundary forms
 assembled using :class:`~skfem.assembly.BoundaryFacetBasis` can depend on the
@@ -194,8 +201,8 @@ This means that the first (zeroth) entry in the DOF array corresponds to the
 first node/vertex in the finite element mesh (see ``m.p`` for a list of
 nodes/vertices).
 
-Similarly, the DOFs corresponding to the edges (``m.edges``) and the facets
-(``m.facets``) of the mesh are
+Similarly, the DOFs corresponding to the edges (``m.edges`` for a list of
+edges) and the facets (``m.facets`` for a list of facets) of the mesh are
 
 .. doctest::
 
@@ -206,7 +213,7 @@ Similarly, the DOFs corresponding to the edges (``m.edges``) and the facets
 
 All DOFs in ``nodal_dofs``, ``edge_dofs`` and ``facet_dofs``
 are shared between neighbouring elements to preserve continuity.
-The remaining DOF is internal to the element and not shared:
+The remaining DOFs are internal to the element and not shared:
 
 .. doctest::
 
