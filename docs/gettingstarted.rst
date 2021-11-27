@@ -4,9 +4,6 @@
  Getting started
 =================
 
-This tutorial introduces you to scikit-fem.
-It assumes that you are familiar with the basics of the finite element method.
-
 If you have a supported Python installation on your computer, you can
 install the package via
 
@@ -24,7 +21,7 @@ web browser and install scikit-fem by executing
 Step 1: Clarify the problem
 ===========================
 
-In this tutorial we solve the Poisson equation
+In this tutorial we solve the Poisson problem
 
 .. math::
    \begin{aligned}
@@ -35,12 +32,18 @@ In this tutorial we solve the Poisson equation
 where :math:`\Omega = (0, 1)^2` is a square domain
 and :math:`f(x,y)=\sin \pi x \sin \pi y`.
 The weak formulation reads:
-find :math:`u \in V` satisfying
+find :math:`u \in H^1_0(\Omega)` satisfying
 
 .. math::
-   \int_\Omega \nabla u \cdot \nabla v \,\mathrm{d}x = \int_\Omega fv\,\mathrm{d}x \quad \forall v \in V,
+   \int_\Omega \nabla u \cdot \nabla v \,\mathrm{d}x = \int_\Omega fv\,\mathrm{d}x \quad \forall v \in H^1_0(\Omega).
 
-where :math:`V = H^1_0(\Omega)`.
+.. note::
+
+   Above :math:`H^1_0(\Omega)` is the space of functions that are zero
+   on the boundary :math:`\partial \Omega` and the square integral of the
+   first derivative is finite.  This is a common function space
+   to use for second-order boundary value problems because 
+   it often corresponds to the space of functions with finite energy.
 
 Step 2: Express the forms as code
 =================================
@@ -71,6 +74,8 @@ decorated as follows:
    ...     f = np.sin(np.pi * x) * np.sin(np.pi * y)
    ...     return f * v
 
+For more information see :ref:`forms`.
+
 Step 3: Create a mesh
 =====================
 
@@ -98,6 +103,11 @@ Here we choose the piecewise-linear basis:
 .. doctest::
 
    >>> Vh = fem.Basis(mesh, fem.ElementTriP1())
+   >>> Vh
+   <skfem CellBasis(MeshTri1, ElementTriP1) object>
+     Number of elements: 128
+     Number of DOFs: 81
+     Size: 27648 B
 
 Step 5: Assemble the linear system
 ==================================
@@ -125,9 +135,9 @@ the boundary.  Empty call to
 .. doctest::
 
    >>> D = Vh.get_dofs()
-   >>> D.flatten()
-   array([ 0,  1,  2,  3,  4,  5,  7,  8,  9, 10, 11, 13, 14, 16, 17, 18, 25,
-          26, 27, 29, 30, 32, 33, 34, 35, 36, 39, 40, 49, 50, 53, 54])
+   >>> D
+   <skfem DofsView(MeshTri1, ElementTriP1) object>
+     Number of nodal DOFs: 32 ['u']
 
 Step 7: Eliminate boundary DOFs and solve
 =========================================

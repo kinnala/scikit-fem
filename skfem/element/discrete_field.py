@@ -5,7 +5,12 @@ from numpy import ndarray
 
 
 class DiscreteField(NamedTuple):
-    """A function defined at the global quadrature points."""
+    """A function defined at the global quadrature points.
+
+    Created using :meth:`~skfem.element.Element.gbasis` or
+    :meth:`~skfem.assembly.CellBasis.interpolate`.
+
+    """
 
     value: ndarray = np.array([0])  # zero field
     grad: Optional[ndarray] = None
