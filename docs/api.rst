@@ -70,6 +70,8 @@ Module: skfem.assembly
 
 .. automodule:: skfem.assembly
 
+.. autofunction:: skfem.assembly.asm
+
 Abstract class: AbstractBasis
 -----------------------------
 
@@ -85,7 +87,7 @@ Class: CellBasis
 .. autoclass:: skfem.assembly.Basis
 
 .. autoclass:: skfem.assembly.CellBasis
-   :members: __init__
+   :members: __init__, interpolate
 
 
 Class: BoundaryFacetBasis

@@ -20,8 +20,8 @@ the boundary.  Currently the main tool for finding DOFs is
    >>> basis = Basis(m, ElementTriP2())
 
 We can provide an indicator function to
-:meth:`~skfem.assembly.basis.AbstractBasis.get_dofs` and it will call
-:meth:`~skfem.mesh.Mesh.facets_satisfying` and find the corresponding DOFs:
+:meth:`~skfem.assembly.basis.AbstractBasis.get_dofs` and it will find the
+DOFs on the matching facets:
 
 .. doctest::
 
@@ -31,8 +31,8 @@ We can provide an indicator function to
    >>> dofs.facet
    {'u': array([26, 30, 39, 40])}
 
-The keys in the above dictionaries indicate the type of the
-DOF according to the following table:
+The keys in the above dictionaries indicate the type of the DOF according to
+the following table:
 
 +-----------+---------------------------------------------------------------+
 | Key       | Description                                                   |
@@ -45,9 +45,9 @@ DOF according to the following table:
 +-----------+---------------------------------------------------------------+
 | ``u_xx``  | Second partial derivative w.r.t :math:`x`                     |
 +-----------+---------------------------------------------------------------+
-| ``u^n``   | Normal component of a vector field (e.g. Raviart-Thomas)      |
+| ``u^n``   | Normal component of a vector field (e.g., Raviart-Thomas)     |
 +-----------+---------------------------------------------------------------+
-| ``u^t``   | Tangential component of a vector field (e.g. Nédélec)         |
+| ``u^t``   | Tangential component of a vector field (e.g., Nédélec)        |
 +-----------+---------------------------------------------------------------+
 | ``u^1``   | First component of a vector field                             |
 +-----------+---------------------------------------------------------------+
@@ -55,11 +55,10 @@ DOF according to the following table:
 +-----------+---------------------------------------------------------------+
 | ``u^1^1`` | First component of the first component in a composite field   |
 +-----------+---------------------------------------------------------------+
-| ``NA``    | Description not available (e.g. hierarchical or bubble DOF's) |
+| ``NA``    | Description not available (e.g., hierarchical or bubble DOF's)|
 +-----------+---------------------------------------------------------------+
 
-An array of all DOFs belonging to the left boundary with the key ``u`` can be
-obtained as follows:
+An array of all DOFs with the key ``u`` can be obtained as follows:
 
 .. doctest::
 
@@ -68,7 +67,7 @@ obtained as follows:
    >>> dofs.flatten()  # all DOFs, no matter which key
    array([ 0,  2,  5, 10, 14, 26, 30, 39, 40])
 
-If a name is associated with the set of facets it can be passed
+If a set of facets is tagged, the name of the tag can be passed
 to :meth:`~skfem.assembly.basis.AbstractBasis.get_dofs`:
 
 .. doctest::
@@ -77,8 +76,8 @@ to :meth:`~skfem.assembly.basis.AbstractBasis.get_dofs`:
    >>> dofs.flatten()
    array([ 0,  2,  5, 10, 14, 26, 30, 39, 40])
    
-Many DOF types are associated with a specific global coordinate.  These
-so-called DOF locations can be found as follows:
+Many DOF types have a well-defined location.  These DOF locations can be found
+as follows:
 
 .. doctest::
 
@@ -91,13 +90,15 @@ See :ref:`dofindexing` for more detailed information.
 Creating discrete functions via projection
 ==========================================
 
-It is possible to perform an :math:`L^2` projection of the boundary data
-:math:`u_0` onto the finite element space :math:`V_h` by solving for the
-function :math:`\widetilde{u_0} \in V_h` which satisfies
+We can use :math:`L^2` projection to turn functions with an explicit expression
+to finite element functions.  Suppose we have :math:`u_0(x,y) = x^3 y^3`
+defined on the boundary of the domain and want to find the corresponding
+discrete function.  We can solve for :math:`\widetilde{u_0} \in
+\mathrm{tr}\,V_h` which satisfies
 
 .. math::
 
-   \int_{\partial \Omega} \widetilde{u_0} v\,\mathrm{d}s = \int_{\partial \Omega} u_0 v\,\mathrm{d}s\quad \forall v \in V_h.
+   \int_{\partial \Omega} \widetilde{u_0} v\,\mathrm{d}s = \int_{\partial \Omega} u_0 v\,\mathrm{d}s\quad \forall v \in \mathrm{tr}\,V_h.
 
 Below we solve explicitly the above variational problem:
 
@@ -127,69 +128,31 @@ the same thing:
           0.     , 0.61237, 0.15811, 0.61237, 0.15811, 0.     , 0.     ,
           0.     , 0.     ])
 
-Assembling jump terms
-=====================
-
-The shorthand :func:`~skfem.assembly.asm`
-supports special syntax for assembling the same form over a list or lists of
-bases and summing the result.  Consider the form
-
-.. math::
-
-   b(u,v) = \sum_{E \in \mathcal{E}_h} \int_{E} [u][v]\,\mathrm{d}s
-
-where :math:`\mathcal{E}_h` is the set of interior facets of a mesh
-and :math:`[u]` is the jump in the value of :math:`u` over the facet
-:math:`E`.
-We have
-:math:`[u] = u_1 - u_2` and :math:`[v] = v_1 - v_2`
-where the subscript denotes the value of the function restricted to one of the
-elements sharing a facet.  The form can be split as
-
-.. math::
-
-   b(u,v) = \sum_{E \in \mathcal{E}_h} \left(\int_{E} u_1 v_1\,\mathrm{d}s - \int_{E} u_1 v_2\,\mathrm{d}s - \int_{E} u_2 v_1\,\mathrm{d}s + \int_{E} u_2 v_2\,\mathrm{d}s\right)
-
-and normally we would assemble all four forms separately.
-
-We can instead provide a list of bases during a call to :func:`skfem.assembly.asm`:
-
-.. doctest::
-
-   >>> import skfem as fem
-   >>> m = fem.MeshTri()
-   >>> e = fem.ElementTriP0()
-   >>> bases = [fem.InteriorFacetBasis(m, e, side=k) for k in [0, 1]]
-   >>> jumpform = fem.BilinearForm(lambda u, v, p: (-1) ** sum(p.idx) * u * v)
-   >>> fem.asm(jumpform, bases, bases).toarray()
-   array([[ 1.41421356, -1.41421356],
-          [-1.41421356,  1.41421356]])
-
 .. _predefined:
 
-Using discrete functions in forms
-=================================
+Discrete functions in forms
+===========================
 
-Often we use a previous solution vector in the form
-definition, e.g., when solving nonlinear problems or
-when evaluating functionals.
-A simple fixed-point iteration for
+We can use previously created finite element functions inside the form.
+For example, consider
+a fixed-point iteration for the nonlinear problem
 
 .. math::
 
    \begin{aligned}
       -\nabla \cdot ((u + 1)\nabla u) &= 1 \quad \text{in $\Omega$}, \\
-      u &= 0 \quad \text{on $\partial \Omega$},
+      u &= 0 \quad \text{on $\partial \Omega$}.
    \end{aligned}
 
-corresponds to repeatedly
-finding :math:`u_{k+1} \in H^1_0(\Omega)` which satisfies
+We repeatedly
+find :math:`u_{k+1} \in H^1_0(\Omega)` which satisfies
 
 .. math::
 
    \int_\Omega (u_{k} + 1) \nabla u_{k+1} \cdot \nabla v \,\mathrm{d}x = \int_\Omega v\,\mathrm{d}x
 
 for every :math:`v \in H^1_0(\Omega)`.
+The previous solution :math:`u_k` is used inside the bilinear form.
 The argument ``w`` is used to define such forms:
 
 .. doctest::
@@ -202,7 +165,8 @@ The argument ``w`` is used to define such forms:
    ...     return (w.u_k + 1.) * dot(grad(u), grad(v))
 
 The previous solution :math:`u_k` must be provided to
-:meth:`~skfem.assembly.BilinearForm.assemble` as a keyword argument:
+:meth:`~skfem.assembly.BilinearForm.assemble` as a keyword argument
+after calling :meth:`~skfem.assembly.CellBasis.interpolate`:
 
 .. doctest::
 
@@ -230,3 +194,37 @@ additional default keys.
 By default, ``w['x']`` (accessible also as ``w.x``) corresponds to the global
 coordinates and ``w['h']`` (accessible also as ``w.h``) corresponds to the local
 mesh parameter.
+
+Assembling jump terms
+=====================
+
+The shorthand :func:`~skfem.assembly.asm`
+supports special syntax for assembling the same form over lists of
+bases and summing the result.  The form
+
+.. math::
+
+   b(u,v) = \sum_{E \in \mathcal{E}_h} \int_{E} [u][v]\,\mathrm{d}s
+
+with jumps
+:math:`[u] = u_1 - u_2` and :math:`[v] = v_1 - v_2`
+over the interior edges can be split as
+
+.. math::
+
+   b(u,v) = \sum_{E \in \mathcal{E}_h} \left(\int_{E} u_1 v_1\,\mathrm{d}s - \int_{E} u_1 v_2\,\mathrm{d}s - \int_{E} u_2 v_1\,\mathrm{d}s + \int_{E} u_2 v_2\,\mathrm{d}s\right)
+
+and normally we would assemble all of the four forms separately.
+
+We can instead provide a list of bases during a call to :func:`skfem.assembly.asm`:
+
+.. doctest::
+
+   >>> import skfem as fem
+   >>> m = fem.MeshTri()
+   >>> e = fem.ElementTriP0()
+   >>> bases = [fem.InteriorFacetBasis(m, e, side=k) for k in [0, 1]]
+   >>> jumpform = fem.BilinearForm(lambda u, v, p: (-1) ** sum(p.idx) * u * v)
+   >>> fem.asm(jumpform, bases, bases).toarray()
+   array([[ 1.41421356, -1.41421356],
+          [-1.41421356,  1.41421356]])
