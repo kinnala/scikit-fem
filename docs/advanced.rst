@@ -14,7 +14,7 @@ We consider forms as the basic building blocks of finite element assembly.
 Thus, it is useful to understand how forms are used in scikit-fem and how to
 express them correctly.
 
-Let us begin with examples.  The bilinear form corresponding to the Laplace
+The bilinear form corresponding to the Laplace
 operator :math:`-\Delta` is
 
 .. math::
@@ -32,8 +32,15 @@ function:
    ... def integrand(u, v, w):
    ...    return dot(grad(u), grad(v))
 
-A typical load vector is given by the :math:`L^2` inner product of a user-given
-function and the test function :math:`v`, e.g.,
+.. note::
+
+   Using helpers such as :func:`~skfem.helpers.grad` and
+   :func:`~skfem.helpers.dot` is optional.  Without helpers the last line would
+   read, e.g., ``u.grad[0] * v.grad[0] + u.grad[1] * v.grad[1]``.  Inside the
+   form ``u`` and ``v`` are of type :class:`~skfem.element.DiscreteField`.
+   The return value is a numpy array.
+
+Here is an example of body loading:
 
 .. math::
 
@@ -50,9 +57,9 @@ This can be written as
    ...    return np.sin(np.pi * w.x[0]) * np.sin(np.pi * w.x[1]) * v
 
 In addition, forms can depend on the local mesh parameter ``w.h`` or other
-finite element functions (see :ref:`predefined`).
-Moreover, boundary forms can depend on the normal vector ``w.n``.
-One example is the form
+finite element functions (see :ref:`predefined`).  Moreover, boundary forms
+assembled using :class:`~skfem.assembly.BoundaryFacetBasis` can depend on the
+outward normal vector ``w.n``.  One example is the form
 
 .. math::
 
@@ -68,10 +75,8 @@ which can be written as
    ... def loading(v, w):
    ...    return dot(w.n, v)
 
-The helper functions such as ``dot`` are discussed further below.
 
-
-The form definition always returns a two-dimensional NumPy array.  This can be
+The form definition always returns a two-dimensional numpy array.  This can be
 verified using the Python debugger:
 
 .. code-block:: python
@@ -83,7 +88,7 @@ verified using the Python debugger:
        import pdb; pdb.set_trace()  # breakpoint
        return dot(grad(u), grad(v))
 
-Saving the above snippet as ``test.py`` and running it via ``python -i test.py``
+Saving the above snippet as ``test.py`` and running it via ``python test.py``
 allows experimenting:
 
 .. code-block:: none
@@ -112,10 +117,11 @@ readable.  An alternative way to write the above form is
 
 .. note::
 
-    In fact, ``u`` and ``v`` are simply tuples of NumPy arrays with the values
-    of the function at ``u[0]`` and the values of the gradient at ``u[1]`` (and
-    some additional magic such as implementing ``__array__`` and ``__mul__`` so
-    that expressions such as ``u * v`` work as expected).
+    In fact, ``u`` and ``v`` are simply named tuples of NumPy arrays with the
+    values of the function at ``u[0]`` or ``u.value`` and the values of the
+    gradient at ``u[1]`` or ``u.grad`` (and some additional magic such as
+    implementing ``__array__`` and ``__mul__`` so that expressions such as
+    ``u * v`` work as expected).
 
 Notice how the shape of ``u[0]`` is what we expect also from the return value:
 
@@ -140,7 +146,7 @@ Indexing of the degrees-of-freedom
    This section contains lower level details on the order of the DOFs.
    Read this only if you did not find an answer in :ref:`finddofs`.
 
-The DOFs :math:`x` are ordered automatically based on the mesh and the element
+The DOFs are ordered automatically based on the mesh and the element
 type.  It is possible to investigate manually how the DOFs match the different
 topological entities (`nodes`, `facets`, `edges`, `elements`) of the mesh.
 
@@ -176,6 +182,10 @@ The DOFs corresponding to the nodes (or vertices) of the mesh are
 
    >>> basis.nodal_dofs
    array([[0, 1, 2, 3, 4, 5, 6, 7]])
+
+This means that the first (zeroth) entry in the DOF array corresponds to the
+first node/vertex in the finite element mesh (see ``m.p`` for a list of
+nodes/vertices).
 
 Similarly, the DOFs corresponding to the edges and the facets of the mesh are
 

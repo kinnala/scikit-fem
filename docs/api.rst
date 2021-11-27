@@ -134,6 +134,8 @@ Module: skfem.element
    :show-inheritance:
    :exclude-members: DiscreteField, ElementVectorH1
 
+.. autoclass:: skfem.element.DiscreteField
+
 Module: skfem.utils
 ===================
 
