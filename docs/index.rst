@@ -25,6 +25,7 @@ Table of contents
 .. toctree::
 
    self
+   fem
    gettingstarted
    howto
    advanced
