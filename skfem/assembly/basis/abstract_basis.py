@@ -361,28 +361,17 @@ class AbstractBasis:
 
     def split_indices(self) -> List[ndarray]:
         """Return indices for the solution components."""
-        if isinstance(self.elem, ElementComposite):
+        if ((isinstance(self.elem, ElementComposite)
+             or isinstance(self.elem, ElementVector))):
+            nelems = (len(self.elem.elems)
+                      if isinstance(self.elem, ElementComposite)
+                      else self.mesh.dim())
             o = np.zeros(4, dtype=np.int64)
             output: List[ndarray] = []
-            for k in range(len(self.elem.elems)):
-                e = self.elem.elems[k]
-                output.append(np.concatenate((
-                    self.nodal_dofs[o[0]:(o[0] + e.nodal_dofs)].flatten('F'),
-                    self.edge_dofs[o[1]:(o[1] + e.edge_dofs)].flatten('F'),
-                    self.facet_dofs[o[2]:(o[2] + e.facet_dofs)].flatten('F'),
-                    (self.interior_dofs[o[3]:(o[3] + e.interior_dofs)]
-                     .flatten('F'))
-                )).astype(np.int64))
-                o += np.array([e.nodal_dofs,
-                               e.edge_dofs,
-                               e.facet_dofs,
-                               e.interior_dofs])
-            return output
-        elif isinstance(self.elem, ElementVector):
-            o = np.zeros(4, dtype=np.int64)
-            output: List[ndarray] = []
-            for k in range(self.mesh.dim()):
-                e = self.elem.elem
+            for k in range(nelems):
+                e = (self.elem.elems[k]
+                     if isinstance(self.elem, ElementComposite)
+                     else self.elem.elem)
                 output.append(np.concatenate((
                     self.nodal_dofs[o[0]:(o[0] + e.nodal_dofs)].flatten('F'),
                     self.edge_dofs[o[1]:(o[1] + e.edge_dofs)].flatten('F'),
