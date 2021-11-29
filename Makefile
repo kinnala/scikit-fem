@@ -1,19 +1,11 @@
-# This Makefile can be used to locally run the container-based tests run by
-# Github Actions for https://github.com/kinnala/scikit-fem.
-
-default: test_py37
-	@echo "Done!"
-
-# Python 3.6
-
-test_py36: build_py36
-	GITHUB_WORKSPACE=/scikit-fem docker run -e GITHUB_WORKSPACE -v ${PWD}:"/scikit-fem" skfem:py36
-
-build_py36:
-	docker build -t skfem:py36 https://github.com/kinnala/scikit-fem-docker-action.git#py36
-
-run_py36:
-	docker run -it -v ${PWD}:"/scikit-fem" --entrypoint /bin/bash skfem:py36
+default:
+	@echo "test_py37    Run Python 3.7 tests inside a container"
+	@echo "test_py38    Run Python 3.8 ..."
+	@echo "test_py39    Run Python 3.9 ..."
+	@echo "doctest      Run Sphinx doctests"
+	@echo "tests        Run pytest, flake8 and doctests"
+	@echo "docs         Build Sphinx documentation"
+	@echo "release      Push new version to PyPI"
 
 # Python 3.7
 
@@ -48,14 +40,23 @@ build_py39:
 run_py39:
 	docker run -it -v ${PWD}:"/scikit-fem" --entrypoint /bin/bash skfem:py39
 
+# Tests
+
+tests: pytest flake8 doctest
+
+pytest:
+	pytest
+
+flake8:
+	flake8 skfem
+
+doctest:
+	@eval sphinx-build -a -b doctest docs docs/_build
+
 # Documentation
 
-sphinx:
-	-rm -r ../scikit-fem-docs/.doctrees/
+docs:
 	@eval sphinx-build -W -a -b html docs docs/_build
-
-sphinx_doctest:
-	@eval sphinx-build -a -b doctest docs docs/_build
 
 # Release
 
@@ -65,3 +66,5 @@ release:
 	-rm -r scikit_fem.egg-info
 	python -m pep517.build --source --binary .
 	twine upload dist/*
+
+.PHONY: docs
