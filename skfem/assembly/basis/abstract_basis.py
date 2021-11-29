@@ -5,7 +5,8 @@ from typing import Any, Dict, List, Optional, Tuple, Type, Union
 import numpy as np
 from numpy import ndarray
 from skfem.assembly.dofs import Dofs, DofsView
-from skfem.element import DiscreteField, Element, ElementComposite
+from skfem.element import (DiscreteField, Element, ElementComposite,
+                           ElementVector)
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh
 from skfem.quadrature import get_quadrature
@@ -360,11 +361,17 @@ class AbstractBasis:
 
     def split_indices(self) -> List[ndarray]:
         """Return indices for the solution components."""
-        if isinstance(self.elem, ElementComposite):
+        if ((isinstance(self.elem, ElementComposite)
+             or isinstance(self.elem, ElementVector))):
+            nelems = (len(self.elem.elems)
+                      if isinstance(self.elem, ElementComposite)
+                      else self.mesh.dim())
             o = np.zeros(4, dtype=np.int64)
             output: List[ndarray] = []
-            for k in range(len(self.elem.elems)):
-                e = self.elem.elems[k]
+            for k in range(nelems):
+                e = (self.elem.elems[k]
+                     if isinstance(self.elem, ElementComposite)
+                     else self.elem.elem)
                 output.append(np.concatenate((
                     self.nodal_dofs[o[0]:(o[0] + e.nodal_dofs)].flatten('F'),
                     self.edge_dofs[o[1]:(o[1] + e.edge_dofs)].flatten('F'),
@@ -385,6 +392,10 @@ class AbstractBasis:
             return [type(self)(self.mesh, e, self.mapping,
                                quadrature=self.quadrature)
                     for e in self.elem.elems]
+        elif isinstance(self.elem, ElementVector):
+            return [type(self)(self.mesh, self.elem.elem, self.mapping,
+                               quadrature=self.quadrature)
+                    for _ in range(self.mesh.dim())]
         raise ValueError("AbstractBasis.elem has only a single component!")
 
     @property
