@@ -5,7 +5,8 @@ from typing import Any, Dict, List, Optional, Tuple, Type, Union
 import numpy as np
 from numpy import ndarray
 from skfem.assembly.dofs import Dofs, DofsView
-from skfem.element import DiscreteField, Element, ElementComposite
+from skfem.element import (DiscreteField, Element, ElementComposite,
+                           ElementVector)
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh
 from skfem.quadrature import get_quadrature
@@ -377,6 +378,23 @@ class AbstractBasis:
                                e.facet_dofs,
                                e.interior_dofs])
             return output
+        elif isinstance(self.elem, ElementVector):
+            o = np.zeros(4, dtype=np.int64)
+            output: List[ndarray] = []
+            for k in range(self.mesh.dim()):
+                e = self.elem.elem
+                output.append(np.concatenate((
+                    self.nodal_dofs[o[0]:(o[0] + e.nodal_dofs)].flatten('F'),
+                    self.edge_dofs[o[1]:(o[1] + e.edge_dofs)].flatten('F'),
+                    self.facet_dofs[o[2]:(o[2] + e.facet_dofs)].flatten('F'),
+                    (self.interior_dofs[o[3]:(o[3] + e.interior_dofs)]
+                     .flatten('F'))
+                )).astype(np.int64))
+                o += np.array([e.nodal_dofs,
+                               e.edge_dofs,
+                               e.facet_dofs,
+                               e.interior_dofs])
+            return output
         raise ValueError("Basis.elem has only a single component!")
 
     def split_bases(self) -> List['AbstractBasis']:
@@ -385,6 +403,10 @@ class AbstractBasis:
             return [type(self)(self.mesh, e, self.mapping,
                                quadrature=self.quadrature)
                     for e in self.elem.elems]
+        elif isinstance(self.elem, ElementVector):
+            return [type(self)(self.mesh, self.elem.elem, self.mapping,
+                               quadrature=self.quadrature)
+                    for _ in range(self.mesh.dim())]
         raise ValueError("AbstractBasis.elem has only a single component!")
 
     @property

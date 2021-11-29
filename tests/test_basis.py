@@ -68,6 +68,13 @@ class TestCompositeSplitting(TestCase):
         self.assertTrue(abs((C1 - C2).min()) < 1e-10)
         self.assertTrue(abs((C1 - C2).max()) < 1e-10)
 
+        # test splitting ElementVector
+        (ux, uxbasis), (uy, uybasis) = u_basis.split(u)
+        assert_allclose(ux[uxbasis.nodal_dofs[0]], u[u_basis.nodal_dofs[0]])
+        assert_allclose(ux[uxbasis.facet_dofs[0]], u[u_basis.facet_dofs[0]])
+        assert_allclose(uy[uybasis.nodal_dofs[0]], u[u_basis.nodal_dofs[1]])
+        assert_allclose(uy[uybasis.facet_dofs[0]], u[u_basis.facet_dofs[1]])
+
 
 class TestCompositeFacetAssembly(TestCase):
 
