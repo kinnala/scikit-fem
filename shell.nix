@@ -28,5 +28,7 @@ in python37.withPackages (ps: with ps; [
   sphinx_rtd_theme
   flake8
   twine
+  pep517
+  pip
   pacopy016
 ])).env
