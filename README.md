@@ -57,11 +57,8 @@ def laplace(u, v, _):
 def rhs(v, _):
     return 1.0 * v
 
-A = asm(laplace, basis)
-b = asm(rhs, basis)
-# or:
-# A = laplace.assemble(basis)
-# b = rhs.assemble(basis)
+A = laplace.assemble(basis)
+b = rhs.assemble(basis)
 
 # Dirichlet boundary conditions
 A, b = enforce(A, b, D=m.boundary_nodes())
@@ -224,6 +221,10 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+### [5.1.0] - 2021-11-30
+
+- Added: `skfem.helpers.mul` for matrix multiplication
+- Added: `Basis.split` will now also split `ElementVector` into its components
 - Fixed: `ElementDG` was not included in the wildcard import
 - Fixed: Automatic visualization of `MeshTri2` and `MeshQuad2` in Jupyter
   notebooks raised exception
