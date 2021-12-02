@@ -85,7 +85,8 @@ class TestCompositeFacetAssembly(TestCase):
         fbasis1 = FacetBasis(m, ElementTriP1() * ElementTriP1(),
                              facets=m.facets_satisfying(lambda x: x[0] == 0))
         fbasis2 = FacetBasis(m, ElementTriP1(),
-                             facets=m.facets_satisfying(lambda x: x[0] == 0))
+                             facets=lambda x: x[0] == 0)
+        fbasis3 = FacetBasis(m, ElementTriP1(), facets='left')
 
         @BilinearForm
         def uv1(u, p, v, q, w):
@@ -97,9 +98,13 @@ class TestCompositeFacetAssembly(TestCase):
 
         A = asm(uv1, fbasis1)
         B = asm(uv2, fbasis2)
+        C = asm(uv2, fbasis2)
 
         assert_allclose(A[0].todense()[0, ::2],
                         B[0].todense()[0])
+
+        assert_allclose(A[0].todense()[0, ::2],
+                        C[0].todense()[0])
 
 
 class TestFacetExpansion(TestCase):

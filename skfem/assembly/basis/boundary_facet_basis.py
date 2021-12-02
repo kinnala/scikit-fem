@@ -52,9 +52,10 @@ class BoundaryFacetBasis(AbstractBasis):
             Optional :class:`~skfem.assembly.Dofs` object.
 
         """
-        logger.info("Initializing {}({}, {})".format(type(self).__name__,
-                                                     type(mesh).__name__,
-                                                     type(elem).__name__))
+        typestr = ("{}({}, {})".format(type(self).__name__,
+                                       type(mesh).__name__,
+                                       type(elem).__name__))
+        logger.info("Initializing " + typestr)
         super(BoundaryFacetBasis, self).__init__(mesh,
                                                  elem,
                                                  mapping,
@@ -67,7 +68,11 @@ class BoundaryFacetBasis(AbstractBasis):
         if facets is None:
             self.find = np.nonzero(self.mesh.f2t[1] == -1)[0]
         else:
-            self.find = facets
+            self.find = self._normalize_facets(facets)
+
+        if len(self.find) == 0:
+            logger.warning("Initializing {} with zero facets.".format(typestr))
+
         self.tind = self.mesh.f2t[_side, self.find]
         self._side = _side  # for debugging
 

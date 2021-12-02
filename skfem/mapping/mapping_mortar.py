@@ -71,7 +71,8 @@ class MappingMortar(Mapping):
         # find unique supermesh facets by combining nodes from both sides
         param_p1 = param(p1)
         param_p2 = param(p2)
-        _, ix = np.unique(np.concatenate((param_p1, param_p2)),
+        _, ix = np.unique(np.concatenate((param_p1.round(decimals=10),
+                                          param_p2.round(decimals=10))),
                           return_index=True)
         ixorig = np.concatenate((p1_ix, p2_ix + mesh1.p.shape[1]))[ix]
         p = np.array([np.hstack((param(mesh1.p), param(mesh2.p)))])

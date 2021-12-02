@@ -239,15 +239,13 @@ class AbstractBasis:
             raise ValueError
 
         if elements is not None:
-            elements = self._get_dofs_normalize_elements(elements)
-            return self.dofs.get_element_dofs(elements,
-                                              skip_dofnames=skip)
+            elements = self._normalize_elements(elements)
+            return self.dofs.get_element_dofs(elements, skip_dofnames=skip)
 
-        facets = self._get_dofs_normalize_facets(facets)
-        return self.dofs.get_facet_dofs(facets,
-                                        skip_dofnames=skip)
+        facets = self._normalize_facets(facets)
+        return self.dofs.get_facet_dofs(facets, skip_dofnames=skip)
 
-    def _get_dofs_normalize_facets(self, facets):
+    def _normalize_facets(self, facets):
         if isinstance(facets, ndarray):
             return facets
         if facets is None:
@@ -255,7 +253,7 @@ class AbstractBasis:
         elif isinstance(facets, (tuple, list, set)):
             return np.unique(
                 np.concatenate(
-                    [self._get_dofs_normalize_facets(f) for f in facets]
+                    [self._normalize_facets(f) for f in facets]
                 )
             )
         elif callable(facets):
@@ -268,7 +266,7 @@ class AbstractBasis:
                 raise ValueError("Boundary '{}' not found.".format(facets))
         raise NotImplementedError
 
-    def _get_dofs_normalize_elements(self, elements):
+    def _normalize_elements(self, elements):
         if isinstance(elements, ndarray):
             return elements
         if callable(elements):
@@ -276,7 +274,7 @@ class AbstractBasis:
         elif isinstance(elements, (tuple, list, set)):
             return np.unique(
                 np.concatenate(
-                    [self._get_dofs_normalize_elements(e) for e in elements]
+                    [self._normalize_elements(e) for e in elements]
                 )
             )
         elif isinstance(elements, str):

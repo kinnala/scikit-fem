@@ -82,9 +82,10 @@ class CellBasis(AbstractBasis):
 
         if elements is None:
             self.nelems = mesh.nelements
+            self.tind = None
         else:
             self.nelems = len(elements)
-        self.tind = elements
+            self.tind = self._normalize_elements(elements)
 
         self.dx = (np.abs(self.mapping.detDF(self.X, tind=elements))
                    * np.tile(self.W, (self.nelems, 1)))
