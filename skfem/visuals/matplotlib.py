@@ -99,7 +99,10 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> Axes:
         ys.append(t)
         ys.append(v)
         ys.append(None)
-    ax.plot(xs, ys, 'k', linewidth='0.5')
+    ax.plot(xs,
+            ys,
+            kwargs['color'] if 'color' in kwargs else 'k',
+            linewidth=kwargs['linewidth'] if 'linewidth' in kwargs else .5)
 
     if "node_numbering" in kwargs:
         for itr in range(m.p.shape[1]):
