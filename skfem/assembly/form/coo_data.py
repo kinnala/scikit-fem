@@ -114,7 +114,7 @@ class COOData:
 
         """
         if len(self.shape) == 0:
-            return self.data[0]
+            return np.sum(self.data, axis=0)
         elif len(self.shape) == 1:
             return self.toarray()
         elif len(self.shape) == 2:
