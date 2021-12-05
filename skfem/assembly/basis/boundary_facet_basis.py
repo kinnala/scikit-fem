@@ -27,8 +27,8 @@ class BoundaryFacetBasis(AbstractBasis):
                  intorder: Optional[int] = None,
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
                  facets: Optional[ndarray] = None,
-                 _side: int = 0,
-                 dofs: Optional[Dofs] = None):
+                 dofs: Optional[Dofs] = None,
+                 _tind: Optional[ndarray] = None):
         """Precomputed global basis on boundary facets.
 
         Parameters
@@ -73,8 +73,10 @@ class BoundaryFacetBasis(AbstractBasis):
         if len(self.find) == 0:
             logger.warning("Initializing {} with zero facets.".format(typestr))
 
-        self.tind = self.mesh.f2t[_side, self.find]
-        self._side = _side  # for debugging
+        if _tind is None:
+            self.tind = self.mesh.f2t[0, self.find]
+        else:
+            self.tind = _tind
 
         # boundary refdom to global facet
         x = self.mapping.G(self.X, find=self.find)

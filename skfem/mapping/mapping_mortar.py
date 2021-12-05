@@ -1,4 +1,5 @@
 from dataclasses import replace
+from typing import Optional
 
 import numpy as np
 from numpy import ndarray
@@ -175,8 +176,9 @@ class MappingMortar(Mapping):
 
     def G(self,
           X: ndarray,
-          find: ndarray = None) -> ndarray:
-        side = self.side
+          find: ndarray = None,
+          side: Optional[int] = None) -> ndarray:
+        side = self.side if side is None else side
         return self.maps[side].G(
             self.helper_maps[side].invF(self.supermap.F(X),
                                         tind=self.super_to_helper[side]),
@@ -187,7 +189,7 @@ class MappingMortar(Mapping):
               X: ndarray,
               find: ndarray = None) -> ndarray:
         if X.shape[0] == 1:
-            segs = self.G(np.array([[0., 1.]]))
+            segs = self.G(np.array([[0., 1.]]), side=0)
             return np.sqrt(np.diff(segs[0], axis=1) ** 2 +
                            np.diff(segs[1], axis=1) ** 2)
         raise NotImplementedError
