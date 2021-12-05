@@ -26,8 +26,12 @@ class MortarFacetBasis(BoundaryFacetBasis):
             raise Exception("'side' must be 0 or 1.")
 
         if facets is None:
+            from copy import deepcopy
+            mapping = deepcopy(mapping)
             mapping.side = side
             facets = mapping.helper_to_orig[side]
+
+        facets = self._normalize_facets(facets)
 
         super(MortarFacetBasis, self).__init__(mesh,
                                                elem,
@@ -35,5 +39,4 @@ class MortarFacetBasis(BoundaryFacetBasis):
                                                intorder=intorder,
                                                quadrature=quadrature,
                                                facets=facets,
-                                               _side=0,
                                                dofs=dofs)
