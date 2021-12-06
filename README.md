@@ -348,6 +348,8 @@ with respect to documented and/or tested features.
 - Removed: `skfem.models.helpers`; available as `skfem.helpers`
 - Removed: `DiscreteField.{f,df,ddf,hod}`; available as `DiscreteField.{value,grad,hess,grad3,...}`
 - Removed: Python 3.6 support
+- Removed: `skfem.utils.L2_projection`
+- Removed: `skfem.utils.derivative`
 - Changed: `Mesh.refined` no more attempts to fix the indexing of `Mesh.boundaries` after refine
 - Changed: `skfem.utils.solve` now uses `scipy.sparse.eigs` instead of `scipy.sparse.eigsh` by default;
   the old behavior can be retained by explicitly passing `solver=solver_scipy_eigs_sym()`
