@@ -59,4 +59,4 @@ if __name__ == '__main__':
     from sys import argv
     name = splitext(argv[0])[0]
 
-    m.save('{}_solution.vtk'.format(name), {'field': y[y_basis.nodal_dofs].T})
+    m.save('{}_solution.vtk'.format(name), {'field': y[ybasis.nodal_dofs].T})

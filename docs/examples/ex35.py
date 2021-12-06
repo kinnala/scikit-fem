@@ -349,11 +349,13 @@ if __name__ == '__main__':
     from skfem.visuals.matplotlib import plot, savefig
     import matplotlib.pyplot as plt
 
-    B_x = global_basis.project(lambda w: w['A'].grad[1], A=A)
-    B_y = -global_basis.project(lambda w: w['A'].grad[0], A=A)
+    Ai = global_basis.interpolate(A)
+    B_x = global_basis.project(Ai.grad[1])
+    B_y = -global_basis.project(Ai.grad[0])
 
-    E_x = -global_basis.project(lambda w: w['U'].grad[0], U=U)
-    E_y = -global_basis.project(lambda w: w['U'].grad[1], U=U)
+    Ui = global_basis.interpolate(U)
+    E_x = -global_basis.project(Ui.grad[0])
+    E_y = -global_basis.project(Ui.grad[1])
 
     fig = plt.figure(figsize=(11.52, 5.12))
 
