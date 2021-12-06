@@ -208,7 +208,7 @@ class CellBasis(AbstractBasis):
             elements=self.tind,
         )
 
-    def project(self, interp, elements=None, **kwargs):
+    def project(self, interp, elements=None):
         from skfem.helpers import inner
         from skfem.utils import solve
         from skfem.assembly import BilinearForm, LinearForm

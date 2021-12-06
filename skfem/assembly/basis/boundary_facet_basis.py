@@ -215,7 +215,7 @@ class BoundaryFacetBasis(AbstractBasis):
             facets=self.find,
         )
 
-    def project(self, interp, facets=None,**kwargs):
+    def project(self, interp, facets=None):
         from skfem.helpers import inner
         from skfem.utils import solve
         from skfem.assembly import BilinearForm, LinearForm

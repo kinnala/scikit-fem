@@ -418,10 +418,6 @@ class AbstractBasis:
         """Create a copy of ``self`` that uses different element."""
         raise NotImplementedError
 
-    def project(self, rhs, **kwargs):
-        """Perform :math:`L^2` projection onto the basis.
-
-        Solves the variational problem ``inner(u, v) = inner(rhs(w), v)``.
-
-        """
+    def project(self, interp, **kwargs):
+        """Perform :math:`L^2` projection onto the basis."""
         raise NotImplementedError
