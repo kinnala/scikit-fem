@@ -5,20 +5,20 @@ from skfem.helpers import grad, dot, ddot
 
 
 @BilinearForm
-def laplace(u, v, w):
+def laplace(u, v, _):
     return dot(grad(u), grad(v))
 
 
 @BilinearForm
-def vector_laplace(u, v, w):
+def vector_laplace(u, v, _):
     return ddot(grad(u), grad(v))
 
 
 @BilinearForm
-def mass(u, v, w):
+def mass(u, v, _):
     return u * v
 
 
 @LinearForm
-def unit_load(v, w):
+def unit_load(v, _):
     return v

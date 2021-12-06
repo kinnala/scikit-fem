@@ -117,12 +117,12 @@ Below we solve explicitly the above variational problem:
           0.     , 0.61237, 0.15811, 0.61237, 0.15811, 0.     , 0.     ,
           0.     , 0.     ])
 
-Alternatively, you can use :func:`skfem.utils.projection` which does exactly
-the same thing:
+Alternatively, you can use :meth:`~skfem.assembly.AbstractBasis.project` which
+does exactly the same thing:
 
 .. doctest::
 
-   >>> y = fem.projection(u_0, basis, I=basis.get_dofs(), expand=True)
+   >>> y = basis.project(u_0)
    >>> np.abs(np.round(y, 5))
    array([0.     , 0.     , 1.     , 0.     , 0.     , 0.     , 0.     ,
           0.     , 0.61237, 0.15811, 0.61237, 0.15811, 0.     , 0.     ,

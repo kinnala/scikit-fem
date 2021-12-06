@@ -214,3 +214,22 @@ class BoundaryFacetBasis(AbstractBasis):
             quadrature=self.quadrature,
             facets=self.find,
         )
+
+    def project(self, interp, facets=None,**kwargs):
+        from skfem.helpers import inner
+        from skfem.utils import solve
+        from skfem.assembly import BilinearForm, LinearForm
+        from skfem.utils import condense
+
+        if isinstance(interp, float):
+            interp = interp + self.global_coordinates().value[0] * 0.
+
+        if callable(interp):
+            interp = interp(self.global_coordinates().value)
+
+        M = BilinearForm(lambda u, v, _: inner(u, v)).assemble(self)
+        f = LinearForm(lambda v, w: inner(interp, v)).assemble(self, **kwargs)
+
+        if facets is not None:
+            return solve(*condense(M, f, I=self.get_dofs(facets=facets)))
+        return solve(*condense(M, f, I=self.get_dofs(facets=self.find)))

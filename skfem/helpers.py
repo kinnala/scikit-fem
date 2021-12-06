@@ -94,6 +94,23 @@ def dddd(u: DiscreteField):
     return u.grad4
 
 
+def inner(u: FieldOrArray, v: FieldOrArray):
+    """Inner product between any matching tensors."""
+    if isinstance(u, DiscreteField) and u.is_zero():
+        return u
+    if isinstance(v, DiscreteField) and v.is_zero():
+        return v
+    U = u.value if isinstance(u, DiscreteField) else u
+    V = v.value if isinstance(v, DiscreteField) else v
+    if len(U.shape) == 2:
+        return U * V
+    elif len(U.shape) == 3:
+        return dot(U, V)
+    elif len(U.shape) == 4:
+        return ddot(U, V)
+    raise NotImplementedError
+
+
 def dot(u: FieldOrArray, v: FieldOrArray):
     """Dot product."""
     if isinstance(u, DiscreteField) and u.is_zero():

@@ -24,7 +24,7 @@ from skfem.io.json import from_file
 
 mesh = from_file(Path(__file__).parent / 'meshes' / 'backward-facing_step.json')
 
-element = {'u': ElementVectorH1(ElementTriP2()),
+element = {'u': ElementVector(ElementTriP2()),
            'p': ElementTriP1()}
 basis = {variable: Basis(mesh, e, intorder=3)
          for variable, e in element.items()}
@@ -36,10 +36,8 @@ B = -asm(divergence, basis['u'], basis['p'])
 
 K = bmat([[A, B.T],
           [B, None]], 'csr')
-uvp = np.zeros(K.shape[0])
 
 inlet_basis = FacetBasis(mesh, element['u'], facets=mesh.boundaries['inlet'])
-inlet_dofs = inlet_basis.get_dofs('inlet')
 
 
 def parabolic(x):
@@ -47,7 +45,10 @@ def parabolic(x):
     return np.stack([4 * x[1] * (1. - x[1]), np.zeros_like(x[0])])
 
 
-uvp[inlet_dofs] = projection(parabolic, inlet_basis, I=inlet_dofs)
+uvp = np.hstack((
+    inlet_basis.project(parabolic),
+    basis['p'].zeros(),
+))
 uvp = solve(*condense(K, x=uvp, D=D))
 
 velocity, pressure = np.split(uvp, [A.shape[0]])

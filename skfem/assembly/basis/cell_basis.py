@@ -207,3 +207,24 @@ class CellBasis(AbstractBasis):
             quadrature=self.quadrature,
             elements=self.tind,
         )
+
+    def project(self, interp, elements=None, **kwargs):
+        from skfem.helpers import inner
+        from skfem.utils import solve
+        from skfem.assembly import BilinearForm, LinearForm
+        from skfem.utils import condense
+
+        if isinstance(interp, float):
+            interp = interp + self.global_coordinates().value[0] * 0.
+
+        if callable(interp):
+            interp = interp(self.global_coordinates().value)
+
+        M = BilinearForm(lambda u, v, _: inner(u, v)).assemble(self)
+        f = LinearForm(lambda v, w: inner(interp, v)).assemble(self, **kwargs)
+
+        if elements is not None:
+            return solve(*condense(M, f, I=self.get_dofs(elements=elements)))
+        elif self.tind is not None:
+            return solve(*condense(M, f, I=self.get_dofs(elements=self.tind)))
+        return solve(M, f)

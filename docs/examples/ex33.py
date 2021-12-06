@@ -50,8 +50,8 @@ D = basis.get_dofs()
 
 x = solve(*condense(A, f, D=D))
 
-y_basis = basis.with_element(ElementVector(ElementTetP1()))
-y = projection(x, y_basis, basis)
+ybasis = basis.with_element(ElementVector(ElementTetP1()))
+y = ybasis.project(basis.interpolate(x))
 
 if __name__ == '__main__':
 

@@ -38,12 +38,8 @@ def dirichlet(x):
     return ((x[0] + 1.j * x[1]) ** 2).real
 
 
-boundary_basis = FacetBasis(m, e)
-boundary_dofs = basis.get_dofs()
-
-u = basis.zeros()
-u[boundary_dofs] = projection(dirichlet, boundary_basis, I=boundary_dofs)
-u = solve(*condense(A, x=u, D=boundary_dofs))
+u = basis.project(dirichlet)
+u = solve(*condense(A, x=u, D=basis.get_dofs()))
 
 
 if __name__ == "__main__":
