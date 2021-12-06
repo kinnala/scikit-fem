@@ -221,7 +221,7 @@ class CellBasis(AbstractBasis):
             interp = interp(self.global_coordinates().value)
 
         M = BilinearForm(lambda u, v, _: inner(u, v)).assemble(self)
-        f = LinearForm(lambda v, w: inner(interp, v)).assemble(self, **kwargs)
+        f = LinearForm(lambda v, w: inner(interp, v)).assemble(self)
 
         if elements is not None:
             return solve(*condense(M, f, I=self.get_dofs(elements=elements)))
