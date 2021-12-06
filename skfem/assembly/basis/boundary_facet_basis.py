@@ -216,19 +216,10 @@ class BoundaryFacetBasis(AbstractBasis):
         )
 
     def project(self, interp, facets=None):
-        from skfem.helpers import inner
-        from skfem.utils import solve
-        from skfem.assembly import BilinearForm, LinearForm
-        from skfem.utils import condense
 
-        if isinstance(interp, float):
-            interp = interp + self.global_coordinates().value[0] * 0.
+        from skfem.utils import solve, condense
 
-        if callable(interp):
-            interp = interp(self.global_coordinates().value)
-
-        M = BilinearForm(lambda u, v, _: inner(u, v)).assemble(self)
-        f = LinearForm(lambda v, w: inner(interp, v)).assemble(self)
+        M, f = self._projection(interp)
 
         if facets is not None:
             return solve(*condense(M, f, I=self.get_dofs(facets=facets)))

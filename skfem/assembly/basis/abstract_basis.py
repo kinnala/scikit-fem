@@ -418,6 +418,22 @@ class AbstractBasis:
         """Create a copy of ``self`` that uses different element."""
         raise NotImplementedError
 
+    def _projection(self, interp):
+
+        from skfem.assembly import BilinearForm, LinearForm
+        from skfem.helpers import inner
+
+        if isinstance(interp, float):
+            interp = interp + self.global_coordinates().value[0] * 0.
+
+        if callable(interp):
+            interp = interp(self.global_coordinates().value)
+
+        return (
+            BilinearForm(lambda u, v, _: inner(u, v)).assemble(self),
+            LinearForm(lambda v, w: inner(interp, v)).assemble(self),
+        )
+
     def project(self, interp, **kwargs):
         """Perform :math:`L^2` projection onto the basis."""
         raise NotImplementedError
