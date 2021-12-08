@@ -11,12 +11,14 @@ install the package via
 
    pip install scikit-fem[all]
 
-You can also try `Google Colab <https://colab.research.google.com/>`_ in your
-web browser and install scikit-fem by executing
+Specifying ``[all]`` includes ``meshio`` for mesh input/output, and
+``matplotlib`` for simple visualization.  The minimal dependencies are
+``numpy`` and ``scipy``.  You can also install scikit-fem in `Google Colab
+<https://colab.research.google.com/>`_ by executing
 
 .. code-block:: bash
 
-   !pip install scikit-fem[all]
+   !pip install scikit-fem
 
 Step 1: Clarify the problem
 ===========================
@@ -39,11 +41,9 @@ find :math:`u \in H^1_0(\Omega)` satisfying
 
 .. note::
 
-   Above :math:`H^1_0(\Omega)` is the space of functions that are zero
-   on the boundary :math:`\partial \Omega` and the square integral of the
-   first derivative is finite.  This is a common function space
-   to use for second-order boundary value problems because 
-   it often corresponds to the space of functions with finite energy.
+   :math:`H^1_0(\Omega)` is the space of functions that are zero on the
+   boundary :math:`\partial \Omega` and have finite energy: the square integral
+   of the first derivative is finite.
 
 Step 2: Express the forms as code
 =================================

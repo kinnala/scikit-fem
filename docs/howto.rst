@@ -19,6 +19,13 @@ the boundary.  Currently the main tool for finding DOFs is
    >>> m = MeshTri().refined(2)
    >>> basis = Basis(m, ElementTriP2())
 
+.. plot::
+
+   from skfem import MeshTri, Basis, ElementTriP2
+   m = MeshTri().refined(2)
+   from skfem.visuals.matplotlib import draw
+   draw(m, node_numbering=True)
+
 We can provide an indicator function to
 :meth:`~skfem.assembly.basis.AbstractBasis.get_dofs` and it will find the
 DOFs on the matching facets:
@@ -30,6 +37,21 @@ DOFs on the matching facets:
    {'u': array([ 0,  2,  5, 10, 14])}
    >>> dofs.facet
    {'u': array([26, 30, 39, 40])}
+
+The facets have their own numbering scheme starting from zero, however, the
+corresponding DOFs are offset by the total number of nodal DOFs.
+
+.. doctest::
+
+   >>> dofs.facet['u'] - basis.nodal_dofs.shape[1]
+   array([ 1,  5, 14, 15])
+
+.. plot::
+
+   from skfem import MeshTri, Basis, ElementTriP2
+   m = MeshTri().refined(2)
+   from skfem.visuals.matplotlib import draw
+   draw(m, facet_numbering=True)
 
 The keys in the above dictionaries indicate the type of the DOF according to
 the following table:
@@ -90,43 +112,48 @@ See :ref:`dofindexing` for more detailed information.
 Creating discrete functions via projection
 ==========================================
 
-We can use :math:`L^2` projection to find discrete counterparts of functions
-with an explicit expression.  Suppose we have :math:`u_0(x,y) = x^3 y^3`
-defined on the boundary of the domain and want to find the corresponding
-discrete function which is extended by zero in the interior of the domain.  We
-can solve for :math:`\widetilde{u_0} \in \mathrm{tr}\,V_h` which satisfies
+We can use :math:`L^2` projection to find discrete counterparts of functions or
+transform from one finite element basis to another.  Suppose we have
+:math:`u_0(x,y) = x^3 y^3` defined on the boundary of the domain and want to
+find the corresponding discrete function which is extended by zero in the
+interior of the domain.  You could explicitly assemble and solve the linear
+system corresponding to: find :math:`\widetilde{u_0} \in V_h` satisfying
 
 .. math::
 
-   \int_{\partial \Omega} \widetilde{u_0} v\,\mathrm{d}s = \int_{\partial \Omega} u_0 v\,\mathrm{d}s\quad \forall v \in \mathrm{tr}\,V_h.
+   \int_{\partial \Omega} \widetilde{u_0} v\,\mathrm{d}s = \int_{\partial \Omega} u_0 v\,\mathrm{d}s\quad \forall v \in V_h.
 
-Below we solve explicitly the above variational problem:
+However, this is so common that we have a shortcut
+:meth:`~skfem.assembly.AbstractBasis.project`:
 
 .. doctest::
 
    >>> import numpy as np
-   >>> import skfem as fem
-   >>> m = fem.MeshQuad()
-   >>> basis = fem.FacetBasis(m, fem.ElementQuadP(3))
-   >>> u_0 = lambda x: (x[0] * x[1]) ** 3
-   >>> M = fem.BilinearForm(lambda u, v, w: u * v).assemble(basis)
-   >>> f = fem.LinearForm(lambda v, w: u_0(w.x) * v).assemble(basis)
-   >>> x = fem.solve(*fem.condense(M, f, I=basis.get_dofs()))
-   >>> np.abs(np.round(x, 5))
-   array([0.     , 0.     , 1.     , 0.     , 0.     , 0.     , 0.     ,
-          0.     , 0.61237, 0.15811, 0.61237, 0.15811, 0.     , 0.     ,
-          0.     , 0.     ])
+   >>> from skfem import MeshQuad, FacetBasis, ElementQuad1
+   >>> m = MeshQuad().refined(2)
+   >>> basis = FacetBasis(m, ElementQuad1())
+   >>> u0 = lambda x: x[0] ** 3 * x[1] ** 3
+   >>> u0t = basis.project(u0)
+   >>> np.abs(np.round(u0t, 5))
+   array([1.0000e-05, 8.9000e-04, 9.7054e-01, 8.9000e-04, 6.0000e-05,
+          6.0000e-05, 1.0944e-01, 1.0944e-01, 0.0000e+00, 2.0000e-05,
+          2.0000e-05, 2.4000e-04, 8.0200e-03, 3.9797e-01, 3.9797e-01,
+          2.4000e-04, 8.0200e-03, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+          0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00])
 
-Alternatively, you can use :meth:`~skfem.assembly.AbstractBasis.project` which
-does exactly the same thing:
+.. plot::
 
-.. doctest::
+   import skfem as fem
+   m = fem.MeshQuad().refined(2)
+   basis = fem.FacetBasis(m, fem.ElementQuad2())
+   u0 = lambda x: x[0] ** 3 * x[1] ** 3
+   u0t = basis.project(u0)
+   np.abs(np.round(u0t, 5))
+   ibasis = fem.InteriorBasis(m, fem.ElementQuad1())
+   from skfem.visuals.matplotlib import plot, draw
+   ax = draw(ibasis)
+   plot(ibasis, u0t, nrefs=3, ax=ax, colorbar=True, shading='gouraud')
 
-   >>> y = basis.project(u_0)
-   >>> np.abs(np.round(y, 5))
-   array([0.     , 0.     , 1.     , 0.     , 0.     , 0.     , 0.     ,
-          0.     , 0.61237, 0.15811, 0.61237, 0.15811, 0.     , 0.     ,
-          0.     , 0.     ])
 
 .. _predefined:
 

@@ -435,5 +435,4 @@ class AbstractBasis:
         )
 
     def project(self, interp, **kwargs):
-        """Perform :math:`L^2` projection onto the basis."""
         raise NotImplementedError

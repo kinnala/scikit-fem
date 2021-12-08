@@ -216,7 +216,23 @@ class BoundaryFacetBasis(AbstractBasis):
         )
 
     def project(self, interp, facets=None):
+        """Perform :math:`L^2` projection onto the basis on the boundary.
 
+        The values of the interior DOFs remain zero.
+
+        Parameters
+        ----------
+        interp
+            An object of type :class:`~skfem.element.DiscreteField` which is a
+            function (to be projected) evaluated at global quadrature points at
+            the boundary of the domain.  If a function is given, then
+            :class:`~skfem.element.DiscreteField` is created by passing
+            an array of global quadrature point locations to the function.
+        facets
+            Optionally perform the projection on a subset of facets.  The
+            values of the remaining DOFs are zero.
+
+        """
         from skfem.utils import solve, condense
 
         M, f = self._projection(interp)
