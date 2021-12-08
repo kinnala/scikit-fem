@@ -93,6 +93,13 @@ unit square:
      Named boundaries [# facets]: left [8], bottom [8], right [8], top [8]
 
 
+.. plot::
+
+   from skfem import *
+   from skfem.visuals.matplotlib import *
+   draw(MeshTri().refined(3))
+
+
 Step 4: Define a basis
 ======================
 
@@ -153,6 +160,19 @@ which is a simple wrapper to ``scipy`` sparse solver:
    >>> x = fem.solve(*fem.condense(A, l, D=D))
    >>> x.shape
    (81,)
+
+.. plot::
+
+   from skfem import *
+   from skfem.visuals.matplotlib import *
+   from skfem.helpers import dot, grad
+   import numpy as np
+   basis = Basis(MeshTri().refined(3), ElementTriP1())
+   a = BilinearForm(lambda u, v, _: dot(grad(u), grad(v)))
+   L = LinearForm(lambda v, w: np.sin(np.pi * w.x[0]) * np.sin(np.pi * w.x[1]) * v)
+   y = solve(*condense(a.assemble(basis), L.assemble(basis), D=basis.get_dofs()))
+   plot(basis, y, nrefs=3, colorbar=True)
+
 
 Step 8: Calculate error
 =======================

@@ -38,8 +38,9 @@ DOFs on the matching facets:
    >>> dofs.facet
    {'u': array([26, 30, 39, 40])}
 
-The facets have their own numbering scheme starting from zero, however, the
-corresponding DOFs are offset by the total number of nodal DOFs.
+This element has one DOF per node and one DOF per facet.  The facets have their
+own numbering scheme starting from zero, however, the corresponding DOFs are
+offset by the total number of nodal DOFs:
 
 .. doctest::
 
@@ -109,8 +110,8 @@ as follows:
 
 See :ref:`dofindexing` for more detailed information.
 
-Creating discrete functions via projection
-==========================================
+Performing :math:`L^2` projections
+==================================
 
 We can use :math:`L^2` projection to find discrete counterparts of functions or
 transform from one finite element basis to another.  Suppose we have
@@ -129,7 +130,7 @@ However, this is so common that we have a shortcut
 .. doctest::
 
    >>> import numpy as np
-   >>> from skfem import MeshQuad, FacetBasis, ElementQuad1
+   >>> from skfem import *
    >>> m = MeshQuad().refined(2)
    >>> basis = FacetBasis(m, ElementQuad1())
    >>> u0 = lambda x: x[0] ** 3 * x[1] ** 3
@@ -145,24 +146,69 @@ However, this is so common that we have a shortcut
 
    import skfem as fem
    m = fem.MeshQuad().refined(2)
-   basis = fem.FacetBasis(m, fem.ElementQuad2())
+   basis = fem.FacetBasis(m, fem.ElementQuad1())
    u0 = lambda x: x[0] ** 3 * x[1] ** 3
    u0t = basis.project(u0)
-   np.abs(np.round(u0t, 5))
    ibasis = fem.InteriorBasis(m, fem.ElementQuad1())
    from skfem.visuals.matplotlib import plot, draw
    ax = draw(ibasis)
    plot(ibasis, u0t, nrefs=3, ax=ax, colorbar=True, shading='gouraud')
 
+We can also project over the entire domain:
+
+.. doctest::
+
+   >>> basis = Basis(m, ElementQuad1())
+   >>> f = lambda x: np.sin(2. * np.pi * x[0]) + 1.
+   >>> fh = basis.project(f)
+   >>> np.abs(np.round(fh, 5))
+   array([1.09848, 0.90152, 0.90152, 1.09848, 1.     , 1.09848, 0.90152,
+          1.     , 1.     , 2.19118, 1.09848, 0.19118, 0.90152, 0.90152,
+          0.19118, 1.09848, 2.19118, 1.     , 2.19118, 0.19118, 1.     ,
+          2.19118, 0.19118, 0.19118, 2.19118])
+
+.. plot::
+
+   import skfem as fem
+   m = fem.MeshQuad().refined(2)
+   basis = fem.CellBasis(m, fem.ElementQuad1())
+   f = lambda x: np.sin(2. * np.pi * x[0]) + 1.
+   fh = basis.project(f)
+   from skfem.visuals.matplotlib import plot, draw
+   ax = draw(basis)
+   plot(basis, fh, nrefs=3, ax=ax, colorbar=True, shading='gouraud')
+
+We can project from one finite element basis to another:
+
+.. doctest::
+
+   >>> basis0 = basis.with_element(ElementQuad0())
+   >>> fh = basis0.project(basis.interpolate(fh))
+   >>> np.abs(np.round(fh, 5))
+   array([1.64483, 0.40441, 0.40441, 1.64483, 1.59559, 0.35517, 0.35517,
+          1.59559, 1.59559, 0.35517, 0.35517, 1.59559, 1.64483, 0.40441,
+          0.40441, 1.64483])
+
+.. plot::
+
+   from skfem import *
+   m = MeshQuad().refined(2)
+   basis = CellBasis(m, ElementQuad1())
+   basis0 = basis.with_element(ElementQuad0())
+   f = lambda x: np.sin(2. * np.pi * x[0]) + 1.
+   fh = basis.project(f)
+   fh = basis0.project(basis.interpolate(fh))
+   from skfem.visuals.matplotlib import plot, draw
+   ax = draw(basis)
+   plot(basis0, fh, nrefs=3, ax=ax, colorbar=True, shading='gouraud')
 
 .. _predefined:
 
 Discrete functions in forms
 ===========================
 
-We can use previously created finite element functions inside the form.
-For example, consider
-a fixed-point iteration for the nonlinear problem
+We can use previously created finite element functions inside the form.  For
+example, consider a fixed-point iteration for the nonlinear problem
 
 .. math::
 
@@ -171,16 +217,15 @@ a fixed-point iteration for the nonlinear problem
       u &= 0 \quad \text{on $\partial \Omega$}.
    \end{aligned}
 
-We repeatedly
-find :math:`u_{k+1} \in H^1_0(\Omega)` which satisfies
+We repeatedly find :math:`u_{k+1} \in H^1_0(\Omega)` which satisfies
 
 .. math::
 
    \int_\Omega (u_{k} + 1) \nabla u_{k+1} \cdot \nabla v \,\mathrm{d}x = \int_\Omega v\,\mathrm{d}x
 
 for every :math:`v \in H^1_0(\Omega)`.
-Note how the bilinear form depends on the previous solution :math:`u_k`.
-The argument ``w`` is used to define such forms:
+Above the bilinear form depends on the previous solution :math:`u_k`.
+We use the argument ``w`` to define such forms:
 
 .. doctest::
 
@@ -191,7 +236,7 @@ The argument ``w`` is used to define such forms:
    ... def bilinf(u, v, w):
    ...     return (w.u_k + 1.) * dot(grad(u), grad(v))
 
-The previous solution :math:`u_k` must be provided to
+The previous solution :math:`u_k` is provided to
 :meth:`~skfem.assembly.BilinearForm.assemble` as a keyword argument
 after calling :meth:`~skfem.assembly.CellBasis.interpolate`:
 
@@ -216,11 +261,12 @@ after calling :meth:`~skfem.assembly.CellBasis.interpolate`:
    0.0703594204
    0.0703594204
 
-Inside the form definition, ``w`` is a dictionary of user provided arguments and
-additional default keys.
-By default, ``w['x']`` (accessible also as ``w.x``) corresponds to the global
-coordinates and ``w['h']`` (accessible also as ``w.h``) corresponds to the local
-mesh parameter.
+.. note::
+
+    Inside the form definition, ``w`` is a dictionary of user provided
+    arguments and additional default keys.  By default, ``w['x']`` (accessible
+    also as ``w.x``) corresponds to the global coordinates and ``w['h']``
+    (accessible also as ``w.h``) corresponds to the local mesh parameter.
 
 Assembling jump terms
 =====================
