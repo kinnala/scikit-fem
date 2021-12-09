@@ -87,7 +87,7 @@ Class: CellBasis
 .. autoclass:: skfem.assembly.Basis
 
 .. autoclass:: skfem.assembly.CellBasis
-   :members: __init__, interpolate
+   :members: __init__, interpolate, project
 
 
 Class: BoundaryFacetBasis
@@ -134,6 +134,17 @@ Module: skfem.element
    :show-inheritance:
    :exclude-members: DiscreteField, ElementVectorH1
 
+.. note::
+
+   The element global basis is calculated at quadrature points and stored inside
+   :class:`~skfem.element.DiscreteField` objects.
+   The different element types precalculate different fields of
+   :class:`~skfem.element.DiscreteField`.  E.g., for :math:`H(div)`
+   finite elements it is natural to precalculate ``DiscreteField.div``.
+   The high order derivatives are created only when using subclasses of
+   :class:`~skfem.element.ElementGlobal`.
+                 
+
 .. autoclass:: skfem.element.DiscreteField
 
 Module: skfem.utils
@@ -154,11 +165,6 @@ Function: enforce
 
 .. autofunction:: skfem.utils.enforce
 
-Function: projection
---------------------
-
-.. autofunction:: skfem.utils.projection
-
 Module: skfem.helpers
 =====================
 
@@ -174,8 +180,24 @@ Module: skfem.helpers
 
 .. autofunction:: skfem.helpers.dd
 
+.. autofunction:: skfem.helpers.ddd
+
+.. autofunction:: skfem.helpers.dddd
+
 .. autofunction:: skfem.helpers.sym_grad
 
 .. autofunction:: skfem.helpers.dot
 
 .. autofunction:: skfem.helpers.ddot
+
+.. autofunction:: skfem.helpers.dddot
+
+.. autofunction:: skfem.helpers.mul
+
+.. autofunction:: skfem.helpers.trace
+
+.. autofunction:: skfem.helpers.transpose
+
+.. autofunction:: skfem.helpers.prod
+
+.. autofunction:: skfem.helpers.inv

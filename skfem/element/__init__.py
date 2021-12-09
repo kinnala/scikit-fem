@@ -13,6 +13,7 @@ from .element import Element
 from .element_h1 import ElementH1
 from .element_hdiv import ElementHdiv
 from .element_hcurl import ElementHcurl
+from .element_global import ElementGlobal
 from .element_vector import ElementVector
 from .element_tri import (ElementTriP1, ElementTriP2,  # noqa
                           ElementTriP0, ElementTriRT0, ElementTriMorley,
@@ -69,6 +70,7 @@ __all__ = [
     "ElementVectorH1",
     "ElementHdiv",
     "ElementHcurl",
+    "ElementGlobal",
     "ElementDG",
     "ElementComposite",
     "ElementTriP1",

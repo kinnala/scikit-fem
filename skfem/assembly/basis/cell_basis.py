@@ -211,6 +211,8 @@ class CellBasis(AbstractBasis):
     def project(self, interp, elements=None):
         """Perform :math:`L^2` projection onto the basis.
 
+        See :ref:`l2proj` for more information.
+
         Parameters
         ----------
         interp

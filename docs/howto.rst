@@ -128,6 +128,8 @@ as follows:
 
 See :ref:`dofindexing` for more details.
 
+.. _l2proj:
+
 Performing :math:`L^2` projections
 ==================================
 
