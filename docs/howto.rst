@@ -130,8 +130,8 @@ See :ref:`dofindexing` for more details.
 
 .. _l2proj:
 
-Performing :math:`L^2` projections
-==================================
+Performing projections
+======================
 
 We can use :math:`L^2` projection to find discrete counterparts of functions or
 transform from one finite element basis to another.  Suppose we have
