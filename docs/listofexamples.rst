@@ -21,6 +21,7 @@ triangular elements.
 
 See the `source code of Example 1 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex01.py>`_ for more information.
 
+.. _ex07:
 
 Example 7: Discontinuous Galerkin method
 ----------------------------------------

@@ -74,24 +74,41 @@ def sym_grad(u: DiscreteField):
 
 
 def dd(u: DiscreteField):
-    """Hessian (if available)."""
+    """Hessian (for :class:`~skfem.element.ElementGlobal`)."""
     if u.is_zero():
         return u
     return u.hess
 
 
 def ddd(u: DiscreteField):
-    """Third derivative (if available)."""
+    """Third derivative (for :class:`~skfem.element.ElementGlobal`)."""
     if u.is_zero():
         return u
     return u.grad3
 
 
 def dddd(u: DiscreteField):
-    """Fourth derivative (if available)."""
+    """Fourth derivative (for :class:`~skfem.element.ElementGlobal`)."""
     if u.is_zero():
         return u
     return u.grad4
+
+
+def inner(u: FieldOrArray, v: FieldOrArray):
+    """Inner product between any matching tensors."""
+    if isinstance(u, DiscreteField) and u.is_zero():
+        return u
+    if isinstance(v, DiscreteField) and v.is_zero():
+        return v
+    U = u.value if isinstance(u, DiscreteField) else u
+    V = v.value if isinstance(v, DiscreteField) else v
+    if len(U.shape) == 2:
+        return U * V
+    elif len(U.shape) == 3:
+        return dot(U, V)
+    elif len(U.shape) == 4:
+        return ddot(U, V)
+    raise NotImplementedError
 
 
 def dot(u: FieldOrArray, v: FieldOrArray):
@@ -181,21 +198,7 @@ def identity(w, N=None):
 
 
 def det(A):
-    """
-    Determinant of an array `A` over trailing axis (if any).
-
-    Parameters
-    ----------
-    A : (N, N,...) numpy.ndarray
-        N = 2 or 3
-        Input array whose determinant is to be computed
-
-    Returns
-    -------
-    det : (...) numpy.ndarray
-        Determinant of `A`.
-
-    """
+    """Determinant of an array `A` over trailing axis (if any)."""
     detA = zeros_like(A[0, 0])
     if A.shape[0] == 3:
         detA = A[0, 0] * (A[1, 1] * A[2, 2] -
@@ -210,20 +213,7 @@ def det(A):
 
 
 def inv(A):
-    """Inverse of an array `A` over trailing axis (if any)
-
-    Parameters
-    ----------
-    A : (N, N,...) numpy.ndarray
-        N = 2 or 3
-        Input array whose inverse is to be computed
-
-    Returns
-    -------
-    Ainv : (N, N,...) numpy.ndarray
-        Inverse of `A`.
-
-    """
+    """Inverse of an array `A` over trailing axis (if any)."""
     invA = zeros_like(A)
     detA = det(A)
     if A.shape[0] == 3:

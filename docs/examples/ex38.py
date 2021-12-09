@@ -47,9 +47,8 @@ b = basis.point_source(source)
 
 x = solve(*condense(A, b, D=basis.get_dofs()))
 
-exact = projection(
-    partial(greens, np.linalg.norm(basis.mesh.p, axis=0).max(), source), basis
-)
+a = np.linalg.norm(basis.mesh.p, axis=0).max()
+exact = basis.project(lambda x: greens(a, source, x))
 error = x - exact
 l2error = np.sqrt(error @ mass.assemble(basis) @ error)
 

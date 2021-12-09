@@ -317,18 +317,14 @@ K_elec = (
 voltage = 1
 
 # initialize the non-homogeneous Dirichlet conditions on the conductor surfaces
-U = np.zeros(K_elec.shape[0])
-U[dofs['inner_conductor_outer_surface']] = projection(
-    lambda x: voltage/2, inner_conductor_outer_surface_basis,
-    I=dofs['inner_conductor_outer_surface'])
-U[dofs['outer_conductor_inner_surface']] = projection(
-    lambda x: -voltage/2, outer_conductor_inner_surface_basis,
-    I=dofs['outer_conductor_inner_surface'])
+U = inner_conductor_outer_surface_basis.project(voltage / 2.)
+U += outer_conductor_inner_surface_basis.project(-voltage / 2.)
+D = np.hstack((
+    dofs['inner_conductor_outer_surface'],
+    dofs['outer_conductor_inner_surface'],
+))
 
-U = solve(*condense(
-    K_elec, x=U,
-    D=dofs['inner_conductor_outer_surface'] |
-    dofs['outer_conductor_inner_surface']))
+U = solve(*condense(K_elec, x=U, D=D))
 
 # electric field energy
 E_elec = 0.5*np.dot(U, K_elec*U)
@@ -353,11 +349,13 @@ if __name__ == '__main__':
     from skfem.visuals.matplotlib import plot, savefig
     import matplotlib.pyplot as plt
 
-    B_x = projection(A, global_basis, global_basis, 1)
-    B_y = -projection(A, global_basis, global_basis, 0)
+    Ai = global_basis.interpolate(A)
+    B_x = global_basis.project(Ai.grad[1])
+    B_y = -global_basis.project(Ai.grad[0])
 
-    E_x = -projection(U, global_basis, global_basis, 0)
-    E_y = -projection(U, global_basis, global_basis, 1)
+    Ui = global_basis.interpolate(U)
+    E_x = -global_basis.project(Ui.grad[0])
+    E_y = -global_basis.project(Ui.grad[1])
 
     fig = plt.figure(figsize=(11.52, 5.12))
 

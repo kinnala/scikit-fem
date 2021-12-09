@@ -11,10 +11,10 @@
 </p>
 
 
-`scikit-fem` is a lightweight Python 3.7+ library for performing [finite element
-assembly](https://en.wikipedia.org/wiki/Finite_element_method). Its main purpose
-is the transformation of bilinear forms into sparse matrices and linear forms
-into vectors.
+`scikit-fem` is a lightweight pure Python 3.7+ library for performing [finite
+element assembly](https://en.wikipedia.org/wiki/Finite_element_method). Its
+main purpose is the transformation of bilinear forms into sparse matrices and
+linear forms into vectors.
 
 Features:
 - minimal dependencies, no compiled code
@@ -29,8 +29,8 @@ The most recent release can be installed simply by
 ```
 pip install scikit-fem[all]
 ```
-Specifying `[all]` includes `meshio` for mesh input/output,
-and `matplotlib` for simple visualization.
+Remove `[all]` to not install the optional dependencies `meshio` for mesh
+input/output, and `matplotlib` for creating simple visualizations.
 The minimal dependencies are `numpy` and `scipy`.
 You can also try the library in browser through [Google Colab](https://colab.research.google.com/github/kinnala/scikit-fem-notebooks/blob/master/ex1.ipynb).
 
@@ -306,7 +306,7 @@ with respect to documented and/or tested features.
 
 - Added: `ElementTriCCR` and `ElementTetCCR`, conforming Crouzeix-Raviart finite elements
 - Fixed: `Mesh.mirrored` returned a wrong mesh when a point other than the origin was used
-- Fixed: `MeshLine` constructor accepted only NumPy arrays and not plain Python lists
+- Fixed: `MeshLine` constructor accepted only numpy arrays and not plain Python lists
 - Fixed: `Mesh.element_finder` (and `CellBasis.probes`, `CellBasis.interpolator`) was not working properly for a small number of elements (<5) or a large number of input points (>1000)
 - Fixed: `MeshTet` and `MeshTri.element_finder` are now more robust against degenerate elements
 - Fixed: `Mesh.element_finder` (and `CellBasis.probes`, `CellBasis.interpolator`) raises exception if the query point is outside of the domain
@@ -348,6 +348,8 @@ with respect to documented and/or tested features.
 - Removed: `skfem.models.helpers`; available as `skfem.helpers`
 - Removed: `DiscreteField.{f,df,ddf,hod}`; available as `DiscreteField.{value,grad,hess,grad3,...}`
 - Removed: Python 3.6 support
+- Removed: `skfem.utils.L2_projection`
+- Removed: `skfem.utils.derivative`
 - Changed: `Mesh.refined` no more attempts to fix the indexing of `Mesh.boundaries` after refine
 - Changed: `skfem.utils.solve` now uses `scipy.sparse.eigs` instead of `scipy.sparse.eigsh` by default;
   the old behavior can be retained by explicitly passing `solver=solver_scipy_eigs_sym()`

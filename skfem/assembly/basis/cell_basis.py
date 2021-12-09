@@ -207,3 +207,31 @@ class CellBasis(AbstractBasis):
             quadrature=self.quadrature,
             elements=self.tind,
         )
+
+    def project(self, interp, elements=None):
+        """Perform :math:`L^2` projection onto the basis.
+
+        See :ref:`l2proj` for more information.
+
+        Parameters
+        ----------
+        interp
+            An object of type :class:`~skfem.element.DiscreteField` which is a
+            function (to be projected) evaluated at global quadrature points.
+            If a function is given, then :class:`~skfem.element.DiscreteField`
+            is created by passing an array of global quadrature point locations
+            to the function.
+        elements
+            Optionally perform the projection on a subset of elements.  The
+            values of the remaining DOFs are zero.
+
+        """
+        from skfem.utils import solve, condense
+
+        M, f = self._projection(interp)
+
+        if elements is not None:
+            return solve(*condense(M, f, I=self.get_dofs(elements=elements)))
+        elif self.tind is not None:
+            return solve(*condense(M, f, I=self.get_dofs(elements=self.tind)))
+        return solve(M, f)

@@ -45,12 +45,7 @@ y = x[:, 4]
 sgb = gb.with_element(ElementVector(e))
 C = linear_stress(lam, mu)
 yi = gb.interpolate(y)
-
-@LinearForm
-def proj(v, _):
-    return ddot(C(sym_grad(yi)), v)
-
-sigma = projection(proj, sgb, gb)
+sigma = sgb.project(C(sym_grad(yi)))
 
 if __name__ == "__main__":
     from skfem.visuals.matplotlib import plot, draw, show

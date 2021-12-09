@@ -50,8 +50,8 @@ D = basis.get_dofs()
 
 x = solve(*condense(A, f, D=D))
 
-y_basis = basis.with_element(ElementVector(ElementTetP1()))
-y = projection(x, y_basis, basis)
+ybasis = basis.with_element(ElementVector(ElementTetP1()))
+y = ybasis.project(basis.interpolate(x))
 
 if __name__ == '__main__':
 
@@ -59,4 +59,4 @@ if __name__ == '__main__':
     from sys import argv
     name = splitext(argv[0])[0]
 
-    m.save('{}_solution.vtk'.format(name), {'field': y[y_basis.nodal_dofs].T})
+    m.save('{}_solution.vtk'.format(name), {'field': y[ybasis.nodal_dofs].T})

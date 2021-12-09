@@ -88,7 +88,7 @@ class COOData:
         )
 
     def toarray(self) -> ndarray:
-        """Return a dense NumPy array."""
+        """Return a dense numpy array."""
         if len(self.shape) == 1:
             return coo_matrix(
                 (self.data, (self.indices[0], np.zeros_like(self.indices[0]))),

@@ -5,6 +5,7 @@ import numpy as np
 
 
 class ElementTriSkeletonP0(ElementH1):
+    """Constant element for the mesh skeleton."""
 
     facet_dofs = 1
     maxdeg = 0

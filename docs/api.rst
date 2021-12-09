@@ -87,7 +87,7 @@ Class: CellBasis
 .. autoclass:: skfem.assembly.Basis
 
 .. autoclass:: skfem.assembly.CellBasis
-   :members: __init__, interpolate
+   :members: __init__, interpolate, project
 
 
 Class: BoundaryFacetBasis
@@ -130,9 +130,69 @@ Module: skfem.element
 =====================
 
 .. automodule:: skfem.element
-   :members:
    :show-inheritance:
-   :exclude-members: DiscreteField, ElementVectorH1
+
+.. autosummary::
+
+    skfem.element.ElementH1
+    skfem.element.ElementVector
+    skfem.element.ElementHdiv
+    skfem.element.ElementHcurl
+    skfem.element.ElementGlobal
+    skfem.element.ElementDG
+    skfem.element.ElementComposite
+    skfem.element.ElementTriP1
+    skfem.element.ElementTriP2
+    skfem.element.ElementTriP3
+    skfem.element.ElementTriP4
+    skfem.element.ElementTriP0
+    skfem.element.ElementTriCR
+    skfem.element.ElementTriCCR
+    skfem.element.ElementTriRT0
+    skfem.element.ElementTriMorley
+    skfem.element.ElementTri15ParamPlate
+    skfem.element.ElementTriArgyris
+    skfem.element.ElementTriMini
+    skfem.element.ElementTriHermite
+    skfem.element.ElementTriSkeletonP0
+    skfem.element.ElementTriSkeletonP1
+    skfem.element.ElementTriBDM1
+    skfem.element.ElementQuad0
+    skfem.element.ElementQuad1
+    skfem.element.ElementQuad2
+    skfem.element.ElementQuadS2
+    skfem.element.ElementQuadP
+    skfem.element.ElementQuadBFS
+    skfem.element.ElementTetP0
+    skfem.element.ElementTetP1
+    skfem.element.ElementTetP2
+    skfem.element.ElementTetRT0
+    skfem.element.ElementTetN0
+    skfem.element.ElementTetMini
+    skfem.element.ElementTetCR
+    skfem.element.ElementTetCCR
+    skfem.element.ElementHex0
+    skfem.element.ElementHex1
+    skfem.element.ElementHex2
+    skfem.element.ElementHexS2
+    skfem.element.ElementLineP0
+    skfem.element.ElementLineP1
+    skfem.element.ElementLineP2
+    skfem.element.ElementLinePp
+    skfem.element.ElementLineHermite
+    skfem.element.ElementLineMini
+   
+
+.. note::
+
+   The element global basis is calculated at quadrature points and stored inside
+   :class:`~skfem.element.DiscreteField` objects.
+   The different element types precalculate different fields of
+   :class:`~skfem.element.DiscreteField`.  E.g., for :math:`H(div)`
+   finite elements it is natural to precalculate ``DiscreteField.div``.
+   The high order derivatives are created only when using subclasses of
+   :class:`~skfem.element.ElementGlobal`.
+                 
 
 .. autoclass:: skfem.element.DiscreteField
 
@@ -154,11 +214,6 @@ Function: enforce
 
 .. autofunction:: skfem.utils.enforce
 
-Function: projection
---------------------
-
-.. autofunction:: skfem.utils.projection
-
 Module: skfem.helpers
 =====================
 
@@ -174,8 +229,24 @@ Module: skfem.helpers
 
 .. autofunction:: skfem.helpers.dd
 
+.. autofunction:: skfem.helpers.ddd
+
+.. autofunction:: skfem.helpers.dddd
+
 .. autofunction:: skfem.helpers.sym_grad
 
 .. autofunction:: skfem.helpers.dot
 
 .. autofunction:: skfem.helpers.ddot
+
+.. autofunction:: skfem.helpers.dddot
+
+.. autofunction:: skfem.helpers.mul
+
+.. autofunction:: skfem.helpers.trace
+
+.. autofunction:: skfem.helpers.transpose
+
+.. autofunction:: skfem.helpers.prod
+
+.. autofunction:: skfem.helpers.inv

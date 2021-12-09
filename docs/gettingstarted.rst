@@ -11,12 +11,14 @@ install the package via
 
    pip install scikit-fem[all]
 
-You can also try `Google Colab <https://colab.research.google.com/>`_ in your
-web browser and install scikit-fem by executing
+Specifying ``[all]`` includes ``meshio`` for mesh input/output, and
+``matplotlib`` for simple visualizations.  The minimal dependencies are
+``numpy`` and ``scipy``.  You can also install scikit-fem in `Google Colab
+<https://colab.research.google.com/>`_ by executing
 
 .. code-block:: bash
 
-   !pip install scikit-fem[all]
+   !pip install scikit-fem
 
 Step 1: Clarify the problem
 ===========================
@@ -39,11 +41,9 @@ find :math:`u \in H^1_0(\Omega)` satisfying
 
 .. note::
 
-   Above :math:`H^1_0(\Omega)` is the space of functions that are zero
-   on the boundary :math:`\partial \Omega` and the square integral of the
-   first derivative is finite.  This is a common function space
-   to use for second-order boundary value problems because 
-   it often corresponds to the space of functions with finite energy.
+   :math:`H^1_0(\Omega)` is the space of functions that are zero on the
+   boundary :math:`\partial \Omega` and have finite energy: the square integral
+   of the first derivative is finite.
 
 Step 2: Express the forms as code
 =================================
@@ -91,6 +91,13 @@ unit square:
      Number of vertices: 81
      Number of nodes: 81
      Named boundaries [# facets]: left [8], bottom [8], right [8], top [8]
+
+
+.. plot::
+
+   from skfem import *
+   from skfem.visuals.matplotlib import *
+   draw(MeshTri().refined(3))
 
 
 Step 4: Define a basis
@@ -153,6 +160,20 @@ which is a simple wrapper to ``scipy`` sparse solver:
    >>> x = fem.solve(*fem.condense(A, l, D=D))
    >>> x.shape
    (81,)
+
+.. plot::
+
+   from skfem import *
+   from skfem.visuals.matplotlib import *
+   from skfem.helpers import dot, grad
+   import numpy as np
+   basis = Basis(MeshTri().refined(3), ElementTriP1())
+   a = BilinearForm(lambda u, v, _: dot(grad(u), grad(v)))
+   L = LinearForm(lambda v, w: np.sin(np.pi * w.x[0]) * np.sin(np.pi * w.x[1]) * v)
+   y = solve(*condense(a.assemble(basis), L.assemble(basis), D=basis.get_dofs()))
+   ax = draw(basis)
+   plot(basis, y, ax=ax, nrefs=3, colorbar=True)
+
 
 Step 8: Calculate error
 =======================
