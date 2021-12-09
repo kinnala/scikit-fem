@@ -11,10 +11,10 @@
 </p>
 
 
-`scikit-fem` is a lightweight Python 3.7+ library for performing [finite element
-assembly](https://en.wikipedia.org/wiki/Finite_element_method). Its main purpose
-is the transformation of bilinear forms into sparse matrices and linear forms
-into vectors.
+`scikit-fem` is a lightweight pure Python 3.7+ library for performing [finite
+element assembly](https://en.wikipedia.org/wiki/Finite_element_method). Its
+main purpose is the transformation of bilinear forms into sparse matrices and
+linear forms into vectors.
 
 Features:
 - minimal dependencies, no compiled code
@@ -29,8 +29,8 @@ The most recent release can be installed simply by
 ```
 pip install scikit-fem[all]
 ```
-Specifying `[all]` includes `meshio` for mesh input/output,
-and `matplotlib` for simple visualizations.
+Remove `[all]` to not install the optional dependencies `meshio` for mesh
+input/output, and `matplotlib` for creating simple visualizations.
 The minimal dependencies are `numpy` and `scipy`.
 You can also try the library in browser through [Google Colab](https://colab.research.google.com/github/kinnala/scikit-fem-notebooks/blob/master/ex1.ipynb).
 

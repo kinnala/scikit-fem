@@ -2,8 +2,8 @@
  Documentation of scikit-fem
 =============================
 
-`scikit-fem <https://github.com/kinnala/scikit-fem>`_ is a lightweight Python 3.7+
-library for performing `finite element assembly
+`scikit-fem <https://github.com/kinnala/scikit-fem>`_ is a lightweight pure
+Python 3.7+ library for performing `finite element assembly
 <https://en.wikipedia.org/wiki/Finite_element_method>`_. Its main purpose is
 the transformation of bilinear forms into sparse matrices and linear forms into
 vectors.  The library supports triangular, quadrilateral, tetrahedral and
@@ -17,7 +17,8 @@ hexahedral meshes as well as one-dimensional problems.
 
         pip install scikit-fem[all]
 
-    Remove ``[all]`` to not install ``meshio`` and ``matplotlib``.
+    Remove ``[all]`` to not install the optional dependencies ``meshio`` and
+    ``matplotlib``.
 
 Table of contents
 =================
