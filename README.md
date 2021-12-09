@@ -30,7 +30,7 @@ The most recent release can be installed simply by
 pip install scikit-fem[all]
 ```
 Specifying `[all]` includes `meshio` for mesh input/output,
-and `matplotlib` for simple visualization.
+and `matplotlib` for simple visualizations.
 The minimal dependencies are `numpy` and `scipy`.
 You can also try the library in browser through [Google Colab](https://colab.research.google.com/github/kinnala/scikit-fem-notebooks/blob/master/ex1.ipynb).
 

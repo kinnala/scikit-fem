@@ -17,7 +17,7 @@ hexahedral meshes as well as one-dimensional problems.
 
         pip install scikit-fem[all]
 
-    Examples can be found in the `gallery <listofexamples.html>`_.
+    Remove ``[all]`` to not install ``meshio`` and ``matplotlib``.
 
 Table of contents
 =================

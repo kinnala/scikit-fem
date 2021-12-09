@@ -12,7 +12,7 @@ install the package via
    pip install scikit-fem[all]
 
 Specifying ``[all]`` includes ``meshio`` for mesh input/output, and
-``matplotlib`` for simple visualization.  The minimal dependencies are
+``matplotlib`` for simple visualizations.  The minimal dependencies are
 ``numpy`` and ``scipy``.  You can also install scikit-fem in `Google Colab
 <https://colab.research.google.com/>`_ by executing
 
