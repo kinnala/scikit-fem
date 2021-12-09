@@ -5,6 +5,7 @@ import numpy as np
 
 
 class ElementTriSkeletonP1(ElementH1):
+    """Linear element for the mesh skeleton."""
 
     facet_dofs = 2
     maxdeg = 1

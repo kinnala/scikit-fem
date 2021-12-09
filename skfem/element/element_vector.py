@@ -4,6 +4,7 @@ from .discrete_field import DiscreteField
 
 
 class ElementVector(Element):
+    """Use the same element for each dimension."""
 
     def __init__(self, elem, dim=None):
         self.elem = elem
