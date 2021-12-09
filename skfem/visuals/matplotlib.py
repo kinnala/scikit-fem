@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
 from ..assembly import CellBasis
-from ..mesh import Mesh2D, MeshLine1, MeshQuad1, MeshTet1, MeshTri1
+from ..mesh import Mesh2D, MeshLine1, MeshQuad1, MeshTet1, MeshTri1, MeshHex1
 
 
 @singledispatch
@@ -38,6 +38,23 @@ def draw_meshtet(m: MeshTet1, **kwargs) -> Axes:
     indexing = m.facets[:, bnd_facets].T
     ax.plot_trisurf(m.p[0], m.p[1], m.p[2],
                     triangles=indexing, cmap=plt.cm.viridis, edgecolor='k')
+    ax.set_axis_off()
+    ax.show = lambda: plt.show()
+    return ax
+
+
+@draw.register(MeshHex1)
+def draw_meshhex(m: MeshHex1, **kwargs) -> Axes:
+    """Visualize a hexahedral mesh by drawing the edges."""
+    ax = plt.figure().add_subplot(1, 1, 1, projection='3d')
+    for ix in range(m.edges.shape[1]):
+        ax.plot3D(
+            m.p[0, m.edges[:, ix]].flatten(),
+            m.p[1, m.edges[:, ix]].flatten(),
+            m.p[2, m.edges[:, ix]].flatten(),
+            kwargs['color'] if 'color' in kwargs else 'k',
+            linewidth=kwargs['linewidth'] if 'linewidth' in kwargs else .5,
+        )
     ax.set_axis_off()
     ax.show = lambda: plt.show()
     return ax

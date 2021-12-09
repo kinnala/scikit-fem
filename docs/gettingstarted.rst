@@ -171,7 +171,8 @@ which is a simple wrapper to ``scipy`` sparse solver:
    a = BilinearForm(lambda u, v, _: dot(grad(u), grad(v)))
    L = LinearForm(lambda v, w: np.sin(np.pi * w.x[0]) * np.sin(np.pi * w.x[1]) * v)
    y = solve(*condense(a.assemble(basis), L.assemble(basis), D=basis.get_dofs()))
-   plot(basis, y, nrefs=3, colorbar=True)
+   ax = draw(basis)
+   plot(basis, y, ax=ax, nrefs=3, colorbar=True)
 
 
 Step 8: Calculate error

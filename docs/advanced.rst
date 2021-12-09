@@ -108,7 +108,7 @@ allows experimenting:
    array([[2., 2., 2.],
           [1., 1., 1.]])
 
-Notice how ``dot(grad(u), grad(v))`` is a NumPy array with the shape `number of
+Notice how ``dot(grad(u), grad(v))`` is a numpy array with the shape `number of
 elements` x `number of quadrature points per element`.  The return value should
 always have such shape no matter which mesh or element type is used.
 
@@ -124,7 +124,7 @@ readable.  An alternative way to write the above form is
 
 .. note::
 
-    In fact, ``u`` and ``v`` are simply named tuples of NumPy arrays with the
+    In fact, ``u`` and ``v`` are simply named tuples of numpy arrays with the
     values of the function at ``u[0]`` or ``u.value`` and the values of the
     gradient at ``u[1]`` or ``u.grad`` (and some additional magic such as
     implementing ``__array__`` and ``__mul__`` so that expressions such as
@@ -190,6 +190,12 @@ cube mesh:
      Number of DOFs: 27
      Size: 296352 B
 
+.. plot::
+
+   from skfem import *
+   from skfem.visuals.matplotlib import *
+   draw(MeshHex())
+
 The DOFs corresponding to the nodes (or vertices) of the mesh are
 
 .. doctest::
@@ -201,6 +207,16 @@ This means that the first (zeroth) entry in the DOF array corresponds to the
 first node/vertex in the finite element mesh (see ``m.p`` for a list of
 nodes/vertices).
 
+.. plot::
+
+   from skfem import *
+   from skfem.visuals.matplotlib import *
+   m = MeshHex()
+   basis = Basis(m, ElementHex2())
+   ax = draw(m)
+   for dof in basis.nodal_dofs.flatten():
+       ax.text(*basis.doflocs[:, dof], str(dof))
+
 Similarly, the DOFs corresponding to the edges (``m.edges`` for a list of
 edges) and the facets (``m.facets`` for a list of facets) of the mesh are
 
@@ -210,6 +226,26 @@ edges) and the facets (``m.facets`` for a list of facets) of the mesh are
    array([[ 8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]])
    >>> basis.facet_dofs
    array([[20, 21, 22, 23, 24, 25]])
+
+.. plot::
+
+   from skfem import *
+   from skfem.visuals.matplotlib import *
+   m = MeshHex()
+   basis = Basis(m, ElementHex2())
+   ax = draw(m)
+   for dof in basis.edge_dofs.flatten():
+       ax.text(*basis.doflocs[:, dof], str(dof))
+
+.. plot::
+
+   from skfem import *
+   from skfem.visuals.matplotlib import *
+   m = MeshHex()
+   basis = Basis(m, ElementHex2())
+   ax = draw(m)
+   for dof in basis.facet_dofs.flatten():
+       ax.text(*basis.doflocs[:, dof], str(dof))
 
 All DOFs in ``nodal_dofs``, ``edge_dofs`` and ``facet_dofs``
 are shared between neighbouring elements to preserve continuity.
