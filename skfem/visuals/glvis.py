@@ -3,13 +3,12 @@ import numpy as np
 import io
 
 from typing import Optional
+from numpy import ndarray
 from glvis import glvis
 
 
 MESH_TYPE_MAPPING = {
     skfem.MeshTet1: 4,
-    skfem.MeshHex1: 5,
-#    skfem.MeshWedge1: 6,
     skfem.MeshTri1: 2,
     skfem.MeshQuad1: 3,
     skfem.MeshLine1: 1,
@@ -21,15 +20,6 @@ BOUNDARY_TYPE_MAPPING = {
     2: 1,
     3: 1,
     5: 3,
-}
-
-
-FEM_COLLECTION_MAPPING = {
-    skfem.ElementTriP1: 'Linear',
-#    skfem.ElementTriP2: 'Quadratic',
-    skfem.ElementTetP1: 'Linear',
-    skfem.ElementQuad1: 'Linear',
-    skfem.ElementHex1: 'Linear',
 }
 
 
@@ -57,7 +47,6 @@ FiniteElementSpace
 FiniteElementCollection: {}
 VDim: {}
 Ordering: 0
-
 {}
 
 {}
@@ -105,9 +94,12 @@ def plot(basis, x, keys: Optional[str] = None):
         m.nvertices,
         m.doflocs.shape[0],
         _to_float_string(m.doflocs.T),
-        FEM_COLLECTION_MAPPING[elem_type],
+        'Linear',
         vdim,
         _to_float_string(x[:, None]),
         "keys\n{}".format(keys) if keys is not None else "",
     ))
 
+
+def draw(basis, keys: Optional[str] = None):
+    return plot(basis, basis.zeros(), keys=keys)
