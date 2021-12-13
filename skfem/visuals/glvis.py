@@ -1,5 +1,4 @@
 import skfem
-import numpy as np
 import io
 
 from typing import Optional
@@ -52,6 +51,7 @@ Ordering: 0
 {}
 """
 
+
 def _to_int_string(arr):
     s = io.BytesIO()
     np.savetxt(s, arr, delimiter=' ', fmt='%d')
@@ -67,11 +67,9 @@ def _to_float_string(arr):
 def plot(basis, x, keys: Optional[str] = None):
     m = basis.mesh
     if isinstance(basis.elem, skfem.ElementVector):
-        elem_type = type(basis.elem.elem)
         vdim = m.dim()
         x = x.reshape((-1, vdim)).flatten('F')
     else:
-        elem_type = type(basis.elem)
         vdim = 1
     bfacets = m.boundary_facets()
     nbfacets = len(bfacets)
@@ -90,7 +88,7 @@ def plot(basis, x, keys: Optional[str] = None):
             (np.zeros(nbfacets, dtype=np.int64)[:, None]
              + BOUNDARY_TYPE_MAPPING[MESH_TYPE_MAPPING[type(m)]]),
             m.facets[:, bfacets].T,
-        ))),        
+        ))),
         m.nvertices,
         m.doflocs.shape[0],
         _to_float_string(m.doflocs.T),
