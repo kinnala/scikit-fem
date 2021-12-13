@@ -2,6 +2,7 @@ import skfem
 import numpy as np
 import io
 
+from typing import Optional
 from glvis import glvis
 
 
@@ -28,6 +29,7 @@ FEM_COLLECTION_MAPPING = {
 #    skfem.ElementTriP2: 'Quadratic',
     skfem.ElementTetP1: 'Linear',
     skfem.ElementQuad1: 'Linear',
+    skfem.ElementHex1: 'Linear',
 }
 
 
@@ -57,6 +59,8 @@ VDim: {}
 Ordering: 0
 
 {}
+
+{}
 """
 
 def _to_int_string(arr):
@@ -71,8 +75,15 @@ def _to_float_string(arr):
     return s.getvalue().decode()
 
 
-def plot(basis, x):
+def plot(basis, x, keys: Optional[str] = None):
     m = basis.mesh
+    if isinstance(basis.elem, skfem.ElementVector):
+        elem_type = type(basis.elem.elem)
+        vdim = m.dim()
+        x = x.reshape((-1, vdim)).flatten('F')
+    else:
+        elem_type = type(basis.elem)
+        vdim = 1
     bfacets = m.boundary_facets()
     nbfacets = len(bfacets)
     return glvis(template.format(
@@ -94,8 +105,9 @@ def plot(basis, x):
         m.nvertices,
         m.doflocs.shape[0],
         _to_float_string(m.doflocs.T),
-        FEM_COLLECTION_MAPPING[type(basis.elem)],
-        1,
+        FEM_COLLECTION_MAPPING[elem_type],
+        vdim,
         _to_float_string(x[:, None]),
+        "keys\n{}".format(keys) if keys is not None else "",
     ))
 
