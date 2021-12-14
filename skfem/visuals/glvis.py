@@ -1,8 +1,8 @@
 import skfem
 import io
+import numpy as np
 
 from typing import Optional
-from numpy import ndarray
 from glvis import glvis
 
 
