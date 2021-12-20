@@ -6,9 +6,9 @@ from skfem.helpers import dot, div
 
 
 p = np.linspace(0, 1, 10)
-m = MeshTri.init_tensor(*(p,) * 2)
+m = MeshQuad.init_tensor(*(p,) * 2)
 
-e = ElementTriRT0() * ElementTriP0()
+e = ElementQuadRT0() * ElementQuad0()
 basis = Basis(m, e)
 
 

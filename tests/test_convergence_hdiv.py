@@ -2,10 +2,11 @@ import unittest
 
 import numpy as np
 
-from skfem import BilinearForm, InteriorBasis, LinearForm, asm, solve
+from skfem import BilinearForm, CellBasis, LinearForm, asm, solve
 from skfem.element import (ElementTetP0, ElementTetRT0, ElementTriP0,
-                           ElementTriRT0, ElementTriBDM1)
-from skfem.mesh import MeshTet, MeshTri
+                           ElementTriRT0, ElementTriBDM1,
+                           ElementQuadRT0, ElementQuad0)
+from skfem.mesh import MeshTet, MeshTri, MeshQuad
 
 
 class ConvergenceRaviartThomas(unittest.TestCase):
@@ -128,8 +129,8 @@ class ConvergenceRaviartThomas(unittest.TestCase):
     def create_basis(self, m):
         e = ElementTriRT0()
         e0 = ElementTriP0()
-        return (InteriorBasis(m, e, intorder=2),
-                InteriorBasis(m, e0, intorder=2))
+        return (CellBasis(m, e, intorder=2),
+                CellBasis(m, e0, intorder=2))
 
     def setUp(self):
         self.mesh = MeshTri().refined(4)
@@ -145,12 +146,23 @@ class ConvergenceBDM1(ConvergenceRaviartThomas):
     def create_basis(self, m):
         e = ElementTriBDM1()
         e0 = ElementTriP0()
-        return (InteriorBasis(m, e, intorder=4),
-                InteriorBasis(m, e0, intorder=4))
+        return (CellBasis(m, e, intorder=4),
+                CellBasis(m, e0, intorder=4))
 
     def setUp(self):
         self.mesh = MeshTri().refined(3)
 
+
+class ConvergenceQuadRT0(ConvergenceRaviartThomas):
+
+    def create_basis(self, m):
+        e = ElementQuadRT0()
+        e0 = ElementQuad0()
+        b = CellBasis(m, e)
+        return (b, b.with_element(e0))
+
+    def setUp(self):
+        self.mesh = MeshQuad().refined(3)
 
 
 class ConvergenceRaviartThomas3D(ConvergenceRaviartThomas):
@@ -163,8 +175,8 @@ class ConvergenceRaviartThomas3D(ConvergenceRaviartThomas):
     def create_basis(self, m):
         e = ElementTetRT0()
         e0 = ElementTetP0()
-        return (InteriorBasis(m, e, intorder=2),
-                InteriorBasis(m, e0, intorder=2))
+        return (CellBasis(m, e, intorder=2),
+                CellBasis(m, e0, intorder=2))
 
     def setUp(self):
         self.mesh = MeshTet().refined(1)
