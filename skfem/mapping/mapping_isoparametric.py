@@ -158,10 +158,8 @@ class MappingIsoparametric(Mapping):
 
     def DF(self, X, tind=None, J=None):
         if J is None:
-            J = [
-                [self.J(i, j, X, tind=tind) for j in range(self.dim)]
-                for i in range(self.dim)
-            ]
+            J = [[self.J(i, j, X, tind=tind) for j in range(self.dim)]
+                 for i in range(self.dim)]
 
         return np.array(J if tind is None else J[:, :, tind])
 
