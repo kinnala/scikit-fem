@@ -29,7 +29,7 @@ element = {'u': ElementVector(ElementTriP2()),
 basis = {variable: Basis(mesh, e, intorder=3)
          for variable, e in element.items()}
 
-D = basis['u'].get_dofs(mesh.boundaries)
+D = basis['u'].get_dofs(['inlet', 'ceiling', 'floor'])
 
 A = asm(vector_laplace, basis['u'])
 B = -asm(divergence, basis['u'], basis['p'])
