@@ -154,12 +154,12 @@ class ConvergenceBDM1(ConvergenceRaviartThomas):
 
 
 class ConvergenceQuadRT0(ConvergenceRaviartThomas):
+    Hdivbound = 0.07
+    L2bound = 0.03
 
     def create_basis(self, m):
-        e = ElementQuadRT0()
-        e0 = ElementQuad0()
-        b = CellBasis(m, e)
-        return (b, b.with_element(e0))
+        b = CellBasis(m, ElementQuadRT0())
+        return (b, b.with_element(ElementQuad0()))
 
     def setUp(self):
         self.mesh = MeshQuad().refined(3)
