@@ -156,6 +156,13 @@ class MappingIsoparametric(Mapping):
     def F(self, X, tind=None):
         return np.array([self.Fmap(i, X, tind) for i in range(X.shape[0])])
 
+    def DF(self, X, tind=None, J=None):
+        if J is None:
+            J = [[self.J(i, j, X, tind=tind) for j in range(self.dim)]
+                 for i in range(self.dim)]
+        
+        return np.array(J if tind is None else J[:, :, tind])
+
     def detDF(self, X, tind=None, J=None):
         if J is None:
             J = [[self.J(i, j, X, tind=tind) for j in range(self.dim)]
