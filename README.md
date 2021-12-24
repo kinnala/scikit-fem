@@ -224,6 +224,8 @@ with respect to documented and/or tested features.
 - Added: `Basis.project`, a more general and easy to use alternative to `projection`
 - Added: `Basis` and `FacetBasis` kwargs `elements` and `facets` can now be a string
   and directly refer to subdomain and boundary tags
+- Added: `ElementQuadRT0`, lowest-order quadrilateral Raviart-Thomas element
+
 
 ### [5.1.0] - 2021-11-30
 

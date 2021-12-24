@@ -25,7 +25,7 @@ from .element_tri import (ElementTriP1, ElementTriP2,  # noqa
                           ElementTriBDM1)
 from .element_quad import (ElementQuad0, ElementQuad1, ElementQuad2,  # noqa
                            ElementQuadS2, ElementQuadP,
-                           ElementQuadBFS, ElementQuad1DG)
+                           ElementQuadBFS, ElementQuadRT0, ElementQuad1DG)
 from .element_tet import (ElementTetP0, ElementTetP1, ElementTetP2,  # noqa
                           ElementTetRT0, ElementTetN0, ElementTetMini,
                           ElementTetCR, ElementTetCCR)
@@ -98,6 +98,7 @@ __all__ = [
     "ElementQuadDG",
     "ElementQuadP",
     "ElementQuadBFS",
+    "ElementQuadRT0",
     "ElementQuad1DG",
     "ElementTetP0",
     "ElementTetP1",
