@@ -16,6 +16,7 @@ from skfem.element import (
     ElementQuad1,
     ElementQuad2,
     ElementQuadP,
+    ElementQuadRT0,
     ElementQuadS2,
     ElementTetMini,
     ElementTetP0,
@@ -125,6 +126,28 @@ class TestNodalityTriRT0(TestCase):
             # calculate integral of normal component over edge
             A = np.sum(e.lbasis(e.doflocs.T, itr)[0] * normals, axis=0)
             n = np.array([1., np.sqrt(2), 1.])
+            Ih[itr] = A * n
+
+        assert_allclose(Ih, np.eye(N),
+                        err_msg="{}".format(type(e)))
+
+
+class TestNodalityQuadRT0(TestCase):
+
+    elem = ElementQuadRT0()
+
+    def runTest(self):
+        e = self.elem
+        N = e.doflocs.shape[0]
+        Ih = np.zeros((N, N))
+        normals = np.array([[0., -1.],
+                            [1., 0.],
+                            [0., 1.],
+                            [-1., 0.]]).T
+        for itr in range(N):
+            # calculate integral of normal component over edge
+            A = np.sum(e.lbasis(e.doflocs.T, itr)[0] * normals, axis=0)
+            n = np.ones(4)
             Ih[itr] = A * n
 
         assert_allclose(Ih, np.eye(N),

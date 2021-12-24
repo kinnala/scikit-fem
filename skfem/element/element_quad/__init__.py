@@ -4,3 +4,4 @@ from .element_quad2 import ElementQuad2  # noqa
 from .element_quad_s2 import ElementQuadS2  # noqa
 from .element_quadp import ElementQuadP  # noqa
 from .element_quad_bfs import ElementQuadBFS  # noqa
+from .element_quad_rt0 import ElementQuadRT0  # noqa
