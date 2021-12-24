@@ -95,7 +95,9 @@ class TestDofsFromBoundaries(TestCase):
         basis = CellBasis(m, ElementTriArgyris())
         assert_allclose(
             basis.get_dofs({'left', 'right'}).all(),
-            (basis.get_dofs('left') | basis.get_dofs('right')).all(),
+            np.sort(
+                np.hstack([basis.get_dofs('left').all(), basis.get_dofs('right').all()])
+            ),
         )
         assert_allclose(
             basis.get_dofs(('left', 'right', 'top', 'bottom')).all(),
