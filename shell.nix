@@ -1,7 +1,7 @@
 with import <nixpkgs> {};
 
 (let
-  pacopy016 = python37.pkgs.buildPythonPackage rec {
+  pacopy016 = python38.pkgs.buildPythonPackage rec {
     # not part of nixpkgs
     pname = "pacopy";
     version = "0.1.6";
@@ -16,7 +16,7 @@ with import <nixpkgs> {};
       description = "Numerical continuation in Python";
     };
   };
-in python37.withPackages (ps: with ps; [
+in python38.withPackages (ps: with ps; [
   numpy
   scipy
   meshio
@@ -25,10 +25,10 @@ in python37.withPackages (ps: with ps; [
   ipython
   pytest
   sphinx
-  sphinx_rtd_theme
   flake8
   twine
   pep517
   pip
   pacopy016
+  jupyter
 ])).env
