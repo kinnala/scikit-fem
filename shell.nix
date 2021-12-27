@@ -6,7 +6,7 @@ with import <nixpkgs> {};
     pname = "pacopy";
     version = "0.1.6";
     format = "pyproject";
-    src = python37.pkgs.fetchPypi {
+    src = python38.pkgs.fetchPypi {
       inherit pname version;
       sha256 = "0rq5yfmq5516giyqsflm3bjirbfhigydd1vlxc554jnn13n3wisr";
     };
