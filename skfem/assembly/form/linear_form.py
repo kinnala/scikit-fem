@@ -30,7 +30,7 @@ class LinearForm(Form):
         dx = vbasis.dx
         w = FormExtraParams({
             **vbasis.default_parameters(),
-            **self.dictify(kwargs, ubasis),
+            **self._normalize_asm_kwargs(kwargs, ubasis),
         })
 
         # initialize COO data structures
