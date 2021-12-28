@@ -1,12 +1,12 @@
 with import <nixpkgs> {};
 
 (let
-  pacopy016 = python37.pkgs.buildPythonPackage rec {
+  pacopy016 = python38.pkgs.buildPythonPackage rec {
     # not part of nixpkgs
     pname = "pacopy";
     version = "0.1.6";
     format = "pyproject";
-    src = python37.pkgs.fetchPypi {
+    src = python38.pkgs.fetchPypi {
       inherit pname version;
       sha256 = "0rq5yfmq5516giyqsflm3bjirbfhigydd1vlxc554jnn13n3wisr";
     };
@@ -16,7 +16,7 @@ with import <nixpkgs> {};
       description = "Numerical continuation in Python";
     };
   };
-in python37.withPackages (ps: with ps; [
+in python38.withPackages (ps: with ps; [
   numpy
   scipy
   meshio
@@ -25,10 +25,10 @@ in python37.withPackages (ps: with ps; [
   ipython
   pytest
   sphinx
-  sphinx_rtd_theme
   flake8
   twine
   pep517
   pip
   pacopy016
+  jupyter
 ])).env

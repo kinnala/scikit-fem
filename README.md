@@ -221,11 +221,15 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
-- Added: `Basis.project`, a more general and easy to use alternative to `projection`
-- Added: `Basis` and `FacetBasis` kwargs `elements` and `facets` can now be a string
-  and directly refer to subdomain and boundary tags
-- Added: `ElementQuadRT0`, lowest-order quadrilateral Raviart-Thomas element
+### [5.2.0] - 2021-12-27
 
+- Added: `Basis.project`, a more general and easy to use alternative for
+  `projection`
+- Added: `Basis` and `FacetBasis` kwargs `elements` and `facets` can now be a
+  string refering to subdomain and boundary tags
+- Added: `ElementQuadRT0`, lowest-order quadrilateral Raviart-Thomas element
+- Fixed: `Functional` returned only the first component for forms with
+  non-scalar output
 
 ### [5.1.0] - 2021-11-30
 
