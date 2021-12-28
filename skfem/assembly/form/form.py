@@ -84,7 +84,7 @@ class Form:
         return COOData(*self._assemble(*args, **kwargs))  # type: ignore
 
     @staticmethod
-    def dictify(w, basis):
+    def _normalize_asm_kwargs(w, basis):
         """Support additional input formats for 'w'."""
         for k in w:
             if isinstance(w[k], DiscreteField):
@@ -95,10 +95,15 @@ class Form:
             elif isinstance(w[k], tuple):
                 # asm() product index is of type tuple
                 continue
-            elif isinstance(w[k], ndarray) and len(w[k].shape) == 2:
-                w[k] = DiscreteField(w[k])
             elif isinstance(w[k], ndarray) and len(w[k].shape) == 1:
                 w[k] = basis.interpolate(w[k])
+            elif isinstance(w[k], list):
+                # for backwards-compatibility
+                w[k] = DiscreteField(np.array([z.value for z in w[k]]),
+                                     np.array([z.grad for z in w[k]]))
+            elif isinstance(w[k], ndarray) and len(w[k].shape) == 2:
+                # for backwards-compatibility
+                w[k] = DiscreteField(w[k])
             else:
                 raise ValueError("The given type '{}' for the list of extra "
                                  "form parameters w cannot be converted to "
