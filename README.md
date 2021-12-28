@@ -221,6 +221,9 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+- Fixed: Improvements to backwards compatibility concerning the types accepted
+  by `asm`
+
 ### [5.2.0] - 2021-12-27
 
 - Added: `Basis.project`, a more general and easy to use alternative for

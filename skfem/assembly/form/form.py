@@ -1,4 +1,5 @@
 import logging
+import warnings
 from copy import deepcopy
 from functools import partial
 from typing import Any, Callable, Optional
@@ -98,10 +99,14 @@ class Form:
             elif isinstance(w[k], ndarray) and len(w[k].shape) == 1:
                 w[k] = basis.interpolate(w[k])
             elif isinstance(w[k], list):
+                warnings.warn("Use Basis.interpolate instead of passing lists "
+                              "to assemble", DeprecationWarning)
                 # for backwards-compatibility
                 w[k] = DiscreteField(np.array([z.value for z in w[k]]),
                                      np.array([z.grad for z in w[k]]))
             elif isinstance(w[k], ndarray) and len(w[k].shape) == 2:
+                warnings.warn("Use Basis.interpolate instead of passing 2D "
+                              "numpy arrays to assemble", DeprecationWarning)
                 # for backwards-compatibility
                 w[k] = DiscreteField(w[k])
             else:
