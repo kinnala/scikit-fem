@@ -221,8 +221,7 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
-- Fixed: Improvements to backwards compatibility concerning the types accepted
-  by `asm`
+- Fixed: Improvements to backwards compatibility in `asm`/`assemble` kwargs
 
 ### [5.2.0] - 2021-12-27
 
@@ -256,8 +255,8 @@ with respect to documented and/or tested features.
 - Fixed: Edge cases in the adaptive refine of `MeshTet1` that failed to produce
   a valid mesh
 - Deprecated: `Basis.find_dofs` in favor of `Basis.get_dofs`
-- Deprecated: Merging `DofsView` objects via `+` and `|` in favor of using
-  `np.hstack`
+- Deprecated: Merging `DofsView` objects via `+` and `|` because of surprising
+  behavior in some edge cases
 
 ### [4.0.1] - 2021-10-15
 
@@ -313,7 +312,6 @@ with respect to documented and/or tested features.
   longer initializes `InteriorFacetBasis` or `MortarFacetBasis` if the keyword
   argument `side` is passed to the constructor
 - Removed: the deprecated `Mesh.define_boundary` method
-- Removed: the unused `Mesh.validate` attribute
 
 ### [3.2.0] - 2021-08-02
 
@@ -366,7 +364,7 @@ with respect to documented and/or tested features.
 - Changed: `Mesh.refined` no more attempts to fix the indexing of `Mesh.boundaries` after refine
 - Changed: `skfem.utils.solve` now uses `scipy.sparse.eigs` instead of `scipy.sparse.eigsh` by default;
   the old behavior can be retained by explicitly passing `solver=solver_scipy_eigs_sym()`
-- Fixed: High memory usage and other small fixes in `skfem.visuals.matplotlib` related to 1D plotting
+- Fixed: High memory usage in `skfem.visuals.matplotlib` related to 1D plotting
 
 ### [2.5.0] - 2021-02-13
 
