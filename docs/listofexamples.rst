@@ -298,6 +298,20 @@ for nearly incompressible Neo-Hookean solids.
 
 See the `source code of Example 36 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex36.py>`_ for more information.
 
+
+Example 43: Hyperelasticity
+---------------------------
+
+This example demonstrates Newton's method applied to the classical formulation
+of a hyperelastic Neo-Hookean solid.
+
+.. figure:: https://user-images.githubusercontent.com/973268/147789791-544e39f2-3160-469b-a79b-b30a9c3155c0.png
+
+   The deformed mesh of Example 43.
+   The figure was created using `vedo <https://github.com/marcomusy/vedo>`__.
+
+See the `source code of Example 43 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex43.py>`_ for more information.
+
 Fluid mechanics
 ===============
 
