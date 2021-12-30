@@ -912,12 +912,7 @@ class Mesh:
         """
         raise NotImplementedError
 
-    def draw(self, *args, **kwargs):
-        """Convenience wrapper for vedo."""
-        if 'visuals' in kwargs:
-            visuals = kwargs['visuals']
-            del kwargs['visuals']
-        else:
-            visuals = 'vedo'
+    def draw(self, visuals='vedo', **kwargs):
+        """Convenience wrapper for skfem.visuals."""
         mod = importlib.import_module('skfem.visuals.{}'.format(visuals))
-        return mod.draw(self, *args, **kwargs)
+        return mod.draw(self, **kwargs)
