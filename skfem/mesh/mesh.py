@@ -297,7 +297,7 @@ class Mesh:
 
         """
         midp = self.p[:, self.facets].mean(axis=1)
-        facets = np.nonzero(test(np.array(midp)))[0]
+        facets = np.nonzero(test(midp))[0]
         if boundaries_only:
             facets = np.intersect1d(facets, self.boundary_facets())
         return facets
@@ -314,7 +314,7 @@ class Mesh:
 
         """
         midp = self.p[:, self.t].mean(axis=1)
-        return np.nonzero(test(np.array(midp)))[0]
+        return np.nonzero(test(midp))[0]
 
     def _expand_facets(self, ix: ndarray) -> Tuple[ndarray, ndarray]:
         """Return vertices and edges corresponding to given facet indices.
