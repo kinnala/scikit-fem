@@ -193,7 +193,8 @@ def plot_meshtri(m: MeshTri1, z: ndarray, **kwargs) -> Axes:
         The ratio of vertical to horizontal length-scales; ignored if ax
         specified.
     colorbar (optional)
-        If True, show colorbar. By default not shown.
+        If True, show colorbar. If a string, use it as a label for the
+        colorbar. Not shown by default.
     figsize (optional)
         Passed on to matplotlib.
     shading (optional)
@@ -230,7 +231,10 @@ def plot_meshtri(m: MeshTri1, z: ndarray, **kwargs) -> Axes:
                                   'vmax']})
 
     if "colorbar" in kwargs:
-        plt.colorbar(im)
+        if isinstance(kwargs["colorbar"], str):
+            plt.colorbar(im, label=kwargs["colorbar"])
+        else:
+            plt.colorbar(im)
 
     ax.show = lambda: plt.show()
     return ax

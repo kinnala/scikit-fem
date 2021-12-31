@@ -7,7 +7,7 @@ from skfem.helpers import dot, grad
 # logging.getLogger('skfem').setLevel(logging.DEBUG)
 
 # create the mesh
-m = MeshTri().refined(4)
+m = MeshTri().refined(6)
 # or, with your own points and cells:
 # m = MeshTri(points, cells)
 

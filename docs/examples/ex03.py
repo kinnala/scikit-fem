@@ -51,5 +51,5 @@ if __name__ == "__main__":
     from skfem.visuals.matplotlib import plot, draw, show
     M = MeshQuad(np.array(m.p + y[gb.nodal_dofs]), m.t)
     ax = draw(M)
-    plot(M, sigma[sgb.nodal_dofs[0]], ax=ax, colorbar=True)
+    plot(M, sigma[sgb.nodal_dofs[0]], ax=ax, colorbar='$\sigma_{xx}$', shading='gouraud')
     show()
