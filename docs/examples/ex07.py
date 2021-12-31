@@ -35,6 +35,7 @@ x = solve(A + B + C, b)
 M, X = ib.refinterp(x, 3)
 
 if __name__ == "__main__":
-    from skfem.visuals.matplotlib import plot, show
-    plot(M, X, shading="gouraud", colorbar=True)
+    from skfem.visuals.matplotlib import plot, draw, show
+    ax = draw(M, boundaries_only=True)
+    plot(M, X, shading="gouraud", ax=ax, colorbar=True)
     show()

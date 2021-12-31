@@ -198,7 +198,10 @@ if __name__ == "__main__":
     from sys import argv
     from skfem.visuals.matplotlib import *
 
-    ax = plot(ib_dg, vonmises1, shading='gouraud')
+    ax = plot(ib_dg,
+              vonmises1,
+              shading='gouraud',
+              colorbar='$\sigma_{\mathrm{mises}}$')
     draw(mdefo, ax=ax)
     plot(Ib_dg, vonmises2, ax=ax, Nrefs=3, shading='gouraud')
     draw(Mdefo, ax=ax)
