@@ -216,9 +216,13 @@ This example solves the biharmonic Kirchhoff plate bending problem :math:`D
 stiffness :math:`D` and a combination of clamped, simply supported and free
 boundary conditions.
 
-.. figure:: https://user-images.githubusercontent.com/973268/87659951-f50bbc00-c766-11ea-8c0e-7de0e9e83714.png
+.. plot::
+   :caption: The solution of Example 2.
 
-   The solution of Example 2.
+   from docs.examples.ex02 import m, ib, x
+   from skfem.visuals.matplotlib import plot, draw
+   ax = draw(m)
+   plot(ib, x, ax=ax, shading='gouraud', colorbar=True, nrefs=2)
 
 See the `source code of Example 2 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex02.py>`_ for more information.
 
@@ -227,11 +231,16 @@ Example 3: Linear elastic eigenvalue problem
 
 This example solves the linear elastic eigenvalue problem
 :math:`\mathrm{div}\,\sigma(u)= \lambda u` with
-the displacement fixed on the left hand side boundary.
+the displacement fixed on the left boundary.
 
-.. figure:: https://user-images.githubusercontent.com/973268/134467300-f7e635ed-39c4-4a36-9e98-aadb6e51961a.png
+.. plot::
+   :caption: The fifth eigenmode of Example 3.
 
-   The fifth eigenmode of Example 3.
+   from docs.examples.ex03 import m, y, gb, sgb, sigma, MeshQuad
+   from skfem.visuals.matplotlib import plot, draw
+   M = MeshQuad(np.array(m.p + .3 * y[gb.nodal_dofs]), m.t)
+   ax = draw(M)
+   plot(M, sigma[sgb.nodal_dofs[0]], ax=ax, colorbar='$\sigma_{xx}$', shading='gouraud')
 
 See the `source code of Example 3 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex03.py>`_ for more information.
 
@@ -243,9 +252,18 @@ between two elastic bodies using the Nitsche's method.
 Triangular and quadrilateral second-order elements are used
 in the discretization of the two elastic bodies.
 
-.. figure:: https://user-images.githubusercontent.com/973268/87661313-1372b700-c769-11ea-89ee-db144986a25a.png
+.. plot::
+   :caption: The displaced meshes and the von Mises stress of Example 4.
 
-   The displaced meshes and the von Mises stress of Example 4.
+   from docs.examples.ex04 import ib_dg, vonmises1, mdefo, Ib_dg, vonmises2, Mdefo
+   from skfem.visuals.matplotlib import plot, draw
+   ax = plot(ib_dg,
+             vonmises1,
+             shading='gouraud',
+             colorbar='$\sigma_{\mathrm{mises}}$')
+   draw(mdefo, ax=ax)
+   plot(Ib_dg, vonmises2, ax=ax, Nrefs=3, shading='gouraud')
+   draw(Mdefo, ax=ax)
 
 See the `source code of Example 4 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex04.py>`_ for more information.
 
