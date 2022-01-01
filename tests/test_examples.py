@@ -195,7 +195,7 @@ class TestEx22(TestCase):
         import docs.examples.ex22 as ex
         u = ex.u
         K = ex.K
-        self.assertAlmostEqual(u.T @ K @ u, 0.2131280267335294)
+        self.assertAlmostEqual(u.T @ K @ u, 0.21120183153583372)
 
 
 class TestEx23(TestCase):

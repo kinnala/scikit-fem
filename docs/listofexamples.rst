@@ -134,9 +134,13 @@ Using linear elements, the error indicators read :math:`\eta_K^2 = h_K^2 \|f\|_{
 for each element :math:`K` and
 edge :math:`E`.
 
-.. figure:: https://user-images.githubusercontent.com/973268/87779195-15a24780-c835-11ea-9a18-767092ae9467.png
+.. plot::
+   :caption: The final solution of Example 22.
 
-   The adaptively refined mesh of Example 22.
+   from docs.examples.ex22 import m, u
+   from skfem.visuals.matplotlib import plot, draw
+   ax = draw(m)
+   plot(m, u, ax=ax, shading='gouraud', colorbar=True)
 
 See the `source code of Example 22 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex22.py>`_ for more information.
 
