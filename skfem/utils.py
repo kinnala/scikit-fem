@@ -406,8 +406,8 @@ def penalize(A: spmatrix,
 
     d = Aout.diagonal()
     if epsilon is None:
-        epsilon = 1e-10 / np.linalg.norm(d[D], np.inf)
-    d[D] = 1/epsilon
+        epsilon = 1e-10 / np.linalg.norm(d[D], np.inf).astype(float)
+    d[D] = 1. / epsilon
     Aout.setdiag(d)
 
     if b is None:
