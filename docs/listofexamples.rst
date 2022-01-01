@@ -43,6 +43,69 @@ is piecewise-quartic but discontinuous over the element edges.
 
 See the `source code of Example 7 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex07.py>`_ for more information.
 
+Example 12: Postprocessing
+--------------------------
+
+This example demonstrates postprocessing the value of a functional, Boussinesq's k-factor.
+
+.. plot::
+   :caption: The solution of Example 12.
+
+   from docs.examples.ex12 import basis, x
+   from skfem.visuals.matplotlib import plot
+   plot(basis, x, shading='gouraud', colorbar=True)
+
+See the `source code of Example 12 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex12.py>`_ for more information.
+
+Example 13: Laplace with mixed boundary conditions
+--------------------------------------------------
+
+This example solves :math:`\Delta u = 0` in
+:math:`\Omega=\{(x,y):1<x^2+y^2<4,~0<\theta<\pi/2\}`, where :math:`\tan \theta =
+y/x`, with :math:`u = 0` on :math:`y = 0`, :math:`u = 1` on :math:`x =
+0`, and :math:`\frac{\partial u}{\partial n} = 0` on the rest of the
+boundary.
+
+.. plot::
+   :caption: The solution of Example 13.
+
+   from docs.examples.ex13 import basis, u
+   from skfem.visuals.matplotlib import plot
+   plot(basis, u, shading='gouraud', colorbar=True)
+
+See the `source code of Example 13 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex13.py>`_ for more information.
+
+.. _ex14:
+
+Example 14: Laplace with inhomogeneous boundary conditions
+----------------------------------------------------------
+
+This example demonstrates how to impose coordinate-dependent Dirichlet
+conditions for the Laplace equation :math:`\Delta u = 0`. The solution will
+satisfy :math:`u=x^2 - y^2` on the boundary of the square domain.
+
+.. plot::
+   :caption: The solution of Example 14.
+
+   from docs.examples.ex14 import basis, u
+   from skfem.visuals.matplotlib import plot
+   plot(basis, u, shading='gouraud', colorbar=True, levels=5)
+
+See the `source code of Example 14 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex14.py>`_ for more information.
+
+Example 15: One-dimensional Poisson equation
+--------------------------------------------
+
+This example solves :math:`-u'' = 1` in :math:`(0,1)` with the boundary
+condition :math:`u(0)=u(1)=0`.
+
+.. figure:: https://user-images.githubusercontent.com/973268/87775166-52b70b80-c82e-11ea-9009-c9fa0a9e28e8.png
+
+   The solution of Example 15.
+
+See the `source code of Example 15 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex15.py>`_ for more information.
+
+
 Example 9: Three-dimensional Poisson equation
 ---------------------------------------------
 
@@ -62,59 +125,6 @@ method.
    figure was created using `ParaView <https://www.paraview.org/>`__.
 
 See the `source code of Example 9 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex09.py>`_ for more information.
-
-Example 12: Postprocessing
---------------------------
-
-This example demonstrates postprocessing the value of a functional, Boussinesq's k-factor.
-
-.. figure:: https://user-images.githubusercontent.com/1588947/93292071-0127fe80-f828-11ea-8c9e-46590d280b69.png
-
-   The solution of Example 12.
-
-See the `source code of Example 12 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex12.py>`_ for more information.
-
-Example 13: Laplace with mixed boundary conditions
---------------------------------------------------
-
-This example solves :math:`\Delta u = 0` in
-:math:`\Omega=\{(x,y):1<x^2+y^2<4,~0<\theta<\pi/2\}`, where :math:`\tan \theta =
-y/x`, with :math:`u = 0` on :math:`y = 0`, :math:`u = 1` on :math:`x =
-0`, and :math:`\frac{\partial u}{\partial n} = 0` on the rest of the
-boundary.
-
-.. figure:: https://user-images.githubusercontent.com/1588947/94758580-d5d51000-03e0-11eb-8219-15cbba1d8c26.png
-
-   The solution of Example 13.
-
-See the `source code of Example 13 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex13.py>`_ for more information.
-
-.. _ex14:
-
-Example 14: Laplace with inhomogeneous boundary conditions
-----------------------------------------------------------
-
-This example demonstrates how to impose coordinate-dependent Dirichlet
-conditions for the Laplace equation :math:`\Delta u = 0`. The solution will
-satisfy :math:`u=x^2 - y^2` on the boundary of the square domain.
-
-.. figure:: https://user-images.githubusercontent.com/973268/87775119-3dda7800-c82e-11ea-8576-2219fcf31814.png
-
-   The solution of Example 14.
-
-See the `source code of Example 14 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex14.py>`_ for more information.
-
-Example 15: One-dimensional Poisson equation
---------------------------------------------
-
-This example solves :math:`-u'' = 1` in :math:`(0,1)` with the boundary
-condition :math:`u(0)=u(1)=0`.
-
-.. figure:: https://user-images.githubusercontent.com/973268/87775166-52b70b80-c82e-11ea-9009-c9fa0a9e28e8.png
-
-   The solution of Example 15.
-
-See the `source code of Example 15 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex15.py>`_ for more information.
 
 Example 22: Adaptive Poisson equation
 -------------------------------------

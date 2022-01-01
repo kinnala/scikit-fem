@@ -230,6 +230,10 @@ def plot_meshtri(m: MeshTri1, z: ndarray, **kwargs) -> Axes:
                                   'vmin',
                                   'vmax']})
 
+    if "levels" in kwargs:
+        ax.tricontour(m.p[0], m.p[1], m.t.T, z,
+                      levels=kwargs["levels"], colors='k')
+
     if "colorbar" in kwargs:
         if isinstance(kwargs["colorbar"], str):
             plt.colorbar(im, label=kwargs["colorbar"])

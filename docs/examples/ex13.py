@@ -71,5 +71,5 @@ if __name__ == '__main__':
     print('conductance:', conductance)
     print('Current in through ports:', current)
 
-    plot(basis, u)
+    plot(basis, u, shading='gouraud', colorbar=True)
     show()

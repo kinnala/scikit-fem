@@ -45,5 +45,5 @@ u = solve(*condense(A, x=u, D=basis.get_dofs()))
 if __name__ == "__main__":
     from skfem.visuals.matplotlib import plot, show
     print('||grad u||**2 = {:f} (exact = 8/3 = {:f})'.format(u @ A @ u, 8/3))
-    plot(basis, u)
+    plot(basis, u, shading='gouraud', colorbar=True, levels=5)
     show()

@@ -45,5 +45,5 @@ if __name__ == '__main__':
     print('k = {:.5f} (exact = 1/8/pi = {:.5f})'.format(k, 1/np.pi/8))
     print("k' = {:.5f} (exact = 1/4/pi = {:.5f})".format(k1, 1/np.pi/4))
 
-    plot(basis, x)
+    plot(basis, x, shading='gouraud', colorbar=True)
     show()
