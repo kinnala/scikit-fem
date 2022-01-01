@@ -162,13 +162,17 @@ Example 38: Point source
 
 Point sources require different assembly to other linear forms.
 
-This example computes the Green's function for a disk; i.e. the solution of
-the Dirichlet problem for the Poisson equation with the source term
-concentrated at a single interior point, :math:`\Delta u = \delta (\mathbf x - \mathbf s)`.
+This example computes the Green's function for a disk; i.e. the solution of the
+Dirichlet problem for the Poisson equation with the source term concentrated at
+a single interior point :math:`\boldsymbol{s}`, :math:`-\Delta u = \delta
+(\boldsymbol{x} - \boldsymbol{s})`.
 
-.. figure:: https://user-images.githubusercontent.com/1588947/115502511-5cd3d200-a2b8-11eb-9929-92ed9550ced8.png
+.. plot::
+   :caption: The scalar potential in the disk with point source at (0.3, 0.2).
 
-    The scalar potential in the disk with point source at (0.3, 0.2).
+   from docs.examples.ex38 import basis, x
+   from skfem.visuals.matplotlib import plot
+   plot(basis, x, shading='gouraud', nrefs=2, colorbar=True)
 
 See the `source code of Example 38 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex38.py>`_
 for more information.
