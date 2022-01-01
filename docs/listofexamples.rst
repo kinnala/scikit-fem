@@ -15,9 +15,12 @@ This example solves the Poisson problem :math:`-\Delta u = 1` with the Dirichlet
 boundary condition :math:`u = 0` in the unit square using piecewise-linear
 triangular elements.
 
-.. figure:: https://user-images.githubusercontent.com/973268/87638021-c3d1c280-c74b-11ea-9859-dd82555747f5.png
+.. plot::
+   :caption: The solution of Example 1.
 
-   The solution of Example 1.
+   from docs.examples.ex01 import m, x
+   from skfem.visuals.matplotlib import plot
+   plot(m, x, shading='gouraud', colorbar=True)
 
 See the `source code of Example 1 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex01.py>`_ for more information.
 
@@ -28,20 +31,24 @@ Example 7: Discontinuous Galerkin method
 
 This example solves the Poisson problem :math:`-\Delta u = 1` with :math:`u=0`
 on the boundary using discontinuous Galerkin method.  The finite element basis
-is piecewise-linear but discontinuous over the element edges.
+is piecewise-quartic but discontinuous over the element edges.
 
-.. figure:: https://user-images.githubusercontent.com/973268/87662192-80d31780-c76a-11ea-9291-2d11920bc098.png
+.. plot::
+   :caption: The solution of Example 7.
 
-   The solution of Example 7.
+   from docs.examples.ex07 import M, X
+   from skfem.visuals.matplotlib import plot, draw
+   ax = draw(M, boundaries_only=True)
+   plot(M, X, shading="gouraud", ax=ax, colorbar=True)
 
 See the `source code of Example 7 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex07.py>`_ for more information.
 
 Example 9: Three-dimensional Poisson equation
 ---------------------------------------------
 
-This example solves :math:`-\Delta u = 1`
-with :math:`u=0` on the boundary using tetrahedral elements and a preconditioned
-conjugate gradient method.
+This example solves :math:`-\Delta u = 1` with :math:`u=0` on the boundary
+using linear tetrahedral elements and a preconditioned conjugate gradient
+method.
 
 .. note::
 

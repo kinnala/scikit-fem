@@ -110,5 +110,5 @@ if __name__ == "__main__":
     from sys import argv
     from skfem.visuals.matplotlib import *
     ax = draw(m)
-    plot(ib, x, ax=ax, shading='gouraud', colorbar=True, Nrefs=2)
+    plot(ib, x, ax=ax, shading='gouraud', colorbar=True, nrefs=2)
     savefig(splitext(argv[0])[0] + '_solution.png')
