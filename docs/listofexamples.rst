@@ -65,9 +65,8 @@ boundary.
 .. plot::
    :caption: The solution of Example 13.
 
-   from docs.examples.ex13 import basis, u
-   from skfem.visuals.matplotlib import plot
-   plot(basis, u, shading='gouraud', colorbar=True)
+   from docs.examples.ex13 import visualize
+   visualize()
 
 See the `source code of Example 13 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex13.py>`_ for more information.
 
@@ -83,9 +82,8 @@ satisfy :math:`u=x^2 - y^2` on the boundary of the square domain.
 .. plot::
    :caption: The solution of Example 14.
 
-   from docs.examples.ex14 import basis, u
-   from skfem.visuals.matplotlib import plot
-   plot(basis, u, shading='gouraud', colorbar=True, levels=5)
+   from docs.examples.ex14 import visualize
+   visualize()
 
 See the `source code of Example 14 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex14.py>`_ for more information.
 

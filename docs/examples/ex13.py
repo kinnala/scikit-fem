@@ -63,13 +63,12 @@ for port, boundary in mesh.boundaries.items():
     fbasis = FacetBasis(mesh, elements, facets=boundary)
     current[port] = asm(port_flux, fbasis, u=u)
 
-if __name__ == '__main__':
-
+def visualize():
     from skfem.visuals.matplotlib import plot, show
+    return plot(basis, u, shading='gouraud', colorbar=True)
 
+if __name__ == '__main__':
     print('L2 error:', error_L2)
     print('conductance:', conductance)
     print('Current in through ports:', current)
-
-    plot(basis, u, shading='gouraud', colorbar=True)
-    show()
+    visualize().show()

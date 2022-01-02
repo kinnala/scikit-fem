@@ -41,7 +41,6 @@ k1, = basis.probes(np.zeros((2, 1))) @ x / area
 def visualize():
     from skfem.visuals.matplotlib import plot
     return plot(basis, x, shading='gouraud', colorbar=True)
-    
 
 if __name__ == '__main__':
     print('area = {:.4f} (exact = {:.4f})'.format(area, np.pi))
