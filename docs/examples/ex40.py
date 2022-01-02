@@ -48,11 +48,13 @@ y = solve(*condense(A, f, D=ibasis.get_dofs()))
 
 (u1, ibasis1), (u2, ibasis2) = ibasis.split(y)
 
+def visualize():
+    from skfem.visuals.matplotlib import plot
+    return plot(ibasis2,
+                u2,
+                Nrefs=4,
+                colorbar=True,
+                shading='gouraud')
+
 if __name__ == '__main__':
-    from os.path import splitext
-    from sys import argv
-    from skfem.visuals.matplotlib import plot, savefig
-    plot(ibasis1, u1, Nrefs=3, colorbar=True, shading='gouraud')
-    savefig(splitext(argv[0])[0] + '_p1dg.png')
-    plot(ibasis2, u2, Nrefs=4, colorbar=True, shading='gouraud')
-    savefig(splitext(argv[0])[0] + '_skeleton.png')
+    visualize().show()

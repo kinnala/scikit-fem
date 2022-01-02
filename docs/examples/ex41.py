@@ -19,10 +19,11 @@ elements that have nodal degrees-of-freedom.  Support for higher-order elements
 on mixed meshes is work-in-progress.
 
 """
+from pathlib import Path
 from skfem import *
 from skfem.models import laplace, unit_load
 
-fname = 'docs/examples/meshes/mixedtriquad.msh'
+fname = Path(__file__).parent / 'meshes' / 'mixedtriquad.msh'
 out = ['cell_sets_dict']  # read boundary nodes from meshio
 m = [
     Mesh.load(fname, force_meshio_type='triangle'),
@@ -36,12 +37,13 @@ f = asm(unit_load, basis)
 
 y = solve(*condense(A, f, D=out[0]['boundary']['line']))
 
-if __name__ == '__main__':
-    from os.path import splitext
-    from sys import argv
-    from skfem.visuals.matplotlib import plot, draw, savefig
-    ax = plot(basis[0], y, Nrefs=4)
+def visualize():
+    from skfem.visuals.matplotlib import plot, draw
+    ax = plot(basis[0], y, Nrefs=4, colorbar=True)
     draw(basis[0], ax=ax)
     plot(basis[1], y, ax=ax, Nrefs=4)
     draw(basis[1], ax=ax)
-    savefig(splitext(argv[0])[0] + '_solution.png')
+    return ax
+
+if __name__ == '__main__':
+    visualize().show()

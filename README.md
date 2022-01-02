@@ -11,13 +11,14 @@
 </p>
 
 
-`scikit-fem` is a lightweight pure Python 3.7+ library for performing [finite
-element assembly](https://en.wikipedia.org/wiki/Finite_element_method). Its
-main purpose is the transformation of bilinear forms into sparse matrices and
-linear forms into vectors.
+`scikit-fem` is a pure Python 3.7+ library for performing [finite element
+assembly](https://en.wikipedia.org/wiki/Finite_element_method). Its main
+purpose is the transformation of bilinear forms into sparse matrices and linear
+forms into vectors.
 
 Features:
-- minimal dependencies, no compiled code
+- minimal dependencies
+- no compiled code
 - meshes: 1D, tri, quad, tet, hex
 - elements: 1D and quad (any order), tri (order < 5), tet and hex (order < 3)
 - special elements: H(div), H(curl), MINI, Crouzeix-Raviart, Argyris, Morley, ...
@@ -221,6 +222,11 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+- Changed: `Mesh.draw` now uses `matplotlib` by default, call
+  `Mesh.draw("vedo")` to use `vedo`
+- Changed: `skfem.visuals.matplotlib` uses now `jet` as the default colormap
+- Added: `Mesh.plot`, a wrapper to `skfem.visuals.*.plot`
+- Added: `Basis.plot`, a wrapper to `skfem.visuals.*.plot`
 - Fixed: Improvements to backwards compatibility in `asm`/`assemble` kwargs
 
 ### [5.2.0] - 2021-12-27

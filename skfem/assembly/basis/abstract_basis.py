@@ -1,4 +1,5 @@
 import logging
+import importlib
 from warnings import warn
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
@@ -436,3 +437,8 @@ class AbstractBasis:
 
     def project(self, interp, **kwargs):
         raise NotImplementedError
+
+    def plot(self, x, visuals='matplotlib', **kwargs):
+        """Convenience wrapper for skfem.visuals."""
+        mod = importlib.import_module('skfem.visuals.{}'.format(visuals))
+        return mod.plot(self, x, **kwargs)

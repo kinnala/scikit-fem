@@ -39,7 +39,7 @@ def greens(a: float, s: np.ndarray, x: np.ndarray) -> np.ndarray:
     return np.log(numerator / denominator) / 2 / np.pi
 
 
-basis = Basis(MeshTri.init_circle(4), ElementTriP2())
+basis = Basis(MeshTri.init_circle(5), ElementTriP2())
 source = np.array([0.3, 0.2])
 
 A = asm(laplace, basis)
@@ -52,10 +52,14 @@ exact = basis.project(lambda x: greens(a, source, x))
 error = x - exact
 l2error = np.sqrt(error @ mass.assemble(basis) @ error)
 
+def visualize():
+    from skfem.visuals.matplotlib import plot
+    return plot(basis,
+                x,
+                shading='gouraud',
+                nrefs=2,
+                colorbar=True)
+
 if __name__ == "__main__":
-    from skfem.visuals.matplotlib import plot, show
-
     print("L2 error:", l2error)
-
-    plot(basis, x)
-    show()
+    visualize().show()

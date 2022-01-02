@@ -163,5 +163,5 @@ for step in range(nsteps):
 
 if __name__ == '__main__':
     (mesh.translated(u[basis.nodal_dofs])
-         .draw(point_data={'uy': u[basis.nodal_dofs[1]]})
+         .draw('vedo', point_data={'uy': u[basis.nodal_dofs[1]]})
          .show())
