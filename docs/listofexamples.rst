@@ -18,9 +18,8 @@ triangular elements.
 .. plot::
    :caption: The solution of Example 1.
 
-   from docs.examples.ex01 import m, x
-   from skfem.visuals.matplotlib import plot
-   plot(m, x, shading='gouraud', colorbar=True)
+   from docs.examples.ex01 import visualize
+   visualize()
 
 See the `source code of Example 1 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex01.py>`_ for more information.
 
@@ -36,10 +35,8 @@ is piecewise-quartic but discontinuous over the element edges.
 .. plot::
    :caption: The solution of Example 7.
 
-   from docs.examples.ex07 import M, X
-   from skfem.visuals.matplotlib import plot, draw
-   ax = draw(M, boundaries_only=True)
-   plot(M, X, shading="gouraud", ax=ax, colorbar=True)
+   from docs.examples.ex07 import visualize
+   visualize()
 
 See the `source code of Example 7 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex07.py>`_ for more information.
 
@@ -51,9 +48,8 @@ This example demonstrates postprocessing the value of a functional, Boussinesq's
 .. plot::
    :caption: The solution of Example 12.
 
-   from docs.examples.ex12 import basis, x
-   from skfem.visuals.matplotlib import plot
-   plot(basis, x, shading='gouraud', colorbar=True)
+   from docs.examples.ex12 import visualize
+   visualize()
 
 See the `source code of Example 12 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex12.py>`_ for more information.
 
@@ -170,9 +166,8 @@ a single interior point :math:`\boldsymbol{s}`, :math:`-\Delta u = \delta
 .. plot::
    :caption: The scalar potential in the disk with point source at (0.3, 0.2).
 
-   from docs.examples.ex38 import basis, x
-   from skfem.visuals.matplotlib import plot
-   plot(basis, x, shading='gouraud', nrefs=2, colorbar=True)
+   from docs.examples.ex38 import visualize
+   visualize()
 
 See the `source code of Example 38 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex38.py>`_
 for more information.
@@ -223,10 +218,8 @@ boundary conditions.
 .. plot::
    :caption: The solution of Example 2.
 
-   from docs.examples.ex02 import m, ib, x
-   from skfem.visuals.matplotlib import plot, draw
-   ax = draw(m)
-   plot(ib, x, ax=ax, shading='gouraud', colorbar=True, nrefs=2)
+   from docs.examples.ex02 import visualize
+   visualize()
 
 See the `source code of Example 2 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex02.py>`_ for more information.
 
@@ -240,11 +233,8 @@ the displacement fixed on the left boundary.
 .. plot::
    :caption: The fifth eigenmode of Example 3.
 
-   from docs.examples.ex03 import m, y, gb, sgb, sigma, MeshQuad
-   from skfem.visuals.matplotlib import plot, draw
-   M = MeshQuad(np.array(m.p + .3 * y[gb.nodal_dofs]), m.t)
-   ax = draw(M)
-   plot(M, sigma[sgb.nodal_dofs[0]], ax=ax, colorbar='$\sigma_{xx}$', shading='gouraud')
+   from docs.examples.ex03 import visualize
+   visualize()
 
 See the `source code of Example 3 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex03.py>`_ for more information.
 

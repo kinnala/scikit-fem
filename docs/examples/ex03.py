@@ -47,9 +47,15 @@ C = linear_stress(lam, mu)
 yi = gb.interpolate(y)
 sigma = sgb.project(C(sym_grad(yi)))
 
-if __name__ == "__main__":
-    from skfem.visuals.matplotlib import plot, draw, show
-    M = MeshQuad(np.array(m.p + y[gb.nodal_dofs]), m.t)
+def visualize():
+    from skfem.visuals.matplotlib import plot, draw
+    M = MeshQuad(np.array(m.p + .5 * y[gb.nodal_dofs]), m.t)
     ax = draw(M)
-    plot(M, sigma[sgb.nodal_dofs[0]], ax=ax, colorbar='$\sigma_{xx}$', shading='gouraud')
-    show()
+    return plot(M,
+                sigma[sgb.nodal_dofs[0]],
+                ax=ax,
+                colorbar='$\sigma_{xx}$',
+                shading='gouraud')
+
+if __name__ == "__main__":
+    visualize().show()

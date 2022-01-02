@@ -105,10 +105,15 @@ D = np.hstack([ib.get_dofs("left"), ib.get_dofs({"right", "top"}).all("u")])
 
 x = solve(*condense(K, f, D=D))
 
-if __name__ == "__main__":
-    from os.path import splitext
-    from sys import argv
-    from skfem.visuals.matplotlib import *
+def visualize():
+    from skfem.visuals.matplotlib import draw, plot
     ax = draw(m)
-    plot(ib, x, ax=ax, shading='gouraud', colorbar=True, nrefs=2)
-    savefig(splitext(argv[0])[0] + '_solution.png')
+    return plot(ib,
+                x,
+                ax=ax,
+                shading='gouraud',
+                colorbar=True,
+                nrefs=2)
+
+if __name__ == "__main__":
+    visualize().show()

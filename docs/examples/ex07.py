@@ -34,8 +34,10 @@ x = solve(A + B + C, b)
 
 M, X = ib.refinterp(x, 4)
 
-if __name__ == "__main__":
-    from skfem.visuals.matplotlib import plot, draw, show
+def visualize():
+    from skfem.visuals.matplotlib import plot, draw
     ax = draw(M, boundaries_only=True)
-    plot(M, X, shading="gouraud", ax=ax, colorbar=True)
-    show()
+    return plot(M, X, shading="gouraud", ax=ax, colorbar=True)
+
+if __name__ == "__main__":
+    visualize().show()
