@@ -14,8 +14,8 @@ The library
 
 - has minimal dependencies
 - contains no compiled code
-- supports one-dimensional, triangular, quadrilateral, tetrahedral and hexahedral meshes and finite elements
-- includes various special elements such as Raviart-Thomas, Brezzi-Douglas-Marini, MINI, Crouzeix-Raviart, Argyris, Morley, ...
+- supports one-dimensional, triangular, quadrilateral, tetrahedral and hexahedral finite elements
+- includes special elements such as Raviart-Thomas, Nédélec, MINI, Crouzeix-Raviart, Argyris, ...
 
 ## Installation
 
