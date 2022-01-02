@@ -1,4 +1,4 @@
-r"""Stokes equations.
+r"""# Stokes equations
 
 This solves for the creeping flow problem in the primitive variables,
 i.e. velocity and pressure instead of the stream-function.  These are governed

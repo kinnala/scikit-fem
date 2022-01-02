@@ -1,5 +1,6 @@
-"""Discontinuous Galerkin method."""
+"""# Discontinuous Galerkin method
 
+"""
 from skfem import *
 from skfem.helpers import grad, dot, jump
 from skfem.models.poisson import laplace, unit_load

@@ -1,5 +1,6 @@
-"""Linear elastic eigenvalue problem."""
+"""# Linear elastic eigenvalue problem
 
+"""
 from skfem import *
 from skfem.helpers import dot, ddot, sym_grad
 from skfem.models.elasticity import linear_elasticity, linear_stress

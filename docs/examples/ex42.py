@@ -1,4 +1,4 @@
-"""Periodic meshes.
+"""# Periodic meshes
 
 When working with periodic boundary conditions, it may be more convenient to
 use a periodic mesh rather than to explicitly force the periodicity on the

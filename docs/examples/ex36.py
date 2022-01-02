@@ -1,4 +1,4 @@
-r"""Incompressible Hyperelasticity
+r"""# Incompressible hyperelasticity
 
 This example solves the governing equations describing the mechanical 
 response of a nearly incompressible elastomer using a mixed formulation. 

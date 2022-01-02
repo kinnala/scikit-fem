@@ -1,4 +1,4 @@
-r"""
+"""# Kirchhoff plate bending problem
 
 This example demonstrates the solution of a slightly more complicated problem
 with multiple boundary conditions and a fourth-order differential operator. We
@@ -61,10 +61,7 @@ using the `non-conforming Morley finite element
 <https://users.aalto.fi/~jakke74/WebFiles/Slides-Niiranen-ADMOS-09.pdf>`_ which
 is a piecewise quadratic :math:`C^0`-continuous element for biharmonic problems.
 
-The full source code of the example reads as follows:
-
-.. literalinclude:: examples/ex02.py
-    :start-after: EOF"""
+"""
 from skfem import *
 from skfem.models.poisson import unit_load
 import numpy as np

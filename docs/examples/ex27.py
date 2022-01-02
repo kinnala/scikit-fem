@@ -1,4 +1,4 @@
-r"""Backward-facing step.
+r"""# Backward-facing step
 
 .. warning::
    This example requires the external package `pacopy 0.1.2 <https://pypi.org/project/pacopy/0.1.2/>`_.
@@ -44,7 +44,6 @@ The Jacobian of the last nonlinear term is
    -\mathrm{Re} \int_\Omega ((\nabla \delta \boldsymbol{u}) \boldsymbol{u} + (\nabla \boldsymbol{u}) \delta \boldsymbol{u}) \cdot \boldsymbol{v} \,\mathrm{d}x.
 
 """
-
 from skfem import *
 from skfem.helpers import grad, dot
 from skfem.models.poisson import vector_laplace, laplace

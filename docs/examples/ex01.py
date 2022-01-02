@@ -1,3 +1,6 @@
+"""# Poisson equation with unit load
+
+"""
 from skfem import *
 from skfem.helpers import dot, grad
 

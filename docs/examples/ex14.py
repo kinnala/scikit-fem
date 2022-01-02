@@ -1,4 +1,4 @@
-r"""Laplace with inhomogeneous boundary
+r"""# Laplace with inhomogeneous boundary
 
 Another simple modification of `ex01.py`, this time showing how
 to impose coordinate-dependent Dirichlet conditions with
@@ -19,7 +19,6 @@ could be assigned more directly; however, the present method is
 recommended as more general.
 
 """
-
 from skfem import *
 from skfem.models.poisson import laplace
 

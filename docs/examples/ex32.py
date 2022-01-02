@@ -1,4 +1,4 @@
-r"""Block diagonally preconditioned Stokes solver.
+r"""# Block diagonally preconditioned Stokes solver
 
 .. note::
 
@@ -45,7 +45,6 @@ then be passed to the MINRES sparse iterative solver from SciPy.
 .. [ELMAN] Elman, H. C., Silvester, D. J.,, Wathen, A. J. (2014). *Finite Elements and Fast Iterative Solvers : with Applications in Incompressible Fluid Dynamics*, ch. 4 'Solution of discrete Stokes problems'.  Oxford University Press.  `doi:10.1093/acprof:oso/9780199678792.001.0001 <https://doi.org/10.1093%2facprof:oso%2f9780199678792.001.0001>`_
 
 .. [McBAIN] McBain, G. D. (2016). `Creeping convection in a horizontally heated ellipsoid <http://people.eng.unimelb.edu.au/imarusic/proceedings/20/548/%20Paper.pdf>`_. *Proceedings of the Twentieth Australasian Fluid Mechanics Conference*.
-
 
 """
 from typing import NamedTuple

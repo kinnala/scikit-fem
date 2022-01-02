@@ -1,4 +1,4 @@
-r"""High-order plotting.
+r"""# High-order plotting
 
 This simple example demonstrates the usage and visualisation of biquadratic
 finite element basis. Many plotting tools, including matplotlib, provide tools
@@ -25,7 +25,6 @@ conditions and biquadratic basis on quadrilateral elements. The quadrilateral
 elements are defined using an isoparametric local-to-global mapping.
 
 """
-
 from skfem import *
 from skfem.models.poisson import laplace, unit_load
 

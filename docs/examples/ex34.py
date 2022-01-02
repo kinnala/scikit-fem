@@ -1,4 +1,4 @@
-r"""Euler-Bernoulli beam.
+r"""# Euler-Bernoulli beam
 
 This example solves the Euler-Bernoulli beam equation
 

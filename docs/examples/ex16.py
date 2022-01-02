@@ -1,4 +1,4 @@
-r"""Spatially varying coefficient.
+r"""# Spatially varying coefficient
 
 This example demonstrates a spatially varying coefficient.
 
@@ -14,7 +14,6 @@ The x-coordinate for the spatially varying coefficient :math:`1 - x^2` is
 accessed inside the bilinear form as `w.x[0]`.
 
 """
-
 from matplotlib.pyplot import subplots, show
 import numpy as np
 from scipy.sparse.linalg import eigsh

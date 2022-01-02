@@ -1,5 +1,6 @@
-"""One-dimensional Poisson."""
+"""# One-dimensional Poisson equation
 
+"""
 import numpy as np
 from skfem import *
 from skfem.models.poisson import laplace, unit_load

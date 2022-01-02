@@ -1,4 +1,4 @@
-r"""Postprocessing Laplace equation.
+r"""# Postprocessing Laplace equation
 
 A basic postprocessing step in finite element analysis is evaluating linear
 forms over the solution. For the Poisson equation, the integral

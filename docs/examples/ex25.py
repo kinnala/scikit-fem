@@ -1,4 +1,4 @@
-r"""Forced convection.
+r"""# Forced convection
 
 We begin the study of forced convection with the plane Graetz problem; viz. the steady distribution of temperature in a plane channel with zero inlet temperature and unit temperature on the walls and a steady laminar unidirectional parabolic plane-Poiseuille flow.
 

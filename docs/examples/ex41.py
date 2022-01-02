@@ -1,4 +1,4 @@
-"""Mixed meshes.
+"""# Mixed meshes
 
 There exists a preliminary support for mixed meshes, i.e. meshes combining
 multiple element types such as triangles and quadrilaterals.  This is mostly

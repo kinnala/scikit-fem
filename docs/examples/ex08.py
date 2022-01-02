@@ -1,5 +1,6 @@
-"""Visualize Argyris basis."""
+"""# Visualize Argyris basis
 
+"""
 from skfem import *
 import numpy as np
 

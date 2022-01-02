@@ -1,4 +1,4 @@
-r"""Structural vibration.
+r"""# Structural vibration
 
 This example demonstrates the solution of a three-dimensional
 vector-valued problem. For this purpose, we consider an elastic

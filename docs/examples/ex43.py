@@ -1,4 +1,4 @@
-r"""Hyperelasticity.
+r"""# Hyperelasticity
 
 The strain energy density function per unit undeformed volume of the
 isotropic hyperelastic Neo-Hookean material formulation is given as

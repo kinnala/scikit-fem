@@ -1,4 +1,4 @@
-r"""Integral condition.
+r"""# Integral condition
 
 This short example demonstrates the implementation of an integral boundary
  condition
@@ -15,7 +15,6 @@ on a part of the boundary of the domain :math:`\Gamma \subset \partial \Omega`
  to a saddle point system.
 
 """
-
 from skfem import *
 from skfem.helpers import dot, grad
 from skfem.models.poisson import laplace

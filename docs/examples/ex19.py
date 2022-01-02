@@ -1,4 +1,4 @@
-r"""Heat equation.
+r"""# Heat equation
 
 The solutions of the heat equation
 
@@ -33,7 +33,6 @@ rule.
 For a constant time-step, this leads to a linear algebraic problem at
 each time with the same matrix but changing right-hand side.  This
 motivates factoring the matrix; e.g. with `scipy.sparse.linalg.splu`.
-
 
 """
 from math import ceil

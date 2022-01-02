@@ -1,4 +1,4 @@
-"""Hybridizable discontinuous Galerkin method.
+"""# Hybridizable discontinuous Galerkin method
 
 This examples solves the Poisson equation with unit load using a technique
 where the finite element basis is first discontinous across element edges and
@@ -12,7 +12,6 @@ is not done here as the example is meant to simply demonstrate the use of
 finite elements defined on the mesh skeleton.
 
 """
-
 from skfem import *
 import numpy as np
 

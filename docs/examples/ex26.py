@@ -1,4 +1,4 @@
-r"""Restricting a problem to a subdomain.
+r"""# Restricting a problem to a subdomain
 
 The `ex17.py` example solved the steady-state heat equation with uniform
 volumetric heating in a central core surrounded by an annular insulating layer

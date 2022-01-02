@@ -1,4 +1,4 @@
-r"""Creeping flow.
+r"""# Creeping flow
 
 The stream-function :math:`\psi` for two-dimensional creeping flow is
 governed by the biharmonic equation
@@ -26,7 +26,6 @@ polynomial solution with circular stream-lines:
     \psi = \left(1 - (x^2+y^2)/a^2\right)^2 / 64.
 
 """
-
 from skfem import *
 from skfem.models.poisson import unit_load
 from skfem.models.general import curluv

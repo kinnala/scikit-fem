@@ -1,12 +1,12 @@
-r"""Contact problem.
+"""# Contact problem
 
 Mortar methods allow setting interface conditions on non-matching meshes.
 They are useful also when solving variational inequalities such as
-`elastic contact problems <https://arxiv.org/abs/1902.09312>`_.
+[elastic contact problems](https://arxiv.org/abs/1902.09312).
 
 This example solves the first contact iteration for the following prototype
-contact problem: find :math:`\boldsymbol{u}_i : \Omega_i \rightarrow
-\mathbb{R}^2`, :math:`i = 1,2`, such that
+contact problem: find $\boldsymbol{u}_i : \Omega_i \rightarrow
+\mathbb{R}^2$, $i = 1,2$, such that
 
 .. math::
    \begin{aligned}
@@ -50,7 +50,6 @@ This is a nonlinear problem since we do not know a priori which subset
    Extending this example should be straightforward.
 
 """
-
 from skfem import *
 from skfem.models.elasticity import (linear_elasticity, lame_parameters,
                                      linear_stress)
@@ -115,8 +114,8 @@ def bilin_mortar(u, v, w):
     return ((1. / (alpha * w.h) * ju * jv - mu * jv - mv * ju)
             * (np.abs(w.x[1]) <= limit))
 
+# initial gap between the bodies
 def gap(x):
-    """Initial gap between the bodies."""
     return (1. - np.sqrt(1. - x[1] ** 2))
 
 

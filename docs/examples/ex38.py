@@ -1,4 +1,4 @@
-r"""Point source.
+r"""# Point source
 
 Sources concentrated at points cannot be evaluated in the usual way, which
 involves discrete quadrature; instead, it requires direct use of the basis
@@ -12,8 +12,6 @@ Turmetov, & Torebek 2015).
   form of the Green function of the Robin problem for the Laplace operator
   in a circle. *Advances in Pure and Applied Mathematics,* 6, 163-172.
   [doi: 10.1515/apam-2015-0003](https://doi.org/10.1515%2fapam-2015-0003)
-
-
 
 """
 from functools import partial

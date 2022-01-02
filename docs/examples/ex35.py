@@ -1,5 +1,4 @@
-"""Computation of the characteristic impedance and velocity factor of RG316
-coaxial cable.
+"""# Characteristic impedance and velocity factor of RG316 coaxial cable
 
 This example solves the series inductance (per meter) and parallel capacitance
 (per meter)

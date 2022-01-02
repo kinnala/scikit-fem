@@ -1,4 +1,4 @@
-r"""Conjugate heat transfer.
+r"""# Conjugate heat transfer
 
 The forced convection example can be extended to conjugate heat transfer by
 giving a finite thickness and thermal conductivity to one of the walls.

@@ -1,4 +1,4 @@
-r"""Insulated wire.
+r"""# Insulated wire
 
 This example solves the steady heat conduction
 with generation in an insulated wire. In radial
@@ -22,7 +22,6 @@ For comparison purposes, the exact solution at the origin is
 
 .. math::
    T(r=0) = \frac{A b^2}{4 k_0} \left( \frac{2k_0}{bh} + \frac{2 k_0}{k_1} \log \frac{b}{a} + 1\right).
-
 
 """
 from pathlib import Path

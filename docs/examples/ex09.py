@@ -1,4 +1,4 @@
-r"""Preconditioned conjugate gradient for 3-D Poisson.
+r"""# Preconditioned conjugate gradient for 3-D Poisson
 
 .. note::
 
@@ -35,7 +35,6 @@ where :math:`\Omega = (0,1)^3`.
 *  Demidov, D. (2019). AMGCL: an efficient, flexible, and extensible algebraic multigrid implementation. `arXiv:1811.05704 <https://arxiv.org/abs/1811.05704>`_
 
 """
-
 from skfem import *
 from skfem.models.poisson import *
 import numpy as np
@@ -101,4 +100,3 @@ if verbose:
     from sys import argv
 
     m.draw('vedo', point_data={'potential': x}).show()
-    #m.save(splitext(argv[0])[0] + ".vtk", {'potential': x})

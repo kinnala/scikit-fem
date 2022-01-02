@@ -1,4 +1,4 @@
-r"""Heat equation in one-dimension.
+r"""# Heat equation in one-dimension
 
 The solution of the heat equation is reduced from two dimensions in ex19 to
 one here, to demonstrate the different post-processing required.

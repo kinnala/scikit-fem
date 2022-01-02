@@ -1,4 +1,4 @@
-r"""Laplace with mixed boundary conditions.
+r"""# Laplace with mixed boundary conditions
 
 This example is another extension of `ex01.py`, still solving the Laplace
 equation but now with mixed boundary conditions, two parts isopotential (charged
@@ -16,7 +16,6 @@ so the conductance (for unit potential difference and conductivity) is
 :math:`\|\nabla u\|^2 = 2 \ln 2 / \pi`.
 
 """
-
 from skfem import *
 from skfem.models.poisson import laplace, mass
 from skfem.io import from_meshio

@@ -1,5 +1,6 @@
-"""Mixed Poisson equation and Raviart-Thomas basis"""
+"""# Mixed Poisson equation and Raviart-Thomas basis
 
+"""
 import numpy as np
 from skfem import *
 from skfem.helpers import dot, div
