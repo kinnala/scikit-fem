@@ -193,11 +193,8 @@ vonmises2 = np.sqrt(.5 * ((S[0, 0] - S[1, 1]) ** 2 +
                           6. * S[0, 1] ** 2))
 
 
-if __name__ == "__main__":
-    from os.path import splitext
-    from sys import argv
-    from skfem.visuals.matplotlib import *
-
+def visualize():
+    from skfem.visuals.matplotlib import plot, draw
     ax = plot(ib_dg,
               vonmises1,
               shading='gouraud',
@@ -205,4 +202,8 @@ if __name__ == "__main__":
     draw(mdefo, ax=ax)
     plot(Ib_dg, vonmises2, ax=ax, Nrefs=3, shading='gouraud')
     draw(Mdefo, ax=ax)
-    savefig(splitext(argv[0])[0] + '_solution.png')
+    return ax
+
+
+if __name__ == "__main__":
+    visualize().show()

@@ -131,10 +131,8 @@ edge :math:`E`.
 .. plot::
    :caption: The final solution of Example 22.
 
-   from docs.examples.ex22 import m, u
-   from skfem.visuals.matplotlib import plot, draw
-   ax = draw(m)
-   plot(m, u, ax=ax, shading='gouraud', colorbar=True)
+   from docs.examples.ex22 import visualize
+   visualize()
 
 See the `source code of Example 22 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex22.py>`_ for more information.
 
@@ -179,9 +177,11 @@ then the continuity is recovered with the help of Lagrange multipliers defined
 on the mesh skeleton (i.e. a "skeleton mesh" consisting only of the edges of
 the original mesh).
 
-.. figure:: https://user-images.githubusercontent.com/973268/133050898-68f1127f-a2fa-40e9-8fb2-0189f7e920d0.png
+.. plot::
+   :caption: The solution of Example 40 on the skeleton mesh.
 
-   The solution of Example 40 on the skeleton mesh.
+   from docs.examples.ex40 import visualize
+   visualize()
 
 See the `source code of Example 40 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex40.py>`_
 for more information.
@@ -195,9 +195,12 @@ preliminary and works only for elements with nodal or internal
 degrees-of-freedom (sharing face and edge DOFs between mesh types is
 work-in-progress).
 
-.. figure:: https://user-images.githubusercontent.com/973268/133418196-4008b78c-2a1f-4abd-9338-fd55690db98c.png
+.. plot::
+   :caption: The solution of Example 41 on the mesh with both
+             triangles and quadrilaterals.
 
-   The solution of Example 41 on the mixed mesh.
+   from docs.examples.ex41 import visualize
+   visualize()
 
 See the `source code of Example 41 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex41.py>`_
 for more information.
@@ -247,15 +250,8 @@ in the discretization of the two elastic bodies.
 .. plot::
    :caption: The displaced meshes and the von Mises stress of Example 4.
 
-   from docs.examples.ex04 import ib_dg, vonmises1, mdefo, Ib_dg, vonmises2, Mdefo
-   from skfem.visuals.matplotlib import plot, draw
-   ax = plot(ib_dg,
-             vonmises1,
-             shading='gouraud',
-             colorbar='$\sigma_{\mathrm{mises}}$')
-   draw(mdefo, ax=ax)
-   plot(Ib_dg, vonmises2, ax=ax, Nrefs=3, shading='gouraud')
-   draw(Mdefo, ax=ax)
+   from docs.examples.ex04 import visualize
+   visualize()
 
 See the `source code of Example 4 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex04.py>`_ for more information.
 
@@ -267,10 +263,12 @@ This example visualizes the :math:`C^1`-continuous fifth degree Argyris basis
 functions on a simple triangular mesh.
 This element can be used in the conforming discretization of biharmonic problems.
 
-.. figure:: https://user-images.githubusercontent.com/973268/87662432-e0c9be00-c76a-11ea-85b9-711c6b34791e.png
+.. plot::
+   :caption: The Argyris basis functions of Example 8 corresponding to the
+             middle node and the edges connected to it.
 
-   The Argyris basis functions of Example 8 corresponding to the middle node and
-   the edges connected to it.
+   from docs.examples.ex08 import visualize
+   visualize()
 
 See the `source code of Example 8 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex08.py>`_ for more information.
 

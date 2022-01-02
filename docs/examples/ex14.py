@@ -52,5 +52,6 @@ def visualize():
 
 
 if __name__ == "__main__":
-    print('||grad u||**2 = {:f} (exact = 8/3 = {:f})'.format(u @ A @ u, 8/3))
+    print('||grad u||**2 = {:f} (exact = 8/3 = {:f})'
+          .format(u @ A @ u, 8/3))
     visualize().show()

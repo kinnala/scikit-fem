@@ -62,7 +62,7 @@ def eval_estimator(m, u):
     return eta_K + eta_E
 
 if __name__ == "__main__":
-    from skfem.visuals.matplotlib import draw, plot, show
+    from skfem.visuals.matplotlib import draw
     draw(m)
 
 for itr in reversed(range(6)):
@@ -78,7 +78,11 @@ for itr in reversed(range(6)):
         m = m.refined(adaptive_theta(eval_estimator(m, u))).smoothed()
 
 
-if __name__ == "__main__":
+def visualize():
+    from skfem.visuals.matplotlib import draw, plot
     ax = draw(m)
-    plot(m, u, ax=ax, shading='gouraud', colorbar=True)
-    show()
+    return plot(m, u, ax=ax, shading='gouraud', colorbar=True)
+
+
+if __name__ == "__main__":
+    visualize().show()
