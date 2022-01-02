@@ -296,9 +296,8 @@ class Mesh:
             If ``True``, include only boundary facets.
 
         """
-        midp = [np.sum(self.p[itr, self.facets], axis=0) / self.facets.shape[0]
-                for itr in range(self.dim())]
-        facets = np.nonzero(test(np.array(midp)))[0]
+        midp = self.p[:, self.facets].mean(axis=1)
+        facets = np.nonzero(test(midp))[0]
         if boundaries_only:
             facets = np.intersect1d(facets, self.boundary_facets())
         return facets
@@ -314,9 +313,8 @@ class Mesh:
             are to be included in the return set.
 
         """
-        midp = [np.sum(self.p[itr, self.t], axis=0) / self.t.shape[0]
-                for itr in range(self.dim())]
-        return np.nonzero(test(np.array(midp)))[0]
+        midp = self.p[:, self.t].mean(axis=1)
+        return np.nonzero(test(midp))[0]
 
     def _expand_facets(self, ix: ndarray) -> Tuple[ndarray, ndarray]:
         """Return vertices and edges corresponding to given facet indices.

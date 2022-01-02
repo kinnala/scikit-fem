@@ -264,9 +264,9 @@ Example 21: Structural vibration
 This example demonstrates the solution of a three-dimensional vector-valued
 eigenvalue problem by considering the vibration of an elastic structure.
 
-.. figure:: https://user-images.githubusercontent.com/973268/87779087-ebe92080-c834-11ea-9acc-d455b6124ad7.png
+.. figure:: https://user-images.githubusercontent.com/973268/147790554-4b768d43-25fa-49cd-ab19-b16a199a6459.png
 
-   An eigenmode of Example 21.
+   The first eigenmode of Example 21.
 
 See the `source code of Example 21 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex21.py>`_ for more information.
 
@@ -297,6 +297,20 @@ for nearly incompressible Neo-Hookean solids.
    The figure was created using `ParaView <https://www.paraview.org/>`__.
 
 See the `source code of Example 36 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex36.py>`_ for more information.
+
+
+Example 43: Hyperelasticity
+---------------------------
+
+This example demonstrates Newton's method applied to the classical formulation
+of a hyperelastic Neo-Hookean solid.
+
+.. figure:: https://user-images.githubusercontent.com/973268/147790182-64f4abf4-3909-4ec0-89ac-2add304b133d.png
+
+   The deformed mesh of Example 43.
+   The figure was created using `vedo <https://github.com/marcomusy/vedo>`__.
+
+See the `source code of Example 43 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex43.py>`_ for more information.
 
 Fluid mechanics
 ===============
