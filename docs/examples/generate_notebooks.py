@@ -7,6 +7,9 @@ gallery = []
 
 for exp in Path.cwd().glob('ex*.py'):
     example = exp.read_text()
+    if exp.stem in ["ex04", "ex32", "ex13", "ex41", "ex28"]:
+        # require loading of meshes: does not work
+        continue
     parts = example.split("\"\"\"")
     if len(parts) < 3:
         continue
@@ -27,6 +30,11 @@ gallery.sort(key=lambda t: int(t[0][2:]))
 nb = nbf.v4.new_notebook()
 
 intro = """# Gallery of interactive examples
+
+The following notebooks are generated automatically from the examples in
+scikit-fem [source code distribution](https://github.com/kinnala/scikit-fem/tree/master/docs/examples).
+
+Run the first cell of the notebook to install dependencies.
 
 """
 
