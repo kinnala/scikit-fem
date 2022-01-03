@@ -2,7 +2,7 @@ import logging
 import warnings
 from copy import deepcopy
 from functools import partial
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Union, Type
 from inspect import signature
 
 import numpy as np
@@ -38,7 +38,8 @@ class Form:
 
     def __init__(self,
                  form: Optional[Callable] = None,
-                 dtype: type = np.float64,
+                 dtype: Union[Type[np.float64],
+                              Type[np.complex64]] = np.float64,
                  nthreads: int = 0,
                  inverse: bool = False):
         self.form = form.form if isinstance(form, Form) else form

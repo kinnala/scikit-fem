@@ -38,12 +38,12 @@ area = sum(b)
 k = b @ x / area**2
 k1, = basis.probes(np.zeros((2, 1))) @ x / area
 
-if __name__ == '__main__':
-    from skfem.visuals.matplotlib import plot, show
+def visualize():
+    from skfem.visuals.matplotlib import plot
+    return plot(basis, x, shading='gouraud', colorbar=True)
 
+if __name__ == '__main__':
     print('area = {:.4f} (exact = {:.4f})'.format(area, np.pi))
     print('k = {:.5f} (exact = 1/8/pi = {:.5f})'.format(k, 1/np.pi/8))
     print("k' = {:.5f} (exact = 1/4/pi = {:.5f})".format(k1, 1/np.pi/4))
-
-    plot(basis, x)
-    show()
+    visualize().show()

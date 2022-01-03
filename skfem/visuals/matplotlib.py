@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
 from ..assembly import CellBasis
-from ..mesh import Mesh2D, MeshLine1, MeshQuad1, MeshTet1, MeshTri1, MeshHex1
+from ..mesh import Mesh2D, MeshLine1, MeshQuad1, MeshTri1, Mesh3D
 
 
 @singledispatch
@@ -30,22 +30,9 @@ def draw_basis(ib: CellBasis, **kwargs) -> Axes:
     return draw(m, boundaries_only=True, **kwargs)
 
 
-@draw.register(MeshTet1)
-def draw_meshtet(m: MeshTet1, **kwargs) -> Axes:
-    """Visualize a tetrahedral mesh by drawing the boundary facets."""
-    bnd_facets = m.boundary_facets()
-    ax = plt.figure().add_subplot(1, 1, 1, projection='3d')
-    indexing = m.facets[:, bnd_facets].T
-    ax.plot_trisurf(m.p[0], m.p[1], m.p[2],
-                    triangles=indexing, cmap=plt.cm.viridis, edgecolor='k')
-    ax.set_axis_off()
-    ax.show = lambda: plt.show()
-    return ax
-
-
-@draw.register(MeshHex1)
-def draw_meshhex(m: MeshHex1, **kwargs) -> Axes:
-    """Visualize a hexahedral mesh by drawing the edges."""
+@draw.register(Mesh3D)
+def draw_meshhex(m: Mesh3D, **kwargs) -> Axes:
+    """Visualize a three-dimensional mesh by drawing the edges."""
     ax = plt.figure().add_subplot(1, 1, 1, projection='3d')
     for ix in range(m.edges.shape[1]):
         ax.plot3D(
@@ -121,6 +108,29 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> Axes:
             kwargs['color'] if 'color' in kwargs else 'k',
             linewidth=kwargs['linewidth'] if 'linewidth' in kwargs else .5)
 
+    if "boundaries" in kwargs:
+        cm = plt.get_cmap('gist_rainbow')
+        colors = [cm(1.*i/len(m.boundaries)) for i in range(len(m.boundaries))]
+        for i, k in enumerate(m.boundaries):
+            facets = m.facets[:, m.boundaries[k]]
+            xs = []
+            ys = []
+            for s, t, u, v in zip(m.p[0, facets[0]],
+                                  m.p[1, facets[0]],
+                                  m.p[0, facets[1]],
+                                  m.p[1, facets[1]]):
+                xs.append(s)
+                xs.append(u)
+                xs.append(None)
+                ys.append(t)
+                ys.append(v)
+                ys.append(None)
+            ax.plot(xs,
+                    ys,
+                    color=colors[i % len(colors)],
+                    linewidth=(kwargs['linewidth']
+                               if 'linewidth' in kwargs else 1.))
+
     if "node_numbering" in kwargs:
         for itr in range(m.p.shape[1]):
             ax.text(m.p[0, itr], m.p[1, itr], str(itr))
@@ -183,7 +193,8 @@ def plot_meshtri(m: MeshTri1, z: ndarray, **kwargs) -> Axes:
         The ratio of vertical to horizontal length-scales; ignored if ax
         specified.
     colorbar (optional)
-        If True, show colorbar. By default not shown.
+        If True, show colorbar. If a string, use it as a label for the
+        colorbar. Not shown by default.
     figsize (optional)
         Passed on to matplotlib.
     shading (optional)
@@ -207,16 +218,27 @@ def plot_meshtri(m: MeshTri1, z: ndarray, **kwargs) -> Axes:
     else:
         ax = kwargs["ax"]
 
-    im = ax.tripcolor(m.p[0], m.p[1], m.t.T, z,
+    if 'cmap' in kwargs:
+        cmap = kwargs['cmap']
+    else:
+        cmap = plt.cm.jet
+
+    im = ax.tripcolor(m.p[0], m.p[1], m.t.T, z, cmap=cmap,
                       **{k: v for k, v in kwargs.items()
                          if k in ['shading',
                                   'edgecolors',
-                                  'cmap',
                                   'vmin',
                                   'vmax']})
 
+    if "levels" in kwargs:
+        ax.tricontour(m.p[0], m.p[1], m.t.T, z,
+                      levels=kwargs["levels"], colors='k')
+
     if "colorbar" in kwargs:
-        plt.colorbar(im)
+        if isinstance(kwargs["colorbar"], str):
+            plt.colorbar(im, label=kwargs["colorbar"])
+        else:
+            plt.colorbar(im)
 
     ax.show = lambda: plt.show()
     return ax
@@ -274,10 +296,14 @@ def plot3_meshtri(m: MeshTri1, z: ndarray, **kwargs) -> Axes:
 
     """
     ax = kwargs.get("ax", plt.figure().add_subplot(1, 1, 1, projection='3d'))
+    if 'cmap' in kwargs:
+        cmap = kwargs['cmap']
+    else:
+        cmap = plt.cm.jet
 
     ax.plot_trisurf(m.p[0], m.p[1], z,
                     triangles=m.t.T,
-                    cmap=plt.cm.viridis,
+                    cmap=cmap,
                     antialiased=False)
 
     ax.show = lambda: plt.show()
