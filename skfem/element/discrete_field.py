@@ -22,6 +22,9 @@ class DiscreteField(NamedTuple):
     grad5: Optional[ndarray] = None
     grad6: Optional[ndarray] = None
 
+    def __getattr__(self, name: str):
+        return getattr(self.value, name)
+
     def __array__(self):
         return self.value
 
