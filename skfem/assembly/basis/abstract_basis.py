@@ -405,17 +405,17 @@ class AbstractBasis:
                     np.concatenate(
                         (
                             self.nodal_dofs[
-                                o[0] : (o[0] + e.nodal_dofs)
+                                o[0]:(o[0] + e.nodal_dofs)
                             ].flatten("F"),
                             self.edge_dofs[
-                                o[1] : (o[1] + e.edge_dofs)
+                                o[1]:(o[1] + e.edge_dofs)
                             ].flatten("F"),
                             self.facet_dofs[
-                                o[2] : (o[2] + e.facet_dofs)
+                                o[2]:(o[2] + e.facet_dofs)
                             ].flatten("F"),
                             (
                                 self.interior_dofs[
-                                    o[3] : (o[3] + e.interior_dofs)
+                                    o[3]:(o[3] + e.interior_dofs)
                                 ].flatten("F")
                             ),
                         )
