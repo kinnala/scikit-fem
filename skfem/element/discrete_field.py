@@ -52,28 +52,31 @@ class DiscreteField(ndarray):
         # attributes are invalidated after ufuncs
         return np.array(out_arr)
 
+    def get(self, n):
+        if n == 0:
+            return np.array(self)
+        return getattr(self, self._extra_attrs[n - 1])
+
     @property
     def astuple(self):
         return tuple(self.get(i) for i in range(len(self._extra_attrs) + 1))
 
     @property
     def value(self):
+        # increase backwards-compatibility
         return self
-
-    def get(self, n):
-        if n == 0:
-            return np.array(self)
-        return getattr(self, self._extra_attrs[n - 1])
 
     def is_zero(self):
         return self.shape == (1,)
 
     def __reduce__(self):
+        # for pickling
         pickled_state = super(DiscreteField, self).__reduce__()
         new_state = pickled_state[2] + self.astuple[1:]
         return (pickled_state[0], pickled_state[1], new_state)
 
     def __setstate__(self, state):
+        # for pickling
         nattrs = len(self._extra_attrs)
         for i in range(nattrs):
             setattr(self, self._extra_attrs[i], state[-nattrs + i])
