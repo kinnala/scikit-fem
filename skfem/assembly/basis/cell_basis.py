@@ -120,7 +120,13 @@ class CellBasis(AbstractBasis):
 
         # interpolate some previous discrete function at the vertices
         # of the refined mesh
-        w = 0. * x[0]
+        test = self.elem.gbasis(self.mapping, X, 0)[0]
+        if len(test.shape) == 3:
+            w = 0. * x
+        elif len(test.shape) == 2:
+            w = 0. * x[0]
+        else:
+            raise NotImplementedError
         for j in range(self.Nbfun):
             basis = self.elem.gbasis(self.mapping, X, j)
             w += y[self.element_dofs[j]][:, None] * basis[0]

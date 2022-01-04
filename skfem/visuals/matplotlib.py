@@ -223,12 +223,15 @@ def plot_meshtri(m: MeshTri1, z: ndarray, **kwargs) -> Axes:
     else:
         cmap = plt.cm.jet
 
-    im = ax.tripcolor(m.p[0], m.p[1], m.t.T, z, cmap=cmap,
-                      **{k: v for k, v in kwargs.items()
-                         if k in ['shading',
-                                  'edgecolors',
-                                  'vmin',
-                                  'vmax']})
+    if len(z) == 2 * len(m.p[0]):
+        im = ax.quiver(m.p[0], m.p[1], *z.reshape(2, -1))
+    else:
+        im = ax.tripcolor(m.p[0], m.p[1], m.t.T, z, cmap=cmap,
+                          **{k: v for k, v in kwargs.items()
+                             if k in ['shading',
+                                      'edgecolors',
+                                      'vmin',
+                                      'vmax']})
 
     if "levels" in kwargs:
         ax.tricontour(m.p[0], m.p[1], m.t.T, z,
