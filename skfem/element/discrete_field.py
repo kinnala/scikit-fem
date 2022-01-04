@@ -48,6 +48,10 @@ class DiscreteField(ndarray):
         self.grad5 = getattr(obj, 'grad5', None)
         self.grad6 = getattr(obj, 'grad6', None)
 
+    def __array_wrap__(self, out_arr, context=None):
+        # attributes are invalidated after ufuncs
+        return np.array(out_arr)
+
     @property
     def astuple(self):
         return tuple(self.get(i) for i in range(len(self._extra_attrs) + 1))
