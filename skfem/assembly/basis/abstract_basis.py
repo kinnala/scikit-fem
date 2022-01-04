@@ -6,8 +6,7 @@ from typing import Any, Dict, List, Optional, Tuple, Type, Union
 import numpy as np
 from numpy import ndarray
 from skfem.assembly.dofs import Dofs, DofsView
-from skfem.element import (DiscreteField, Element, ElementComposite,
-                           ElementVector)
+from skfem.element import DiscreteField, Element, ElementComposite, ElementVector
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh
 from skfem.quadrature import get_quadrature
@@ -39,14 +38,16 @@ class AbstractBasis:
     dofs: Dofs
     _side: int = 1
 
-    def __init__(self,
-                 mesh: Mesh,
-                 elem: Element,
-                 mapping: Optional[Mapping] = None,
-                 intorder: Optional[int] = None,
-                 quadrature: Optional[Tuple[ndarray, ndarray]] = None,
-                 refdom: Type[Refdom] = Refdom,
-                 dofs: Optional[Dofs] = None):
+    def __init__(
+        self,
+        mesh: Mesh,
+        elem: Element,
+        mapping: Optional[Mapping] = None,
+        intorder: Optional[int] = None,
+        quadrature: Optional[Tuple[ndarray, ndarray]] = None,
+        refdom: Type[Refdom] = Refdom,
+        dofs: Optional[Dofs] = None,
+    ):
 
         if mesh.refdom != elem.refdom:
             raise ValueError("Incompatible Mesh and Element.")
@@ -62,8 +63,9 @@ class AbstractBasis:
             # match mapped dofs and global dof numbering
             for itr in range(doflocs.shape[0]):
                 for jtr in range(self.dofs.element_dofs.shape[0]):
-                    self.doflocs[itr, self.dofs.element_dofs[jtr]] =\
-                        doflocs[itr, :, jtr]
+                    self.doflocs[itr, self.dofs.element_dofs[jtr]] = doflocs[
+                        itr, :, jtr
+                    ]
         except Exception:
             logger.warning("Unable to calculate global DOF locations.")
 
@@ -78,8 +80,7 @@ class AbstractBasis:
             self.X, self.W = quadrature
         else:
             self.X, self.W = get_quadrature(
-                refdom,
-                intorder if intorder is not None else 2 * self.elem.maxdeg
+                refdom, intorder if intorder is not None else 2 * self.elem.maxdeg
             )
 
     @property
@@ -104,7 +105,7 @@ class AbstractBasis:
 
     @property
     def element_dofs(self):
-        if not hasattr(self, '_element_dofs'):
+        if not hasattr(self, "_element_dofs"):
             if self.tind is None:
                 self._element_dofs = self.dofs.element_dofs
             else:
@@ -117,23 +118,26 @@ class AbstractBasis:
             D = tuple(D[0][key].all() for key in D[0])
         return np.setdiff1d(np.arange(self.N), np.concatenate(D))
 
-    def find_dofs(self,
-                  facets: Dict[str, ndarray] = None,
-                  skip: List[str] = None) -> Dict[str, DofsView]:
+    def find_dofs(
+        self, facets: Dict[str, ndarray] = None, skip: List[str] = None
+    ) -> Dict[str, DofsView]:
         warn("find_dofs deprecated in favor of get_dofs.", DeprecationWarning)
         if facets is None:
             if self.mesh.boundaries is None:
-                facets = {'all': self.mesh.boundary_facets()}
+                facets = {"all": self.mesh.boundary_facets()}
             else:
                 facets = self.mesh.boundaries
 
-        return {k: self.dofs.get_facet_dofs(facets[k], skip_dofnames=skip)
-                for k in facets}
+        return {
+            k: self.dofs.get_facet_dofs(facets[k], skip_dofnames=skip) for k in facets
+        }
 
-    def get_dofs(self,
-                 facets: Optional[Any] = None,
-                 elements: Optional[Any] = None,
-                 skip: List[str] = None) -> Any:
+    def get_dofs(
+        self,
+        facets: Optional[Any] = None,
+        elements: Optional[Any] = None,
+        skip: List[str] = None,
+    ) -> Any:
         """Find global DOF numbers.
 
         Accepts an array of facet/element indices.  However, various argument
@@ -232,9 +236,10 @@ class AbstractBasis:
                     return self.mesh.facets_satisfying(f)
                 return f
 
-            return {k: self.dofs.get_facet_dofs(to_indices(facets[k]),
-                                                skip_dofnames=skip)
-                    for k in facets}
+            return {
+                k: self.dofs.get_facet_dofs(to_indices(facets[k]), skip_dofnames=skip)
+                for k in facets
+            }
 
         if elements is not None and facets is not None:
             raise ValueError
@@ -253,15 +258,12 @@ class AbstractBasis:
             return self.mesh.boundary_facets()
         elif isinstance(facets, (tuple, list, set)):
             return np.unique(
-                np.concatenate(
-                    [self._normalize_facets(f) for f in facets]
-                )
+                np.concatenate([self._normalize_facets(f) for f in facets])
             )
         elif callable(facets):
             return self.mesh.facets_satisfying(facets)
         elif isinstance(facets, str):
-            if ((self.mesh.boundaries is not None
-                 and facets in self.mesh.boundaries)):
+            if self.mesh.boundaries is not None and facets in self.mesh.boundaries:
                 return self.mesh.boundaries[facets]
             else:
                 raise ValueError("Boundary '{}' not found.".format(facets))
@@ -274,26 +276,30 @@ class AbstractBasis:
             return self.mesh.elements_satisfying(elements)
         elif isinstance(elements, (tuple, list, set)):
             return np.unique(
-                np.concatenate(
-                    [self._normalize_elements(e) for e in elements]
-                )
+                np.concatenate([self._normalize_elements(e) for e in elements])
             )
         elif isinstance(elements, str):
-            if ((self.mesh.subdomains is not None
-                 and elements in self.mesh.subdomains)):
+            if self.mesh.subdomains is not None and elements in self.mesh.subdomains:
                 return self.mesh.subdomains[elements]
             else:
                 raise ValueError("Subdomain '{}' not found.".format(elements))
         raise NotImplementedError
 
     def __repr__(self):
-        size = sum([sum([y.size if hasattr(y, 'size') else 0
-                         for y in x])
-                    for x in self.basis[0]]) * 8 * len(self.basis)
+        size = (
+            sum(
+                [
+                    sum([y.size if hasattr(y, "size") else 0 for y in x])
+                    for x in self.basis[0]
+                ]
+            )
+            * 8
+            * len(self.basis)
+        )
         rep = ""
-        rep += "<skfem {}({}, {}) object>\n".format(type(self).__name__,
-                                                    type(self.mesh).__name__,
-                                                    type(self.elem).__name__)
+        rep += "<skfem {}({}, {}) object>\n".format(
+            type(self).__name__, type(self.mesh).__name__, type(self.elem).__name__
+        )
         rep += "  Number of elements: {}\n".format(self.nelems)
         rep += "  Number of DOFs: {}\n".format(self.N)
         rep += "  Size: {} B".format(size)
@@ -307,8 +313,9 @@ class AbstractBasis:
         parameters for 'w'."""
         raise NotImplementedError("Default parameters not implemented.")
 
-    def interpolate(self, w: ndarray) -> Union[DiscreteField,
-                                               Tuple[DiscreteField, ...]]:
+    def interpolate(
+        self, w: ndarray
+    ) -> Union[DiscreteField, Tuple[DiscreteField, ...]]:
         """Interpolate a solution vector to quadrature points.
 
         Useful when a solution vector is needed in the forms, e.g., when
@@ -336,13 +343,12 @@ class AbstractBasis:
 
             def linear_combination(n, refn):
                 """Global discrete function at quadrature points."""
-                out = 0. * refn.copy()
+                out = 0.0 * refn.copy()
                 for i in range(self.Nbfun):
                     values = w[self.element_dofs[i]]
                     if self.basis[i][c].is_zero():
                         continue
-                    out += np.einsum('...,...j->...j', values,
-                                     self.basis[i][c][n])
+                    out += np.einsum("...,...j->...j", values, self.basis[i][c][n])
                 return out
 
             # interpolate DiscreteField
@@ -360,48 +366,63 @@ class AbstractBasis:
 
     def split_indices(self) -> List[ndarray]:
         """Return indices for the solution components."""
-        if ((isinstance(self.elem, ElementComposite)
-             or isinstance(self.elem, ElementVector))):
-            nelems = (len(self.elem.elems)
-                      if isinstance(self.elem, ElementComposite)
-                      else self.mesh.dim())
+        if isinstance(self.elem, ElementComposite) or isinstance(
+            self.elem, ElementVector
+        ):
+            nelems = (
+                len(self.elem.elems)
+                if isinstance(self.elem, ElementComposite)
+                else self.mesh.dim()
+            )
             o = np.zeros(4, dtype=np.int64)
             output: List[ndarray] = []
             for k in range(nelems):
-                e = (self.elem.elems[k]
-                     if isinstance(self.elem, ElementComposite)
-                     else self.elem.elem)
-                output.append(np.concatenate((
-                    self.nodal_dofs[o[0]:(o[0] + e.nodal_dofs)].flatten('F'),
-                    self.edge_dofs[o[1]:(o[1] + e.edge_dofs)].flatten('F'),
-                    self.facet_dofs[o[2]:(o[2] + e.facet_dofs)].flatten('F'),
-                    (self.interior_dofs[o[3]:(o[3] + e.interior_dofs)]
-                     .flatten('F'))
-                )).astype(np.int64))
-                o += np.array([e.nodal_dofs,
-                               e.edge_dofs,
-                               e.facet_dofs,
-                               e.interior_dofs])
+                e = (
+                    self.elem.elems[k]
+                    if isinstance(self.elem, ElementComposite)
+                    else self.elem.elem
+                )
+                output.append(
+                    np.concatenate(
+                        (
+                            self.nodal_dofs[o[0] : (o[0] + e.nodal_dofs)].flatten("F"),
+                            self.edge_dofs[o[1] : (o[1] + e.edge_dofs)].flatten("F"),
+                            self.facet_dofs[o[2] : (o[2] + e.facet_dofs)].flatten("F"),
+                            (
+                                self.interior_dofs[
+                                    o[3] : (o[3] + e.interior_dofs)
+                                ].flatten("F")
+                            ),
+                        )
+                    ).astype(np.int64)
+                )
+                o += np.array(
+                    [e.nodal_dofs, e.edge_dofs, e.facet_dofs, e.interior_dofs]
+                )
             return output
         raise ValueError("Basis.elem has only a single component!")
 
-    def split_bases(self) -> List['AbstractBasis']:
+    def split_bases(self) -> List["AbstractBasis"]:
         """Return Basis objects for the solution components."""
         if isinstance(self.elem, ElementComposite):
-            return [type(self)(self.mesh, e, self.mapping,
-                               quadrature=self.quadrature)
-                    for e in self.elem.elems]
+            return [
+                type(self)(self.mesh, e, self.mapping, quadrature=self.quadrature)
+                for e in self.elem.elems
+            ]
         elif isinstance(self.elem, ElementVector):
-            return [type(self)(self.mesh, self.elem.elem, self.mapping,
-                               quadrature=self.quadrature)
-                    for _ in range(self.mesh.dim())]
+            return [
+                type(self)(
+                    self.mesh, self.elem.elem, self.mapping, quadrature=self.quadrature
+                )
+                for _ in range(self.mesh.dim())
+            ]
         raise ValueError("AbstractBasis.elem has only a single component!")
 
     @property
     def quadrature(self):
         return self.X, self.W
 
-    def split(self, x: ndarray) -> List[Tuple[ndarray, 'AbstractBasis']]:
+    def split(self, x: ndarray) -> List[Tuple[ndarray, "AbstractBasis"]]:
         """Split a solution vector into components."""
         xs = [x[ix] for ix in self.split_indices()]
         return list(zip(xs, self.split_bases()))
@@ -415,7 +436,7 @@ class AbstractBasis:
         """Return a zero array with same dimensions as the solution."""
         return np.zeros(self.N)
 
-    def with_element(self, elem: Element) -> 'AbstractBasis':
+    def with_element(self, elem: Element) -> "AbstractBasis":
         """Create a copy of ``self`` that uses different element."""
         raise NotImplementedError
 
@@ -425,7 +446,7 @@ class AbstractBasis:
         from skfem.helpers import inner
 
         if isinstance(interp, float):
-            interp = interp + self.global_coordinates().value[0] * 0.
+            interp = interp + self.global_coordinates().value[0] * 0.0
 
         if callable(interp):
             interp = interp(self.global_coordinates().value)
@@ -438,7 +459,7 @@ class AbstractBasis:
     def project(self, interp, **kwargs):
         raise NotImplementedError
 
-    def plot(self, x, visuals='matplotlib', **kwargs):
+    def plot(self, x, visuals="matplotlib", **kwargs):
         """Convenience wrapper for skfem.visuals."""
-        mod = importlib.import_module('skfem.visuals.{}'.format(visuals))
+        mod = importlib.import_module("skfem.visuals.{}".format(visuals))
         return mod.plot(self, x, **kwargs)
