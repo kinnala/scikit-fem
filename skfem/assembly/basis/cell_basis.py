@@ -104,7 +104,8 @@ class CellBasis(AbstractBasis):
 
     def mesh_parameters(self) -> DiscreteField:
         return DiscreteField(
-            np.abs(self.mapping.detDF(self.X, self.tind)) ** (1.0 / self.mesh.dim())
+            np.abs(self.mapping.detDF(self.X, self.tind))
+            ** (1.0 / self.mesh.dim())
         )
 
     def refinterp(
