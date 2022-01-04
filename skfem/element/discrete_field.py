@@ -83,11 +83,11 @@ class DiscreteField(ndarray):
                     .format(self.shape[-1]))
             rep += "\n  Number of elements: {}".format(self.shape[-2])
             rep += "\n  Order: {}".format(len(self.shape) - 2)
-        rep += "\n  Attributes: {}".format(
-            ', '.join([attr
-                       for attr in self._extra_attrs
-                       if getattr(self, attr) is not None])
-        )
+            rep += "\n  Attributes: {}".format(
+                ', '.join([attr
+                           for attr in self._extra_attrs
+                           if getattr(self, attr) is not None])
+            )
         return rep
 
     def __reduce__(self):
