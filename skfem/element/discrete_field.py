@@ -39,13 +39,18 @@ class DiscreteField(ndarray):
     def __array_finalize__(self, obj):
         if obj is None:
             return
-        for k in self._extra_attrs:
-            setattr(self, k, getattr(obj, k, None))
+        self.grad = getattr(obj, 'grad', None)
+        self.div = getattr(obj, 'div', None)
+        self.curl = getattr(obj, 'curl', None)
+        self.hess = getattr(obj, 'hess', None)
+        self.grad3 = getattr(obj, 'grad3', None)
+        self.grad4 = getattr(obj, 'grad4', None)
+        self.grad5 = getattr(obj, 'grad5', None)
+        self.grad6 = getattr(obj, 'grad6', None)
 
     @property
     def astuple(self):
-        return (np.array(self),) + tuple(getattr(self, k)
-                                         for k in self._extra_attrs)
+        return tuple(self.get(i) for i in range(len(self._extra_attrs) + 1))
 
     @property
     def value(self):
@@ -53,7 +58,7 @@ class DiscreteField(ndarray):
 
     def get(self, n):
         if n == 0:
-            return self
+            return np.array(self)
         return getattr(self, self._extra_attrs[n - 1])
 
     def is_zero(self):
