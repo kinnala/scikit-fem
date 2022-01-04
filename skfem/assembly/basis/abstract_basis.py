@@ -332,6 +332,7 @@ class AbstractBasis:
             if ref.is_zero():
                 dfs.append(ref)
                 continue
+            ref = ref.astuple
             fs = []
 
             def linear_combination(n, refn):
@@ -342,7 +343,7 @@ class AbstractBasis:
                     if self.basis[i][c].is_zero():
                         continue
                     out += np.einsum('...,...j->...j', values,
-                                     self.basis[i][c][n])
+                                     self.basis[i][c].astuple[n])
                 return out
 
             # interpolate DiscreteField
