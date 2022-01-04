@@ -51,6 +51,11 @@ class DiscreteField(ndarray):
     def value(self):
         return self
 
+    def get(self, n):
+        if n == 0:
+            return self
+        return getattr(self, self._extra_attrs[n - 1])
+
     def is_zero(self):
         return self.shape == (1,)
 

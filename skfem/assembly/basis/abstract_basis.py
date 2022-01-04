@@ -343,7 +343,7 @@ class AbstractBasis:
                     if self.basis[i][c].is_zero():
                         continue
                     out += np.einsum('...,...j->...j', values,
-                                     self.basis[i][c].astuple[n])
+                                     self.basis[i][c].get(n))
                 return out
 
             # interpolate DiscreteField
