@@ -16,7 +16,7 @@ class DiscreteField(ndarray):
     )
 
     def __new__(cls,
-                value=np.array([0]),
+                value=None,
                 grad=None,
                 div=None,
                 curl=None,
@@ -25,6 +25,8 @@ class DiscreteField(ndarray):
                 grad4=None,
                 grad5=None,
                 grad6=None):
+        if value is None:
+            value = np.array([0])
         obj = np.asarray(value).view(cls)
         obj.grad = grad
         obj.div = div
@@ -48,8 +50,12 @@ class DiscreteField(ndarray):
         self.grad5 = getattr(obj, 'grad5', None)
         self.grad6 = getattr(obj, 'grad6', None)
 
+    def __getitem__(self, key):
+        # invalidate attributes after slice
+        return np.array(self)[key]
+
     def __array_wrap__(self, out_arr, context=None):
-        # attributes are invalidated after ufuncs
+        # invalidate attributes after ufuncs
         return np.array(out_arr)
 
     def get(self, n):
@@ -63,11 +69,25 @@ class DiscreteField(ndarray):
 
     @property
     def value(self):
-        # increase backwards-compatibility
-        return self
+        # for backwards-compatibility
+        return np.array(self)
 
     def is_zero(self):
         return self.shape == (1,)
+
+    def __repr__(self):
+        rep = ""
+        rep += "<skfem DiscreteField object>"
+        if not self.is_zero():
+            rep += "\n  Quadrature points per element: {}".format(self.shape[-1])
+            rep += "\n  Number of elements: {}".format(self.shape[-2])
+            rep += "\n  Order: {}".format(len(self.shape) - 2)
+        rep += "\n  Attributes: {}".format(
+            ', '.join([attr
+                       for attr in self._extra_attrs
+                       if getattr(self, attr) is not None])
+        )
+        return rep
 
     def __reduce__(self):
         # for pickling
