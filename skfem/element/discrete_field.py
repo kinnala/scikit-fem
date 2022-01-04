@@ -4,6 +4,17 @@ from numpy import ndarray
 
 class DiscreteField(ndarray):
 
+    _extra_attrs = (
+        'grad',
+        'div',
+        'curl',
+        'hess',
+        'grad3',
+        'grad4',
+        'grad5',
+        'grad6',
+    )
+
     def __new__(cls,
                 value=np.array([0]),
                 grad=None,
@@ -28,28 +39,13 @@ class DiscreteField(ndarray):
     def __array_finalize__(self, obj):
         if obj is None:
             return
-        self.grad = getattr(obj, 'grad', None)
-        self.div = getattr(obj, 'div', None)
-        self.curl = getattr(obj, 'curl', None)
-        self.hess = getattr(obj, 'hess', None)
-        self.grad3 = getattr(obj, 'grad3', None)
-        self.grad4 = getattr(obj, 'grad4', None)
-        self.grad5 = getattr(obj, 'grad5', None)
-        self.grad6 = getattr(obj, 'grad6', None)
+        for k in self._extra_attrs:
+            setattr(self, k, getattr(obj, k, None))
 
     @property
     def astuple(self):
-        return (
-            np.array(self),
-            self.grad,
-            self.div,
-            self.curl,
-            self.hess,
-            self.grad3,
-            self.grad4,
-            self.grad5,
-            self.grad6,
-        )
+        return (np.array(self),) + tuple(getattr(self, k)
+                                         for k in self._extra_attrs)
 
     @property
     def value(self):
@@ -64,12 +60,7 @@ class DiscreteField(ndarray):
         return (pickled_state[0], pickled_state[1], new_state)
 
     def __setstate__(self, state):
-        self.grad = state[-8]
-        self.div = state[-7]
-        self.curl = state[-6]
-        self.hess = state[-5]
-        self.grad3 = state[-4]
-        self.grad4 = state[-3]
-        self.grad5 = state[-2]
-        self.grad6 = state[-1]
-        super(DiscreteField, self).__setstate__(state[0:-8])
+        nattrs = len(self._extra_attrs)
+        for i in range(nattrs):
+            setattr(self, self._extra_attrs[i], state[-nattrs + i])
+        super(DiscreteField, self).__setstate__(state[0:-nattrs])
