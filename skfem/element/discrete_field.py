@@ -79,7 +79,8 @@ class DiscreteField(ndarray):
         rep = ""
         rep += "<skfem DiscreteField object>"
         if not self.is_zero():
-            rep += "\n  Quadrature points per element: {}".format(self.shape[-1])
+            rep += ("\n  Quadrature points per element: {}"
+                    .format(self.shape[-1]))
             rep += "\n  Number of elements: {}".format(self.shape[-2])
             rep += "\n  Order: {}".format(len(self.shape) - 2)
         rep += "\n  Attributes: {}".format(
