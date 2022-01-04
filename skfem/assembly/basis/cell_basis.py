@@ -167,7 +167,7 @@ class CellBasis(AbstractBasis):
         pts = self.mapping.invF(x[:, :, np.newaxis], tind=cells)
         phis = np.array(
             [
-                self.elem.gbasis(self.mapping, pts, k, tind=cells)[0].value
+                self.elem.gbasis(self.mapping, pts, k, tind=cells)[0]
                 for k in range(self.Nbfun)
             ]
         ).flatten()
