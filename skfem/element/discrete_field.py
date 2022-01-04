@@ -1,5 +1,3 @@
-from typing import NamedTuple, Optional
-
 import numpy as np
 from numpy import ndarray
 
@@ -28,7 +26,8 @@ class DiscreteField(ndarray):
         return obj
 
     def __array_finalize__(self, obj):
-        if obj is None: return
+        if obj is None:
+            return
         self.grad = getattr(obj, 'grad', None)
         self.div = getattr(obj, 'div', None)
         self.curl = getattr(obj, 'curl', None)
