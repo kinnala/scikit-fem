@@ -98,7 +98,6 @@ __all__ = [
     "BoundaryFacetBasis",
     "InteriorFacetBasis",
     "MortarFacetBasis",
-#    "SubdomainFacetBasis",
     "Dofs",
     "DofsView",
     "TrilinearForm",
