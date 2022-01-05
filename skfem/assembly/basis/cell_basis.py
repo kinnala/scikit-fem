@@ -34,17 +34,14 @@ class CellBasis(AbstractBasis):
     (5, 5)
 
     """
-
-    def __init__(
-        self,
-        mesh: Mesh,
-        elem: Element,
-        mapping: Optional[Mapping] = None,
-        intorder: Optional[int] = None,
-        elements: Optional[ndarray] = None,
-        quadrature: Optional[Tuple[ndarray, ndarray]] = None,
-        dofs: Optional[Dofs] = None,
-    ):
+    def __init__(self,
+                 mesh: Mesh,
+                 elem: Element,
+                 mapping: Optional[Mapping] = None,
+                 intorder: Optional[int] = None,
+                 elements: Optional[ndarray] = None,
+                 quadrature: Optional[Tuple[ndarray, ndarray]] = None,
+                 dofs: Optional[Dofs] = None):
         """Combine :class:`~skfem.mesh.Mesh` and :class:`~skfem.element.Element`
         into a set of precomputed global basis functions.
 
@@ -69,19 +66,19 @@ class CellBasis(AbstractBasis):
             Optional :class:`~skfem.assembly.Dofs` object.
 
         """
-        logger.info(
-            "Initializing {}({}, {})".format(
-                type(self).__name__, type(mesh).__name__, type(elem).__name__
-            )
-        )
-        super().__init__(
-            mesh, elem, mapping, intorder, quadrature, mesh.refdom, dofs
-        )
+        logger.info("Initializing {}({}, {})".format(type(self).__name__,
+                                                     type(mesh).__name__,
+                                                     type(elem).__name__))
+        super(CellBasis, self).__init__(mesh,
+                                        elem,
+                                        mapping,
+                                        intorder,
+                                        quadrature,
+                                        mesh.refdom,
+                                        dofs)
 
-        self.basis = [
-            self.elem.gbasis(self.mapping, self.X, j, tind=elements)
-            for j in range(self.Nbfun)
-        ]
+        self.basis = [self.elem.gbasis(self.mapping, self.X, j, tind=elements)
+                      for j in range(self.Nbfun)]
 
         if elements is None:
             self.nelems = mesh.nelements
@@ -90,26 +87,26 @@ class CellBasis(AbstractBasis):
             self.nelems = len(elements)
             self.tind = self._normalize_elements(elements)
 
-        self.dx = np.abs(self.mapping.detDF(self.X, tind=elements)) * np.tile(
-            self.W, (self.nelems, 1)
-        )
+        self.dx = (np.abs(self.mapping.detDF(self.X, tind=elements))
+                   * np.tile(self.W, (self.nelems, 1)))
         logger.info("Initializing finished.")
 
     def default_parameters(self):
         """Return default parameters for `~skfem.assembly.asm`."""
-        return {"x": self.global_coordinates(), "h": self.mesh_parameters()}
+        return {'x': self.global_coordinates(),
+                'h': self.mesh_parameters()}
 
     def global_coordinates(self) -> DiscreteField:
         return DiscreteField(self.mapping.F(self.X, tind=self.tind))
 
     def mesh_parameters(self) -> DiscreteField:
-        return DiscreteField(
-            np.abs(self.mapping.detDF(self.X, self.tind)) ** (1.0 / self.mesh.dim())
-        )
+        return DiscreteField(np.abs(self.mapping.detDF(self.X, self.tind))
+                             ** (1. / self.mesh.dim()))
 
-    def refinterp(
-        self, y: ndarray, nrefs: int = 1, Nrefs: Optional[int] = None
-    ) -> Tuple[Mesh, ndarray]:
+    def refinterp(self,
+                  y: ndarray,
+                  nrefs: int = 1,
+                  Nrefs: Optional[int] = None) -> Tuple[Mesh, ndarray]:
         """Refine and interpolate (for plotting)."""
         if Nrefs is not None:
             nrefs = Nrefs  # for backwards compatibility
@@ -123,7 +120,7 @@ class CellBasis(AbstractBasis):
 
         # interpolate some previous discrete function at the vertices
         # of the refined mesh
-        w = 0.0 * x[0]
+        w = 0. * x[0]
         for j in range(self.Nbfun):
             basis = self.elem.gbasis(self.mapping, X, j)
             w += y[self.element_dofs[j]][:, None] * basis[0]
@@ -132,12 +129,10 @@ class CellBasis(AbstractBasis):
         nt = self.nelems
         t = np.tile(m.t, (1, nt))
         dt = np.max(t)
-        t += (dt + 1) * (
-            np.tile(np.arange(nt), (m.t.shape[0] * m.t.shape[1], 1))
-            .flatten("F")
-            .reshape((-1, m.t.shape[0]))
-            .T
-        )
+        t += (dt + 1) *\
+            (np.tile(np.arange(nt), (m.t.shape[0] * m.t.shape[1], 1))
+             .flatten('F')
+             .reshape((-1, m.t.shape[0])).T)
 
         if X.shape[0] == 1:
             p = np.array([x.flatten()])
@@ -203,7 +198,7 @@ class CellBasis(AbstractBasis):
 
         return interpfun
 
-    def with_element(self, elem: Element) -> "CellBasis":
+    def with_element(self, elem: Element) -> 'CellBasis':
         """Return a similar basis using a different element."""
         return type(self)(
             self.mesh,

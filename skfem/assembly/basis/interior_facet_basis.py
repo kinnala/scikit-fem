@@ -6,29 +6,26 @@ from skfem.element import Element
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh
 
-from .facet_basis import FacetBasis
+from .boundary_facet_basis import BoundaryFacetBasis
 from ..dofs import Dofs
 
 
-class InteriorFacetBasis(FacetBasis):
+class InteriorFacetBasis(BoundaryFacetBasis):
     """For evaluating integrals over interior facets.
 
     Useful for, e.g., a posteriori error estimators or implementing interior
     penalty/discontinuous Galerkin methods.
 
     """
-
-    def __init__(
-        self,
-        mesh: Mesh,
-        elem: Element,
-        mapping: Optional[Mapping] = None,
-        intorder: Optional[int] = None,
-        quadrature: Optional[Tuple[ndarray, ndarray]] = None,
-        facets: Optional[ndarray] = None,
-        side: int = 0,
-        dofs: Optional[Dofs] = None,
-    ):
+    def __init__(self,
+                 mesh: Mesh,
+                 elem: Element,
+                 mapping: Optional[Mapping] = None,
+                 intorder: Optional[int] = None,
+                 quadrature: Optional[Tuple[ndarray, ndarray]] = None,
+                 facets: Optional[ndarray] = None,
+                 side: int = 0,
+                 dofs: Optional[Dofs] = None):
         """Precomputed global basis on interior facets."""
 
         if side not in (0, 1):
@@ -40,13 +37,11 @@ class InteriorFacetBasis(FacetBasis):
         facets = self._normalize_facets(facets)
         tind = mesh.f2t[side, facets]
 
-        super().__init__(
-            mesh,
-            elem,
-            mapping=mapping,
-            intorder=intorder,
-            quadrature=quadrature,
-            facets=facets,
-            _tind=tind,
-            dofs=dofs,
-        )
+        super(InteriorFacetBasis, self).__init__(mesh,
+                                                 elem,
+                                                 mapping=mapping,
+                                                 intorder=intorder,
+                                                 quadrature=quadrature,
+                                                 facets=facets,
+                                                 _tind=tind,
+                                                 dofs=dofs)
