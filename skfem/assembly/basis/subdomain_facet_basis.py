@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple
 
 import numpy as np
 from numpy import ndarray
@@ -49,8 +49,8 @@ class SubdomainFacetBasis(FacetBasis):
         ind_p0 = basis_p0.zeros()
         ind_p0[basis_p0.get_dofs(elements=elements)] = 1
 
-        facet_list = list()  # type: List[int]
-        flip_list = list()  # type: List[ndarray]
+        facet_list = list()
+        flip_list = list()
         asm(
             get_boundary(facet_list, flip_list),
             [facet_basis_p0_s0, facet_basis_p0_s1],
