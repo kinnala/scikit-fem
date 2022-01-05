@@ -6,12 +6,7 @@ from typing import Any, Dict, List, Optional, Tuple, Type, Union
 import numpy as np
 from numpy import ndarray
 from skfem.assembly.dofs import Dofs, DofsView
-from skfem.element import (
-    DiscreteField,
-    Element,
-    ElementComposite,
-    ElementVector,
-)
+from skfem.element import DiscreteField, Element, ElementComposite, ElementVector
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh
 from skfem.quadrature import get_quadrature
@@ -85,8 +80,7 @@ class AbstractBasis:
             self.X, self.W = quadrature
         else:
             self.X, self.W = get_quadrature(
-                refdom,
-                intorder if intorder is not None else 2 * self.elem.maxdeg,
+                refdom, intorder if intorder is not None else 2 * self.elem.maxdeg
             )
 
     @property
@@ -135,8 +129,7 @@ class AbstractBasis:
                 facets = self.mesh.boundaries
 
         return {
-            k: self.dofs.get_facet_dofs(facets[k], skip_dofnames=skip)
-            for k in facets
+            k: self.dofs.get_facet_dofs(facets[k], skip_dofnames=skip) for k in facets
         }
 
     def get_dofs(
@@ -244,9 +237,7 @@ class AbstractBasis:
                 return f
 
             return {
-                k: self.dofs.get_facet_dofs(
-                    to_indices(facets[k]), skip_dofnames=skip
-                )
+                k: self.dofs.get_facet_dofs(to_indices(facets[k]), skip_dofnames=skip)
                 for k in facets
             }
 
@@ -272,10 +263,7 @@ class AbstractBasis:
         elif callable(facets):
             return self.mesh.facets_satisfying(facets)
         elif isinstance(facets, str):
-            if (
-                self.mesh.boundaries is not None
-                and facets in self.mesh.boundaries
-            ):
+            if self.mesh.boundaries is not None and facets in self.mesh.boundaries:
                 return self.mesh.boundaries[facets]
             else:
                 raise ValueError("Boundary '{}' not found.".format(facets))
@@ -291,10 +279,7 @@ class AbstractBasis:
                 np.concatenate([self._normalize_elements(e) for e in elements])
             )
         elif isinstance(elements, str):
-            if (
-                self.mesh.subdomains is not None
-                and elements in self.mesh.subdomains
-            ):
+            if self.mesh.subdomains is not None and elements in self.mesh.subdomains:
                 return self.mesh.subdomains[elements]
             else:
                 raise ValueError("Subdomain '{}' not found.".format(elements))
@@ -313,9 +298,7 @@ class AbstractBasis:
         )
         rep = ""
         rep += "<skfem {}({}, {}) object>\n".format(
-            type(self).__name__,
-            type(self.mesh).__name__,
-            type(self.elem).__name__,
+            type(self).__name__, type(self.mesh).__name__, type(self.elem).__name__
         )
         rep += "  Number of elements: {}\n".format(self.nelems)
         rep += "  Number of DOFs: {}\n".format(self.N)
@@ -365,9 +348,7 @@ class AbstractBasis:
                     values = w[self.element_dofs[i]]
                     if self.basis[i][c].is_zero():
                         continue
-                    out += np.einsum(
-                        "...,...j->...j", values, self.basis[i][c][n]
-                    )
+                    out += np.einsum("...,...j->...j", values, self.basis[i][c][n])
                 return out
 
             # interpolate DiscreteField
@@ -404,15 +385,9 @@ class AbstractBasis:
                 output.append(
                     np.concatenate(
                         (
-                            self.nodal_dofs[
-                                o[0] : (o[0] + e.nodal_dofs)
-                            ].flatten("F"),
-                            self.edge_dofs[
-                                o[1] : (o[1] + e.edge_dofs)
-                            ].flatten("F"),
-                            self.facet_dofs[
-                                o[2] : (o[2] + e.facet_dofs)
-                            ].flatten("F"),
+                            self.nodal_dofs[o[0] : (o[0] + e.nodal_dofs)].flatten("F"),
+                            self.edge_dofs[o[1] : (o[1] + e.edge_dofs)].flatten("F"),
+                            self.facet_dofs[o[2] : (o[2] + e.facet_dofs)].flatten("F"),
                             (
                                 self.interior_dofs[
                                     o[3] : (o[3] + e.interior_dofs)
@@ -431,18 +406,13 @@ class AbstractBasis:
         """Return Basis objects for the solution components."""
         if isinstance(self.elem, ElementComposite):
             return [
-                type(self)(
-                    self.mesh, e, self.mapping, quadrature=self.quadrature
-                )
+                type(self)(self.mesh, e, self.mapping, quadrature=self.quadrature)
                 for e in self.elem.elems
             ]
         elif isinstance(self.elem, ElementVector):
             return [
                 type(self)(
-                    self.mesh,
-                    self.elem.elem,
-                    self.mapping,
-                    quadrature=self.quadrature,
+                    self.mesh, self.elem.elem, self.mapping, quadrature=self.quadrature
                 )
                 for _ in range(self.mesh.dim())
             ]
