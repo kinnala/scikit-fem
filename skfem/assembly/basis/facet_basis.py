@@ -133,7 +133,7 @@ class FacetBasis(AbstractBasis):
 
         from skfem.utils import projection
 
-        fbasis = FacetBasis(
+        fbasis = BoundaryFacetBasis(
             self.mesh, elem, facets=self.find, quadrature=(self.X, self.W)
         )
         I = fbasis.get_dofs(self.find).all()
@@ -214,7 +214,7 @@ class FacetBasis(AbstractBasis):
             self._trace_project(x, target_elem),
         )
 
-    def with_element(self, elem: Element) -> "FacetBasis":
+    def with_element(self, elem: Element) -> "BoundaryFacetBasis":
         """Return a similar basis using a different element."""
         return type(self)(
             self.mesh,
