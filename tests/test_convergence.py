@@ -97,7 +97,7 @@ class ConvergenceQ1(unittest.TestCase):
         return ib.get_dofs().all('u')
 
     def compute_error(self, m, basis, U):
-        uh, duh, *_ = basis.interpolate(U)
+        uh, duh, *_ = basis.interpolate(U).astuple
         dx = basis.dx
         x = basis.global_coordinates()
 
@@ -464,10 +464,7 @@ class FacetConvergenceTetP2(unittest.TestCase):
 
     def runTest(self):
 
-        @BilinearForm
-        def dudv(u, v, w):
-            du, dv = u[1], v[1]
-            return sum(du * dv)
+        dudv = laplace
 
         @BilinearForm
         def uv(u, v, w):
@@ -528,7 +525,7 @@ class FacetConvergenceTetP2(unittest.TestCase):
         self.assertLess(L2err[-1], 0.005)
 
     def compute_error(self, m, basis, U):
-        uh, duh, *_ = basis.interpolate(U)
+        uh, duh, *_ = basis.interpolate(U).astuple
         dx = basis.dx
         x = basis.global_coordinates().value
 

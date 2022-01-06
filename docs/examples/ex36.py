@@ -95,7 +95,7 @@ def F1(w):
 
 def F2(w):
     u = w["disp"]
-    p = w["press"].value
+    p = w["press"]
     F = grad(u) + identity(u)
     J = det(F)
     Js = .5 * (lmbda + p + 2. * np.sqrt(lmbda * mu + .25 * (lmbda + p) ** 2)) / lmbda
@@ -127,7 +127,7 @@ def A12(w):
 
 def A22(w):
     u = w["disp"]
-    p = w["press"].value
+    p = w["press"]
     Js = .5 * (lmbda + p + 2. * np.sqrt(lmbda * mu + .25 * (lmbda + p) ** 2)) / lmbda
     dJsdp = ((.25 * lmbda + .25 * p + .5 * np.sqrt(lmbda * mu + .25 * (lmbda + p) ** 2))
              / (lmbda * np.sqrt(lmbda * mu + .25 * (lmbda + p) ** 2)))
@@ -156,7 +156,7 @@ mesh = (
         }
     )
 )
-uelem = ElementVectorH1(ElementTetP2())
+uelem = ElementVector(ElementTetP2())
 pelem = ElementTetP1()
 elems = {
     "u": uelem,

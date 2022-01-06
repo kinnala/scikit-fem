@@ -113,7 +113,7 @@ Here we choose the piecewise-linear basis:
    <skfem CellBasis(MeshTri1, ElementTriP1) object>
      Number of elements: 128
      Number of DOFs: 81
-     Size: 27648 B
+     Size: 9216 B
 
 Step 5: Assemble the linear system
 ==================================

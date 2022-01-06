@@ -60,7 +60,7 @@ This can be written as
 
    The last argument ``w`` is a dictionary of
    :class:`~skfem.element.DiscreteField` objects.  Its ``_getattr_`` is
-   overridden so that ``w.x`` corresponds to ``w['x'].value``.  Some keys are
+   overridden so that ``w.x`` corresponds to ``w['x']``.  Some keys are
    populated by default, e.g., ``w.x`` are the global quadrature points.
 
 In addition, forms can depend on the local mesh parameter ``w.h`` or other
@@ -113,24 +113,8 @@ elements` x `number of quadrature points per element`.  The return value should
 always have such shape no matter which mesh or element type is used.
 
 The module :mod:`skfem.helpers` contains functions that make the forms more
-readable.  An alternative way to write the above form is
-
-.. doctest:: python
-
-   >>> from skfem import BilinearForm
-   >>> @BilinearForm
-   ... def integrand(u, v, w):
-   ...     return u[1][0] * v[1][0] + u[1][1] * v[1][1]
-
-.. note::
-
-    In fact, ``u`` and ``v`` are simply named tuples of numpy arrays with the
-    values of the function at ``u[0]`` or ``u.value`` and the values of the
-    gradient at ``u[1]`` or ``u.grad`` (and some additional magic such as
-    implementing ``__array__`` and ``__mul__`` so that expressions such as
-    ``u * v`` work as expected).
-
-Notice how the shape of ``u[0]`` is what we expect also from the return value:
+readable.  Notice how the shape of ``u.grad[0]`` is what we expect also from
+the return value:
 
 .. code-block:: none
 
@@ -138,7 +122,7 @@ Notice how the shape of ``u[0]`` is what we expect also from the return value:
    >>> asm(integrand, Basis(MeshTri(), ElementTriP1()))
    > /home/tom/src/scikit-fem/test.py(7)integrand()
    -> return dot(grad(u), grad(v))
-   (Pdb) !u[0]
+   (Pdb) !u.grad[0]
    array([[0.66666667, 0.16666667, 0.16666667],
           [0.66666667, 0.16666667, 0.16666667]])
 
@@ -188,7 +172,7 @@ cube mesh:
    <skfem CellBasis(MeshHex1, ElementHex2) object>
      Number of elements: 1
      Number of DOFs: 27
-     Size: 296352 B
+     Size: 74088 B
 
 .. plot::
 

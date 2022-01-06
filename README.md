@@ -215,11 +215,20 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+- Changed: `DiscreteField` is now a subclass of `ndarray` instead of
+  `NamedTuple`
+- Changed: Writing `w['u']` and `w.u` inside the form definition is now
+  equivalent (previously `w.u == w['u'].value`)
 - Changed: `Mesh.draw` now uses `matplotlib` by default, call
-  `Mesh.draw("vedo")` to use `vedo`
-- Changed: `skfem.visuals.matplotlib` uses now `jet` as the default colormap
+  `Mesh.draw("vedo")` to keep using `vedo`
+- Changed: `skfem.visuals.matplotlib` now uses `jet` as the default colormap
+- Deprecated: `DiscreteField.value` remains for backwards-compatibility but is
+  now deprecated and can be dropped
 - Added: `Mesh.plot`, a wrapper to `skfem.visuals.*.plot`
 - Added: `Basis.plot`, a wrapper to `skfem.visuals.*.plot`
+- Added: `Basis.refinterp` now supports vectorial fields
+- Added: `skfem.visuals.matpltlib.plot` now has a basic quiver plot for vector
+  fields
 - Fixed: Improvements to backwards compatibility in `asm`/`assemble` kwargs
 
 ### [5.2.0] - 2021-12-27
@@ -244,7 +253,6 @@ with respect to documented and/or tested features.
 
 - Changed: `meshio` is now an optional dependency
 - Changed: `ElementComposite` uses `DiscreteField()` to represent zero
-- Changed: Better string `__repr__` for `Basis` and `DofsView`
 - Added: Support more argument types in `Basis.get_dofs`
 - Added: Version information in `skfem.__version__`
 - Added: Preserve `Mesh.boundaries` during uniform refinement of `MeshLine1`,
