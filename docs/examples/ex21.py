@@ -69,7 +69,7 @@ from pathlib import Path
 
 m = MeshTet.load(Path(__file__).parent / 'meshes' / 'beams.msh')
 e1 = ElementTetP2()
-e = ElementVectorH1(e1)
+e = ElementVector(e1)
 
 ib = Basis(m, e)
 
