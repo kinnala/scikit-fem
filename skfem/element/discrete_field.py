@@ -1,3 +1,5 @@
+from warnings import warn
+
 import numpy as np
 from numpy import ndarray
 
@@ -70,6 +72,8 @@ class DiscreteField(ndarray):
     @property
     def value(self):
         # for backwards-compatibility
+        warn("Writing 'u.value' is unnecessary "
+             "and can be replaced by 'u'.", DeprecationWarning)
         return np.array(self)
 
     def is_zero(self):
@@ -83,11 +87,11 @@ class DiscreteField(ndarray):
                     .format(self.shape[-1]))
             rep += "\n  Number of elements: {}".format(self.shape[-2])
             rep += "\n  Order: {}".format(len(self.shape) - 2)
-            rep += "\n  Attributes: {}".format(
-                ', '.join([attr
-                           for attr in self._extra_attrs
-                           if getattr(self, attr) is not None])
-            )
+            attrs = ', '.join([attr
+                               for attr in self._extra_attrs
+                               if getattr(self, attr) is not None])
+            if len(attrs) > 0:
+                rep += "\n  Attributes: {}".format(attrs)
         return rep
 
     def __reduce__(self):
