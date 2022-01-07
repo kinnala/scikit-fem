@@ -1,89 +1,108 @@
-from typing import NamedTuple, Optional
+from warnings import warn
 
 import numpy as np
 from numpy import ndarray
 
 
-class DiscreteField(NamedTuple):
-    """A function defined at the global quadrature points.
+class DiscreteField(ndarray):
 
-    Created using :meth:`~skfem.element.Element.gbasis` or
-    :meth:`~skfem.assembly.CellBasis.interpolate`.
+    _extra_attrs = (
+        'grad',
+        'div',
+        'curl',
+        'hess',
+        'grad3',
+        'grad4',
+        'grad5',
+        'grad6',
+    )
 
-    """
+    def __new__(cls,
+                value=None,
+                grad=None,
+                div=None,
+                curl=None,
+                hess=None,
+                grad3=None,
+                grad4=None,
+                grad5=None,
+                grad6=None):
+        if value is None:
+            value = np.array([0])
+        obj = np.asarray(value).view(cls)
+        obj.grad = grad
+        obj.div = div
+        obj.curl = curl
+        obj.hess = hess
+        obj.grad3 = grad3
+        obj.grad4 = grad4
+        obj.grad5 = grad5
+        obj.grad6 = grad6
+        return obj
 
-    value: ndarray = np.array([0])  # zero field
-    grad: Optional[ndarray] = None
-    div: Optional[ndarray] = None
-    curl: Optional[ndarray] = None
-    hess: Optional[ndarray] = None
-    grad3: Optional[ndarray] = None
-    grad4: Optional[ndarray] = None
-    grad5: Optional[ndarray] = None
-    grad6: Optional[ndarray] = None
+    def __array_finalize__(self, obj):
+        if obj is None:
+            return
+        self.grad = getattr(obj, 'grad', None)
+        self.div = getattr(obj, 'div', None)
+        self.curl = getattr(obj, 'curl', None)
+        self.hess = getattr(obj, 'hess', None)
+        self.grad3 = getattr(obj, 'grad3', None)
+        self.grad4 = getattr(obj, 'grad4', None)
+        self.grad5 = getattr(obj, 'grad5', None)
+        self.grad6 = getattr(obj, 'grad6', None)
 
-    def __array__(self):
-        return self.value
+    def __getitem__(self, key):
+        # invalidate attributes after slice
+        return np.array(self)[key]
 
-    def __add__(self, other):
-        if isinstance(other, DiscreteField):
-            return self.value + other.value
-        return self.value + other
+    def __array_wrap__(self, out_arr, context=None):
+        # invalidate attributes after ufuncs
+        return np.array(out_arr)
 
-    def __sub__(self, other):
-        if isinstance(other, DiscreteField):
-            return self.value - other.value
-        return self.value - other
+    def get(self, n):
+        if n == 0:
+            return np.array(self)
+        return getattr(self, self._extra_attrs[n - 1])
 
-    def __mul__(self, other):
-        if isinstance(other, DiscreteField):
-            return self.value * other.value
-        return self.value * other
+    @property
+    def astuple(self):
+        return tuple(self.get(i) for i in range(len(self._extra_attrs) + 1))
 
-    def __truediv__(self, other):
-        if isinstance(other, DiscreteField):
-            return self.value / other.value
-        return self.value / other
-
-    def __pow__(self, other):
-        if isinstance(other, DiscreteField):
-            return self.value ** other.value
-        return self.value ** other
-
-    def __neg__(self):
-        return -self.value
-
-    def __radd__(self, other):
-        return self.__add__(other)
-
-    def __rsub__(self, other):
-        return other - self.value
-
-    def __rmul__(self, other):
-        return self.__mul__(other)
-
-    def __rtruediv__(self, other):
-        return other / self.value
-
-    def __rpow__(self, other):
-        return other ** self.value
-
-    def _split(self):
-        """Split all components based on their first dimension."""
-        return [DiscreteField(*[f[i] for f in self if f is not None])
-                for i in range(self.value.shape[0])]
+    @property
+    def value(self):
+        # for backwards-compatibility
+        warn("Writing 'u.value' is unnecessary "
+             "and can be replaced by 'u'.", DeprecationWarning)
+        return np.array(self)
 
     def is_zero(self):
-        if self.value.shape == (1,):
-            return True
-        return False
+        return self.shape == (1,)
 
-    def zeros_like(self) -> 'DiscreteField':
-        """Return zero :class:`~skfem.element.DiscreteField` with same size."""
+    def __repr__(self):
+        rep = ""
+        rep += "<skfem DiscreteField object>"
+        if not self.is_zero():
+            rep += ("\n  Quadrature points per element: {}"
+                    .format(self.shape[-1]))
+            rep += "\n  Number of elements: {}".format(self.shape[-2])
+            rep += "\n  Order: {}".format(len(self.shape) - 2)
+            attrs = ', '.join([attr
+                               for attr in self._extra_attrs
+                               if getattr(self, attr) is not None])
+            if len(attrs) > 0:
+                rep += "\n  Attributes: {}".format(attrs)
+        return rep
 
-        def zero_or_none(x):
-            if x is None:
-                return None
-            return np.zeros_like(x)
+    def __reduce__(self):
+        # for pickling
+        pickled_state = super(DiscreteField, self).__reduce__()
+        new_state = pickled_state[2] + self.astuple[1:]
+        return (pickled_state[0], pickled_state[1], new_state)
 
-        return DiscreteField(*[zero_or_none(field) for field in self])
+    def __setstate__(self, state):
+        # for pickling
+        nattrs = len(self._extra_attrs)
+        for i in range(nattrs):
+            setattr(self, self._extra_attrs[i], state[-nattrs + i])
+        super(DiscreteField, self).__setstate__(state[0:-nattrs])

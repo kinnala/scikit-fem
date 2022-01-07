@@ -17,7 +17,7 @@ from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
                            ElementLineP0, ElementQuad1, ElementQuad0,
                            ElementTetP1, ElementTetP0, ElementHex1,
                            ElementHex0, ElementLineP1, ElementLineMini,
-                           ElementWedge1)
+                           ElementWedge1, ElementTriRT0, ElementQuadRT0)
 from skfem.models.poisson import laplace
 
 
@@ -403,3 +403,42 @@ def test_mortar_basis(m1, m2, lenright):
 
     assert_allclose(mass.assemble(mb[0], mb[1]).toarray(),
                     mass.assemble(mb[1], mb[0]).T.toarray())
+
+
+@pytest.mark.parametrize(
+    "m, e, fun",
+    [
+        (MeshTri(), ElementTriP1(), lambda x: x[0]),
+        (MeshTri(), ElementTriRT0(), lambda x: x),
+        (MeshQuad(), ElementQuadRT0(), lambda x: x),
+    ]
+)
+def test_basis_project(m, e, fun):
+
+    basis = CellBasis(m, e)
+    y = basis.project(fun)
+
+    @Functional
+    def int_y_1(w):
+        return w.y ** 2
+
+    @Functional
+    def int_y_2(w):
+        return fun(w.x) ** 2
+
+    assert_almost_equal(int_y_1.assemble(basis, y=y),
+                        int_y_2.assemble(basis))
+
+
+def test_basis_project_grad():
+
+    m, e = (MeshTri(), ElementTriP1())
+    basis = CellBasis(m, e)
+    Y = basis.interpolate(m.p[0])
+    y = basis.project(Y.grad[0])
+
+    @Functional
+    def int_y(w):
+        return w.y ** 2
+
+    assert_almost_equal(int_y.assemble(basis, y=y), 1.)

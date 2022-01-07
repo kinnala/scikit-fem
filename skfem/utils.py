@@ -616,11 +616,11 @@ def projection(fun,
     def mass(u, v, w):
         from skfem.helpers import dot, ddot
         p = 0
-        if len(u.value.shape) == 2:
+        if len(u.shape) == 2:
             p = u * v
-        elif len(u.value.shape) == 3:
+        elif len(u.shape) == 3:
             p = dot(u, v)
-        elif len(u.value.shape) == 4:
+        elif len(u.shape) == 4:
             p = ddot(u, v)
         return p
 

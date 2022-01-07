@@ -100,14 +100,12 @@ def inner(u: FieldOrArray, v: FieldOrArray):
         return u
     if isinstance(v, DiscreteField) and v.is_zero():
         return v
-    U = u.value if isinstance(u, DiscreteField) else u
-    V = v.value if isinstance(v, DiscreteField) else v
-    if len(U.shape) == 2:
-        return U * V
-    elif len(U.shape) == 3:
-        return dot(U, V)
-    elif len(U.shape) == 4:
-        return ddot(U, V)
+    if len(u.shape) == 2:
+        return u * v
+    elif len(u.shape) == 3:
+        return dot(u, v)
+    elif len(u.shape) == 4:
+        return ddot(u, v)
     raise NotImplementedError
 
 
@@ -180,21 +178,13 @@ def eye(w, n):
 
 def identity(w, N=None):
     """Create identity matrix."""
-    if isinstance(w, DiscreteField):
-        proto = w.value
-    elif isinstance(w, ndarray):
-        proto = w
-    else:
-        raise NotImplementedError
-
     if N is None:
-        if len(proto.shape) > 2:
-            N = proto.shape[-3]
+        if len(w.shape) > 2:
+            N = w.shape[-3]
         else:
             raise ValueError("Cannot deduce the size of the identity matrix. "
                              "Give an explicit keyword argument N.")
-
-    return eye(np.ones(proto.shape[-2:]), N)
+    return eye(np.ones(w.shape[-2:]), N)
 
 
 def det(A):

@@ -19,17 +19,9 @@ class FormExtraParams(dict):
     """Passed to forms as 'w'."""
 
     def __getattr__(self, attr):
-        if attr[:4] == 'sign':
-            # for backwards compatibility
-            ix = int(attr[4]) - 1 if len(attr) == 5 else 0
-            if hasattr(self, 'idx') and ix < len(self['idx']):
-                return (-1.) ** self['idx'][ix]
-            return 1.
         if attr in self:
-            if hasattr(self[attr], 'value'):
-                return self[attr].value
             return self[attr]
-        raise ValueError
+        raise AttributeError("Attribute '{}' not found in 'w'.".format(attr))
 
 
 class Form:

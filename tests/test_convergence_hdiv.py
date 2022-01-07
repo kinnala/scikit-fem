@@ -85,7 +85,7 @@ class ConvergenceRaviartThomas(unittest.TestCase):
         self.assertLess(L2s[-1], self.L2bound)
 
     def compute_L2(self, m, basis, U):
-        uh, *_ = basis.interpolate(U)
+        uh, *_ = basis.interpolate(U).astuple
         dx = basis.dx
         x = basis.global_coordinates()
 
@@ -102,7 +102,7 @@ class ConvergenceRaviartThomas(unittest.TestCase):
         return np.sqrt(np.sum(np.sum((uh - u(x.value)) ** 2 * dx, axis=1)))
 
     def compute_Hdiv(self, m, basis, U):
-        uh, duh, *_ = basis.interpolate(U)
+        uh, duh, *_ = basis.interpolate(U).astuple
         dx = basis.dx
         x = basis.global_coordinates()
 
