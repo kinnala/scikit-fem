@@ -50,7 +50,10 @@ class BoundaryFacetBasis(AbstractBasis):
             Optional subset of facet indices.
         dofs
             Optional :class:`~skfem.assembly.Dofs` object.
-
+        _tind
+            Optional subset of triangle indices.
+        _tind_normals
+            Optional subset of triangle indicies.
         """
         typestr = ("{}({}, {})".format(type(self).__name__,
                                        type(mesh).__name__,

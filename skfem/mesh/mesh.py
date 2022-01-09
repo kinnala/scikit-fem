@@ -98,12 +98,20 @@ class Mesh:
 
     @property
     def t2f(self):
+        """triangles to facets
+        
+        i.e. ith column contains facets corresponding to ith triangle
+        """
         if not hasattr(self, '_t2f'):
             self._init_facets()
         return self._t2f
 
     @property
     def f2t(self):
+        """"facets to triangles
+        
+        i.e. ith column contains triangles corresponding to ith facet
+        """
         if not hasattr(self, '_f2t'):
             self._f2t = self.build_inverse(self.t, self.t2f)
         return self._f2t
@@ -124,11 +132,23 @@ class Mesh:
         return self.elem.refdom.dim()
 
     def boundary_facets(self) -> ndarray:
-        """Return an array of boundary facet indices."""
+        """Return an array of boundary facet indices.
+        
+        Boundary facets are defined as any facets that form the boundary of a
+        single cell in the mesh. Boundary facets are a disjoint set with
+        interior facets. Interior facets form a boundary between two cells in
+        the mesh.
+
+        The union of the set of boundary facets with the set of interior facets
+        is the set of all facets.
+        """
         return np.nonzero(self.f2t[1] == -1)[0]
 
     def boundary_edges(self) -> ndarray:
-        """Return an array of boundary edge indices."""
+        """Return an array of boundary edge indices.
+        
+        Boundary edges are defined as any edges belonging to a boundary facet.
+        """
         facets = self.boundary_facets()
         boundary_edges = np.sort(np.hstack(
             tuple([np.vstack((self.facets[itr, facets],
@@ -180,7 +200,6 @@ class Mesh:
             as keys.  The midpoint of the element should return ``True`` for
             the corresponding lambda function if the element belongs to the
             subdomain.
-
         """
         return replace(
             self,
@@ -255,11 +274,21 @@ class Mesh:
         return boundaries, subdomains
 
     def boundary_nodes(self) -> ndarray:
-        """Return an array of boundary node indices."""
+        """Return an array of boundary node indices.
+        
+        Boundary nodes are defined as any node that lies on a boundary facet. 
+        The set of boundary nodes are not disjoint with the set of interior
+        nodes.
+        """
         return np.unique(self.facets[:, self.boundary_facets()])
 
     def interior_nodes(self) -> ndarray:
-        """Return an array of interior node indices."""
+        """Return an array of interior node indices.
+        
+        Interior nodes are defined as any node that lies on a boundary facet. 
+        The set of boundary nodes are not disjoint with the set of interior
+        nodes.
+        """
         return np.setdiff1d(np.arange(0, self.p.shape[1]),
                             self.boundary_nodes())
 
@@ -304,7 +333,8 @@ class Mesh:
 
     def elements_satisfying(self,
                             test: Callable[[ndarray], ndarray]) -> ndarray:
-        """Return elements whose midpoints satisfy some condition.
+        """Return the indices of elements whose midpoints satisfy some
+        condition.
 
         Parameters
         ----------
@@ -317,7 +347,8 @@ class Mesh:
         return np.nonzero(test(midp))[0]
 
     def _expand_facets(self, ix: ndarray) -> Tuple[ndarray, ndarray]:
-        """Return vertices and edges corresponding to given facet indices.
+        """Return the indicies of vertices and edges corresponding to given
+        facet indices.
 
         Parameters
         ----------
