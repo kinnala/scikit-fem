@@ -13,19 +13,21 @@ from ..dofs import Dofs
 class SubdomainFacetBasis(BoundaryFacetBasis):
 
     def __init__(self,
-                 mesh,
-                 elem,
-                 mapping=None,
-                 intorder=None,
-                 elements=None,
-                 quadrature=None,
+                 mesh: Mesh,
+                 elem: Element,
+                 mapping: Optional[Mapping] = None,
+                 intorder: Optional[int] = None,
+                 elements: Optional[ndarray] = None,
+                 quadrature: Optional[Tuple[ndarray, ndarray]] = None,
                  side: int = 0,
-                 dofs=None):
+                 dofs: Optional[Dofs] = None):
 
         assert elements is not None
         self.mesh = mesh  # required by _normalize_elements
         elements = self._normalize_elements(elements)
-        all_facets, counts = np.unique(mesh.t2f[:, elements], return_counts=True)
+        assert isinstance(elements, ndarray)
+        all_facets, counts = np.unique(mesh.t2f[:, elements],
+                                       return_counts=True)
         facets = all_facets[counts == 1]
         tind = mesh.f2t[:, facets].flatten('F')
         ix = np.in1d(tind, elements)
