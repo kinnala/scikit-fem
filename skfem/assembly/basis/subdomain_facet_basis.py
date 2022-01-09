@@ -23,8 +23,7 @@ class SubdomainFacetBasis(BoundaryFacetBasis):
                  dofs: Optional[Dofs] = None):
 
         assert elements is not None
-        self.mesh = mesh  # required by _normalize_elements
-        elements = self._normalize_elements(elements)
+        elements = self._normalize_elements(mesh, elements)
         assert isinstance(elements, ndarray)
         all_facets, counts = np.unique(mesh.t2f[:, elements],
                                        return_counts=True)
@@ -39,7 +38,7 @@ class SubdomainFacetBasis(BoundaryFacetBasis):
             intorder=intorder,
             quadrature=quadrature,
             facets=facets,
+            dofs=dofs,
             _tind=_tind,
             _tind_normals=_tind,
-            dofs=dofs,
         )

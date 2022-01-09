@@ -69,7 +69,7 @@ class BoundaryFacetBasis(AbstractBasis):
         if facets is None:
             self.find = np.nonzero(self.mesh.f2t[1] == -1)[0]
         else:
-            self.find = self._normalize_facets(facets)
+            self.find = self._normalize_facets(mesh, facets)
 
         if len(self.find) == 0:
             logger.warning("Initializing {} with zero facets.".format(typestr))
