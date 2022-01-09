@@ -28,7 +28,8 @@ class BoundaryFacetBasis(AbstractBasis):
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
                  facets: Optional[ndarray] = None,
                  dofs: Optional[Dofs] = None,
-                 _tind: Optional[ndarray] = None):
+                 _tind: Optional[ndarray] = None,
+                 _tind_normals: Optional[ndarray] = None):
         """Precomputed global basis on boundary facets.
 
         Parameters
@@ -83,13 +84,17 @@ class BoundaryFacetBasis(AbstractBasis):
         # global facet to refdom facet
         Y = self.mapping.invF(x, tind=self.tind)
 
-        # construct normal vectors from side=0 always
-        Y0 = self.mapping.invF(x, tind=self.mesh.f2t[0, self.find])
+        if _tind_normals is None:
+            # construct normal vectors from side=0 by default
+            _tind_normals = self.mesh.f2t[0, self.find]
+
         self.normals = DiscreteField(
-            value=self.mapping.normals(Y0,
-                                       self.mesh.f2t[0, self.find],
-                                       self.find,
-                                       self.mesh.t2f)
+            value=self.mapping.normals(
+                self.mapping.invF(x, tind=_tind_normals),
+                _tind_normals,
+                self.find,
+                self.mesh.t2f,
+            ),
         )
 
         self.nelems = len(self.find)
