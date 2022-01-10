@@ -99,7 +99,7 @@ class Mesh:
     @property
     def t2f(self):
         """triangles to facets
-        
+
         i.e. ith column contains facets corresponding to ith triangle
         """
         if not hasattr(self, '_t2f'):
@@ -109,7 +109,7 @@ class Mesh:
     @property
     def f2t(self):
         """"facets to triangles
-        
+
         i.e. ith column contains triangles corresponding to ith facet
         """
         if not hasattr(self, '_f2t'):
@@ -133,7 +133,7 @@ class Mesh:
 
     def boundary_facets(self) -> ndarray:
         """Return an array of boundary facet indices.
-        
+
         Boundary facets are defined as any facets that form the boundary of a
         single cell in the mesh. Boundary facets are a disjoint set with
         interior facets. Interior facets form a boundary between two cells in
@@ -146,7 +146,7 @@ class Mesh:
 
     def boundary_edges(self) -> ndarray:
         """Return an array of boundary edge indices.
-        
+
         Boundary edges are defined as any edges belonging to a boundary facet.
         """
         facets = self.boundary_facets()
@@ -275,8 +275,8 @@ class Mesh:
 
     def boundary_nodes(self) -> ndarray:
         """Return an array of boundary node indices.
-        
-        Boundary nodes are defined as any node that lies on a boundary facet. 
+
+        Boundary nodes are defined as any node that lies on a boundary facet.
         The set of boundary nodes are not disjoint with the set of interior
         nodes.
         """
@@ -284,8 +284,8 @@ class Mesh:
 
     def interior_nodes(self) -> ndarray:
         """Return an array of interior node indices.
-        
-        Interior nodes are defined as any node that lies on a boundary facet. 
+
+        Interior nodes are defined as any node that lies on a boundary facet.
         The set of boundary nodes are not disjoint with the set of interior
         nodes.
         """
