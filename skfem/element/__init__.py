@@ -8,12 +8,12 @@ elements.
 
 """
 from typing import Type, Dict
-from .discrete_field import DiscreteField
+from .discrete_field import DiscreteField  # noqa
 from .element import Element
-from .element_h1 import ElementH1
-from .element_hdiv import ElementHdiv
-from .element_hcurl import ElementHcurl
-from .element_global import ElementGlobal
+from .element_h1 import ElementH1  # noqa
+from .element_hdiv import ElementHdiv  # noqa
+from .element_hcurl import ElementHcurl  # noqa
+from .element_global import ElementGlobal  # noqa
 from .element_vector import ElementVector
 from .element_tri import (ElementTriP1, ElementTriP2,  # noqa
                           ElementTriP0, ElementTriRT0, ElementTriMorley,
@@ -34,7 +34,7 @@ from .element_hex import (ElementHex0, ElementHex1, ElementHex2,  # noqa
 from .element_line import (ElementLineP0, ElementLineP1, ElementLineP2,  # noqa
                            ElementLinePp, ElementLineHermite,
                            ElementLineMini, ElementLineP1DG)
-from .element_wedge_1 import ElementWedge1
+from .element_wedge_1 import ElementWedge1  # noqa
 from .element_composite import ElementComposite  # noqa
 from .element_dg import ElementDG
 
