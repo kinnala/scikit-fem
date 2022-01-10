@@ -962,19 +962,29 @@ class Mesh:
             Criteria of which facets to include. Function has different
             behavior based on the type of this parameter.
         """
+        if isinstance(facets, int):
+            # Make  normalize_facets([1,2,3]) have the same behavior as
+            # normalize_facets(np.array([1,2,3]))
+            return np.array([int])
         if isinstance(facets, ndarray):
+            # Assume the facets have already been normalized
             return facets
         if facets is None:
+            # Default behavior.
             return self.boundary_facets()
         elif isinstance(facets, (tuple, list, set)):
+            # Recurse over the list, building an array of all matching facets
             return np.unique(
                 np.concatenate(
-                    [self.normalize_facets(self, f) for f in facets]
+                    [self.normalize_facets(f) for f in facets]
                 )
             )
         elif callable(facets):
+            # The callable should accept an array of facet centers and return
+            # an boolean array with True for facets that should be included.
             return self.facets_satisfying(facets)
         elif isinstance(facets, str):
+            # Assume string is the label of a boundary in the mesh.
             if ((self.boundaries is not None
                  and facets in self.boundaries)):
                 return self.boundaries[facets]
@@ -1008,7 +1018,7 @@ class Mesh:
             # Recurse over the list, building an array of all matching elements
             return np.unique(
                 np.concatenate(
-                    [self.normalize_elements(self, e) for e in elements]
+                    [self.normalize_elements(e) for e in elements]
                 )
             )
         elif isinstance(elements, str):
