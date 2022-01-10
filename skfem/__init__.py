@@ -6,4 +6,4 @@ from skfem.mapping import *  # noqa
 from skfem.element import *  # noqa
 from skfem.utils import *  # noqa
 
-from .__about__ import __version__
+from .__about__ import __version__  # noqa
