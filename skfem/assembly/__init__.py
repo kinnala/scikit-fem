@@ -87,7 +87,7 @@ def asm(form: Form,
     return retval
 
 
-__all__ = [
+__all__ = [  # noqa
     "asm",
     "Basis",
     "CellBasis",
