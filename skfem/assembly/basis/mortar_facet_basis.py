@@ -31,7 +31,7 @@ class MortarFacetBasis(BoundaryFacetBasis):
             mapping.side = side
             facets = mapping.helper_to_orig[side]
 
-        facets = self._normalize_facets(mesh, facets)
+        facets = mesh.normalize_facets(facets)
 
         super(MortarFacetBasis, self).__init__(mesh,
                                                elem,

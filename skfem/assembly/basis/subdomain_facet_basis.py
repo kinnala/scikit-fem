@@ -25,6 +25,7 @@ class SubdomainFacetBasis(BoundaryFacetBasis):
         elements = mesh.normalize_elements(elements)
         all_facets, counts = np.unique(mesh.t2f[:, elements],
                                        return_counts=True)
+        
         facets = all_facets[counts == 1]
         tind = mesh.f2t[:, facets].flatten('F')
         ix = np.in1d(tind, elements)

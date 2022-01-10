@@ -240,10 +240,10 @@ class AbstractBasis:
             raise ValueError
 
         if elements is not None:
-            elements = self.mesh.normalize_elements(self.mesh, elements)
+            elements = self.mesh.normalize_elements(elements)
             return self.dofs.get_element_dofs(elements, skip_dofnames=skip)
 
-        facets = self.mesh.normalize_facets(self.mesh, facets)
+        facets = self.mesh.normalize_facets(facets)
         return self.dofs.get_facet_dofs(facets, skip_dofnames=skip)
 
     def __repr__(self):
