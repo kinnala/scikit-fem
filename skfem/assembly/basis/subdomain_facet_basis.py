@@ -22,9 +22,7 @@ class SubdomainFacetBasis(BoundaryFacetBasis):
                  side: int = 0,
                  dofs: Optional[Dofs] = None):
 
-
         elements = mesh.normalize_elements(elements)
-
         all_facets, counts = np.unique(mesh.t2f[:, elements],
                                        return_counts=True)
         facets = all_facets[counts == 1]
