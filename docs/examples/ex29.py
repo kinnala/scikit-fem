@@ -31,11 +31,11 @@ of pressure :math:`p` and longitudinal :math:`u` and transverse :math:`w`
 components of the disturbance to the velocity:
 
 .. math::
-   
+
    \left(\mathrm j\alpha R U(z) + \alpha^2 - \frac{\mathrm d^2}{\mathrm dz^2}\right)u + RU'(z)w + \mathrm j\alpha  Rp &= \mathrm j\alpha Rc u \\
    \left(\mathrm j\alpha R U(z) + \alpha^2 - \frac{\mathrm d^2}{\mathrm dz^2}\right)w + R\frac{\mathrm dp}{\mathrm dz} &= \mathrm j\alpha Rc w \\
    \mathrm j\alpha R u + R\;\frac{\mathrm dw}{\mathrm dz} &= 0
-   
+
 This primitive system is second-order and can be discretized using
 one-dimensional Taylor–Hood or Mini elements; here the former are the default with the latter selectable with the `--element Mini` command-line option.
 
@@ -53,7 +53,7 @@ segments.
 
 """
 from skfem import *
-import skfem.element.element_line as element_line
+from skfem.element import element_line
 from skfem.models.general import divergence
 from skfem.models.poisson import laplace, mass
 
@@ -75,7 +75,7 @@ if __name__ == '__main__':
     u_element = args.element
 else:
     u_element = 'P2'
-    
+
 U = Polynomial([1, 0, -1])      # base-flow profile
 
 
