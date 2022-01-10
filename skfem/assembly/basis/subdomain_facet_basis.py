@@ -23,12 +23,27 @@ class SubdomainFacetBasis(BoundaryFacetBasis):
                  dofs: Optional[Dofs] = None):
 
         elements = mesh.normalize_elements(elements)
-        all_facets, counts = np.unique(mesh.t2f[:, elements],
-                                       return_counts=True)
-        
-        facets = all_facets[counts == 1]
+        # Get indices of all facets in the mesh
+        all_facets, all_counts = np.unique(mesh.t2f,
+                                           return_counts=True)
+        # Find the exterior ones
+        exterior_facets = all_facets[all_counts == 1]
+        # Get indices of all facets in the subdomain
+        subdomain__facets, sub_counts = np.unique(mesh.t2f[:, elements],
+                                                  return_counts=True)
+        # Don't want facets on the exterior boundary, even if they are on the
+        # subdomain boundary
+        not_exterior = np.logical_not(
+                np.isin(subdomain__facets, exterior_facets))
+        # Find facets that are on boundary of subdomain (but not boundary of
+        # exterior)
+        facets = subdomain__facets[np.logical_and(sub_counts==1, not_exterior)]
+        # Find the indices of the triangles for these facets (note some of
+        # these triangles won't be in the subdomain.)
         tind = mesh.f2t[:, facets].flatten('F')
+        # Boolean indicator array for which triangles are in the subdomain
         ix = np.in1d(tind, elements)
+        # Get triangles to use for this basis based on `side` parameter
         _tind = tind[~ix] if side == 1 else tind[ix]
         super().__init__(
             mesh,
