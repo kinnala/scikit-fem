@@ -965,7 +965,7 @@ class Mesh:
         if isinstance(facets, int):
             # Make  normalize_facets([1,2,3]) have the same behavior as
             # normalize_facets(np.array([1,2,3]))
-            return np.array([int])
+            return np.array([facets])
         if isinstance(facets, ndarray):
             # Assume the facets have already been normalized
             return facets
@@ -1006,7 +1006,7 @@ class Mesh:
         if isinstance(elements, int):
             # Make  normalize_elements([1,2,3]) have the same behavior as
             # normalize_elements(np.array([1,2,3]))
-            return np.array([int])
+            return np.array([elements])
         if isinstance(elements, ndarray):
             # Assume the elements have already been normalized
             return elements
