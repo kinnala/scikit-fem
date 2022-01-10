@@ -21,6 +21,9 @@ class SubdomainFacetBasis(BoundaryFacetBasis):
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
                  side: int = 0,
                  dofs: Optional[Dofs] = None):
+        # Used by .with_element()
+        self._elements = elements
+        self._side = side
 
         elements = mesh.normalize_elements(elements)
         # Get indices of all facets in the mesh
@@ -56,4 +59,16 @@ class SubdomainFacetBasis(BoundaryFacetBasis):
             dofs=dofs,
             _tind=_tind,
             _tind_normals=_tind,
+        )
+
+
+    def with_element(self, elem: Element) -> 'SubdomainFacetBasis':
+        """Return a similar basis using a different element."""
+        return type(self)(
+            self.mesh,
+            elem,
+            elements=self._elements,
+            side=self._side,
+            mapping=self.mapping,
+            quadrature=self.quadrature,
         )
