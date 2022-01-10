@@ -77,29 +77,3 @@ class MeshLineConstructor:
 
 
 MeshLine = MeshLineConstructor()
-
-
-__all__ = [
-    "Mesh",
-    "MeshLine",
-    "MeshLine1",
-    "MeshLine1DG",
-    "Mesh2D",
-    "MeshTri",
-    "MeshTri1",
-    "MeshTri2",
-    "MeshTri1DG",
-    "MeshQuad",
-    "MeshQuad1",
-    "MeshQuad2",
-    "MeshQuad1DG",
-    "Mesh3D",
-    "MeshTet",
-    "MeshTet1",
-    "MeshTet2",
-    "MeshHex",
-    "MeshHex1",
-    "MeshHex2",
-    "MeshHex1DG",
-    "MeshWedge1",
-]

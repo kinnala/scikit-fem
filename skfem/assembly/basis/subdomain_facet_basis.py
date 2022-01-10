@@ -46,9 +46,11 @@ class SubdomainFacetBasis(BoundaryFacetBasis):
         # these triangles won't be in the subdomain.)
         tind = mesh.f2t[:, facets].flatten('F')
         # Boolean indicator array for which triangles are in the subdomain
-        ix = np.in1d(tind, elements)
+        ix = np.isin(tind, elements)
         # Get triangles to use for this basis based on `side` parameter
-        _tind = tind[~ix] if side == 1 else tind[ix]
+        #    side==0: outward pointing
+        #    side==1: inward pointing
+        _tind = tind[ix] if side == 1 else tind[~ix]
         super().__init__(
             mesh,
             elem,
