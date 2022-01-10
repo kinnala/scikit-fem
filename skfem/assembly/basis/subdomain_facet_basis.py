@@ -15,16 +15,16 @@ class SubdomainFacetBasis(BoundaryFacetBasis):
     def __init__(self,
                  mesh: Mesh,
                  elem: Element,
+                 elements: ndarray,
                  mapping: Optional[Mapping] = None,
                  intorder: Optional[int] = None,
-                 elements: Optional[ndarray] = None,
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
                  side: int = 0,
                  dofs: Optional[Dofs] = None):
 
-        assert elements is not None
-        elements = self._normalize_elements(mesh, elements)
-        assert isinstance(elements, ndarray)
+
+        elements = mesh.normalize_elements(elements)
+
         all_facets, counts = np.unique(mesh.t2f[:, elements],
                                        return_counts=True)
         facets = all_facets[counts == 1]

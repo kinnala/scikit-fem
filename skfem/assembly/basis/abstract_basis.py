@@ -240,51 +240,11 @@ class AbstractBasis:
             raise ValueError
 
         if elements is not None:
-            elements = self._normalize_elements(self.mesh, elements)
+            elements = self.mesh.normalize_elements(self.mesh, elements)
             return self.dofs.get_element_dofs(elements, skip_dofnames=skip)
 
-        facets = self._normalize_facets(self.mesh, facets)
+        facets = self.mesh.normalize_facets(self.mesh, facets)
         return self.dofs.get_facet_dofs(facets, skip_dofnames=skip)
-
-    def _normalize_facets(self, mesh, facets):
-        if isinstance(facets, ndarray):
-            return facets
-        if facets is None:
-            return mesh.boundary_facets()
-        elif isinstance(facets, (tuple, list, set)):
-            return np.unique(
-                np.concatenate(
-                    [self._normalize_facets(mesh, f) for f in facets]
-                )
-            )
-        elif callable(facets):
-            return mesh.facets_satisfying(facets)
-        elif isinstance(facets, str):
-            if ((mesh.boundaries is not None
-                 and facets in mesh.boundaries)):
-                return mesh.boundaries[facets]
-            else:
-                raise ValueError("Boundary '{}' not found.".format(facets))
-        raise NotImplementedError
-
-    def _normalize_elements(self, mesh, elements):
-        if isinstance(elements, ndarray):
-            return elements
-        if callable(elements):
-            return mesh.elements_satisfying(elements)
-        elif isinstance(elements, (tuple, list, set)):
-            return np.unique(
-                np.concatenate(
-                    [self._normalize_elements(mesh, e) for e in elements]
-                )
-            )
-        elif isinstance(elements, str):
-            if ((mesh.subdomains is not None
-                 and elements in mesh.subdomains)):
-                return mesh.subdomains[elements]
-            else:
-                raise ValueError("Subdomain '{}' not found.".format(elements))
-        raise NotImplementedError
 
     def __repr__(self):
         size = sum([sum([y.size if hasattr(y, 'size') else 0

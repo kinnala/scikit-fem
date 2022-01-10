@@ -1,4 +1,4 @@
-"""Support for wildcard import."""
+"""Library for performing finite element assembly."""
 
 from skfem.mesh import *  # noqa
 from skfem.assembly import *  # noqa
