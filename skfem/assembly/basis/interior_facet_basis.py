@@ -34,7 +34,7 @@ class InteriorFacetBasis(BoundaryFacetBasis):
         if facets is None:
             facets = np.nonzero(mesh.f2t[1] != -1)[0]
 
-        facets = self._normalize_facets(facets)
+        facets = self._normalize_facets(mesh, facets)
         tind = mesh.f2t[side, facets]
 
         super(InteriorFacetBasis, self).__init__(mesh,
