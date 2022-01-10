@@ -51,7 +51,7 @@ import logging
 from typing import Any
 from itertools import product
 
-from .basis import *  # noaq
+from .basis import *  # noqa
 from .dofs import Dofs, DofsView
 from .form import Form, TrilinearForm, BilinearForm, LinearForm, Functional
 
