@@ -61,7 +61,6 @@ class SubdomainFacetBasis(BoundaryFacetBasis):
             _tind_normals=_tind,
         )
 
-
     def with_element(self, elem: Element) -> 'SubdomainFacetBasis':
         """Return a similar basis using a different element."""
         return type(self)(
