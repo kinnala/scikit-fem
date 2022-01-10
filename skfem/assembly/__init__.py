@@ -56,7 +56,7 @@ from .dofs import Dofs, DofsView
 from .form import Form, TrilinearForm, BilinearForm, LinearForm, Functional
 
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 def _sum(blocks):
@@ -76,31 +76,12 @@ def asm(form: Form,
 
     """
     assert form.form is not None
-    logger.info("Assembling '{}'.".format(form.form.__name__))
+    _logger.info("Assembling '{}'.".format(form.form.__name__))
     nargs = [[arg] if not isinstance(arg, list) else arg for arg in args]
     retval = to(map(lambda a: form.coo_data(*a[1],
                                             idx=a[0],
                                             **kwargs),
                     zip(product(*(range(len(x)) for x in nargs)),
                         product(*nargs))))
-    logger.info("Assembling finished.")
+    _logger.info("Assembling finished.")
     return retval
-
-
-__all__ = [  # noqa
-    "asm",
-    "Basis",
-    "CellBasis",
-    "FacetBasis",
-    "BoundaryFacetBasis",
-    "InteriorFacetBasis",
-    "MortarFacetBasis",
-    "Dofs",
-    "DofsView",
-    "TrilinearForm",
-    "BilinearForm",
-    "LinearForm",
-    "Functional",
-    "InteriorBasis",  # backwards compatibility
-    "ExteriorFacetBasis",  # backwards compatibility
-]
