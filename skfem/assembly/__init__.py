@@ -51,9 +51,7 @@ import logging
 from typing import Any
 from itertools import product
 
-from .basis import (Basis, CellBasis, FacetBasis, BoundaryFacetBasis,
-                    InteriorFacetBasis, MortarFacetBasis)
-from .basis import InteriorBasis, ExteriorFacetBasis  # backwards compatibility
+from .basis import *
 from .dofs import Dofs, DofsView
 from .form import Form, TrilinearForm, BilinearForm, LinearForm, Functional
 
