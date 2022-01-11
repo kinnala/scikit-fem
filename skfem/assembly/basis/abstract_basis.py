@@ -332,6 +332,7 @@ class AbstractBasis:
             if ref.is_zero():
                 dfs.append(ref)
                 continue
+            ref = ref.astuple
             fs = []
 
             def linear_combination(n, refn):
@@ -342,7 +343,7 @@ class AbstractBasis:
                     if self.basis[i][c].is_zero():
                         continue
                     out += np.einsum('...,...j->...j', values,
-                                     self.basis[i][c][n])
+                                     self.basis[i][c].get(n))
                 return out
 
             # interpolate DiscreteField
@@ -425,10 +426,10 @@ class AbstractBasis:
         from skfem.helpers import inner
 
         if isinstance(interp, float):
-            interp = interp + self.global_coordinates().value[0] * 0.
+            interp = interp + self.global_coordinates()[0] * 0.
 
         if callable(interp):
-            interp = interp(self.global_coordinates().value)
+            interp = interp(self.global_coordinates())
 
         return (
             BilinearForm(lambda u, v, _: inner(u, v)).assemble(self),

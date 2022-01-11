@@ -63,7 +63,7 @@ from scipy.sparse.linalg import LinearOperator, minres
 
 mesh = MeshQuad.init_tensor(*(np.linspace(-.5, .5, 2**6),)*2)
 
-element = {'u': ElementVectorH1(ElementQuad2()),
+element = {'u': ElementVector(ElementQuad2()),
            'p': ElementQuad1()}
 basis = {variable: Basis(mesh, e, intorder=3)
          for variable, e in element.items()}
@@ -71,7 +71,7 @@ basis = {variable: Basis(mesh, e, intorder=3)
 
 @LinearForm
 def body_force(v, w):
-    return w.x[0] * v.value[1]
+    return w.x[0] * v[1]
 
 
 A = asm(vector_laplace, basis['u'])

@@ -100,7 +100,7 @@ def acceleration_jacobian(u, v, w):
 
 class BackwardFacingStep:
 
-    element = {'u': ElementVectorH1(ElementTriP2()),
+    element = {'u': ElementVector(ElementTriP2()),
                'p': ElementTriP1()}
 
     def __init__(self,

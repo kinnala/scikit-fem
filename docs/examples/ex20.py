@@ -54,7 +54,7 @@ psi = solve(*condense(stokes, rotf, D=ib.get_dofs()))
 
 velocity = asm(
     LinearForm(curluv).partial(ib.interpolate(psi)),
-    ib.with_element(ElementVectorH1(ElementTriP1())),
+    ib.with_element(ElementVector(ElementTriP1())),
 )
 
 if __name__ == "__main__":
