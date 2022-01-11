@@ -26,23 +26,23 @@ constructor :meth:`~skfem.mesh.Mesh.load`.
 """
 import numpy as np
 
-from .mesh import Mesh  # noqa
-from .mesh_2d import Mesh2D  # noqa
-from .mesh_3d import Mesh3D  # noqa
+from .mesh import Mesh
+from .mesh_2d import Mesh2D
+from .mesh_3d import Mesh3D
 from .mesh_hex_1 import MeshHex1
-from .mesh_hex_2 import MeshHex2  # noqa
+from .mesh_hex_2 import MeshHex2
 from .mesh_line_1 import MeshLine1
 from .mesh_quad_1 import MeshQuad1
-from .mesh_quad_2 import MeshQuad2  # noqa
+from .mesh_quad_2 import MeshQuad2
 from .mesh_tet_1 import MeshTet1
-from .mesh_tet_2 import MeshTet2  # noqa
+from .mesh_tet_2 import MeshTet2
 from .mesh_tri_1 import MeshTri1
-from .mesh_tri_2 import MeshTri2  # noqa
-from .mesh_tri_1_dg import MeshTri1DG  # noqa
-from .mesh_quad_1_dg import MeshQuad1DG  # noqa
-from .mesh_hex_1_dg import MeshHex1DG  # noqa
-from .mesh_line_1_dg import MeshLine1DG  # noqa
-from .mesh_wedge_1 import MeshWedge1  # noqa
+from .mesh_tri_2 import MeshTri2
+from .mesh_tri_1_dg import MeshTri1DG
+from .mesh_quad_1_dg import MeshQuad1DG
+from .mesh_hex_1_dg import MeshHex1DG
+from .mesh_line_1_dg import MeshLine1DG
+from .mesh_wedge_1 import MeshWedge1
 
 # aliases
 MeshTri = MeshTri1
@@ -77,3 +77,29 @@ class MeshLineConstructor:
 
 
 MeshLine = MeshLineConstructor()
+
+
+__all__ = [
+    "Mesh",
+    "MeshLine",
+    "MeshLine1",
+    "MeshLine1DG",
+    "Mesh2D",
+    "MeshTri",
+    "MeshTri1",
+    "MeshTri2",
+    "MeshTri1DG",
+    "MeshQuad",
+    "MeshQuad1",
+    "MeshQuad2",
+    "MeshQuad1DG",
+    "Mesh3D",
+    "MeshTet",
+    "MeshTet1",
+    "MeshTet2",
+    "MeshHex",
+    "MeshHex1",
+    "MeshHex2",
+    "MeshHex1DG",
+    "MeshWedge1",
+]

@@ -51,12 +51,14 @@ import logging
 from typing import Any
 from itertools import product
 
-from .basis import *  # noqa
-from .dofs import Dofs, DofsView  # noqa
-from .form import Form, TrilinearForm, BilinearForm, LinearForm, Functional  # noqa
+from .basis import (Basis, CellBasis, FacetBasis, BoundaryFacetBasis,
+                    InteriorFacetBasis, MortarFacetBasis)
+from .basis import InteriorBasis, ExteriorFacetBasis  # backwards compatibility
+from .dofs import Dofs, DofsView
+from .form import Form, TrilinearForm, BilinearForm, LinearForm, Functional
 
 
-_logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def _sum(blocks):
@@ -76,12 +78,31 @@ def asm(form: Form,
 
     """
     assert form.form is not None
-    _logger.info("Assembling '{}'.".format(form.form.__name__))
+    logger.info("Assembling '{}'.".format(form.form.__name__))
     nargs = [[arg] if not isinstance(arg, list) else arg for arg in args]
     retval = to(map(lambda a: form.coo_data(*a[1],
                                             idx=a[0],
                                             **kwargs),
                     zip(product(*(range(len(x)) for x in nargs)),
                         product(*nargs))))
-    _logger.info("Assembling finished.")
+    logger.info("Assembling finished.")
     return retval
+
+
+__all__ = [
+    "asm",
+    "Basis",
+    "CellBasis",
+    "FacetBasis",
+    "BoundaryFacetBasis",
+    "InteriorFacetBasis",
+    "MortarFacetBasis",
+    "Dofs",
+    "DofsView",
+    "TrilinearForm",
+    "BilinearForm",
+    "LinearForm",
+    "Functional",
+    "InteriorBasis",  # backwards compatibility
+    "ExteriorFacetBasis",  # backwards compatibility
+]
