@@ -5,7 +5,8 @@ import pytest
 import numpy as np
 from numpy.testing import assert_allclose, assert_almost_equal
 
-from skfem import BilinearForm, LinearForm, asm, solve, condense, projection
+from skfem import (BilinearForm, LinearForm, asm, solve, condense, projection,
+                   enforce)
 from skfem.mesh import (MeshTri, MeshTet, MeshHex,
                         MeshQuad, MeshLine1, MeshWedge1)
 from skfem.assembly import (CellBasis, FacetBasis, Dofs, Functional,
@@ -17,8 +18,10 @@ from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
                            ElementLineP0, ElementQuad1, ElementQuad0,
                            ElementTetP1, ElementTetP0, ElementHex1,
                            ElementHex0, ElementLineP1, ElementLineMini,
-                           ElementWedge1, ElementTriRT0, ElementQuadRT0)
+                           ElementWedge1, ElementTriRT0, ElementQuadRT0,
+                           ElementTriP3)
 from skfem.models.poisson import laplace
+from skfem.helpers import dot, grad
 
 
 class TestCompositeSplitting(TestCase):
@@ -446,20 +449,32 @@ def test_basis_project_grad():
 
 def test_subdomain_facet_basis():
 
-    def is_subdomain(x):
+    def subdomain(x):
         return np.logical_and(
             np.logical_and(x[0]>.25, x[0]<.75),
             np.logical_and(x[1]>.25, x[1]<.75),
         )
-    m, e = MeshTri().refined(2), ElementTriP0()
-    cb0 = CellBasis(m, e)
-    sfb0_s0 = SubdomainFacetBasis(m, e, elements=is_subdomain, side=0)
-    sfb0_s1 = SubdomainFacetBasis(m, e, elements=is_subdomain, side=1)
-    u = cb0.zeros()
-    u[cb0.get_dofs(elements=is_subdomain)] = 1
-    @Functional
-    def f(w):
-        return w.u
+    m, e = MeshTri().refined(4), ElementTriP3()
+    cbasis = CellBasis(m, e)
+    cbasis_p0 = cbasis.with_element(ElementTriP0())
+    sfbasis = SubdomainFacetBasis(m, e, elements=subdomain)
+    sfbasis_p0 = sfbasis.with_element(ElementTriP0())
+    sigma = cbasis_p0.zeros() + 1
+    @BilinearForm
+    def laplace(u, v, w):
+        return dot(w.sigma*grad(u), grad(v))
+    A = laplace.assemble(cbasis, sigma=cbasis_p0.interpolate(sigma))
+    u0 = cbasis.zeros()
+    u0[cbasis.get_dofs(elements=subdomain)] = 1
+    u0_dofs = cbasis.get_dofs() + cbasis.get_dofs(elements=subdomain)
+    A,b = enforce(A, D=u0_dofs, x=u0)
+    u = solve(A, b)
 
-    assert_almost_equal(f.assemble(sfb0_s0, u=sfb0_s0.interpolate(u)), 0)
-    assert_almost_equal(f.assemble(sfb0_s1, u=sfb0_s1.interpolate(u)), 2)
+    @Functional
+    def measure_current(w):
+        return dot(w.n, w.sigma*grad(w.u))
+    meas = measure_current.assemble(sfbasis,
+                                    sigma=sfbasis_p0.interpolate(sigma),
+                                    u=sfbasis.interpolate(u))
+
+    assert_almost_equal(meas, 9.892055861077877)
