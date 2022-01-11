@@ -9,7 +9,7 @@ from skfem import BilinearForm, LinearForm, asm, solve, condense, projection
 from skfem.mesh import (MeshTri, MeshTet, MeshHex,
                         MeshQuad, MeshLine1, MeshWedge1)
 from skfem.assembly import (CellBasis, FacetBasis, Dofs, Functional,
-                            MortarFacetBasis)
+                            MortarFacetBasis, SubdomainFacetBasis)
 from skfem.mapping import MappingIsoparametric, MappingMortar
 from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
                            ElementTetP2, ElementHexS2, ElementHex2,
@@ -442,3 +442,24 @@ def test_basis_project_grad():
         return w.y ** 2
 
     assert_almost_equal(int_y.assemble(basis, y=y), 1.)
+
+
+def test_subdomain_facet_basis():
+
+    def is_subdomain(x):
+        return np.logical_and(
+            np.logical_and(x[0]>.25, x[0]<.75),
+            np.logical_and(x[1]>.25, x[1]<.75),
+        )
+    m, e = MeshTri().refined(2), ElementTriP0()
+    cb0 = CellBasis(m, e)
+    sfb0_s0 = SubdomainFacetBasis(m, e, elements=is_subdomain, side=0)
+    sfb0_s1 = SubdomainFacetBasis(m, e, elements=is_subdomain, side=1)
+    u = cb0.zeros()
+    u[cb0.get_dofs(elements=is_subdomain)] = 1
+    @Functional
+    def f(w):
+        return w.u
+
+    assert_almost_equal(f.assemble(sfb0_s0, u=sfb0_s0.interpolate(u)), 0)
+    assert_almost_equal(f.assemble(sfb0_s1, u=sfb0_s1.interpolate(u)), 2)
