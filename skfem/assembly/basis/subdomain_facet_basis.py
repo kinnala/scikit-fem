@@ -48,9 +48,12 @@ class SubdomainFacetBasis(BoundaryFacetBasis):
         # Boolean indicator array for which triangles are in the subdomain
         ix = np.isin(tind, elements)
         # Get triangles to use for this basis based on `side` parameter
-        #    side==0: outward pointing
-        #    side==1: inward pointing
-        _tind = tind[ix] if side == 1 else tind[~ix]
+        if side==0:
+            # normals point out of subdomain
+            _tind = tind[ix]
+        else:
+            # normals point into subdomain
+            _tind = tind[~ix]
         super().__init__(
             mesh,
             elem,
