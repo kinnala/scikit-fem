@@ -472,7 +472,7 @@ def test_subdomain_facet_basis():
 
     @Functional
     def measure_current(w):
-        return dot(w.n, w.sigma*grad(w.u))
+        return dot(w.n, -w.sigma*grad(w.u))
     meas = measure_current.assemble(sfbasis,
                                     sigma=sfbasis_p0.interpolate(sigma),
                                     u=sfbasis.interpolate(u))
