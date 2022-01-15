@@ -5,7 +5,6 @@ from itertools import product
 
 import numpy as np
 from numpy import ndarray
-from scipy.sparse import csr_matrix
 
 from ..basis import Basis
 from .coo_data import COOData
@@ -128,7 +127,7 @@ class BilinearForm(Form):
             (vbasis.Nbfun, ubasis.Nbfun),
         )
 
-    def assemble(self, *args, **kwargs) -> csr_matrix:
+    def assemble(self, *args, **kwargs):
         """Assemble the bilinear form into a sparse matrix.
 
         Parameters
