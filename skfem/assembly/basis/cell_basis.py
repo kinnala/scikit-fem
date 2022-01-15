@@ -3,7 +3,6 @@ from typing import Callable, Optional, Tuple
 
 import numpy as np
 from numpy import ndarray
-from scipy.sparse import coo_matrix
 from skfem.element import DiscreteField, Element
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh
@@ -151,7 +150,7 @@ class CellBasis(AbstractBasis):
 
         return M, w.flatten()
 
-    def probes(self, x: ndarray) -> coo_matrix:
+    def probes(self, x: ndarray):
         """Return matrix which acts on a solution vector to find its values
         on points `x`.
 
@@ -162,6 +161,7 @@ class CellBasis(AbstractBasis):
         not assembled with the usual quadratures.
 
         """
+        from scipy.sparse import coo_matrix
 
         cells = self.mesh.element_finder(mapping=self.mapping)(*x)
         pts = self.mapping.invF(x[:, :, np.newaxis], tind=cells)

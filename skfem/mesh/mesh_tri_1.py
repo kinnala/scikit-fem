@@ -3,7 +3,6 @@ from typing import Type
 
 import numpy as np
 from numpy import ndarray
-from scipy.spatial import cKDTree
 
 from ..element import Element, ElementTriP1
 from .mesh_2d import Mesh2D
@@ -381,6 +380,7 @@ class MeshTri1(MeshSimplex, Mesh2D):
             mapping = self._mapping()
 
         if not hasattr(self, '_cached_tree'):
+            from scipy.spatial import cKDTree
             self._cached_tree = cKDTree(np.mean(self.p[:, self.t], axis=1).T)
 
         tree = self._cached_tree

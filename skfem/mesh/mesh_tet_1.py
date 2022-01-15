@@ -3,7 +3,6 @@ from typing import Type
 
 import numpy as np
 from numpy import ndarray
-from scipy.spatial import cKDTree
 
 from ..element import Element, ElementTetP1
 from .mesh_3d import Mesh3D
@@ -36,6 +35,7 @@ class MeshTet1(MeshSimplex, Mesh3D):
             mapping = self._mapping()
 
         if not hasattr(self, '_cached_tree'):
+            from scipy.spatial import cKDTree
             self._cached_tree = cKDTree(np.mean(self.p[:, self.t], axis=1).T)
 
         tree = self._cached_tree
