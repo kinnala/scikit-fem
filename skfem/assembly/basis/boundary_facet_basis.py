@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, Optional, Tuple
+from typing import Callable, Optional, Tuple, Any
 
 import numpy as np
 from numpy import ndarray
@@ -26,9 +26,8 @@ class BoundaryFacetBasis(AbstractBasis):
                  mapping: Optional[Mapping] = None,
                  intorder: Optional[int] = None,
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
-                 facets: Optional[ndarray] = None,
-                 dofs: Optional[Dofs] = None,
-                 _tind: Optional[ndarray] = None):
+                 facets: Optional[Any] = None,
+                 dofs: Optional[Dofs] = None):
         """Precomputed global basis on boundary facets.
 
         Parameters
@@ -55,39 +54,41 @@ class BoundaryFacetBasis(AbstractBasis):
         typestr = ("{}({}, {})".format(type(self).__name__,
                                        type(mesh).__name__,
                                        type(elem).__name__))
-        logger.info("Initializing " + typestr)
-        super(BoundaryFacetBasis, self).__init__(mesh,
-                                                 elem,
-                                                 mapping,
-                                                 intorder,
-                                                 quadrature,
-                                                 mesh.brefdom,
-                                                 dofs)
+        logger.info("Initializing {}".format(typestr))
+        super(BoundaryFacetBasis, self).__init__(
+            mesh,
+            elem,
+            mapping,
+            intorder,
+            quadrature,
+            mesh.brefdom,
+            dofs,
+        )
 
-        # facets where the basis is evaluated
-        if facets is None:
-            self.find = np.nonzero(self.mesh.f2t[1] == -1)[0]
+        # initialize indices
+        if isinstance(facets, tuple):
+            self.find, self.tind, self.tind_normals = facets
         else:
-            self.find = self._normalize_facets(facets)
+            if facets is None:
+                self.find = np.nonzero(self.mesh.f2t[1] == -1)[0]
+            else:
+                self.find = mesh.normalize_facets(facets)
+            self.tind = self.mesh.f2t[0, self.find]
+            self.tind_normals = self.mesh.f2t[0, self.find]
 
         if len(self.find) == 0:
-            logger.warning("Initializing {} with zero facets.".format(typestr))
-
-        if _tind is None:
-            self.tind = self.mesh.f2t[0, self.find]
-        else:
-            self.tind = _tind
+            logger.warning("Initializing {} with no facets.".format(typestr))
 
         # boundary refdom to global facet
         x = self.mapping.G(self.X, find=self.find)
         # global facet to refdom facet
         Y = self.mapping.invF(x, tind=self.tind)
 
-        # construct normal vectors from side=0 always
-        Y0 = self.mapping.invF(x, tind=self.mesh.f2t[0, self.find])
+        # calculate normals
+        Y0 = self.mapping.invF(x, tind=self.tind_normals)
         self.normals = DiscreteField(
             value=self.mapping.normals(Y0,
-                                       self.mesh.f2t[0, self.find],
+                                       self.tind_normals,
                                        self.find,
                                        self.mesh.t2f)
         )
@@ -100,6 +101,18 @@ class BoundaryFacetBasis(AbstractBasis):
         self.dx = (np.abs(self.mapping.detDG(self.X, find=self.find))
                    * np.tile(self.W, (self.nelems, 1)))
         logger.info("Initializing finished.")
+
+    @classmethod
+    def init_subdomain(cls, mesh, elem, elements=None, side=0, **kwargs):
+        assert elements is not None
+        elements = mesh.normalize_elements(elements)
+        subdomain_facets, sub_counts = np.unique(mesh.t2f[:, elements],
+                                                 return_counts=True)
+        facets = subdomain_facets[sub_counts == 1]
+        tind = mesh.f2t[:, facets].flatten('F')
+        ix = np.isin(tind, elements)
+        tind = tind[ix] if side == 0 else tind[~ix]
+        return cls(mesh, elem, facets=(facets, tind, tind), **kwargs)
 
     def default_parameters(self):
         """Return default parameters for `~skfem.assembly.asm`."""
@@ -117,11 +130,45 @@ class BoundaryFacetBasis(AbstractBasis):
                               ** (1. / (self.mesh.dim() - 1.)))
                              if self.mesh.dim() != 1 else np.array([0.]))
 
+    def with_element(self, elem: Element) -> 'BoundaryFacetBasis':
+        """Return a similar basis using a different element."""
+        return type(self)(
+            self.mesh,
+            elem,
+            mapping=self.mapping,
+            quadrature=self.quadrature,
+            facets=(self.find, self.tind, self.tind_normals),
+        )
+
+    def project(self, interp, facets=None):
+        """Perform :math:`L^2` projection onto the basis on the boundary.
+
+        The values of the interior DOFs remain zero.
+
+        Parameters
+        ----------
+        interp
+            An object of type :class:`~skfem.element.DiscreteField` which is a
+            function (to be projected) evaluated at global quadrature points at
+            the boundary of the domain.  If a function is given, then
+            :class:`~skfem.element.DiscreteField` is created by passing
+            an array of global quadrature point locations to the function.
+        facets
+            Optionally perform the projection on a subset of facets.  The
+            values of the remaining DOFs are zero.
+
+        """
+        from skfem.utils import solve, condense
+
+        M, f = self._projection(interp)
+
+        if facets is not None:
+            return solve(*condense(M, f, I=self.get_dofs(facets=facets)))
+        return solve(*condense(M, f, I=self.get_dofs(facets=self.find)))
+
     def _trace_project(self,
                        x: ndarray,
                        elem: Element) -> ndarray:
-        """Trace mesh basis projection."""
-
         from skfem.utils import projection
 
         fbasis = BoundaryFacetBasis(self.mesh,
@@ -145,34 +192,6 @@ class BoundaryFacetBasis(AbstractBasis):
               projection: Callable[[ndarray], ndarray],
               target_elem: Optional[Element] = None) -> Tuple[CellBasis,
                                                               ndarray]:
-        """Restrict solution to :math:`d-1` dimensional trace mesh.
-
-        The parameter ``projection`` defines how the boundary points are
-        projected to :math:`d-1` dimensional space.  For example,
-
-        >>> projection = lambda p: p[0]
-
-        will keep only the `x`-coordinate in the trace mesh.
-
-        Parameters
-        ----------
-        x
-            The solution vector.
-        projection
-            A function defining the projection of the boundary points.  See
-            above for an example.
-        target_elem
-            Optional finite element to project to before restriction.  If not
-            given, a piecewise constant element is used.
-
-        Returns
-        -------
-        CellBasis
-            An object corresponding to the trace mesh.
-        ndarray
-            A projected solution vector defined on the trace mesh.
-
-        """
         DEFAULT_TARGET = {
             MeshTri: ElementTriP0,
             MeshQuad: ElementQuad0,
@@ -204,39 +223,3 @@ class BoundaryFacetBasis(AbstractBasis):
             CellBasis(target_meshcls(projection(p), t), elemcls()),
             self._trace_project(x, target_elem)
         )
-
-    def with_element(self, elem: Element) -> 'BoundaryFacetBasis':
-        """Return a similar basis using a different element."""
-        return type(self)(
-            self.mesh,
-            elem,
-            mapping=self.mapping,
-            quadrature=self.quadrature,
-            facets=self.find,
-        )
-
-    def project(self, interp, facets=None):
-        """Perform :math:`L^2` projection onto the basis on the boundary.
-
-        The values of the interior DOFs remain zero.
-
-        Parameters
-        ----------
-        interp
-            An object of type :class:`~skfem.element.DiscreteField` which is a
-            function (to be projected) evaluated at global quadrature points at
-            the boundary of the domain.  If a function is given, then
-            :class:`~skfem.element.DiscreteField` is created by passing
-            an array of global quadrature point locations to the function.
-        facets
-            Optionally perform the projection on a subset of facets.  The
-            values of the remaining DOFs are zero.
-
-        """
-        from skfem.utils import solve, condense
-
-        M, f = self._projection(interp)
-
-        if facets is not None:
-            return solve(*condense(M, f, I=self.get_dofs(facets=facets)))
-        return solve(*condense(M, f, I=self.get_dofs(facets=self.find)))

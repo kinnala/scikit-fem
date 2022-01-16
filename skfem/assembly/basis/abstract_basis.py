@@ -23,7 +23,7 @@ class AbstractBasis:
     Please see the following implementations:
 
     - :class:`~skfem.assembly.CellBasis`, basis functions inside elements
-    - :class:`~skfem.assembly.ExteriorFacetBasis`, basis functions on boundary
+    - :class:`~skfem.assembly.BoundaryFacetBasis`, basis functions on boundary
     - :class:`~skfem.assembly.InteriorFacetBasis`, basis functions on facets
       inside the domain
 
@@ -32,12 +32,12 @@ class AbstractBasis:
     mesh: Mesh
     elem: Element
     tind: Optional[ndarray] = None
+    tind_normals: Optional[ndarray] = None
     dx: ndarray
     basis: List[Tuple[DiscreteField, ...]] = []
     X: ndarray
     W: ndarray
     dofs: Dofs
-    _side: int = 1
 
     def __init__(self,
                  mesh: Mesh,
@@ -247,44 +247,10 @@ class AbstractBasis:
         return self.dofs.get_facet_dofs(facets, skip_dofnames=skip)
 
     def _normalize_facets(self, facets):
-        if isinstance(facets, ndarray):
-            return facets
-        if facets is None:
-            return self.mesh.boundary_facets()
-        elif isinstance(facets, (tuple, list, set)):
-            return np.unique(
-                np.concatenate(
-                    [self._normalize_facets(f) for f in facets]
-                )
-            )
-        elif callable(facets):
-            return self.mesh.facets_satisfying(facets)
-        elif isinstance(facets, str):
-            if ((self.mesh.boundaries is not None
-                 and facets in self.mesh.boundaries)):
-                return self.mesh.boundaries[facets]
-            else:
-                raise ValueError("Boundary '{}' not found.".format(facets))
-        raise NotImplementedError
+        return self.mesh.normalize_facets(facets)
 
     def _normalize_elements(self, elements):
-        if isinstance(elements, ndarray):
-            return elements
-        if callable(elements):
-            return self.mesh.elements_satisfying(elements)
-        elif isinstance(elements, (tuple, list, set)):
-            return np.unique(
-                np.concatenate(
-                    [self._normalize_elements(e) for e in elements]
-                )
-            )
-        elif isinstance(elements, str):
-            if ((self.mesh.subdomains is not None
-                 and elements in self.mesh.subdomains)):
-                return self.mesh.subdomains[elements]
-            else:
-                raise ValueError("Subdomain '{}' not found.".format(elements))
-        raise NotImplementedError
+        return self.mesh.normalize_elements(elements)
 
     def __repr__(self):
         size = sum([sum([y.size if hasattr(y, 'size') else 0

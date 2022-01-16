@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union, Any
 
 import numpy as np
 from numpy import ndarray
@@ -23,25 +23,22 @@ class InteriorFacetBasis(BoundaryFacetBasis):
                  mapping: Optional[Mapping] = None,
                  intorder: Optional[int] = None,
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
-                 facets: Optional[ndarray] = None,
+                 facets: Optional[Any] = None,
                  side: int = 0,
                  dofs: Optional[Dofs] = None):
         """Precomputed global basis on interior facets."""
 
-        if side not in (0, 1):
-            raise Exception("'side' must be 0 or 1.")
-
         if facets is None:
             facets = np.nonzero(mesh.f2t[1] != -1)[0]
 
-        facets = self._normalize_facets(facets)
-        tind = mesh.f2t[side, facets]
+        facets = mesh.normalize_facets(facets)
 
-        super(InteriorFacetBasis, self).__init__(mesh,
-                                                 elem,
-                                                 mapping=mapping,
-                                                 intorder=intorder,
-                                                 quadrature=quadrature,
-                                                 facets=facets,
-                                                 _tind=tind,
-                                                 dofs=dofs)
+        super(InteriorFacetBasis, self).__init__(
+            mesh,
+            elem,
+            mapping=mapping,
+            intorder=intorder,
+            quadrature=quadrature,
+            facets=(facets, mesh.f2t[side, facets], mesh.f2t[0, facets]),
+            dofs=dofs,
+        )

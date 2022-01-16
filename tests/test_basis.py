@@ -17,7 +17,10 @@ from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
                            ElementLineP0, ElementQuad1, ElementQuad0,
                            ElementTetP1, ElementTetP0, ElementHex1,
                            ElementHex0, ElementLineP1, ElementLineMini,
-                           ElementWedge1, ElementTriRT0, ElementQuadRT0)
+                           ElementWedge1, ElementTriRT0, ElementQuadRT0,
+                           ElementTriP1)
+from skfem.helpers import dot, grad
+from skfem.utils import enforce
 from skfem.models.poisson import laplace
 
 
@@ -442,3 +445,58 @@ def test_basis_project_grad():
         return w.y ** 2
 
     assert_almost_equal(int_y.assemble(basis, y=y), 1.)
+
+
+def test_subdomain_facet_assembly():
+
+    def subdomain(x):
+        return np.logical_and(
+            np.logical_and(x[0]>.25, x[0]<.75),
+            np.logical_and(x[1]>.25, x[1]<.75),
+        )
+
+    m, e = MeshTri().refined(4), ElementTriP2()
+    cbasis = CellBasis(m, e)
+    cbasis_p0 = cbasis.with_element(ElementTriP0())
+    sfbasis = FacetBasis.init_subdomain(m, e, elements=subdomain, side=1)
+    sfbasis_p0 = sfbasis.with_element(ElementTriP0())
+    sigma = cbasis_p0.zeros() + 1
+
+    @BilinearForm
+    def laplace(u, v, w):
+        return dot(w.sigma * grad(u), grad(v))
+
+    A = laplace.assemble(cbasis, sigma=cbasis_p0.interpolate(sigma))
+    u0 = cbasis.zeros()
+    u0[cbasis.get_dofs(elements=subdomain)] = 1
+    u0_dofs = cbasis.get_dofs() + cbasis.get_dofs(elements=subdomain)
+    A, b = enforce(A, D=u0_dofs, x=u0)
+    u = solve(A, b)
+
+    @Functional
+    def measure_current(w):
+        return dot(w.n, w.sigma * grad(w.u))
+
+    meas = measure_current.assemble(sfbasis,
+                                    sigma=sfbasis_p0.interpolate(sigma),
+                                    u=sfbasis.interpolate(u))
+
+    assert_almost_equal(meas, 9.751915526759191)
+
+
+def test_subdomain_facet_assembly_2():
+
+    m = MeshTri().refined(4).with_subdomains({'all': lambda x: x[0] * 0 + 1})
+    e = ElementTriP1()
+
+    @Functional
+    def boundary_integral(w):
+        return dot(w.n, grad(w.u))
+
+    sfbasis = FacetBasis.init_subdomain(m, e, elements='all')
+    fbasis = FacetBasis(m, e)
+
+    assert_almost_equal(
+        boundary_integral.assemble(sfbasis, u=m.p[0] * m.p[1]),
+        boundary_integral.assemble(fbasis, u=m.p[0] * m.p[1]),
+    )

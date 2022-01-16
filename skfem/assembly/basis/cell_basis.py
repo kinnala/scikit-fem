@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, Optional, Tuple
+from typing import Callable, Optional, Tuple, Any
 
 import numpy as np
 from numpy import ndarray
@@ -38,7 +38,7 @@ class CellBasis(AbstractBasis):
                  elem: Element,
                  mapping: Optional[Mapping] = None,
                  intorder: Optional[int] = None,
-                 elements: Optional[ndarray] = None,
+                 elements: Optional[Any] = None,
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
                  dofs: Optional[Dofs] = None):
         """Combine :class:`~skfem.mesh.Mesh` and :class:`~skfem.element.Element`
@@ -84,7 +84,7 @@ class CellBasis(AbstractBasis):
             self.tind = None
         else:
             self.nelems = len(elements)
-            self.tind = self._normalize_elements(elements)
+            self.tind = mesh.normalize_elements(elements)
 
         self.dx = (np.abs(self.mapping.detDF(self.X, tind=elements))
                    * np.tile(self.W, (self.nelems, 1)))

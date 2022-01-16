@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Any
 
 from numpy import ndarray
 from skfem.element import Element
@@ -17,7 +17,7 @@ class MortarFacetBasis(BoundaryFacetBasis):
                  mapping: MappingMortar,
                  intorder: Optional[int] = None,
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
-                 facets: Optional[ndarray] = None,
+                 facets: Optional[Any] = None,
                  side: int = 0,
                  dofs: Optional[Dofs] = None):
         """Precomputed global basis on the mortar mesh."""
@@ -31,12 +31,14 @@ class MortarFacetBasis(BoundaryFacetBasis):
             mapping.side = side
             facets = mapping.helper_to_orig[side]
 
-        facets = self._normalize_facets(facets)
+        facets = mesh.normalize_facets(facets)
 
-        super(MortarFacetBasis, self).__init__(mesh,
-                                               elem,
-                                               mapping=mapping,
-                                               intorder=intorder,
-                                               quadrature=quadrature,
-                                               facets=facets,
-                                               dofs=dofs)
+        super(MortarFacetBasis, self).__init__(
+            mesh,
+            elem,
+            mapping=mapping,
+            intorder=intorder,
+            quadrature=quadrature,
+            facets=facets,
+            dofs=dofs,
+        )
