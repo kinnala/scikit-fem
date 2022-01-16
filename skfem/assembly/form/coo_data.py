@@ -1,9 +1,13 @@
+import logging
+
 from dataclasses import dataclass, replace
 from typing import Tuple, Any, Optional
 
 import numpy as np
 from numpy import ndarray
-from scipy.sparse import coo_matrix, csr_matrix
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -20,8 +24,8 @@ class COOData:
             data: ndarray,
             shape: Tuple[int, ...],
             local_shape: Optional[Tuple[int, ...]]
-    ) -> csr_matrix:
-
+    ):
+        from scipy.sparse import coo_matrix
         K = coo_matrix((data, (indices[0], indices[1])), shape=shape)
         K.eliminate_zeros()
         return K.tocsr()
@@ -78,7 +82,7 @@ class COOData:
             local_shape=None,
         )
 
-    def tocsr(self) -> csr_matrix:
+    def tocsr(self):
         """Return a sparse SciPy CSR matrix."""
         return self._assemble_scipy_csr(
             self.indices,
@@ -90,6 +94,7 @@ class COOData:
     def toarray(self) -> ndarray:
         """Return a dense numpy array."""
         if len(self.shape) == 1:
+            from scipy.sparse import coo_matrix
             return coo_matrix(
                 (self.data, (self.indices[0], np.zeros_like(self.indices[0]))),
                 shape=self.shape + (1,),
@@ -120,3 +125,55 @@ class COOData:
         elif len(self.shape) == 2:
             return self.tocsr()
         return self
+
+    def dot(self, x, D=None):
+        """Matrix-vector product.
+
+        Parameters
+        ----------
+        x
+            The vector to multiply with.
+        D
+            Optionally, keep some DOFs unchanged.  An array of DOF indices.
+
+        """
+        y = self.data * x[self.indices[1]]
+        z = np.zeros_like(x)
+        np.add.at(z, self.indices[0], y)
+        if D is not None:
+            z[D] = x[D]
+        return z
+
+    def solve(self, b, D=None, tol=1e-10, maxiters=500):
+        """Solve linear system using the conjugate gradient method.
+
+        Parameters
+        ----------
+        b
+            The right-hand side vector.
+        D
+            An optional array of Dirichlet DOF indices for which the fixed
+            value is taken from ``b``.
+        tol
+            A tolerance for terminating the conjugate gradient method.
+        maxiters
+            The maximum number of iterations before forced termination.
+
+        """
+        x = b
+        r = b - self.dot(x, D=D)
+        p = r
+        rsold = np.dot(r, r)
+        for k in range(maxiters):
+            Ap = self.dot(p, D=D)
+            alpha = rsold / np.dot(p, Ap)
+            x = x + alpha * p
+            r = r - alpha * Ap
+            rsnew = np.dot(r, r)
+            if np.sqrt(rsnew) < tol:
+                break
+            p = r + (rsnew / rsold) * p
+            rsold = rsnew
+        if k == maxiters:
+            logger.warning("Iterative solver did not converge.")
+        return x
