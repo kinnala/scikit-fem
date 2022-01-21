@@ -111,6 +111,10 @@ class Mesh:
         """"facets to triangles
 
         i.e. ith column contains triangles corresponding to ith facet
+        the first row always refers to a triangle.
+        the second row is
+            -1 for boundary facets
+            a triangle index for interior facets
         """
         if not hasattr(self, '_f2t'):
             self._f2t = self.build_inverse(self.t, self.t2f)
@@ -965,9 +969,14 @@ class Mesh:
         if isinstance(facets, int):
             # Make  normalize_facets([1,2,3]) have the same behavior as
             # normalize_facets(np.array([1,2,3]))
-            return np.array([facets])
+            facets = np.array([facets])
+            # allow to drop through to the next if statement so value guards
+            # are in one place only.
         if isinstance(facets, ndarray):
             # Assume the facets have already been normalized
+            if (facets < 0).any():
+                raise ValueError('Negative numbers are not valid facet'
+                                 ' indices')
             return facets
         if facets is None:
             # Default behavior.
@@ -1006,9 +1015,14 @@ class Mesh:
         if isinstance(elements, int):
             # Make  normalize_elements([1,2,3]) have the same behavior as
             # normalize_elements(np.array([1,2,3]))
-            return np.array([elements])
+            elements = np.array([elements])
+            # allow to drop through to the next if statement so value guards
+            # are in one place only.
         if isinstance(elements, ndarray):
             # Assume the elements have already been normalized
+            if (elements < 0).any():
+                raise ValueError('Negative numbers are not valid element'
+                                 ' indices')
             return elements
         if callable(elements):
             # The callable should accept an array of element centers and return
