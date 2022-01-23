@@ -4,6 +4,21 @@ import meshio
 import numpy as np
 import skfem
 
+from numpy import ndarray
+
+
+class OrientedFacetSet(ndarray):
+
+    def __new__(cls, indices, ori):
+        obj = np.asarray(indices).view(cls)
+        obj.ori = ori
+        return obj
+
+    def __array_finalize__(self, obj):
+        if obj is None:
+            return
+        self.ori = getattr(obj, 'ori', None)
+
 
 MESH_TYPE_MAPPING = {
     'tetra': skfem.MeshTet1,
@@ -123,6 +138,45 @@ def from_meshio(m,
                                    enumerate(map(tuple, mtmp.facets.T))
                                    if f in v])
                       for k, v in facets.items()}
+        # read orientations
+        oris = {}
+        for k in boundaries:
+            ori = []
+            for i, facet in enumerate(facets[k]):
+                t1, t2 = mtmp.f2t[:, boundaries[k][i]]
+                if t2 == -1:
+                    # on boundary
+                    break
+                if len(facet) == 2:
+                    # rotate tangent to find normal
+                    p1 = mtmp.p[:, facet[0]]
+                    p2 = mtmp.p[:, facet[1]]
+                    tangent = p2 - p1
+                    normal = np.array([-tangent[1], tangent[0]])
+                elif len(facet) == 3:
+                    # cross product to find normal
+                    p1 = mtmp.p[:, facet[0]]
+                    p2 = mtmp.p[:, facet[1]]
+                    p3 = mtmp.p[:, facet[2]]
+                    tangent1 = p2 - p1
+                    tangent2 = p3 - p1
+                    normal = np.cross(tangent1, tangent2)
+                else:
+                    # not supported
+                    break
+                # find normal based on third node
+                third = np.setdiff1d(mtmp.t[:, t1], np.array(facet))[0]
+                p1 = mtmp.p[:, third]
+                p2 = mtmp.p[:, facet[0]]
+                Normal = p2 - p1
+                if np.dot(normal, Normal) > 0:
+                    ori.append(1)
+                else:
+                    ori.append(0)
+            oris[k] = OrientedFacetSet(boundaries[k], ori)
+
+        boundaries = {**boundaries, **oris}
+
 
     # MSH 2.2 tag parsing
     if m.cell_data and m.field_data:

@@ -24,8 +24,8 @@ class InteriorFacetBasis(BoundaryFacetBasis):
                  intorder: Optional[int] = None,
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
                  facets: Optional[Any] = None,
-                 side: int = 0,
-                 dofs: Optional[Dofs] = None):
+                 dofs: Optional[Dofs] = None,
+                 side: int = 0):
         """Precomputed global basis on interior facets."""
 
         if facets is None:
@@ -39,6 +39,7 @@ class InteriorFacetBasis(BoundaryFacetBasis):
             mapping=mapping,
             intorder=intorder,
             quadrature=quadrature,
-            facets=(facets, mesh.f2t[side, facets], mesh.f2t[0, facets]),
+            facets=facets,
             dofs=dofs,
+            side=side,
         )

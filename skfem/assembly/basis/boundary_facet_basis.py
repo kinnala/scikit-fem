@@ -27,7 +27,8 @@ class BoundaryFacetBasis(AbstractBasis):
                  intorder: Optional[int] = None,
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
                  facets: Optional[Any] = None,
-                 dofs: Optional[Dofs] = None):
+                 dofs: Optional[Dofs] = None,
+                 side: int = 0):
         """Precomputed global basis on boundary facets.
 
         Parameters
@@ -65,15 +66,18 @@ class BoundaryFacetBasis(AbstractBasis):
             dofs,
         )
 
-        # initialize indices
-        if isinstance(facets, tuple):
-            self.find, self.tind, self.tind_normals = facets
+        # default arguments and cast to a set of facet indices
+        if facets is None:
+            self.find = np.nonzero(self.mesh.f2t[1] == -1)[0]
         else:
-            if facets is None:
-                self.find = np.nonzero(self.mesh.f2t[1] == -1)[0]
-            else:
-                self.find = mesh.normalize_facets(facets)
-            self.tind = self.mesh.f2t[0, self.find]
+            self.find = mesh.normalize_facets(facets)
+
+        # fix the orientation
+        if hasattr(self.find, 'ori'):
+            self.tind = self.mesh.f2t[self.find.ori, self.find]
+            self.tind_normals = self.mesh.f2t[self.find.ori, self.find]
+        else:
+            self.tind = self.mesh.f2t[side, self.find]
             self.tind_normals = self.mesh.f2t[0, self.find]
 
         if len(self.find) == 0:
@@ -137,7 +141,7 @@ class BoundaryFacetBasis(AbstractBasis):
             elem,
             mapping=self.mapping,
             quadrature=self.quadrature,
-            facets=(self.find, self.tind, self.tind_normals),
+            facets=self.find,
         )
 
     def project(self, interp, facets=None):
