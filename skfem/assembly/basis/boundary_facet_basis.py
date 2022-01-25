@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, Optional, Tuple, Any
+from typing import Callable, Optional, Tuple
 
 import numpy as np
 from numpy import ndarray
@@ -26,9 +26,10 @@ class BoundaryFacetBasis(AbstractBasis):
                  mapping: Optional[Mapping] = None,
                  intorder: Optional[int] = None,
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
-                 facets: Optional[Any] = None,
+                 facets: Optional[ndarray] = None,
                  dofs: Optional[Dofs] = None,
-                 side: int = 0):
+                 flip_traces: bool = False,
+                 flip_normals: bool = False):
         """Precomputed global basis on boundary facets.
 
         Parameters
@@ -66,7 +67,7 @@ class BoundaryFacetBasis(AbstractBasis):
             dofs,
         )
 
-        # default arguments and cast to a set of facet indices
+        # by default use boundary facets
         if facets is None:
             self.find = np.nonzero(self.mesh.f2t[1] == -1)[0]
         else:
@@ -74,11 +75,14 @@ class BoundaryFacetBasis(AbstractBasis):
 
         # fix the orientation
         if hasattr(self.find, 'ori'):
-            self.tind = self.mesh.f2t[self.find.ori, self.find]
-            self.tind_normals = self.mesh.f2t[self.find.ori, self.find]
+            ori = -self.find.ori + 1 if flip_traces else self.find.ori
+            ori_normals = -self.find.ori + 1 if flip_normals else self.find.ori
         else:
-            self.tind = self.mesh.f2t[side, self.find]
-            self.tind_normals = self.mesh.f2t[0, self.find]
+            ori = int(flip_traces)
+            ori_normals = int(flip_normals)
+
+        self.tind = self.mesh.f2t[ori, self.find]
+        self.tind_normals = self.mesh.f2t[ori_normals, self.find]
 
         if len(self.find) == 0:
             logger.warning("Initializing {} with no facets.".format(typestr))
@@ -106,18 +110,6 @@ class BoundaryFacetBasis(AbstractBasis):
                    * np.tile(self.W, (self.nelems, 1)))
         logger.info("Initializing finished.")
 
-    @classmethod
-    def init_subdomain(cls, mesh, elem, elements=None, side=0, **kwargs):
-        assert elements is not None
-        elements = mesh.normalize_elements(elements)
-        subdomain_facets, sub_counts = np.unique(mesh.t2f[:, elements],
-                                                 return_counts=True)
-        facets = subdomain_facets[sub_counts == 1]
-        tind = mesh.f2t[:, facets].flatten('F')
-        ix = np.isin(tind, elements)
-        tind = tind[ix] if side == 0 else tind[~ix]
-        return cls(mesh, elem, facets=(facets, tind, tind), **kwargs)
-
     def default_parameters(self):
         """Return default parameters for `~skfem.assembly.asm`."""
         return {
@@ -133,6 +125,92 @@ class BoundaryFacetBasis(AbstractBasis):
         return DiscreteField((np.abs(self.mapping.detDG(self.X, self.find))
                               ** (1. / (self.mesh.dim() - 1.)))
                              if self.mesh.dim() != 1 else np.array([0.]))
+
+    def _trace_project(self,
+                       x: ndarray,
+                       elem: Element) -> ndarray:
+        from skfem.utils import projection
+
+        fbasis = BoundaryFacetBasis(self.mesh,
+                                    elem,
+                                    facets=self.find,
+                                    quadrature=(self.X, self.W))
+        I = fbasis.get_dofs(self.find).all()
+        if len(I) == 0:  # special case: no facet DOFs
+            if fbasis.dofs.interior_dofs is not None:
+                if fbasis.dofs.interior_dofs.shape[0] > 1:
+                    # no one-to-one restriction: requires interpolation
+                    raise NotImplementedError
+                # special case: piecewise constant elem
+                I = fbasis.dofs.interior_dofs[:, self.tind].flatten()
+            else:
+                raise ValueError
+        return projection(x, fbasis, self, I=I)
+
+    def trace(self,
+              x: ndarray,
+              projection: Callable[[ndarray], ndarray],
+              target_elem: Optional[Element] = None) -> Tuple[CellBasis,
+                                                              ndarray]:
+        """Restrict solution to :math:`d-1` dimensional trace mesh.
+
+        The parameter ``projection`` defines how the boundary points are
+        projected to :math:`d-1` dimensional space.  For example,
+
+        >>> projection = lambda p: p[0]
+
+        will keep only the `x`-coordinate in the trace mesh.
+
+        Parameters
+        ----------
+        x
+            The solution vector.
+        projection
+            A function defining the projection of the boundary points.  See
+            above for an example.
+        target_elem
+            Optional finite element to project to before restriction.  If not
+            given, a piecewise constant element is used.
+
+        Returns
+        -------
+        CellBasis
+            An object corresponding to the trace mesh.
+        ndarray
+            A projected solution vector defined on the trace mesh.
+
+        """
+        DEFAULT_TARGET = {
+            MeshTri: ElementTriP0,
+            MeshQuad: ElementQuad0,
+            MeshTet: ElementTetP0,
+            MeshHex: ElementHex0,
+        }
+
+        meshcls = type(self.mesh)
+        if meshcls not in DEFAULT_TARGET:
+            raise NotImplementedError("Mesh type not supported.")
+        if target_elem is None:
+            target_elem = DEFAULT_TARGET[meshcls]()
+
+        if type(target_elem) not in BOUNDARY_ELEMENT_MAP:
+            raise Exception("The specified element not supported.")
+        elemcls = BOUNDARY_ELEMENT_MAP[type(target_elem)]
+        target_meshcls = {
+            MeshTri: MeshLine,
+            MeshQuad: MeshLine,
+            MeshTet: MeshTri,
+            MeshHex: MeshQuad,
+        }[meshcls]
+
+        assert callable(target_meshcls)  # to satisfy mypy
+
+        p, t = self.mesh._reix(self.mesh.facets[:, self.find])
+
+        return (
+            CellBasis(target_meshcls(projection(p), t), elemcls()),
+            self._trace_project(x, target_elem)
+        )
 
     def with_element(self, elem: Element) -> 'BoundaryFacetBasis':
         """Return a similar basis using a different element."""
@@ -169,61 +247,3 @@ class BoundaryFacetBasis(AbstractBasis):
         if facets is not None:
             return solve(*condense(M, f, I=self.get_dofs(facets=facets)))
         return solve(*condense(M, f, I=self.get_dofs(facets=self.find)))
-
-    def _trace_project(self,
-                       x: ndarray,
-                       elem: Element) -> ndarray:
-        from skfem.utils import projection
-
-        fbasis = BoundaryFacetBasis(self.mesh,
-                                    elem,
-                                    facets=self.find,
-                                    quadrature=(self.X, self.W))
-        I = fbasis.get_dofs(self.find).all()
-        if len(I) == 0:  # special case: no facet DOFs
-            if fbasis.dofs.interior_dofs is not None:
-                if fbasis.dofs.interior_dofs.shape[0] > 1:
-                    # no one-to-one restriction: requires interpolation
-                    raise NotImplementedError
-                # special case: piecewise constant elem
-                I = fbasis.dofs.interior_dofs[:, self.tind].flatten()
-            else:
-                raise ValueError
-        return projection(x, fbasis, self, I=I)
-
-    def trace(self,
-              x: ndarray,
-              projection: Callable[[ndarray], ndarray],
-              target_elem: Optional[Element] = None) -> Tuple[CellBasis,
-                                                              ndarray]:
-        DEFAULT_TARGET = {
-            MeshTri: ElementTriP0,
-            MeshQuad: ElementQuad0,
-            MeshTet: ElementTetP0,
-            MeshHex: ElementHex0,
-        }
-
-        meshcls = type(self.mesh)
-        if meshcls not in DEFAULT_TARGET:
-            raise NotImplementedError("Mesh type not supported.")
-        if target_elem is None:
-            target_elem = DEFAULT_TARGET[meshcls]()
-
-        if type(target_elem) not in BOUNDARY_ELEMENT_MAP:
-            raise Exception("The specified element not supported.")
-        elemcls = BOUNDARY_ELEMENT_MAP[type(target_elem)]
-        target_meshcls = {
-            MeshTri: MeshLine,
-            MeshQuad: MeshLine,
-            MeshTet: MeshTri,
-            MeshHex: MeshQuad,
-        }[meshcls]
-
-        assert callable(target_meshcls)  # to satisfy mypy
-
-        p, t = self.mesh._reix(self.mesh.facets[:, self.find])
-
-        return (
-            CellBasis(target_meshcls(projection(p), t), elemcls()),
-            self._trace_project(x, target_elem)
-        )
