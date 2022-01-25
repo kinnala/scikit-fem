@@ -7,11 +7,12 @@ import skfem
 from numpy import ndarray
 
 
-class OrientedIndexArray(ndarray):
+class OrientedFacetArray(ndarray):
 
     def __new__(cls, indices, ori):
         obj = np.asarray(indices).view(cls)
         obj.ori = np.array(ori, dtype=int)
+        assert len(obj) == len(obj.ori)
         return obj
 
     def __array_finalize__(self, obj):
@@ -146,6 +147,10 @@ def from_meshio(m,
                     ix = sorted_facets[k].index(f)
                     facet = v[ix]
                     t1, t2 = mtmp.f2t[:, i]
+                    if t2 == -1:
+                        # orientation on boundary is 0
+                        oris.append(0)
+                        continue
                     if len(f) == 2:
                         # rotate tangent to find normal
                         tangent = mtmp.p[:, facet[1]] - mtmp.p[:, facet[0]]
@@ -154,7 +159,7 @@ def from_meshio(m,
                         # cross product to find normal
                         tangent1 = mtmp.p[:, facet[1]] - mtmp.p[:, facet[0]]
                         tangent2 = mtmp.p[:, facet[2]] - mtmp.p[:, facet[0]]
-                        normal = np.cross(tangent1, tangent2)
+                        normal = -np.cross(tangent1, tangent2)
                     else:
                         raise NotImplementedError
                     # find another vector using node outside of boundary
@@ -165,7 +170,7 @@ def from_meshio(m,
                         oris.append(1)
                     else:
                         oris.append(0)
-            boundaries[k] = OrientedIndexArray(indices, oris)
+            boundaries[k] = OrientedFacetArray(indices, oris)
 
     # MSH 2.2 tag parsing
     if len(boundaries) == 0 and m.cell_data and m.field_data:
