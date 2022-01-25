@@ -7,11 +7,11 @@ import skfem
 from numpy import ndarray
 
 
-class OrientedFacetSet(ndarray):
+class OrientedIndexArray(ndarray):
 
     def __new__(cls, indices, ori):
         obj = np.asarray(indices).view(cls)
-        obj.ori = ori
+        obj.ori = np.array(ori, dtype=int)
         return obj
 
     def __array_finalize__(self, obj):
@@ -129,57 +129,46 @@ def from_meshio(m,
 
     # parse boundaries from cell_sets
     if m.cell_sets and bnd_type in m.cells_dict:
-        facets = {
-            k: [tuple(f) for f in np.sort(m.cells_dict[bnd_type][v[bnd_type]])]
+        oriented_facets = {
+            k: [tuple(f) for f in m.cells_dict[bnd_type][v[bnd_type]]]
             for k, v in m.cell_sets_dict.items()
             if bnd_type in v and k.split(":")[0] != "gmsh"
         }
-        boundaries = {k: np.array([i for i, f in
-                                   enumerate(map(tuple, mtmp.facets.T))
-                                   if f in v])
-                      for k, v in facets.items()}
-        # read orientations
-        oris = {}
-        for k in boundaries:
-            ori = []
-            for i, facet in enumerate(facets[k]):
-                t1, t2 = mtmp.f2t[:, boundaries[k][i]]
-                if t2 == -1:
-                    # on boundary
-                    break
-                if len(facet) == 2:
-                    # rotate tangent to find normal
-                    p1 = mtmp.p[:, facet[0]]
-                    p2 = mtmp.p[:, facet[1]]
-                    tangent = p2 - p1
-                    normal = np.array([-tangent[1], tangent[0]])
-                elif len(facet) == 3:
-                    # cross product to find normal
-                    p1 = mtmp.p[:, facet[0]]
-                    p2 = mtmp.p[:, facet[1]]
-                    p3 = mtmp.p[:, facet[2]]
-                    tangent1 = p2 - p1
-                    tangent2 = p3 - p1
-                    normal = np.cross(tangent1, tangent2)
-                else:
-                    # not supported
-                    break
-                # find normal based on third node
-                third = np.setdiff1d(mtmp.t[:, t1], np.array(facet))[0]
-                p1 = mtmp.p[:, third]
-                p2 = mtmp.p[:, facet[0]]
-                Normal = p2 - p1
-                if np.dot(normal, Normal) > 0:
-                    ori.append(1)
-                else:
-                    ori.append(0)
-            oris[k] = OrientedFacetSet(boundaries[k], ori)
+        sorted_facets = {k: [tuple(np.sort(f)) for f in v]
+                         for k, v in oriented_facets.items()}
 
-        boundaries = {**boundaries, **oris}
-
+        for k, v in oriented_facets.items():
+            indices = []
+            oris = []
+            for i, f in enumerate(map(tuple, mtmp.facets.T)):
+                if f in sorted_facets[k]:
+                    indices.append(i)
+                    ix = sorted_facets[k].index(f)
+                    facet = v[ix]
+                    t1, t2 = mtmp.f2t[:, i]
+                    if len(f) == 2:
+                        # rotate tangent to find normal
+                        tangent = mtmp.p[:, facet[1]] - mtmp.p[:, facet[0]]
+                        normal = np.array([-tangent[1], tangent[0]])
+                    elif len(f) == 3:
+                        # cross product to find normal
+                        tangent1 = mtmp.p[:, facet[1]] - mtmp.p[:, facet[0]]
+                        tangent2 = mtmp.p[:, facet[2]] - mtmp.p[:, facet[0]]
+                        normal = np.cross(tangent1, tangent2)
+                    else:
+                        raise NotImplementedError
+                    # find another vector using node outside of boundary
+                    third = np.setdiff1d(mtmp.t[:, t1],
+                                         np.array(f))[0]
+                    outplane = mtmp.p[:, f[0]] - mtmp.p[:, third]
+                    if np.dot(normal, outplane) > 0:
+                        oris.append(1)
+                    else:
+                        oris.append(0)
+            boundaries[k] = OrientedIndexArray(indices, oris)
 
     # MSH 2.2 tag parsing
-    if m.cell_data and m.field_data:
+    if len(boundaries) == 0 and m.cell_data and m.field_data:
         try:
             elements_tag = m.cell_data_dict['gmsh:physical'][meshio_type]
             subdomains = {}
