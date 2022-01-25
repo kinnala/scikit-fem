@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, Any
+from typing import Optional, Tuple
 
 import numpy as np
 from numpy import ndarray
@@ -23,7 +23,7 @@ class InteriorFacetBasis(BoundaryFacetBasis):
                  mapping: Optional[Mapping] = None,
                  intorder: Optional[int] = None,
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
-                 facets: Optional[Any] = None,
+                 facets: Optional[ndarray] = None,
                  dofs: Optional[Dofs] = None,
                  side: int = 0):
         """Precomputed global basis on interior facets."""
