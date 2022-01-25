@@ -8,6 +8,7 @@ from skfem.element import (BOUNDARY_ELEMENT_MAP, DiscreteField, Element,
                            ElementTriP0)
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
+from skfem.generic_utils import OrientedFacetArray
 
 from .abstract_basis import AbstractBasis
 from .cell_basis import CellBasis
@@ -74,7 +75,7 @@ class BoundaryFacetBasis(AbstractBasis):
             self.find = mesh.normalize_facets(facets)
 
         # fix the orientation
-        if hasattr(self.find, 'ori'):
+        if isinstance(self.find, OrientedFacetArray):
             ori = -self.find.ori + 1 if flip_traces else self.find.ori
             ori_normals = -self.find.ori + 1 if flip_normals else self.find.ori
         else:
