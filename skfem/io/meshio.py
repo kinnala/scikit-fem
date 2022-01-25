@@ -3,12 +3,9 @@
 import meshio
 import numpy as np
 
-from numpy import ndarray
-
 from skfem.mesh import (MeshTet1, MeshTet2, MeshHex1, MeshHex2, MeshWedge1,
                         MeshTri1, MeshTri2, MeshQuad1, MeshQuad2, MeshLine1)
 from skfem.generic_utils import OrientedFacetArray
-
 
 
 MESH_TYPE_MAPPING = {
@@ -233,7 +230,7 @@ def to_meshio(mesh,
     t = mesh.dofs.element_dofs.copy()
     if isinstance(mesh, MeshHex2):
         t = t[HEX_MAPPING]
-    elif isinstance(mesh, MeshHex):
+    elif isinstance(mesh, MeshHex1):
         t = t[HEX_MAPPING[:8]]
 
     mtype = TYPE_MESH_MAPPING[type(mesh)]
