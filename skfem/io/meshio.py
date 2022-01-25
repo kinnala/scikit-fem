@@ -2,36 +2,26 @@
 
 import meshio
 import numpy as np
-import skfem
 
 from numpy import ndarray
 
+from skfem.mesh import (MeshTet1, MeshTet2, MeshHex1, MeshHex2, MeshWedge1,
+                        MeshTri1, MeshTri2, MeshQuad1, MeshQuad2, MeshLine1)
+from skfem.generic_utils import OrientedFacetArray
 
-class OrientedFacetArray(ndarray):
-
-    def __new__(cls, indices, ori):
-        obj = np.asarray(indices).view(cls)
-        obj.ori = np.array(ori, dtype=int)
-        assert len(obj) == len(obj.ori)
-        return obj
-
-    def __array_finalize__(self, obj):
-        if obj is None:
-            return
-        self.ori = getattr(obj, 'ori', None)
 
 
 MESH_TYPE_MAPPING = {
-    'tetra': skfem.MeshTet1,
-    'tetra10': skfem.MeshTet2,
-    'hexahedron': skfem.MeshHex1,
-    'hexahedron27': skfem.MeshHex2,
-    'wedge': skfem.MeshWedge1,
-    'triangle': skfem.MeshTri1,
-    'triangle6': skfem.MeshTri2,
-    'quad': skfem.MeshQuad1,
-    'quad9': skfem.MeshQuad2,
-    'line': skfem.MeshLine1,
+    'tetra': MeshTet1,
+    'tetra10': MeshTet2,
+    'hexahedron': MeshHex1,
+    'hexahedron27': MeshHex2,
+    'wedge': MeshWedge1,
+    'triangle': MeshTri1,
+    'triangle6': MeshTri2,
+    'quad': MeshQuad1,
+    'quad9': MeshQuad2,
+    'line': MeshLine1,
 }
 
 BOUNDARY_TYPE_MAPPING = {
@@ -166,10 +156,7 @@ def from_meshio(m,
                     third = np.setdiff1d(mtmp.t[:, t1],
                                          np.array(f))[0]
                     outplane = mtmp.p[:, f[0]] - mtmp.p[:, third]
-                    if np.dot(normal, outplane) > 0:
-                        oris.append(1)
-                    else:
-                        oris.append(0)
+                    oris.append(1 if np.dot(normal, outplane) > 0 else 0)
             boundaries[k] = OrientedFacetArray(indices, oris)
 
     # MSH 2.2 tag parsing
@@ -244,9 +231,9 @@ def to_meshio(mesh,
               encode_point_data=False):
 
     t = mesh.dofs.element_dofs.copy()
-    if isinstance(mesh, skfem.MeshHex2):
+    if isinstance(mesh, MeshHex2):
         t = t[HEX_MAPPING]
-    elif isinstance(mesh, skfem.MeshHex):
+    elif isinstance(mesh, MeshHex):
         t = t[HEX_MAPPING[:8]]
 
     mtype = TYPE_MESH_MAPPING[type(mesh)]
