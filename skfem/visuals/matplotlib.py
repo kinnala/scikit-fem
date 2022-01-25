@@ -130,9 +130,12 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> Axes:
                     ys,
                     color=colors[i % len(colors)],
                     linewidth=(kwargs['linewidth']
-                               if 'linewidth' in kwargs else 1.))
+                               if 'linewidth' in kwargs else 2.))
             if hasattr(m.boundaries[k], 'ori'):
-                collec = PolyCollection(m.p[:, m.t[:, m.f2t[m.boundaries[k].ori, m.boundaries[k]]]].T)
+                tris = m.f2t[m.boundaries[k].ori, m.boundaries[k]]
+                color = colors[i % len(colors)][:3] + (.1,)
+                collec = PolyCollection(m.p[:, m.t[:, tris]].T,
+                                        color=color)
                 ax.add_collection(collec)
 
     if "node_numbering" in kwargs:
