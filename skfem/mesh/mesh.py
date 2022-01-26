@@ -943,7 +943,7 @@ class Mesh:
         mod = importlib.import_module('skfem.visuals.{}'.format(visuals))
         return mod.plot(self, x, **kwargs)
 
-    def normalize_facets(self, facets):
+    def normalize_facets(self, facets) -> ndarray:
         """Generate an array of facet indices.
 
         Parameters
@@ -983,7 +983,7 @@ class Mesh:
                 raise ValueError("Boundary '{}' not found.".format(facets))
         raise NotImplementedError
 
-    def normalize_elements(self, elements):
+    def normalize_elements(self, elements) -> ndarray:
         """Generate an array of element indices.
 
         Parameters

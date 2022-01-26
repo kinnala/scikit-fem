@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, Optional, Tuple
+from typing import Callable, Optional, Tuple, Any
 
 import numpy as np
 from numpy import ndarray
@@ -27,7 +27,7 @@ class FacetBasis(AbstractBasis):
                  mapping: Optional[Mapping] = None,
                  intorder: Optional[int] = None,
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
-                 facets: Optional[ndarray] = None,
+                 facets: Optional[Any] = None,
                  dofs: Optional[Dofs] = None,
                  flip_traces: bool = False,
                  flip_normals: bool = False):
