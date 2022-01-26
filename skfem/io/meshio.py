@@ -264,7 +264,7 @@ def to_file(mesh,
             encode_point_data=False,
             **kwargs):
 
-    if filename.split('.')[-1] == 'msh':
+    if 'file_format' not in kwargs and filename.split('.')[-1] == 'msh':
         kwargs.update({'file_format': 'gmsh'})
 
     meshio.write(filename,
