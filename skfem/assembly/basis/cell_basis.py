@@ -68,25 +68,27 @@ class CellBasis(AbstractBasis):
         logger.info("Initializing {}({}, {})".format(type(self).__name__,
                                                      type(mesh).__name__,
                                                      type(elem).__name__))
-        super(CellBasis, self).__init__(mesh,
-                                        elem,
-                                        mapping,
-                                        intorder,
-                                        quadrature,
-                                        mesh.refdom,
-                                        dofs)
-
-        self.basis = [self.elem.gbasis(self.mapping, self.X, j, tind=elements)
-                      for j in range(self.Nbfun)]
+        super(CellBasis, self).__init__(
+            mesh,
+            elem,
+            mapping,
+            intorder,
+            quadrature,
+            mesh.refdom,
+            dofs,
+        )
 
         if elements is None:
-            self.nelems = mesh.nelements
             self.tind = None
+            self.nelems = mesh.nelements
         else:
-            self.nelems = len(elements)
             self.tind = mesh.normalize_elements(elements)
+            self.nelems = len(self.tind)
 
-        self.dx = (np.abs(self.mapping.detDF(self.X, tind=elements))
+        self.basis = [self.elem.gbasis(self.mapping, self.X, j, tind=self.tind)
+                      for j in range(self.Nbfun)]
+
+        self.dx = (np.abs(self.mapping.detDF(self.X, tind=self.tind))
                    * np.tile(self.W, (self.nelems, 1)))
         logger.info("Initializing finished.")
 

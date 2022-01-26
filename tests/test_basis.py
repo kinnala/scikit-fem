@@ -534,3 +534,42 @@ def test_oriented_interface_integral(m, e, facets, fun):
         Functional(lambda w: dot(w.fun.grad, w.n)).assemble(fb, fun=fun(m)),
         1.0,
     )
+
+
+@pytest.mark.parametrize(
+    "m, e",
+    [
+        (
+            MeshTri().refined(6).with_subdomains({
+                'mid': lambda x: (x[0] - .5) ** 2 + (x[1] - .5) ** 2 < .5 ** 2,
+            }),
+            ElementTriP1(),
+        ),
+        (
+            MeshTet().refined(4).with_subdomains({
+                'mid': lambda x: ((x[0] - .5) ** 2
+                                  + (x[1] - .5) ** 2
+                                  + (x[2] - .5) ** 2)< .5 ** 2,
+            }),
+            ElementTetP1(),
+        ),
+        (
+            MeshHex().refined(4).with_subdomains({
+                'mid': lambda x: ((x[0] - .5) ** 2
+                                  + (x[1] - .5) ** 2
+                                  + (x[2] - .5) ** 2)< .5 ** 2,
+            }),
+            ElementHex1(),
+        ),
+    ]
+)
+def test_oriented_gauss_integral(m, e):
+
+    facets = m.facets_around('mid')
+    fb = FacetBasis(m, e, facets=facets)
+    cb = CellBasis(m, e, elements='mid')
+    assert_almost_equal(
+        Functional(lambda w: w.x[0] * w.n[0]).assemble(fb),
+        Functional(lambda w: 1. + 0. * w.x[0]).assemble(cb),
+        decimal=5,
+    )
