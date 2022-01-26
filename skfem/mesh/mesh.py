@@ -147,16 +147,19 @@ class Mesh:
         return edge_candidates[ix]
 
     def with_boundaries(self,
-                        boundaries: Dict[str, Callable[[ndarray], ndarray]],
+                        boundaries: Dict[str, Union[Callable[[ndarray],
+                                                             ndarray],
+                                                    ndarray]],
                         boundaries_only: bool = True):
         """Return a copy of the mesh with named boundaries.
 
         Parameters
         ----------
         boundaries
-            A dictionary of lambda functions with the names of the boundaries
-            as keys.  The midpoint of the facet should return ``True`` for the
-            corresponding lambda function if the facet belongs to the boundary.
+            A dictionary of index arrays or lambda functions with the names of
+            the boundaries as keys.  The midpoint of the facet should return
+            ``True`` for the corresponding lambda function if the facet belongs
+            to the boundary.
         boundaries_only
             If ``True``, consider only facets on the boundary of the domain.
 
@@ -165,8 +168,9 @@ class Mesh:
             self,
             _boundaries={
                 **({} if self._boundaries is None else self._boundaries),
-                **{name: self.facets_satisfying(test, boundaries_only)
-                   for name, test in boundaries.items()}
+                **{name: self.facets_satisfying(test_or_set, boundaries_only)
+                   if callable(test_or_set) else test_or_set
+                   for name, test_or_set in boundaries.items()}
             },
         )
 

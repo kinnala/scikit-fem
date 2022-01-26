@@ -528,9 +528,9 @@ def test_saveload_cycle_vtk(m):
 
     from tempfile import NamedTemporaryFile
     m = m.refined(2)
-    with NamedTemporaryFile() as f:
-        m.save(f.name + ".vtk")
-        m2 = Mesh.load(f.name + ".vtk")
+    with NamedTemporaryFile(suffix='.vtk') as f:
+        m.save(f.name)
+        m2 = Mesh.load(f.name)
 
     assert_array_equal(m.p, m2.p)
     assert_array_equal(m.t, m2.t)
@@ -564,10 +564,10 @@ def test_saveload_cycle_tags(fmt, kwargs, m):
          .with_boundaries({'test': lambda x: (x[0] == 0) * (x[1] < 0.6),
                            'set': lambda x: (x[0] == 0) * (x[1] > 0.3)}))
     from tempfile import NamedTemporaryFile
-    with NamedTemporaryFile() as f:
-        m.save(f.name + fmt, point_data={'foo': m.p[0]}, **kwargs)
+    with NamedTemporaryFile(suffix=fmt) as f:
+        m.save(f.name, point_data={'foo': m.p[0]}, **kwargs)
         out = ['point_data', 'cells_dict']
-        m2 = Mesh.load(f.name + fmt, out=out)
+        m2 = Mesh.load(f.name, out=out)
 
 
         assert_array_equal(m.p, m2.p)
