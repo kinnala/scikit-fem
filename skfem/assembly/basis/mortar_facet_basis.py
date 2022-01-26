@@ -5,11 +5,11 @@ from skfem.element import Element
 from skfem.mapping import MappingMortar
 from skfem.mesh import Mesh
 
-from .boundary_facet_basis import BoundaryFacetBasis
+from .facet_basis import FacetBasis
 from ..dofs import Dofs
 
 
-class MortarFacetBasis(BoundaryFacetBasis):
+class MortarFacetBasis(FacetBasis):
 
     def __init__(self,
                  mesh: Mesh,

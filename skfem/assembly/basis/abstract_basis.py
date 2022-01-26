@@ -23,7 +23,7 @@ class AbstractBasis:
     Please see the following implementations:
 
     - :class:`~skfem.assembly.CellBasis`, basis functions inside elements
-    - :class:`~skfem.assembly.BoundaryFacetBasis`, basis functions on boundary
+    - :class:`~skfem.assembly.FacetBasis`, basis functions on boundary
     - :class:`~skfem.assembly.InteriorFacetBasis`, basis functions on facets
       inside the domain
 

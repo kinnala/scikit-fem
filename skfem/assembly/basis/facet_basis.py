@@ -18,8 +18,8 @@ from ..dofs import Dofs
 logger = logging.getLogger(__name__)
 
 
-class BoundaryFacetBasis(AbstractBasis):
-    """For fields defined on the boundary of the domain."""
+class FacetBasis(AbstractBasis):
+    """For integrating over facets of the mesh.  Usually over the boundary."""
 
     def __init__(self,
                  mesh: Mesh,
@@ -58,7 +58,7 @@ class BoundaryFacetBasis(AbstractBasis):
                                        type(mesh).__name__,
                                        type(elem).__name__))
         logger.info("Initializing {}".format(typestr))
-        super(BoundaryFacetBasis, self).__init__(
+        super(FacetBasis, self).__init__(
             mesh,
             elem,
             mapping,
@@ -132,10 +132,10 @@ class BoundaryFacetBasis(AbstractBasis):
                        elem: Element) -> ndarray:
         from skfem.utils import projection
 
-        fbasis = BoundaryFacetBasis(self.mesh,
-                                    elem,
-                                    facets=self.find,
-                                    quadrature=(self.X, self.W))
+        fbasis = FacetBasis(self.mesh,
+                            elem,
+                            facets=self.find,
+                            quadrature=(self.X, self.W))
         I = fbasis.get_dofs(self.find).all()
         if len(I) == 0:  # special case: no facet DOFs
             if fbasis.dofs.interior_dofs is not None:
@@ -213,7 +213,7 @@ class BoundaryFacetBasis(AbstractBasis):
             self._trace_project(x, target_elem)
         )
 
-    def with_element(self, elem: Element) -> 'BoundaryFacetBasis':
+    def with_element(self, elem: Element) -> 'FacetBasis':
         """Return a similar basis using a different element."""
         return type(self)(
             self.mesh,

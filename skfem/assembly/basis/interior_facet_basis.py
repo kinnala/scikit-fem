@@ -6,11 +6,11 @@ from skfem.element import Element
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh
 
-from .boundary_facet_basis import BoundaryFacetBasis
+from .facet_basis import FacetBasis
 from ..dofs import Dofs
 
 
-class InteriorFacetBasis(BoundaryFacetBasis):
+class InteriorFacetBasis(FacetBasis):
     """For evaluating integrals over interior facets.
 
     Useful for, e.g., a posteriori error estimators or implementing interior
