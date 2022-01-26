@@ -23,10 +23,3 @@ class OrientedFacetArray(ndarray):
         if obj is None:
             return
         self.ori = getattr(obj, 'ori', None)
-
-    @classmethod
-    def by_subdomain(cls, m, ix):
-        facets, counts = np.unique(m.t2f[:, ix], return_counts=True)
-        facets = facets[counts == 1]
-        ori = np.nonzero(np.isin(m.f2t[:, facets], ix).T)[1]
-        return cls(facets, ori)

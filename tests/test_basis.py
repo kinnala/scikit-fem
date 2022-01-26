@@ -459,12 +459,8 @@ def test_subdomain_facet_assembly():
     cbasis = CellBasis(m, e)
     cbasis_p0 = cbasis.with_element(ElementTriP0())
 
-    from skfem.generic_utils import OrientedFacetArray
-    facets = OrientedFacetArray.by_subdomain(m,
-                                             m.elements_satisfying(subdomain))
-
     sfbasis = FacetBasis(m, e,
-                         facets=facets,
+                         facets=m.facets_around(subdomain),
                          flip_traces=True,
                          flip_normals=True)
     sfbasis_p0 = sfbasis.with_element(ElementTriP0())
@@ -501,10 +497,7 @@ def test_subdomain_facet_assembly_2():
     def boundary_integral(w):
         return dot(w.n, grad(w.u))
 
-    from skfem.generic_utils import OrientedFacetArray
-    facets = OrientedFacetArray.by_subdomain(m, m.subdomains['all'])
-
-    sfbasis = FacetBasis(m, e, facets=facets)
+    sfbasis = FacetBasis(m, e, facets=m.facets_around('all'))
     fbasis = FacetBasis(m, e)
 
     assert_almost_equal(

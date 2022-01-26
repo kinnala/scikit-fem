@@ -8,6 +8,7 @@ import numpy as np
 from numpy import ndarray
 
 from ..element import BOUNDARY_ELEMENT_MAP, Element
+from ..generic_utils import OrientedFacetArray
 
 
 logger = logging.getLogger(__name__)
@@ -301,6 +302,22 @@ class Mesh:
         if boundaries_only:
             facets = np.intersect1d(facets, self.boundary_facets())
         return facets
+
+    def facets_around(self, elements) -> OrientedFacetArray:
+        """Return the oriented set of facets around a set of elements.
+
+        Parameters
+        ----------
+        elements
+            An array of element indices or, alternatively, something that can
+            be cast into one via ``Mesh.normalize_elements``.
+
+        """
+        elements = self.normalize_elements(elements)
+        facets, counts = np.unique(self.t2f[:, elements], return_counts=True)
+        facets = facets[counts == 1]
+        ori = np.nonzero(np.isin(self.f2t[:, facets], elements).T)[1]
+        return OrientedFacetArray(facets, ori)
 
     def elements_satisfying(self,
                             test: Callable[[ndarray], ndarray]) -> ndarray:
