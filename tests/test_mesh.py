@@ -16,6 +16,9 @@ from skfem.io.meshio import to_meshio, from_meshio
 from skfem.io.json import to_dict, from_dict
 
 
+MESH_PATH = Path(__file__).parents[1] / 'docs' / 'examples' / 'meshes'
+
+
 class MeshTests(TestCase):
     """Test some of the methods in mesh classes
     that are not tested elsewhere."""
@@ -59,9 +62,6 @@ class FaultyInputs(TestCase):
             # floats in element connectivity
             MeshTri(np.array([[0, 0], [0, 1], [1, 0], [1, 1]]).T,
                     np.array([[0.0, 1.0, 2.0], [1.0, 2.0, 3.0]]).T)
-
-
-MESH_PATH = Path(__file__).parents[1] / 'docs' / 'examples' / 'meshes'
 
 
 class Loading(TestCase):

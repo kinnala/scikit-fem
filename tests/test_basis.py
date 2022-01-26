@@ -1,5 +1,6 @@
 import pickle
 from unittest import TestCase
+from pathlib import Path
 
 import pytest
 import numpy as np
@@ -22,6 +23,9 @@ from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
 from skfem.helpers import dot, grad
 from skfem.utils import enforce
 from skfem.models.poisson import laplace
+
+
+MESH_PATH = Path(__file__).parents[1] / 'docs' / 'examples' / 'meshes'
 
 
 class TestCompositeSplitting(TestCase):
@@ -503,4 +507,30 @@ def test_subdomain_facet_assembly_2():
     assert_almost_equal(
         boundary_integral.assemble(sfbasis, u=m.p[0] * m.p[1]),
         boundary_integral.assemble(fbasis, u=m.p[0] * m.p[1]),
+    )
+
+
+@pytest.mark.parametrize(
+    "m, e, facets, fun",
+    [
+        (
+            MeshTri.load(MESH_PATH / 'interface.msh'),
+            ElementTriP1(),
+            'interfacee',
+            lambda m: m.p[1],
+        ),
+        (
+            MeshTet.load(MESH_PATH / 'cuubat.msh'),
+            ElementTetP1(),
+            'interface',
+            lambda m: m.p[0],
+        )
+    ]
+)
+def test_oriented_interface_integral(m, e, facets, fun):
+
+    fb = FacetBasis(m, e, facets=facets)
+    assert_almost_equal(
+        Functional(lambda w: dot(w.fun.grad, w.n)).assemble(fb, fun=fun(m)),
+        1.0,
     )
