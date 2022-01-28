@@ -285,7 +285,8 @@ class AbstractBasis:
 
         if isinstance(self.elem, ElementVector):
             # ElementVector shouldn't get split here: workaround
-            refs = [(None, self)]
+            refs: List[Tuple[ndarray, 'AbstractBasis']] = [(np.array([]),
+                                                            self)]
         else:
             refs = self.split(w)
         dfs: List[DiscreteField] = []
