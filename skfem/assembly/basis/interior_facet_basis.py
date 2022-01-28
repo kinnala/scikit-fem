@@ -41,5 +41,5 @@ class InteriorFacetBasis(FacetBasis):
             quadrature=quadrature,
             facets=facets,
             dofs=dofs,
-            flip_traces=bool(side),
+            side=side,
         )

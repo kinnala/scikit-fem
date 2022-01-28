@@ -465,10 +465,7 @@ def test_subdomain_facet_assembly():
     cbasis = CellBasis(m, e)
     cbasis_p0 = cbasis.with_element(ElementTriP0())
 
-    sfbasis = FacetBasis(m, e,
-                         facets=m.facets_around(subdomain),
-                         flip_traces=True,
-                         flip_normals=True)
+    sfbasis = FacetBasis(m, e, facets=m.facets_around(subdomain, flip=True))
     sfbasis_p0 = sfbasis.with_element(ElementTriP0())
     sigma = cbasis_p0.zeros() + 1
 

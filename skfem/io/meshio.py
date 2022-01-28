@@ -5,7 +5,7 @@ import numpy as np
 
 from skfem.mesh import (MeshTet1, MeshTet2, MeshHex1, MeshHex2, MeshWedge1,
                         MeshTri1, MeshTri2, MeshQuad1, MeshQuad2, MeshLine1)
-from skfem.generic_utils import OrientedFacetArray
+from skfem.generic_utils import OrientedBoundary
 
 
 MESH_TYPE_MAPPING = {
@@ -154,7 +154,7 @@ def from_meshio(m,
                                          np.array(f))[0]
                     outplane = mtmp.p[:, f[0]] - mtmp.p[:, third]
                     oris.append(1 if np.dot(normal, outplane) > 0 else 0)
-            boundaries[k] = OrientedFacetArray(indices, oris)
+            boundaries[k] = OrientedBoundary(indices, oris)
 
     # MSH 2.2 tag parsing
     if len(boundaries) == 0 and m.cell_data and m.field_data:

@@ -8,7 +8,7 @@ from skfem.element import (BOUNDARY_ELEMENT_MAP, DiscreteField, Element,
                            ElementTriP0)
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
-from skfem.generic_utils import OrientedFacetArray
+from skfem.generic_utils import OrientedBoundary
 
 from .abstract_basis import AbstractBasis
 from .cell_basis import CellBasis
@@ -29,8 +29,7 @@ class FacetBasis(AbstractBasis):
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
                  facets: Optional[Any] = None,
                  dofs: Optional[Dofs] = None,
-                 flip_traces: bool = False,
-                 flip_normals: bool = False):
+                 side: int = 0):
         """Precomputed global basis on boundary facets.
 
         Parameters
@@ -75,15 +74,13 @@ class FacetBasis(AbstractBasis):
             self.find = mesh.normalize_facets(facets)
 
         # fix the orientation
-        if isinstance(self.find, OrientedFacetArray):
-            ori = -self.find.ori + 1 if flip_traces else self.find.ori
-            ori_normals = -self.find.ori + 1 if flip_normals else self.find.ori
+        if isinstance(self.find, OrientedBoundary):
+            self.tind = self.mesh.f2t[(-1) ** side * self.find.ori - side,
+                                      self.find]
+            self.tind_normals = self.mesh.f2t[self.find.ori, self.find]
         else:
-            ori = int(flip_traces)
-            ori_normals = int(flip_normals)
-
-        self.tind = self.mesh.f2t[ori, self.find]
-        self.tind_normals = self.mesh.f2t[ori_normals, self.find]
+            self.tind = self.mesh.f2t[side, self.find]
+            self.tind_normals = self.mesh.f2t[0, self.find]
 
         if len(self.find) == 0:
             logger.warning("Initializing {} with no facets.".format(typestr))

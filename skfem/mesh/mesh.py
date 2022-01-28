@@ -8,7 +8,7 @@ import numpy as np
 from numpy import ndarray
 
 from ..element import BOUNDARY_ELEMENT_MAP, Element
-from ..generic_utils import OrientedFacetArray
+from ..generic_utils import OrientedBoundary
 
 
 logger = logging.getLogger(__name__)
@@ -307,7 +307,7 @@ class Mesh:
             facets = np.intersect1d(facets, self.boundary_facets())
         return facets
 
-    def facets_around(self, elements) -> OrientedFacetArray:
+    def facets_around(self, elements, flip=False) -> OrientedBoundary:
         """Return the oriented set of facets around a set of elements.
 
         Parameters
@@ -315,13 +315,18 @@ class Mesh:
         elements
             An array of element indices or, alternatively, something that can
             be cast into one via ``Mesh.normalize_elements``.
+        flip
+            If ``True``, use traces outside the subdomain and inward normals.
 
         """
         elements = self.normalize_elements(elements)
         facets, counts = np.unique(self.t2f[:, elements], return_counts=True)
         facets = facets[counts == 1]
-        ori = np.nonzero(np.isin(self.f2t[:, facets], elements).T)[1]
-        return OrientedFacetArray(facets, ori)
+        if flip:
+            ori = np.nonzero(~np.isin(self.f2t[:, facets], elements).T)[1]
+        else:
+            ori = np.nonzero(np.isin(self.f2t[:, facets], elements).T)[1]
+        return OrientedBoundary(facets, ori)
 
     def elements_satisfying(self,
                             test: Callable[[ndarray], ndarray]) -> ndarray:

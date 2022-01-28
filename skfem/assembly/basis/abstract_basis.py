@@ -344,7 +344,7 @@ class AbstractBasis:
                                e.facet_dofs,
                                e.interior_dofs])
             return output
-        raise ValueError("Basis.elem has only a single component!")
+        return [np.unique(self.dofs.element_dofs)]
 
     def split_bases(self) -> List['AbstractBasis']:
         """Return Basis objects for the solution components."""
@@ -356,7 +356,8 @@ class AbstractBasis:
             return [type(self)(self.mesh, self.elem.elem, self.mapping,
                                quadrature=self.quadrature)
                     for _ in range(self.mesh.dim())]
-        raise ValueError("AbstractBasis.elem has only a single component!")
+        return [self]
+        #raise ValueError("AbstractBasis.elem has only a single component!")
 
     @property
     def quadrature(self):

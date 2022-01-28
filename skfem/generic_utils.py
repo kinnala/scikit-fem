@@ -10,7 +10,7 @@ def hash_args(*args):
                  else hash(arg) for arg in args)
 
 
-class OrientedFacetArray(ndarray):
+class OrientedBoundary(ndarray):
     """An array of facet indices with orientation."""
 
     def __new__(cls, indices, ori):
