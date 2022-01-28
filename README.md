@@ -227,9 +227,24 @@ with respect to documented and/or tested features.
 - Added: `Mesh.plot`, a wrapper to `skfem.visuals.*.plot`
 - Added: `Basis.plot`, a wrapper to `skfem.visuals.*.plot`
 - Added: `Basis.refinterp` now supports vectorial fields
-- Added: `skfem.visuals.matpltlib.plot` now has a basic quiver plot for vector
+- Added: `skfem.visuals.matplotlib.plot` now has a basic quiver plot for vector
   fields
+- Added: `Mesh.facets_around` which constructs a set of facets around a
+  subdomain
+- Added: `Mesh.load` now tries loading the orientation of boundaries and
+  interfaces
+- Added: `FacetBasis` will use the facet orientations (if present) to calculate
+  traces and normal vectors
+- Added: `Mesh.facets_satisfying` allows specifying the keyword argument
+  `normal` for orienting the resulting interface
+- Added: `FacetBasis` constructor now has the keyword argument `side` which
+  allows changing the side of the facet used to calculate the basis function
+  values and gradients
 - Fixed: Improvements to backwards compatibility in `asm`/`assemble` kwargs
+- Fixed: Save format issue with meshio 5.3.0+
+- Fixed: `CellBasis` did not properly support `elements` argument
+- Fixed: `Basis.interpolate` did not properly interpolate all components of
+  `ElementComposite`
 
 ### [5.2.0] - 2021-12-27
 
