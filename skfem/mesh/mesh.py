@@ -289,7 +289,8 @@ class Mesh:
 
     def facets_satisfying(self,
                           test: Callable[[ndarray], ndarray],
-                          boundaries_only: bool = False) -> ndarray:
+                          boundaries_only: bool = False,
+                          normal: Optional[ndarray] = None) -> ndarray:
         """Return facets whose midpoints satisfy some condition.
 
         Parameters
@@ -299,12 +300,23 @@ class Mesh:
             to be included in the return set.
         boundaries_only
             If ``True``, include only boundary facets.
+        normal
+            If given, used to orient the set of facets.
 
         """
         midp = self.p[:, self.facets].mean(axis=1)
         facets = np.nonzero(test(midp))[0]
         if boundaries_only:
             facets = np.intersect1d(facets, self.boundary_facets())
+        if normal is not None:
+            tind = self.f2t[0, facets]
+            mapping = self._mapping()
+            normals = mapping.normals(np.zeros((self.dim(), 1)),
+                                      tind,
+                                      facets,
+                                      self.t2f).T[0].T
+            ori = 1 * (np.dot(normal, normals) < 0)
+            return OrientedBoundary(facets, ori)
         return facets
 
     def facets_around(self, elements, flip=False) -> OrientedBoundary:

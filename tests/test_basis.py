@@ -536,6 +536,32 @@ def test_oriented_interface_integral(m, e, facets, fun):
 
 
 @pytest.mark.parametrize(
+    "m, e, facets, normal",
+    [
+        (
+            MeshTri().refined(2) + MeshTri().translated((1.0, 0.0)).refined(2),
+            ElementTriP1(),
+            lambda x: x[0] == 1.0,
+            np.array([1, 0]),
+        ),
+        (
+            MeshHex().refined(2) + MeshHex().translated((1., 0., 0.)).refined(2),
+            ElementHex1(),
+            lambda x: x[0] == 1.0,
+            np.array([1, 0, 0]),
+        ),
+    ]
+)
+def test_oriented_interface_integral2(m, e, facets, normal):
+
+    fb = FacetBasis(m, e, facets=m.facets_satisfying(facets, normal=normal))
+    assert_almost_equal(
+        Functional(lambda w: dot(w.fun.grad, w.n)).assemble(fb, fun=m.p[0]),
+        1.0,
+    )
+
+
+@pytest.mark.parametrize(
     "m, e",
     [
         (
