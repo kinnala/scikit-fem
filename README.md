@@ -216,12 +216,15 @@ with respect to documented and/or tested features.
 ### Unreleased
 
 - Changed: `DiscreteField` is now a subclass of `ndarray` instead of
-  `NamedTuple`
+  `NamedTuple` and, consequently, the components of `DiscreteField` cannot no
+  more be indexed inside forms like `u[1]` (use `u.grad` instead)
 - Changed: Writing `w['u']` and `w.u` inside the form definition is now
   equivalent (previously `w.u == w['u'].value`)
-- Changed: `Mesh.draw` now uses `matplotlib` by default, call
-  `Mesh.draw("vedo")` to keep using `vedo`
+- Changed: `Mesh.draw` now uses `matplotlib` by default, calling
+  `Mesh.draw("vedo")` uses `vedo`
 - Changed: `skfem.visuals.matplotlib` now uses `jet` as the default colormap
+- Changed: `BoundaryFacetBasis` is now an alias of `FacetBasis` instead of
+  other way around
 - Deprecated: `DiscreteField.value` remains for backwards-compatibility but is
   now deprecated and can be dropped
 - Added: `Mesh.plot`, a wrapper to `skfem.visuals.*.plot`
@@ -235,12 +238,15 @@ with respect to documented and/or tested features.
   interfaces
 - Added: `FacetBasis` will use the facet orientations (if present) to calculate
   traces and normal vectors
+- Added: `skfem.visuals.matplotlib.draw` will visualize the orientations if
+  `boundaries=True` is given
 - Added: `Mesh.facets_satisfying` allows specifying the keyword argument
   `normal` for orienting the resulting interface
 - Added: `FacetBasis` constructor now has the keyword argument `side` which
   allows changing the side of the facet used to calculate the basis function
   values and gradients
-- Fixed: Improvements to backwards compatibility in `asm`/`assemble` kwargs
+- Fixed: Improvements to backwards compatibility in `asm`/`assemble` keyword
+  arguments
 - Fixed: Save format issue with meshio 5.3.0+
 - Fixed: `CellBasis` did not properly support `elements` argument
 - Fixed: `Basis.interpolate` did not properly interpolate all components of
