@@ -283,7 +283,11 @@ class AbstractBasis:
         if w.shape[0] != self.N:
             raise ValueError("Input array has wrong size.")
 
-        refs = self.split(w)
+        if isinstance(self.elem, ElementVector):
+            # ElementVector shouldn't get split here: workaround
+            refs = [(None, self)]
+        else:
+            refs = self.split(w)
         dfs: List[DiscreteField] = []
 
         # loop over solution components
@@ -357,7 +361,6 @@ class AbstractBasis:
                                quadrature=self.quadrature)
                     for _ in range(self.mesh.dim())]
         return [self]
-        #raise ValueError("AbstractBasis.elem has only a single component!")
 
     @property
     def quadrature(self):
