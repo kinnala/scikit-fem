@@ -283,12 +283,12 @@ class AbstractBasis:
         if w.shape[0] != self.N:
             raise ValueError("Input array has wrong size.")
 
-        refs = self.basis[0]
+        refs = self.split(w)
         dfs: List[DiscreteField] = []
 
         # loop over solution components
         for c in range(len(refs)):
-            ref = refs[c]
+            ref = refs[c][1].basis[0][0]
             if ref.is_zero():
                 dfs.append(ref)
                 continue

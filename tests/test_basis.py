@@ -22,6 +22,7 @@ from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
                            ElementTriP1)
 from skfem.helpers import dot, grad
 from skfem.utils import enforce
+from skfem.io.meshio import to_meshio, from_meshio
 from skfem.models.poisson import laplace
 
 
@@ -67,6 +68,7 @@ class TestCompositeSplitting(TestCase):
         U, P = basis.interpolate(x)
         self.assertTrue(isinstance(U.value, np.ndarray))
         self.assertTrue(isinstance(P.value, np.ndarray))
+        self.assertTrue(P.shape[0] == m.nelements)
 
         self.assertTrue((basis.doflocs[:, D['up'].all()][1] == 1.).all())
 
@@ -549,7 +551,7 @@ def test_oriented_interface_integral(m, e, facets, fun):
             MeshTet().refined(4).with_subdomains({
                 'mid': lambda x: ((x[0] - .5) ** 2
                                   + (x[1] - .5) ** 2
-                                  + (x[2] - .5) ** 2)< .5 ** 2,
+                                  + (x[2] - .5) ** 2) < .5 ** 2,
             }),
             ElementTetP1(),
         ),
@@ -557,7 +559,7 @@ def test_oriented_interface_integral(m, e, facets, fun):
             MeshHex().refined(4).with_subdomains({
                 'mid': lambda x: ((x[0] - .5) ** 2
                                   + (x[1] - .5) ** 2
-                                  + (x[2] - .5) ** 2)< .5 ** 2,
+                                  + (x[2] - .5) ** 2) < .5 ** 2,
             }),
             ElementHex1(),
         ),
@@ -572,4 +574,21 @@ def test_oriented_gauss_integral(m, e):
         Functional(lambda w: w.x[0] * w.n[0]).assemble(fb),
         Functional(lambda w: 1. + 0. * w.x[0]).assemble(cb),
         decimal=5,
+    )
+
+
+def test_oriented_saveload():
+
+    m = MeshTri().refined(4)
+    m = m.with_boundaries({
+        'mid': m.facets_around([5]),
+    })
+    assert len(m.boundaries['mid'].ori) == 3
+
+    # cycle to meshio and check that orientation is preserved
+    M = from_meshio(to_meshio(m))
+
+    assert_almost_equal(
+        m.boundaries['mid'].ori,
+        M.boundaries['mid'].ori,
     )
