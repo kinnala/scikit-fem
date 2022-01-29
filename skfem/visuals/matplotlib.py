@@ -7,6 +7,7 @@ from numpy import ndarray
 
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
+from matplotlib.collections import PolyCollection
 
 from ..assembly import CellBasis
 from ..mesh import Mesh2D, MeshLine1, MeshQuad1, MeshTri1, Mesh3D
@@ -129,7 +130,13 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> Axes:
                     ys,
                     color=colors[i % len(colors)],
                     linewidth=(kwargs['linewidth']
-                               if 'linewidth' in kwargs else 1.))
+                               if 'linewidth' in kwargs else 2.))
+            if hasattr(m.boundaries[k], 'ori'):
+                tris = m.f2t[m.boundaries[k].ori, m.boundaries[k]]
+                color = colors[i % len(colors)][:3] + (.1,)
+                collec = PolyCollection(m.p[:, m.t[:, tris]].T,
+                                        color=color)
+                ax.add_collection(collec)
 
     if "node_numbering" in kwargs:
         for itr in range(m.p.shape[1]):

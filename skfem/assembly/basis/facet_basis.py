@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, Optional, Tuple
+from typing import Callable, Optional, Tuple, Any
 
 import numpy as np
 from numpy import ndarray
@@ -8,6 +8,7 @@ from skfem.element import (BOUNDARY_ELEMENT_MAP, DiscreteField, Element,
                            ElementTriP0)
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
+from skfem.generic_utils import OrientedBoundary
 
 from .abstract_basis import AbstractBasis
 from .cell_basis import CellBasis
@@ -17,8 +18,8 @@ from ..dofs import Dofs
 logger = logging.getLogger(__name__)
 
 
-class BoundaryFacetBasis(AbstractBasis):
-    """For fields defined on the boundary of the domain."""
+class FacetBasis(AbstractBasis):
+    """For integrating over facets of the mesh.  Usually over the boundary."""
 
     def __init__(self,
                  mesh: Mesh,
@@ -26,9 +27,9 @@ class BoundaryFacetBasis(AbstractBasis):
                  mapping: Optional[Mapping] = None,
                  intorder: Optional[int] = None,
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
-                 facets: Optional[ndarray] = None,
+                 facets: Optional[Any] = None,
                  dofs: Optional[Dofs] = None,
-                 _tind: Optional[ndarray] = None):
+                 side: int = 0):
         """Precomputed global basis on boundary facets.
 
         Parameters
@@ -55,39 +56,45 @@ class BoundaryFacetBasis(AbstractBasis):
         typestr = ("{}({}, {})".format(type(self).__name__,
                                        type(mesh).__name__,
                                        type(elem).__name__))
-        logger.info("Initializing " + typestr)
-        super(BoundaryFacetBasis, self).__init__(mesh,
-                                                 elem,
-                                                 mapping,
-                                                 intorder,
-                                                 quadrature,
-                                                 mesh.brefdom,
-                                                 dofs)
+        logger.info("Initializing {}".format(typestr))
+        super(FacetBasis, self).__init__(
+            mesh,
+            elem,
+            mapping,
+            intorder,
+            quadrature,
+            mesh.brefdom,
+            dofs,
+        )
 
-        # facets where the basis is evaluated
+        # by default use boundary facets
         if facets is None:
             self.find = np.nonzero(self.mesh.f2t[1] == -1)[0]
         else:
-            self.find = self._normalize_facets(facets)
+            self.find = mesh.normalize_facets(facets)
+
+        # fix the orientation
+        if isinstance(self.find, OrientedBoundary):
+            self.tind = self.mesh.f2t[(-1) ** side * self.find.ori - side,
+                                      self.find]
+            self.tind_normals = self.mesh.f2t[self.find.ori, self.find]
+        else:
+            self.tind = self.mesh.f2t[side, self.find]
+            self.tind_normals = self.mesh.f2t[0, self.find]
 
         if len(self.find) == 0:
-            logger.warning("Initializing {} with zero facets.".format(typestr))
-
-        if _tind is None:
-            self.tind = self.mesh.f2t[0, self.find]
-        else:
-            self.tind = _tind
+            logger.warning("Initializing {} with no facets.".format(typestr))
 
         # boundary refdom to global facet
         x = self.mapping.G(self.X, find=self.find)
         # global facet to refdom facet
         Y = self.mapping.invF(x, tind=self.tind)
 
-        # construct normal vectors from side=0 always
-        Y0 = self.mapping.invF(x, tind=self.mesh.f2t[0, self.find])
+        # calculate normals
+        Y0 = self.mapping.invF(x, tind=self.tind_normals)
         self.normals = DiscreteField(
             value=self.mapping.normals(Y0,
-                                       self.mesh.f2t[0, self.find],
+                                       self.tind_normals,
                                        self.find,
                                        self.mesh.t2f)
         )
@@ -120,14 +127,12 @@ class BoundaryFacetBasis(AbstractBasis):
     def _trace_project(self,
                        x: ndarray,
                        elem: Element) -> ndarray:
-        """Trace mesh basis projection."""
-
         from skfem.utils import projection
 
-        fbasis = BoundaryFacetBasis(self.mesh,
-                                    elem,
-                                    facets=self.find,
-                                    quadrature=(self.X, self.W))
+        fbasis = FacetBasis(self.mesh,
+                            elem,
+                            facets=self.find,
+                            quadrature=(self.X, self.W))
         I = fbasis.get_dofs(self.find).all()
         if len(I) == 0:  # special case: no facet DOFs
             if fbasis.dofs.interior_dofs is not None:
@@ -205,7 +210,7 @@ class BoundaryFacetBasis(AbstractBasis):
             self._trace_project(x, target_elem)
         )
 
-    def with_element(self, elem: Element) -> 'BoundaryFacetBasis':
+    def with_element(self, elem: Element) -> 'FacetBasis':
         """Return a similar basis using a different element."""
         return type(self)(
             self.mesh,

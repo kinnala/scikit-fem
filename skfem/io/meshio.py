@@ -2,20 +2,23 @@
 
 import meshio
 import numpy as np
-import skfem
+
+from skfem.mesh import (MeshTet1, MeshTet2, MeshHex1, MeshHex2, MeshWedge1,
+                        MeshTri1, MeshTri2, MeshQuad1, MeshQuad2, MeshLine1)
+from skfem.generic_utils import OrientedBoundary
 
 
 MESH_TYPE_MAPPING = {
-    'tetra': skfem.MeshTet1,
-    'tetra10': skfem.MeshTet2,
-    'hexahedron': skfem.MeshHex1,
-    'hexahedron27': skfem.MeshHex2,
-    'wedge': skfem.MeshWedge1,
-    'triangle': skfem.MeshTri1,
-    'triangle6': skfem.MeshTri2,
-    'quad': skfem.MeshQuad1,
-    'quad9': skfem.MeshQuad2,
-    'line': skfem.MeshLine1,
+    'tetra': MeshTet1,
+    'tetra10': MeshTet2,
+    'hexahedron': MeshHex1,
+    'hexahedron27': MeshHex2,
+    'wedge': MeshWedge1,
+    'triangle': MeshTri1,
+    'triangle6': MeshTri2,
+    'quad': MeshQuad1,
+    'quad9': MeshQuad2,
+    'line': MeshLine1,
 }
 
 BOUNDARY_TYPE_MAPPING = {
@@ -114,18 +117,47 @@ def from_meshio(m,
 
     # parse boundaries from cell_sets
     if m.cell_sets and bnd_type in m.cells_dict:
-        facets = {
-            k: [tuple(f) for f in np.sort(m.cells_dict[bnd_type][v[bnd_type]])]
+        oriented_facets = {
+            k: [tuple(f) for f in m.cells_dict[bnd_type][v[bnd_type]]]
             for k, v in m.cell_sets_dict.items()
             if bnd_type in v and k.split(":")[0] != "gmsh"
         }
-        boundaries = {k: np.array([i for i, f in
-                                   enumerate(map(tuple, mtmp.facets.T))
-                                   if f in v])
-                      for k, v in facets.items()}
+        sorted_facets = {k: [tuple(np.sort(f)) for f in v]
+                         for k, v in oriented_facets.items()}
+
+        for k, v in oriented_facets.items():
+            indices = []
+            oris = []
+            for i, f in enumerate(map(tuple, mtmp.facets.T)):
+                if f in sorted_facets[k]:
+                    indices.append(i)
+                    ix = sorted_facets[k].index(f)
+                    facet = v[ix]
+                    t1, t2 = mtmp.f2t[:, i]
+                    if t2 == -1:
+                        # orientation on boundary is 0
+                        oris.append(0)
+                        continue
+                    if len(f) == 2:
+                        # rotate tangent to find normal
+                        tangent = mtmp.p[:, facet[1]] - mtmp.p[:, facet[0]]
+                        normal = np.array([-tangent[1], tangent[0]])
+                    elif len(f) == 3:
+                        # cross product to find normal
+                        tangent1 = mtmp.p[:, facet[1]] - mtmp.p[:, facet[0]]
+                        tangent2 = mtmp.p[:, facet[2]] - mtmp.p[:, facet[0]]
+                        normal = -np.cross(tangent1, tangent2)
+                    else:
+                        raise NotImplementedError
+                    # find another vector using node outside of boundary
+                    third = np.setdiff1d(mtmp.t[:, t1],
+                                         np.array(f))[0]
+                    outplane = mtmp.p[:, f[0]] - mtmp.p[:, third]
+                    oris.append(1 if np.dot(normal, outplane) > 0 else 0)
+            boundaries[k] = OrientedBoundary(indices, oris)
 
     # MSH 2.2 tag parsing
-    if m.cell_data and m.field_data:
+    if len(boundaries) == 0 and m.cell_data and m.field_data:
         try:
             elements_tag = m.cell_data_dict['gmsh:physical'][meshio_type]
             subdomains = {}
@@ -196,9 +228,9 @@ def to_meshio(mesh,
               encode_point_data=False):
 
     t = mesh.dofs.element_dofs.copy()
-    if isinstance(mesh, skfem.MeshHex2):
+    if isinstance(mesh, MeshHex2):
         t = t[HEX_MAPPING]
-    elif isinstance(mesh, skfem.MeshHex):
+    elif isinstance(mesh, MeshHex1):
         t = t[HEX_MAPPING[:8]]
 
     mtype = TYPE_MESH_MAPPING[type(mesh)]
@@ -231,6 +263,9 @@ def to_file(mesh,
             encode_cell_data=True,
             encode_point_data=False,
             **kwargs):
+
+    if 'file_format' not in kwargs and filename.split('.')[-1] == 'msh':
+        kwargs.update({'file_format': 'gmsh'})
 
     meshio.write(filename,
                  to_meshio(mesh,

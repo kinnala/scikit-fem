@@ -1,15 +1,15 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Any
 
 from numpy import ndarray
 from skfem.element import Element
 from skfem.mapping import MappingMortar
 from skfem.mesh import Mesh
 
-from .boundary_facet_basis import BoundaryFacetBasis
+from .facet_basis import FacetBasis
 from ..dofs import Dofs
 
 
-class MortarFacetBasis(BoundaryFacetBasis):
+class MortarFacetBasis(FacetBasis):
 
     def __init__(self,
                  mesh: Mesh,
@@ -17,9 +17,9 @@ class MortarFacetBasis(BoundaryFacetBasis):
                  mapping: MappingMortar,
                  intorder: Optional[int] = None,
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
-                 facets: Optional[ndarray] = None,
-                 side: int = 0,
-                 dofs: Optional[Dofs] = None):
+                 facets: Optional[Any] = None,
+                 dofs: Optional[Dofs] = None,
+                 side: int = 0):
         """Precomputed global basis on the mortar mesh."""
 
         if side not in (0, 1):
@@ -31,12 +31,14 @@ class MortarFacetBasis(BoundaryFacetBasis):
             mapping.side = side
             facets = mapping.helper_to_orig[side]
 
-        facets = self._normalize_facets(facets)
+        facets = mesh.normalize_facets(facets)
 
-        super(MortarFacetBasis, self).__init__(mesh,
-                                               elem,
-                                               mapping=mapping,
-                                               intorder=intorder,
-                                               quadrature=quadrature,
-                                               facets=facets,
-                                               dofs=dofs)
+        super(MortarFacetBasis, self).__init__(
+            mesh,
+            elem,
+            mapping=mapping,
+            intorder=intorder,
+            quadrature=quadrature,
+            facets=facets,
+            dofs=dofs,
+        )
