@@ -236,6 +236,9 @@ with respect to documented and/or tested features.
   subdomain
 - Added: `Mesh.load` now tries loading the orientation of boundaries and
   interfaces
+- Added: `OrientedBoundary` which is a subclass of `ndarray` for facet index
+  arrays with the orientation information (0 or 1 per facet) available as
+  `OrientedBoundary.ori`
 - Added: `FacetBasis` will use the facet orientations (if present) to calculate
   traces and normal vectors
 - Added: `skfem.visuals.matplotlib.draw` will visualize the orientations if
