@@ -7,7 +7,7 @@ from skfem.helpers import dot, grad
 # logging.getLogger('skfem').setLevel(logging.DEBUG)
 
 # create the mesh
-m = MeshTri().refined(4)
+m = MeshTri().refined(6)
 # or, with your own points and cells:
 # m = MeshTri(points, cells)
 
@@ -37,10 +37,9 @@ A, b = enforce(A, b, D=m.boundary_nodes())
 # solve -- can be anything that takes a sparse matrix and a right-hand side
 x = solve(A, b)
 
-if __name__ == "__main__":
-    from os.path import splitext
-    from sys import argv
-    from skfem.visuals.matplotlib import plot, savefig
+def visualize():
+    from skfem.visuals.matplotlib import plot
+    return plot(m, x, shading='gouraud', colorbar=True)
 
-    plot(m, x, shading='gouraud', colorbar=True)
-    savefig(splitext(argv[0])[0] + '_solution.png')
+if __name__ == "__main__":
+    visualize().show()

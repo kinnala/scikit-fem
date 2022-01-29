@@ -69,7 +69,7 @@ from pathlib import Path
 
 m = MeshTet.load(Path(__file__).parent / 'meshes' / 'beams.msh')
 e1 = ElementTetP2()
-e = ElementVectorH1(e1)
+e = ElementVector(e1)
 
 ib = Basis(m, e)
 
@@ -91,6 +91,5 @@ L, x = solve(
 
 if __name__ == "__main__":
     from skfem.visuals.matplotlib import draw, show
-    sf = 2.0
-    draw(MeshTet(np.array(m.p + sf * x[ib.nodal_dofs, 0]), m.t))
-    show()
+    sf = 10.0
+    m.translated(sf * x[ib.nodal_dofs, 0]).draw().show()

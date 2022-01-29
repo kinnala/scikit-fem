@@ -1,9 +1,8 @@
 import logging
-from typing import Callable, Optional, Tuple
+from typing import Callable, Optional, Tuple, Any
 
 import numpy as np
 from numpy import ndarray
-from scipy.sparse import coo_matrix
 from skfem.element import DiscreteField, Element
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh
@@ -39,7 +38,7 @@ class CellBasis(AbstractBasis):
                  elem: Element,
                  mapping: Optional[Mapping] = None,
                  intorder: Optional[int] = None,
-                 elements: Optional[ndarray] = None,
+                 elements: Optional[Any] = None,
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
                  dofs: Optional[Dofs] = None):
         """Combine :class:`~skfem.mesh.Mesh` and :class:`~skfem.element.Element`
@@ -69,25 +68,27 @@ class CellBasis(AbstractBasis):
         logger.info("Initializing {}({}, {})".format(type(self).__name__,
                                                      type(mesh).__name__,
                                                      type(elem).__name__))
-        super(CellBasis, self).__init__(mesh,
-                                        elem,
-                                        mapping,
-                                        intorder,
-                                        quadrature,
-                                        mesh.refdom,
-                                        dofs)
-
-        self.basis = [self.elem.gbasis(self.mapping, self.X, j, tind=elements)
-                      for j in range(self.Nbfun)]
+        super(CellBasis, self).__init__(
+            mesh,
+            elem,
+            mapping,
+            intorder,
+            quadrature,
+            mesh.refdom,
+            dofs,
+        )
 
         if elements is None:
-            self.nelems = mesh.nelements
             self.tind = None
+            self.nelems = mesh.nelements
         else:
-            self.nelems = len(elements)
-            self.tind = self._normalize_elements(elements)
+            self.tind = mesh.normalize_elements(elements)
+            self.nelems = len(self.tind)
 
-        self.dx = (np.abs(self.mapping.detDF(self.X, tind=elements))
+        self.basis = [self.elem.gbasis(self.mapping, self.X, j, tind=self.tind)
+                      for j in range(self.Nbfun)]
+
+        self.dx = (np.abs(self.mapping.detDF(self.X, tind=self.tind))
                    * np.tile(self.W, (self.nelems, 1)))
         logger.info("Initializing finished.")
 
@@ -120,7 +121,13 @@ class CellBasis(AbstractBasis):
 
         # interpolate some previous discrete function at the vertices
         # of the refined mesh
-        w = 0. * x[0]
+        test = self.elem.gbasis(self.mapping, X, 0)[0]
+        if len(test.shape) == 3:
+            w = 0. * x
+        elif len(test.shape) == 2:
+            w = 0. * x[0]
+        else:
+            raise NotImplementedError
         for j in range(self.Nbfun):
             basis = self.elem.gbasis(self.mapping, X, j)
             w += y[self.element_dofs[j]][:, None] * basis[0]
@@ -145,7 +152,7 @@ class CellBasis(AbstractBasis):
 
         return M, w.flatten()
 
-    def probes(self, x: ndarray) -> coo_matrix:
+    def probes(self, x: ndarray):
         """Return matrix which acts on a solution vector to find its values
         on points `x`.
 
@@ -156,12 +163,13 @@ class CellBasis(AbstractBasis):
         not assembled with the usual quadratures.
 
         """
+        from scipy.sparse import coo_matrix
 
         cells = self.mesh.element_finder(mapping=self.mapping)(*x)
         pts = self.mapping.invF(x[:, :, np.newaxis], tind=cells)
         phis = np.array(
             [
-                self.elem.gbasis(self.mapping, pts, k, tind=cells)[0][0]
+                self.elem.gbasis(self.mapping, pts, k, tind=cells)[0]
                 for k in range(self.Nbfun)
             ]
         ).flatten()

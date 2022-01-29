@@ -1,5 +1,6 @@
 import pickle
 from unittest import TestCase
+from pathlib import Path
 
 import pytest
 import numpy as np
@@ -17,8 +18,15 @@ from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
                            ElementLineP0, ElementQuad1, ElementQuad0,
                            ElementTetP1, ElementTetP0, ElementHex1,
                            ElementHex0, ElementLineP1, ElementLineMini,
-                           ElementWedge1)
+                           ElementWedge1, ElementTriRT0, ElementQuadRT0,
+                           ElementTriP1)
+from skfem.helpers import dot, grad
+from skfem.utils import enforce
+from skfem.io.meshio import to_meshio, from_meshio
 from skfem.models.poisson import laplace
+
+
+MESH_PATH = Path(__file__).parents[1] / 'docs' / 'examples' / 'meshes'
 
 
 class TestCompositeSplitting(TestCase):
@@ -60,6 +68,7 @@ class TestCompositeSplitting(TestCase):
         U, P = basis.interpolate(x)
         self.assertTrue(isinstance(U.value, np.ndarray))
         self.assertTrue(isinstance(P.value, np.ndarray))
+        self.assertTrue(P.shape[0] == m.nelements)
 
         self.assertTrue((basis.doflocs[:, D['up'].all()][1] == 1.).all())
 
@@ -403,3 +412,207 @@ def test_mortar_basis(m1, m2, lenright):
 
     assert_allclose(mass.assemble(mb[0], mb[1]).toarray(),
                     mass.assemble(mb[1], mb[0]).T.toarray())
+
+
+@pytest.mark.parametrize(
+    "m, e, fun",
+    [
+        (MeshTri(), ElementTriP1(), lambda x: x[0]),
+        (MeshTri(), ElementTriRT0(), lambda x: x),
+        (MeshQuad(), ElementQuadRT0(), lambda x: x),
+    ]
+)
+def test_basis_project(m, e, fun):
+
+    basis = CellBasis(m, e)
+    y = basis.project(fun)
+
+    @Functional
+    def int_y_1(w):
+        return w.y ** 2
+
+    @Functional
+    def int_y_2(w):
+        return fun(w.x) ** 2
+
+    assert_almost_equal(int_y_1.assemble(basis, y=y),
+                        int_y_2.assemble(basis))
+
+
+def test_basis_project_grad():
+
+    m, e = (MeshTri(), ElementTriP1())
+    basis = CellBasis(m, e)
+    Y = basis.interpolate(m.p[0])
+    y = basis.project(Y.grad[0])
+
+    @Functional
+    def int_y(w):
+        return w.y ** 2
+
+    assert_almost_equal(int_y.assemble(basis, y=y), 1.)
+
+
+def test_subdomain_facet_assembly():
+
+    def subdomain(x):
+        return np.logical_and(
+            np.logical_and(x[0]>.25, x[0]<.75),
+            np.logical_and(x[1]>.25, x[1]<.75),
+        )
+
+    m, e = MeshTri().refined(4), ElementTriP2()
+    cbasis = CellBasis(m, e)
+    cbasis_p0 = cbasis.with_element(ElementTriP0())
+
+    sfbasis = FacetBasis(m, e, facets=m.facets_around(subdomain, flip=True))
+    sfbasis_p0 = sfbasis.with_element(ElementTriP0())
+    sigma = cbasis_p0.zeros() + 1
+
+    @BilinearForm
+    def laplace(u, v, w):
+        return dot(w.sigma * grad(u), grad(v))
+
+    A = laplace.assemble(cbasis, sigma=cbasis_p0.interpolate(sigma))
+    u0 = cbasis.zeros()
+    u0[cbasis.get_dofs(elements=subdomain)] = 1
+    u0_dofs = cbasis.get_dofs() + cbasis.get_dofs(elements=subdomain)
+    A, b = enforce(A, D=u0_dofs, x=u0)
+    u = solve(A, b)
+
+    @Functional
+    def measure_current(w):
+        return dot(w.n, w.sigma * grad(w.u))
+
+    meas = measure_current.assemble(sfbasis,
+                                    sigma=sfbasis_p0.interpolate(sigma),
+                                    u=sfbasis.interpolate(u))
+
+    assert_almost_equal(meas, 9.751915526759191)
+
+
+def test_subdomain_facet_assembly_2():
+
+    m = MeshTri().refined(4).with_subdomains({'all': lambda x: x[0] * 0 + 1})
+    e = ElementTriP1()
+
+    @Functional
+    def boundary_integral(w):
+        return dot(w.n, grad(w.u))
+
+    sfbasis = FacetBasis(m, e, facets=m.facets_around('all'))
+    fbasis = FacetBasis(m, e)
+
+    assert_almost_equal(
+        boundary_integral.assemble(sfbasis, u=m.p[0] * m.p[1]),
+        boundary_integral.assemble(fbasis, u=m.p[0] * m.p[1]),
+    )
+
+
+@pytest.mark.parametrize(
+    "m, e, facets, fun",
+    [
+        (
+            MeshTri.load(MESH_PATH / 'interface.msh'),
+            ElementTriP1(),
+            'interfacee',
+            lambda m: m.p[1],
+        ),
+        (
+            MeshTet.load(MESH_PATH / 'cuubat.msh'),
+            ElementTetP1(),
+            'interface',
+            lambda m: m.p[0],
+        )
+    ]
+)
+def test_oriented_interface_integral(m, e, facets, fun):
+
+    fb = FacetBasis(m, e, facets=facets)
+    assert_almost_equal(
+        Functional(lambda w: dot(w.fun.grad, w.n)).assemble(fb, fun=fun(m)),
+        1.0,
+    )
+
+
+@pytest.mark.parametrize(
+    "m, e, facets, normal",
+    [
+        (
+            MeshTri().refined(2) + MeshTri().translated((1.0, 0.0)).refined(2),
+            ElementTriP1(),
+            lambda x: x[0] == 1.0,
+            np.array([1, 0]),
+        ),
+        (
+            MeshHex().refined(2) + MeshHex().translated((1., 0., 0.)).refined(2),
+            ElementHex1(),
+            lambda x: x[0] == 1.0,
+            np.array([1, 0, 0]),
+        ),
+    ]
+)
+def test_oriented_interface_integral2(m, e, facets, normal):
+
+    fb = FacetBasis(m, e, facets=m.facets_satisfying(facets, normal=normal))
+    assert_almost_equal(
+        Functional(lambda w: dot(w.fun.grad, w.n)).assemble(fb, fun=m.p[0]),
+        1.0,
+    )
+
+
+@pytest.mark.parametrize(
+    "m, e",
+    [
+        (
+            MeshTri().refined(6).with_subdomains({
+                'mid': lambda x: (x[0] - .5) ** 2 + (x[1] - .5) ** 2 < .5 ** 2,
+            }),
+            ElementTriP1(),
+        ),
+        (
+            MeshTet().refined(4).with_subdomains({
+                'mid': lambda x: ((x[0] - .5) ** 2
+                                  + (x[1] - .5) ** 2
+                                  + (x[2] - .5) ** 2) < .5 ** 2,
+            }),
+            ElementTetP1(),
+        ),
+        (
+            MeshHex().refined(4).with_subdomains({
+                'mid': lambda x: ((x[0] - .5) ** 2
+                                  + (x[1] - .5) ** 2
+                                  + (x[2] - .5) ** 2) < .5 ** 2,
+            }),
+            ElementHex1(),
+        ),
+    ]
+)
+def test_oriented_gauss_integral(m, e):
+
+    facets = m.facets_around('mid')
+    fb = FacetBasis(m, e, facets=facets)
+    cb = CellBasis(m, e, elements='mid')
+    assert_almost_equal(
+        Functional(lambda w: w.x[0] * w.n[0]).assemble(fb),
+        Functional(lambda w: 1. + 0. * w.x[0]).assemble(cb),
+        decimal=5,
+    )
+
+
+## TODO preserve orientation in save/load cycle
+# def test_oriented_saveload():
+
+#     m = MeshTri().refined(4)
+#     m = m.with_boundaries({
+#         'mid': m.facets_around([5]),
+#     })
+#     assert len(m.boundaries['mid'].ori) == 3
+
+#     # cycle to meshio and check that orientation is preserved
+#     M = from_meshio(to_meshio(m))
+
+#     assert_almost_equal(
+#         m.boundaries['mid'].ori,
+#         M.boundaries['mid'].ori,
+#     )

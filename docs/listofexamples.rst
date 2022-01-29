@@ -15,9 +15,11 @@ This example solves the Poisson problem :math:`-\Delta u = 1` with the Dirichlet
 boundary condition :math:`u = 0` in the unit square using piecewise-linear
 triangular elements.
 
-.. figure:: https://user-images.githubusercontent.com/973268/87638021-c3d1c280-c74b-11ea-9859-dd82555747f5.png
+.. plot::
+   :caption: The solution of Example 1.
 
-   The solution of Example 1.
+   from docs.examples.ex01 import visualize
+   visualize()
 
 See the `source code of Example 1 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex01.py>`_ for more information.
 
@@ -28,42 +30,26 @@ Example 7: Discontinuous Galerkin method
 
 This example solves the Poisson problem :math:`-\Delta u = 1` with :math:`u=0`
 on the boundary using discontinuous Galerkin method.  The finite element basis
-is piecewise-linear but discontinuous over the element edges.
+is piecewise-quartic but discontinuous over the element edges.
 
-.. figure:: https://user-images.githubusercontent.com/973268/87662192-80d31780-c76a-11ea-9291-2d11920bc098.png
+.. plot::
+   :caption: The solution of Example 7.
 
-   The solution of Example 7.
+   from docs.examples.ex07 import visualize
+   visualize()
 
 See the `source code of Example 7 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex07.py>`_ for more information.
-
-Example 9: Three-dimensional Poisson equation
----------------------------------------------
-
-This example solves :math:`-\Delta u = 1`
-with :math:`u=0` on the boundary using tetrahedral elements and a preconditioned
-conjugate gradient method.
-
-.. note::
-
-   This example will make use of the external packages `PyAMG
-   <https://pypi.org/project/pyamg/>`__ or `pyamgcl
-   <https://pypi.org/project/pyamgcl/>`__, if installed.
-
-.. figure:: https://user-images.githubusercontent.com/973268/93183072-33abfb80-f743-11ea-9076-1324cbf28531.png
-
-   The solution of Example 9 on a cross-section of the tetrahedral mesh.  The
-   figure was created using `ParaView <https://www.paraview.org/>`__.
-
-See the `source code of Example 9 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex09.py>`_ for more information.
 
 Example 12: Postprocessing
 --------------------------
 
 This example demonstrates postprocessing the value of a functional, Boussinesq's k-factor.
 
-.. figure:: https://user-images.githubusercontent.com/1588947/93292071-0127fe80-f828-11ea-8c9e-46590d280b69.png
+.. plot::
+   :caption: The solution of Example 12.
 
-   The solution of Example 12.
+   from docs.examples.ex12 import visualize
+   visualize()
 
 See the `source code of Example 12 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex12.py>`_ for more information.
 
@@ -76,9 +62,11 @@ y/x`, with :math:`u = 0` on :math:`y = 0`, :math:`u = 1` on :math:`x =
 0`, and :math:`\frac{\partial u}{\partial n} = 0` on the rest of the
 boundary.
 
-.. figure:: https://user-images.githubusercontent.com/1588947/94758580-d5d51000-03e0-11eb-8219-15cbba1d8c26.png
+.. plot::
+   :caption: The solution of Example 13.
 
-   The solution of Example 13.
+   from docs.examples.ex13 import visualize
+   visualize()
 
 See the `source code of Example 13 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex13.py>`_ for more information.
 
@@ -91,9 +79,11 @@ This example demonstrates how to impose coordinate-dependent Dirichlet
 conditions for the Laplace equation :math:`\Delta u = 0`. The solution will
 satisfy :math:`u=x^2 - y^2` on the boundary of the square domain.
 
-.. figure:: https://user-images.githubusercontent.com/973268/87775119-3dda7800-c82e-11ea-8576-2219fcf31814.png
+.. plot::
+   :caption: The solution of Example 14.
 
-   The solution of Example 14.
+   from docs.examples.ex14 import visualize
+   visualize()
 
 See the `source code of Example 14 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex14.py>`_ for more information.
 
@@ -109,6 +99,27 @@ condition :math:`u(0)=u(1)=0`.
 
 See the `source code of Example 15 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex15.py>`_ for more information.
 
+
+Example 9: Three-dimensional Poisson equation
+---------------------------------------------
+
+This example solves :math:`-\Delta u = 1` with :math:`u=0` on the boundary
+using linear tetrahedral elements and a preconditioned conjugate gradient
+method.
+
+.. note::
+
+   This example will make use of the external packages `PyAMG
+   <https://pypi.org/project/pyamg/>`__ or `pyamgcl
+   <https://pypi.org/project/pyamgcl/>`__, if installed.
+
+.. figure:: https://user-images.githubusercontent.com/973268/93183072-33abfb80-f743-11ea-9076-1324cbf28531.png
+
+   The solution of Example 9 on a cross-section of the tetrahedral mesh.  The
+   figure was created using `ParaView <https://www.paraview.org/>`__.
+
+See the `source code of Example 9 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex09.py>`_ for more information.
+
 Example 22: Adaptive Poisson equation
 -------------------------------------
 
@@ -117,9 +128,11 @@ Using linear elements, the error indicators read :math:`\eta_K^2 = h_K^2 \|f\|_{
 for each element :math:`K` and
 edge :math:`E`.
 
-.. figure:: https://user-images.githubusercontent.com/973268/87779195-15a24780-c835-11ea-9a18-767092ae9467.png
+.. plot::
+   :caption: The final solution of Example 22.
 
-   The adaptively refined mesh of Example 22.
+   from docs.examples.ex22 import visualize
+   visualize()
 
 See the `source code of Example 22 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex22.py>`_ for more information.
 
@@ -141,13 +154,16 @@ Example 38: Point source
 
 Point sources require different assembly to other linear forms.
 
-This example computes the Green's function for a disk; i.e. the solution of
-the Dirichlet problem for the Poisson equation with the source term
-concentrated at a single interior point, :math:`\Delta u = \delta (\mathbf x - \mathbf s)`.
+This example computes the Green's function for a disk; i.e. the solution of the
+Dirichlet problem for the Poisson equation with the source term concentrated at
+a single interior point :math:`\boldsymbol{s}`, :math:`-\Delta u = \delta
+(\boldsymbol{x} - \boldsymbol{s})`.
 
-.. figure:: https://user-images.githubusercontent.com/1588947/115502511-5cd3d200-a2b8-11eb-9929-92ed9550ced8.png
+.. plot::
+   :caption: The scalar potential in the disk with point source at (0.3, 0.2).
 
-    The scalar potential in the disk with point source at (0.3, 0.2).
+   from docs.examples.ex38 import visualize
+   visualize()
 
 See the `source code of Example 38 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex38.py>`_
 for more information.
@@ -161,9 +177,11 @@ then the continuity is recovered with the help of Lagrange multipliers defined
 on the mesh skeleton (i.e. a "skeleton mesh" consisting only of the edges of
 the original mesh).
 
-.. figure:: https://user-images.githubusercontent.com/973268/133050898-68f1127f-a2fa-40e9-8fb2-0189f7e920d0.png
+.. plot::
+   :caption: The solution of Example 40 on the skeleton mesh.
 
-   The solution of Example 40 on the skeleton mesh.
+   from docs.examples.ex40 import visualize
+   visualize()
 
 See the `source code of Example 40 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex40.py>`_
 for more information.
@@ -177,9 +195,12 @@ preliminary and works only for elements with nodal or internal
 degrees-of-freedom (sharing face and edge DOFs between mesh types is
 work-in-progress).
 
-.. figure:: https://user-images.githubusercontent.com/973268/133418196-4008b78c-2a1f-4abd-9338-fd55690db98c.png
+.. plot::
+   :caption: The solution of Example 41 on the mesh with both
+             triangles and quadrilaterals.
 
-   The solution of Example 41 on the mixed mesh.
+   from docs.examples.ex41 import visualize
+   visualize()
 
 See the `source code of Example 41 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex41.py>`_
 for more information.
@@ -195,9 +216,11 @@ This example solves the biharmonic Kirchhoff plate bending problem :math:`D
 stiffness :math:`D` and a combination of clamped, simply supported and free
 boundary conditions.
 
-.. figure:: https://user-images.githubusercontent.com/973268/87659951-f50bbc00-c766-11ea-8c0e-7de0e9e83714.png
+.. plot::
+   :caption: The solution of Example 2.
 
-   The solution of Example 2.
+   from docs.examples.ex02 import visualize
+   visualize()
 
 See the `source code of Example 2 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex02.py>`_ for more information.
 
@@ -206,11 +229,13 @@ Example 3: Linear elastic eigenvalue problem
 
 This example solves the linear elastic eigenvalue problem
 :math:`\mathrm{div}\,\sigma(u)= \lambda u` with
-the displacement fixed on the left hand side boundary.
+the displacement fixed on the left boundary.
 
-.. figure:: https://user-images.githubusercontent.com/973268/134467300-f7e635ed-39c4-4a36-9e98-aadb6e51961a.png
+.. plot::
+   :caption: The fifth eigenmode of Example 3.
 
-   The fifth eigenmode of Example 3.
+   from docs.examples.ex03 import visualize
+   visualize()
 
 See the `source code of Example 3 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex03.py>`_ for more information.
 
@@ -222,9 +247,11 @@ between two elastic bodies using the Nitsche's method.
 Triangular and quadrilateral second-order elements are used
 in the discretization of the two elastic bodies.
 
-.. figure:: https://user-images.githubusercontent.com/973268/87661313-1372b700-c769-11ea-89ee-db144986a25a.png
+.. plot::
+   :caption: The displaced meshes and the von Mises stress of Example 4.
 
-   The displaced meshes and the von Mises stress of Example 4.
+   from docs.examples.ex04 import visualize
+   visualize()
 
 See the `source code of Example 4 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex04.py>`_ for more information.
 
@@ -236,10 +263,12 @@ This example visualizes the :math:`C^1`-continuous fifth degree Argyris basis
 functions on a simple triangular mesh.
 This element can be used in the conforming discretization of biharmonic problems.
 
-.. figure:: https://user-images.githubusercontent.com/973268/87662432-e0c9be00-c76a-11ea-85b9-711c6b34791e.png
+.. plot::
+   :caption: The Argyris basis functions of Example 8 corresponding to the
+             middle node and the edges connected to it.
 
-   The Argyris basis functions of Example 8 corresponding to the middle node and
-   the edges connected to it.
+   from docs.examples.ex08 import visualize
+   visualize()
 
 See the `source code of Example 8 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex08.py>`_ for more information.
 
@@ -264,9 +293,9 @@ Example 21: Structural vibration
 This example demonstrates the solution of a three-dimensional vector-valued
 eigenvalue problem by considering the vibration of an elastic structure.
 
-.. figure:: https://user-images.githubusercontent.com/973268/87779087-ebe92080-c834-11ea-9acc-d455b6124ad7.png
+.. figure:: https://user-images.githubusercontent.com/973268/147790554-4b768d43-25fa-49cd-ab19-b16a199a6459.png
 
-   An eigenmode of Example 21.
+   The first eigenmode of Example 21.
 
 See the `source code of Example 21 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex21.py>`_ for more information.
 
@@ -297,6 +326,20 @@ for nearly incompressible Neo-Hookean solids.
    The figure was created using `ParaView <https://www.paraview.org/>`__.
 
 See the `source code of Example 36 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex36.py>`_ for more information.
+
+
+Example 43: Hyperelasticity
+---------------------------
+
+This example demonstrates Newton's method applied to the classical formulation
+of a hyperelastic Neo-Hookean solid.
+
+.. figure:: https://user-images.githubusercontent.com/973268/147790182-64f4abf4-3909-4ec0-89ac-2add304b133d.png
+
+   The deformed mesh of Example 43.
+   The figure was created using `vedo <https://github.com/marcomusy/vedo>`__.
+
+See the `source code of Example 43 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex43.py>`_ for more information.
 
 Fluid mechanics
 ===============

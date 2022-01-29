@@ -96,8 +96,7 @@ unit square:
 .. plot::
 
    from skfem import *
-   from skfem.visuals.matplotlib import *
-   draw(MeshTri().refined(3))
+   MeshTri().refined(3).draw(boundaries=True)
 
 
 Step 4: Define a basis
@@ -114,7 +113,7 @@ Here we choose the piecewise-linear basis:
    <skfem CellBasis(MeshTri1, ElementTriP1) object>
      Number of elements: 128
      Number of DOFs: 81
-     Size: 27648 B
+     Size: 9216 B
 
 Step 5: Assemble the linear system
 ==================================
@@ -172,7 +171,7 @@ which is a simple wrapper to ``scipy`` sparse solver:
    L = LinearForm(lambda v, w: np.sin(np.pi * w.x[0]) * np.sin(np.pi * w.x[1]) * v)
    y = solve(*condense(a.assemble(basis), L.assemble(basis), D=basis.get_dofs()))
    ax = draw(basis)
-   plot(basis, y, ax=ax, nrefs=3, colorbar=True)
+   plot(basis, y, ax=ax, nrefs=2, colorbar=True, shading='gouraud')
 
 
 Step 8: Calculate error

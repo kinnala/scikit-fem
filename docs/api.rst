@@ -90,12 +90,12 @@ Class: CellBasis
    :members: __init__, interpolate, project
 
 
-Class: BoundaryFacetBasis
-*************************
-
-.. autoclass:: skfem.assembly.FacetBasis
+Class: FacetBasis
+*****************
 
 .. autoclass:: skfem.assembly.BoundaryFacetBasis
+
+.. autoclass:: skfem.assembly.FacetBasis
    :members: __init__
 
 Class: InteriorFacetBasis

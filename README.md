@@ -1,27 +1,21 @@
-<p align="center">
-<img src="https://user-images.githubusercontent.com/973268/105249009-115a3c80-5b80-11eb-8f3c-2d776d3715f1.png" width="35%">
-</p>
+# scikit-fem
 
-<p align="center">
+`scikit-fem` is a pure Python 3.7+ library for performing [finite element
+assembly](https://en.wikipedia.org/wiki/Finite_element_method). Its main
+purpose is the transformation of bilinear forms into sparse matrices and linear
+forms into vectors.
+
+<a href="https://colab.research.google.com/github/kinnala/scikit-fem-notebooks/blob/master/ex1.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 <a href="https://pypi.org/project/scikit-fem/" alt="PyPI"><img src="https://img.shields.io/pypi/v/scikit-fem" /></a>
 <a href="https://scikit-fem.readthedocs.io/" alt="Documentation"><img src="https://readthedocs.org/projects/pip/badge/?version=stable" /></a>
 <a href="https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e" alt="status"><img src="https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e/status.svg" /></a>
-<a href="https://github.com/kinnala/scikit-fem/actions" alt="Tests"><img src="https://github.com/kinnala/scikit-fem/workflows/tests/badge.svg" /></a>
-<a href="https://colab.research.google.com/github/kinnala/scikit-fem-notebooks/blob/master/ex1.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"></a>
-</p>
 
+The library
 
-`scikit-fem` is a lightweight pure Python 3.7+ library for performing [finite
-element assembly](https://en.wikipedia.org/wiki/Finite_element_method). Its
-main purpose is the transformation of bilinear forms into sparse matrices and
-linear forms into vectors.
-
-Features:
-- minimal dependencies, no compiled code
-- meshes: 1D, tri, quad, tet, hex
-- elements: 1D and quad (any order), tri (order < 5), tet and hex (order < 3)
-- special elements: H(div), H(curl), MINI, Crouzeix-Raviart, Argyris, Morley, ...
-- conforming adaptive mesh refinement
+- has minimal dependencies
+- contains no compiled code
+- supports one-dimensional, triangular, quadrilateral, tetrahedral and hexahedral finite elements
+- includes special elements such as Raviart-Thomas, Nédélec, MINI, Crouzeix-Raviart, Argyris, ...
 
 ## Installation
 
@@ -221,7 +215,45 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
-- Fixed: Improvements to backwards compatibility in `asm`/`assemble` kwargs
+- Changed: `DiscreteField` is now a subclass of `ndarray` instead of
+  `NamedTuple` and, consequently, the components of `DiscreteField` cannot no
+  more be indexed inside forms like `u[1]` (use `u.grad` instead)
+- Changed: Writing `w['u']` and `w.u` inside the form definition is now
+  equivalent (previously `w.u == w['u'].value`)
+- Changed: `Mesh.draw` now uses `matplotlib` by default, calling
+  `Mesh.draw("vedo")` uses `vedo`
+- Changed: `skfem.visuals.matplotlib` now uses `jet` as the default colormap
+- Changed: `BoundaryFacetBasis` is now an alias of `FacetBasis` instead of
+  other way around
+- Deprecated: `DiscreteField.value` remains for backwards-compatibility but is
+  now deprecated and can be dropped
+- Added: `Mesh.plot`, a wrapper to `skfem.visuals.*.plot`
+- Added: `Basis.plot`, a wrapper to `skfem.visuals.*.plot`
+- Added: `Basis.refinterp` now supports vectorial fields
+- Added: `skfem.visuals.matplotlib.plot` now has a basic quiver plot for vector
+  fields
+- Added: `Mesh.facets_around` which constructs a set of facets around a
+  subdomain
+- Added: `Mesh.load` now tries loading the orientation of boundaries and
+  interfaces
+- Added: `OrientedBoundary` which is a subclass of `ndarray` for facet index
+  arrays with the orientation information (0 or 1 per facet) available as
+  `OrientedBoundary.ori`
+- Added: `FacetBasis` will use the facet orientations (if present) to calculate
+  traces and normal vectors
+- Added: `skfem.visuals.matplotlib.draw` will visualize the orientations if
+  `boundaries=True` is given
+- Added: `Mesh.facets_satisfying` allows specifying the keyword argument
+  `normal` for orienting the resulting interface
+- Added: `FacetBasis` constructor now has the keyword argument `side` which
+  allows changing the side of the facet used to calculate the basis function
+  values and gradients
+- Fixed: Improvements to backwards compatibility in `asm`/`assemble` keyword
+  arguments
+- Fixed: Save format issue with meshio 5.3.0+
+- Fixed: `CellBasis` did not properly support `elements` argument
+- Fixed: `Basis.interpolate` did not properly interpolate all components of
+  `ElementComposite`
 
 ### [5.2.0] - 2021-12-27
 
@@ -245,7 +277,6 @@ with respect to documented and/or tested features.
 
 - Changed: `meshio` is now an optional dependency
 - Changed: `ElementComposite` uses `DiscreteField()` to represent zero
-- Changed: Better string `__repr__` for `Basis` and `DofsView`
 - Added: Support more argument types in `Basis.get_dofs`
 - Added: Version information in `skfem.__version__`
 - Added: Preserve `Mesh.boundaries` during uniform refinement of `MeshLine1`,

@@ -406,8 +406,8 @@ def penalize(A: spmatrix,
 
     d = Aout.diagonal()
     if epsilon is None:
-        epsilon = 1e-10 / np.linalg.norm(d[D], np.inf)
-    d[D] = 1/epsilon
+        epsilon = 1e-10 / np.linalg.norm(d[D], np.inf).astype(float)
+    d[D] = 1. / epsilon
     Aout.setdiag(d)
 
     if b is None:
@@ -616,11 +616,11 @@ def projection(fun,
     def mass(u, v, w):
         from skfem.helpers import dot, ddot
         p = 0
-        if len(u.value.shape) == 2:
+        if len(u.shape) == 2:
             p = u * v
-        elif len(u.value.shape) == 3:
+        elif len(u.shape) == 3:
             p = dot(u, v)
-        elif len(u.value.shape) == 4:
+        elif len(u.shape) == 4:
             p = ddot(u, v)
         return p
 

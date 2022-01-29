@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Any
 
 import numpy as np
 from numpy import ndarray
@@ -6,11 +6,11 @@ from skfem.element import Element
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh
 
-from .boundary_facet_basis import BoundaryFacetBasis
+from .facet_basis import FacetBasis
 from ..dofs import Dofs
 
 
-class InteriorFacetBasis(BoundaryFacetBasis):
+class InteriorFacetBasis(FacetBasis):
     """For evaluating integrals over interior facets.
 
     Useful for, e.g., a posteriori error estimators or implementing interior
@@ -23,25 +23,23 @@ class InteriorFacetBasis(BoundaryFacetBasis):
                  mapping: Optional[Mapping] = None,
                  intorder: Optional[int] = None,
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
-                 facets: Optional[ndarray] = None,
-                 side: int = 0,
-                 dofs: Optional[Dofs] = None):
+                 facets: Optional[Any] = None,
+                 dofs: Optional[Dofs] = None,
+                 side: int = 0):
         """Precomputed global basis on interior facets."""
-
-        if side not in (0, 1):
-            raise Exception("'side' must be 0 or 1.")
 
         if facets is None:
             facets = np.nonzero(mesh.f2t[1] != -1)[0]
 
-        facets = self._normalize_facets(facets)
-        tind = mesh.f2t[side, facets]
+        facets = mesh.normalize_facets(facets)
 
-        super(InteriorFacetBasis, self).__init__(mesh,
-                                                 elem,
-                                                 mapping=mapping,
-                                                 intorder=intorder,
-                                                 quadrature=quadrature,
-                                                 facets=facets,
-                                                 _tind=tind,
-                                                 dofs=dofs)
+        super(InteriorFacetBasis, self).__init__(
+            mesh,
+            elem,
+            mapping=mapping,
+            intorder=intorder,
+            quadrature=quadrature,
+            facets=facets,
+            dofs=dofs,
+            side=side,
+        )

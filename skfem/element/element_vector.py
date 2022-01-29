@@ -38,7 +38,7 @@ class ElementVector(Element):
         ind = int(np.floor(float(i) / float(self.dim)))
         n = i - self.dim * ind
         fields = []
-        for field in self.elem.gbasis(mapping, X, ind, tind)[0]:
+        for field in self.elem.gbasis(mapping, X, ind, tind)[0].astuple:
             if field is None:
                 fields.append(None)
             else:

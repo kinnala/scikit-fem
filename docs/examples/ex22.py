@@ -62,24 +62,27 @@ def eval_estimator(m, u):
     return eta_K + eta_E
 
 if __name__ == "__main__":
-    from skfem.visuals.matplotlib import draw, plot, show
+    from skfem.visuals.matplotlib import draw
     draw(m)
 
-for itr in reversed(range(9)):
-        
+for itr in reversed(range(6)):
     basis = Basis(m, e)
-    
+
     K = asm(laplace, basis)
     f = asm(load, basis)
 
     I = m.interior_nodes()
     u = solve(*condense(K, f, I=I))
-        
+
     if itr > 0:
-        m = m.refined(adaptive_theta(eval_estimator(m, u)))
+        m = m.refined(adaptive_theta(eval_estimator(m, u))).smoothed()
+
+
+def visualize():
+    from skfem.visuals.matplotlib import draw, plot
+    ax = draw(m)
+    return plot(m, u, ax=ax, shading='gouraud', colorbar=True)
 
 
 if __name__ == "__main__":
-    draw(m)
-    plot(m, u, shading='gouraud')
-    show()
+    visualize().show()

@@ -2,7 +2,7 @@ import logging
 import warnings
 from copy import deepcopy
 from functools import partial
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Union, Type
 from inspect import signature
 
 import numpy as np
@@ -19,17 +19,9 @@ class FormExtraParams(dict):
     """Passed to forms as 'w'."""
 
     def __getattr__(self, attr):
-        if attr[:4] == 'sign':
-            # for backwards compatibility
-            ix = int(attr[4]) - 1 if len(attr) == 5 else 0
-            if hasattr(self, 'idx') and ix < len(self['idx']):
-                return (-1.) ** self['idx'][ix]
-            return 1.
         if attr in self:
-            if hasattr(self[attr], 'value'):
-                return self[attr].value
             return self[attr]
-        raise ValueError
+        raise AttributeError("Attribute '{}' not found in 'w'.".format(attr))
 
 
 class Form:
@@ -38,7 +30,8 @@ class Form:
 
     def __init__(self,
                  form: Optional[Callable] = None,
-                 dtype: type = np.float64,
+                 dtype: Union[Type[np.float64],
+                              Type[np.complex64]] = np.float64,
                  nthreads: int = 0,
                  inverse: bool = False):
         self.form = form.form if isinstance(form, Form) else form

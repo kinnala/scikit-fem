@@ -3,7 +3,7 @@ sense.
 
 In order to use an element, you simply initialize the respective object and
 pass it to the constructor of :class:`~skfem.assembly.CellBasis` or
-:class:`~skfem.assembly.BoundaryFacetBasis`.  See below for a list of supported
+:class:`~skfem.assembly.FacetBasis`.  See below for a list of supported
 elements.
 
 """
