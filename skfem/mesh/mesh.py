@@ -8,6 +8,7 @@ import numpy as np
 from numpy import ndarray
 
 from ..element import BOUNDARY_ELEMENT_MAP, Element
+from ..generic_utils import OrientedBoundary
 
 
 logger = logging.getLogger(__name__)
@@ -146,16 +147,19 @@ class Mesh:
         return edge_candidates[ix]
 
     def with_boundaries(self,
-                        boundaries: Dict[str, Callable[[ndarray], ndarray]],
+                        boundaries: Dict[str, Union[Callable[[ndarray],
+                                                             ndarray],
+                                                    ndarray]],
                         boundaries_only: bool = True):
         """Return a copy of the mesh with named boundaries.
 
         Parameters
         ----------
         boundaries
-            A dictionary of lambda functions with the names of the boundaries
-            as keys.  The midpoint of the facet should return ``True`` for the
-            corresponding lambda function if the facet belongs to the boundary.
+            A dictionary of index arrays or lambda functions with the names of
+            the boundaries as keys.  The midpoint of the facet should return
+            ``True`` for the corresponding lambda function if the facet belongs
+            to the boundary.
         boundaries_only
             If ``True``, consider only facets on the boundary of the domain.
 
@@ -164,8 +168,9 @@ class Mesh:
             self,
             _boundaries={
                 **({} if self._boundaries is None else self._boundaries),
-                **{name: self.facets_satisfying(test, boundaries_only)
-                   for name, test in boundaries.items()}
+                **{name: self.facets_satisfying(test_or_set, boundaries_only)
+                   if callable(test_or_set) else test_or_set
+                   for name, test_or_set in boundaries.items()}
             },
         )
 
@@ -284,7 +289,8 @@ class Mesh:
 
     def facets_satisfying(self,
                           test: Callable[[ndarray], ndarray],
-                          boundaries_only: bool = False) -> ndarray:
+                          boundaries_only: bool = False,
+                          normal: Optional[ndarray] = None) -> ndarray:
         """Return facets whose midpoints satisfy some condition.
 
         Parameters
@@ -294,13 +300,45 @@ class Mesh:
             to be included in the return set.
         boundaries_only
             If ``True``, include only boundary facets.
+        normal
+            If given, used to orient the set of facets.
 
         """
         midp = self.p[:, self.facets].mean(axis=1)
         facets = np.nonzero(test(midp))[0]
         if boundaries_only:
             facets = np.intersect1d(facets, self.boundary_facets())
+        if normal is not None:
+            tind = self.f2t[0, facets]
+            mapping = self._mapping()
+            normals = mapping.normals(np.zeros((self.dim(), 1)),
+                                      tind,
+                                      facets,
+                                      self.t2f).T[0].T
+            ori = 1 * (np.dot(normal, normals) < 0)
+            return OrientedBoundary(facets, ori)
         return facets
+
+    def facets_around(self, elements, flip=False) -> OrientedBoundary:
+        """Return the oriented set of facets around a set of elements.
+
+        Parameters
+        ----------
+        elements
+            An array of element indices or, alternatively, something that can
+            be cast into one via ``Mesh.normalize_elements``.
+        flip
+            If ``True``, use traces outside the subdomain and inward normals.
+
+        """
+        elements = self.normalize_elements(elements)
+        facets, counts = np.unique(self.t2f[:, elements], return_counts=True)
+        facets = facets[counts == 1]
+        if flip:
+            ori = np.nonzero(~np.isin(self.f2t[:, facets], elements).T)[1]
+        else:
+            ori = np.nonzero(np.isin(self.f2t[:, facets], elements).T)[1]
+        return OrientedBoundary(facets, ori)
 
     def elements_satisfying(self,
                             test: Callable[[ndarray], ndarray]) -> ndarray:
@@ -921,3 +959,80 @@ class Mesh:
         """Convenience wrapper for skfem.visuals."""
         mod = importlib.import_module('skfem.visuals.{}'.format(visuals))
         return mod.plot(self, x, **kwargs)
+
+    def normalize_facets(self, facets) -> ndarray:
+        """Generate an array of facet indices.
+
+        Parameters
+        ----------
+        elements
+            Criteria of which facets to include.  Function has different
+            behavior based on the type of this parameter.
+
+        """
+        if isinstance(facets, int):
+            # Make  normalize_facets([1,2,3]) have the same behavior as
+            # normalize_facets(np.array([1,2,3]))
+            return np.array([facets])
+        if isinstance(facets, ndarray):
+            # Assume the facets have already been normalized
+            return facets
+        if facets is None:
+            # Default behavior.
+            return self.boundary_facets()
+        elif isinstance(facets, (tuple, list, set)):
+            # Recurse over the list, building an array of all matching facets
+            return np.unique(
+                np.concatenate(
+                    [self.normalize_facets(f) for f in facets]
+                )
+            )
+        elif callable(facets):
+            # The callable should accept an array of facet centers and return
+            # an boolean array with True for facets that should be included.
+            return self.facets_satisfying(facets)
+        elif isinstance(facets, str):
+            # Assume string is the label of a boundary in the mesh.
+            if ((self.boundaries is not None
+                 and facets in self.boundaries)):
+                return self.boundaries[facets]
+            else:
+                raise ValueError("Boundary '{}' not found.".format(facets))
+        raise NotImplementedError
+
+    def normalize_elements(self, elements) -> ndarray:
+        """Generate an array of element indices.
+
+        Parameters
+        ----------
+        elements
+            Criteria of which elements to include.  Function has different
+            behavior based on the type of this parameter.
+
+        """
+        if isinstance(elements, int):
+            # Make  normalize_elements([1,2,3]) have the same behavior as
+            # normalize_elements(np.array([1,2,3]))
+            return np.array([elements])
+        if isinstance(elements, ndarray):
+            # Assume the elements have already been normalized
+            return elements
+        if callable(elements):
+            # The callable should accept an array of element centers and return
+            # an boolean array with True for elements that should be included.
+            return self.elements_satisfying(elements)
+        elif isinstance(elements, (tuple, list, set)):
+            # Recurse over the list, building an array of all matching elements
+            return np.unique(
+                np.concatenate(
+                    [self.normalize_elements(e) for e in elements]
+                )
+            )
+        elif isinstance(elements, str):
+            # Assume string is the label of a subdomain in the mesh.
+            if ((self.subdomains is not None
+                 and elements in self.subdomains)):
+                return self.subdomains[elements]
+            else:
+                raise ValueError("Subdomain '{}' not found.".format(elements))
+        raise NotImplementedError

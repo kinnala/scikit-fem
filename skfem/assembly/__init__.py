@@ -14,7 +14,7 @@ following:
   Named boundaries [# facets]: left [1], bottom [1], right [1], top [1]
 
 2. Create :class:`~skfem.assembly.CellBasis` or
-   :class:`~skfem.assembly.BoundaryFacetBasis` objects.
+   :class:`~skfem.assembly.FacetBasis` objects.
 
 >>> basis = fem.CellBasis(m, e)
 

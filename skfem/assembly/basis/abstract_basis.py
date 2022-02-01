@@ -23,7 +23,7 @@ class AbstractBasis:
     Please see the following implementations:
 
     - :class:`~skfem.assembly.CellBasis`, basis functions inside elements
-    - :class:`~skfem.assembly.ExteriorFacetBasis`, basis functions on boundary
+    - :class:`~skfem.assembly.FacetBasis`, basis functions on boundary
     - :class:`~skfem.assembly.InteriorFacetBasis`, basis functions on facets
       inside the domain
 
@@ -32,12 +32,12 @@ class AbstractBasis:
     mesh: Mesh
     elem: Element
     tind: Optional[ndarray] = None
+    tind_normals: Optional[ndarray] = None
     dx: ndarray
     basis: List[Tuple[DiscreteField, ...]] = []
     X: ndarray
     W: ndarray
     dofs: Dofs
-    _side: int = 1
 
     def __init__(self,
                  mesh: Mesh,
@@ -240,51 +240,11 @@ class AbstractBasis:
             raise ValueError
 
         if elements is not None:
-            elements = self._normalize_elements(elements)
+            elements = self.mesh.normalize_elements(elements)
             return self.dofs.get_element_dofs(elements, skip_dofnames=skip)
 
-        facets = self._normalize_facets(facets)
+        facets = self.mesh.normalize_facets(facets)
         return self.dofs.get_facet_dofs(facets, skip_dofnames=skip)
-
-    def _normalize_facets(self, facets):
-        if isinstance(facets, ndarray):
-            return facets
-        if facets is None:
-            return self.mesh.boundary_facets()
-        elif isinstance(facets, (tuple, list, set)):
-            return np.unique(
-                np.concatenate(
-                    [self._normalize_facets(f) for f in facets]
-                )
-            )
-        elif callable(facets):
-            return self.mesh.facets_satisfying(facets)
-        elif isinstance(facets, str):
-            if ((self.mesh.boundaries is not None
-                 and facets in self.mesh.boundaries)):
-                return self.mesh.boundaries[facets]
-            else:
-                raise ValueError("Boundary '{}' not found.".format(facets))
-        raise NotImplementedError
-
-    def _normalize_elements(self, elements):
-        if isinstance(elements, ndarray):
-            return elements
-        if callable(elements):
-            return self.mesh.elements_satisfying(elements)
-        elif isinstance(elements, (tuple, list, set)):
-            return np.unique(
-                np.concatenate(
-                    [self._normalize_elements(e) for e in elements]
-                )
-            )
-        elif isinstance(elements, str):
-            if ((self.mesh.subdomains is not None
-                 and elements in self.mesh.subdomains)):
-                return self.mesh.subdomains[elements]
-            else:
-                raise ValueError("Subdomain '{}' not found.".format(elements))
-        raise NotImplementedError
 
     def __repr__(self):
         size = sum([sum([y.size if hasattr(y, 'size') else 0
@@ -323,12 +283,17 @@ class AbstractBasis:
         if w.shape[0] != self.N:
             raise ValueError("Input array has wrong size.")
 
-        refs = self.basis[0]
+        if isinstance(self.elem, ElementVector):
+            # ElementVector shouldn't get split here: workaround
+            refs: List[Tuple[ndarray, 'AbstractBasis']] = [(np.array([]),
+                                                            self)]
+        else:
+            refs = self.split(w)
         dfs: List[DiscreteField] = []
 
         # loop over solution components
         for c in range(len(refs)):
-            ref = refs[c]
+            ref = refs[c][1].basis[0][0]
             if ref.is_zero():
                 dfs.append(ref)
                 continue
@@ -384,7 +349,7 @@ class AbstractBasis:
                                e.facet_dofs,
                                e.interior_dofs])
             return output
-        raise ValueError("Basis.elem has only a single component!")
+        return [np.unique(self.dofs.element_dofs)]
 
     def split_bases(self) -> List['AbstractBasis']:
         """Return Basis objects for the solution components."""
@@ -396,7 +361,7 @@ class AbstractBasis:
             return [type(self)(self.mesh, self.elem.elem, self.mapping,
                                quadrature=self.quadrature)
                     for _ in range(self.mesh.dim())]
-        raise ValueError("AbstractBasis.elem has only a single component!")
+        return [self]
 
     @property
     def quadrature(self):

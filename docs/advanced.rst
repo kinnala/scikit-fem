@@ -65,7 +65,7 @@ This can be written as
 
 In addition, forms can depend on the local mesh parameter ``w.h`` or other
 finite element functions (see :ref:`predefined`).  Moreover, boundary forms
-assembled using :class:`~skfem.assembly.BoundaryFacetBasis` can depend on the
+assembled using :class:`~skfem.assembly.FacetBasis` can depend on the
 outward normal vector ``w.n``.  One example is the form
 
 .. math::
