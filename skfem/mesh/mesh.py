@@ -257,13 +257,23 @@ class Mesh:
             if subnames[1] == "s":
                 subdomains[subnames[2]] = np.nonzero(data[0])[0]
             elif subnames[1] == "b":
-                if data[0].max() > (2 ** self.t2f.shape[0] - 1):  # oriented
-                    raise NotImplementedError
+                oriented = data[0].max() > 2 ** self.t2f.shape[0] - 1
+                powers = 1 << np.arange(self.t2f.shape[0] * (1 + oriented))[:, None]
+                indices = powers & data[0].astype(np.int64) > 0
+                if oriented:
+                    facets = np.unique(
+                        np.concatenate(
+                            [
+                                self.t2f[indices[: self.t2f.shape[0]]],
+                                self.t2f[indices[self.t2f.shape[0] :]],
+                            ]
+                        )
+                    )
+                    boundaries[subnames[2]] = OrientedBoundary(
+                        facets, np.zeros_like(facets)  # XXX placeholder for ori
+                    )
                 else:
-                    boundaries[subnames[2]] = np.sort(self.t2f[
-                        (1 << np.arange(self.t2f.shape[0]))[:, None]
-                        & data[0].astype(np.int64) > 0
-                ])
+                    boundaries[subnames[2]] = np.sort(self.t2f[indices])
 
         return boundaries, subdomains
 
