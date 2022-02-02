@@ -224,10 +224,13 @@ class Mesh:
         subdomains = {} if self._subdomains is None else self._subdomains
         boundaries = {} if self._boundaries is None else self._boundaries
 
-        def encode_boundary(boundary: Union[ndarray, OrientedBoundary]) -> ndarray:
+        def encode_boundary(
+            boundary: Union[ndarray, OrientedBoundary]
+        ) -> ndarray:
             if hasattr(boundary, "ori"):
                 ori = boundary.ori.astype(bool)
-                cells = np.vstack([np.isin(self.t2f, boundary[o]) for o in [ori, ~ori]])
+                cells = np.vstack([np.isin(self.t2f, boundary[o])
+                                   for o in [ori, ~ori]])
             else:
                 cells = np.isin(self.t2f, boundary)
             return (1 << np.arange(cells.shape[0])) @ cells
@@ -266,7 +269,7 @@ class Mesh:
                 if oriented:
                     oriented_facets = (
                         self.t2f[indices[: self.t2f.shape[0]]],
-                        self.t2f[indices[self.t2f.shape[0] :]],
+                        self.t2f[indices[self.t2f.shape[0]:]],
                     )
                     facets, index = np.unique(
                         np.concatenate(oriented_facets), return_index=True
