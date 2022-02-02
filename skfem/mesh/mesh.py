@@ -258,8 +258,11 @@ class Mesh:
                 subdomains[subnames[2]] = np.nonzero(data[0])[0]
             elif subnames[1] == "b":
                 oriented = data[0].max() > 2 ** self.t2f.shape[0] - 1
-                powers = 1 << np.arange(self.t2f.shape[0] * (1 + oriented))[:, None]
-                indices = powers & data[0].astype(np.int64) > 0
+                indices = (
+                    1 << np.arange(self.t2f.shape[0] * (1 + oriented))[:, None]
+                    & data[0].astype(np.int64)
+                    > 0
+                )
                 if oriented:
                     oriented_facets = (
                         self.t2f[indices[: self.t2f.shape[0]]],
