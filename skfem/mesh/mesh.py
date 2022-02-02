@@ -261,16 +261,21 @@ class Mesh:
                 powers = 1 << np.arange(self.t2f.shape[0] * (1 + oriented))[:, None]
                 indices = powers & data[0].astype(np.int64) > 0
                 if oriented:
-                    facets = np.unique(
-                        np.concatenate(
-                            [
-                                self.t2f[indices[: self.t2f.shape[0]]],
-                                self.t2f[indices[self.t2f.shape[0] :]],
-                            ]
-                        )
+                    oriented_facets = (
+                        self.t2f[indices[: self.t2f.shape[0]]],
+                        self.t2f[indices[self.t2f.shape[0] :]],
+                    )
+                    facets, index = np.unique(
+                        np.concatenate(oriented_facets), return_index=True
                     )
                     boundaries[subnames[2]] = OrientedBoundary(
-                        facets, np.zeros_like(facets)  # XXX placeholder for ori
+                        facets,
+                        np.concatenate(
+                            [
+                                np.ones_like(oriented_facets[0]),
+                                np.zeros_like(oriented_facets[1]),
+                            ]
+                        )[index],
                     )
                 else:
                     boundaries[subnames[2]] = np.sort(self.t2f[indices])
