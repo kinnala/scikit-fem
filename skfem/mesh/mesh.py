@@ -224,6 +224,14 @@ class Mesh:
         subdomains = {} if self._subdomains is None else self._subdomains
         boundaries = {} if self._boundaries is None else self._boundaries
 
+        def encode_boundary(boundary: Union[ndarray, OrientedBoundary]) -> ndarray:
+            if hasattr(boundary, "ori"):
+                ori = boundary.ori.astype(bool)
+                cells = np.vstack([np.isin(self.t2f, boundary[o]) for o in [ori, ~ori]])
+            else:
+                cells = np.isin(self.t2f, boundary)
+            return (1 << np.arange(cells.shape[0])) @ cells
+
         return {
             **{
                 f"skfem:s:{name}": [
@@ -232,10 +240,7 @@ class Mesh:
                 for name, subdomain in subdomains.items()
             },
             **{
-                f"skfem:b:{name}": [
-                    ((1 << np.arange(self.t2f.shape[0]))
-                     @ np.isin(self.t2f, boundary)).astype(int)
-                ]
+                f"skfem:b:{name}": [encode_boundary(boundary)]
                 for name, boundary in boundaries.items()
             },
         }
@@ -252,9 +257,12 @@ class Mesh:
             if subnames[1] == "s":
                 subdomains[subnames[2]] = np.nonzero(data[0])[0]
             elif subnames[1] == "b":
-                boundaries[subnames[2]] = np.sort(self.t2f[
-                    (1 << np.arange(self.t2f.shape[0]))[:, None]
-                    & data[0].astype(np.int64) > 0
+                if data[0].max() > (2 ** self.t2f.shape[0] - 1):  # oriented
+                    raise NotImplementedError
+                else:
+                    boundaries[subnames[2]] = np.sort(self.t2f[
+                        (1 << np.arange(self.t2f.shape[0]))[:, None]
+                        & data[0].astype(np.int64) > 0
                 ])
 
         return boundaries, subdomains
