@@ -600,19 +600,14 @@ def test_oriented_gauss_integral(m, e):
     )
 
 
-## TODO preserve orientation in save/load cycle
-# def test_oriented_saveload():
+def test_oriented_saveload():
 
-#     m = MeshTri().refined(4)
-#     m = m.with_boundaries({
-#         'mid': m.facets_around([5]),
-#     })
-#     assert len(m.boundaries['mid'].ori) == 3
+    m = MeshTri().refined(4)
+    m = m.with_boundaries({"mid": m.facets_around([5]),})
+    assert len(m.boundaries["mid"].ori) == 3
 
-#     # cycle to meshio and check that orientation is preserved
-#     M = from_meshio(to_meshio(m))
+    M = from_meshio(to_meshio(m))
 
-#     assert_almost_equal(
-#         m.boundaries['mid'].ori,
-#         M.boundaries['mid'].ori,
-#     )
+    assert_almost_equal(
+        m.boundaries["mid"].ori, M.boundaries["mid"].ori,
+    )
