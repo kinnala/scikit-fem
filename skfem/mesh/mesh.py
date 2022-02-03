@@ -251,7 +251,7 @@ class Mesh:
     def _decode_cell_data(self, cell_data: Dict[str, List[ndarray]]):
 
         subdomains = {}
-        boundaries : Dict[str, Union[ndarray, OrientedBoundary]] = {}
+        boundaries: Dict[str, Union[ndarray, OrientedBoundary]] = {}
 
         for name, data in cell_data.items():
             subnames = name.split(":")
