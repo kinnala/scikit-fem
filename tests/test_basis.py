@@ -7,9 +7,9 @@ import numpy as np
 from numpy.testing import assert_allclose, assert_almost_equal
 
 from skfem import BilinearForm, LinearForm, asm, solve, condense, projection
-from skfem.mesh import (MeshTri, MeshTet, MeshHex,
+from skfem.mesh import (Mesh, MeshTri, MeshTet, MeshHex,
                         MeshQuad, MeshLine1, MeshWedge1)
-from skfem.assembly import (CellBasis, FacetBasis, Dofs, Functional,
+from skfem.assembly import (CellBasis, FacetBasis, Functional,
                             MortarFacetBasis)
 from skfem.mapping import MappingIsoparametric, MappingMortar
 from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
@@ -600,11 +600,14 @@ def test_oriented_gauss_integral(m, e):
     )
 
 
-def test_oriented_saveload():
+@pytest.mark.parametrize(
+    "mesh", [MeshLine1(), MeshTri(), MeshQuad(), MeshTet(), MeshHex()]
+)
+def test_oriented_saveload(mesh: Mesh):
 
-    m = MeshTri().refined(4)
+    m = mesh.refined(4)
     m = m.with_boundaries({"mid": m.facets_around([5]),})
-    assert len(m.boundaries["mid"].ori) == 3
+    assert len(m.boundaries["mid"].ori) == m.refdom.nfacets
 
     M = from_meshio(to_meshio(m))
 
