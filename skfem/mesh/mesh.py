@@ -227,7 +227,7 @@ class Mesh:
         def encode_boundary(
             boundary: Union[ndarray, OrientedBoundary]
         ) -> ndarray:
-            if hasattr(boundary, "ori"):
+            if isinstance(boundary, OrientedBoundary):
                 ori = boundary.ori.astype(bool)
                 cells = np.vstack([np.isin(self.t2f, boundary[o])
                                    for o in [ori, ~ori]])
@@ -251,7 +251,7 @@ class Mesh:
     def _decode_cell_data(self, cell_data: Dict[str, List[ndarray]]):
 
         subdomains = {}
-        boundaries = {}
+        boundaries : Dict[str, Union[ndarray, OrientedBoundary]] = {}
 
         for name, data in cell_data.items():
             subnames = name.split(":")
