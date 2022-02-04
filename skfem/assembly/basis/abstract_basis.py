@@ -408,3 +408,8 @@ class AbstractBasis:
         """Convenience wrapper for skfem.visuals."""
         mod = importlib.import_module('skfem.visuals.{}'.format(visuals))
         return mod.plot(self, x, **kwargs)
+
+    def draw(self, visuals='matplotlib', **kwargs):
+        """Convenience wrapper for skfem.visuals."""
+        mod = importlib.import_module('skfem.visuals.{}'.format(visuals))
+        return mod.draw(self, **kwargs)
