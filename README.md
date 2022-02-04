@@ -172,9 +172,8 @@ in the documentation may have a different license.
 ## Acknowledgements
 
 This project was started while working under a grant from the [Finnish Cultural
-Foundation](https://skr.fi/).  Versions 2.0.0+ were prepared while working in a
-project funded by the [Academy of
-Finland](https://akareport.aka.fi/ibi_apps/WFServlet?IBIF_ex=x_HakKuvaus2&CLICKED_ON=&HAKNRO1=324611&UILANG=en).
+Foundation](https://skr.fi/).  Versions 2.0.0+ were prepared while working in
+a project funded by Academy of Finland (decisions nr. 324611 and 338341).
 The approach used in the finite element assembly has been inspired by the [work
 of A. Hannukainen and
 M. Juntunen](https://au.mathworks.com/matlabcentral/fileexchange/36108-hjfem_lite).
