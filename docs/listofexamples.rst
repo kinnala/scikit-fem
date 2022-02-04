@@ -498,7 +498,7 @@ Example 19: Heat equation
 This example solves the heat equation :math:`\frac{\partial T}{\partial t} = \kappa\Delta T` in the domain :math:`|x|<w_0` and :math:`|y|<w_1` with the initial value :math:`T_0(x,y) = \cos\frac{\pi x}{2w_0}\cos\frac{\pi y}{2w_1}` using the generalized trapezoidal
 rule ("theta method") and fast time-stepping by factorizing the evolution matrix once and for all.
 
-.. figure:: https://user-images.githubusercontent.com/973268/87778846-7b420400-c834-11ea-8ff6-c439699b2802.gif
+.. figure:: https://user-images.githubusercontent.com/973268/152611674-984c18fb-2e81-4253-9abb-b4a95289dee5.gif
 
    The solution of Example 19.
 
