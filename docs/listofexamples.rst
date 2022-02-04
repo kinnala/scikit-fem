@@ -653,3 +653,15 @@ characteristic impedance and velocity factor of the cable.
    The results of Example 35.
 
 See the `source code of Example 35 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex35.py>`_ for more information.
+
+Example 44: Wave equation
+-------------------------
+
+This example solves the one-dimensional wave equation :math:`u_{tt} = c^2
+u_{xx}` by reducing it to a first order system.
+
+.. figure:: https://user-images.githubusercontent.com/973268/152610782-8c7534ba-3a47-4bfd-bf59-c7a4f187fac9.gif
+
+   The results of Example 44.
+
+See the `source code of Example 44 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex44.py>`_ for more information.
