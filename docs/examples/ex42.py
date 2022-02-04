@@ -31,28 +31,23 @@ def source(v, w):
     return v * np.exp(-1e3 * (x[0] ** 2 + x[1] ** 2))
 
 
-# nonperiodic mesh
-m = MeshTri.init_symmetric().refined(5)
-
-# create a periodic mesh
-Mp = MeshTri1DG.periodic(
-    m,
-    m.nodes_satisfying(lambda x: x[0] == 1),
-    m.nodes_satisfying(lambda x: x[0] == 0),
+m = MeshTri1DG.init_tensor(
+    np.linspace(0, 1, 30),
+    np.linspace(0, 1, 30),
+    periodic=[0],
 )
 
 peclet = 1e2
 
-basis = Basis(Mp, ElementTriP2())
+basis = Basis(m, ElementTriP2())
 A = laplace.assemble(basis) + peclet * advection.assemble(basis)
 f = source.assemble(basis)
 
-D = basis.get_dofs()
-x = solve(*condense(A, f, D=D))
+x = solve(*condense(A, f, D=basis.get_dofs()))
 
 if __name__ == '__main__':
     from os.path import splitext
     from sys import argv
     from skfem.visuals.matplotlib import plot, savefig
-    plot(basis, x, shading='gouraud')
+    plot(basis, x, shading='gouraud', colorbar=True)
     savefig(splitext(argv[0])[0] + '_solution.png')

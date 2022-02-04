@@ -6,6 +6,30 @@ import numpy as np
 class MeshDG:
 
     @classmethod
+    def init_tensor(cls,
+                    *args,
+                    periodic=[]):
+        mesh = cls.__bases__[-1].init_tensor(*args)
+        ix = np.empty((0,), dtype=np.int64)
+        ix0 = np.empty((0,), dtype=np.int64)
+        for dim in periodic:
+            argmin = args[dim].min()
+            argmax = args[dim].max()
+            ix = np.concatenate((
+                ix,
+                mesh.nodes_satisfying(lambda x: argmin == x[dim]),
+            ))
+            ix0 = np.concatenate((
+                ix0,
+                mesh.nodes_satisfying(lambda x: argmax == x[dim]),
+            ))
+        ix, uniq = np.unique(ix, return_index=True)
+        ix0 = ix0[uniq]
+        for k, idx in enumerate(ix):
+            ix0[ix0 == idx] = ix0[k]
+        return cls.periodic(mesh, ix, ix0)
+
+    @classmethod
     def periodic(cls, mesh, ix, ix0):
         """Initialize a periodic mesh from a standard (nonperiodic) mesh.
 

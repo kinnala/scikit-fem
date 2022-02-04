@@ -372,3 +372,14 @@ class TestEx43(TestCase):
         import docs.examples.ex43 as ex
 
         self.assertAlmostEqual(ex.u.max(), 0.2466622622014594, delta=1e-8)
+
+
+class TestEx44(TestCase):
+
+    def runTest(self):
+        import docs.examples.ex44 as ex  # noqa
+
+        stepper = ex.evolve(0., ex.U)
+        for itr in range(10):
+            t, u = next(stepper)
+            self.assertAlmostEqual(np.sum(u), 11.34, 2)
