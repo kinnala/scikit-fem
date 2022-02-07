@@ -82,7 +82,7 @@ class Form:
         """Support additional input formats for 'w'."""
         for k in w:
             if isinstance(w[k], DiscreteField):
-                if w[k][0].shape[-1] != basis.X.shape[1]:
+                if w[k].shape[-1] != basis.X.shape[1]:
                     raise ValueError("Quadrature mismatch: '{}' should have "
                                      "same number of integration points as "
                                      "the basis object.".format(k))

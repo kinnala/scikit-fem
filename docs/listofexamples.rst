@@ -498,7 +498,7 @@ Example 19: Heat equation
 This example solves the heat equation :math:`\frac{\partial T}{\partial t} = \kappa\Delta T` in the domain :math:`|x|<w_0` and :math:`|y|<w_1` with the initial value :math:`T_0(x,y) = \cos\frac{\pi x}{2w_0}\cos\frac{\pi y}{2w_1}` using the generalized trapezoidal
 rule ("theta method") and fast time-stepping by factorizing the evolution matrix once and for all.
 
-.. figure:: https://user-images.githubusercontent.com/973268/87778846-7b420400-c834-11ea-8ff6-c439699b2802.gif
+.. figure:: https://user-images.githubusercontent.com/973268/152611674-984c18fb-2e81-4253-9abb-b4a95289dee5.gif
 
    The solution of Example 19.
 
@@ -556,7 +556,7 @@ Example 39: One-dimensional heat equation
 This examples reduces the two-dimensional heat equation of Example 19 to
 demonstrate the special post-processing required.
 
-.. figure:: https://user-images.githubusercontent.com/1588947/127958860-6454e542-67ba-4e94-8053-5175da201daa.gif
+.. figure:: https://user-images.githubusercontent.com/973268/152611200-a427dcc1-9425-40af-b6fd-23f66ed18088.gif
 
    The solution of Example 39.
 
@@ -653,3 +653,15 @@ characteristic impedance and velocity factor of the cable.
    The results of Example 35.
 
 See the `source code of Example 35 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex35.py>`_ for more information.
+
+Example 44: Wave equation
+-------------------------
+
+This example solves the one-dimensional wave equation :math:`u_{tt} = c^2
+u_{xx}` by reducing it to a first order system.
+
+.. figure:: https://user-images.githubusercontent.com/973268/152610782-8c7534ba-3a47-4bfd-bf59-c7a4f187fac9.gif
+
+   The results of Example 44.
+
+See the `source code of Example 44 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex44.py>`_ for more information.

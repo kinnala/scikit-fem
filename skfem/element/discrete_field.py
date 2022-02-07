@@ -53,6 +53,8 @@ class DiscreteField(ndarray):
         self.grad6 = getattr(obj, 'grad6', None)
 
     def __getitem__(self, key):
+        if self.is_zero():
+            return self
         # invalidate attributes after slice
         return np.array(self)[key]
 
