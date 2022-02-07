@@ -281,16 +281,17 @@ class Mesh:
             if subnames[1] == "s":
                 subdomains[subnames[2]] = np.nonzero(data[0])[0]
             elif subnames[1] == "b":
-                indices = (
+                mask = (
                     (1 << np.arange(self.refdom.nfacets))[:, None] 
                     & data[0].astype(int)
                 ).astype(bool)
-                facets = np.sort(self.t2f[indices])
-                ori = np.argwhere(
-                    np.isin(self.f2t[:, facets], indices.any(0).nonzero()[0]).T
-                )[:, 1]
+                unsorted_facets = self.t2f[mask]
+                cells = mask.nonzero()[1]
+                ori = (self.f2t[:, self.t2f[mask]] == cells).nonzero()[0]
+                permutation = unsorted_facets.argsort()
+                facets = unsorted_facets[permutation]
                 boundaries[subnames[2]] = (
-                    OrientedBoundary(facets, ori) if ori.any() else facets
+                    OrientedBoundary(facets, ori[permutation]) if ori.any() else facets
                 )
         return boundaries, subdomains
 
