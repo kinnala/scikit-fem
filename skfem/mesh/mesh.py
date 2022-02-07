@@ -45,7 +45,8 @@ class Mesh:
     @property
     def dofs(self):
         from skfem.assembly import Dofs
-        if not hasattr(self, '_dofs'):
+
+        if not hasattr(self, "_dofs"):
             self._dofs = Dofs(self, self.elem())
         return self._dofs
 
@@ -93,31 +94,31 @@ class Mesh:
 
     @property
     def facets(self):
-        if not hasattr(self, '_facets'):
+        if not hasattr(self, "_facets"):
             self._init_facets()
         return self._facets
 
     @property
     def t2f(self):
-        if not hasattr(self, '_t2f'):
+        if not hasattr(self, "_t2f"):
             self._init_facets()
         return self._t2f
 
     @property
     def f2t(self):
-        if not hasattr(self, '_f2t'):
+        if not hasattr(self, "_f2t"):
             self._f2t = self.build_inverse(self.t, self.t2f)
         return self._f2t
 
     @property
     def edges(self):
-        if not hasattr(self, '_edges'):
+        if not hasattr(self, "_edges"):
             self._init_edges()
         return self._edges
 
     @property
     def t2e(self):
-        if not hasattr(self, '_t2e'):
+        if not hasattr(self, "_t2e"):
             self._init_edges()
         return self._t2e
 
@@ -131,26 +132,39 @@ class Mesh:
     def boundary_edges(self) -> ndarray:
         """Return an array of boundary edge indices."""
         facets = self.boundary_facets()
-        boundary_edges = np.sort(np.hstack(
-            tuple([np.vstack((self.facets[itr, facets],
-                              self.facets[(itr + 1) % self.facets.shape[0],
-                              facets]))
-                   for itr in range(self.facets.shape[0])])).T, axis=1)
+        boundary_edges = np.sort(
+            np.hstack(
+                tuple(
+                    [
+                        np.vstack(
+                            (
+                                self.facets[itr, facets],
+                                self.facets[(itr + 1) % self.facets.shape[0], facets],
+                            )
+                        )
+                        for itr in range(self.facets.shape[0])
+                    ]
+                )
+            ).T,
+            axis=1,
+        )
         edge_candidates = np.unique(self.t2e[:, self.f2t[0, facets]])
         A = self.edges[:, edge_candidates].T
         B = boundary_edges
         dims = A.max(0) + 1
-        ix = np.where(np.in1d(
-            np.ravel_multi_index(A.T, dims),  # type: ignore
-            np.ravel_multi_index(B.T, dims),  # type: ignore
-        ))[0]
+        ix = np.where(
+            np.in1d(
+                np.ravel_multi_index(A.T, dims),  # type: ignore
+                np.ravel_multi_index(B.T, dims),  # type: ignore
+            )
+        )[0]
         return edge_candidates[ix]
 
-    def with_boundaries(self,
-                        boundaries: Dict[str, Union[Callable[[ndarray],
-                                                             ndarray],
-                                                    ndarray]],
-                        boundaries_only: bool = True):
+    def with_boundaries(
+        self,
+        boundaries: Dict[str, Union[Callable[[ndarray], ndarray], ndarray]],
+        boundaries_only: bool = True,
+    ):
         """Return a copy of the mesh with named boundaries.
 
         Parameters
@@ -168,14 +182,16 @@ class Mesh:
             self,
             _boundaries={
                 **({} if self._boundaries is None else self._boundaries),
-                **{name: self.facets_satisfying(test_or_set, boundaries_only)
-                   if callable(test_or_set) else test_or_set
-                   for name, test_or_set in boundaries.items()}
+                **{
+                    name: self.facets_satisfying(test_or_set, boundaries_only)
+                    if callable(test_or_set)
+                    else test_or_set
+                    for name, test_or_set in boundaries.items()
+                },
             },
         )
 
-    def with_subdomains(self,
-                        subdomains: Dict[str, Callable[[ndarray], ndarray]]):
+    def with_subdomains(self, subdomains: Dict[str, Callable[[ndarray], ndarray]]):
         """Return a copy of the mesh with named subdomains.
 
         Parameters
@@ -191,8 +207,10 @@ class Mesh:
             self,
             _subdomains={
                 **({} if self._subdomains is None else self._subdomains),
-                **{name: self.elements_satisfying(test)
-                   for name, test in subdomains.items()},
+                **{
+                    name: self.elements_satisfying(test)
+                    for name, test in subdomains.items()
+                },
             },
         )
 
@@ -208,13 +226,13 @@ class Mesh:
 
         return {
             **{
-                f"skfem:s:{name}": indicator(np.unique(self.t[:, subdomain]
-                                                       .flatten()))
+                f"skfem:s:{name}": indicator(np.unique(self.t[:, subdomain].flatten()))
                 for name, subdomain in subdomains.items()
             },
             **{
-                f"skfem:b:{name}": indicator(np.unique(self.facets[:, boundary]
-                                                       .flatten()))
+                f"skfem:b:{name}": indicator(
+                    np.unique(self.facets[:, boundary].flatten())
+                )
                 for name, boundary in boundaries.items()
             },
         }
@@ -224,9 +242,7 @@ class Mesh:
         subdomains = {} if self._subdomains is None else self._subdomains
         boundaries = {} if self._boundaries is None else self._boundaries
 
-        def encode_boundary(
-            boundary: Union[ndarray, OrientedBoundary]
-        ) -> ndarray:
+        def encode_boundary(boundary: Union[ndarray, OrientedBoundary]) -> ndarray:
             """return an array with an int per cell encoding a 'boundary'
 
             i.e. a subset of (optionally oriented) facets.
@@ -301,12 +317,11 @@ class Mesh:
 
     def interior_nodes(self) -> ndarray:
         """Return an array of interior node indices."""
-        return np.setdiff1d(np.arange(0, self.p.shape[1]),
-                            self.boundary_nodes())
+        return np.setdiff1d(np.arange(0, self.p.shape[1]), self.boundary_nodes())
 
-    def nodes_satisfying(self,
-                         test: Callable[[ndarray], ndarray],
-                         boundaries_only: bool = False) -> ndarray:
+    def nodes_satisfying(
+        self, test: Callable[[ndarray], ndarray], boundaries_only: bool = False
+    ) -> ndarray:
         """Return nodes that satisfy some condition.
 
         Parameters
@@ -323,10 +338,12 @@ class Mesh:
             nodes = np.intersect1d(nodes, self.boundary_nodes())
         return nodes
 
-    def facets_satisfying(self,
-                          test: Callable[[ndarray], ndarray],
-                          boundaries_only: bool = False,
-                          normal: Optional[ndarray] = None) -> ndarray:
+    def facets_satisfying(
+        self,
+        test: Callable[[ndarray], ndarray],
+        boundaries_only: bool = False,
+        normal: Optional[ndarray] = None,
+    ) -> ndarray:
         """Return facets whose midpoints satisfy some condition.
 
         Parameters
@@ -347,10 +364,11 @@ class Mesh:
         if normal is not None:
             tind = self.f2t[0, facets]
             mapping = self._mapping()
-            normals = mapping.normals(np.zeros((self.dim(), 1)),
-                                      tind,
-                                      facets,
-                                      self.t2f).T[0].T
+            normals = (
+                mapping.normals(np.zeros((self.dim(), 1)), tind, facets, self.t2f)
+                .T[0]
+                .T
+            )
             ori = 1 * (np.dot(normal, normals) < 0)
             return OrientedBoundary(facets, ori)
         return facets
@@ -376,8 +394,7 @@ class Mesh:
             ori = np.nonzero(np.isin(self.f2t[:, facets], elements).T)[1]
         return OrientedBoundary(facets, ori)
 
-    def elements_satisfying(self,
-                            test: Callable[[ndarray], ndarray]) -> ndarray:
+    def elements_satisfying(self, test: Callable[[ndarray], ndarray]) -> ndarray:
         """Return elements whose midpoints satisfy some condition.
 
         Parameters
@@ -405,12 +422,14 @@ class Mesh:
             edge_candidates = self.t2e[:, self.f2t[0, ix]].flatten()
             # subset of edges that share all points with the given facets
             subset = np.nonzero(
-                np.prod(np.isin(self.edges[:, edge_candidates],
-                                self.facets[:, ix].flatten()),
-                        axis=0)
+                np.prod(
+                    np.isin(
+                        self.edges[:, edge_candidates], self.facets[:, ix].flatten()
+                    ),
+                    axis=0,
+                )
             )[0]
-            edges = np.intersect1d(self.boundary_edges(),
-                                   edge_candidates[subset])
+            edges = np.intersect1d(self.boundary_edges(), edge_candidates[subset])
         else:
             edges = np.array([], dtype=np.int64)
 
@@ -419,30 +438,23 @@ class Mesh:
     def _mapping(self):
         """Return a default reference mapping for the mesh."""
         from skfem.mapping import MappingAffine, MappingIsoparametric
-        if not hasattr(self, '_cached_mapping'):
+
+        if not hasattr(self, "_cached_mapping"):
             if self.affine:
                 self._cached_mapping = MappingAffine(self)
             else:
                 self._cached_mapping = MappingIsoparametric(
-                    self,
-                    self.elem(),
-                    self.bndelem,
+                    self, self.elem(), self.bndelem,
                 )
         return self._cached_mapping
 
     def _init_facets(self):
         """Initialize ``self.facets``."""
-        self._facets, self._t2f = self.build_entities(
-            self.t,
-            self.elem.refdom.facets,
-        )
+        self._facets, self._t2f = self.build_entities(self.t, self.elem.refdom.facets,)
 
     def _init_edges(self):
         """Initialize ``self.edges``."""
-        self._edges, self._t2e = self.build_entities(
-            self.t,
-            self.elem.refdom.edges,
-        )
+        self._edges, self._t2e = self.build_entities(self.t, self.elem.refdom.edges,)
 
     def __post_init__(self):
         """Support node orders used in external formats.
@@ -468,37 +480,36 @@ class Mesh:
             p, t = self.doflocs, self.t
             t_nodes = t[:M]
             uniq, ix = np.unique(t_nodes, return_inverse=True)
-            self.t = (np.arange(len(uniq), dtype=np.int64)[ix]
-                      .reshape(t_nodes.shape))
-            doflocs = np.hstack((
-                p[:, uniq],
-                np.zeros((p.shape[0], np.max(t) + 1 - len(uniq))),
-            ))
-            doflocs[:, self.dofs.element_dofs[M:].flatten('F')] =\
-                p[:, t[M:].flatten('F')]
+            self.t = np.arange(len(uniq), dtype=np.int64)[ix].reshape(t_nodes.shape)
+            doflocs = np.hstack(
+                (p[:, uniq], np.zeros((p.shape[0], np.max(t) + 1 - len(uniq))),)
+            )
+            doflocs[:, self.dofs.element_dofs[M:].flatten("F")] = p[
+                :, t[M:].flatten("F")
+            ]
             self.doflocs = doflocs
 
         # C_CONTIGUOUS is more performant in dimension-based slices
-        if not self.doflocs.flags['C_CONTIGUOUS']:
+        if not self.doflocs.flags["C_CONTIGUOUS"]:
             if self.doflocs.shape[1] > 1e3:
-                logger.warning("Transforming over 1000 vertices "
-                               "to C_CONTIGUOUS.")
+                logger.warning("Transforming over 1000 vertices " "to C_CONTIGUOUS.")
             self.doflocs = np.ascontiguousarray(self.doflocs)
 
-        if not self.t.flags['C_CONTIGUOUS']:
+        if not self.t.flags["C_CONTIGUOUS"]:
             if self.t.shape[1] > 1e3:
-                logger.warning("Transforming over 1000 elements "
-                               "to C_CONTIGUOUS.")
+                logger.warning("Transforming over 1000 elements " "to C_CONTIGUOUS.")
             self.t = np.ascontiguousarray(self.t)
 
         # add boundary tags for the default cubes
-        if ((self._boundaries is None
-             and self.doflocs.shape[1] == 2 ** self.dim()
-             and self.dim() <= 2)):
+        if (
+            self._boundaries is None
+            and self.doflocs.shape[1] == 2 ** self.dim()
+            and self.dim() <= 2
+        ):
             boundaries = {}
             # default boundary names along the dimensions
-            minnames = ['left', 'bottom', 'front']
-            maxnames = ['right', 'top', 'back']
+            minnames = ["left", "bottom", "front"]
+            maxnames = ["right", "top", "back"]
             for d in range(self.doflocs.shape[0]):
                 dmin = np.min(self.doflocs[d])
                 ix = self.facets_satisfying(lambda x: x[d] == dmin)
@@ -546,7 +557,7 @@ class Mesh:
 
         # check that there are no duplicate points
         tmp = np.ascontiguousarray(self.p.T)
-        p_unique = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]))
+        p_unique = np.unique(tmp.view([("", tmp.dtype)] * tmp.shape[1]))
         if self.p.shape[1] != p_unique.shape[0]:
             msg = "Mesh contains duplicate vertices."
             if raise_:
@@ -555,8 +566,7 @@ class Mesh:
             return False
 
         # check that all points are at least in some element
-        if len(np.setdiff1d(np.arange(self.p.shape[1]),
-                            np.unique(self.t))) > 0:
+        if len(np.setdiff1d(np.arange(self.p.shape[1]), np.unique(self.t))) > 0:
             msg = "Mesh contains a vertex not belonging to any element."
             if raise_:
                 raise ValueError(msg)
@@ -578,13 +588,15 @@ class Mesh:
         if isinstance(other, list):
             p = np.hstack((self.p,) + tuple([mesh.p for mesh in other]))
             pT = np.ascontiguousarray(p.T)
-            _, ixa, ixb = np.unique(pT.view([('', pT.dtype)] * pT.shape[1]),
-                                    return_index=True, return_inverse=True)
+            _, ixa, ixb = np.unique(
+                pT.view([("", pT.dtype)] * pT.shape[1]),
+                return_index=True,
+                return_inverse=True,
+            )
             p = p[:, ixa]
             return [
                 cls(p, ixb[self.t]),
-                *[type(m)(p, ixb[m.t + self.p.shape[1]])
-                  for i, m in enumerate(other)],
+                *[type(m)(p, ixb[m.t + self.p.shape[1]]) for i, m in enumerate(other)],
             ]
         raise NotImplementedError
 
@@ -593,12 +605,14 @@ class Mesh:
         cls = type(self)
         if not isinstance(other, cls):
             raise TypeError("Can only join meshes with same type.")
-        p = np.hstack((self.p.round(decimals=8),
-                       other.p.round(decimals=8)))
+        p = np.hstack((self.p.round(decimals=8), other.p.round(decimals=8)))
         t = np.hstack((self.t, other.t + self.p.shape[1]))
         tmp = np.ascontiguousarray(p.T)
-        tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]),
-                                  return_index=True, return_inverse=True)
+        tmp, ixa, ixb = np.unique(
+            tmp.view([("", tmp.dtype)] * tmp.shape[1]),
+            return_index=True,
+            return_inverse=True,
+        )
         p = p[:, ixa]
         t = ixb[t]
         return cls(p, t)
@@ -611,16 +625,20 @@ class Mesh:
         rep += "  Number of nodes: {}".format(self.p.shape[1])
         if self.subdomains is not None:
             rep += "\n  Named subdomains [# elements]: {}".format(
-                ', '.join(
-                    map(lambda k: '{} [{}]'.format(k, len(self.subdomains[k])),
-                        list(self.subdomains.keys()))
+                ", ".join(
+                    map(
+                        lambda k: "{} [{}]".format(k, len(self.subdomains[k])),
+                        list(self.subdomains.keys()),
+                    )
                 )
             )
         if self.boundaries is not None:
             rep += "\n  Named boundaries [# facets]: {}".format(
-                ', '.join(
-                    map(lambda k: '{} [{}]'.format(k, len(self.boundaries[k])),
-                        list(self.boundaries.keys()))
+                ", ".join(
+                    map(
+                        lambda k: "{} [{}]".format(k, len(self.boundaries[k])),
+                        list(self.boundaries.keys()),
+                    )
                 )
             )
         return rep
@@ -628,11 +646,13 @@ class Mesh:
     def __str__(self):
         return self.__repr__()
 
-    def save(self,
-             filename: str,
-             point_data: Optional[Dict[str, ndarray]] = None,
-             cell_data: Optional[Dict[str, ndarray]] = None,
-             **kwargs) -> None:
+    def save(
+        self,
+        filename: str,
+        point_data: Optional[Dict[str, ndarray]] = None,
+        cell_data: Optional[Dict[str, ndarray]] = None,
+        **kwargs,
+    ) -> None:
         """Export the mesh and fields using meshio.
 
         Parameters
@@ -647,17 +667,11 @@ class Mesh:
 
         """
         from skfem.io.meshio import to_file
-        return to_file(self,
-                       filename,
-                       point_data,
-                       cell_data,
-                       **kwargs)
+
+        return to_file(self, filename, point_data, cell_data, **kwargs)
 
     @classmethod
-    def load(cls,
-             filename: str,
-             out: Optional[List[str]] = None,
-             **kwargs):
+    def load(cls, filename: str, out: Optional[List[str]] = None, **kwargs):
         """Load a mesh using meshio.
 
         Parameters
@@ -670,17 +684,18 @@ class Mesh:
 
         """
         from skfem.io.meshio import from_file
-        return from_file(filename,
-                         out,
-                         **kwargs)
+
+        return from_file(filename, out, **kwargs)
 
     @classmethod
     def from_dict(cls, d):
         from skfem.io.json import from_dict
+
         return from_dict(cls, d)
 
     def to_dict(self):
         from skfem.io.json import to_dict
+
         return to_dict(self)
 
     @classmethod
@@ -711,10 +726,7 @@ class Mesh:
             for jtr in range(dofs.element_dofs.shape[0]):
                 doflocs[itr, dofs.element_dofs[jtr]] = locs[itr, :, jtr]
 
-        return cls(
-            doflocs=doflocs,
-            t=t if t is not None else mesh.t,
-        )
+        return cls(doflocs=doflocs, t=t if t is not None else mesh.t,)
 
     @classmethod
     def init_refdom(cls):
@@ -743,16 +755,18 @@ class Mesh:
         m = self
         has_boundaries = self.boundaries is not None
         if self.subdomains is not None:
-            logger.warning("Named subdomains invalidated by a call to "
-                           "Mesh.refined()")
+            logger.warning(
+                "Named subdomains invalidated by a call to " "Mesh.refined()"
+            )
         if isinstance(times_or_ix, int):
             for _ in range(times_or_ix):
                 m = m._uniform()
         else:
             m = m._adaptive(times_or_ix)
         if has_boundaries and m.boundaries is None:
-            logger.warning("Named boundaries invalidated by a call to "
-                           "Mesh.refined()")
+            logger.warning(
+                "Named boundaries invalidated by a call to " "Mesh.refined()"
+            )
         return m
 
     def scaled(self, factors):
@@ -769,8 +783,9 @@ class Mesh:
             factors = self.doflocs.shape[0] * [factors]
         return replace(
             self,
-            doflocs=np.array([self.doflocs[itr] * factors[itr]
-                              for itr in range(len(factors))]),
+            doflocs=np.array(
+                [self.doflocs[itr] * factors[itr] for itr in range(len(factors))]
+            ),
         )
 
     def translated(self, diffs):
@@ -785,13 +800,14 @@ class Mesh:
         """
         return replace(
             self,
-            doflocs=np.array([self.doflocs[itr] + diffs[itr]
-                              for itr in range(len(diffs))]),
+            doflocs=np.array(
+                [self.doflocs[itr] + diffs[itr] for itr in range(len(diffs))]
+            ),
         )
 
-    def mirrored(self,
-                 normal: Tuple[float, ...],
-                 point: Optional[Tuple[float, ...]] = None):
+    def mirrored(
+        self, normal: Tuple[float, ...], point: Optional[Tuple[float, ...]] = None
+    ):
         """Return a mesh mirrored with respect to a normal.
 
         Meant to be combined with the other methods to build more general
@@ -822,12 +838,9 @@ class Mesh:
         p0 = np.array(point)
         n = np.array(normal)
         n = n / np.linalg.norm(n)
-        p = p - 2. * np.dot(n, p - p0[:, None]) * n[:, None]
+        p = p - 2.0 * np.dot(n, p - p0[:, None]) * n[:, None]
 
-        return replace(
-            self,
-            doflocs=p,
-        )
+        return replace(self, doflocs=p,)
 
     def smoothed(self, fixed_nodes=None):
         """Laplacian smoothing.
@@ -849,18 +862,23 @@ class Mesh:
         edges = self.edges if p.shape[0] == 3 else self.facets
         nneighbors = np.bincount(edges.reshape(-1), minlength=nv)
 
-        p += np.array([np.bincount(edges[0], pi, minlength=nv)
-                       for pi in self.doflocs[:, edges[1]]])
-        p += np.array([np.bincount(edges[1], pi, minlength=nv)
-                       for pi in self.doflocs[:, edges[0]]])
+        p += np.array(
+            [
+                np.bincount(edges[0], pi, minlength=nv)
+                for pi in self.doflocs[:, edges[1]]
+            ]
+        )
+        p += np.array(
+            [
+                np.bincount(edges[1], pi, minlength=nv)
+                for pi in self.doflocs[:, edges[0]]
+            ]
+        )
         p /= nneighbors
 
         p[:, fixed_nodes] = self.doflocs[:, fixed_nodes]
 
-        return replace(
-            self,
-            doflocs=p,
-        )
+        return replace(self, doflocs=p,)
 
     def _uniform(self):
         """Perform a single uniform refinement."""
@@ -890,10 +908,12 @@ class Mesh:
         nt = self.nelements
         t = np.tile(m.t, (1, nt))
         dt = np.max(t)
-        t += ((dt + 1)
-              * (np.tile(np.arange(nt), (m.t.shape[0] * m.t.shape[1], 1))
-                 .flatten('F')
-                 .reshape((-1, m.t.shape[0])).T))
+        t += (dt + 1) * (
+            np.tile(np.arange(nt), (m.t.shape[0] * m.t.shape[1], 1))
+            .flatten("F")
+            .reshape((-1, m.t.shape[0]))
+            .T
+        )
 
         if X.shape[0] == 1:
             p = np.array([x.flatten()])
@@ -914,10 +934,9 @@ class Mesh:
         indexing = np.hstack(tuple([t[ix] for ix in indices]))
         sorted_indexing = np.sort(indexing, axis=0)
 
-        sorted_indexing, ixa, ixb = np.unique(sorted_indexing,
-                                              axis=1,
-                                              return_index=True,
-                                              return_inverse=True)
+        sorted_indexing, ixa, ixb = np.unique(
+            sorted_indexing, axis=1, return_index=True, return_inverse=True
+        )
         mapping = ixb.reshape((len(indices), t.shape[1]))
 
         if sort:
@@ -928,7 +947,7 @@ class Mesh:
     @staticmethod
     def build_inverse(t, mapping):
         """Build inverse mapping from low dimensional topological entities."""
-        e = mapping.flatten(order='C')
+        e = mapping.flatten(order="C")
         tix = np.tile(np.arange(t.shape[1]), (1, t.shape[0]))[0]
 
         e_first, ix_first = np.unique(e, return_index=True)
@@ -969,11 +988,7 @@ class Mesh:
 
         """
         p, t = self._reix(np.delete(self.t, element_indices, axis=1))
-        return replace(
-            self,
-            doflocs=p,
-            t=t,
-        )
+        return replace(self, doflocs=p, t=t,)
 
     def element_finder(self, mapping=None):
         """Return a function handle from location to element index.
@@ -986,14 +1001,14 @@ class Mesh:
         """
         raise NotImplementedError
 
-    def draw(self, visuals='matplotlib', **kwargs):
+    def draw(self, visuals="matplotlib", **kwargs):
         """Convenience wrapper for skfem.visuals."""
-        mod = importlib.import_module('skfem.visuals.{}'.format(visuals))
+        mod = importlib.import_module("skfem.visuals.{}".format(visuals))
         return mod.draw(self, **kwargs)
 
-    def plot(self, x, visuals='matplotlib', **kwargs):
+    def plot(self, x, visuals="matplotlib", **kwargs):
         """Convenience wrapper for skfem.visuals."""
-        mod = importlib.import_module('skfem.visuals.{}'.format(visuals))
+        mod = importlib.import_module("skfem.visuals.{}".format(visuals))
         return mod.plot(self, x, **kwargs)
 
     def normalize_facets(self, facets) -> ndarray:
@@ -1018,19 +1033,14 @@ class Mesh:
             return self.boundary_facets()
         elif isinstance(facets, (tuple, list, set)):
             # Recurse over the list, building an array of all matching facets
-            return np.unique(
-                np.concatenate(
-                    [self.normalize_facets(f) for f in facets]
-                )
-            )
+            return np.unique(np.concatenate([self.normalize_facets(f) for f in facets]))
         elif callable(facets):
             # The callable should accept an array of facet centers and return
             # an boolean array with True for facets that should be included.
             return self.facets_satisfying(facets)
         elif isinstance(facets, str):
             # Assume string is the label of a boundary in the mesh.
-            if ((self.boundaries is not None
-                 and facets in self.boundaries)):
+            if self.boundaries is not None and facets in self.boundaries:
                 return self.boundaries[facets]
             else:
                 raise ValueError("Boundary '{}' not found.".format(facets))
@@ -1060,14 +1070,11 @@ class Mesh:
         elif isinstance(elements, (tuple, list, set)):
             # Recurse over the list, building an array of all matching elements
             return np.unique(
-                np.concatenate(
-                    [self.normalize_elements(e) for e in elements]
-                )
+                np.concatenate([self.normalize_elements(e) for e in elements])
             )
         elif isinstance(elements, str):
             # Assume string is the label of a subdomain in the mesh.
-            if ((self.subdomains is not None
-                 and elements in self.subdomains)):
+            if self.subdomains is not None and elements in self.subdomains:
                 return self.subdomains[elements]
             else:
                 raise ValueError("Subdomain '{}' not found.".format(elements))
