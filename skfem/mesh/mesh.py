@@ -227,13 +227,32 @@ class Mesh:
         def encode_boundary(
             boundary: Union[ndarray, OrientedBoundary]
         ) -> ndarray:
-            if isinstance(boundary, OrientedBoundary):
-                ori = boundary.ori.astype(bool)
-                cells = np.vstack([np.isin(self.t2f, boundary[o])
-                                   for o in [ori, ~ori]])
-            else:
-                cells = np.isin(self.t2f, boundary)
-            return (1 << np.arange(cells.shape[0])) @ cells
+            """return an array with an int per cell encoding a 'boundary'
+
+            i.e. a subset of (optionally oriented) facets.  
+            
+            Although these are stored internally as
+            arrays of indices of facets, with an optional array of 0/1
+            orientations, an alternative representation is as a boolean
+            array of shape (self.nelements, self.refdom.nfacets) with entries
+            True if that facet belongs to the boundary.  This array can be bit
+            -packed to give a one-dimensional array of ints, one per cell.
+            This is convenient as it can be treated as `cell_data` by
+            `skfem.io.meshio` and stored in many external formats (VTK, XDMF,
+            ...).
+
+            That is, the binary expansion of the int for a cell gives the bit-
+            flags for whether the corresponding facets are in `boundary`.
+            """
+            b = (
+                boundary
+                if isinstance(boundary, OrientedBoundary)
+                else OrientedBoundary(boundary, np.zeros_like(boundary))
+            )
+            t2f = np.zeros_like(self.t2f)
+            columns = self.f2t[(b.ori, b)]
+            t2f[:, columns] = np.isin(self.t2f[:, columns], b)
+            return (1 << np.arange(self.refdom.nfacets)) @ t2f
 
         return {
             **{
@@ -260,32 +279,16 @@ class Mesh:
             if subnames[1] == "s":
                 subdomains[subnames[2]] = np.nonzero(data[0])[0]
             elif subnames[1] == "b":
-                oriented = data[0].max() > 2 ** self.t2f.shape[0] - 1
                 indices = (
-                    1 << np.arange(self.t2f.shape[0] * (1 + oriented))[:, None]
-                    & data[0].astype(np.int64)
-                    > 0
+                    (1 << np.arange(self.refdom.nfacets))[:, None] & data[0]
+                ).astype(bool)
+                facets = np.sort(self.t2f[indices])
+                ori = np.argwhere(
+                    np.isin(self.f2t[:, facets], indices.any(0).nonzero()[0]).T
+                )[:, 1]
+                boundaries[subnames[2]] = (
+                    OrientedBoundary(facets, ori) if ori.any() else facets
                 )
-                if oriented:
-                    oriented_facets = (
-                        self.t2f[indices[: self.t2f.shape[0]]],
-                        self.t2f[indices[self.t2f.shape[0]:]],
-                    )
-                    facets, index = np.unique(
-                        np.concatenate(oriented_facets), return_index=True
-                    )
-                    boundaries[subnames[2]] = OrientedBoundary(
-                        facets,
-                        np.concatenate(
-                            [
-                                np.ones_like(oriented_facets[0]),
-                                np.zeros_like(oriented_facets[1]),
-                            ]
-                        )[index],
-                    )
-                else:
-                    boundaries[subnames[2]] = np.sort(self.t2f[indices])
-
         return boundaries, subdomains
 
     def boundary_nodes(self) -> ndarray:
