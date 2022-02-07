@@ -231,18 +231,19 @@ class Mesh:
 
             i.e. a subset of (optionally oriented) facets.
 
-            Although these are stored internally as
-            arrays of indices of facets, with an optional array of 0/1
-            orientations, an alternative representation is as a boolean
-            array of shape (self.nelements, self.refdom.nfacets) with entries
-            True if that facet belongs to the boundary.  This array can be bit
-            -packed to give a one-dimensional array of ints, one per cell.
-            This is convenient as it can be treated as `cell_data` by
-            `skfem.io.meshio` and stored in many external formats (VTK, XDMF,
-            ...).
+            Although these are stored internally as arrays of indices of
+            facets, with an optional array of 0/1 orientations, an alternative
+            representation is as a boolean array of shape (self.nelements,
+            self.refdom.nfacets) with entries `True` if that facet belongs to
+            the boundary.  This array can be bit-packed to give a one-
+            dimensional array of ints, one per cell.  This is convenient as it
+            can be treated as `cell_data` by `skfem.io.meshio` and stored in
+            many external formats (VTK, XDMF, ...).
 
             That is, the binary expansion of the int for a cell gives the bit-
-            flags for whether the corresponding facets are in `boundary`.
+            flags for whether the corresponding facets are in `boundary`.  This
+            naturally implies the orientation, as the cell is on the inside of
+            the facet.
             """
             b = (
                 boundary
@@ -251,7 +252,8 @@ class Mesh:
             )
             t2f = np.zeros_like(self.t2f)
             columns = self.f2t[(b.ori, b)]
-            t2f[:, columns] = np.isin(self.t2f[:, columns], b)
+            r, c = np.nonzero(self.t2f[:, columns] == b)
+            t2f[(r, columns[c])] = 1
             return (1 << np.arange(self.refdom.nfacets)) @ t2f
 
         return {
@@ -280,7 +282,8 @@ class Mesh:
                 subdomains[subnames[2]] = np.nonzero(data[0])[0]
             elif subnames[1] == "b":
                 indices = (
-                    (1 << np.arange(self.refdom.nfacets))[:, None] & data[0]
+                    (1 << np.arange(self.refdom.nfacets))[:, None] 
+                    & data[0].astype(int)
                 ).astype(bool)
                 facets = np.sort(self.t2f[indices])
                 ori = np.argwhere(
