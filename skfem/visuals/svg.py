@@ -133,6 +133,21 @@ def plot(m, x: ndarray, **kwargs) -> SvgPlot:
     raise NotImplementedError("Type {} not supported.".format(type(m)))
 
 
+COLORS = np.array([
+    [49, 54, 149],
+    [69, 117, 180],
+    [116, 173, 209],
+    [171, 217, 233],
+    [224, 243, 248],
+    [255, 255, 191],
+    [254, 224, 144],
+    [253, 174, 97],
+    [244, 109, 67],
+    [215, 48, 39],
+    [165, 0, 38],
+])
+
+
 @plot.register(Mesh2D)
 def plot_mesh2d(m: Mesh2D, x: ndarray, **kwargs) -> SvgPlot:
     t = m.t
@@ -144,8 +159,11 @@ def plot_mesh2d(m: Mesh2D, x: ndarray, **kwargs) -> SvgPlot:
                 """style="fill:rgb({}, {}, {});" />""")
     elems = ""
     for ix, e in enumerate(t.T):
-        color = int((x[e].mean() - minval) / (maxval - minval) * 255)
-        elems += template.format(*p[:, e].flatten(order='F'), *(3 * (color,)))
+        scalar = (x[e].mean() - minval) / (maxval - minval) * (len(COLORS) - 1)
+        ix1 = int(np.floor(scalar))
+        ix2 = int(np.ceil(scalar))
+        color = (COLORS[ix2] - COLORS[ix1]) * (scalar - ix1) + COLORS[ix1]
+        elems += template.format(*p[:, e].flatten(order='F'), *color)
     elems += draw_mesh2d(m, boundaries_only=True, color="black").svg
     return SvgPlot((
         """<svg xmlns="http://www.w3.org/2000/svg" version="1.1" """

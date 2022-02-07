@@ -121,7 +121,13 @@ if __name__ == '__main__':
         title.set_text(f'$t$ = {t:.2f}')
         field.set_array(u[basis.nodal_dofs.flatten()])
 
-    animation = FuncAnimation(fig, update, evolve(0., u_init), repeat=False)
+    animation = FuncAnimation(
+        fig,
+        update,
+        evolve(0., u_init),
+        repeat=False,
+        interval=50,
+    )
     if args.gif:
         animation.save(Path(__file__).with_suffix('.gif'), 'imagemagick')
     else:

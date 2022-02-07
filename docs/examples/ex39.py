@@ -112,7 +112,13 @@ if __name__ == "__main__":
         line.set_ydata(u[sorting])
         line_exact.set_ydata(exact(t)[sorting])
 
-    animation = FuncAnimation(fig, update, evolve(0.0, u_init), repeat=False)
+    animation = FuncAnimation(
+        fig,
+        update,
+        evolve(0.0, u_init),
+        repeat=False,
+        interval=50,
+    )
     if args.gif:
         animation.save(Path(__file__).with_suffix(".gif"), "imagemagick")
     else:
