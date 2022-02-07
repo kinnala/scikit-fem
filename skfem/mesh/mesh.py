@@ -229,8 +229,8 @@ class Mesh:
         ) -> ndarray:
             """return an array with an int per cell encoding a 'boundary'
 
-            i.e. a subset of (optionally oriented) facets.  
-            
+            i.e. a subset of (optionally oriented) facets.
+
             Although these are stored internally as
             arrays of indices of facets, with an optional array of 0/1
             orientations, an alternative representation is as a boolean
