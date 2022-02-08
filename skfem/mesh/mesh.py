@@ -266,11 +266,11 @@ class Mesh:
                 if isinstance(boundary, OrientedBoundary)
                 else OrientedBoundary(boundary, np.zeros_like(boundary))
             )
-            t2f = np.zeros_like(self.t2f)
+            t2f_mask = np.zeros_like(self.t2f)
             columns = self.f2t[(b.ori, b)]
             r, c = np.nonzero(self.t2f[:, columns] == b)
-            t2f[(r, columns[c])] = 1
-            return (1 << np.arange(self.refdom.nfacets)) @ t2f
+            t2f_mask[(r, columns[c])] = 1
+            return (1 << np.arange(self.refdom.nfacets)) @ t2f_mask
 
         return {
             **{
@@ -301,13 +301,11 @@ class Mesh:
                     (1 << np.arange(self.refdom.nfacets))[:, None] 
                     & data[0].astype(int)
                 ).astype(bool)
-                unsorted_facets = self.t2f[mask]
+                facets = np.sort(self.t2f[mask])
                 cells = mask.nonzero()[1]
-                ori = (self.f2t[:, self.t2f[mask]] == cells).nonzero()[0]
-                permutation = unsorted_facets.argsort()
-                facets = unsorted_facets[permutation]
+                ori = np.arange(2) @ (self.f2t[:, facets] == cells)
                 boundaries[subnames[2]] = (
-                    OrientedBoundary(facets, ori[permutation]) if ori.any() else facets
+                    OrientedBoundary(facets, ori) if ori.any() else facets
                 )
         return boundaries, subdomains
 
