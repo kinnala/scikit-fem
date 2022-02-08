@@ -267,7 +267,7 @@ def to_file(mesh,
             **kwargs):
 
     path = Path(filename)
-    if 'file_format' not in kwargs and path.suffix == 'msh':
+    if 'file_format' not in kwargs and path.suffix == '.msh':
         kwargs.update({'file_format': 'gmsh'})
 
     meshio.write(path,
