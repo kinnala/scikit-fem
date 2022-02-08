@@ -466,7 +466,7 @@ _test_lambda = {
 
 
 @pytest.mark.parametrize(
-    "internal_facets",
+    "boundaries_only",
     [
         True,
         False,
@@ -485,9 +485,9 @@ _test_lambda = {
         MeshTet2.load(MESH_PATH / 'quadraticsphere.msh'),
     ]
 )
-def test_meshio_cycle_boundaries(internal_facets, m):
+def test_meshio_cycle_boundaries(boundaries_only, m):
 
-    m = m.with_boundaries(_test_lambda, internal_facets)
+    m = m.with_boundaries(_test_lambda, boundaries_only)
     M = from_meshio(to_meshio(m))
     assert_array_equal(M.p, m.p)
     assert_array_equal(M.t, m.t)
