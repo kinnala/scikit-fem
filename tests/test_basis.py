@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 import numpy as np
-from numpy.testing import assert_allclose, assert_almost_equal
+from numpy.testing import assert_allclose, assert_almost_equal, assert_array_equal
 
 from skfem import BilinearForm, LinearForm, asm, solve, condense, projection
 from skfem.mesh import (Mesh, MeshTri, MeshTet, MeshHex,
@@ -611,6 +611,6 @@ def test_oriented_saveload(mesh: Mesh):
 
     M = from_meshio(to_meshio(m))
 
-    assert_almost_equal(
+    assert_array_equal(
         m.boundaries["mid"].ori, M.boundaries["mid"].ori,
     )

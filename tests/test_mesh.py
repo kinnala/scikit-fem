@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 from scipy.spatial import Delaunay
-from numpy.testing import assert_array_equal, assert_almost_equal
+from numpy.testing import assert_array_equal
 
 from skfem.mesh import (Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
                         MeshTri2, MeshQuad2, MeshTet2, MeshHex2, MeshLine1DG,
