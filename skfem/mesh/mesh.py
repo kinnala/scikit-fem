@@ -224,7 +224,8 @@ class Mesh:
         subdomains = {} if self._subdomains is None else self._subdomains
         boundaries = {} if self._boundaries is None else self._boundaries
 
-        def encode_boundary(boundary: Union[ndarray, OrientedBoundary]) -> ndarray:
+        def encode_boundary(
+            boundary: Union[ndarray, OrientedBoundary]) -> ndarray:
             """return an array with an int per cell encoding a 'boundary'
 
             i.e. a subset of (optionally oriented) facets.
@@ -280,7 +281,7 @@ class Mesh:
                 subdomains[subnames[2]] = np.nonzero(data[0])[0]
             elif subnames[1] == "b":
                 mask = (
-                    (1 << np.arange(self.refdom.nfacets))[:, None] 
+                    (1 << np.arange(self.refdom.nfacets))[:, None]
                     & data[0].astype(int)
                 ).astype(bool)
                 facets = np.sort(self.t2f[mask])
@@ -289,7 +290,7 @@ class Mesh:
                 boundaries[subnames[2]] = (
                     OrientedBoundary(facets, ori) if ori.any() else facets
                 )
-    
+
         return boundaries, subdomains
 
     def boundary_nodes(self) -> ndarray:
