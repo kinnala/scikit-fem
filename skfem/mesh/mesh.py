@@ -224,6 +224,36 @@ class Mesh:
         subdomains = {} if self._subdomains is None else self._subdomains
         boundaries = {} if self._boundaries is None else self._boundaries
 
+        def encode_boundary(boundary: Union[ndarray, OrientedBoundary]) -> ndarray:
+            """return an array with an int per cell encoding a 'boundary'
+
+            i.e. a subset of (optionally oriented) facets.
+
+            Although these are stored internally as arrays of indices of
+            facets, with an optional array of 0/1 orientations, an alternative
+            representation is as a boolean array of shape (self.nelements,
+            self.refdom.nfacets) with entries `True` if that facet belongs to
+            the boundary.  This array can be bit-packed to give a one-
+            dimensional array of ints, one per cell.  This is convenient as it
+            can be treated as `cell_data` by `skfem.io.meshio` and stored in
+            many external formats (VTK, XDMF, ...).
+
+            That is, the binary expansion of the int for a cell gives the bit-
+            flags for whether the corresponding facets are in `boundary`.  This
+            naturally implies the orientation, as the cell is on the inside of
+            the facet.
+            """
+            b = (
+                boundary
+                if isinstance(boundary, OrientedBoundary)
+                else OrientedBoundary(boundary, np.zeros_like(boundary))
+            )
+            t2f_mask = np.zeros_like(self.t2f)
+            columns = self.f2t[(b.ori, b)]
+            r, c = np.nonzero(self.t2f[:, columns] == b)
+            t2f_mask[(r, columns[c])] = 1
+            return (1 << np.arange(self.refdom.nfacets)) @ t2f_mask
+
         return {
             **{
                 f"skfem:s:{name}": [
@@ -232,10 +262,7 @@ class Mesh:
                 for name, subdomain in subdomains.items()
             },
             **{
-                f"skfem:b:{name}": [
-                    ((1 << np.arange(self.t2f.shape[0]))
-                     @ np.isin(self.t2f, boundary)).astype(int)
-                ]
+                f"skfem:b:{name}": [encode_boundary(boundary)]
                 for name, boundary in boundaries.items()
             },
         }
@@ -252,11 +279,17 @@ class Mesh:
             if subnames[1] == "s":
                 subdomains[subnames[2]] = np.nonzero(data[0])[0]
             elif subnames[1] == "b":
-                boundaries[subnames[2]] = np.sort(self.t2f[
-                    (1 << np.arange(self.t2f.shape[0]))[:, None]
-                    & data[0].astype(np.int64) > 0
-                ])
-
+                mask = (
+                    (1 << np.arange(self.refdom.nfacets))[:, None] 
+                    & data[0].astype(int)
+                ).astype(bool)
+                facets = np.sort(self.t2f[mask])
+                cells = mask.nonzero()[1]
+                ori = np.arange(2) @ (self.f2t[:, facets] == cells)
+                boundaries[subnames[2]] = (
+                    OrientedBoundary(facets, ori) if ori.any() else facets
+                )
+    
         return boundaries, subdomains
 
     def boundary_nodes(self) -> ndarray:
