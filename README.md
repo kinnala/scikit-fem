@@ -233,7 +233,7 @@ with respect to documented and/or tested features.
   fields
 - Added: `Mesh.facets_around` which constructs a set of facets around a
   subdomain
-- Added: `Mesh.load` now tries loading the orientation of boundaries and
+- Added: `Mesh.save` and `load` now preserve the orientation of boundaries and
   interfaces
 - Added: `OrientedBoundary` which is a subclass of `ndarray` for facet index
   arrays with the orientation information (0 or 1 per facet) available as

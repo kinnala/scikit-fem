@@ -4,10 +4,11 @@ from pathlib import Path
 
 import pytest
 import numpy as np
-from numpy.testing import assert_allclose, assert_almost_equal
+from numpy.testing import (assert_allclose, assert_almost_equal,
+                           assert_array_equal)
 
 from skfem import BilinearForm, LinearForm, asm, solve, condense, projection
-from skfem.mesh import (MeshTri, MeshTet, MeshHex,
+from skfem.mesh import (Mesh, MeshTri, MeshTet, MeshHex,
                         MeshQuad, MeshLine1, MeshWedge1)
 from skfem.assembly import (CellBasis, FacetBasis, Dofs, Functional,
                             MortarFacetBasis)
@@ -599,20 +600,17 @@ def test_oriented_gauss_integral(m, e):
         decimal=5,
     )
 
+@pytest.mark.parametrize(
+    "m", [MeshLine1(), MeshTri(), MeshQuad(), MeshTet(), MeshHex()]
+)
+def test_oriented_saveload(m: Mesh):
 
-## TODO preserve orientation in save/load cycle
-# def test_oriented_saveload():
+    m = m.refined(4)
+    m = m.with_boundaries({"mid": m.facets_around([5]),})
+    assert len(m.boundaries["mid"].ori) == m.refdom.nfacets
 
-#     m = MeshTri().refined(4)
-#     m = m.with_boundaries({
-#         'mid': m.facets_around([5]),
-#     })
-#     assert len(m.boundaries['mid'].ori) == 3
+    M = from_meshio(to_meshio(m))
 
-#     # cycle to meshio and check that orientation is preserved
-#     M = from_meshio(to_meshio(m))
-
-#     assert_almost_equal(
-#         m.boundaries['mid'].ori,
-#         M.boundaries['mid'].ori,
-#     )
+    assert_array_equal(
+        m.boundaries["mid"].ori, M.boundaries["mid"].ori,
+    )
