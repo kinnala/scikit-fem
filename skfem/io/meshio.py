@@ -1,5 +1,7 @@
 """Import/export any formats supported by meshio."""
 
+from pathlib import Path
+
 import meshio
 import numpy as np
 
@@ -264,10 +266,11 @@ def to_file(mesh,
             encode_point_data=False,
             **kwargs):
 
-    if 'file_format' not in kwargs and filename.split('.')[-1] == 'msh':
+    path = Path(filename)
+    if 'file_format' not in kwargs and path.suffix == '.msh':
         kwargs.update({'file_format': 'gmsh'})
 
-    meshio.write(filename,
+    meshio.write(path,
                  to_meshio(mesh,
                            point_data,
                            cell_data,

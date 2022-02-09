@@ -2,6 +2,7 @@ import logging
 import importlib
 
 from dataclasses import dataclass, replace
+from os import PathLike
 from typing import Callable, Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
@@ -627,7 +628,7 @@ class Mesh:
         return self.__repr__()
 
     def save(self,
-             filename: str,
+             filename: Union[str, PathLike],
              point_data: Optional[Dict[str, ndarray]] = None,
              cell_data: Optional[Dict[str, ndarray]] = None,
              **kwargs) -> None:
