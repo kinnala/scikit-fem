@@ -28,8 +28,9 @@ class MeshTri2(Mesh2D2, MeshTri1):
 
     @classmethod
     def init_circle(cls: Type,
-                    nrefs: int = 3) -> 'MeshTri2':
-        m = MeshTri1.init_circle(nrefs=nrefs)
+                    nrefs: int = 3,
+                    smoothed: bool = False) -> 'MeshTri2':
+        m = MeshTri1.init_circle(nrefs=nrefs, smoothed=smoothed)
         M = cls.from_mesh(m)
         D = M.dofs.get_facet_dofs(M.boundary_facets()).flatten()
         doflocs = M.doflocs.copy()
