@@ -1045,6 +1045,8 @@ class Mesh:
             behavior based on the type of this parameter.
 
         """
+        if isinstance(elements, bool) and elements:
+            return np.arange(self.nelements, dtype=np.int64)
         if isinstance(elements, int):
             # Make  normalize_elements([1,2,3]) have the same behavior as
             # normalize_elements(np.array([1,2,3]))
