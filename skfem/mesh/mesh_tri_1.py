@@ -157,7 +157,8 @@ class MeshTri1(MeshSimplex, Mesh2D):
 
     @classmethod
     def init_circle(cls: Type,
-                    nrefs: int = 3) -> Mesh2D:
+                    nrefs: int = 3,
+                    smoothed: bool = False) -> Mesh2D:
         r"""Initialize a circle mesh.
 
         Works by repeatedly refining the following mesh and moving
@@ -177,6 +178,8 @@ class MeshTri1(MeshSimplex, Mesh2D):
         ----------
         nrefs
             Number of refinements, by default 3.
+        smoothed
+            If ``True``, apply smoothing after each refine.
 
         """
         p = np.array([[0., 0.],
@@ -191,6 +194,8 @@ class MeshTri1(MeshSimplex, Mesh2D):
         m = cls(p, t)
         for _ in range(nrefs):
             m = m.refined()
+            if smoothed:
+                m = m.smoothed()
             D = m.boundary_nodes()
             tmp = m.p
             tmp[:, D] = tmp[:, D] / np.linalg.norm(tmp[:, D], axis=0)
