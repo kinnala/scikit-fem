@@ -17,6 +17,19 @@ The library
 - supports one-dimensional, triangular, quadrilateral, tetrahedral and hexahedral finite elements
 - includes special elements such as Raviart-Thomas, Nédélec, MINI, Crouzeix-Raviart, Argyris, ...
 
+```
+@article{skfem2020,
+  doi = {10.21105/joss.02369},
+  year = {2020},
+  volume = {5},
+  number = {52},
+  pages = {2369},
+  author = {Tom Gustafsson and G. D. McBain},
+  title = {scikit-fem: A {P}ython package for finite element assembly},
+  journal = {Journal of Open Source Software}
+}
+```
+
 ## Installation
 
 The most recent release can be installed simply by
@@ -189,22 +202,6 @@ for first timers include:
 - Finding typos in the documentation.
 
 *By contributing code to scikit-fem, you are agreeing to release it under BSD-3-Clause, see LICENSE.md.*
-
-## Citing the library
-
-We appreciate if you cite the following article in your scientific works:
-```
-@article{skfem2020,
-  doi = {10.21105/joss.02369},
-  year = {2020},
-  volume = {5},
-  number = {52},
-  pages = {2369},
-  author = {Tom Gustafsson and G. D. McBain},
-  title = {scikit-fem: A {P}ython package for finite element assembly},
-  journal = {Journal of Open Source Software}
-}
-```
 
 ## Changelog
 
