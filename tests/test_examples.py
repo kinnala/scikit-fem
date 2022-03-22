@@ -203,7 +203,7 @@ class TestEx23(TestCase):
     def runTest(self):
         import docs.examples.ex23 as ex
         self.assertAlmostEqual(max(ex.lmbda_list), ex.turning_point,
-                               delta=5e-5)
+                               delta=1e-3)
 
 
 class TestEx24(TestCase):
