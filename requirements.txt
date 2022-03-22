@@ -6,7 +6,7 @@ ipython
 pytest
 pygmsh
 gmsh
-pacopy==0.1.2
+pacopy
 pyamg
 mypy
 flake8
