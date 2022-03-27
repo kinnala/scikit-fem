@@ -209,6 +209,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 with respect to documented and/or tested features.
 
+### Unreleased
+
+- Added: `solver_iter_cg`, a simple pure Python conjugate gradient solver for
+  environments that do not have sparse solver libraries
+- Fixed: Assembly now works inside Pyodide
+
 ### [6.0.0] - 2022-03-15
 
 - Changed: `DiscreteField` is now a subclass of `ndarray` instead of
