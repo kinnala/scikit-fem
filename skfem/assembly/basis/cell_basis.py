@@ -1,4 +1,5 @@
 import logging
+import sys
 from typing import Callable, Optional, Tuple, Any
 
 import numpy as np
@@ -6,6 +7,11 @@ from numpy import ndarray
 from skfem.element import DiscreteField, Element
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh
+
+if "pyodide" in sys.modules:
+    from scipy.sparse.coo import coo_matrix
+else:
+    from scipy.sparse import coo_matrix
 
 from .abstract_basis import AbstractBasis
 from ..dofs import Dofs
@@ -163,8 +169,6 @@ class CellBasis(AbstractBasis):
         not assembled with the usual quadratures.
 
         """
-        from scipy.sparse import coo_matrix
-
         cells = self.mesh.element_finder(mapping=self.mapping)(*x)
         pts = self.mapping.invF(x[:, :, np.newaxis], tind=cells)
         phis = np.array(

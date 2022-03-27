@@ -167,6 +167,34 @@ def solver_iter_pcg(**kwargs) -> LinearSolver:
     return solver_iter_krylov(**kwargs)
 
 
+def solver_iter_cg(**kwargs):
+    """Pure Python conjugate gradient solver (for old scipy versions)."""
+
+    def solver(A, b, **solve_time_kwargs):
+        kwargs.update(solve_time_kwargs)
+        maxiters = kwargs['maxiters'] if 'maxiters' in kwargs else 500
+        tol = kwargs['tol'] if 'tol' in kwargs else 1e-10
+        x = b
+        r = b - A.dot(x)
+        p = r
+        rsold = np.dot(r, r)
+        for k in range(maxiters):
+            Ap = A.dot(p)
+            alpha = rsold / np.dot(p, Ap)
+            x = x + alpha * p
+            r = r - alpha * Ap
+            rsnew = np.dot(r, r)
+            if np.sqrt(rsnew) < tol:
+                break
+            p = r + (rsnew / rsold) * p
+            rsold = rsnew
+        if k == maxiters:
+            logger.warning("Iterative solver did not converge.")
+        return x
+
+    return solver
+
+
 # solve and condense
 
 def solve_eigen(A: spmatrix,

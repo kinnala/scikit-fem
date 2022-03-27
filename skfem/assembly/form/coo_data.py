@@ -1,10 +1,16 @@
 import logging
+import sys
 
 from dataclasses import dataclass, replace
 from typing import Tuple, Any, Optional
 
 import numpy as np
 from numpy import ndarray
+
+if "pyodide" in sys.modules:
+    from scipy.sparse.coo import coo_matrix
+else:
+    from scipy.sparse import coo_matrix
 
 
 logger = logging.getLogger(__name__)
@@ -25,7 +31,6 @@ class COOData:
             shape: Tuple[int, ...],
             local_shape: Optional[Tuple[int, ...]]
     ):
-        from scipy.sparse import coo_matrix
         K = coo_matrix((data, (indices[0], indices[1])), shape=shape)
         K.eliminate_zeros()
         return K.tocsr()
@@ -94,7 +99,6 @@ class COOData:
     def toarray(self) -> ndarray:
         """Return a dense numpy array."""
         if len(self.shape) == 1:
-            from scipy.sparse import coo_matrix
             return coo_matrix(
                 (self.data, (self.indices[0], np.zeros_like(self.indices[0]))),
                 shape=self.shape + (1,),

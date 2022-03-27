@@ -31,5 +31,6 @@ __all__ = all_mesh + all_assembly + all_element + [  # noqa
     'solver_eigen_scipy_sym',
     'solver_iter_pcg',
     'solver_iter_krylov',
+    'solver_iter_cg',
     '__version__',
 ]
