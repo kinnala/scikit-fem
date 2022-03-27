@@ -1,6 +1,7 @@
 """This module contains utility functions such as convenient access to
 SciPy linear solvers."""
 
+import sys
 import logging
 from warnings import warn
 from typing import Optional, Union, Tuple, Callable, Dict
@@ -10,7 +11,11 @@ import scipy.sparse as sp
 import scipy.sparse.csgraph as spg
 import scipy.sparse.linalg as spl
 from numpy import ndarray
-from scipy.sparse import spmatrix
+
+if "pyodide" in sys.modules:
+    from scipy.sparse.base import spmatrix
+else:
+    from scipy.sparse import spmatrix
 
 from skfem.assembly import asm, BilinearForm, LinearForm, DofsView
 from skfem.assembly.basis import AbstractBasis
