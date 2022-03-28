@@ -201,7 +201,7 @@ def solve_eigen(A: spmatrix,
                 M: spmatrix,
                 x: Optional[ndarray] = None,
                 I: Optional[ndarray] = None,
-                solver: Optional[Union[EigenSolver]] = None,
+                solver: Optional[EigenSolver] = None,
                 **kwargs) -> Tuple[ndarray, ndarray]:
 
     if solver is None:
@@ -219,7 +219,7 @@ def solve_linear(A: spmatrix,
                  b: ndarray,
                  x: Optional[ndarray] = None,
                  I: Optional[ndarray] = None,
-                 solver: Optional[Union[LinearSolver]] = None,
+                 solver: Optional[LinearSolver] = None,
                  **kwargs) -> ndarray:
 
     if solver is None:
