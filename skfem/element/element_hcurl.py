@@ -33,4 +33,4 @@ class ElementHcurl(Element):
         ),)
 
     def lbasis(self, X, i):
-        raise Exception("ElementHcurl.lbasis method not found.")
+        raise NotImplementedError

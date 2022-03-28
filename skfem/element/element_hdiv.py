@@ -28,4 +28,4 @@ class ElementHdiv(Element):
         ),)
 
     def lbasis(self, X, i):
-        raise Exception("ElementHdiv.lbasis method not found.")
+        raise NotImplementedError
