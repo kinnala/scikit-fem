@@ -172,7 +172,7 @@ cube mesh:
    <skfem CellBasis(MeshHex1, ElementHex2) object>
      Number of elements: 1
      Number of DOFs: 27
-     Size: 74088 B
+     Size: 296352 B
 
 .. plot::
 
