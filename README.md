@@ -214,6 +214,7 @@ with respect to documented and/or tested features.
 - Added: `solver_iter_cg`, a simple pure Python conjugate gradient solver for
   environments that do not have sparse solver libraries
 - Fixed: Assembly now works inside Pyodide
+- Fixed: Calculation of size in `Basis.__repr__` was slow and incorrect
 
 ### [6.0.0] - 2022-03-15
 
