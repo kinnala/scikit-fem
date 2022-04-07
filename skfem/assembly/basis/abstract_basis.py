@@ -248,7 +248,7 @@ class AbstractBasis:
 
     def __repr__(self):
         size = sum([sum([y.size if hasattr(y, 'size') else 0
-                         for y in x])
+                         for y in x.astuple])
                     for x in self.basis[0]]) * 8 * len(self.basis)
         rep = ""
         rep += "<skfem {}({}, {}) object>\n".format(type(self).__name__,
