@@ -1,31 +1,31 @@
 from skfem import DiscreteField, BilinearForm, LinearForm
 from skfem.assembly.form import Form
-from jax import linearize, jvp
+from jax import jvp
 from jax.config import config
 
 
 config.update("jax_enable_x64", True)
 
 
-def derivative(fun, u0):
-    if not isinstance(u0, DiscreteField):
-        raise NotImplementedError("Second argument must be DiscreteField.")
-    y, DF = linearize(fun, u0.astuple)
-    return y, lambda u: DF(u.astuple)
+class NonlinearForm(Form):
 
+    def linearize(self, u0):
 
-def diff(F, u0):
-    if not isinstance(u0, DiscreteField):
-        raise NotImplementedError("Second argument must be DiscreteField.")
+        if not isinstance(u0, DiscreteField):
+            raise NotImplementedError("NonlinearForm.linearize requires "
+                                      "the point around which the form is "
+                                      "linearized as an argument.")
 
-    @BilinearForm
-    def DF(u, v, w):
-        F1 = lambda U: F(U, v, w)
-        return jvp(F1, (u0.astuple,), (u.astuple,))[1]
+        @BilinearForm
+        def DF(u, v, w):
+            F1 = lambda U: self.form(U, v, w)
+            return jvp(F1, (u0.astuple,), (u.astuple,))[1]
 
-    @LinearForm
-    def y(v, w):
-        F1 = lambda U: F(U, v, w)
-        return -F1(u0.astuple)
+        @LinearForm
+        def y(v, w):
+            return -self.form(u0.astuple, v, w)
 
-    return y, DF
+        return DF, y
+
+    def hessian(self, u0):
+        pass
