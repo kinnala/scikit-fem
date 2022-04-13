@@ -1,21 +1,26 @@
+import logging
+import jax.numpy as jnp
+
 from skfem import DiscreteField, BilinearForm, LinearForm
 from skfem.assembly.form import Form
-from jax import jvp
+from jax import jvp, linearize, vjp, hessian
 from jax.config import config
 from numpy import ndarray
 
 
 config.update("jax_enable_x64", True)
+logger = logging.getLogger(__name__)
+logger.warning("skfem.autodiff is an experimental feature which requires JAX "
+               "for automatic differentiation of forms. You can install JAX "
+               "by running 'pip install jax[cpu]'.")
 
 
 class NonlinearForm(Form):
 
-    def linearize(self, u0):
+    def linearize(self, u0: DiscreteField):
 
         if not isinstance(u0, DiscreteField):
-            raise NotImplementedError("linearize requires the point around "
-                                      "which the form is linearized as "
-                                      "an argument.")
+            raise NotImplementedError
 
         @BilinearForm
         def DF(u, v, w):
@@ -45,6 +50,9 @@ class NonlinearForm(Form):
 class NonlinearFunctional(Form):
 
     def linearize(self, u0):
+
+        if not isinstance(u0, DiscreteField):
+            raise NotImplementedError
 
         @BilinearForm
         def HF(u, v, w):
