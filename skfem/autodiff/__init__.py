@@ -1,9 +1,8 @@
 import logging
-import jax.numpy as jnp
 
 from skfem import DiscreteField, BilinearForm, LinearForm
 from skfem.assembly.form import Form
-from jax import jvp, linearize, vjp, hessian
+from jax import jvp
 from jax.config import config
 from numpy import ndarray
 
