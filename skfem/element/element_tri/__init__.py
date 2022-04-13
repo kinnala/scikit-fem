@@ -14,3 +14,5 @@ from .element_tri_hermite import ElementTriHermite  # noqa
 from .element_tri_ccr import ElementTriCCR  # noqa
 from .element_tri_skeleton_p0 import ElementTriSkeletonP0  # noqa
 from .element_tri_skeleton_p1 import ElementTriSkeletonP1  # noqa
+from .element_tri_p1g import ElementTriP1G  # noqa
+from .element_tri_p2g import ElementTriP2G  # noqa
