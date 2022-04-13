@@ -1,5 +1,3 @@
-import logging
-
 from skfem import DiscreteField, BilinearForm, LinearForm
 from skfem.assembly.form import Form
 from jax import jvp
@@ -8,11 +6,6 @@ from numpy import ndarray
 
 
 config.update("jax_enable_x64", True)
-logger = logging.getLogger(__name__)
-logger.warning("skfem.autodiff is an experimental feature and might change at "
-               "any time without notice.  It uses JAX for automatic "
-               "differentiation of forms. You can install JAX by running "
-               "'pip install jax[cpu]'.")
 
 
 class NonlinearForm(Form):

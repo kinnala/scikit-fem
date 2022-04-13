@@ -1,12 +1,14 @@
 r"""Automatic differentiation.
 
+Warning: This example uses experimental features.
+
 This example solves the minimal surface problem from example 10 using automatic
 differentation in order to derive the tangent system for Newton's method.
 
 """
 from skfem import *
-from skfem.autodiff import NonlinearFunctional
-from skfem.autodiff.helpers import grad, dot
+from skfem.experimental.autodiff import NonlinearFunctional
+from skfem.experimental.autodiff.helpers import grad, dot
 import numpy as np
 import jax.numpy as jnp
 
