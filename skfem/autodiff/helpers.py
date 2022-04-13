@@ -17,6 +17,12 @@ def grad(u):
     return u[1]
 
 
+def dd(u):
+    if isinstance(u, DiscreteField):
+        return u.hess
+    return u[4]
+
+
 def transpose(T):
     return jnp.einsum('ij...->ji...', T)
 
