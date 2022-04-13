@@ -19,12 +19,13 @@ class NonlinearForm(Form):
 
         @BilinearForm
         def DF(u, v, w):
-            F1 = lambda U: self.form(U, v, w)
-            return jvp(F1, (u0.astuple,), (u.astuple,))[1]
+            return jvp(lambda U: self.form(U, v, w),
+                       (u0.astuple,),
+                       (u.astuple,))[1]
 
         @LinearForm
         def y(v, w):
-            return -self.form(u0.astuple, v, w)
+            return self.form(u0.astuple, v, w)
 
         return DF, y
 
@@ -47,14 +48,17 @@ class NonlinearFunctional(Form):
 
         @BilinearForm
         def HF(u, v, w):
-            F1 = lambda U: self.form(U, w)
-            F2 = lambda U: jvp(F1, (U,), (v.astuple,))[1]
-            return jvp(F2, (u0.astuple,), (u.astuple,))[1]
+            return jvp(lambda U0: jvp(lambda U: self.form(U, w),
+                                      (U0,),
+                                      (v.astuple,))[1],
+                       (u0.astuple,),
+                       (u.astuple,))[1]
 
         @LinearForm
         def DF(v, w):
-            F1 = lambda U: self.form(U, w)
-            return -jvp(F1, (u0.astuple,), (v.astuple,))[1]
+            return jvp(lambda U: self.form(U, w),
+                       (u0.astuple,),
+                       (v.astuple,))[1]
 
         return HF, DF
 
