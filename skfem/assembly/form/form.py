@@ -35,6 +35,9 @@ class Form:
                  nthreads: int = 0,
                  inverse: bool = False):
         self.form = form.form if isinstance(form, Form) else form
+        self.nargs = (len(signature(self.form).parameters)
+                      if self.form is not None
+                      else None)
         self.dtype = dtype
         self.nthreads = nthreads
 
@@ -48,12 +51,10 @@ class Form:
     def block(self, *args):
         form = deepcopy(self)
         name = form.form.__name__
-        sig = signature(form.form)
-        nargs = len(sig.parameters)
         form.form = lambda *arg: self.form(
             *[arg[k] if args[k] == j else DiscreteField()
               for k in range(len(arg) - 1)
-              for j in range(int((nargs - 1) / (len(arg) - 1)))],
+              for j in range(int((self.nargs - 1) / (len(arg) - 1)))],
             arg[-1]
         )
         form.form.__name__ = name

@@ -7,7 +7,7 @@ differentation in order to derive the tangent system for Newton's method.
 
 """
 from skfem import *
-from skfem.experimental.autodiff import NonlinearFunctional
+from skfem.experimental.autodiff import NonlinearForm
 from skfem.experimental.autodiff.helpers import grad, dot
 import numpy as np
 import jax.numpy as jnp
@@ -15,7 +15,7 @@ import jax.numpy as jnp
 m = MeshTri().refined(5)
 
 
-@NonlinearFunctional
+@NonlinearForm
 def energy(u, _):
     return jnp.sqrt(1. + dot(grad(u), grad(u)))
 
