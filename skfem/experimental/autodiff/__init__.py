@@ -1,9 +1,7 @@
-from skfem import DiscreteField, BilinearForm, LinearForm
 from skfem.assembly.form.form import Form, FormExtraParams
 from skfem.assembly.form.coo_data import COOData
 from jax import jvp, linearize
 from jax.config import config
-from functools import partial
 from numpy import ndarray
 import numpy as np
 
@@ -37,14 +35,15 @@ class NonlinearForm(Form):
 
         # loop over the indices of local stiffness matrix
         for i in range(basis.Nbfun):
+            V = basis.basis[i][0].astuple
             if self.nargs == 3:
                 y, DF = linearize(lambda U: self.form(U,
-                                                      basis.basis[i][0].astuple,
+                                                      V,
                                                       wdict), u0.astuple)
             elif self.nargs == 2:
                 y, DF = linearize(lambda U0: jvp(lambda U: self.form(U, wdict),
                                                  (U0,),
-                                                 (basis.basis[i][0].astuple,))[1],
+                                                 (V,))[1],
                                   u0.astuple)
             else:
                 raise NotImplementedError

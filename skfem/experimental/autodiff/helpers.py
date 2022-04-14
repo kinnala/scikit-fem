@@ -41,6 +41,7 @@ def eye(w, size):
     return jnp.array([[w if i == j else 0. * w for i in range(size)]
                       for j in range(size)])
 
+
 def det(A):
     detA = jnp.zeros_like(A[0, 0])
     if A.shape[0] == 3:
