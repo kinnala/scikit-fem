@@ -18,7 +18,7 @@ class NonlinearForm(Form):
 
         nt = basis.nelems
         dx = basis.dx
-        wdict = FormExtraParams({
+        w = FormExtraParams({
             **basis.default_parameters(),
             **self._normalize_asm_kwargs(kwargs, basis),
         })
@@ -37,14 +37,12 @@ class NonlinearForm(Form):
         for i in range(basis.Nbfun):
             V = basis.basis[i][0].astuple
             if self.nargs == 3:
-                y, DF = linearize(lambda U: self.form(U,
-                                                      V,
-                                                      wdict), u0.astuple)
+                y, DF = linearize(lambda U: self.form(U, V, w), u0.astuple)
             elif self.nargs == 2:
-                y, DF = linearize(lambda U0: jvp(lambda U: self.form(U, wdict),
-                                                 (U0,),
-                                                 (V,))[1],
-                                  u0.astuple)
+                y, DF = linearize(
+                    lambda W: jvp(lambda U: self.form(U, w), (W,), (V,))[1],
+                    u0.astuple
+                )
             else:
                 raise NotImplementedError
             for j in range(basis.Nbfun):
