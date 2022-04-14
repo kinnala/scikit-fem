@@ -30,6 +30,7 @@ from skfem.element import (
     ElementTriP4,
     ElementTriP1G,
     ElementTriP2G,
+    ElementTriP2B,
 )
 from skfem.assembly import FacetBasis, Basis
 from skfem.mesh import (MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
@@ -228,6 +229,13 @@ class ConvergenceTriP2(ConvergenceTriP1):
 
     def create_basis(self, m):
         e = ElementTriP2()
+        return Basis(m, e)
+
+
+class ConvergenceTriP2B(ConvergenceTriP2):
+
+    def create_basis(self, m):
+        e = ElementTriP2B()
         return Basis(m, e)
 
 
