@@ -81,6 +81,10 @@ class DiscreteField(ndarray):
     def is_zero(self):
         return self.shape == (1,)
 
+    def zeros(self):
+        return DiscreteField(*tuple(None if c is None else np.zeros_like(c)
+                                    for c in self.astuple))
+
     def __repr__(self):
         rep = ""
         rep += "<skfem DiscreteField object>"

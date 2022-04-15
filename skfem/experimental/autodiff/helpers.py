@@ -17,6 +17,12 @@ def grad(u):
     return u[1]
 
 
+def div(u):
+    if u[2] is not None:
+        return u[2]
+    return jnp.einsum('ii...', u[1])
+
+
 def dd(u):
     if isinstance(u, DiscreteField):
         return u.hess

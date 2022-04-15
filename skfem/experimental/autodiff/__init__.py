@@ -11,10 +11,14 @@ config.update("jax_enable_x64", True)
 
 class NonlinearForm(Form):
 
-    def assemble(self, u0, basis, **kwargs):
+    def assemble(self, u0, basis, hessian=False, **kwargs):
 
         if isinstance(u0, ndarray):
             u0 = basis.interpolate(u0)
+            if isinstance(u0, tuple):
+                u0 = tuple(c.astuple for c in u0)
+            else:
+                u0 = (u0.astuple,)
 
         nt = basis.nelems
         dx = basis.dx
@@ -35,23 +39,21 @@ class NonlinearForm(Form):
 
         # loop over the indices of local stiffness matrix
         for i in range(basis.Nbfun):
-            V = basis.basis[i][0].astuple
-            if self.nargs == 3:
-                y, DF = linearize(lambda U: self.form(U, V, w), u0.astuple)
-            elif self.nargs == 2:
+            V = tuple(c.astuple for c in basis.basis[i])
+            if hessian:
                 y, DF = linearize(
-                    lambda W: jvp(lambda U: self.form(U, w), (W,), (V,))[1],
-                    u0.astuple
+                    lambda W: jvp(lambda U: self.form(*U, w), (W,), (V,))[1],
+                    u0
                 )
             else:
-                raise NotImplementedError
+                y, DF = linearize(lambda U: self.form(*U, *V, w), u0)
             for j in range(basis.Nbfun):
+                U = tuple(c.astuple for c in basis.basis[j])
                 ixs = slice(nt * (basis.Nbfun * j + i),
                             nt * (basis.Nbfun * j + i + 1))
                 rows[ixs] = basis.element_dofs[i]
                 cols[ixs] = basis.element_dofs[j]
-                data[j, i, :] = np.sum(DF(basis.basis[j][0].astuple) * dx,
-                                       axis=1)
+                data[j, i, :] = np.sum(DF(U) * dx, axis=1)
             ixs1 = slice(nt * i, nt * (i + 1))
             rows1[ixs1] = basis.element_dofs[i]
             data1[ixs1] = np.sum(y * dx, axis=1)

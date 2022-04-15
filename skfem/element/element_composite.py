@@ -100,5 +100,5 @@ class ElementComposite(Element):
             if n == k:
                 output.append(e.gbasis(mapping, X, ind, tind)[0])
             else:
-                output.append(DiscreteField())
+                output.append(e.gbasis(mapping, X, 0, tind)[0].zeros())
         return tuple(output)
