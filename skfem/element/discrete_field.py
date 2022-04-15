@@ -53,7 +53,7 @@ class DiscreteField(ndarray):
         self.grad6 = getattr(obj, 'grad6', None)
 
     def __getitem__(self, key):
-           return np.array(self)[key]
+        return np.array(self)[key]
 
     def __array_wrap__(self, out_arr, context=None):
         # invalidate attributes after ufuncs
