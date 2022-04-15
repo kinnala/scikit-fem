@@ -18,9 +18,9 @@ def grad(u):
 
 
 def div(u):
-    if u[2] is not None:
-        return u[2]
-    return np.einsum('ii...', u[1])
+    if len(u[1].shape) == 4:
+        return np.einsum('ii...', u[1])
+    return u[2]
 
 
 def dd(u):
