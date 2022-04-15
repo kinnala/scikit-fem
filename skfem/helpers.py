@@ -22,15 +22,11 @@ def jump(w: FormExtraParams, *args):
 
 def grad(u: DiscreteField):
     """Gradient."""
-    if u.is_zero():
-        return u
     return u.grad
 
 
 def div(u: DiscreteField):
     """Divergence."""
-    if u.is_zero():
-        return u
     if u.div is not None:
         return u.div
     elif u.grad is not None:
@@ -43,8 +39,6 @@ def div(u: DiscreteField):
 
 def curl(u: DiscreteField):
     """Curl."""
-    if u.is_zero():
-        return u
     if u.curl is not None:
         return u.curl
     elif u.grad is not None:
@@ -55,8 +49,6 @@ def curl(u: DiscreteField):
 
 def d(u: DiscreteField):
     """Gradient, divergence or curl."""
-    if u.is_zero():
-        return u
     if u.grad is not None:
         return u.grad
     elif u.div is not None:
@@ -68,38 +60,26 @@ def d(u: DiscreteField):
 
 def sym_grad(u: DiscreteField):
     """Symmetric gradient."""
-    if u.is_zero():
-        return u
     return .5 * (u.grad + transpose(u.grad))
 
 
 def dd(u: DiscreteField):
     """Hessian (for :class:`~skfem.element.ElementGlobal`)."""
-    if u.is_zero():
-        return u
     return u.hess
 
 
 def ddd(u: DiscreteField):
     """Third derivative (for :class:`~skfem.element.ElementGlobal`)."""
-    if u.is_zero():
-        return u
     return u.grad3
 
 
 def dddd(u: DiscreteField):
     """Fourth derivative (for :class:`~skfem.element.ElementGlobal`)."""
-    if u.is_zero():
-        return u
     return u.grad4
 
 
 def inner(u: FieldOrArray, v: FieldOrArray):
     """Inner product between any matching tensors."""
-    if isinstance(u, DiscreteField) and u.is_zero():
-        return u
-    if isinstance(v, DiscreteField) and v.is_zero():
-        return v
     if len(u.shape) == 2:
         return u * v
     elif len(u.shape) == 3:
@@ -111,28 +91,16 @@ def inner(u: FieldOrArray, v: FieldOrArray):
 
 def dot(u: FieldOrArray, v: FieldOrArray):
     """Dot product."""
-    if isinstance(u, DiscreteField) and u.is_zero():
-        return u
-    if isinstance(v, DiscreteField) and v.is_zero():
-        return v
     return np.einsum('i...,i...', u, v)
 
 
 def ddot(u: FieldOrArray, v: FieldOrArray):
     """Double dot product."""
-    if isinstance(u, DiscreteField) and u.is_zero():
-        return u
-    if isinstance(v, DiscreteField) and v.is_zero():
-        return v
     return np.einsum('ij...,ij...', u, v)
 
 
 def dddot(u: FieldOrArray, v: FieldOrArray):
     """Triple dot product."""
-    if isinstance(u, DiscreteField) and u.is_zero():
-        return u
-    if isinstance(v, DiscreteField) and v.is_zero():
-        return v
     return np.einsum('ijk...,ijk...', u, v)
 
 
@@ -140,12 +108,6 @@ def prod(u: FieldOrArray,
          v: FieldOrArray,
          w: Optional[FieldOrArray] = None):
     """Tensor product."""
-    if isinstance(u, DiscreteField) and u.is_zero():
-        return u
-    if isinstance(v, DiscreteField) and v.is_zero():
-        return v
-    if isinstance(w, DiscreteField) and w.is_zero():
-        return w
     if w is None:
         return np.einsum('i...,j...->ij...', u, v)
     return np.einsum('i...,j...,k...->ijk...', u, v, w)
@@ -153,10 +115,6 @@ def prod(u: FieldOrArray,
 
 def mul(A: FieldOrArray, x: FieldOrArray):
     """Matrix multiplication."""
-    if isinstance(A, DiscreteField) and A.is_zero():
-        return A
-    if isinstance(x, DiscreteField) and x.is_zero():
-        return x
     return np.einsum('ij...,j...->i...', A, x)
 
 

@@ -294,9 +294,6 @@ class AbstractBasis:
         # loop over solution components
         for c in range(len(refs)):
             ref = refs[c][1].basis[0][0]
-            if ref.is_zero():
-                dfs.append(ref)
-                continue
             ref = ref.astuple
             fs = []
 
@@ -305,8 +302,6 @@ class AbstractBasis:
                 out = 0. * refn.copy()
                 for i in range(self.Nbfun):
                     values = w[self.element_dofs[i]]
-                    if self.basis[i][c].is_zero():
-                        continue
                     out += np.einsum('...,...j->...j', values,
                                      self.basis[i][c].get(n))
                 return out

@@ -52,7 +52,7 @@ class Form:
         form = deepcopy(self)
         name = form.form.__name__
         form.form = lambda *arg: self.form(
-            *[arg[k] if args[k] == j else DiscreteField()
+            *[arg[k] if args[k] == j else arg[k].zeros()
               for k in range(len(arg) - 1)
               for j in range(int((self.nargs - 1) / (len(arg) - 1)))],
             arg[-1]
