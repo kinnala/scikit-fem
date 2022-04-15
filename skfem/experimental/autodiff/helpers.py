@@ -45,7 +45,7 @@ def trace(T):
 
 def eye(w, size):
     return np.array([[w if i == j else 0. * w for i in range(size)]
-                      for j in range(size)])
+                     for j in range(size)])
 
 
 def det(A):

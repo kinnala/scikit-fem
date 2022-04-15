@@ -6,7 +6,6 @@ import numpy as np
 from autograd import make_jvp
 
 
-
 class NonlinearForm(Form):
 
     def assemble(self, u0, basis, **kwargs):
