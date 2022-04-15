@@ -11,7 +11,7 @@ config.update("jax_enable_x64", True)
 
 class NonlinearForm(Form):
 
-    def assemble(self, u0, basis, hessian=False, **kwargs):
+    def assemble(self, u0, basis, **kwargs):
 
         if isinstance(u0, ndarray):
             u0 = basis.interpolate(u0)
@@ -40,7 +40,7 @@ class NonlinearForm(Form):
         # loop over the indices of local stiffness matrix
         for i in range(basis.Nbfun):
             V = tuple(c.astuple for c in basis.basis[i])
-            if hessian:
+            if 'hessian' in self.params:
                 y, DF = linearize(
                     lambda W: jvp(lambda U: self.form(*U, w), (W,), (V,))[1],
                     u0

@@ -15,7 +15,7 @@ import jax.numpy as jnp
 m = MeshTri().refined(5)
 
 
-@NonlinearForm
+@NonlinearForm(hessian=True)
 def energy(u, _):
     return jnp.sqrt(1. + dot(grad(u), grad(u)))
 
