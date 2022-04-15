@@ -10,14 +10,14 @@ from skfem import *
 from skfem.experimental.autodiff import NonlinearForm
 from skfem.experimental.autodiff.helpers import grad, dot
 import numpy as np
-import jax.numpy as jnp
+import autograd.numpy as anp
 
 m = MeshTri().refined(5)
 
 
 @NonlinearForm(hessian=True)
 def energy(u, _):
-    return jnp.sqrt(1. + dot(grad(u), grad(u)))
+    return anp.sqrt(1. + dot(grad(u), grad(u)))
 
 
 basis = Basis(m, ElementTriP1())

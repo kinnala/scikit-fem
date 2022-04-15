@@ -1,12 +1,10 @@
 from skfem.assembly.form.form import Form, FormExtraParams
 from skfem.assembly.form.coo_data import COOData
-from jax import jvp, linearize
-from jax.config import config
 from numpy import ndarray
 import numpy as np
 
+from autograd import make_jvp
 
-config.update("jax_enable_x64", True)
 
 
 class NonlinearForm(Form):
@@ -41,19 +39,18 @@ class NonlinearForm(Form):
         for i in range(basis.Nbfun):
             V = tuple(c.astuple for c in basis.basis[i])
             if 'hessian' in self.params:
-                y, DF = linearize(
-                    lambda W: jvp(lambda U: self.form(*U, w), (W,), (V,))[1],
-                    u0
-                )
+                tmp = make_jvp(lambda U: self.form(*U, w))
+                DF = make_jvp(lambda W: tmp(W)(V)[1])(u0)
             else:
-                y, DF = linearize(lambda U: self.form(*U, *V, w), u0)
+                DF = make_jvp(lambda U: self.form(*U, *V, w))(u0)
             for j in range(basis.Nbfun):
                 U = tuple(c.astuple for c in basis.basis[j])
+                y, DFU = DF(U)
                 ixs = slice(nt * (basis.Nbfun * j + i),
                             nt * (basis.Nbfun * j + i + 1))
                 rows[ixs] = basis.element_dofs[i]
                 cols[ixs] = basis.element_dofs[j]
-                data[j, i, :] = np.sum(DF(U) * dx, axis=1)
+                data[j, i, :] = np.sum(DFU * dx, axis=1)
             ixs1 = slice(nt * i, nt * (i + 1))
             rows1[ixs1] = basis.element_dofs[i]
             data1[ixs1] = np.sum(y * dx, axis=1)
