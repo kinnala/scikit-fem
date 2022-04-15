@@ -14,4 +14,4 @@ dmsh
 sphinx
 h5py
 glvis
-jax[cpu]
+autograd
