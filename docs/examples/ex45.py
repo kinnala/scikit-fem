@@ -28,7 +28,7 @@ x = np.sin(np.pi * m.p[0])
 for itr in range(100):
     J, F = energy.assemble(x, basis)
     x_prev = x.copy()
-    x += 0.7 * solve(*condense(J, -F, D=D))
+    x += solve(*condense(J, -F, D=D))
     res = np.linalg.norm(x - x_prev)
     if res < 1e-8:
         break
