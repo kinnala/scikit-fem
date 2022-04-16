@@ -9,7 +9,18 @@ from autograd import make_jvp
 class NonlinearForm(Form):
 
     def assemble(self, u0, basis, **kwargs):
+        """Assemble the Jacobian and the right-hand side.
 
+        Parameters
+        ----------
+        u0
+            The point at which the form is linearized.
+        basis
+            The basis used for all variables.
+
+        """
+        # interpolate and cast to tuple
+        # make u0 compatible with u in forms
         if isinstance(u0, ndarray):
             u0 = basis.interpolate(u0)
             if isinstance(u0, tuple):
@@ -34,22 +45,33 @@ class NonlinearForm(Form):
         data1 = np.zeros(sz1, dtype=self.dtype)
         rows1 = np.zeros(sz1, dtype=np.int64)
 
+        def _make_jacobian(V):
+            if 'hessian' in self.params:
+                F = make_jvp(lambda U: self.form(*U, w))
+                return make_jvp(lambda W: F(W)(V)[1])(u0)
+            return make_jvp(lambda U: self.form(*U, *V, w))(u0)
+
+        # # JAX version
+        # def _make_jacobian(V):
+        #     if 'hessian' in self.params:
+        #         return linearize(
+        #             lambda W: jvp(lambda U: self.form(*U, w), (W,), (V,))[1],
+        #             u0
+        #         )
+        #     return linearize(lambda U: self.form(*U, *V, w), u0)
+
         # loop over the indices of local stiffness matrix
         for i in range(basis.Nbfun):
-            V = tuple(c.astuple for c in basis.basis[i])
-            if 'hessian' in self.params:
-                tmp = make_jvp(lambda U: self.form(*U, w))
-                DF = make_jvp(lambda W: tmp(W)(V)[1])(u0)
-            else:
-                DF = make_jvp(lambda U: self.form(*U, *V, w))(u0)
+            DF = _make_jacobian(tuple(c.astuple for c in basis.basis[i]))
             for j in range(basis.Nbfun):
-                U = tuple(c.astuple for c in basis.basis[j])
-                y, DFU = DF(U)
+                y, DFU = DF(tuple(c.astuple for c in basis.basis[j]))
+                # Jacobian
                 ixs = slice(nt * (basis.Nbfun * j + i),
                             nt * (basis.Nbfun * j + i + 1))
                 rows[ixs] = basis.element_dofs[i]
                 cols[ixs] = basis.element_dofs[j]
                 data[j, i, :] = np.sum(DFU * dx, axis=1)
+            # rhs
             ixs1 = slice(nt * i, nt * (i + 1))
             rows1[ixs1] = basis.element_dofs[i]
             data1[ixs1] = np.sum(y * dx, axis=1)
