@@ -11,6 +11,10 @@ def ddot(u, v):
     return np.einsum('ij...,ij...', u, v)
 
 
+def dddot(u, v):
+    return np.einsum('ijk...,ijk...', u, v)
+
+
 def grad(u):
     if isinstance(u, DiscreteField):
         return u.grad

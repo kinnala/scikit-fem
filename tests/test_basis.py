@@ -440,6 +440,37 @@ def test_basis_project(m, e, fun):
                         int_y_2.assemble(basis))
 
 
+
+@pytest.mark.parametrize(
+    "m, e, p1, p2",
+    [
+        (
+            MeshTri(),
+            ElementTriP1() * ElementTriP1(),
+            (1, 1),
+            np.ones(8),
+        ),
+        (
+            MeshTri(),
+            ElementTriP1() * ElementTriP1(),
+            (lambda x: x[0] * 0 + 1, 1),
+            np.ones(8),
+        ),
+        (
+            MeshTri(),
+            ElementTriP1() * ElementTriP1(),
+            lambda x: (x[0] * 0 + 1, x[0] * 0 + 1),
+            np.ones(8),
+        ),
+    ]
+)
+def test_basis_project_composite(m, e, p1, p2):
+
+    basis = CellBasis(m, e)
+    y = basis.project(p1)
+    assert_almost_equal(y, p2)
+
+
 def test_basis_project_grad():
 
     m, e = (MeshTri(), ElementTriP1())
@@ -452,6 +483,25 @@ def test_basis_project_grad():
         return w.y ** 2
 
     assert_almost_equal(int_y.assemble(basis, y=y), 1.)
+
+
+@pytest.mark.parametrize(
+    "m, e",
+    [
+        (MeshTri(), ElementTriP1()),
+        (MeshTri(), ElementTriRT0()),
+        (MeshQuad(), ElementQuadRT0()),
+        (MeshTri(), ElementTriP2() * ElementTriP1()),
+    ]
+)
+def test_basis_interpolate_project(m, e):
+
+    basis = CellBasis(m, e)
+    x = basis.zeros() + 1
+    Y = basis.interpolate(x)
+    X = basis.project(Y)
+    # check that interpolate and project are inverses
+    assert_almost_equal(x, X)
 
 
 def test_subdomain_facet_assembly():

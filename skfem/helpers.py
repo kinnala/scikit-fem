@@ -1,6 +1,6 @@
 """Helper functions for defining forms."""
 
-from typing import Union, Optional
+from typing import Union, Optional, Tuple
 import numpy as np
 from numpy import ndarray, zeros_like
 from skfem.element import DiscreteField
@@ -78,8 +78,15 @@ def dddd(u: DiscreteField):
     return u.grad4
 
 
-def inner(u: FieldOrArray, v: FieldOrArray):
+def inner(u: Union[FieldOrArray, Tuple[FieldOrArray, ...]],
+          v: Union[FieldOrArray, Tuple[FieldOrArray, ...]]):
     """Inner product between any matching tensors."""
+    # support for ElementComposite
+    if isinstance(u, tuple) and isinstance(v, tuple):
+        out = []
+        for i in range(len(v)):
+            out.append(inner(u[i], v[i]))
+        return sum(out)
     if len(u.shape) == 2:
         return u * v
     elif len(u.shape) == 3:

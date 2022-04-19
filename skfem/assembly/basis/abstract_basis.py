@@ -380,20 +380,36 @@ class AbstractBasis:
         """Create a copy of ``self`` that uses different element."""
         raise NotImplementedError
 
+    def _normalize_interp(self, interp) -> Tuple[ndarray, ...]:
+
+        if isinstance(interp, ndarray):
+            pass
+        elif callable(interp):
+            interp = interp(self.global_coordinates())
+        elif isinstance(interp, (float, int)):
+            interp = interp + self.zero_w()
+        elif isinstance(interp, (tuple, list)):
+            interp = tuple(self._normalize_interp(c) for c in interp)
+
+        return interp
+
     def _projection(self, interp):
 
         from skfem.assembly import BilinearForm, LinearForm
         from skfem.helpers import inner
 
-        if isinstance(interp, float):
-            interp = interp + self.global_coordinates()[0] * 0.
-
-        if callable(interp):
-            interp = interp(self.global_coordinates())
+        interp = self._normalize_interp(interp)
+        if not isinstance(interp, tuple):
+            interp = (interp,)
+        assert len(interp) == len(self.basis[0])
 
         return (
-            BilinearForm(lambda u, v, _: inner(u, v)).assemble(self),
-            LinearForm(lambda v, w: inner(interp, v)).assemble(self),
+            (BilinearForm(lambda *args: inner(args[:(len(args) - 1) // 2],
+                                              args[(len(args) - 1) // 2:-1]))
+             .assemble(self)),
+            (LinearForm(lambda *args: inner(interp,
+                                            args[:(len(args) - 1)]))
+             .assemble(self)),
         )
 
     def project(self, interp, **kwargs):
@@ -403,6 +419,11 @@ class AbstractBasis:
         """Convenience wrapper for skfem.visuals."""
         mod = importlib.import_module('skfem.visuals.{}'.format(visuals))
         return mod.plot(self, x, **kwargs)
+
+    def plot3(self, x, visuals='matplotlib', **kwargs):
+        """Convenience wrapper for skfem.visuals."""
+        mod = importlib.import_module('skfem.visuals.{}'.format(visuals))
+        return mod.plot3(self, x, **kwargs)
 
     def draw(self, visuals='matplotlib', **kwargs):
         """Convenience wrapper for skfem.visuals."""
