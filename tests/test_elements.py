@@ -34,6 +34,8 @@ from skfem.element import (
     ElementQuadBFS,
     ElementTriCR,
     ElementTriCCR,
+    ElementTriP1B,
+    ElementTriP2B,
     ElementTetCR,
     ElementTetCCR,
     ElementTriHermite,
@@ -303,7 +305,8 @@ class TestPartitionofUnity(TestCase):
         ElementTetCR(),
         ElementTetCCR(),
         ElementTriCR(),
-        ElementTriCCR(),
+        ElementTriP1B(),
+        ElementTriP2B(),
         ElementWedge1(),
     ]
 
@@ -320,6 +323,8 @@ class TestPartitionofUnity(TestCase):
                               [.15]])
             out = 0.
             for i in range(elem.doflocs.shape[0]):
+                if np.isnan(elem.doflocs[i]).any():
+                    continue
                 out += elem.lbasis(y, i)[0][0]
             self.assertAlmostEqual(out, 1, msg='failed for {}'.format(elem))
 
