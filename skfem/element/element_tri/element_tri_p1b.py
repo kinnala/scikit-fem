@@ -4,7 +4,7 @@ from ..element_h1 import ElementH1
 from ...refdom import RefTri
 
 
-class ElementTriMini(ElementH1):
+class ElementTriP1B(ElementH1):
     """The MINI element, i.e. piecewise linears with one bubble DOF."""
 
     nodal_dofs = 1

@@ -15,15 +15,13 @@ from .element_hdiv import ElementHdiv
 from .element_hcurl import ElementHcurl
 from .element_global import ElementGlobal
 from .element_vector import ElementVector
-from .element_tri import (ElementTriP1, ElementTriP2,  # noqa
-                          ElementTriP0, ElementTriRT0, ElementTriMorley,
-                          ElementTriArgyris, ElementTriMini, ElementTriCR,
-                          ElementTriHermite, ElementTriCCR,
+from .element_tri import (ElementTriP1, ElementTriP2, # noqa ElementTriP0,
+                          ElementTriRT0, ElementTriMorley, ElementTriArgyris,
+                          ElementTriP1B, ElementTriCR, ElementTriHermite,
                           ElementTriP1DG, ElementTriSkeletonP0,
-                          ElementTriSkeletonP1, ElementTriP3,
-                          ElementTriP4, ElementTri15ParamPlate,
-                          ElementTriBDM1, ElementTriP1G, ElementTriP2G,
-                          ElementTriP2B)
+                          ElementTriSkeletonP1, ElementTriP3, ElementTriP4,
+                          ElementTri15ParamPlate, ElementTriBDM1,
+                          ElementTriP1G, ElementTriP2G, ElementTriP2B)
 from .element_quad import (ElementQuad0, ElementQuad1, ElementQuad2,  # noqa
                            ElementQuadS2, ElementQuadP,
                            ElementQuadBFS, ElementQuadRT0, ElementQuad1DG)
@@ -61,6 +59,8 @@ ElementTriDG = ElementDG
 ElementQuadDG = ElementDG
 ElementHexDG = ElementDG
 ElementTetDG = ElementDG
+ElementTriMini = ElementTriP1B
+ElementTriCCR = ElementTriP2B
 
 
 __all__ = [
@@ -94,6 +94,7 @@ __all__ = [
     "ElementTriBDM1",
     "ElementTriP1G",
     "ElementTriP2G",
+    "ElementTriP1B",
     "ElementTriP2B",
     "ElementQuad0",
     "ElementQuad1",
