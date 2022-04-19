@@ -1,6 +1,6 @@
 """Helper functions for defining forms."""
 
-from typing import Union, Optional, Tuple
+from typing import Union, Optional
 import numpy as np
 from numpy import ndarray, zeros_like
 from skfem.element import DiscreteField
