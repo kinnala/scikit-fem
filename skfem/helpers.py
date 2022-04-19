@@ -78,11 +78,10 @@ def dddd(u: DiscreteField):
     return u.grad4
 
 
-def inner(u: Union[FieldOrArray, Tuple[FieldOrArray, ...]],
-          v: Union[FieldOrArray, Tuple[FieldOrArray, ...]]):
+def inner(u: FieldOrArray, v: FieldOrArray):
     """Inner product between any matching tensors."""
-    # support for ElementComposite
     if isinstance(u, tuple) and isinstance(v, tuple):
+        # support for ElementComposite
         out = []
         for i in range(len(v)):
             out.append(inner(u[i], v[i]))

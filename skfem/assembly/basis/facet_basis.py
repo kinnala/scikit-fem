@@ -92,6 +92,7 @@ class FacetBasis(AbstractBasis):
 
         # calculate normals
         Y0 = self.mapping.invF(x, tind=self.tind_normals)
+        assert self.tind_normals is not None  # satisfy mypy
         self.normals = DiscreteField(
             value=self.mapping.normals(Y0,
                                        self.tind_normals,

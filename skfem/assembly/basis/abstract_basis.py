@@ -31,6 +31,7 @@ class AbstractBasis:
 
     mesh: Mesh
     elem: Element
+    mapping: Mapping
     tind: Optional[ndarray] = None
     tind_normals: Optional[ndarray] = None
     dx: ndarray
@@ -378,6 +379,9 @@ class AbstractBasis:
 
     def with_element(self, elem: Element) -> 'AbstractBasis':
         """Create a copy of ``self`` that uses different element."""
+        raise NotImplementedError
+
+    def global_coordinates(self) -> ndarray:
         raise NotImplementedError
 
     def _normalize_interp(self, interp) -> Tuple[ndarray, ...]:
