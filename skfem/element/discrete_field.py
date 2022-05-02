@@ -28,7 +28,7 @@ class DiscreteField(ndarray):
                 grad5=None,
                 grad6=None):
         if value is None:
-            value = np.array([0])
+            value = np.array([0])  # TODO unused?
         obj = np.asarray(value).view(cls)
         obj.grad = grad
         obj.div = div
@@ -53,9 +53,6 @@ class DiscreteField(ndarray):
         self.grad6 = getattr(obj, 'grad6', None)
 
     def __getitem__(self, key):
-        if self.is_zero():
-            return self
-        # invalidate attributes after slice
         return np.array(self)[key]
 
     def __array_wrap__(self, out_arr, context=None):
@@ -78,22 +75,22 @@ class DiscreteField(ndarray):
              "and can be replaced by 'u'.", DeprecationWarning)
         return np.array(self)
 
-    def is_zero(self):
-        return self.shape == (1,)
+    def zeros(self):
+        return DiscreteField(*tuple(None if c is None else np.zeros_like(c)
+                                    for c in self.astuple))
 
     def __repr__(self):
         rep = ""
         rep += "<skfem DiscreteField object>"
-        if not self.is_zero():
-            rep += ("\n  Quadrature points per element: {}"
-                    .format(self.shape[-1]))
-            rep += "\n  Number of elements: {}".format(self.shape[-2])
-            rep += "\n  Order: {}".format(len(self.shape) - 2)
-            attrs = ', '.join([attr
-                               for attr in self._extra_attrs
-                               if getattr(self, attr) is not None])
-            if len(attrs) > 0:
-                rep += "\n  Attributes: {}".format(attrs)
+        rep += ("\n  Quadrature points per element: {}"
+                .format(self.shape[-1]))
+        rep += "\n  Number of elements: {}".format(self.shape[-2])
+        rep += "\n  Order: {}".format(len(self.shape) - 2)
+        attrs = ', '.join([attr
+                           for attr in self._extra_attrs
+                           if getattr(self, attr) is not None])
+        if len(attrs) > 0:
+            rep += "\n  Attributes: {}".format(attrs)
         return rep
 
     def __reduce__(self):

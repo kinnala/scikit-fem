@@ -28,6 +28,9 @@ from skfem.element import (
     ElementWedge1,
     ElementTriP3,
     ElementTriP4,
+    ElementTriP1G,
+    ElementTriP2G,
+    ElementTriP2B,
 )
 from skfem.assembly import FacetBasis, Basis
 from skfem.mesh import (MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
@@ -212,6 +215,13 @@ class ConvergenceTriP1QuadraticMesh(ConvergenceTriP1):
         self.mesh = MeshTri2.from_mesh(MeshTri.init_sqsymmetric().refined(2))
 
 
+class ConvergenceTriP1G(ConvergenceTriP1):
+
+    def create_basis(self, m):
+        e = ElementTriP1G()
+        return Basis(m, e)
+
+
 class ConvergenceTriP2(ConvergenceTriP1):
 
     rateL2 = 3.0
@@ -219,6 +229,20 @@ class ConvergenceTriP2(ConvergenceTriP1):
 
     def create_basis(self, m):
         e = ElementTriP2()
+        return Basis(m, e)
+
+
+class ConvergenceTriP2B(ConvergenceTriP2):
+
+    def create_basis(self, m):
+        e = ElementTriP2B()
+        return Basis(m, e)
+
+
+class ConvergenceTriP2G(ConvergenceTriP2):
+
+    def create_basis(self, m):
+        e = ElementTriP2G()
         return Basis(m, e)
 
 

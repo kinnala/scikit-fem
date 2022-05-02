@@ -34,6 +34,8 @@ from skfem.element import (
     ElementQuadBFS,
     ElementTriCR,
     ElementTriCCR,
+    ElementTriP1B,
+    ElementTriP2B,
     ElementTetCR,
     ElementTetCCR,
     ElementTriHermite,
@@ -173,8 +175,6 @@ class TestComposite(TestCase):
         for k in range(6):
             for i in [0, 1]:
                 # accessing i'th component looks slightly different
-                if ec.gbasis(mapping, X, k)[i].is_zero():
-                    continue
                 assert_array_equal(
                     ev.gbasis(mapping, X, k)[0].value[i],
                     ec.gbasis(mapping, X, k)[i].value
@@ -305,7 +305,8 @@ class TestPartitionofUnity(TestCase):
         ElementTetCR(),
         ElementTetCCR(),
         ElementTriCR(),
-        ElementTriCCR(),
+        ElementTriP1B(),
+        ElementTriP2B(),
         ElementWedge1(),
     ]
 
@@ -322,6 +323,8 @@ class TestPartitionofUnity(TestCase):
                               [.15]])
             out = 0.
             for i in range(elem.doflocs.shape[0]):
+                if np.isnan(elem.doflocs[i]).any():
+                    continue
                 out += elem.lbasis(y, i)[0][0]
             self.assertAlmostEqual(out, 1, msg='failed for {}'.format(elem))
 

@@ -211,9 +211,20 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+- Changed: The optimization of using `DiscreteField.is_zero` in the helpers to
+  skip the evaluation of zero components in `ElementComposite` was removed to
+  improve type stability with respect to the size of the underlying numpy
+  arrays
+- Removed: The unused `DiscreteField.is_zero` method
+- Added: `Basis.project` now better supports `ElementComposite`
 - Added: `solver_iter_cg`, a simple pure Python conjugate gradient solver for
-  environments that do not have sparse solver libraries
-- Fixed: Assembly now works inside Pyodide
+  environments that do not have sparse solver libraries (e.g., Pyodide)
+- Added: `ElementTriP2B` and `ElementTriP1B`, new aliases for `ElementTriMini`
+  and `ElementTriCCR`
+- Added: `ElementTriP1G` and `ElementTriP2G`, variants of `ElementTriP1` and
+  `ElementTriP2` using `ElementGlobal` so that second derivatives are available
+  (useful, e.g., for stabilized methods and the Stokes problem)
+- Added: `Basis.plot3`, a wrapper to `skfem.visuals.*.plot3`
 - Fixed: Calculation of size in `Basis.__repr__` was slow and incorrect
 
 ### [6.0.0] - 2022-03-15

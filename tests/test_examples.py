@@ -383,3 +383,10 @@ class TestEx44(TestCase):
         for itr in range(10):
             t, u = next(stepper)
             self.assertAlmostEqual(np.sum(u), 11.34, 2)
+
+
+class TestEx45(TestCase):
+
+    def runTest(self):
+        import docs.examples.ex45 as ex45
+        self.assertAlmostEqual(np.mean(ex45.x), 0.277931521728906)

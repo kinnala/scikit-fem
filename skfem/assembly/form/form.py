@@ -33,10 +33,14 @@ class Form:
                  dtype: Union[Type[np.float64],
                               Type[np.complex64]] = np.float64,
                  nthreads: int = 0,
-                 inverse: bool = False):
+                 **params):
         self.form = form.form if isinstance(form, Form) else form
+        self.nargs = (len(signature(self.form).parameters)
+                      if self.form is not None
+                      else None)
         self.dtype = dtype
         self.nthreads = nthreads
+        self.params = params
 
     def partial(self, *args, **kwargs):
         form = deepcopy(self)
@@ -48,12 +52,10 @@ class Form:
     def block(self, *args):
         form = deepcopy(self)
         name = form.form.__name__
-        sig = signature(form.form)
-        nargs = len(sig.parameters)
         form.form = lambda *arg: self.form(
-            *[arg[k] if args[k] == j else DiscreteField()
+            *[arg[k] if args[k] == j else arg[k].zeros()
               for k in range(len(arg) - 1)
-              for j in range(int((nargs - 1) / (len(arg) - 1)))],
+              for j in range(int((self.nargs - 1) / (len(arg) - 1)))],
             arg[-1]
         )
         form.form.__name__ = name
@@ -63,7 +65,8 @@ class Form:
         if self.form is None:  # decorate
             return type(self)(form=args[0],
                               dtype=self.dtype,
-                              nthreads=self.nthreads)
+                              nthreads=self.nthreads,
+                              **self.params)
         return self.assemble(self.kernel(*args))
 
     def assemble(self, *args, **kwargs) -> Any:
