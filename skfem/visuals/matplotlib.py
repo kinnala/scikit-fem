@@ -233,9 +233,14 @@ def plot_meshtri(m: MeshTri1, z: ndarray, **kwargs) -> Axes:
     if len(z) == 2 * len(m.p[0]):
         im = ax.quiver(m.p[0], m.p[1], *z.reshape(2, -1),
                        **{k: v for k, v in kwargs.items()
-                             if k in ['angles',
-                                      'scale',
-                                      'width']})
+                          if k in ['angles',
+                                   'scale',
+                                   'width',
+                                   'headwidth',
+                                   'headlength',
+                                   'minshaft',
+                                   'pivot',
+                                   'color']})
     else:
         im = ax.tripcolor(m.p[0], m.p[1], m.t.T, z, cmap=cmap,
                           **{k: v for k, v in kwargs.items()
