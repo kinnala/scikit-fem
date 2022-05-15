@@ -256,6 +256,8 @@ def plot_meshtri(m: MeshTri1, z: ndarray, **kwargs) -> Axes:
     if "colorbar" in kwargs:
         if isinstance(kwargs["colorbar"], str):
             plt.colorbar(im, label=kwargs["colorbar"])
+        elif isinstance(kwargs["colorbar"], dict):
+            plt.colorbar(im, **kwargs["colorbar"])
         else:
             plt.colorbar(im)
 
