@@ -8,7 +8,7 @@ from skfem.helpers import dot, div
 p = np.linspace(0, 1, 10)
 m = MeshTet.init_tensor(*(p,) * 3)
 
-e = ElementTetRT0() * ElementTetP0()
+e = ElementTetRT1() * ElementTetP0()
 basis = Basis(m, e)
 
 
