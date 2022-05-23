@@ -4,7 +4,7 @@ from ..element_hdiv import ElementHdiv
 from ...refdom import RefTri
 
 
-class ElementTriRT0(ElementHdiv):
+class ElementTriRT1(ElementHdiv):
     """The lowest order Raviart-Thomas element."""
 
     facet_dofs = 1

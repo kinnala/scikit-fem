@@ -4,7 +4,7 @@ from ..element_hdiv import ElementHdiv
 from ...refdom import RefTet
 
 
-class ElementTetRT0(ElementHdiv):
+class ElementTetRT1(ElementHdiv):
     """The lowest order Raviart-Thomas element."""
 
     facet_dofs = 1
