@@ -37,7 +37,7 @@ class ElementTriRT1(ElementHdiv):
             phi = -np.array([2*x*(1-4*y), 4*y*(1-2*y)])
             dphi = -(6 - 24*y)
         elif i == 4:  # left
-            phi = np.array([-8*x**2 - 8*x*y + 12*x + 6*y - 4, 2*y*(-4*x-4*y+3)])
+            phi = np.array([-8*x**2-8*x*y+12*x+6*y-4, 2*y*(-4*x-4*y+3)])
             dphi = -6 * (-3 + 4*x + 4*y)
         elif i == 5:
             phi = np.array([8*x*y-2*x-6*y+2, 4*y*(2*y-1)])
