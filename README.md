@@ -215,8 +215,10 @@ with respect to documented and/or tested features.
   skip the evaluation of zero components in `ElementComposite` was removed to
   improve type stability with respect to the size of the underlying numpy
   arrays
+- Changed: Renamed `ElementTriRT0` to `ElementTriRT1`
+- Changed: Renamed `ElementTetRT0` to `ElementTetRT1`
 - Removed: The unused `DiscreteField.is_zero` method
-- Added: `ElementTriRT1`, the next finite element from the Raviart-Thomas family
+- Added: `ElementTriRT2`, the second order Raviart-Thomas element
 - Added: `Basis.project` now better supports `ElementComposite`
 - Added: `solver_iter_cg`, a simple pure Python conjugate gradient solver for
   environments that do not have sparse solver libraries (e.g., Pyodide)

@@ -5,7 +5,7 @@ import numpy as np
 from skfem import BilinearForm, CellBasis, LinearForm, asm, solve
 from skfem.element import (ElementTetP0, ElementTetRT0, ElementTriP0,
                            ElementTriRT0, ElementTriBDM1, ElementDG,
-                           ElementQuadRT0, ElementQuad0, ElementTriRT1,
+                           ElementQuadRT0, ElementQuad0, ElementTriRT2,
                            ElementTriP1)
 from skfem.mesh import MeshTet, MeshTri, MeshQuad
 
@@ -154,7 +154,7 @@ class ConvergenceBDM1(ConvergenceRaviartThomas):
         self.mesh = MeshTri().refined(3)
 
 
-class ConvergenceRT1(ConvergenceRaviartThomas):
+class ConvergenceRT2(ConvergenceRaviartThomas):
     rateL2 = 2.
     rateHdiv = 2.
     eps = 0.1
@@ -162,7 +162,7 @@ class ConvergenceRT1(ConvergenceRaviartThomas):
     L2bound = 0.05
 
     def create_basis(self, m):
-        e = ElementTriRT1()
+        e = ElementTriRT2()
         e0 = ElementDG(ElementTriP1())
         return (CellBasis(m, e, intorder=4),
                 CellBasis(m, e0, intorder=4))
