@@ -217,6 +217,7 @@ with respect to documented and/or tested features.
   arrays
 - Changed: Renamed `ElementTriRT0` to `ElementTriRT1`
 - Changed: Renamed `ElementTetRT0` to `ElementTetRT1`
+- Changed: Renamed `ElementQuadRT0` to `ElementQuadRT1`
 - Removed: The unused `DiscreteField.is_zero` method
 - Added: `ElementTriRT2`, the second order Raviart-Thomas element
 - Added: `Basis.project` now better supports `ElementComposite`
