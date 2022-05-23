@@ -12,6 +12,10 @@ class ElementHdiv(Element):
             # TODO fix
             raise NotImplementedError("TODO: fix tind support in ElementHdiv")
         ix = int(i / self.facet_dofs)
+        if ix >= self.refdom.nfacets:
+            # interior dofs: no need for orientation
+            # TODO support edge DOFs
+            return np.ones(mapping.mesh.t.shape[1], dtype=np.int64)
         return -1 + 2 * (mapping.mesh.f2t[0, mapping.mesh.t2f[ix]]
                          == np.arange(mapping.mesh.t.shape[1]))
 

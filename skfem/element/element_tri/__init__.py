@@ -5,6 +5,7 @@ from .element_tri_p4 import ElementTriP4  # noqa
 from .element_tri_cr import ElementTriCR  # noqa
 from .element_tri_p0 import ElementTriP0  # noqa
 from .element_tri_rt0 import ElementTriRT0  # noqa
+from .element_tri_rt1 import ElementTriRT1  # noqa
 from .element_tri_bdm1 import ElementTriBDM1  # noqa
 from .element_tri_p1b import ElementTriP1B  # noqa
 from .element_tri_morley import ElementTriMorley  # noqa

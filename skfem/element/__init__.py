@@ -21,7 +21,8 @@ from .element_tri import (ElementTriP1, ElementTriP2, ElementTriP0,
                           ElementTriP1DG, ElementTriSkeletonP0,
                           ElementTriSkeletonP1, ElementTriP3, ElementTriP4,
                           ElementTri15ParamPlate, ElementTriBDM1,
-                          ElementTriP1G, ElementTriP2G, ElementTriP2B)  # noqa
+                          ElementTriP1G, ElementTriP2G, ElementTriP2B,
+                          ElementTriRT1)  # noqa
 from .element_quad import (ElementQuad0, ElementQuad1, ElementQuad2,  # noqa
                            ElementQuadS2, ElementQuadP,
                            ElementQuadBFS, ElementQuadRT0, ElementQuad1DG)
@@ -83,6 +84,7 @@ __all__ = [
     "ElementTriCR",
     "ElementTriCCR",
     "ElementTriRT0",
+    "ElementTriRT1",
     "ElementTriMorley",
     "ElementTri15ParamPlate",
     "ElementTriArgyris",

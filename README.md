@@ -216,6 +216,7 @@ with respect to documented and/or tested features.
   improve type stability with respect to the size of the underlying numpy
   arrays
 - Removed: The unused `DiscreteField.is_zero` method
+- Added: `ElementTriRT1`, the next finite element from the Raviart-Thomas family
 - Added: `Basis.project` now better supports `ElementComposite`
 - Added: `solver_iter_cg`, a simple pure Python conjugate gradient solver for
   environments that do not have sparse solver libraries (e.g., Pyodide)
