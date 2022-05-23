@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+authors:
+  - family-names: Gustafsson
+    given-names: Tom
+    orcid: 0000-0003-1611-5032
+  - family-names: McBain
+    given-names: G. D.
+    orcid: 0000-0002-1904-122X
+title: scikit-fem
+license: BSD-3-Clause
+url: https://github.com/kinnala/scikit-fem
+preferred-citation:
+  type: article
+  authors:
+  - family-names: Gustafsson
+    given-names: Tom
+    orcid: 0000-0003-1611-5032
+  - family-names: McBain
+    given-names: G. D.
+    orcid: 0000-0002-1904-122X
+  doi: 10.21105/joss.02369
+  journal: Journal of Open Source Software
+  title: "scikit-fem: A Python package for finite element assembly"
+  volume: 5
+  issue: 52
+  start: 2369
+  year: 2020
