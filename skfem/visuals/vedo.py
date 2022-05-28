@@ -18,3 +18,9 @@ def draw(m, backend=False, **kwargs):
         grid.show = lambda: vp.show([grid.tomesh()]).close()
         grid.plotter = vp
     return grid
+
+
+def plot(basis, z, **kwargs):
+    nrefs = kwargs["nrefs"] if 'nrefs' in kwargs else 1
+    m, Z = basis.refinterp(z, nrefs=nrefs)
+    return draw(m, point_data={'z': Z})
