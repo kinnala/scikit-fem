@@ -987,11 +987,15 @@ class Mesh:
 
     def draw(self, visuals='matplotlib', **kwargs):
         """Convenience wrapper for skfem.visuals."""
+        if not isinstance(visuals, str):
+            logger.warning("First argument, 'visuals', must be a string.")
         mod = importlib.import_module('skfem.visuals.{}'.format(visuals))
         return mod.draw(self, **kwargs)
 
     def plot(self, x, visuals='matplotlib', **kwargs):
         """Convenience wrapper for skfem.visuals."""
+        if not isinstance(visuals, str):
+            logger.warning("Second argument, 'visuals', must be a string.")
         mod = importlib.import_module('skfem.visuals.{}'.format(visuals))
         return mod.plot(self, x, **kwargs)
 
