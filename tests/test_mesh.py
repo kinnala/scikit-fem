@@ -634,3 +634,10 @@ def test_refine_boundaries(mtype):
     # check that same facets exist no matter the order of with_boundaries
     # and refined
     np.testing.assert_equal(M1.boundaries, M2.boundaries)
+
+
+def test_point_outside_mesh():
+
+    m = MeshTri.load(MESH_PATH / 'troublesome_mesh.vtk')
+    elem_finder = m.element_finder()
+    elem_finder(*m.p)

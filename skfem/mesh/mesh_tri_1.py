@@ -402,9 +402,10 @@ class MeshTri1(MeshSimplex, Mesh2D):
                 ix = np.arange(nelems, dtype=np.int64)
 
             X = mapping.invF(np.array([x, y])[:, None], ix)
-            inside = ((X[0] >= 0) *
-                      (X[1] >= 0) *
-                      (1 - X[0] - X[1] >= 0))
+            eps = np.finfo(X.dtype).eps
+            inside = ((X[0] >= -eps) *
+                      (X[1] >= -eps) *
+                      (1 - X[0] - X[1] >= -eps))
 
             if not inside.max(axis=0).all():
                 if _search_all:
