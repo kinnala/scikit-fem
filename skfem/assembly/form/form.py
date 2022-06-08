@@ -1,5 +1,6 @@
 import logging
 import warnings
+import numbers
 from copy import deepcopy
 from functools import partial
 from typing import Any, Callable, Optional, Union, Type
@@ -89,10 +90,14 @@ class Form:
                     raise ValueError("Quadrature mismatch: '{}' should have "
                                      "same number of integration points as "
                                      "the basis object.".format(k))
+            elif isinstance(w[k], numbers.Number):
+                # scalar parameter is passed to form
+                continue
             elif isinstance(w[k], tuple):
                 # asm() product index is of type tuple
                 continue
             elif isinstance(w[k], ndarray) and len(w[k].shape) == 1:
+                # interpolate DOF arrays at quadrature points
                 w[k] = basis.interpolate(w[k])
             elif isinstance(w[k], list):
                 warnings.warn("Use Basis.interpolate instead of passing lists "
