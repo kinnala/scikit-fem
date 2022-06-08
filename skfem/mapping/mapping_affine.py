@@ -155,7 +155,12 @@ class MappingAffine(Mapping):
         else:
             DF = self.A[:, :, tind]
 
-        return np.einsum('ijk,l->ijkl', DF, 1 + 0*X[0, :])
+        if len(X.shape) == 2:
+            return np.einsum('ijk,l->ijkl', DF, 1 + np.zeros_like(X[0]))
+        elif len(X.shape) == 3:
+            return np.einsum('ijk,kl->ijkl', DF, 1 + np.zeros_like(X[0]))
+
+        raise Exception("Wrong dimension of input.")
 
     def invDF(self, X, tind=None):
         if tind is None:
