@@ -21,6 +21,7 @@ class ElementH1(Element):
                 value=np.broadcast_to(phi, (invDF.shape[2], invDF.shape[3])),
                 grad=np.einsum('ijkl,ikl->jkl', invDF, dphi)
             ),)
+        raise NotImplementedError
 
     def lbasis(self, X, i):
         raise NotImplementedError

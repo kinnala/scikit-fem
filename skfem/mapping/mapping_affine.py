@@ -128,8 +128,7 @@ class MappingAffine(Mapping):
             return (np.einsum('ijk,jl', A, X).T + b.T).T
         elif len(X.shape) == 3:
             return (np.einsum('ijk,jkl->ikl', A, X).T + b.T).T
-
-        raise Exception("Wrong dimension of input.")
+        raise NotImplementedError
 
     def invF(self, x, tind=None):
         if tind is None:
@@ -147,7 +146,7 @@ class MappingAffine(Mapping):
         else:
             detDF = self.detA[tind]
 
-        return np.tile(detDF, (X.shape[1], 1)).T
+        return np.tile(detDF, (X.shape[-1], 1)).T
 
     def DF(self, X, tind=None):
         if tind is None:
@@ -159,8 +158,7 @@ class MappingAffine(Mapping):
             return np.einsum('ijk,l->ijkl', DF, 1 + np.zeros_like(X[0]))
         elif len(X.shape) == 3:
             return np.einsum('ijk,kl->ijkl', DF, 1 + np.zeros_like(X[0]))
-
-        raise Exception("Wrong dimension of input.")
+        raise NotImplementedError
 
     def invDF(self, X, tind=None):
         if tind is None:

@@ -220,6 +220,17 @@ class CellBasis(AbstractBasis):
             elements=self.tind,
         )
 
+    def boundary(self):
+        """Return corresponding :class:`~skfem.assembly.basis.FacetBasis`."""
+        from skfem.assembly.basis.facet_basis import FacetBasis
+        if self.tind is not None:
+            raise NotImplementedError("Boundary of subdomain not supported.")
+        return FacetBasis(
+            self.mesh,
+            self.elem,
+            mapping=self.mapping,
+        )
+
     def project(self, interp, elements=None):
         """Perform :math:`L^2` projection onto the basis.
 

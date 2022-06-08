@@ -13,7 +13,8 @@ from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementTriMorley, ElementVectorH1, ElementQuadP,
                            ElementHex2, ElementTriArgyris, ElementTriP2,
                            ElementTriDG, ElementQuadDG, ElementHexDG,
-                           ElementTetDG, ElementTriHermite, ElementVector)
+                           ElementTetDG, ElementTriHermite, ElementVector,
+                           ElementTriRT1)
 from skfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
                         MeshTri2, MeshTet2, MeshHex2, MeshTri1DG, MeshQuad1DG,
                         MeshHex1DG)
@@ -588,3 +589,22 @@ def test_matrix_element_projection(m, e):
         return ddot(C(sym_grad(x)), v)
 
     y = projection(proj, basis1, basis0)
+
+
+@pytest.mark.parametrize(
+    "basis",
+    [
+        Basis(MeshTri().refined(1), ElementTriRT1()),
+    ]
+)
+def test_hdiv_boundary_integration(basis):
+
+    y = basis.project(lambda x: np.array([1. + 0 * x[0],
+                                          0. + 0 * x[1]]))
+    fbasis = basis.boundary()
+
+    @Functional
+    def test1(w):
+        return w['y'][0]
+
+    assert_almost_equal(test1.assemble(fbasis, y=y), -2.0)
