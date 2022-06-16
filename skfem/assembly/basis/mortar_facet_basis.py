@@ -42,3 +42,14 @@ class MortarFacetBasis(FacetBasis):
             facets=facets,
             dofs=dofs,
         )
+
+    def default_parameters(self):
+        """Return default parameters for `~skfem.assembly.asm`."""
+        return {
+            **super(MortarFacetBasis, self).default_parameters(),
+            # TODO following is not valid in 3D
+            'h1': self.mapping.maps[0].detDG(self.X,
+                                             self.mapping.helper_to_orig[0]),
+            'h2': self.mapping.maps[1].detDG(self.X,
+                                             self.mapping.helper_to_orig[1]),
+        }
