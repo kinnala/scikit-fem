@@ -396,6 +396,15 @@ def test_mortar_basis(m1, m2, lenright):
     def mass(u, v, w):
         return u * v
 
+    assert_allclose(mb[0].default_parameters()['h1'],
+                    mb[1].default_parameters()['h1'])
+
+    assert_allclose(mb[0].default_parameters()['h2'],
+                    mb[1].default_parameters()['h2'])
+
+    assert (mb[0].default_parameters()['h1']
+            < mb[0].default_parameters()['h2']).all()
+
     assert_almost_equal(unity.assemble(mb[0]), lenright)
     assert_almost_equal(unity.assemble(mb[1]), lenright)
 

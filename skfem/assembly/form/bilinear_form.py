@@ -36,14 +36,14 @@ class BilinearForm(Form):
     ... def form(u, v, _):
     ...     return u * v
 
-    Inside the form definition, ``u`` and ``v`` are tuples containing the basis
+    Inside the form definition, ``u`` and ``v`` are arrays containing the basis
     function values at quadrature points.  They also contain the values of
-    the derivatives:
+    the derivatives as attributes:
 
     >>> @BilinearForm
     ... def form(u, v, _):
-    ...     # u[1][0] is first derivative with respect to x, and so on
-    ...     return u[1][0] * v[1][0] + u[1][1] * v[1][1]  # laplacian
+    ...     # u.grad[0] is first derivative with respect to x, and so on
+    ...     return u.grad[0] * v.grad[0] + u.grad[1] * v.grad[1]  # laplacian
 
     We suggest you to use helper functions from :mod:`skfem.helpers` to make
     the forms more readable:
