@@ -1,12 +1,12 @@
 from dataclasses import dataclass, replace
 from typing import Union, Any, List, Optional
-from warnings import warn
 
 import numpy as np
 from numpy import ndarray
 
 from skfem.element import Element
 from skfem.mesh import Mesh
+from skfem.generic_utils import deprecated
 
 
 @dataclass(repr=False)
@@ -197,8 +197,8 @@ class DofsView:
     def __getattr__(self, attr):
         return getattr(self.obj, attr)
 
+    @deprecated("numpy.hstack")
     def __or__(self, other):
-        warn("Use numpy.hstack to combine sets of DOFs", DeprecationWarning)
         return replace(
             self,
             nodal_ix=np.union1d(self.nodal_ix, other.nodal_ix),

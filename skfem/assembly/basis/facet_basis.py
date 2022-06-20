@@ -8,7 +8,7 @@ from skfem.element import (BOUNDARY_ELEMENT_MAP, DiscreteField, Element,
                            ElementTriP0)
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
-from skfem.generic_utils import OrientedBoundary
+from skfem.generic_utils import OrientedBoundary, deprecated
 
 from .abstract_basis import AbstractBasis
 from .cell_basis import CellBasis
@@ -146,39 +146,13 @@ class FacetBasis(AbstractBasis):
                 raise ValueError
         return projection(x, fbasis, self, I=I)
 
+    @deprecated("Basis.interpolator + Basis.project")
     def trace(self,
               x: ndarray,
               projection: Callable[[ndarray], ndarray],
               target_elem: Optional[Element] = None) -> Tuple[CellBasis,
                                                               ndarray]:
-        """Restrict solution to :math:`d-1` dimensional trace mesh.
 
-        The parameter ``projection`` defines how the boundary points are
-        projected to :math:`d-1` dimensional space.  For example,
-
-        >>> projection = lambda p: p[0]
-
-        will keep only the `x`-coordinate in the trace mesh.
-
-        Parameters
-        ----------
-        x
-            The solution vector.
-        projection
-            A function defining the projection of the boundary points.  See
-            above for an example.
-        target_elem
-            Optional finite element to project to before restriction.  If not
-            given, a piecewise constant element is used.
-
-        Returns
-        -------
-        CellBasis
-            An object corresponding to the trace mesh.
-        ndarray
-            A projected solution vector defined on the trace mesh.
-
-        """
         DEFAULT_TARGET = {
             MeshTri: ElementTriP0,
             MeshQuad: ElementQuad0,

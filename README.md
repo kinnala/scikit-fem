@@ -219,6 +219,9 @@ with respect to documented and/or tested features.
 - Changed: Renamed `ElementTetRT0` to `ElementTetRT1`
 - Changed: Renamed `ElementQuadRT0` to `ElementQuadRT1`
 - Removed: The unused `DiscreteField.is_zero` method
+- Deprecated: `FacetBasis.trace` in favor of `Basis.interpolator` and `Basis.project`
+- Added: Output of `Basis.interpolator` can be now passed to `Basis.project`
+  thanks to supporting numpy array trailing axes in the interpolator
 - Added: `ElementTriRT2`, the second order Raviart-Thomas element
 - Added: `Basis.project` now better supports `ElementComposite`
 - Added: `solver_iter_cg`, a simple pure Python conjugate gradient solver for
