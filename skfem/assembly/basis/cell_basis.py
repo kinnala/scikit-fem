@@ -206,7 +206,17 @@ class CellBasis(AbstractBasis):
         values of the given solution vector `y` on given points."""
 
         def interpfun(x: ndarray) -> ndarray:
-            return self.probes(x) @ y
+            # reshape to 2-array to support trailing axes
+            # this is useful, e.g., to pass interpfun to Basis.project
+            shape = None
+            if len(x.shape) > 2:
+                shape = x.shape
+                x = x.reshape(shape[0], -1)
+            out = self.probes(x) @ y
+            # reshape output back to original shape
+            if shape is not None:
+                return out.reshape(*shape[1:])
+            return out
 
         return interpfun
 

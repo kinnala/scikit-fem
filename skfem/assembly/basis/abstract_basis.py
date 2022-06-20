@@ -12,6 +12,7 @@ from skfem.mapping import Mapping
 from skfem.mesh import Mesh
 from skfem.quadrature import get_quadrature
 from skfem.refdom import Refdom
+from skfem.generic_utils import deprecated
 
 
 logger = logging.getLogger(__name__)
@@ -118,10 +119,10 @@ class AbstractBasis:
             D = tuple(D[0][key].all() for key in D[0])
         return np.setdiff1d(np.arange(self.N), np.concatenate(D))
 
+    @deprecated("Basis.get_dofs")
     def find_dofs(self,
                   facets: Dict[str, ndarray] = None,
                   skip: List[str] = None) -> Dict[str, DofsView]:
-        warn("find_dofs deprecated in favor of get_dofs.", DeprecationWarning)
         if facets is None:
             if self.mesh.boundaries is None:
                 facets = {'all': self.mesh.boundary_facets()}

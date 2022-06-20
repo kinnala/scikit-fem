@@ -1,3 +1,6 @@
+import warnings
+import functools
+
 import numpy as np
 
 from numpy import ndarray
@@ -23,3 +26,16 @@ class OrientedBoundary(ndarray):
         if obj is None:
             return
         self.ori = getattr(obj, 'ori', None)
+
+
+def deprecated(replacement):
+    def deprecated_decorator(func):
+        @functools.wraps(func)
+        def new_func(*args, **kwargs):
+            warnings.warn("{} is deprecated in favor of {}.".format(
+                func.__name__,
+                replacement,
+            ), DeprecationWarning, stacklevel=2)
+            return func(*args, **kwargs)
+        return new_func
+    return deprecated_decorator

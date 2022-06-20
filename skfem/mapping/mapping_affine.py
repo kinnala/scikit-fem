@@ -155,7 +155,7 @@ class MappingAffine(Mapping):
         else:
             DF = self.A[:, :, tind]
 
-        return np.einsum('ijk,l->ijkl', DF, 1 + 0*X[0, :])
+        return np.einsum('ijk,l->ijkl', DF, 1 + 0 * X[0])
 
     def invDF(self, X, tind=None):
         if tind is None:
