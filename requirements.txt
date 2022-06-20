@@ -6,7 +6,6 @@ ipython
 pytest
 pygmsh
 gmsh
-pacopy
 pyamg
 mypy
 flake8
@@ -15,3 +14,4 @@ sphinx
 h5py
 glvis
 autograd
+pacopy==0.1.2
