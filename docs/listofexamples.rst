@@ -388,23 +388,6 @@ with a parabolic velocity profile at the inlet.
 
 See the `source code of Example 24 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex24.py>`_ for more information.
 
-Example 27: Backward-facing step
---------------------------------
-
-This example uses `pacopy 0.1.2 <https://pypi.org/project/pacopy/0.1.2>`__ to extend
-the Stokes equations over a backward-facing step (Example 24) to finite Reynolds
-number; this means defining a residual for the nonlinear problem and its
-derivatives with respect to the solution and to the Reynolds number.
-
-.. note::
-   This example requires the external package `pacopy 0.1.2 <https://pypi.org/project/pacopy/0.1.2>`__.
-
-.. figure:: https://user-images.githubusercontent.com/973268/87858972-97c86400-c93a-11ea-86e4-66f870b03e48.png
-
-   The streamlines of Example 27 for :math:`\mathrm{Re}=750`.
-
-See the `source code of Example 27 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex27.py>`_ for more information.
-
 Example 29: Linear hydrodynamic stability
 -----------------------------------------
 
@@ -595,21 +578,6 @@ This example solves the eigenvalue problem :math:`((1 - x^2) u')' + k u = 0` in
    The six first eigenmodes of Example 16.
 
 See the `source code of Example 16 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex16.py>`_ for more information.
-
-Example 23: Bratu-Gelfand
--------------------------
-
-This example solves the Bratu-Gelfand two-point boundary value problem :math:`u'' + \lambda \mathrm e^u = 0`, :math:`0 < x < 1`,
-with :math:`u(0)=u(1)=0` and where :math:`\lambda > 0` is a parameter.
-
-.. note::
-   This example requires the external package `pacopy 0.1.2 <https://pypi.org/project/pacopy/0.1.2>`__.
-
-.. figure:: https://user-images.githubusercontent.com/973268/87779278-38ccf700-c835-11ea-955a-b77a0336b791.png
-
-   The results of Example 23.
-
-See the `source code of Example 23 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex23.py>`_ for more information.
 
 Example 31: Curved elements
 ---------------------------

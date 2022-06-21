@@ -3,7 +3,6 @@ SciPy linear solvers."""
 
 import sys
 import logging
-from warnings import warn
 from typing import Optional, Union, Tuple, Callable, Dict
 
 import numpy as np
@@ -20,6 +19,7 @@ else:
 from skfem.assembly import asm, BilinearForm, LinearForm, DofsView
 from skfem.assembly.basis import AbstractBasis
 from skfem.element import ElementVector
+from skfem.generic_utils import deprecated
 
 
 logger = logging.getLogger(__name__)
@@ -615,6 +615,7 @@ def adaptive_theta(est, theta=0.5, max=None):
         return np.nonzero(theta * max < est)[0]
 
 
+@deprecated("Basis.project")
 def projection(fun,
                basis_to: Optional[AbstractBasis] = None,
                basis_from: Optional[AbstractBasis] = None,
@@ -687,14 +688,13 @@ def projection(fun,
     return solve_linear(M, f)
 
 
+@deprecated("Basis.project")
 def project(fun,
             basis_from: Optional[AbstractBasis] = None,
             basis_to: Optional[AbstractBasis] = None,
             diff: Optional[int] = None,
             I: Optional[ndarray] = None,
             expand: bool = False) -> ndarray:
-    warn("project is deprecated in favor of projection.",
-         DeprecationWarning)
     return projection(
         fun,
         basis_to=basis_to,

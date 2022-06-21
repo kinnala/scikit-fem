@@ -6,7 +6,6 @@ ipython
 pytest
 pygmsh
 gmsh
-pacopy
 pyamg
 mypy
 flake8

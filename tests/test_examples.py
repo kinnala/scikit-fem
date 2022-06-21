@@ -198,14 +198,6 @@ class TestEx22(TestCase):
         self.assertAlmostEqual(u.T @ K @ u, 0.21120183153583372)
 
 
-class TestEx23(TestCase):
-
-    def runTest(self):
-        import docs.examples.ex23 as ex
-        self.assertAlmostEqual(max(ex.lmbda_list), ex.turning_point,
-                               delta=1e-3)
-
-
 class TestEx24(TestCase):
 
     def runTest(self):
@@ -228,15 +220,6 @@ class TestEx26(TestCase):
     def runTest(self):
         from docs.examples.ex26 import T0
         self.assertAlmostEqual(*T0.values(), delta=2e-4)
-
-
-class TestEx27(TestCase):
-
-    def runTest(self):
-        import docs.examples.ex27 as ex
-        _, psi = ex.psi.popitem()
-        self.assertAlmostEqual(min(psi), -0.027043, delta=1e-6)
-        self.assertAlmostEqual(max(psi), 0.6668, delta=1e-5)
 
 
 class TestEx28(TestCase):
