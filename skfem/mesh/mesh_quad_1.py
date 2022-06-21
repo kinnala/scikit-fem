@@ -128,6 +128,21 @@ class MeshQuad1(Mesh2D):
                 .flatten())
         return cls(p, t.astype(np.int64))
 
+    def to_meshtri_sym(self):
+        """Split each quadrilateral into four triangles."""
+        tnew = np.arange(np.max(self.t) + 1,
+                         np.max(self.t) + 1 + self.t.shape[1],
+                         dtype=np.int64)
+        t = np.hstack((
+            np.vstack((self.t[[0, 1]], tnew)),
+            np.vstack((self.t[[1, 2]], tnew)),
+            np.vstack((self.t[[2, 3]], tnew)),
+            np.vstack((self.t[[0, 3]], tnew)),
+        ))
+        pnew = np.array([np.mean(self.doflocs, axis=0)])
+        return MeshTri1(np.hstack((self.doflocs,
+                                   self.doflocs[:, self.t].mean(axis=1))), t)
+
     def to_meshtri(self, x: Optional[ndarray] = None):
         """Split each quadrilateral into two triangles."""
         t = np.hstack((self.t[[0, 1, 3]], self.t[[1, 2, 3]]))
