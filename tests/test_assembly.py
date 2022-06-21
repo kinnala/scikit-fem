@@ -594,18 +594,16 @@ def test_matrix_element_projection(m, e):
 @pytest.mark.parametrize(
     "basis",
     [
-        Basis(MeshTri().refined(3), ElementTriRT1()),
+        Basis(MeshTri().refined(7), ElementTriRT1()),
     ]
 )
 def test_hdiv_boundary_integration(basis):
 
     y = basis.project(lambda x: np.array([x[0], 0 * x[1]]))
-    fbasis = basis.boundary()
+    fbasis = basis.boundary('right')
 
     @Functional
     def test1(w):
-        return w['y'][0]
+        return dot(w['y'], w.n)
 
-    #import pdb; pdb.set_trace()
-
-    assert_almost_equal(test1.assemble(fbasis, y=y), -2.0)
+    assert_almost_equal(test1.assemble(fbasis, y=y), 1, decimal=2)

@@ -230,7 +230,7 @@ class CellBasis(AbstractBasis):
             elements=self.tind,
         )
 
-    def boundary(self):
+    def boundary(self, facets: Optional[Any] = None):
         """Return corresponding :class:`~skfem.assembly.basis.FacetBasis`."""
         from skfem.assembly.basis.facet_basis import FacetBasis
         if self.tind is not None:
@@ -239,6 +239,7 @@ class CellBasis(AbstractBasis):
             self.mesh,
             self.elem,
             mapping=self.mapping,
+            facets=facets,
         )
 
     def project(self, interp, elements=None):
