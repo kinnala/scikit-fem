@@ -131,7 +131,18 @@ class MeshQuad1(Mesh2D):
     def to_meshtri(self,
                    x: Optional[ndarray] = None,
                    style: Optional[str] = None):
-        """Split each quadrilateral into two triangles."""
+        """Split each quadrilateral into two triangles.
+
+        Parameters
+        ----------
+        x
+            Elementwise constant function to preserve. If given, returned as
+            the second additional output parameter.
+        style
+            Optionally, specify a splitting style `'x'` for crisscross
+            splitting.
+
+        """
         if style == 'x':
             tnew = np.arange(np.max(self.t) + 1,
                              np.max(self.t) + 1 + self.t.shape[1],
