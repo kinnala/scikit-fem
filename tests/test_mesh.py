@@ -148,26 +148,27 @@ class TestMeshQuadSplit(TestCase):
 
     def runTest(self):
         from docs.examples.ex17 import mesh
-        mesh_tri = mesh.to_meshtri()
+        for style in [None, 'x']:
+            mesh_tri = mesh.to_meshtri(style=style)
 
-        for s in mesh.subdomains:
-            self.assertEqual(np.setdiff1d(*[m.t.T[m.subdomains[s]]
-                                            for m in [mesh, mesh_tri]]).size,
-                             0)
+            for s in mesh.subdomains:
+                self.assertEqual(
+                    np.setdiff1d(*[m.t.T[m.subdomains[s]]
+                                   for m in [mesh, mesh_tri]]).size, 0)
 
-        for b in mesh.boundaries:
-            np.testing.assert_array_equal(*[m.facets.T[m.boundaries[b]]
-                                            for m in [mesh, mesh_tri]])
+            for b in mesh.boundaries:
+                np.testing.assert_array_equal(*[m.facets.T[m.boundaries[b]]
+                                                for m in [mesh, mesh_tri]])
 
-    def runRefineTest(self):
-        mesh = MeshQuad().refined().with_boundaries({
-            'left': lambda x: x[0] == 0,
-        })
-        mesh_tri = mesh.to_meshtri()
+        for style in [None, 'x']:
+            mesh = MeshQuad().refined().with_boundaries({
+                'left': lambda x: x[0] == 0,
+            })
+            mesh_tri = mesh.to_meshtri(style=style)
 
-        for b in mesh.boundaries:
-            np.testing.assert_array_equal(*[m.facets.T[m.boundaries[b]]
-                                            for m in [mesh, mesh_tri]])
+            for b in mesh.boundaries:
+                np.testing.assert_array_equal(*[m.facets.T[m.boundaries[b]]
+                                                for m in [mesh, mesh_tri]])
 
 
 class TestAdaptiveSplitting1D(TestCase):
@@ -390,14 +391,6 @@ def test_smoothed(m):
     assert M.is_valid()
     # points have moved?
     assert np.linalg.norm((M.p - m.p) ** 2) > 0
-
-
-def test_crisscross():
-    m = MeshQuad.init_tensor(np.linspace(0, 1, 10),
-                             np.linspace(0, 1, 5))
-    assert m.to_meshtri_sym().is_valid()
-    m = MeshQuad().refined(3)
-    assert m.to_meshtri_sym().is_valid()
 
 
 @pytest.mark.parametrize(
