@@ -128,16 +128,55 @@ class MeshQuad1(Mesh2D):
                 .flatten())
         return cls(p, t.astype(np.int64))
 
-    def to_meshtri(self, x: Optional[ndarray] = None):
-        """Split each quadrilateral into two triangles."""
-        t = np.hstack((self.t[[0, 1, 3]], self.t[[1, 2, 3]]))
+    def to_meshtri(self,
+                   x: Optional[ndarray] = None,
+                   style: Optional[str] = None):
+        """Split each quadrilateral into two triangles.
+
+        Parameters
+        ----------
+        x
+            Elementwise constant function to preserve. If given, returned as
+            the second additional output parameter.
+        style
+            Optionally, specify a splitting style `'x'` for crisscross
+            splitting.
+
+        """
+        if style == 'x':
+            tnew = np.arange(np.max(self.t) + 1,
+                             np.max(self.t) + 1 + self.t.shape[1],
+                             dtype=np.int64)
+            t = np.hstack((
+                np.vstack((self.t[[0, 1]], tnew)),
+                np.vstack((self.t[[1, 2]], tnew)),
+                np.vstack((self.t[[2, 3]], tnew)),
+                np.vstack((self.t[[0, 3]], tnew)),
+            ))
+        else:
+            t = np.hstack((self.t[[0, 1, 3]], self.t[[1, 2, 3]]))
+
+        nt = self.t.shape[1]
 
         subdomains = None
         if self.subdomains:
-            subdomains = {k: np.concatenate((v, v + self.t.shape[1]))
-                          for k, v in self.subdomains.items()}
+            if style == 'x':
+                subdomains = {k: np.concatenate((v,
+                                                 v + nt,
+                                                 v + 2 * nt,
+                                                 v + 3 * nt))
+                              for k, v in self.subdomains.items()}
+            else:
+                subdomains = {k: np.concatenate((v, v + nt))
+                              for k, v in self.subdomains.items()}
 
-        mesh = MeshTri1(self.doflocs, t)
+        if style == 'x':
+            p = np.hstack((self.doflocs,
+                           self.doflocs[:, self.t].mean(axis=1)))
+        else:
+            p = self.doflocs
+
+        mesh = MeshTri1(p, t)
 
         boundaries = None
         if self.boundaries:
@@ -158,12 +197,15 @@ class MeshQuad1(Mesh2D):
             )
 
         if x is not None:
-            if len(x) == self.t.shape[1]:
+            if len(x) == nt:
                 # preserve elemental constant functions
-                X = np.concatenate((x, x))
+                if style == 'x':
+                    X = np.concatenate((x, x, x, x))
+                else:
+                    X = np.concatenate((x, x))
             else:
-                raise Exception("The parameter x must have one value per "
-                                "element.")
+                raise NotImplementedError("The parameter x must have one "
+                                          "value per element.")
             return mesh, X
         return mesh
 
