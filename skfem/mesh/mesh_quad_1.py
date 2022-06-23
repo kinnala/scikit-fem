@@ -139,7 +139,6 @@ class MeshQuad1(Mesh2D):
             np.vstack((self.t[[2, 3]], tnew)),
             np.vstack((self.t[[0, 3]], tnew)),
         ))
-        pnew = np.array([np.mean(self.doflocs, axis=0)])
         return MeshTri1(np.hstack((self.doflocs,
                                    self.doflocs[:, self.t].mean(axis=1))), t)
 
