@@ -392,6 +392,14 @@ def test_smoothed(m):
     assert np.linalg.norm((M.p - m.p) ** 2) > 0
 
 
+def test_crisscross():
+    m = MeshQuad.init_tensor(np.linspace(0, 1, 10),
+                             np.linspace(0, 1, 5))
+    assert m.to_meshtri_sym().is_valid()
+    m = MeshQuad().refined(3)
+    assert m.to_meshtri_sym().is_valid()
+
+
 @pytest.mark.parametrize(
     "m",
     [
