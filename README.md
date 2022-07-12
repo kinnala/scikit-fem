@@ -17,6 +17,7 @@ The library
 - supports one-dimensional, triangular, quadrilateral, tetrahedral and hexahedral finite elements
 - includes special elements such as Raviart-Thomas, Nédélec, MINI, Crouzeix-Raviart, Argyris, ...
 
+If you use the library in your research, you can cite the following article:
 ```
 @article{skfem2020,
   doi = {10.21105/joss.02369},
