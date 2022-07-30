@@ -78,7 +78,9 @@ class Mesh:
 
     @property
     def nedges(self):
-        return self.edges.shape[1]
+        if self.edges is not None:
+            return self.edges.shape[1]
+        raise NotImplementedError
 
     @property
     def nnodes(self):
