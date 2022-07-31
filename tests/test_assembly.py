@@ -14,7 +14,7 @@ from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementHex2, ElementTriArgyris, ElementTriP2,
                            ElementTriDG, ElementQuadDG, ElementHexDG,
                            ElementTetDG, ElementTriHermite, ElementVector,
-                           ElementTriRT1)
+                           ElementTriRT1, ElementTriRT2, ElementTriBDM1, ElementQuadRT1)
 from skfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
                         MeshTri2, MeshTet2, MeshHex2, MeshTri1DG, MeshQuad1DG,
                         MeshHex1DG)
@@ -594,7 +594,10 @@ def test_matrix_element_projection(m, e):
 @pytest.mark.parametrize(
     "basis",
     [
-        Basis(MeshTri().refined(7), ElementTriRT1()),
+        Basis(MeshTri().refined(5), ElementTriRT1()),
+        Basis(MeshTri().refined(4), ElementTriRT2()),
+        Basis(MeshTri().refined(4), ElementTriBDM1()),
+        #Basis(MeshQuad().refined(4), ElementQuadRT1()),
     ]
 )
 def test_hdiv_boundary_integration(basis):

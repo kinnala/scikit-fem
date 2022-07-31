@@ -5,7 +5,8 @@ m = MeshTri().refined(5)
 e = ElementTriRT1() * ElementTriP0()
 
 basis = Basis(m, e)
-fbasis = basis.boundary()
+fbasis = basis.boundary('right')
+#fbasis = basis.boundary()
 
 @BilinearForm
 def bilinf(sigma, u, tau, v, _):
@@ -13,11 +14,11 @@ def bilinf(sigma, u, tau, v, _):
 
 @LinearForm
 def linf(tau, v, _):
-    return 1. * v
+    return 0. * v
 
 @LinearForm
 def load(tau, v, w):
-    return dot(tau, w.n) * np.isclose(w.x[0], 1) * (np.sin(np.pi * w.x[1]))
+    return -dot(tau, w.n) * np.isclose(w.x[0], 1) * np.sin(np.pi * w.x[1])
 
 A = bilinf.assemble(basis)
 f = linf.assemble(basis) + load.assemble(fbasis)

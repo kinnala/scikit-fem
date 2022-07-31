@@ -4,7 +4,7 @@ import numpy as np
 from skfem.mesh import MeshHex, MeshQuad, MeshTri
 from skfem.element import ElementHex1, ElementQuad1, ElementHex2
 from skfem.assembly import FacetBasis
-from skfem.mapping.mapping_mortar import MappingMortar
+from skfem.mapping import MappingMortar
 
 
 class TestIsoparamNormals(unittest.TestCase):
