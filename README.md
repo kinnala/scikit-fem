@@ -216,7 +216,7 @@ with respect to documented and/or tested features.
   helpers to skip the evaluation of zero components in `ElementComposite` to
   improve type stability with respect to the size of the underlying numpy
   arrays; this is technically a backwards incompatible change and might affect
-  self-created helper functions       
+  self-created helper functions
 - Deprecated: `FacetBasis.trace` in favor of `Basis.interpolator` and `Basis.project`
 - Added: Output of `Basis.interpolator` supports trailing axes; can be now
   passed to `Basis.project` for (inexact) interpolation between meshes
