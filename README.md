@@ -227,6 +227,7 @@ with respect to documented and/or tested features.
 - Added: Renamed `ElementQuadRT0` to `ElementQuadRT1` and added alias for
   backwards compatibility
 - Added: `ElementTriRT2`, the second order Raviart-Thomas element
+- Added: `ElementHexRT1`, the first order Raviart-Thomas element for hexahedral meshes
 - Added: `Basis.project` now better supports `ElementComposite`
 - Added: `solver_iter_cg`, a simple pure Python conjugate gradient solver for
   environments that do not have sparse solver libraries (e.g., Pyodide)
