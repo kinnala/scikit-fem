@@ -184,7 +184,7 @@ class MeshQuad1(Mesh2D):
             for k in self.boundaries:
                 slots = enumerate(mesh.facets.T)
                 boundaries[k] = np.array([
-                    next(dropwhile(lambda s: not(np.array_equal(f, s[1])),
+                    next(dropwhile(lambda s: (not np.array_equal(f, s[1])),
                                    slots))[0]
                     for f in self.facets.T[np.sort(self.boundaries[k])]])
 
