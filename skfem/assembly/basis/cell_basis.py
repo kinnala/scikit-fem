@@ -232,7 +232,14 @@ class CellBasis(AbstractBasis):
         )
 
     def boundary(self, facets: Optional[Any] = None):
-        """Return corresponding :class:`~skfem.assembly.basis.FacetBasis`."""
+        """Return corresponding :class:`~skfem.assembly.basis.FacetBasis`.
+
+        Parameters
+        ----------
+        facets
+            Anything that can be passed to ``FacetBasis(..., facets=facets)``.
+
+        """
         from skfem.assembly.basis.facet_basis import FacetBasis
         if self.tind is not None:
             raise NotImplementedError("Boundary of subdomain not supported.")

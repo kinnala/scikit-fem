@@ -234,6 +234,7 @@ with respect to documented and/or tested features.
   (useful, e.g., for stabilized methods and the Stokes problem)
 - Added: `Basis.plot3`, a wrapper to `skfem.visuals.*.plot3`
 - Fixed: Calculation of size in `Basis.__repr__` was slow and incorrect
+- Fixed: Subclasses of `ElementHdiv` did not work together with `FacetBasis`
 
 ### [6.0.0] - 2022-03-15
 
@@ -270,6 +271,8 @@ with respect to documented and/or tested features.
 - Added: `FacetBasis` constructor now has the keyword argument `side` which
   allows changing the side of the facet used to calculate the basis function
   values and gradients
+- Added: `Basis.boundary` method to quickly initialize the corresponding
+  `FacetBasis`
 - Fixed: Improvements to backwards compatibility in `asm`/`assemble` keyword
   arguments
 - Fixed: Save format issue with meshio 5.3.0+
