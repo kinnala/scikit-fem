@@ -594,10 +594,10 @@ def test_matrix_element_projection(m, e):
 @pytest.mark.parametrize(
     "basis",
     [
-        Basis(MeshTri().refined(5), ElementTriRT1()),
+        Basis(MeshTri().refined(6), ElementTriRT1()),
         Basis(MeshTri().refined(4), ElementTriRT2()),
-        Basis(MeshTri().refined(4), ElementTriBDM1()),
-        #Basis(MeshQuad().refined(4), ElementQuadRT1()),
+        Basis(MeshTri().refined(5), ElementTriBDM1()),
+        Basis(MeshQuad().refined(4), ElementQuadRT1()),
     ]
 )
 def test_hdiv_boundary_integration(basis):
@@ -609,4 +609,11 @@ def test_hdiv_boundary_integration(basis):
     def test1(w):
         return dot(w['y'], w.n)
 
+    @Functional
+    def test2(w):
+        return w['y'].div
+
     assert_almost_equal(test1.assemble(fbasis, y=y), 1, decimal=2)
+
+    if not isinstance(basis.elem, ElementTriRT1):
+        assert_almost_equal(test2.assemble(fbasis, y=y), 1, decimal=5)
