@@ -29,7 +29,8 @@ class Mapping():
     def invF(self,
              x: ndarray,
              tind: Optional[ndarray] = None) -> ndarray:
-        """Perform an inverse mapping from global elements to reference element.
+        """Perform an inverse mapping from global elements to reference
+        element.
 
         Parameters
         ----------

@@ -47,8 +47,9 @@ class CellBasis(AbstractBasis):
                  elements: Optional[Any] = None,
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
                  dofs: Optional[Dofs] = None):
-        """Combine :class:`~skfem.mesh.Mesh` and :class:`~skfem.element.Element`
-        into a set of precomputed global basis functions.
+        """Combine :class:`~skfem.mesh.Mesh` and
+        :class:`~skfem.element.Element` into a set of precomputed global basis
+        functions.
 
         Parameters
         ----------
