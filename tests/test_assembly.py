@@ -14,7 +14,8 @@ from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementHex2, ElementTriArgyris, ElementTriP2,
                            ElementTriDG, ElementQuadDG, ElementHexDG,
                            ElementTetDG, ElementTriHermite, ElementVector,
-                           ElementTriRT1, ElementTriRT2, ElementTriBDM1, ElementQuadRT1)
+                           ElementTriRT1, ElementTriRT2, ElementTriBDM1,
+                           ElementQuadRT1, ElementTetRT1)
 from skfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
                         MeshTri2, MeshTet2, MeshHex2, MeshTri1DG, MeshQuad1DG,
                         MeshHex1DG)
@@ -617,3 +618,28 @@ def test_hdiv_boundary_integration(basis):
 
     if not isinstance(basis.elem, ElementTriRT1):
         assert_almost_equal(test2.assemble(fbasis, y=y), 1, decimal=5)
+
+
+@pytest.mark.parametrize(
+    "basis",
+    [
+        Basis(MeshTet().refined(4).with_boundaries({
+            'right': lambda x: x[0] == 1
+        }), ElementTetRT1()),
+    ]
+)
+def test_hdiv_boundary_integration_3d(basis):
+
+    y = basis.project(lambda x: np.array([x[0], 0 * x[1], 0 * x[2]]))
+    fbasis = basis.boundary('right')
+
+    @Functional
+    def test1(w):
+        return dot(w['y'], w.n)
+
+    # @Functional
+    # def test2(w):
+    #     return w['y'].div
+
+    assert_almost_equal(test1.assemble(fbasis, y=y), 1, decimal=2)
+    # assert_almost_equal(test2.assemble(fbasis, y=y), 1, decimal=5)
