@@ -215,9 +215,8 @@ with respect to documented and/or tested features.
 - Changed: Removed the optimization of using `DiscreteField.is_zero` in the
   helpers to skip the evaluation of zero components in `ElementComposite` to
   improve type stability with respect to the size of the underlying numpy
-  arrays; this allows more easily using packages such as JAX and autograd to
-  calculate derivatives of complicated forms; this is technically a backwards
-  incompatible change
+  arrays; this is technically a backwards incompatible change and might affect
+  self-created helper functions       
 - Deprecated: `FacetBasis.trace` in favor of `Basis.interpolator` and `Basis.project`
 - Added: Output of `Basis.interpolator` supports trailing axes; can be now
   passed to `Basis.project` for (inexact) interpolation between meshes
