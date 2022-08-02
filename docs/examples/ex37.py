@@ -10,6 +10,7 @@ m = MeshTet.init_tensor(*(p,) * 3)
 
 e = ElementTetRT1() * ElementTetP0()
 basis = Basis(m, e)
+fbasis = basis.boundary()
 
 
 @BilinearForm
@@ -19,11 +20,14 @@ def bilinf(sigma, u, tau, v, w):
 
 @LinearForm
 def linf(tau, v, w):
-    return - 1. * v
+    return (dot(tau, w.n)
+            * np.sin(np.pi * w.x[1])
+            * np.sin(np.pi * w.x[2])
+            * np.isclose(w.x[0], 1))
 
 
 A = asm(bilinf, basis)
-b = asm(linf, basis)
+b = asm(linf, fbasis)
 x = solve(A, b)
 
 (sigma, rtbasis), (u, ubasis) = basis.split(x)

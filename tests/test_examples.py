@@ -302,7 +302,7 @@ class TestEx37(TestCase):
 
     def runTest(self):
         from docs.examples.ex37 import u
-        self.assertAlmostEqual(np.max(u), 0.05594193697362236)
+        self.assertAlmostEqual(np.max(u), 0.8619044895314989)
 
 
 class TestEx38(TestCase):
