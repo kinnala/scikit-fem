@@ -47,8 +47,9 @@ class CellBasis(AbstractBasis):
                  elements: Optional[Any] = None,
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
                  dofs: Optional[Dofs] = None):
-        """Combine :class:`~skfem.mesh.Mesh` and :class:`~skfem.element.Element`
-        into a set of precomputed global basis functions.
+        """Combine :class:`~skfem.mesh.Mesh` and
+        :class:`~skfem.element.Element` into a set of precomputed global basis
+        functions.
 
         Parameters
         ----------
@@ -228,6 +229,25 @@ class CellBasis(AbstractBasis):
             mapping=self.mapping,
             quadrature=self.quadrature,
             elements=self.tind,
+        )
+
+    def boundary(self, facets: Optional[Any] = None):
+        """Return corresponding :class:`~skfem.assembly.basis.FacetBasis`.
+
+        Parameters
+        ----------
+        facets
+            Anything that can be passed to ``FacetBasis(..., facets=facets)``.
+
+        """
+        from skfem.assembly.basis.facet_basis import FacetBasis
+        if self.tind is not None:
+            raise NotImplementedError("Boundary of subdomain not supported.")
+        return FacetBasis(
+            self.mesh,
+            self.elem,
+            mapping=self.mapping,
+            facets=facets,
         )
 
     def project(self, interp, elements=None):

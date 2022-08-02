@@ -212,18 +212,22 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
-- Changed: The optimization of using `DiscreteField.is_zero` in the helpers to
-  skip the evaluation of zero components in `ElementComposite` was removed to
+- Changed: Removed the optimization of using `DiscreteField.is_zero` in the
+  helpers to skip the evaluation of zero components in `ElementComposite` to
   improve type stability with respect to the size of the underlying numpy
-  arrays
-- Changed: Renamed `ElementTriRT0` to `ElementTriRT1`
-- Changed: Renamed `ElementTetRT0` to `ElementTetRT1`
-- Changed: Renamed `ElementQuadRT0` to `ElementQuadRT1`
-- Removed: The unused `DiscreteField.is_zero` method
+  arrays; this is technically a backwards incompatible change and might affect
+  self-created helper functions
 - Deprecated: `FacetBasis.trace` in favor of `Basis.interpolator` and `Basis.project`
 - Added: Output of `Basis.interpolator` supports trailing axes; can be now
   passed to `Basis.project` for (inexact) interpolation between meshes
+- Added: Renamed `ElementTriRT0` to `ElementTriRT1` and added alias for
+  backwards compatibility
+- Added: Renamed `ElementTetRT0` to `ElementTetRT1` and added alias for
+  backwards compatibility
+- Added: Renamed `ElementQuadRT0` to `ElementQuadRT1` and added alias for
+  backwards compatibility
 - Added: `ElementTriRT2`, the second order Raviart-Thomas element
+- Added: `ElementHexRT1`, the first order Raviart-Thomas element for hexahedral meshes
 - Added: `Basis.project` now better supports `ElementComposite`
 - Added: `solver_iter_cg`, a simple pure Python conjugate gradient solver for
   environments that do not have sparse solver libraries (e.g., Pyodide)
@@ -234,6 +238,7 @@ with respect to documented and/or tested features.
   (useful, e.g., for stabilized methods and the Stokes problem)
 - Added: `Basis.plot3`, a wrapper to `skfem.visuals.*.plot3`
 - Fixed: Calculation of size in `Basis.__repr__` was slow and incorrect
+- Fixed: Subclasses of `ElementHdiv` did not work together with `FacetBasis`
 
 ### [6.0.0] - 2022-03-15
 
@@ -270,6 +275,8 @@ with respect to documented and/or tested features.
 - Added: `FacetBasis` constructor now has the keyword argument `side` which
   allows changing the side of the facet used to calculate the basis function
   values and gradients
+- Added: `Basis.boundary` method to quickly initialize the corresponding
+  `FacetBasis`
 - Fixed: Improvements to backwards compatibility in `asm`/`assemble` keyword
   arguments
 - Fixed: Save format issue with meshio 5.3.0+

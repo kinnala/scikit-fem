@@ -142,7 +142,7 @@ Example 37: Mixed Poisson equation
 This example solves the mixed formulation of the Poisson equation
 using the lowest order Raviart-Thomas elements.
 
-.. figure:: https://user-images.githubusercontent.com/973268/93132097-c2862d00-f6dd-11ea-97ad-40aaf2732ad1.png
+.. figure:: https://user-images.githubusercontent.com/973268/182335108-7f29b086-f9b2-42fb-ae9f-dd707d3808f8.png
 
    The piecewise constant solution field.
    The figure was created using `ParaView <https://www.paraview.org/>`__.

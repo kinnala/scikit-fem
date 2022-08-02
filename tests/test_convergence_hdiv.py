@@ -6,8 +6,8 @@ from skfem import BilinearForm, CellBasis, LinearForm, asm, solve
 from skfem.element import (ElementTetP0, ElementTetRT0, ElementTriP0,
                            ElementTriRT0, ElementTriBDM1, ElementDG,
                            ElementQuadRT0, ElementQuad0, ElementTriRT2,
-                           ElementTriP1)
-from skfem.mesh import MeshTet, MeshTri, MeshQuad
+                           ElementTriP1, ElementHexRT1, ElementHex0)
+from skfem.mesh import MeshTet, MeshTri, MeshQuad, MeshHex
 
 
 class ConvergenceRaviartThomas(unittest.TestCase):
@@ -198,3 +198,20 @@ class ConvergenceRaviartThomas3D(ConvergenceRaviartThomas):
 
     def setUp(self):
         self.mesh = MeshTet().refined(1)
+
+
+class ConvergenceRaviartThomas3DHex(ConvergenceRaviartThomas3D):
+
+    rateL2 = 1.0
+    L2bound = 0.1
+    rateHdiv = 1.0
+    Hdivbound = 0.31
+
+    def create_basis(self, m):
+        e = ElementHexRT1()
+        e0 = ElementHex0()
+        return (CellBasis(m, e, intorder=2),
+                CellBasis(m, e0, intorder=2))
+
+    def setUp(self):
+        self.mesh = MeshHex().refined(1)
