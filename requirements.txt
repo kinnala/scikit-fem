@@ -14,3 +14,4 @@ sphinx
 h5py
 glvis
 autograd
+pep517
