@@ -61,6 +61,14 @@ docs:
 # Release
 
 release:
+	@echo "Steps for release:"
+	@echo "1. Update changelog in README.md and modify version number in setup.cfg"
+	@echo "2. Create a commit, e.g., 'Bump up version number'"
+	@echo "3. Push (and wait for CI to run successfully to minimize bugs)"
+	@echo "4. Run 'make release'"
+	@echo "5. Go to GitHub and draft a release; add tag during release"
+	@echo "6. After 15 mins, go to kinnala/scikit-fem-release-tests and add new version"
+	@read -p "... Press enter to build and upload the current branch ..."
 	-rm -r dist
 	-rm -r build
 	-rm -r scikit_fem.egg-info
