@@ -232,7 +232,7 @@ with respect to documented and/or tested features.
   backwards compatibility
 - Added: `ElementTriRT2`, the second order Raviart-Thomas element
 - Added: `ElementHexRT1`, the first order Raviart-Thomas element for hexahedral meshes
-- Added: `Basis.project` now better supports `ElementComposite`[6.0.0] - 2022-03-15
+- Added: `Basis.project` now better supports `ElementComposite`
 - Added: `solver_iter_cg`, a simple pure Python conjugate gradient solver for
   environments that do not have sparse solver libraries (e.g., Pyodide)
 - Added: `ElementTriP2B` and `ElementTriP1B`, new aliases for `ElementTriMini`
