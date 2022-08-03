@@ -210,7 +210,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 with respect to documented and/or tested features.
 
-### Unreleased
+### [7.0.1] - 2022-08-03
+
+- Fixed: Updated changelog was missing.
+
+### [7.0.0] - 2022-08-03
 
 - Changed: Removed the optimization of using `DiscreteField.is_zero` in the
   helpers to skip the evaluation of zero components in `ElementComposite` to
@@ -228,7 +232,7 @@ with respect to documented and/or tested features.
   backwards compatibility
 - Added: `ElementTriRT2`, the second order Raviart-Thomas element
 - Added: `ElementHexRT1`, the first order Raviart-Thomas element for hexahedral meshes
-- Added: `Basis.project` now better supports `ElementComposite`
+- Added: `Basis.project` now better supports `ElementComposite`[6.0.0] - 2022-03-15
 - Added: `solver_iter_cg`, a simple pure Python conjugate gradient solver for
   environments that do not have sparse solver libraries (e.g., Pyodide)
 - Added: `ElementTriP2B` and `ElementTriP1B`, new aliases for `ElementTriMini`
