@@ -974,6 +974,8 @@ class Mesh:
             self,
             doflocs=p,
             t=t,
+            _boundaries=None,
+            _subdomains=None,
         )
 
     def element_finder(self, mapping=None):
