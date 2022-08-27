@@ -5,6 +5,7 @@ import numpy as np
 from numpy import ndarray
 
 from ..element import Element, ElementLineP1
+
 from .mesh import Mesh
 from .mesh_quad_1 import MeshQuad1
 from .mesh_simplex import MeshSimplex
@@ -18,6 +19,11 @@ class MeshLine1(MeshSimplex, Mesh):
     t: ndarray = np.array([[0], [1]], dtype=np.int64)
     elem: Type[Element] = ElementLineP1
     affine: bool = True
+
+    @classmethod
+    def init_tensor(cls, p):
+        from skfem.mesh import MeshLine
+        return MeshLine(p)
 
     def __mul__(self, other):
 
