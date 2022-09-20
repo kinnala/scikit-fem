@@ -32,11 +32,13 @@ class ElementQuadP(ElementLinePp):
         self.Px, self.Py = np.zeros((0, 0)), np.zeros((0, 0))
         self.dPx, self.dPy = np.zeros((0, 0, 1)), np.zeros((0, 0, 1))
         self.p = p
+        self._X = np.array([])
 
     def lbasis(self, X, i):
         x, y = X
 
-        if self.Px.shape[1] != len(x):
+        if self._X.shape != X.shape or (self._X != X).any():
+            self._X = X.copy()
             self.Px, self.dPx = self._reval_legendre(x, self.p)
             self.Py, self.dPy = self._reval_legendre(y, self.p)
 
