@@ -233,7 +233,8 @@ class CellBasis(AbstractBasis):
 
     def boundary(self,
                  facets: Optional[Any] = None,
-                 intorder: Optional[int] = None):
+                 intorder: Optional[int] = None,
+                 quadrature: Optional[Tuple[ndarray, ndarray]] = None):
         """Return corresponding :class:`~skfem.assembly.basis.FacetBasis`.
 
         Parameters
@@ -242,6 +243,8 @@ class CellBasis(AbstractBasis):
             Anything that can be passed to ``FacetBasis(..., facets=facets)``.
         intorder
             Optionally, specify integration order.
+        quadrature
+            Optionally, specify quadrature.
 
         """
         from skfem.assembly.basis.facet_basis import FacetBasis
@@ -253,6 +256,7 @@ class CellBasis(AbstractBasis):
             mapping=self.mapping,
             facets=facets,
             intorder=intorder,
+            quadrature=quadrature,
         )
 
     def project(self, interp, elements=None):
