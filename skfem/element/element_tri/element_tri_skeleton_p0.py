@@ -18,6 +18,6 @@ class ElementTriSkeletonP0(ElementH1):
     def lbasis(self, X, i):
 
         if i in [0, 1, 2]:
-            return RefTri.on_facet(i, X), 0. * X
+            return 1. * RefTri.on_facet(i, X), 0. * X
         else:
             self._index_error()
