@@ -231,13 +231,17 @@ class CellBasis(AbstractBasis):
             elements=self.tind,
         )
 
-    def boundary(self, facets: Optional[Any] = None):
+    def boundary(self,
+                 facets: Optional[Any] = None,
+                 intorder: Optional[int] = None):
         """Return corresponding :class:`~skfem.assembly.basis.FacetBasis`.
 
         Parameters
         ----------
         facets
             Anything that can be passed to ``FacetBasis(..., facets=facets)``.
+        intorder
+            Optionally, specify integration order.
 
         """
         from skfem.assembly.basis.facet_basis import FacetBasis
@@ -248,6 +252,7 @@ class CellBasis(AbstractBasis):
             self.elem,
             mapping=self.mapping,
             facets=facets,
+            intorder=intorder,
         )
 
     def project(self, interp, elements=None):
