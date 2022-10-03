@@ -34,7 +34,10 @@ def draw_basis(ib: CellBasis, **kwargs) -> Axes:
 @draw.register(Mesh3D)
 def draw_meshhex(m: Mesh3D, **kwargs) -> Axes:
     """Visualize a three-dimensional mesh by drawing the edges."""
-    ax = plt.figure().add_subplot(1, 1, 1, projection='3d')
+    if 'ax' not in kwargs:
+        ax = plt.figure().add_subplot(1, 1, 1, projection='3d')
+    else:
+        ax = kwargs['ax']
     for ix in range(m.edges.shape[1]):
         ax.plot3D(
             m.p[0, m.edges[:, ix]].flatten(),
