@@ -567,6 +567,9 @@ class Mesh:
         logger.debug("Mesh validation completed with no warnings.")
         return True
 
+    def __iter__(self):
+        return iter((self.doflocs, self.t))
+
     def __rmatmul__(self, other):
         out = self.__matmul__(other)
         return out[1:] + out[0:1]
