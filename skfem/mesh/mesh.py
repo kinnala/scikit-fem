@@ -963,6 +963,28 @@ class Mesh:
         t[ixuniq] = np.arange(len(ixuniq), dtype=np.int64)
         return self.p[:, ixuniq], t[ix]
 
+    def trace(self, facets):
+        """Create a raw trace mesh (p, t).  Returns also the facet indices.
+
+        Parameters
+        ----------
+        facets
+            Criteria of which facets to include.  This input is normalized
+            using ``self.normalize_facets``.
+
+        Returns
+        -------
+        p : ndarray
+            An array of points in the trace mesh.
+        t : ndarray
+            The element connectivity of the trace mesh.
+        facets : ndarray
+            An array of facet indices to the original mesh.
+
+        """
+        facets = self.normalize_facets(facets)
+        return *self._reix(self.facets[:, facets]), facets
+
     def remove_elements(self, element_indices: ndarray):
         """Construct a new mesh by removing elements.
 
