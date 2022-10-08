@@ -983,7 +983,8 @@ class Mesh:
 
         """
         facets = self.normalize_facets(facets)
-        return *self._reix(self.facets[:, facets]), facets
+        p, t = self._reix(self.facets[:, facets])
+        return p, t, facets
 
     def remove_elements(self, element_indices: ndarray):
         """Construct a new mesh by removing elements.
