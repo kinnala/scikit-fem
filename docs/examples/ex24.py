@@ -15,7 +15,6 @@ from pathlib import Path
 
 from matplotlib.pyplot import subplots
 import numpy as np
-from scipy.sparse import bmat
 
 from skfem import *
 from skfem.models.poisson import vector_laplace, laplace
@@ -34,8 +33,8 @@ D = basis['u'].get_dofs(['inlet', 'ceiling', 'floor'])
 A = asm(vector_laplace, basis['u'])
 B = -asm(divergence, basis['u'], basis['p'])
 
-K = bmat([[A, B.T],
-          [B, None]], 'csr')
+K, ix = block([[A, B.T],
+               [B, None]])
 
 inlet_basis = FacetBasis(mesh, element['u'], facets=mesh.boundaries['inlet'])
 
@@ -51,7 +50,7 @@ uvp = np.hstack((
 ))
 uvp = solve(*condense(K, x=uvp, D=D))
 
-velocity, pressure = np.split(uvp, [A.shape[0]])
+velocity, pressure = np.split(uvp, ix)
 
 basis['psi'] = basis['u'].with_element(ElementTriP2())
 A = asm(laplace, basis['psi'])

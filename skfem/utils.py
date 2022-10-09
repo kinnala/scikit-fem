@@ -600,6 +600,32 @@ def condense(A: spmatrix,
 # additional utilities
 
 
+def block(blocks, mat_type: str = 'csr'):
+    """A variant of scipy bmat which returns indices to different blocks."""
+    m = len(blocks)
+
+    if not isinstance(blocks[0], list):
+        raise ValueError("'blocks' must be a list of lists.")
+    n = len(blocks[0])
+
+    sizes = []
+    diff = 0
+
+    for j in range(n - 1):
+        for i in range(m):
+            if blocks[i][j] is None:
+                continue
+            else:
+                if len(blocks[i][j].shape) == 1:
+                    sizes.append(blocks[i][j].shape[0] + diff)
+                else:
+                    sizes.append(blocks[i][j].shape[1] + diff)
+                diff += sizes[-1]
+                break
+
+    return sp.bmat(blocks, mat_type), sizes
+
+
 def rcm(A: spmatrix,
         b: ndarray) -> Tuple[spmatrix, ndarray, ndarray]:
     """Reverse Cuthill-McKee ordering."""

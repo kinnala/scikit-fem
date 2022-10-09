@@ -1,6 +1,6 @@
 """Wave equation."""
 import numpy as np
-from scipy.sparse import bmat, identity
+from scipy.sparse import identity
 from scipy.sparse.linalg import splu
 from skfem import *
 from skfem.models import laplace, mass
@@ -16,11 +16,11 @@ I = identity(N)
 c = 1.
 
 # reduction to first order system in time
-A0 = bmat([[I, None],
-           [None, M]], "csc")
+A0, _ = block([[I, None],
+               [None, M]], "csc")
 
-B0 = bmat([[None, I],
-           [-c ** 2 * L, None]], "csc")
+B0, _ = block([[None, I],
+               [-c ** 2 * L, None]], "csc")
 
 # Crank-Nicolson
 dt = .01
