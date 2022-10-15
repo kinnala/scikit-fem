@@ -16,11 +16,11 @@ I = identity(N)
 c = 1.
 
 # reduction to first order system in time
-A0, _ = block([[I, None],
-               [None, M]], "csc")
+A0 = block([[I, None],
+            [None, M]], "csc")[0]
 
-B0, _ = block([[None, I],
-               [-c ** 2 * L, None]], "csc")
+B0 = block([[None, I],
+            [-c ** 2 * L, None]], "csc")[0]
 
 # Crank-Nicolson
 dt = .01
