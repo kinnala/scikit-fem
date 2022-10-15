@@ -68,7 +68,7 @@ B = asm(divergence, basis['u'], basis['p'])
 C = asm(mass, basis['p'])
 
 K = bmat([[A, -B.T],
-          [-B, 1e-6 * C]])
+          [-B, 1e-6 * C]], 'csr')
 
 f = np.concatenate([asm(body_force, basis['u']),
                     basis['p'].zeros()])

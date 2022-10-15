@@ -600,8 +600,8 @@ def condense(A: spmatrix,
 # additional utilities
 
 
-def bmat(blocks, mat_type: str = 'csr'):
-    """A variant of scipy bmat which includes indices to different blocks."""
+def bmat(blocks, **kwargs):
+    """A variant of scipy bmat which adds block indices to out.blocks."""
     m = len(blocks)
 
     if not isinstance(blocks[0], list):
@@ -623,7 +623,7 @@ def bmat(blocks, mat_type: str = 'csr'):
                 diff += sizes[-1]
                 break
 
-    mat = sp.bmat(blocks, mat_type)
+    mat = sp.bmat(blocks, **kwargs)
     mat.blocks = sizes  # add block sizes as an attribute
 
     return mat
