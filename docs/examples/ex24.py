@@ -33,8 +33,8 @@ D = basis['u'].get_dofs(['inlet', 'ceiling', 'floor'])
 A = asm(vector_laplace, basis['u'])
 B = -asm(divergence, basis['u'], basis['p'])
 
-K, ix = block([[A, B.T],
-               [B, None]])
+K = bmat([[A, B.T],
+          [B, None]])
 
 inlet_basis = FacetBasis(mesh, element['u'], facets=mesh.boundaries['inlet'])
 
@@ -50,7 +50,7 @@ uvp = np.hstack((
 ))
 uvp = solve(*condense(K, x=uvp, D=D))
 
-velocity, pressure = np.split(uvp, ix)
+velocity, pressure = np.split(uvp, K.blocks)
 
 basis['psi'] = basis['u'].with_element(ElementTriP2())
 A = asm(laplace, basis['psi'])

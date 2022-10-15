@@ -67,15 +67,15 @@ A = asm(vector_laplace, basis['u'])
 B = asm(divergence, basis['u'], basis['p'])
 C = asm(mass, basis['p'])
 
-K, ix = block([[A, -B.T],
-               [-B, 1e-6 * C]])
+K = bmat([[A, -B.T],
+          [-B, 1e-6 * C]])
 
 f = np.concatenate([asm(body_force, basis['u']),
                     basis['p'].zeros()])
 
 uvp = solve(*condense(K, f, D=basis['u'].get_dofs()))
 
-velocity, pressure = np.split(uvp, ix)
+velocity, pressure = np.split(uvp, K.blocks)
 
 basis['psi'] = basis['u'].with_element(ElementTriP2())
 A = asm(laplace, basis['psi'])

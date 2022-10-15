@@ -26,7 +26,7 @@ __all__ = all_mesh + all_assembly + all_element + [  # noqa
     'project',
     'projection',
     'solve',
-    'block',
+    'bmat',
     'solver_direct_scipy',
     'solver_eigen_scipy',
     'solver_eigen_scipy_sym',
