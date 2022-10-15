@@ -1,6 +1,6 @@
 """Wave equation."""
 import numpy as np
-from scipy.sparse import bmat, identity
+from scipy.sparse import identity
 from scipy.sparse.linalg import splu
 from skfem import *
 from skfem.models import laplace, mass

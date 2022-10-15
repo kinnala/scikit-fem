@@ -15,7 +15,6 @@ from pathlib import Path
 
 from matplotlib.pyplot import subplots
 import numpy as np
-from scipy.sparse import bmat
 
 from skfem import *
 from skfem.models.poisson import vector_laplace, laplace
@@ -51,7 +50,7 @@ uvp = np.hstack((
 ))
 uvp = solve(*condense(K, x=uvp, D=D))
 
-velocity, pressure = np.split(uvp, [A.shape[0]])
+velocity, pressure = np.split(uvp, K.blocks)
 
 basis['psi'] = basis['u'].with_element(ElementTriP2())
 A = asm(laplace, basis['psi'])

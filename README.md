@@ -210,6 +210,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 with respect to documented and/or tested features.
 
+### Unreleased
+
+- Added: `ElementTetSkeletonP0`, extension of `ElementTriSkeletonP0` to
+  tetrahedral meshes
+- Added: `Mesh.trace` which turns facets into a trace mesh
+- Added: `skfem.utils.bmat`, a variant of `scipy.sparse.bmat` which adds the
+  indices of the different blocks as an attribute `out.blocks`
+
 ### [7.0.1] - 2022-08-03
 
 - Fixed: Updated changelog was missing.
@@ -391,7 +399,7 @@ with respect to documented and/or tested features.
 - Added: `Basis`, a shorthand for `CellBasis`
 - Added: `CellBasis`, a new preferred name for `InteriorBasis`
 - Added: `BoundaryFacetBasis`, a new preferred name for `ExteriorFacetBasis`
-- Added: `utils.penalize`, an alternative to `condense` and `enforce` for
+- Added: `skfem.utils.penalize`, an alternative to `condense` and `enforce` for
   essential boundary conditions
 - Added: `InteriorBasis.point_source`, with `ex38`
 - Added: `ElementTetDG`, similar to `ElementTriDG` for tetrahedral meshes

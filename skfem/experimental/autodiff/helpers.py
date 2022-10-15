@@ -21,6 +21,12 @@ def grad(u):
     return u[1]
 
 
+def sym_grad(u):
+    if isinstance(u, DiscreteField):
+        return .5 * (u.grad + transpose(u.grad))
+    return .5 * (u[1] + transpose(u[1]))
+
+
 def div(u):
     if len(u[1].shape) == 4:
         return np.einsum('ii...', u[1])

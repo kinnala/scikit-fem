@@ -48,7 +48,6 @@ from skfem.models.general import divergence, rot
 from pathlib import Path
 
 import numpy as np
-from scipy.sparse import bmat
 
 
 mesh = MeshTri.init_circle(4)
@@ -76,7 +75,7 @@ f = np.concatenate([asm(body_force, basis['u']),
 
 uvp = solve(*condense(K, f, D=basis['u'].get_dofs()))
 
-velocity, pressure = np.split(uvp, [A.shape[0]])
+velocity, pressure = np.split(uvp, K.blocks)
 
 basis['psi'] = basis['u'].with_element(ElementTriP2())
 A = asm(laplace, basis['psi'])
@@ -105,7 +104,7 @@ if __name__ == '__main__':
 
     ax = draw(mesh)
     velocity1 = velocity[basis['u'].nodal_dofs]
-    ax.quiver(*mesh.p, *velocity1, mesh.p[0, :])  # colour by buoyancy
+    ax.quiver(*mesh.p, *velocity1, mesh.p[0])  # colour by buoyancy
     savefig(f'{name}_velocity.png')
 
     ax = draw(mesh)
