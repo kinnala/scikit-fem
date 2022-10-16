@@ -17,15 +17,15 @@ from .__about__ import __version__
 __all__ = all_mesh + all_assembly + all_element + [  # noqa
     'MappingAffine',
     'MappingIsoparametric',
-    'MappingMortar',
+    'MappingMortar',  # TODO remove due to deprecation
     'adaptive_theta',
     'build_pc_ilu',
     'build_pc_diag',
     'condense',
     'enforce',
     'penalize',
-    'project',
-    'projection',
+    'project',  # TODO remove due to deprecation
+    'projection',  # TODO remove due to deprecation
     'solve',
     'bmat',
     'get_quadrature',
