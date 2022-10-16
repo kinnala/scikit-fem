@@ -1,22 +1,23 @@
 """Tabulated and generated quadrature points for various reference domains."""
 
-from typing import Tuple, Type
+from typing import Tuple, Type, Union
 
 import numpy as np
 from numpy.polynomial.legendre import leggauss
 from .refdom import (Refdom, RefPoint, RefLine, RefTri, RefQuad, RefTet,
                      RefHex, RefWedge)
+from .element import Element
 
 
-def get_quadrature(refdom: Type[Refdom],
+def get_quadrature(refdom_or_elem: Union[Type[Refdom], Type[Element], Element],
                    norder: int) -> Tuple[np.ndarray, np.ndarray]:
     """Return a nth order accurate quadrature rule for different reference
     domains.
 
     Parameters
     ----------
-    refdom
-        The reference domain type.
+    refdom_or_elem
+        The reference domain type or finite element.
 
     norder
         The polynomial order upto which the requested quadrature rule is
@@ -28,8 +29,10 @@ def get_quadrature(refdom: Type[Refdom],
         weights (Nqp).
 
     """
-    if not isinstance(refdom, Refdom) and hasattr(refdom, 'refdom'):
-        refdom = refdom.refdom
+    if hasattr(refdom_or_elem, 'refdom'):
+        refdom = refdom_or_elem.refdom
+    else:
+        refdom = refdom_or_elem
     if refdom == RefTri:
         return get_quadrature_tri(norder)
     elif refdom == RefTet:
