@@ -30,7 +30,7 @@ def get_quadrature(refdom_or_elem: Union[Type[Refdom], Type[Element], Element],
 
     """
     if hasattr(refdom_or_elem, 'refdom'):
-        refdom = refdom_or_elem.refdom
+        refdom = refdom_or_elem.refdom  # type: ignore
     else:
         refdom = refdom_or_elem
     if refdom == RefTri:

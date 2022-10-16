@@ -86,7 +86,7 @@ class Form:
         """Support additional input formats for 'w'."""
         for k in w:
             if isinstance(w[k], DiscreteField):
-                if w[k].shape[-1] != basis.X.shape[1]:
+                if w[k].shape[-1] != basis.X.shape[-1]:
                     raise ValueError("Quadrature mismatch: '{}' should have "
                                      "same number of integration points as "
                                      "the basis object.".format(k))
@@ -99,17 +99,14 @@ class Form:
             elif isinstance(w[k], ndarray) and len(w[k].shape) == 1:
                 # interpolate DOF arrays at quadrature points
                 w[k] = basis.interpolate(w[k])
+            elif isinstance(w[k], ndarray) and len(w[k].shape) > 1:
+                w[k] = DiscreteField(w[k])
             elif isinstance(w[k], list):
                 warnings.warn("Use Basis.interpolate instead of passing lists "
                               "to assemble", DeprecationWarning)
                 # for backwards-compatibility
                 w[k] = DiscreteField(np.array([z.value for z in w[k]]),
                                      np.array([z.grad for z in w[k]]))
-            elif isinstance(w[k], ndarray) and len(w[k].shape) == 2:
-                warnings.warn("Use Basis.interpolate instead of passing 2D "
-                              "numpy arrays to assemble", DeprecationWarning)
-                # for backwards-compatibility
-                w[k] = DiscreteField(w[k])
             else:
                 raise ValueError("The given type '{}' for the list of extra "
                                  "form parameters w cannot be converted to "

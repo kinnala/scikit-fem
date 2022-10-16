@@ -418,7 +418,6 @@ class Mesh:
         return vertices, edges
 
     def _mapping(self):
-        """Return a default reference mapping for the mesh."""
         from skfem.mapping import MappingAffine, MappingIsoparametric
         if not hasattr(self, '_cached_mapping'):
             if self.affine:
@@ -430,6 +429,10 @@ class Mesh:
                     self.bndelem,
                 )
         return self._cached_mapping
+
+    def mapping(self):
+        """Return a default reference mapping for the mesh."""
+        return self._mapping()
 
     def _init_facets(self):
         """Initialize ``self.facets``."""
