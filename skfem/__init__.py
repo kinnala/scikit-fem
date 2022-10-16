@@ -5,6 +5,7 @@ from skfem.assembly import *  # noqa
 from skfem.mapping import *  # noqa
 from skfem.element import *  # noqa
 from skfem.utils import *  # noqa
+from skfem.utils import get_quadrature  # noqa
 
 from skfem.assembly import __all__ as all_assembly
 from skfem.mesh import __all__ as all_mesh
@@ -27,6 +28,7 @@ __all__ = all_mesh + all_assembly + all_element + [  # noqa
     'projection',
     'solve',
     'bmat',
+    'get_quadrature',
     'solver_direct_scipy',
     'solver_eigen_scipy',
     'solver_eigen_scipy_sym',

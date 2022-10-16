@@ -28,6 +28,8 @@ def get_quadrature(refdom: Type[Refdom],
         weights (Nqp).
 
     """
+    if not isinstance(refdom, Refdom) and hasattr(refdom, 'refdom'):
+        refdom = refdom.refdom
     if refdom == RefTri:
         return get_quadrature_tri(norder)
     elif refdom == RefTet:

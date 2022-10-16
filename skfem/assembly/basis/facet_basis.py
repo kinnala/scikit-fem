@@ -106,7 +106,7 @@ class FacetBasis(AbstractBasis):
                       for j in range(self.Nbfun)]
 
         self.dx = (np.abs(self.mapping.detDG(self.X, find=self.find))
-                   * np.tile(self.W, (self.nelems, 1)))
+                   * np.broadcast_to(self.W, (self.nelems, self.W.shape[-1])))
         logger.info("Initializing finished.")
 
     def default_parameters(self):
