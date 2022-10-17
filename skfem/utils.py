@@ -603,9 +603,6 @@ def condense(A: spmatrix,
 def bmat(blocks, *args, **kwargs):
     """A variant of scipy bmat which adds block indices to out.blocks."""
     m = len(blocks)
-
-    if not isinstance(blocks[0], list):
-        raise ValueError("'blocks' must be a list of lists.")
     n = len(blocks[0])
 
     sizes = []
