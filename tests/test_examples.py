@@ -28,8 +28,8 @@ class TestEx04(TestCase):
 
     def runTest(self):
         import docs.examples.ex04 as ex04
-        self.assertAlmostEqual(np.max(ex04.vonmises1), 62.145822877277546)
-        self.assertAlmostEqual(np.max(ex04.vonmises2), 65.21160117344738)
+        self.assertAlmostEqual(np.max(ex04.vonmises1), 61.42437154384301)
+        self.assertAlmostEqual(np.max(ex04.vonmises2), 64.5756996946833)
 
 
 class TestEx05(TestCase):
