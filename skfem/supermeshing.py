@@ -1,6 +1,7 @@
 import numpy as np
 
 from .mesh import MeshLine
+from .quadrature import get_quadrature
 
 
 def intersect(p1, t1, p2, t2):
@@ -18,3 +19,16 @@ def intersect(p1, t1, p2, t2):
     ix2 = MeshLine(p2, t2).element_finder()(mps[0, :, 0])
 
     return p, t, ix1, ix2
+
+
+def build_quadrature(supermesh, tind, mesh, order=None):
+    """For creating global quadrature rules based on the supermesh."""
+    if order is None:
+        order = 4
+    X, W = get_quadrature(supermesh.elem, order)
+    mmap = mesh.mapping()
+    smap = supermesh.mapping()
+    return (
+        mmap.invF(smap.F(X), tind=tind),
+        np.abs(smap.detDF(X) / mmap.detDF(X, tind=tind)) * W,
+    )

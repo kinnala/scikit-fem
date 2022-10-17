@@ -8,12 +8,13 @@ They are useful also when solving variational inequalities such as
 
 import numpy as np
 from skfem import *
-from skfem.supermeshing import intersect
+from skfem.supermeshing import intersect, build_quadrature
 from skfem.models.elasticity import (linear_elasticity, lame_parameters,
                                      linear_stress)
-from skfem.helpers import dot, ddot, prod, sym_grad, jump, mul
+from skfem.helpers import dot, sym_grad, jump, mul
 from skfem.io.json import from_file
 from pathlib import Path
+
 
 # create meshes
 mesh_file = Path(__file__).parent / 'meshes' / 'ex04_mesh.json'
@@ -35,46 +36,24 @@ p1, t1, facets1 = m1.trace('contact')
 p2, t2, facets2 = m2.trace('contact')
 p1 = p1[1:]
 p2 = p2[1:]
+m1t = MeshLine(p1, t1)
+m2t = MeshLine(p2, t2)
 
 # create supermesh for integration
 p12, t12, orig1, orig2 = intersect(p1, t1, p2, t2)
 m12 = MeshLine(p12, t12)
 
-# create mappings
-map1t = MeshLine(p1, t1).mapping()
-map2t = MeshLine(p2, t2).mapping()
-map1 = m1.mapping()
-map2 = m2.mapping()
-map12 = m12.mapping()
-
 basis1 = Basis(m1, e1)
 basis2 = Basis(m2, e2)
 
-# quadrature points are created using the supermesh and mapped to the facets
-# of the original meshes
-X, W = get_quadrature(ElementLineP1, 3)
-
-fbasis1 = FacetBasis(
-    m1,
-    e1,
-    mapping=map1,
-    quadrature=(
-        map1t.invF(map12.F(X), tind=orig1),
-        map12.detDF(X) / map1.detDG(X, find=facets1[orig1]) * W,
-    ),
-    facets=facets1[orig1],
-)
-
-fbasis2 = FacetBasis(
-    m2,
-    e2,
-    mapping=map2,
-    quadrature=(
-        map2t.invF(map12.F(X), tind=orig2),
-        map12.detDF(X) / map2.detDG(X, find=facets2[orig2]) * W,
-    ),
-    facets=facets2[orig2],
-)
+fbases = [
+    FacetBasis(m1, e1,
+               quadrature=build_quadrature(m12, orig1, m1t),
+               facets=facets1[orig1]),
+    FacetBasis(m2, e2,
+               quadrature=build_quadrature(m12, orig2, m2t),
+               facets=facets2[orig2]),
+]
 
 # problem definition
 youngs_modulus = 1000.0
@@ -105,9 +84,10 @@ def lin_mortar(v, w):
     return ((1. / (alpha * w.h) * gap(w.x) * jv - gap(w.x) * mv)
             * (np.abs(w.x[1]) <= limit))
 
+# fix mesh parameter and normals from m2
 params = {
-    'h': map12.detDF(X),
-    'n': -fbasis2.normals,
+    'h': fbases[1].mesh_parameters(),
+    'n': -fbases[1].normals,
 }
 
 # assemble the block system
@@ -115,16 +95,15 @@ K1 = weakform.assemble(basis1)
 K2 = weakform.assemble(basis2)
 
 K = [[K1, 0], [0, K2]]
-f = [None, None]
+f = [0, 0]
 
-fbases = [fbasis1, fbasis2]
 for i in [0, 1]:
     for j in [0, 1]:
         K[i][j] += bilin_mortar.assemble(fbases[j],
                                          fbases[i],
-                                         idx=(j, i),
+                                         idx=(j, i),  # for jump sign
                                          **params)
-    f[i] = lin_mortar.assemble(fbases[i], idx=(i,), **params)
+    f[i] += lin_mortar.assemble(fbases[i], idx=(i,), **params)
 
 K = bmat(K, 'csr')
 f = np.concatenate(f)
