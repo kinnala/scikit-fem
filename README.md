@@ -217,6 +217,10 @@ with respect to documented and/or tested features.
 - Added: `Mesh.trace` which turns facets into a trace mesh
 - Added: `skfem.utils.bmat`, a variant of `scipy.sparse.bmat` which adds the
   indices of the different blocks as an attribute `out.blocks`
+- Added: `skfem.supermeshing`, tools for creating element-by-element quadrature
+  rules with the help of supermeshes
+- Deprecated: `MappingMortar` and `MortarFacetBasis` in favor of
+  `skfem.supermeshing` and plain `FacetBasis`
 
 ### [7.0.1] - 2022-08-03
 

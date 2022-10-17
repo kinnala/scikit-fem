@@ -4,6 +4,7 @@ from typing import Optional
 import numpy as np
 from numpy import ndarray
 
+from ..generic_utils import deprecated
 from ..mesh import Mesh2D
 from .mapping import Mapping
 
@@ -13,6 +14,7 @@ class MappingMortar(Mapping):
 
     side = 0
 
+    @deprecated("skfem.supermeshing")
     def __init__(self,
                  maps,
                  helper_to_orig,
