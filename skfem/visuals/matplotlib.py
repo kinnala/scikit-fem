@@ -163,6 +163,25 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> Axes:
     return ax
 
 
+@draw.register(MeshLine1)
+def draw_meshline(m: MeshLine1, **kwargs):
+    """Draw the nodes of one-dimensional mesh."""
+    if "ax" not in kwargs:
+        # create new figure
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+    else:
+        ax = kwargs["ax"]
+
+    color = kwargs["color"] if "color" in kwargs else 'ko-'
+    ix = np.argsort(m.p[0])
+
+    ax.plot(m.p[0][ix], 0. * m.p[0][ix], color)
+
+    ax.show = lambda: plt.show()
+    return ax
+
+
 @singledispatch
 def plot(m, u, **kwargs) -> Axes:
     """Plot functions defined on nodes of the mesh."""
