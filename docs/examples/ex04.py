@@ -32,8 +32,8 @@ e1 = ElementVector(ElementTriP2())
 e2 = ElementVector(ElementQuad2())
 
 # create trace meshes and project
-p1, t1, facets1 = m1.trace('contact')
-p2, t2, facets2 = m2.trace('contact')
+p1, t1, facets1, _ = m1.trace('contact')
+p2, t2, facets2, _ = m2.trace('contact')
 p1 = p1[1:]
 p2 = p2[1:]
 m1t = MeshLine(p1, t1)

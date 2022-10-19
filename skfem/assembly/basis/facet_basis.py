@@ -178,7 +178,7 @@ class FacetBasis(AbstractBasis):
 
         assert callable(target_meshcls)  # to satisfy mypy
 
-        p, t = self.mesh._reix(self.mesh.facets[:, self.find])
+        p, t, _ = self.mesh._reix(self.mesh.facets[:, self.find])
 
         return (
             CellBasis(target_meshcls(projection(p), t), elemcls()),
