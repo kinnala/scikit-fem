@@ -25,8 +25,8 @@ class ElementTriN0(ElementHcurl):
             phi = np.array([-y, x])
             dphi = np.array([2. + 0. * x])
         elif i == 2:
-            phi = np.array([-y, x - 1.])
-            dphi = np.array([2. + 0. * x])
+            phi = np.array([y, 1. - x])
+            dphi = np.array([-2. + 0. * x])
         else:
             self._index_error()
 
