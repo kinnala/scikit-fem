@@ -959,7 +959,7 @@ class Mesh:
         """Return mesh parameter, viz the length of the longest edge."""
         raise NotImplementedError
 
-    def _reix(self, ix: ndarray) -> Tuple[ndarray, ndarray]:
+    def _reix(self, ix: ndarray) -> Tuple[ndarray, ndarray, ndarray]:
         """Connect ``self.p`` based on the indices ``ix``."""
         ixuniq = np.unique(ix)
         t = np.zeros(np.max(ix) + 1, dtype=np.int64)
