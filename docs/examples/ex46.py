@@ -6,7 +6,7 @@ from skfem.helpers import *
 
 
 mesh = MeshTri().init_tensor(np.linspace(0, 1, 9),
-                             np.linspace(0, .5, 5))
+                             np.linspace(0, .5, 5)).refined(3)
 basis = Basis(mesh, ElementTriN0() * ElementTriP1())
 
 epsilon = lambda x: 1. + 0. * x[0]
@@ -35,14 +35,16 @@ B = bform.assemble(basis)
 C = gauge.assemble(basis)
 
 lams, xs = solve(*condense(A + C, B, D=basis.get_dofs()),
-                 solver=solver_eigen_scipy_sym(k=6))
+                 solver=solver_eigen_scipy_sym(k=3))
 
 
-for itr, lam in enumerate(lams):
-    if lam < 1e-8:
-        continue
-    basis.plot(xs[:, itr], colorbar=True).show()
+# compare against analytical eigenvalues
+err1 = np.abs(lams[0] - np.pi ** 2)
+err2 = np.abs(lams[1] - 4. * np.pi ** 2)
+err3 = np.abs(lams[2] - 4. * np.pi ** 2)
 
 
-print('TE10 (calculated): {}'.format(lams[0]))
-print('TE10 (analytical): {}'.format(np.pi ** 2))
+if __name__ == "__main__":
+    print('TE10 error: {}'.format(err1))
+    print('TE01 error: {}'.format(err2))
+    print('TE20 error: {}'.format(err3))
