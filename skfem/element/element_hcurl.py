@@ -36,10 +36,10 @@ class ElementHcurl(Element):
             ),)
         else:
             return (DiscreteField(
+                # TODO orientation is automatically correct for triangular
+                # meshes, check that this works for quadrilateral meshes
                 value=np.einsum('ijkl,il,k->jkl', invDF, phi, orient),
-                curl=dphi / detDF,# * orient[:, None],
-                #curl=dphi / detDF * orient[:, None],
-                #curl=dphi / np.abs(detDF) * orient[:, None],
+                curl=dphi / np.abs(detDF) * orient[:, None],
             ),)
 
     def lbasis(self, X, i):

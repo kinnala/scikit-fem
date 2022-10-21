@@ -1,9 +1,6 @@
-"""
-Like http://diyhpl.us/~nmz787/pdf/Using_the_FEniCS_Package_for_FEM_Solutions_in_Electromagnetics.pdf (4.1)
-"""
+"""Waveguide cutoff analysis."""
 
 import numpy as np
-
 from skfem import *
 from skfem.helpers import *
 
@@ -11,7 +8,6 @@ from skfem.helpers import *
 mesh = MeshTri().init_tensor(np.linspace(0, 1, 9),
                              np.linspace(0, .5, 5))
 basis = Basis(mesh, ElementTriN0() * ElementTriP1())
-#basis = Basis(mesh, ElementTriN0())
 
 epsilon = lambda x: 1. + 0. * x[0]
 # epsilon = lambda x: 3 * (x[1] < 0.25) + 1
