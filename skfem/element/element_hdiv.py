@@ -21,7 +21,7 @@ class ElementHdiv(Element):
         return ori[tind]
 
     def gbasis(self, mapping, X, i, tind=None):
-        """Covariant Piola transformation."""
+        """Contravariant Piola transformation."""
         phi, dphi = self.lbasis(X, i)
         DF = mapping.DF(X, tind)
         detDF = mapping.detDF(X, tind)

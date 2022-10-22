@@ -373,3 +373,12 @@ class TestEx45(TestCase):
     def runTest(self):
         import docs.examples.ex45 as ex45
         self.assertAlmostEqual(np.mean(ex45.x), 0.277931521728906)
+
+
+class TestEx46(TestCase):
+
+    def runTest(self):
+        import docs.examples.ex46 as ex46
+        self.assertAlmostEqual(ex46.err1, 0, delta=1e-3)
+        self.assertAlmostEqual(ex46.err2, 0, delta=2e-2)
+        self.assertAlmostEqual(ex46.err3, 0, delta=2e-2)
