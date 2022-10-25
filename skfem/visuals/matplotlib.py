@@ -205,7 +205,8 @@ def plot_meshline(m: MeshLine1, z: ndarray, **kwargs):
 
     color = kwargs["color"] if "color" in kwargs else 'ko-'
     ix = np.argsort(m.p[0])
-    ax.plot(m.p[0][ix], z[ix], color)
+    plot_kwargs = kwargs["plot_kwargs"] if "plot_kwargs" in kwargs else {}
+    ax.plot(m.p[0][ix], z[ix], color, **plot_kwargs)
 
     ax.show = lambda: plt.show()
     return ax
