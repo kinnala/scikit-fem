@@ -93,6 +93,7 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> Axes:
         facets = m.facets[:, m.boundary_facets()]
     else:
         facets = m.facets
+    plot_kwargs = kwargs["plot_kwargs"] if "plot_kwargs" in kwargs else {}
     # faster plotting is achieved through
     # None insertion trick.
     xs = []
@@ -110,7 +111,8 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> Axes:
     ax.plot(xs,
             ys,
             kwargs['color'] if 'color' in kwargs else 'k',
-            linewidth=kwargs['linewidth'] if 'linewidth' in kwargs else .5)
+            linewidth=kwargs['linewidth'] if 'linewidth' in kwargs else .5,
+            **plot_kwargs)
 
     if "boundaries" in kwargs:
         cm = plt.get_cmap('gist_rainbow')
@@ -133,7 +135,8 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> Axes:
                     ys,
                     color=colors[i % len(colors)],
                     linewidth=(kwargs['linewidth']
-                               if 'linewidth' in kwargs else 2.))
+                               if 'linewidth' in kwargs else 2.)
+                    **plot_kwargs)
             if hasattr(m.boundaries[k], 'ori'):
                 tris = m.f2t[m.boundaries[k].ori, m.boundaries[k]]
                 color = colors[i % len(colors)][:3] + (.1,)
@@ -176,7 +179,9 @@ def draw_meshline(m: MeshLine1, **kwargs):
     color = kwargs["color"] if "color" in kwargs else 'ko-'
     ix = np.argsort(m.p[0])
 
-    ax.plot(m.p[0][ix], 0. * m.p[0][ix], color)
+    plot_kwargs = kwargs["plot_kwargs"] if "plot_kwargs" in kwargs else {}
+
+    ax.plot(m.p[0][ix], 0. * m.p[0][ix], color, **plot_kwargs)
 
     ax.show = lambda: plt.show()
     return ax
