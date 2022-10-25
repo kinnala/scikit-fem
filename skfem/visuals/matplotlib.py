@@ -135,7 +135,7 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> Axes:
                     ys,
                     color=colors[i % len(colors)],
                     linewidth=(kwargs['linewidth']
-                               if 'linewidth' in kwargs else 2.)
+                               if 'linewidth' in kwargs else 2.),
                     **plot_kwargs)
             if hasattr(m.boundaries[k], 'ori'):
                 tris = m.f2t[m.boundaries[k].ori, m.boundaries[k]]
