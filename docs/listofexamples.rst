@@ -2,8 +2,8 @@
  Gallery of examples
 =====================
 
-This page contains an overview of the examples contained in the `source code
-repository <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/>`_.
+This page contains an overview of the examples contained in the source code
+repository.
 
 Poisson equation
 ================
@@ -21,7 +21,7 @@ triangular elements.
    from docs.examples.ex01 import visualize
    visualize()
 
-See the `source code of Example 1 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex01.py>`_ for more information.
+See the source code of :exlink:`01` for more information.
 
 .. _ex07:
 
@@ -38,7 +38,7 @@ is piecewise-quartic but discontinuous over the element edges.
    from docs.examples.ex07 import visualize
    visualize()
 
-See the `source code of Example 7 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex07.py>`_ for more information.
+See the source code of :exlink:`07` for more information.
 
 Example 12: Postprocessing
 --------------------------
@@ -51,7 +51,7 @@ This example demonstrates postprocessing the value of a functional, Boussinesq's
    from docs.examples.ex12 import visualize
    visualize()
 
-See the `source code of Example 12 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex12.py>`_ for more information.
+See the source code of :exlink:`12` for more information.
 
 Example 13: Laplace with mixed boundary conditions
 --------------------------------------------------
@@ -68,7 +68,7 @@ boundary.
    from docs.examples.ex13 import visualize
    visualize()
 
-See the `source code of Example 13 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex13.py>`_ for more information.
+See the source code of :exlink:`13` for more information.
 
 .. _ex14:
 
@@ -85,7 +85,7 @@ satisfy :math:`u=x^2 - y^2` on the boundary of the square domain.
    from docs.examples.ex14 import visualize
    visualize()
 
-See the `source code of Example 14 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex14.py>`_ for more information.
+See the source code of :exlink:`14` for more information.
 
 Example 15: One-dimensional Poisson equation
 --------------------------------------------
@@ -97,7 +97,7 @@ condition :math:`u(0)=u(1)=0`.
 
    The solution of Example 15.
 
-See the `source code of Example 15 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex15.py>`_ for more information.
+See the source code of :exlink:`15` for more information.
 
 
 Example 9: Three-dimensional Poisson equation
@@ -118,7 +118,7 @@ method.
    The solution of Example 9 on a cross-section of the tetrahedral mesh.  The
    figure was created using `ParaView <https://www.paraview.org/>`__.
 
-See the `source code of Example 9 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex09.py>`_ for more information.
+See the source code of :exlink:`09` for more information.
 
 Example 22: Adaptive Poisson equation
 -------------------------------------
@@ -134,7 +134,7 @@ edge :math:`E`.
    from docs.examples.ex22 import visualize
    visualize()
 
-See the `source code of Example 22 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex22.py>`_ for more information.
+See the source code of :exlink:`22` for more information.
 
 Example 37: Mixed Poisson equation
 ----------------------------------
@@ -147,7 +147,7 @@ using the lowest order Raviart-Thomas elements.
    The piecewise constant solution field.
    The figure was created using `ParaView <https://www.paraview.org/>`__.
 
-See the `source code of Example 37 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex37.py>`_ for more information.
+See the source code of :exlink:`37` for more information.
 
 Example 38: Point source
 ------------------------
@@ -165,7 +165,7 @@ a single interior point :math:`\boldsymbol{s}`, :math:`-\Delta u = \delta
    from docs.examples.ex38 import visualize
    visualize()
 
-See the `source code of Example 38 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex38.py>`_
+See the source code of :exlink:`38`
 for more information.
 
 Example 40: Hybridizable discontinuous Galerkin method
@@ -183,7 +183,7 @@ the original mesh).
    from docs.examples.ex40 import visualize
    visualize()
 
-See the `source code of Example 40 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex40.py>`_
+See the source code of :exlink:`40`
 for more information.
 
 Example 41: Mixed meshes
@@ -202,7 +202,7 @@ work-in-progress).
    from docs.examples.ex41 import visualize
    visualize()
 
-See the `source code of Example 41 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex41.py>`_
+See the source code of :exlink:`41`
 for more information.
 
 Solid mechanics
@@ -222,7 +222,7 @@ boundary conditions.
    from docs.examples.ex02 import visualize
    visualize()
 
-See the `source code of Example 2 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex02.py>`_ for more information.
+See the source code of :exlink:`02` for more information.
 
 Example 3: Linear elastic eigenvalue problem
 --------------------------------------------
@@ -237,7 +237,7 @@ the displacement fixed on the left boundary.
    from docs.examples.ex03 import visualize
    visualize()
 
-See the `source code of Example 3 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex03.py>`_ for more information.
+See the source code of :exlink:`03` for more information.
 
 Example 4: Linearized contact problem
 -------------------------------------
@@ -253,7 +253,7 @@ in the discretization of the two elastic bodies.
    from docs.examples.ex04 import visualize
    visualize()
 
-See the `source code of Example 4 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex04.py>`_ for more information.
+See the source code of :exlink:`04` for more information.
 
 
 Example 8: Argyris basis functions
@@ -270,7 +270,7 @@ This element can be used in the conforming discretization of biharmonic problems
    from docs.examples.ex08 import visualize
    visualize()
 
-See the `source code of Example 8 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex08.py>`_ for more information.
+See the source code of :exlink:`08` for more information.
 
 Example 11: Three-dimensional linear elasticity
 -----------------------------------------------
@@ -285,7 +285,7 @@ fixed and the other is displaced slightly outwards.
    The displaced mesh of Example 11.  The figure was created using `ParaView
    <https://www.paraview.org/>`__.
 
-See the `source code of Example 11 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex11.py>`_ for more information.
+See the source code of :exlink:`11` for more information.
 
 Example 21: Structural vibration
 --------------------------------
@@ -297,7 +297,7 @@ eigenvalue problem by considering the vibration of an elastic structure.
 
    The first eigenmode of Example 21.
 
-See the `source code of Example 21 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex21.py>`_ for more information.
+See the source code of :exlink:`21` for more information.
 
 Example 34: Euler-Bernoulli beam
 --------------------------------
@@ -312,7 +312,7 @@ The exact solution at :math:`x=1` is :math:`u(1)=1/8`.
 
    The solution of Example 34.
 
-See the `source code of Example 34 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex34.py>`_ for more information.
+See the source code of :exlink:`34` for more information.
 
 Example 36: Nearly incompressible hyperelasticity
 -------------------------------------------------
@@ -325,7 +325,7 @@ for nearly incompressible Neo-Hookean solids.
    The displacement contour of Example 36.
    The figure was created using `ParaView <https://www.paraview.org/>`__.
 
-See the `source code of Example 36 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex36.py>`_ for more information.
+See the source code of :exlink:`36` for more information.
 
 
 Example 43: Hyperelasticity
@@ -339,7 +339,7 @@ of a hyperelastic Neo-Hookean solid.
    The deformed mesh of Example 43.
    The figure was created using `vedo <https://github.com/marcomusy/vedo>`__.
 
-See the `source code of Example 43 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex43.py>`_ for more information.
+See the source code of :exlink:`43` for more information.
 
 Fluid mechanics
 ===============
@@ -355,7 +355,7 @@ by the Stokes momentum :math:`- \nu\Delta\boldsymbol{u} + \rho^{-1}\nabla p = \b
 
    The streamlines of Example 18.
 
-See the `source code of Example 18 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex18.py>`_ for more information.
+See the source code of :exlink:`18` for more information.
 
 Example 20: Creeping flow via stream-function
 ---------------------------------------------
@@ -374,7 +374,7 @@ slip)
 
    The velocity field of Example 20.
 
-See the `source code of Example 20 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex20.py>`_ for more information.
+See the source code of :exlink:`20` for more information.
 
 Example 24: Stokes flow with inhomogeneous boundary conditions
 --------------------------------------------------------------
@@ -386,7 +386,7 @@ with a parabolic velocity profile at the inlet.
 
    The streamlines of Example 24.
 
-See the `source code of Example 24 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex24.py>`_ for more information.
+See the source code of :exlink:`24` for more information.
 
 Example 29: Linear hydrodynamic stability
 -----------------------------------------
@@ -412,7 +412,7 @@ Reynolds number.
 
    The results of Example 29.
 
-See the `source code of Example 29 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex29.py>`_ for more information.
+See the source code of :exlink:`29` for more information.
 
 Example 30: Krylov-Uzawa method for the Stokes equation
 -------------------------------------------------------
@@ -423,7 +423,7 @@ This example solves the Stokes equation iteratively in a square domain.
 
    The pressure field of Example 30.
 
-See the `source code of Example 30 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex30.py>`_ for more information.
+See the source code of :exlink:`30` for more information.
 
 Example 32: Block diagonally preconditioned Stokes solver
 ---------------------------------------------------------
@@ -440,7 +440,7 @@ minutes).
    The velocity and pressure fields of Example 32, clipped in the plane of spanwise symmetry, *z* = 0.
    The figure was created using `ParaView <https://www.paraview.org/>`_ 5.8.1.
 
-See the `source code of Example 32 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex32.py>`_ for more information.
+See the source code of :exlink:`32` for more information.
 
 Example 42: Periodic meshes
 ---------------------------
@@ -451,7 +451,7 @@ This example solves the advection equation on a periodic square mesh.
 
    The solution of Example 42 on a periodic mesh.
 
-See the `source code of Example 42 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex42.py>`_
+See the source code of :exlink:`42`
 for more information.
 
 Heat transfer
@@ -473,7 +473,7 @@ with the boundary condition
 
    The solution of Example 17.
 
-See the `source code of Example 17 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex17.py>`_ for more information.
+See the source code of :exlink:`17` for more information.
 
 Example 19: Heat equation
 -------------------------
@@ -485,7 +485,7 @@ rule ("theta method") and fast time-stepping by factorizing the evolution matrix
 
    The solution of Example 19.
 
-See the `source code of Example 19 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex19.py>`_ for more information.
+See the source code of :exlink:`19` for more information.
 
 Example 25: Forced convection
 -----------------------------
@@ -500,7 +500,7 @@ by the thermal diffusivity.
 
    The solution of Example 25.
 
-See the `source code of Example 25 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex25.py>`_ for more information.
+See the source code of :exlink:`25` for more information.
 
 Example 26: Restricting problem to a subdomain
 ----------------------------------------------
@@ -511,7 +511,7 @@ This example extends Example 17 by restricting the solution to a subdomain.
 
    The solution of Example 26.
 
-See the `source code of Example 26 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex26.py>`_ for more information.
+See the source code of :exlink:`26` for more information.
 
 Example 28: Conjugate heat transfer
 -----------------------------------
@@ -531,7 +531,7 @@ gradient and a transverse profile.
 
    A comparison of inlet and outlet temperature profiles in Example 28.
 
-See the `source code of Example 28 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex28.py>`_ for more information.
+See the source code of :exlink:`28` for more information.
 
 Example 39: One-dimensional heat equation
 -----------------------------------------
@@ -543,7 +543,7 @@ demonstrate the special post-processing required.
 
    The solution of Example 39.
 
-See the `source code of Example 39 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex39.py>`_
+See the source code of :exlink:`39`
 for more information.
 
 Electromagnetism
@@ -565,7 +565,7 @@ hand.
 
    The solution of Example 10.
 
-See the `source code of Example 10 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex10.py>`_ for more information.
+See the source code of :exlink:`10` for more information.
 
 Example 16: Legendre's equation
 -------------------------------
@@ -577,7 +577,7 @@ This example solves the eigenvalue problem :math:`((1 - x^2) u')' + k u = 0` in
 
    The six first eigenmodes of Example 16.
 
-See the `source code of Example 16 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex16.py>`_ for more information.
+See the source code of :exlink:`16` for more information.
 
 Example 31: Curved elements
 ---------------------------
@@ -591,7 +591,7 @@ quadrilaterals.
 
    An eigenmode of Example 31 in a curved mesh.
 
-See the `source code of Example 31 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex31.py>`_ for more information.
+See the source code of :exlink:`31` for more information.
 
 Example 33: H(curl) conforming model problem
 --------------------------------------------
@@ -607,7 +607,7 @@ element.
    of the vector field.
    The figure was created using `ParaView <https://www.paraview.org/>`__.
 
-See the `source code of Example 33 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex33.py>`_ for more information.
+See the source code of :exlink:`33` for more information.
 
 Example 35: Characteristic impedance and velocity factor
 --------------------------------------------------------
@@ -620,7 +620,7 @@ characteristic impedance and velocity factor of the cable.
 
    The results of Example 35.
 
-See the `source code of Example 35 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex35.py>`_ for more information.
+See the source code of :exlink:`35` for more information.
 
 Example 44: Wave equation
 -------------------------
@@ -632,4 +632,4 @@ u_{xx}` by reducing it to a first order system.
 
    The results of Example 44.
 
-See the `source code of Example 44 <https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex44.py>`_ for more information.
+See the source code of :exlink:`44` for more information.

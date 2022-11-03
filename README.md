@@ -220,7 +220,7 @@ with respect to documented and/or tested features.
 - Added: `skfem.supermeshing`, tools for creating element-by-element quadrature
   rules with the help of supermeshes
 - Deprecated: `MappingMortar` and `MortarFacetBasis` in favor of
-  `skfem.supermeshing` and plain `FacetBasis`
+  `skfem.supermeshing` and plain `FacetBasis` (see [`ex04.py`](https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex04.py))
 
 ### [7.0.1] - 2022-08-03
 
