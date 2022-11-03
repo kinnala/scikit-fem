@@ -3,8 +3,6 @@ import tempfile
 
 def draw(m, backend=False, **kwargs):
     """Visualize meshes."""
-    import vedo
-    vedo.embedWindow(backend)
     from vedo import Plotter, UGrid
     vp = Plotter()
     grid = None

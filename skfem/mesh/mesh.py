@@ -418,7 +418,6 @@ class Mesh:
         return vertices, edges
 
     def _mapping(self):
-        """Return a default reference mapping for the mesh."""
         from skfem.mapping import MappingAffine, MappingIsoparametric
         if not hasattr(self, '_cached_mapping'):
             if self.affine:
@@ -430,6 +429,10 @@ class Mesh:
                     self.bndelem,
                 )
         return self._cached_mapping
+
+    def mapping(self):
+        """Return a default reference mapping for the mesh."""
+        return self._mapping()
 
     def _init_facets(self):
         """Initialize ``self.facets``."""
@@ -956,12 +959,12 @@ class Mesh:
         """Return mesh parameter, viz the length of the longest edge."""
         raise NotImplementedError
 
-    def _reix(self, ix: ndarray) -> Tuple[ndarray, ndarray]:
+    def _reix(self, ix: ndarray) -> Tuple[ndarray, ndarray, ndarray]:
         """Connect ``self.p`` based on the indices ``ix``."""
         ixuniq = np.unique(ix)
         t = np.zeros(np.max(ix) + 1, dtype=np.int64)
         t[ixuniq] = np.arange(len(ixuniq), dtype=np.int64)
-        return self.p[:, ixuniq], t[ix]
+        return self.p[:, ixuniq], t[ix], ixuniq
 
     def trace(self, facets):
         """Create a raw trace mesh (p, t).  Returns also the facet indices.
@@ -980,11 +983,13 @@ class Mesh:
             The element connectivity of the trace mesh.
         facets : ndarray
             An array of facet indices to the original mesh.
+        points : ndarray
+            An array of points indices to the original mesh.
 
         """
         facets = self.normalize_facets(facets)
-        p, t = self._reix(self.facets[:, facets])
-        return p, t, facets
+        p, t, points = self._reix(self.facets[:, facets])
+        return p, t, facets, points
 
     def remove_elements(self, element_indices: ndarray):
         """Construct a new mesh by removing elements.
@@ -995,7 +1000,7 @@ class Mesh:
             List of element indices to remove.
 
         """
-        p, t = self._reix(np.delete(self.t, element_indices, axis=1))
+        p, t, _ = self._reix(np.delete(self.t, element_indices, axis=1))
         return replace(
             self,
             doflocs=p,

@@ -32,13 +32,13 @@ def draw_basis(ib: CellBasis, **kwargs) -> Axes:
 
 
 @draw.register(Mesh3D)
-def draw_meshhex(m: Mesh3D, **kwargs) -> Axes:
+def draw_mesh3d(m: Mesh3D, **kwargs) -> Axes:
     """Visualize a three-dimensional mesh by drawing the edges."""
     if 'ax' not in kwargs:
         ax = plt.figure().add_subplot(1, 1, 1, projection='3d')
     else:
         ax = kwargs['ax']
-    for ix in range(m.edges.shape[1]):
+    for ix in m.boundary_edges():
         ax.plot3D(
             m.p[0, m.edges[:, ix]].flatten(),
             m.p[1, m.edges[:, ix]].flatten(),
@@ -93,6 +93,7 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> Axes:
         facets = m.facets[:, m.boundary_facets()]
     else:
         facets = m.facets
+    plot_kwargs = kwargs["plot_kwargs"] if "plot_kwargs" in kwargs else {}
     # faster plotting is achieved through
     # None insertion trick.
     xs = []
@@ -110,7 +111,8 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> Axes:
     ax.plot(xs,
             ys,
             kwargs['color'] if 'color' in kwargs else 'k',
-            linewidth=kwargs['linewidth'] if 'linewidth' in kwargs else .5)
+            linewidth=kwargs['linewidth'] if 'linewidth' in kwargs else .5,
+            **plot_kwargs)
 
     if "boundaries" in kwargs:
         cm = plt.get_cmap('gist_rainbow')
@@ -133,7 +135,8 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> Axes:
                     ys,
                     color=colors[i % len(colors)],
                     linewidth=(kwargs['linewidth']
-                               if 'linewidth' in kwargs else 2.))
+                               if 'linewidth' in kwargs else 2.),
+                    **plot_kwargs)
             if hasattr(m.boundaries[k], 'ori'):
                 tris = m.f2t[m.boundaries[k].ori, m.boundaries[k]]
                 color = colors[i % len(colors)][:3] + (.1,)
@@ -163,6 +166,27 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> Axes:
     return ax
 
 
+@draw.register(MeshLine1)
+def draw_meshline(m: MeshLine1, **kwargs):
+    """Draw the nodes of one-dimensional mesh."""
+    if "ax" not in kwargs:
+        # create new figure
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+    else:
+        ax = kwargs["ax"]
+
+    color = kwargs["color"] if "color" in kwargs else 'ko-'
+    ix = np.argsort(m.p[0])
+
+    plot_kwargs = kwargs["plot_kwargs"] if "plot_kwargs" in kwargs else {}
+
+    ax.plot(m.p[0][ix], 0. * m.p[0][ix], color, **plot_kwargs)
+
+    ax.show = lambda: plt.show()
+    return ax
+
+
 @singledispatch
 def plot(m, u, **kwargs) -> Axes:
     """Plot functions defined on nodes of the mesh."""
@@ -181,7 +205,8 @@ def plot_meshline(m: MeshLine1, z: ndarray, **kwargs):
 
     color = kwargs["color"] if "color" in kwargs else 'ko-'
     ix = np.argsort(m.p[0])
-    ax.plot(m.p[0][ix], z[ix], color)
+    plot_kwargs = kwargs["plot_kwargs"] if "plot_kwargs" in kwargs else {}
+    ax.plot(m.p[0][ix], z[ix], color, **plot_kwargs)
 
     ax.show = lambda: plt.show()
     return ax

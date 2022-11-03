@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'scikit-fem'
-copyright = '2018-2021, scikit-fem developers'
+copyright = '2018-2022, scikit-fem developers'
 author = 'scikit-fem developers'
 
 
@@ -28,6 +28,8 @@ import re
 release = re.sub('^v', '', os.popen('git describe --tags').read().strip())
 # The short X.Y version
 version = release
+# For links to source tree
+previous_release = version.split("-")[0]
 
 
 # -- General configuration ---------------------------------------------------
@@ -45,8 +47,16 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
+    'sphinx.ext.extlinks',
     'matplotlib.sphinxext.plot_directive',
 ]
+
+extlinks = {
+    'exlink': (
+        "https://github.com/kinnala/scikit-fem/blob/{}/docs/examples/ex%s.py".format(previous_release),
+        "ex%s.py"
+    ),
+}
 
 autosummary_generate = True
 

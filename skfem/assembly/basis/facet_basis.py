@@ -106,7 +106,7 @@ class FacetBasis(AbstractBasis):
                       for j in range(self.Nbfun)]
 
         self.dx = (np.abs(self.mapping.detDG(self.X, find=self.find))
-                   * np.tile(self.W, (self.nelems, 1)))
+                   * np.broadcast_to(self.W, (self.nelems, self.W.shape[-1])))
         logger.info("Initializing finished.")
 
     def default_parameters(self):
@@ -178,7 +178,7 @@ class FacetBasis(AbstractBasis):
 
         assert callable(target_meshcls)  # to satisfy mypy
 
-        p, t = self.mesh._reix(self.mesh.facets[:, self.find])
+        p, t, _ = self.mesh._reix(self.mesh.facets[:, self.find])
 
         return (
             CellBasis(target_meshcls(projection(p), t), elemcls()),

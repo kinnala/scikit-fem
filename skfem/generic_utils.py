@@ -32,8 +32,11 @@ def deprecated(replacement):
     def deprecated_decorator(func):
         @functools.wraps(func)
         def new_func(*args, **kwargs):
+            orig = func.__name__
+            if orig == '__init__':
+                orig = func.__qualname__
             warnings.warn("{} is deprecated in favor of {}.".format(
-                func.__name__,
+                orig,
                 replacement,
             ), DeprecationWarning, stacklevel=2)
             return func(*args, **kwargs)

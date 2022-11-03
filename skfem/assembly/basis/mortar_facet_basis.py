@@ -4,6 +4,7 @@ from numpy import ndarray
 from skfem.element import Element
 from skfem.mapping import MappingMortar
 from skfem.mesh import Mesh
+from skfem.generic_utils import deprecated
 
 from .facet_basis import FacetBasis
 from ..dofs import Dofs
@@ -11,6 +12,7 @@ from ..dofs import Dofs
 
 class MortarFacetBasis(FacetBasis):
 
+    @deprecated("FacetBasis + skfem.supermeshing")
     def __init__(self,
                  mesh: Mesh,
                  elem: Element,

@@ -65,7 +65,7 @@ class BilinearForm(Form):
 
         if vbasis is None:
             vbasis = ubasis
-        elif ubasis.X.shape[1] != vbasis.X.shape[1]:
+        elif ubasis.X.shape[-1] != vbasis.X.shape[-1]:
             raise ValueError("Quadrature mismatch: trial and test functions "
                              "should have same number of integration points.")
 
