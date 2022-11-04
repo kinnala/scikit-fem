@@ -381,6 +381,10 @@ class AbstractBasis:
         """Return a zero array with same dimensions as the solution."""
         return np.zeros(self.N)
 
+    def ones(self) -> ndarray:
+        """Return a ones array with same dimensions as the solution."""
+        return np.ones(self.N)
+
     def with_element(self, elem: Element) -> 'AbstractBasis':
         """Create a copy of ``self`` that uses different element."""
         raise NotImplementedError
