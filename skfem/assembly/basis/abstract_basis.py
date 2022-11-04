@@ -369,14 +369,14 @@ class AbstractBasis:
         xs = [x[ix] for ix in self.split_indices()]
         return list(zip(xs, self.split_bases()))
 
-    def zero_w(self) -> ndarray:
+    def zero_w(self, dtype=None) -> ndarray:
         """Return a zero array with correct dimensions for
         :func:`~skfem.assembly.asm`."""
-        return np.zeros((self.nelems, 0 if self.W is None else len(self.W)))
+        return np.zeros((self.nelems, 0 if self.W is None else len(self.W)), dtype=dtype)
 
-    def zeros(self) -> ndarray:
+    def zeros(self, dtype=None) -> ndarray:
         """Return a zero array with same dimensions as the solution."""
-        return np.zeros(self.N)
+        return np.zeros(self.N, dtype=dtype)
 
     def with_element(self, elem: Element) -> 'AbstractBasis':
         """Create a copy of ``self`` that uses different element."""
