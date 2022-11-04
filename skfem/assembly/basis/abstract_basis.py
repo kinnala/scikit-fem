@@ -301,7 +301,7 @@ class AbstractBasis:
 
             def linear_combination(n, refn):
                 """Global discrete function at quadrature points."""
-                out = 0. * refn.copy()
+                out = np.zeros_like(refn, dtype=w.dtype)
                 for i in range(self.Nbfun):
                     values = w[self.element_dofs[i]]
                     out += np.einsum('...,...j->...j', values,
