@@ -372,7 +372,8 @@ class AbstractBasis:
     def zero_w(self, dtype=None) -> ndarray:
         """Return a zero array with correct dimensions for
         :func:`~skfem.assembly.asm`."""
-        return np.zeros((self.nelems, 0 if self.W is None else len(self.W)), dtype=dtype)
+        return np.zeros((self.nelems, 0 if self.W is None else len(self.W)),
+                        dtype=dtype)
 
     def zeros(self, dtype=None) -> ndarray:
         """Return a zero array with same dimensions as the solution."""
