@@ -130,9 +130,9 @@ class CellBasis(AbstractBasis):
         # of the refined mesh
         test = self.elem.gbasis(self.mapping, X, 0)[0]
         if len(test.shape) == 3:
-            w = 0. * x
+            w = np.zeros_like(x, dtype=y.dtype)
         elif len(test.shape) == 2:
-            w = 0. * x[0]
+            w = np.zeros_like(x[0], dtype=y.dtype)
         else:
             raise NotImplementedError
         for j in range(self.Nbfun):
