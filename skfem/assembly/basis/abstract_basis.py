@@ -381,9 +381,9 @@ class AbstractBasis:
         """Return a zero array with same dimensions as the solution."""
         return np.zeros(self.N)
 
-    def ones(self) -> ndarray:
+    def ones(self, dtype=None) -> ndarray:
         """Return a ones array with same dimensions as the solution."""
-        return np.ones(self.N)
+        return np.ones(self.N, dtype=dtype)
 
     def with_element(self, elem: Element) -> 'AbstractBasis':
         """Create a copy of ``self`` that uses different element."""
