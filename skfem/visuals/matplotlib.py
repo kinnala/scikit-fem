@@ -267,6 +267,7 @@ def plot_meshtri(m: MeshTri1, z: ndarray, **kwargs) -> Axes:
                                    'headwidth',
                                    'headlength',
                                    'minshaft',
+                                   'minlength',
                                    'pivot',
                                    'color']})
     else:
