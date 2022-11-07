@@ -167,6 +167,7 @@ cube mesh:
      Number of elements: 1
      Number of vertices: 8
      Number of nodes: 8
+     Named boundaries [# facets]: left [1], bottom [1], front [1], right [1], top [1], back [1]
    >>> basis = Basis(m, ElementHex2())
    >>> basis
    <skfem CellBasis(MeshHex1, ElementHex2) object>
