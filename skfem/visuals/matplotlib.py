@@ -258,6 +258,8 @@ def plot_meshtri(m: MeshTri1, z: ndarray, **kwargs) -> Axes:
     else:
         cmap = plt.cm.jet
 
+    plot_kwargs = kwargs["plot_kwargs"] if "plot_kwargs" in kwargs else {}
+
     if len(z) == 2 * len(m.p[0]):
         im = ax.quiver(m.p[0], m.p[1], *z.reshape(2, -1),
                        **{k: v for k, v in kwargs.items()
@@ -268,18 +270,21 @@ def plot_meshtri(m: MeshTri1, z: ndarray, **kwargs) -> Axes:
                                    'headlength',
                                    'minshaft',
                                    'pivot',
-                                   'color']})
+                                   'color']},  # for backwards compatibility
+                       **plot_kwargs)
     else:
         im = ax.tripcolor(m.p[0], m.p[1], m.t.T, z, cmap=cmap,
                           **{k: v for k, v in kwargs.items()
                              if k in ['shading',
                                       'edgecolors',
                                       'vmin',
-                                      'vmax']})
+                                      'vmax']},  # for backwards compatibility
+                          **plot_kwargs)
 
     if "levels" in kwargs:
         ax.tricontour(m.p[0], m.p[1], m.t.T, z,
-                      levels=kwargs["levels"], colors='k')
+                      levels=kwargs["levels"],
+                      **{**{'colors': 'k'}, **plot_kwargs})
 
     if "colorbar" in kwargs:
         if isinstance(kwargs["colorbar"], str):

@@ -121,8 +121,8 @@ class AbstractBasis:
 
     @deprecated("Basis.get_dofs")
     def find_dofs(self,
-                  facets: Dict[str, ndarray] = None,
-                  skip: List[str] = None) -> Dict[str, DofsView]:
+                  facets: Optional[Dict[str, ndarray]] = None,
+                  skip: Optional[List[str]] = None) -> Dict[str, DofsView]:
         if facets is None:
             if self.mesh.boundaries is None:
                 facets = {'all': self.mesh.boundary_facets()}
@@ -135,7 +135,7 @@ class AbstractBasis:
     def get_dofs(self,
                  facets: Optional[Any] = None,
                  elements: Optional[Any] = None,
-                 skip: List[str] = None) -> Any:
+                 skip: Optional[List[str]] = None) -> Any:
         """Find global DOF numbers.
 
         Accepts an array of facet/element indices.  However, various argument
