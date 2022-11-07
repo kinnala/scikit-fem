@@ -495,10 +495,9 @@ class Mesh:
                                "to C_CONTIGUOUS.")
             self.t = np.ascontiguousarray(self.t)
 
-        # add boundary tags for the default cubes
+        # try adding default boundary tags
         if ((self._boundaries is None
-             and self.doflocs.shape[1] == 2 ** self.dim()
-             and self.dim() <= 2)):
+             and self.doflocs.shape[1] < 1e3)):
             boundaries = {}
             # default boundary names along the dimensions
             minnames = ['left', 'bottom', 'front']
