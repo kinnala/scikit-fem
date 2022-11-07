@@ -178,7 +178,7 @@ class MappingMortar(Mapping):
 
     def G(self,
           X: ndarray,
-          find: ndarray = None,
+          find: Optional[ndarray] = None,
           side: Optional[int] = None) -> ndarray:
         side = self.side if side is None else side
         return self.maps[side].G(
@@ -189,7 +189,7 @@ class MappingMortar(Mapping):
 
     def detDG(self,
               X: ndarray,
-              find: ndarray = None) -> ndarray:
+              find: Optional[ndarray] = None) -> ndarray:
         if X.shape[0] == 1:
             segs = self.G(np.array([[0., 1.]]), side=0)
             return np.sqrt(np.diff(segs[0], axis=1) ** 2 +

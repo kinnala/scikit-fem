@@ -297,9 +297,10 @@ class Dofs:
         # total dofs
         self.N = np.max(self.element_dofs) + 1
 
-    def get_element_dofs(self,
-                         elements: ndarray,
-                         skip_dofnames: List[str] = None) -> DofsView:
+    def get_element_dofs(
+            self,
+            elements: ndarray,
+            skip_dofnames: Optional[List[str]] = None) -> DofsView:
         """Return a subset of DOFs corresponding to the given elements.
 
         Parameters
@@ -335,7 +336,7 @@ class Dofs:
 
     def get_facet_dofs(self,
                        facets: ndarray,
-                       skip_dofnames: List[str] = None) -> DofsView:
+                       skip_dofnames: Optional[List[str]] = None) -> DofsView:
         """Return a subset of DOFs corresponding to the given facets.
 
         Parameters
