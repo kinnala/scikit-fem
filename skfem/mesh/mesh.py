@@ -964,10 +964,14 @@ class Mesh:
         ixuniq = np.unique(ix)
         t = np.zeros(np.max(ix) + 1, dtype=np.int64)
         t[ixuniq] = np.arange(len(ixuniq), dtype=np.int64)
-        return self.p[:, ixuniq], t[ix], ixuniq
+        return (
+            np.ascontiguousarray(self.p[:, ixuniq]),
+            np.ascontiguousarray(t[ix]),
+            ixuniq
+        )
 
     def trace(self, facets):
-        """Create a raw trace mesh (p, t).  Returns also the facet indices.
+        """Create a raw trace mesh (p, t).
 
         Parameters
         ----------
@@ -990,6 +994,26 @@ class Mesh:
         facets = self.normalize_facets(facets)
         p, t, points = self._reix(self.facets[:, facets])
         return p, t, facets, points
+
+    def restrict(self, elements):
+        """Restrict the mesh to a subset of elements.
+
+        Parameters
+        ----------
+        elements
+            Criteria of which elements to include.  This input is normalized
+            using ``self.normalize_elements``.
+
+        """
+        elements = self.normalize_elements(elements)
+        p, t, _ = self._reix(self.t[:, elements])
+        return replace(
+            self,
+            doflocs=p,
+            t=t,
+            _boundaries=None,
+            _subdomains=None,
+        )
 
     def remove_elements(self, element_indices: ndarray):
         """Construct a new mesh by removing elements.
