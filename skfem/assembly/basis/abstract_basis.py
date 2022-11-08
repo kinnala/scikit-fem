@@ -404,7 +404,7 @@ class AbstractBasis:
         from skfem.assembly import BilinearForm, LinearForm
         from skfem.helpers import inner
 
-        interp = self._normalize_interp(interp)
+        interp = np.array(self._normalize_interp(interp))
         if not isinstance(interp, tuple):
             interp = (interp,)
         assert len(interp) == len(self.basis[0])
