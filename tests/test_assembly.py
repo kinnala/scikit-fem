@@ -15,14 +15,15 @@ from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementTriDG, ElementQuadDG, ElementHexDG,
                            ElementTetDG, ElementTriHermite, ElementVector,
                            ElementTriRT1, ElementTriRT2, ElementTriBDM1,
-                           ElementQuadRT1, ElementTetRT1, ElementHexRT1)
+                           ElementQuadRT1, ElementTetRT1, ElementHexRT1,
+                           ElementTriN0, ElementTriP0)
 from skfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
                         MeshTri2, MeshTet2, MeshHex2, MeshTri1DG, MeshQuad1DG,
                         MeshHex1DG)
 from skfem.assembly import FacetBasis, Basis
 from skfem.utils import projection
 from skfem.models import laplace, unit_load, mass
-from skfem.helpers import grad, dot, ddot, sym_grad
+from skfem.helpers import grad, dot, ddot, sym_grad, curl
 from skfem.models import linear_stress
 
 
@@ -647,3 +648,41 @@ def test_hdiv_boundary_integration_3d(basis):
     assert_almost_equal(test1.assemble(fbasis, y=y), 1, decimal=2)
     if not isinstance(basis.elem, ElementTetRT1):
         assert_almost_equal(test2.assemble(fbasis, y=y), 1, decimal=5)
+
+
+
+def test_hcurl_projections_2d():
+
+    m = MeshTri.init_tensor(np.linspace(-1, 1, 20),
+                            np.linspace(-1, 1, 20))
+    basis0 = Basis(m, ElementVector(ElementTriP1()))
+    y = basis0.project(lambda x: np.array([x[1], -x[0]]))
+    basis = basis0.with_element(ElementTriN0())
+    x = basis.project(lambda x: np.array([x[1], -x[0]]))
+    dbasis = basis0.with_element(ElementTriP0())
+    curla = dbasis.project(lambda x: x[0] * 0 - 2.)
+
+    curly = dbasis.project(curl(basis0.interpolate(y)))
+    curlx = dbasis.project(curl(basis.interpolate(x)))
+
+    assert_almost_equal(curly, curlx)
+    assert_almost_equal(curly, curla)
+
+
+# def test_hcurl_projections_3d():
+
+#     m = MeshTet.init_tensor(np.linspace(-1, 1, 20),
+#                             np.linspace(-1, 1, 20),
+#                             np.linspace(-1, 1, 20))
+#     basis0 = Basis(m, ElementVector(ElementTriP1()))
+#     y = basis0.project(lambda x: np.array([x[1], -x[0]]))
+#     basis = basis0.with_element(ElementTriN0())
+#     x = basis.project(lambda x: np.array([x[1], -x[0]]))
+#     dbasis = basis0.with_element(ElementTriP0())
+#     curla = dbasis.project(lambda x: x[0] * 0 + 2.)
+
+#     curly = dbasis.project(curl(basis0.interpolate(y)))
+#     curlx = dbasis.project(curl(basis.interpolate(x)))
+
+#     assert_almost_equal(curly, curlx)
+#     assert_almost_equal(curly, curla)
