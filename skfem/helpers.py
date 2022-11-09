@@ -42,8 +42,19 @@ def curl(u: DiscreteField):
     if u.curl is not None:
         return u.curl
     elif u.grad is not None:
-        if u.grad.shape[0] == 2:
+        if len(u.grad.shape) == 3 and u.grad.shape[0] == 2:
+            # curl of scalar field
             return np.array([u.grad[1], -u.grad[0]])
+        elif len(u.grad.shape) == 4 and u.grad.shape[0] == 2:
+            # 2d-curl of vector field
+            return u.grad[1, 0] - u.grad[0, 1]
+        elif len(u.grad.shape) == 4 and u.grad.shape[0] == 3:
+            # full 3d curl
+            return np.array([
+                u.grad[2, 1] - u.grad[1, 2],
+                u.grad[0, 2] - u.grad[2, 0],
+                u.grad[1, 0] - u.grad[0, 1],
+            ])
     raise NotImplementedError
 
 

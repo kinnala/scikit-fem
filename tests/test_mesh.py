@@ -41,6 +41,20 @@ class MeshTests(TestCase):
         # Mesh3D.facets_satisfying
         self.assertEqual(len(m.facets_satisfying(lambda x: x[0] == 0.5)), 1)
 
+        # test restrict
+        m = MeshQuad().refined().with_subdomains({
+            'left': lambda x: x[0] < 0.5,
+            'right': lambda x: x[0] > 0.5,
+        })
+        assert_array_equal(
+            m.remove_elements(m.normalize_elements('left')).p,
+            m.restrict('right').p
+        )
+        assert_array_equal(
+            m.remove_elements(m.normalize_elements('left')).t,
+            m.restrict('right').t
+        )
+
 
 class FaultyInputs(TestCase):
     """Check that faulty meshes are detected by the constructors."""

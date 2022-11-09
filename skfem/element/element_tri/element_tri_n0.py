@@ -20,13 +20,13 @@ class ElementTriN0(ElementHcurl):
 
         if i == 0:
             phi = np.array([y - 1., -x])
-            dphi = 2. + 0. * x
+            dphi = -2. + 0. * x
         elif i == 1:
             phi = np.array([y, -x])
-            dphi = 2. + 0. * x
+            dphi = -2. + 0. * x
         elif i == 2:
             phi = np.array([-y, -1. + x])
-            dphi = -2. + 0. * x
+            dphi = 2. + 0. * x
         else:
             self._index_error()
 
