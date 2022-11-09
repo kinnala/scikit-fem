@@ -212,6 +212,7 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+- Added: `ElementTriN0`, a two-dimensional H(curl) conforming element
 - Added: `ElementTetSkeletonP0`, extension of `ElementTriSkeletonP0` to
   tetrahedral meshes
 - Added: `Mesh.trace` which turns facets into a trace mesh

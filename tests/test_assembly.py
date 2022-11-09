@@ -16,7 +16,7 @@ from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementTetDG, ElementTriHermite, ElementVector,
                            ElementTriRT1, ElementTriRT2, ElementTriBDM1,
                            ElementQuadRT1, ElementTetRT1, ElementHexRT1,
-                           ElementTriN0, ElementTriP0)
+                           ElementTriN0, ElementTriP0, ElementTetN0)
 from skfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
                         MeshTri2, MeshTet2, MeshHex2, MeshTri1DG, MeshQuad1DG,
                         MeshHex1DG)
@@ -669,20 +669,20 @@ def test_hcurl_projections_2d():
     assert_almost_equal(curly, curla)
 
 
-# def test_hcurl_projections_3d():
+def test_hcurl_projections_3d():
 
-#     m = MeshTet.init_tensor(np.linspace(-1, 1, 20),
-#                             np.linspace(-1, 1, 20),
-#                             np.linspace(-1, 1, 20))
-#     basis0 = Basis(m, ElementVector(ElementTriP1()))
-#     y = basis0.project(lambda x: np.array([x[1], -x[0]]))
-#     basis = basis0.with_element(ElementTriN0())
-#     x = basis.project(lambda x: np.array([x[1], -x[0]]))
-#     dbasis = basis0.with_element(ElementTriP0())
-#     curla = dbasis.project(lambda x: x[0] * 0 + 2.)
+    m = MeshTet.init_tensor(np.linspace(-1, 1, 10),
+                            np.linspace(-1, 1, 10),
+                            np.linspace(-1, 1, 10))
+    basis0 = Basis(m, ElementVector(ElementTetP1()))
+    y = basis0.project(lambda x: np.array([x[1], -x[0], 0*x[0]]))
+    basis = basis0.with_element(ElementTetN0())
+    x = basis.project(lambda x: np.array([x[1], -x[0], 0*x[0]]))
+    dbasis = basis0.with_element(ElementVector(ElementTetP0()))
+    curla = dbasis.project(lambda x: np.array([0*x[0], 0*x[0], x[0] * 0 - 2.]))
 
-#     curly = dbasis.project(curl(basis0.interpolate(y)))
-#     curlx = dbasis.project(curl(basis.interpolate(x)))
+    curly = dbasis.project(curl(basis0.interpolate(y)))
+    curlx = dbasis.project(curl(basis.interpolate(x)))
 
-#     assert_almost_equal(curly, curlx)
-#     assert_almost_equal(curly, curla)
+    assert_almost_equal(curly, curlx)
+    assert_almost_equal(curly, curla)

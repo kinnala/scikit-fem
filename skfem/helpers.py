@@ -46,8 +46,15 @@ def curl(u: DiscreteField):
             # curl of scalar field
             return np.array([u.grad[1], -u.grad[0]])
         elif len(u.grad.shape) == 4 and u.grad.shape[0] == 2:
-            # curl of vector field
+            # 2d-curl of vector field
             return u.grad[1, 0] - u.grad[0, 1]
+        elif len(u.grad.shape) == 4 and u.grad.shape[0] == 3:
+            # full 3d curl
+            return np.array([
+                u.grad[2, 1] - u.grad[1, 2],
+                u.grad[0, 2] - u.grad[2, 0],
+                u.grad[1, 0] - u.grad[0, 1],
+            ])
     raise NotImplementedError
 
 
