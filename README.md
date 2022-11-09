@@ -215,6 +215,7 @@ with respect to documented and/or tested features.
 - Added: `ElementTriN0`, a two-dimensional H(curl) conforming element
 - Added: `ElementTetSkeletonP0`, extension of `ElementTriSkeletonP0` to
   tetrahedral meshes
+- Added: `Mesh.restrict` which returns a new mesh given a subset of elements or subdomain
 - Added: `Mesh.trace` which turns facets into a trace mesh
 - Added: `skfem.utils.bmat`, a variant of `scipy.sparse.bmat` which adds the
   indices of the different blocks as an attribute `out.blocks`
