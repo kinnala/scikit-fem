@@ -5,3 +5,4 @@ from .element_quad_s2 import ElementQuadS2  # noqa
 from .element_quadp import ElementQuadP  # noqa
 from .element_quad_bfs import ElementQuadBFS  # noqa
 from .element_quad_rt1 import ElementQuadRT1  # noqa
+from .element_quad_n0 import ElementQuadN0  # noqa
