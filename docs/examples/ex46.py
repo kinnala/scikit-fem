@@ -1,6 +1,7 @@
 """Waveguide cutoff analysis."""
 
 import numpy as np
+import matplotlib.pyplot as plt
 from skfem import *
 from skfem.helpers import *
 
@@ -13,8 +14,9 @@ mtype_elem = [
 
 
 for mtype, elem in mtype_elem:
-    mesh = mtype().init_tensor(np.linspace(0, 1, 9),
-                               np.linspace(0, .5, 5)).refined(3)
+    xs = np.linspace(0, 1, 49) ** 0.9
+    ys = np.linspace(0, .5, 20)
+    mesh = mtype().init_tensor(xs, ys)
     basis = Basis(mesh, elem)
 
     epsilon = lambda x: 1. + 0. * x[0]
@@ -57,8 +59,10 @@ for mtype, elem in mtype_elem:
         print('TE01 error: {}'.format(err2))
         print('TE20 error: {}'.format(err3))
 
-        # draw TE20 mode
-        for itr in range(5):
+        fig, axs = plt.subplots(4, 1)
+        for itr in range(4):
             (E, Ebasis), (_, lambasis) = basis.split(xs[:, itr])
-            Ex = lambasis.project(Ebasis.interpolate(E)[0])
-            lambasis.plot(Ex, colorbar=True).show()
+            Ei = Ebasis.interpolate(E)
+            Emag = lambasis.project(np.sqrt(dot(Ei, Ei)))
+            lambasis.plot(Emag, colorbar=True, ax=axs[itr])
+        plt.show()
