@@ -212,7 +212,8 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
-- Added: `ElementTriN0`, a two-dimensional H(curl) conforming element
+- Added: `ElementQuadN0`, a two-dimensional H(curl) conforming quadrilateral element
+- Added: `ElementTriN0`, a two-dimensional H(curl) conforming triangle element
 - Added: `ElementTetSkeletonP0`, extension of `ElementTriSkeletonP0` to
   tetrahedral meshes
 - Added: `Mesh.restrict` which returns a new mesh given a subset of elements or subdomain
@@ -352,17 +353,17 @@ with respect to documented and/or tested features.
   a time
 - Added: `asm` will now accept a list of bases, assemble the same form using
   all of the bases and sum the result (useful for jump terms and mixed meshes,
-  see Example 41)
+  see [`ex41.py`](https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex41.py)
 - Added: `Mesh.with_boundaries` now allows the definition of internal boundaries/interfaces
   via the flag `boundaries_only=False`
 - Added: `MeshTri1DG`, `MeshQuad1DG`, `MeshHex1DG`, `MeshLine1DG`; new mesh
   types for describing meshes with a discontinuous topology, e.g., periodic
-  meshes (see Example 42)
+  meshes (see [`ex42.py`](https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex42.py))
 - Added: `ElementHexDG` for transforming hexahedral H1 elements to DG/L2 elements.
 - Added: `ElementTriP1DG`, `ElementQuad1DG`, `ElementHex1DG`,
   `ElementLineP1DG`; shorthands for `ElementTriDG(ElementTriP1())` etc.
 - Added: `ElementTriSkeletonP0` and `ElementTriSkeletonP1` for defining
-  Lagrange multipliers on the skeleton mesh (see Example 40)
+  Lagrange multipliers on the skeleton mesh (see [`ex40.py`](https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex40.py))
 - Added: `TrilinearForm` for assembling a sparse 3-tensor, e.g., when dealing
   with unknown material data
 - Added: `MeshTri.oriented` for CCW oriented triangular meshes which can be
