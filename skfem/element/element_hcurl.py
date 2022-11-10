@@ -17,6 +17,9 @@ class ElementHcurl(Element):
         elif mapping.mesh.dim() == 2 and mapping.mesh.t.shape[0] == 3:
             t1 = [0, 1, 0][i]
             t2 = [1, 2, 2][i]
+        elif mapping.mesh.dim() == 2 and mapping.mesh.t.shape[0] == 4:
+            t1 = [0, 1, 2, 3][i]
+            t2 = [1, 2, 3, 0][i]
         else:
             raise NotImplementedError("The element type not supported.")
         return 1 - 2 * (mapping.mesh.t[t1] > mapping.mesh.t[t2])
@@ -36,8 +39,6 @@ class ElementHcurl(Element):
             ),)
         else:
             return (DiscreteField(
-                # TODO orientation is automatically correct for triangular
-                # meshes, check that this works for quadrilateral meshes
                 value=np.einsum('ijkl,il,k->jkl', invDF, phi, orient),
                 curl=dphi / detDF * orient[:, None],
             ),)
