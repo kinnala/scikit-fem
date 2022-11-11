@@ -323,17 +323,12 @@ class AbstractBasis:
 
     def split_indices(self) -> List[ndarray]:
         """Return indices for the solution components."""
-        if ((isinstance(self.elem, ElementComposite)
-             or isinstance(self.elem, ElementVector))):
-            nelems = (len(self.elem.elems)
-                      if isinstance(self.elem, ElementComposite)
-                      else self.mesh.dim())
+        output: List[ndarray] = []
+        if isinstance(self.elem, ElementComposite):
+            nelems = len(self.elem.elems)
             o = np.zeros(4, dtype=np.int64)
-            output: List[ndarray] = []
             for k in range(nelems):
-                e = (self.elem.elems[k]
-                     if isinstance(self.elem, ElementComposite)
-                     else self.elem.elem)
+                e = self.elem.elems[k]
                 output.append(np.concatenate((
                     self.nodal_dofs[o[0]:(o[0] + e.nodal_dofs)].flatten('F'),
                     self.edge_dofs[o[1]:(o[1] + e.edge_dofs)].flatten('F'),
@@ -345,6 +340,17 @@ class AbstractBasis:
                                e.edge_dofs,
                                e.facet_dofs,
                                e.interior_dofs])
+            return output
+        elif isinstance(self.elem, ElementVector):
+            ndims = self.mesh.dim()
+            e = self.elem.elem
+            for k in range(ndims):
+                output.append(np.concatenate((
+                    self.nodal_dofs[k::ndims].flatten('F'),
+                    self.edge_dofs[k::ndims].flatten('F'),
+                    self.facet_dofs[k::ndims].flatten('F'),
+                    self.interior_dofs[k::ndims].flatten('F'),
+                )).astype(np.int64))
             return output
         return [np.unique(self.dofs.element_dofs)]
 
