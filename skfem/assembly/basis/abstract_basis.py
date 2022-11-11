@@ -323,10 +323,10 @@ class AbstractBasis:
 
     def split_indices(self) -> List[ndarray]:
         """Return indices for the solution components."""
+        output: List[ndarray] = []
         if isinstance(self.elem, ElementComposite):
             nelems = len(self.elem.elems)
             o = np.zeros(4, dtype=np.int64)
-            output: List[ndarray] = []
             for k in range(nelems):
                 e = self.elem.elems[k]
                 output.append(np.concatenate((
@@ -344,7 +344,6 @@ class AbstractBasis:
         elif isinstance(self.elem, ElementVector):
             ndims = self.mesh.dim()
             e = self.elem.elem
-            output: List[ndarray] = []
             for k in range(ndims):
                 output.append(np.concatenate((
                     self.nodal_dofs[k::ndims].flatten('F'),
