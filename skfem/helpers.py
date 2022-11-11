@@ -206,3 +206,14 @@ def inv(A):
         invA[1, 0] = -A[1, 0] / detA
         invA[1, 1] = A[0, 0] / detA
     return invA
+
+
+def cross(A, B):
+    if A.shape[0] == 2:
+        return A[0] * B[1] - A[1] * B[0]
+    if A.shape[0] == 3:
+        return np.array([
+            A[1] * B[2] - A[2] * B[1],
+            A[2] * B[0] - A[0] * B[2],
+            A[0] * B[1] - A[1] * B[0]
+        ])
