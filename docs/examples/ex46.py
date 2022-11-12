@@ -6,19 +6,27 @@ from skfem import *
 from skfem.helpers import *
 
 
-# two different mesh and element types
-mtype_elem = [
-    (MeshTri, ElementTriN1() * ElementTriP2()),
-    (MeshQuad, ElementQuadN0() * ElementQuad1()),
+# three different mesh and element types
+mesh_elem = [
+    (
+        MeshTri.init_tensor(np.linspace(0, 1, 40),
+                            np.linspace(0, .5, 20)),
+        ElementTriN0() * ElementTriP1(),
+    ),
+    (
+        MeshQuad.init_tensor(np.linspace(0, 1, 40) ** 0.9,
+                             np.linspace(0, .5, 20)),
+        ElementQuadN0() * ElementQuad1(),
+    ),
+    (
+        MeshTri.init_tensor(np.linspace(0, 1, 10),
+                            np.linspace(0, .5, 5)),
+        ElementTriN1() * ElementTriP2(),
+    ),
 ]
 
 
-for mtype, elem in mtype_elem:
-    xs = np.linspace(0, 1, 49) ** 0.9
-    ys = np.linspace(0, .5, 20)
-    xs = np.linspace(0, 1, 10) ** 0.9
-    ys = np.linspace(0, .5, 5)
-    mesh = mtype().init_tensor(xs, ys)
+for mesh, elem in mesh_elem:
     basis = Basis(mesh, elem)
 
     epsilon = lambda x: 1. + 0. * x[0]
@@ -66,5 +74,9 @@ for mtype, elem in mtype_elem:
             (E, Ebasis), (_, lambasis) = basis.split(xs[:, itr])
             Ei = Ebasis.interpolate(E)
             Emag = lambasis.project(np.sqrt(dot(Ei, Ei)))
-            lambasis.plot(Emag, colorbar=True, ax=axs[itr])
+            lambasis.plot(Emag,
+                          colorbar=True,
+                          ax=axs[itr],
+                          shading='gouraud',
+                          nrefs=2)
         plt.show()
