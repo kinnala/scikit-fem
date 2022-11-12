@@ -214,9 +214,9 @@ with respect to documented and/or tested features.
 
 - Added: Renamed `ElementTetN0` to `ElementTriN1` and added alias for backwards
   compatibility
-- Added: `ElementQuadN1`, a two-dimensional H(curl) conforming quadrilateral element
-- Added: `ElementTriN1`, first order two-dimensional H(curl) conforming triangle element
-- Added: `ElementTriN2`, second order two-dimensional H(curl) conforming triangle element
+- Added: `ElementQuadN1`, first order H(curl) conforming quadrilateral element
+- Added: `ElementTriN1`, first order H(curl) conforming triangle element
+- Added: `ElementTriN2`, second order H(curl) conforming triangle element
 - Added: `ElementTetSkeletonP0`, extension of `ElementTriSkeletonP0` to
   tetrahedral meshes
 - Added: `Mesh.restrict` which returns a new mesh given a subset of elements or subdomain
