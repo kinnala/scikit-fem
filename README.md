@@ -212,8 +212,11 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
-- Added: `ElementQuadN0`, a two-dimensional H(curl) conforming quadrilateral element
-- Added: `ElementTriN0`, a two-dimensional H(curl) conforming triangle element
+- Added: Renamed `ElementTetN0` to `ElementTriN1` and added alias for backwards
+  compatibility
+- Added: `ElementQuadN1`, first order H(curl) conforming quadrilateral element
+- Added: `ElementTriN1`, first order H(curl) conforming triangle element
+- Added: `ElementTriN2`, second order H(curl) conforming triangle element
 - Added: `ElementTetSkeletonP0`, extension of `ElementTriSkeletonP0` to
   tetrahedral meshes
 - Added: `Mesh.restrict` which returns a new mesh given a subset of elements or subdomain
@@ -222,6 +225,8 @@ with respect to documented and/or tested features.
   indices of the different blocks as an attribute `out.blocks`
 - Added: `skfem.supermeshing`, tools for creating element-by-element quadrature
   rules with the help of supermeshes
+- Fixed: `Basis.split` worked incorrectly for `ElementVector` and multiple DOFs
+  of same type
 - Deprecated: `MappingMortar` and `MortarFacetBasis` in favor of
   `skfem.supermeshing` and plain `FacetBasis` (see [`ex04.py`](https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex04.py))
 

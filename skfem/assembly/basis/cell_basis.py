@@ -121,7 +121,13 @@ class CellBasis(AbstractBasis):
         # mesh reference domain, refine and take the vertices
         meshclass = type(self.mesh)
         m = meshclass.init_refdom().refined(nrefs)
-        X = m.p
+
+        if self.mesh.dim() == 1:
+            # this workaround makes sorting preserve correct order of duplicate
+            # nodes in skfem.visuals.matplotlib.plot_meshline
+            X = (1. - 1e-10) * m.p + 5e-11
+        else:
+            X = m.p
 
         # map vertices to global elements
         x = self.mapping.F(X)
