@@ -19,8 +19,8 @@ mesh_elem = [
         ElementQuadN1() * ElementQuad1(),
     ),
     (
-        MeshTri.init_tensor(np.linspace(0, 1, 10),
-                            np.linspace(0, .5, 5)),
+        MeshTri.init_tensor(np.linspace(0, 1, 20),
+                            np.linspace(0, .5, 10)),
         ElementTriN2() * ElementTriP2(),
     ),
 ]
@@ -73,13 +73,13 @@ for mesh, elem in mesh_elem:
 if __name__ == "__main__":
     fig, axs = plt.subplots(4, 1)
     for itr in range(4):
-        (E, Ebasis), (_, lambasis) = basis.split(xs[:, itr])
+        (E, Ebasis), _ = basis.split(xs[:, itr])
         Ei = Ebasis.interpolate(E)
         plotbasis = Ebasis.with_element(ElementDG(ElementTriP2()))
         Emag = plotbasis.project(np.sqrt(dot(Ei, Ei)))
-        lambasis.plot(Emag,
-                      colorbar=True,
-                      ax=axs[itr],
-                      shading='gouraud',
-                      nrefs=3)
+        plotbasis.plot(Emag,
+                       colorbar=True,
+                       ax=axs[itr],
+                       shading='gouraud',
+                       nrefs=2)
     plt.show()
