@@ -11,17 +11,17 @@ mesh_elem = [
     (
         MeshTri.init_tensor(np.linspace(0, 1, 40),
                             np.linspace(0, .5, 20)),
-        ElementTriN0() * ElementTriP1(),
+        ElementTriN1() * ElementTriP1(),
     ),
     (
         MeshQuad.init_tensor(np.linspace(0, 1, 40) ** 0.9,
                              np.linspace(0, .5, 20)),
-        ElementQuadN0() * ElementQuad1(),
+        ElementQuadN1() * ElementQuad1(),
     ),
     (
         MeshTri.init_tensor(np.linspace(0, 1, 10),
                             np.linspace(0, .5, 5)),
-        ElementTriN1() * ElementTriP2(),
+        ElementTriN2() * ElementTriP2(),
     ),
 ]
 
@@ -69,14 +69,17 @@ for mesh, elem in mesh_elem:
         print('TE01 error: {}'.format(err2))
         print('TE20 error: {}'.format(err3))
 
-        fig, axs = plt.subplots(4, 1)
-        for itr in range(4):
-            (E, Ebasis), (_, lambasis) = basis.split(xs[:, itr])
-            Ei = Ebasis.interpolate(E)
-            Emag = lambasis.project(np.sqrt(dot(Ei, Ei)))
-            lambasis.plot(Emag,
-                          colorbar=True,
-                          ax=axs[itr],
-                          shading='gouraud',
-                          nrefs=2)
-        plt.show()
+
+if __name__ == "__main__":
+    fig, axs = plt.subplots(4, 1)
+    for itr in range(4):
+        (E, Ebasis), (_, lambasis) = basis.split(xs[:, itr])
+        Ei = Ebasis.interpolate(E)
+        plotbasis = Ebasis.with_element(ElementDG(ElementTriP2()))
+        Emag = plotbasis.project(np.sqrt(dot(Ei, Ei)))
+        lambasis.plot(Emag,
+                      colorbar=True,
+                      ax=axs[itr],
+                      shading='gouraud',
+                      nrefs=3)
+    plt.show()

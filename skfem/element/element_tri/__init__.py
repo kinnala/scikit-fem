@@ -17,5 +17,5 @@ from .element_tri_skeleton_p1 import ElementTriSkeletonP1  # noqa
 from .element_tri_p1g import ElementTriP1G  # noqa
 from .element_tri_p2g import ElementTriP2G  # noqa
 from .element_tri_p2b import ElementTriP2B  # noqa
-from .element_tri_n0 import ElementTriN0  # noqa
 from .element_tri_n1 import ElementTriN1  # noqa
+from .element_tri_n2 import ElementTriN2  # noqa

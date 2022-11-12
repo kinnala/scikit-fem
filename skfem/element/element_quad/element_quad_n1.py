@@ -4,7 +4,7 @@ from ..element_hcurl import ElementHcurl
 from ...refdom import RefQuad
 
 
-class ElementQuadN0(ElementHcurl):
+class ElementQuadN1(ElementHcurl):
     """The lowest order Nédélec element."""
 
     facet_dofs = 1
