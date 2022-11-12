@@ -8,7 +8,7 @@ from skfem.helpers import *
 
 # two different mesh and element types
 mtype_elem = [
-    (MeshTri, ElementTriN0() * ElementTriP1()),
+    (MeshTri, ElementTriN1() * ElementTriP2()),
     (MeshQuad, ElementQuadN0() * ElementQuad1()),
 ]
 
@@ -16,6 +16,8 @@ mtype_elem = [
 for mtype, elem in mtype_elem:
     xs = np.linspace(0, 1, 49) ** 0.9
     ys = np.linspace(0, .5, 20)
+    xs = np.linspace(0, 1, 10) ** 0.9
+    ys = np.linspace(0, .5, 5)
     mesh = mtype().init_tensor(xs, ys)
     basis = Basis(mesh, elem)
 

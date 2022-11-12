@@ -11,15 +11,21 @@ class ElementHcurl(Element):
         if tind is not None:
             # TODO fix
             raise NotImplementedError("TODO: fix tind support in ElementHcurl")
+        divide_by = (self.facet_dofs
+                     if mapping.mesh.dim() == 2
+                     else self.edge_dofs)
+        ix = int(i / divide_by)
+        if mapping.mesh.dim() == 2 and ix >= self.refdom.nfacets:
+            return np.ones(mapping.mesh.t.shape[1], dtype=np.int64)
         if mapping.mesh.dim() == 3 and mapping.mesh.t.shape[0] == 4:
-            t1 = [0, 1, 0, 0, 1, 2][i]
-            t2 = [1, 2, 2, 3, 3, 3][i]
+            t1 = [0, 1, 0, 0, 1, 2][ix]
+            t2 = [1, 2, 2, 3, 3, 3][ix]
         elif mapping.mesh.dim() == 2 and mapping.mesh.t.shape[0] == 3:
-            t1 = [0, 1, 0][i]
-            t2 = [1, 2, 2][i]
+            t1 = [0, 1, 0][ix]
+            t2 = [1, 2, 2][ix]
         elif mapping.mesh.dim() == 2 and mapping.mesh.t.shape[0] == 4:
-            t1 = [0, 1, 2, 3][i]
-            t2 = [1, 2, 3, 0][i]
+            t1 = [0, 1, 2, 3][ix]
+            t2 = [1, 2, 3, 0][ix]
         else:
             raise NotImplementedError("The element type not supported.")
         return 1 - 2 * (mapping.mesh.t[t1] > mapping.mesh.t[t2])

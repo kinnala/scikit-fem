@@ -17,7 +17,7 @@ from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementTriRT1, ElementTriRT2, ElementTriBDM1,
                            ElementQuadRT1, ElementTetRT1, ElementHexRT1,
                            ElementTriN0, ElementTriP0, ElementTetN0,
-                           ElementQuadN0, ElementQuad0)
+                           ElementQuadN0, ElementQuad0, ElementTriN1)
 from skfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
                         MeshTri2, MeshTet2, MeshHex2, MeshTri1DG, MeshQuad1DG,
                         MeshHex1DG)
@@ -655,6 +655,7 @@ def test_hdiv_boundary_integration_3d(basis):
     "mtype,e1,e2,e3",
     [
         (MeshTri, ElementVector(ElementTriP1()), ElementTriN0(), ElementTriP0()),
+        (MeshTri, ElementVector(ElementTriP2()), ElementTriN1(), ElementTriP0()),
         (MeshQuad, ElementVector(ElementQuad1()), ElementQuadN0(), ElementQuad0()),
     ]
 )
