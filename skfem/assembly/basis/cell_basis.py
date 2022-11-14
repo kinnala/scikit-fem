@@ -265,7 +265,7 @@ class CellBasis(AbstractBasis):
             quadrature=quadrature,
         )
 
-    def project(self, interp, elements=None):
+    def project(self, interp, elements=None, dtype=None):
         """Perform :math:`L^2` projection onto the basis.
 
         See :ref:`l2proj` for more information.
@@ -285,7 +285,7 @@ class CellBasis(AbstractBasis):
         """
         from skfem.utils import solve, condense
 
-        M, f = self._projection(interp)
+        M, f = self._projection(interp, dtype=dtype)
 
         if elements is not None:
             return solve(*condense(M, f, I=self.get_dofs(elements=elements)))
