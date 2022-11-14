@@ -417,10 +417,12 @@ class AbstractBasis:
 
         return (
             (BilinearForm(lambda *args: inner(args[:(len(args) - 1) // 2],
-                                              args[(len(args) - 1) // 2:-1]), dtype=dtype)
+                                              args[(len(args) - 1) // 2:-1]),
+                          dtype=dtype)
              .assemble(self)),
             (LinearForm(lambda *args: inner(interp,
-                                            args[:(len(args) - 1)]), dtype=dtype)
+                                            args[:(len(args) - 1)]),
+                        dtype=dtype)
              .assemble(self)),
         )
 
