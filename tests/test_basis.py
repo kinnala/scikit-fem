@@ -471,6 +471,18 @@ def test_basis_project(m, e, fun):
             lambda x: (x[0] * 0 + 1, x[0] * 0 + 1),
             np.ones(8),
         ),
+        (
+            MeshTri(),
+            ElementTriP1() * ElementTriP1(),
+            lambda x: [x[0] * 0 + 1, x[0] * 0 + 1],
+            np.ones(8),
+        ),
+        (
+            MeshTri(),
+            ElementTriP1() * ElementTriP1(),
+            lambda x: [x[0] * 0 + 1, 1],
+            np.ones(8),
+        ),
     ]
 )
 def test_basis_project_composite(m, e, p1, p2):

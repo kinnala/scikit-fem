@@ -394,14 +394,17 @@ class AbstractBasis:
 
     def _normalize_interp(self, interp) -> Tuple[ndarray, ...]:
 
-        if isinstance(interp, ndarray):
-            pass
-        elif callable(interp):
-            interp = interp(self.global_coordinates())
-        elif isinstance(interp, (float, int)):
+        if isinstance(interp, (tuple, list)):
+            interp = tuple(self._normalize_interp(c)[0] for c in interp)
+
+        if callable(interp):
+            interp = self._normalize_interp(interp(self.global_coordinates()))
+
+        if isinstance(interp, (float, int)):
             interp = interp + self.zero_w()
-        elif isinstance(interp, (tuple, list)):
-            interp = tuple(self._normalize_interp(c) for c in interp)
+
+        if isinstance(interp, ndarray):
+            interp = (interp,)
 
         return interp
 
@@ -411,8 +414,7 @@ class AbstractBasis:
         from skfem.helpers import inner
 
         interp = self._normalize_interp(interp)
-        if not isinstance(interp, tuple):
-            interp = (interp,)
+        assert isinstance(interp, tuple)
         assert len(interp) == len(self.basis[0])
 
         return (
