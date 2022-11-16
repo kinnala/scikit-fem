@@ -195,7 +195,7 @@ class FacetBasis(AbstractBasis):
             facets=self.find,
         )
 
-    def project(self, interp, facets=None):
+    def project(self, interp, facets=None, dtype=None):
         """Perform :math:`L^2` projection onto the basis on the boundary.
 
         The values of the interior DOFs remain zero.
@@ -215,7 +215,7 @@ class FacetBasis(AbstractBasis):
         """
         from skfem.utils import solve, condense
 
-        M, f = self._projection(interp)
+        M, f = self._projection(interp, dtype=dtype)
 
         if facets is not None:
             return solve(*condense(M, f, I=self.get_dofs(facets=facets)))
