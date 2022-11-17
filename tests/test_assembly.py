@@ -17,7 +17,8 @@ from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementTriRT1, ElementTriRT2, ElementTriBDM1,
                            ElementQuadRT1, ElementTetRT1, ElementHexRT1,
                            ElementTriN1, ElementTriP0, ElementTetN0,
-                           ElementQuadN1, ElementQuad0, ElementTriN2)
+                           ElementQuadN1, ElementQuad0, ElementTriN2,
+                           ElementTetN1)
 from skfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
                         MeshTri2, MeshTet2, MeshHex2, MeshTri1DG, MeshQuad1DG,
                         MeshHex1DG)
@@ -649,6 +650,58 @@ def test_hdiv_boundary_integration_3d(basis):
     assert_almost_equal(test1.assemble(fbasis, y=y), 1, decimal=2)
     if not isinstance(basis.elem, ElementTetRT1):
         assert_almost_equal(test2.assemble(fbasis, y=y), 1, decimal=5)
+
+
+@pytest.mark.parametrize(
+    "basis",
+    [
+        Basis(MeshTri().refined(4), ElementTriN1()),
+        Basis(MeshTri().refined(4), ElementTriN2()),
+        Basis(MeshQuad().refined(3), ElementQuadN1()),
+    ]
+)
+def test_hcurl_boundary_integration(basis):
+
+    y = basis.project(lambda x: np.array([x[1], -x[0]]))
+    fbasis = basis.boundary('right')
+
+    @Functional
+    def test1(w):
+        rotx = np.array([w.x[1], -w.x[0]])
+        return dot(w['y'], w.n) - dot(rotx, w.n)
+
+    @Functional
+    def test2(w):
+        return w['y'].curl
+
+    assert_almost_equal(test1.assemble(fbasis, y=y), 0, decimal=2)
+    assert_almost_equal(test2.assemble(fbasis, y=y), -2, decimal=5)
+
+
+@pytest.mark.parametrize(
+    "basis",
+    [
+        Basis(MeshTet().refined(2), ElementTetN1()),
+    ]
+)
+def test_hcurl_boundary_integration(basis):
+
+    y = basis.project(lambda x: np.array([x[1], -x[0], 0*x[0]]))
+    fbasis = basis.boundary('right')
+
+    @Functional
+    def test1(w):
+        rotx = np.array([w.x[1], -w.x[0], w.x[2]*0.])
+        return dot(w['y'], w.n) - dot(rotx, w.n)
+
+    @Functional
+    def test2(w):
+        return w['y'].curl
+
+    assert_almost_equal(test1.assemble(fbasis, y=y), 0, decimal=2)
+    assert_almost_equal(test2.assemble(fbasis, y=y),
+                        np.array([0, 0, -2]),
+                        decimal=5)
 
 
 @pytest.mark.parametrize(

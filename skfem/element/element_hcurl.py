@@ -16,7 +16,8 @@ class ElementHcurl(Element):
         ix = int(i / divide_by)
         if mapping.mesh.dim() == 2 and ix >= self.refdom.nfacets:
             # no orientation required for interior DOFs => return 1
-            return np.ones(mapping.mesh.t.shape[1], dtype=np.int64)
+            ori = np.ones(mapping.mesh.t.shape[1], dtype=np.int64)
+            return ori[tind]
         if mapping.mesh.dim() == 3:
             t1, t2 = mapping.mesh.refdom.edges[ix]
         elif mapping.mesh.dim() == 2:
