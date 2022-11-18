@@ -616,14 +616,15 @@ def test_oriented_saveload(m: Mesh):
     )
 
 
-def test_zeros_ones():
-    basis = CellBasis(MeshTri(), ElementTriP0())
-    a = basis.zeros(dtype=int) + 1
-    b = basis.ones(dtype=float) * 2.
-    assertEqual(len(b), basis.N)
-    assertTrue(a.dtype == int)
-    assertTrue(b.dtype == float)
-    assert_array_equal(
-        a.astype(float) + b, np.array([3., 3.])
-    )
+class TestZerosOnes(TestCase):
 
+    def runTest(self):
+        basis = CellBasis(MeshTri(), ElementTriP0())
+        a = basis.zeros(dtype=int) + 1
+        b = basis.ones(dtype=float) * 2.
+        self.assertEqual(len(b), basis.N)
+        self.assertTrue(a.dtype == int)
+        self.assertTrue(b.dtype == float)
+        assert_array_equal(
+            a.astype(float) + b, np.array([3., 3.])
+        )
