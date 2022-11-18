@@ -21,13 +21,16 @@ class ElementQuadN1(ElementHcurl):
         nil = np.zeros_like(x)
         if i == 0:
             phi = np.array([y - 1.0, nil])
+            dphi = -np.ones_like(x)
         elif i == 1:
             phi = np.array([nil, x])
+            dphi = np.ones_like(x)
         elif i == 2:
             phi = np.array([y, nil])
+            dphi = -np.ones_like(x)
         elif i == 3:
-            phi = np.array([nil, x - 1.0])
+            phi = np.array([nil, 1.0 - x])
+            dphi = -np.ones_like(x)
         else:
             self._index_error()
-        dphi = np.ones_like(x) * (-1) ** (i + 1)
         return phi, dphi
