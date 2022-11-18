@@ -311,7 +311,7 @@ def _init_bc(A: spmatrix,
     assert isinstance(D, ndarray)
 
     if x is None:
-        x = np.zeros(A.shape[0])
+        x = np.zeros(A.shape[0], dtype=A.dtype)
     elif b is None:
         b = np.zeros_like(x)
 
