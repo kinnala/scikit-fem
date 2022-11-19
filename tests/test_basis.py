@@ -685,3 +685,17 @@ def test_oriented_saveload(m: Mesh):
     assert_array_equal(
         m.boundaries["mid"].ori, M.boundaries["mid"].ori,
     )
+
+
+class TestZerosOnes(TestCase):
+
+    def runTest(self):
+        basis = CellBasis(MeshTri(), ElementTriP0())
+        a = basis.zeros(dtype=int) + 1
+        b = basis.ones(dtype=float) * 2.
+        self.assertEqual(len(b), basis.N)
+        self.assertTrue(a.dtype == int)
+        self.assertTrue(b.dtype == float)
+        assert_array_equal(
+            a.astype(float) + b, np.array([3., 3.])
+        )
