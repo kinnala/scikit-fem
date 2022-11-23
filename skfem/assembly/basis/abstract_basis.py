@@ -1,18 +1,17 @@
 import logging
 import importlib
 from warnings import warn
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, List, Optional, Tuple, Type, Union
 
 import numpy as np
 from numpy import ndarray
-from skfem.assembly.dofs import Dofs, DofsView
+from skfem.assembly.dofs import Dofs
 from skfem.element import (DiscreteField, Element, ElementComposite,
                            ElementVector)
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh
 from skfem.quadrature import get_quadrature
 from skfem.refdom import Refdom
-from skfem.generic_utils import deprecated
 
 
 logger = logging.getLogger(__name__)
