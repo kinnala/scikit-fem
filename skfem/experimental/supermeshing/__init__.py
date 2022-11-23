@@ -1,7 +1,7 @@
 import numpy as np
 
-from .mesh import MeshLine
-from .quadrature import get_quadrature
+from skfem.mesh import MeshLine
+from skfem.quadrature import get_quadrature
 
 
 def intersect(p1, t1, p2, t2):
