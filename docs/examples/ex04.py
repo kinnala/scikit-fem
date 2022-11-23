@@ -40,8 +40,7 @@ m1t = MeshLine(p1, t1)
 m2t = MeshLine(p2, t2)
 
 # create supermesh for integration
-p12, t12, orig1, orig2 = intersect(p1, t1, p2, t2)
-m12 = MeshLine(p12, t12)
+m12, orig1, orig2 = intersect(m1t, m2t)
 
 basis1 = Basis(m1, e1)
 basis2 = Basis(m2, e2)

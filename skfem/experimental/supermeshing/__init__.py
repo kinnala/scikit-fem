@@ -4,8 +4,10 @@ from skfem.mesh import MeshLine
 from skfem.quadrature import get_quadrature
 
 
-def intersect(p1, t1, p2, t2):
+def intersect(pt1, pt2):
     """One-dimensional supermesh."""
+    p1, t1 = pt1
+    p2, t2 = pt2
     # find unique supermesh facets by combining nodes from both sides
     p = np.concatenate((p1.flatten().round(decimals=10),
                         p2.flatten().round(decimals=10)))
@@ -18,7 +20,7 @@ def intersect(p1, t1, p2, t2):
     ix1 = MeshLine(p1, t1).element_finder()(mps[0, :, 0])
     ix2 = MeshLine(p2, t2).element_finder()(mps[0, :, 0])
 
-    return p, t, ix1, ix2
+    return MeshLine(p, t), ix1, ix2
 
 
 def build_quadrature(supermesh, tind, mesh, order=None):
