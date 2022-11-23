@@ -295,13 +295,13 @@ class AbstractBasis:
 
         # loop over solution components
         for c in range(len(refs)):
-            ref = refs[c][1].basis[0][0]
-            ref = ref.astuple
-            fs = []
+            ref = refs[c][1].basis[0][0].astuple
 
-            def linear_combination(n, refn):
+            def linear_combination(n):
                 """Global discrete function at quadrature points."""
-                out = np.zeros_like(refn, dtype=w.dtype)
+                out = 0. * np.einsum('...,...j->...j',
+                                     w[self.element_dofs[0]],
+                                     self.basis[0][c].get(n))
                 for i in range(self.Nbfun):
                     values = w[self.element_dofs[i]]
                     out += np.einsum('...,...j->...j', values,
@@ -309,9 +309,10 @@ class AbstractBasis:
                 return out
 
             # interpolate DiscreteField
+            fs = []
             for n in range(len(ref)):
                 if ref[n] is not None:
-                    fs.append(linear_combination(n, ref[n]))
+                    fs.append(linear_combination(n))
                 else:
                     fs.append(None)
 
