@@ -119,19 +119,6 @@ class AbstractBasis:
             D = tuple(D[0][key].all() for key in D[0])
         return np.setdiff1d(np.arange(self.N), np.concatenate(D))
 
-    @deprecated("Basis.get_dofs")
-    def find_dofs(self,
-                  facets: Optional[Dict[str, ndarray]] = None,
-                  skip: Optional[List[str]] = None) -> Dict[str, DofsView]:
-        if facets is None:
-            if self.mesh.boundaries is None:
-                facets = {'all': self.mesh.boundary_facets()}
-            else:
-                facets = self.mesh.boundaries
-
-        return {k: self.dofs.get_facet_dofs(facets[k], skip_dofnames=skip)
-                for k in facets}
-
     def get_dofs(self,
                  facets: Optional[Any] = None,
                  elements: Optional[Any] = None,

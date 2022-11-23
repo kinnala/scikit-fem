@@ -53,9 +53,10 @@ class TestCompositeSplitting(TestCase):
 
         S = asm(bilinf, basis)
 
-        D = basis.find_dofs(skip=['u^2'])
+        D = basis.get_dofs(skip=['u^2'])
+        Dup = basis.get_dofs('up', skip=['u^2'])
         x = basis.zeros()
-        x[D['up'].all('u^1^1')] = .1
+        x[Dup.all('u^1^1')] = .1
 
         x = solve(*condense(S, x=x, D=D))
 
@@ -71,7 +72,7 @@ class TestCompositeSplitting(TestCase):
         self.assertTrue(isinstance(P.value, np.ndarray))
         self.assertTrue(P.shape[0] == m.nelements)
 
-        self.assertTrue((basis.doflocs[:, D['up'].all()][1] == 1.).all())
+        self.assertTrue((basis.doflocs[:, Dup.all()][1] == 1.).all())
 
         # test blocks splitting of forms while at it
         C1 = asm(bilinf.block(1, 1), CellBasis(m, ElementTriP1()))
@@ -142,7 +143,7 @@ class TestFacetExpansion(TestCase):
                     lambda x: x[1] == 1,
                     lambda x: x[2] == 0,
                     lambda x: x[2] == 1]:
-            arr1 = basis.find_dofs({
+            arr1 = basis.get_dofs({
                 'kek': m.facets_satisfying(fun)
             })['kek'].edge['u']
             arr2 = basis.edge_dofs[:, m.edges_satisfying(fun)]
