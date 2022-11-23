@@ -212,6 +212,8 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+- Removed: The deprecated `Basis.find_dofs` method, see `Basis.get_dofs` for a
+  replacement
 - Added: Renamed `ElementTetN0` to `ElementTriN1` and added alias for backwards
   compatibility
 - Added: `ElementQuadN1`, first order H(curl) conforming quadrilateral element
