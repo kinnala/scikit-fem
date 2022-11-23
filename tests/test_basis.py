@@ -117,6 +117,13 @@ class TestCompositeFacetAssembly(TestCase):
         assert_allclose(A[0].todense()[0, ::2],
                         C[0].todense()[0])
 
+        y = fbasis1.zeros()
+        y[fbasis1.get_dofs('left')] = 1
+        assert_allclose(
+            fbasis1.project(fbasis1.interpolate(fbasis1.ones())),
+            y,
+        )
+
 
 class TestFacetExpansion(TestCase):
 
