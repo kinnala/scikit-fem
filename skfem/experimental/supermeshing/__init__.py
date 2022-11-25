@@ -20,19 +20,14 @@ def intersect(m1, m2):
     ix1 = MeshLine(p1, t1).element_finder()(mps[0, :, 0])
     ix2 = MeshLine(p2, t2).element_finder()(mps[0, :, 0])
 
-    return MeshLine(p, t)
-        t,
-        cell_data={
+    return {
+        'doflocs': p,
+        't': t,
+        'cell_data': {
             't1': ix1,
             't2': ix2,
-            **({'facets1': m1.cell_data['facets'][ix1]}
-               if (m1.cell_data is not None
-                   and 'facets' in m1.cell_data) else {}),
-            **({'facets2': m2.cell_data['facets'][ix2]}
-               if (m2.cell_data is not None
-                   and 'facets' in m2.cell_data) else {}),
-        },
-    )
+        }
+    }
 
 
 def elementwise_quadrature(mesh, supermesh=None, key=None, order=None):

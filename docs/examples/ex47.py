@@ -10,7 +10,7 @@ m2 = MeshLine(np.logspace(0, 1, 10))
 e1 = ElementLineP1()
 e2 = ElementLineP1()
 
-m12 = intersect(m1, m2)
+m12 = MeshLine1(**intersect(m1, m2))
 
 bases = [
     Basis(m1, e1),
