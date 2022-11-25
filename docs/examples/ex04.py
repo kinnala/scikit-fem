@@ -8,7 +8,7 @@ They are useful also when solving variational inequalities such as
 
 import numpy as np
 from skfem import *
-from skfem.experimental.supermeshing import intersect, build_quadrature
+from skfem.experimental.supermeshing import intersect, elementwise_quadrature
 from skfem.models.elasticity import (linear_elasticity, lame_parameters,
                                      linear_stress)
 from skfem.helpers import dot, sym_grad, jump, mul
@@ -32,14 +32,10 @@ e1 = ElementVector(ElementTriP2())
 e2 = ElementVector(ElementQuad2())
 
 # create trace meshes and project
-p1, t1, facets1, _ = m1.trace('contact')
-p2, t2, facets2, _ = m2.trace('contact')
-p1 = p1[1:]
-p2 = p2[1:]
-m1t = MeshLine(p1, t1)
-m2t = MeshLine(p2, t2)
+m1t = m1.trace('contact', mtype=MeshLine, project=lambda p: p[1:])
+m2t = m2.trace('contact', mtype=MeshLine, project=lambda p: p[1:])
 
-# create supermesh for integration
+# create a supermesh for integration
 m12, orig1, orig2 = intersect(m1t, m2t)
 
 basis1 = Basis(m1, e1)
@@ -47,11 +43,11 @@ basis2 = Basis(m2, e2)
 
 fbases = [
     FacetBasis(m1, e1,
-               quadrature=build_quadrature(m12, orig1, m1t),
-               facets=facets1[orig1]),
+               quadrature=elementwise_quadrature(m1t, m12, 't1'),
+               facets=m12.cell_data['facets1']),
     FacetBasis(m2, e2,
-               quadrature=build_quadrature(m12, orig2, m2t),
-               facets=facets2[orig2]),
+               quadrature=elementwise_quadrature(m2t, m12, 't2'),
+               facets=m12.cell_data['facets2']),
 ]
 
 # problem definition

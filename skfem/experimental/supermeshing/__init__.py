@@ -4,10 +4,10 @@ from skfem.mesh import MeshLine
 from skfem.quadrature import get_quadrature
 
 
-def intersect(pt1, pt2):
+def intersect(m1, m2):
     """One-dimensional supermesh."""
-    p1, t1 = pt1
-    p2, t2 = pt2
+    p1, t1 = m1
+    p2, t2 = m2
     # find unique supermesh facets by combining nodes from both sides
     p = np.concatenate((p1.flatten().round(decimals=10),
                         p2.flatten().round(decimals=10)))
@@ -20,13 +20,30 @@ def intersect(pt1, pt2):
     ix1 = MeshLine(p1, t1).element_finder()(mps[0, :, 0])
     ix2 = MeshLine(p2, t2).element_finder()(mps[0, :, 0])
 
-    return MeshLine(p, t), ix1, ix2
+    return MeshLine(p, t)
+        t,
+        cell_data={
+            't1': ix1,
+            't2': ix2,
+            **({'facets1': m1.cell_data['facets'][ix1]}
+               if (m1.cell_data is not None
+                   and 'facets' in m1.cell_data) else {}),
+            **({'facets2': m2.cell_data['facets'][ix2]}
+               if (m2.cell_data is not None
+                   and 'facets' in m2.cell_data) else {}),
+        },
+    )
 
 
-def build_quadrature(supermesh, tind, mesh, order=None):
-    """For creating global quadrature rules based on the supermesh."""
+def elementwise_quadrature(mesh, supermesh=None, key=None, order=None):
+    """For creating element-by-element quadrature rules."""
     if order is None:
         order = 4
+    if supermesh is None:
+        supermesh = mesh
+        tind = None
+    else:
+        tind = supermesh.cell_data[key]
     X, W = get_quadrature(supermesh.elem, order)
     mmap = mesh.mapping()
     smap = supermesh.mapping()

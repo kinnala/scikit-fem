@@ -38,6 +38,8 @@ class Mesh:
     # off this behaviour and, hence, this flag exists.
     sort_t: bool = False
     validate: bool = True  # run validation check if log_level<=DEBUG
+    cell_data: Optional[Dict[str, ndarray]] = None
+    point_data: Optional[Dict[str, ndarray]] = None
 
     @property
     def p(self):
@@ -467,8 +469,9 @@ class Mesh:
 
         M = self.elem.refdom.nnodes
 
-        if self.nnodes > M:
+        if self.nnodes > M and self.elem is not Element:
             # reorder DOFs to the expected format: vertex DOFs are first
+            # note: not run if elem is not set
             p, t = self.doflocs, self.t
             t_nodes = t[:M]
             uniq, ix = np.unique(t_nodes, return_inverse=True)
@@ -497,7 +500,9 @@ class Mesh:
 
         # try adding default boundary tags
         if ((self._boundaries is None
-             and self.doflocs.shape[1] < 1e3)):
+             and self.doflocs.shape[1] < 1e3
+             and self.elem is not Element)):
+            # note: not run if elem is not set
             boundaries = {}
             # default boundary names along the dimensions
             minnames = ['left', 'bottom', 'front']
@@ -628,6 +633,12 @@ class Mesh:
                     map(lambda k: '{} [{}]'.format(k, len(self.boundaries[k])),
                         list(self.boundaries.keys()))
                 )
+            )
+        if self.cell_data is not None:
+            rep += "\n  Cell data: {}".format(", ".join(self.cell_data.keys()))
+        if self.point_data is not None:
+            rep += "\n  Point data: {}".format(
+                ", ".join(self.point_data.keys())
             )
         return rep
 
@@ -969,30 +980,31 @@ class Mesh:
             ixuniq
         )
 
-    def trace(self, facets):
-        """Create a raw trace mesh (p, t).
+    def trace(self, facets, mtype=None, project=None):
+        """Create a trace mesh.
 
         Parameters
         ----------
         facets
             Criteria of which facets to include.  This input is normalized
             using ``self.normalize_facets``.
-
-        Returns
-        -------
-        p : ndarray
-            An array of points in the trace mesh.
-        t : ndarray
-            The element connectivity of the trace mesh.
-        facets : ndarray
-            An array of facet indices to the original mesh.
-        points : ndarray
-            An array of points indices to the original mesh.
+        mtype
+            Optional subtype of Mesh which is used to initialize the return
+            value.  If not provided, the raw Mesh type is used.
+        project
+            Optional lambda for modifying doflocs before initializing.  Usually
+            for projecting doflocs because trace may lead to a lower
+            dimensional mesh.  Useful example is ``lambda p: p[1:]``.
 
         """
         facets = self.normalize_facets(facets)
         p, t, points = self._reix(self.facets[:, facets])
-        return p, t, facets, points
+        return (Mesh if mtype is None else mtype)(
+            (project(p) if project is not None else p),
+            t,
+            cell_data={'facets': facets},
+            point_data={'vertices': points},
+        )
 
     def restrict(self, elements):
         """Restrict the mesh to a subset of elements.
@@ -1005,13 +1017,15 @@ class Mesh:
 
         """
         elements = self.normalize_elements(elements)
-        p, t, _ = self._reix(self.t[:, elements])
+        p, t, points = self._reix(self.t[:, elements])
         return replace(
             self,
             doflocs=p,
             t=t,
             _boundaries=None,
             _subdomains=None,
+            cell_data={'original facets': facets},
+            point_data={'original points': points},
         )
 
     def remove_elements(self, element_indices: ndarray):
