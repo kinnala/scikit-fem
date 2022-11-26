@@ -2,7 +2,7 @@
 
 import numpy as np
 from skfem import *
-from skfem.experimental.supermeshing import intersect, elementwise_quadrature
+from skfem.experimental.supermeshing import intersect1d, elementwise_quadrature
 
 
 m1 = MeshLine(np.linspace(1, 10, 20))
@@ -10,15 +10,15 @@ m2 = MeshLine(np.logspace(0, 1, 10))
 e1 = ElementLineP1()
 e2 = ElementLineP1()
 
-m12 = MeshLine1(**intersect(m1, m2))
+m12, t1, t2 = intersect1d(m1, m2)
 
 bases = [
     Basis(m1, e1),
     Basis(m2, e2),
 ]
 projbases = [
-    Basis(m1, e1, quadrature=elementwise_quadrature(m1, m12, 't1'), elements=m12.cell_data['t1']),
-    Basis(m2, e2, quadrature=elementwise_quadrature(m2, m12, 't2'), elements=m12.cell_data['t2']),
+    Basis(m1, e1, quadrature=elementwise_quadrature(m1, m12, t1), elements=t1),
+    Basis(m2, e2, quadrature=elementwise_quadrature(m2, m12, t2), elements=t2),
 ]
 
 

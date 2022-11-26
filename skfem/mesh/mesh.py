@@ -38,8 +38,6 @@ class Mesh:
     # off this behaviour and, hence, this flag exists.
     sort_t: bool = False
     validate: bool = True  # run validation check if log_level<=DEBUG
-    cell_data: Optional[Dict[str, ndarray]] = None
-    point_data: Optional[Dict[str, ndarray]] = None
 
     @property
     def p(self):
@@ -634,12 +632,6 @@ class Mesh:
                         list(self.boundaries.keys()))
                 )
             )
-        if self.cell_data is not None:
-            rep += "\n  Cell data: {}".format(", ".join(self.cell_data.keys()))
-        if self.point_data is not None:
-            rep += "\n  Point data: {}".format(
-                ", ".join(self.point_data.keys())
-            )
         return rep
 
     def __str__(self):
@@ -998,13 +990,11 @@ class Mesh:
 
         """
         facets = self.normalize_facets(facets)
-        p, t, points = self._reix(self.facets[:, facets])
+        p, t, _ = self._reix(self.facets[:, facets])
         return (Mesh if mtype is None else mtype)(
             (project(p) if project is not None else p),
-            t,
-            cell_data={'facets': facets},
-            point_data={'vertices': points},
-        )
+            t
+        ), facets
 
     def restrict(self, elements):
         """Restrict the mesh to a subset of elements.
@@ -1017,15 +1007,13 @@ class Mesh:
 
         """
         elements = self.normalize_elements(elements)
-        p, t, points = self._reix(self.t[:, elements])
+        p, t, _ = self._reix(self.t[:, elements])
         return replace(
             self,
             doflocs=p,
             t=t,
             _boundaries=None,
             _subdomains=None,
-            cell_data={'original facets': facets},
-            point_data={'original points': points},
         )
 
     def remove_elements(self, element_indices: ndarray):
