@@ -605,6 +605,10 @@ def bmat(blocks, *args, **kwargs):
     m = len(blocks)
     n = len(blocks[0])
 
+    # turn COOData into scipy/numpy
+    blocks = [[coo.todefault() if hasattr(coo, 'todefault') else coo
+               for coo in row] for row in blocks]
+
     sizes = []
     diff = 0
 

@@ -38,8 +38,10 @@ m2t, orig2 = m2.trace('contact', mtype=MeshLine, project=lambda p: p[1:])
 # create a supermesh for integration
 m12, t1, t2 = intersect1d(m1t, m2t)
 
-basis1 = Basis(m1, e1)
-basis2 = Basis(m2, e2)
+bases = [
+    Basis(m1, e1),
+    Basis(m2, e2),
+]
 
 fbases = [
     FacetBasis(m1, e1,
@@ -86,30 +88,21 @@ params = {
 }
 
 # assemble the block system
-K1 = weakform.assemble(basis1)
-K2 = weakform.assemble(basis2)
+A = asm(weakform, bases, to=list)
+B = asm(bilin_mortar, fbases, fbases, **params, to=list)
+b = asm(lin_mortar, fbases, **params, to=list)
 
-K = [[K1, 0], [0, K2]]
-f = [0, 0]
+K = bmat([[A[0] + B[0], B[2]],
+          [B[1], A[1] + B[3]]], 'csr')
+f = np.concatenate(b)
 
-for i in [0, 1]:
-    for j in [0, 1]:
-        K[i][j] += bilin_mortar.assemble(fbases[j],
-                                         fbases[i],
-                                         idx=(j, i),  # for jump sign
-                                         **params)
-    f[i] += lin_mortar.assemble(fbases[i], idx=(i,), **params)
-
-K = bmat(K, 'csr')
-f = np.concatenate(f)
-
-D1 = basis1.get_dofs('dirichlet').all()
-D2 = basis2.get_dofs('dirichlet').all() + K.blocks[0]
+D1 = bases[0].get_dofs('dirichlet').all()
+D2 = bases[1].get_dofs('dirichlet').all() + K.blocks[0]
 
 # initialize boundary conditions
-y1 = basis1.zeros()
-y2 = basis2.zeros()
-y1[basis1.get_dofs('dirichlet').all('u^1')] = .1
+y1 = bases[0].zeros()
+y2 = bases[1].zeros()
+y1[bases[0].get_dofs('dirichlet').all('u^1')] = .1
 y = np.concatenate((y1, y2))
 
 # linear solve
@@ -118,15 +111,15 @@ y = solve(*condense(K, f, D=np.concatenate((D1, D2)), x=y))
 # create a displaced mesh for visualization
 sf = 1
 y1, y2 = np.split(y, K.blocks)
-mdefo1 = m1.translated(sf * y1[basis1.nodal_dofs])
-mdefo2 = m2.translated(sf * y2[basis2.nodal_dofs])
+mdefo1 = m1.translated(sf * y1[bases[0].nodal_dofs])
+mdefo2 = m2.translated(sf * y2[bases[1].nodal_dofs])
 
 # calculate von Mises stress
 s1, s2 = {}, {}
-dg1 = basis1.with_element(ElementTriDG(ElementTriP1()))
-dg2 = basis2.with_element(ElementQuadDG(ElementQuad1()))
-u1 = basis1.interpolate(y1)
-u2 = basis2.interpolate(y2)
+dg1 = bases[0].with_element(ElementTriDG(ElementTriP1()))
+dg2 = bases[1].with_element(ElementQuadDG(ElementQuad1()))
+u1 = bases[0].interpolate(y1)
+u2 = bases[1].interpolate(y2)
 
 for i in [0, 1]:
     for j in [0, 1]:
