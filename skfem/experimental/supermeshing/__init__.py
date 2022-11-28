@@ -18,25 +18,28 @@ def _intersect2d(p1, t1, p2, t2):
     """Two-dimensional supermesh using shapely and bruteforce."""
     try:
         from shapely.geometry import Polygon
+        from shapely.strtree import STRtree
         from shapely.ops import triangulate
     except Exception:
         raise Exception("2D supermeshing requires the package 'shapely'.")
     t = np.empty((3, 0))
     p = np.empty((2, 0))
+    polys = [Polygon(p1[:, t1[:, itr]].T) for itr in range(t1.shape[1])]
+    ixmap = {id(polys[itr]): itr for itr in range(t1.shape[1])}
+    s = STRtree(polys)
     ix1, ix2 = [], []
-    for itr in range(m1.t.shape[1]):
-        for jtr in range(m2.t.shape[1]):
-            tri1, tri2 = p1[:, t1[:, itr]], p2[:, t2[:, jtr]]
-            poly1 = Polygon(tri1.T)
-            poly2 = Polygon(tri2.T)
-            if not poly1.intersects(poly2):
-                continue
+    for jtr in range(t2.shape[1]):
+        poly1 = Polygon(p2[:, t2[:, jtr]].T)
+        result = s.query(Polygon(p2[:, t2[:, jtr]].T))
+        if len(result) == 0:
+            continue
+        for poly2 in result:
             tris = triangulate(poly1.intersection(poly2))
             for tri in tris:
                 p = np.hstack((p, np.vstack(tri.exterior.xy)[:, :-1]))
                 diff = np.max(t) + 1 if t.shape[1] > 0 else 0
                 t = np.hstack((t, np.array([[0], [1], [2]]) + diff))
-                ix1.append(itr)
+                ix1.append(ixmap[id(poly2)])
                 ix2.append(jtr)
     return (
         MeshTri(p, t),
