@@ -8,7 +8,7 @@ They are useful also when solving variational inequalities such as
 
 import numpy as np
 from skfem import *
-from skfem.experimental.supermeshing import intersect1d, elementwise_quadrature
+from skfem.experimental.supermeshing import intersect, elementwise_quadrature
 from skfem.models.elasticity import (linear_elasticity, lame_parameters,
                                      linear_stress)
 from skfem.helpers import dot, sym_grad, jump, mul
@@ -36,7 +36,7 @@ m1t, orig1 = m1.trace('contact', mtype=MeshLine, project=lambda p: p[1:])
 m2t, orig2 = m2.trace('contact', mtype=MeshLine, project=lambda p: p[1:])
 
 # create a supermesh for integration
-m12, t1, t2 = intersect1d(m1t, m2t)
+m12, t1, t2 = intersect(m1t, m2t)
 
 bases = [
     Basis(m1, e1),

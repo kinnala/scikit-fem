@@ -4,12 +4,23 @@ from skfem.mesh import MeshLine, MeshTri
 from skfem.quadrature import get_quadrature
 
 
-def intersect2d(m1, m2):
-    """Two-dimensional supermesh using shapely and bruteforce."""
-    from shapely.geometry import Polygon
-    from shapely.ops import triangulate
+def intersect(m1, m2):
     p1, t1 = m1
     p2, t2 = m2
+    if p1.shape[0] == 1 and p2.shape[0] == 1:
+        return _intersect1d(p1, t1, p2, t2)
+    elif p1.shape[0] == 2 and p2.shape[0] == 2:
+        return _intersect2d(p1, t1, p2, t2)
+    raise NotImplementedError("The given mesh types not supported.")
+
+
+def _intersect2d(p1, t1, p2, t2):
+    """Two-dimensional supermesh using shapely and bruteforce."""
+    try:
+        from shapely.geometry import Polygon
+        from shapely.ops import triangulate
+    except Exception:
+        raise Exception("2D supermeshing requires the package 'shapely'.")
     t = np.empty((3, 0))
     p = np.empty((2, 0))
     ix1, ix2 = [], []
@@ -34,10 +45,8 @@ def intersect2d(m1, m2):
     )
 
 
-def intersect1d(m1, m2):
+def _intersect1d(p1, t1, p2, t2):
     """One-dimensional supermesh."""
-    p1, t1 = m1
-    p2, t2 = m2
     # find unique supermesh facets by combining nodes from both sides
     p = np.concatenate((p1.flatten().round(decimals=10),
                         p2.flatten().round(decimals=10)))

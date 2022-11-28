@@ -2,7 +2,7 @@
 
 import numpy as np
 from skfem import *
-from skfem.experimental.supermeshing import intersect1d, elementwise_quadrature
+from skfem.experimental.supermeshing import intersect, elementwise_quadrature
 
 
 m1 = MeshLine(np.linspace(1, 10, 20))
@@ -10,7 +10,7 @@ m2 = MeshLine(np.logspace(0, 1, 10))
 e1 = ElementLineP1()
 e2 = ElementLineP1()
 
-m12, t1, t2 = intersect1d(m1, m2)
+m12, t1, t2 = intersect(m1, m2)
 
 bases = [
     Basis(m1, e1),
