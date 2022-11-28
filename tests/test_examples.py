@@ -382,3 +382,10 @@ class TestEx46(TestCase):
         self.assertAlmostEqual(ex46.err1, 0, delta=1e-4)
         self.assertAlmostEqual(ex46.err2, 0, delta=1e-4)
         self.assertAlmostEqual(ex46.err3, 0, delta=1e-4)
+
+
+class TestEx47(TestCase):
+
+    def runTest(self):
+        import docs.examples.ex47 as ex47
+        self.assertAlmostEqual(ex47.l2, 0, delta=1e-2)

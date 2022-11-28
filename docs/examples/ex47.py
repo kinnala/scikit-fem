@@ -30,8 +30,16 @@ def mass(u, v, _):
 P = mass.assemble(*projbases)
 M = mass.assemble(projbases[1])
 
-y1 = bases[0].project(lambda x: x[0] ** 3)
+y1 = bases[0].project(lambda x: x[0] ** 1.6)
 y2 = solve(M, P.dot(y1))
 
-ax = bases[0].plot(y1, color='k-')
-bases[1].plot(y2, color='r-', ax=ax).show()
+
+l2 = .09 * (bases[0].interpolator(y1)(np.linspace(1, 10, 100)[None])
+            - bases[1].interpolator(y2)(np.linspace(1, 10, 100)[None])).sum()
+
+if __name__ == "__main__":
+    print('L2 error: {}'.format(l2))
+    ax = bases[0].plot(y1, color='ko-')
+    m1.draw(ax=ax, color='ko')
+    m2.draw(ax=ax, color='ro')
+    bases[1].plot(y2, color='ro:', ax=ax).show()
