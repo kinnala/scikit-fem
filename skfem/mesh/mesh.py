@@ -467,8 +467,9 @@ class Mesh:
 
         M = self.elem.refdom.nnodes
 
-        if self.nnodes > M:
+        if self.nnodes > M and self.elem is not Element:
             # reorder DOFs to the expected format: vertex DOFs are first
+            # note: not run if elem is not set
             p, t = self.doflocs, self.t
             t_nodes = t[:M]
             uniq, ix = np.unique(t_nodes, return_inverse=True)
@@ -497,7 +498,9 @@ class Mesh:
 
         # try adding default boundary tags
         if ((self._boundaries is None
-             and self.doflocs.shape[1] < 1e3)):
+             and self.doflocs.shape[1] < 1e3
+             and self.elem is not Element)):
+            # note: not run if elem is not set
             boundaries = {}
             # default boundary names along the dimensions
             minnames = ['left', 'bottom', 'front']
@@ -969,30 +972,29 @@ class Mesh:
             ixuniq
         )
 
-    def trace(self, facets):
-        """Create a raw trace mesh (p, t).
+    def trace(self, facets, mtype=None, project=None):
+        """Create a trace mesh.
 
         Parameters
         ----------
         facets
             Criteria of which facets to include.  This input is normalized
             using ``self.normalize_facets``.
-
-        Returns
-        -------
-        p : ndarray
-            An array of points in the trace mesh.
-        t : ndarray
-            The element connectivity of the trace mesh.
-        facets : ndarray
-            An array of facet indices to the original mesh.
-        points : ndarray
-            An array of points indices to the original mesh.
+        mtype
+            Optional subtype of Mesh which is used to initialize the return
+            value.  If not provided, the raw Mesh type is used.
+        project
+            Optional lambda for modifying doflocs before initializing.  Usually
+            for projecting doflocs because trace may lead to a lower
+            dimensional mesh.  Useful example is ``lambda p: p[1:]``.
 
         """
         facets = self.normalize_facets(facets)
-        p, t, points = self._reix(self.facets[:, facets])
-        return p, t, facets, points
+        p, t, _ = self._reix(self.facets[:, facets])
+        return (Mesh if mtype is None else mtype)(
+            (project(p) if project is not None else p),
+            t
+        ), facets
 
     def restrict(self, elements):
         """Restrict the mesh to a subset of elements.

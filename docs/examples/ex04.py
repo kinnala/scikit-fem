@@ -8,7 +8,7 @@ They are useful also when solving variational inequalities such as
 
 import numpy as np
 from skfem import *
-from skfem.supermeshing import intersect, build_quadrature
+from skfem.experimental.supermeshing import intersect, elementwise_quadrature
 from skfem.models.elasticity import (linear_elasticity, lame_parameters,
                                      linear_stress)
 from skfem.helpers import dot, sym_grad, jump, mul
@@ -32,27 +32,24 @@ e1 = ElementVector(ElementTriP2())
 e2 = ElementVector(ElementQuad2())
 
 # create trace meshes and project
-p1, t1, facets1, _ = m1.trace('contact')
-p2, t2, facets2, _ = m2.trace('contact')
-p1 = p1[1:]
-p2 = p2[1:]
-m1t = MeshLine(p1, t1)
-m2t = MeshLine(p2, t2)
+m1t, orig1 = m1.trace('contact', mtype=MeshLine, project=lambda p: p[1:])
+m2t, orig2 = m2.trace('contact', mtype=MeshLine, project=lambda p: p[1:])
 
-# create supermesh for integration
-p12, t12, orig1, orig2 = intersect(p1, t1, p2, t2)
-m12 = MeshLine(p12, t12)
+# create a supermesh for integration
+m12, t1, t2 = intersect(m1t, m2t)
 
-basis1 = Basis(m1, e1)
-basis2 = Basis(m2, e2)
+bases = [
+    Basis(m1, e1),
+    Basis(m2, e2),
+]
 
 fbases = [
     FacetBasis(m1, e1,
-               quadrature=build_quadrature(m12, orig1, m1t),
-               facets=facets1[orig1]),
+               quadrature=elementwise_quadrature(m1t, m12, t1),
+               facets=orig1[t1]),
     FacetBasis(m2, e2,
-               quadrature=build_quadrature(m12, orig2, m2t),
-               facets=facets2[orig2]),
+               quadrature=elementwise_quadrature(m2t, m12, t2),
+               facets=orig2[t2]),
 ]
 
 # problem definition
@@ -91,30 +88,21 @@ params = {
 }
 
 # assemble the block system
-K1 = weakform.assemble(basis1)
-K2 = weakform.assemble(basis2)
+A = asm(weakform, bases, to=list)
+B = asm(bilin_mortar, fbases, fbases, **params, to=list)
+b = asm(lin_mortar, fbases, **params, to=list)
 
-K = [[K1, 0], [0, K2]]
-f = [0, 0]
+K = bmat([[A[0] + B[0], B[2]],
+          [B[1], A[1] + B[3]]], 'csr')
+f = np.concatenate(b)
 
-for i in [0, 1]:
-    for j in [0, 1]:
-        K[i][j] += bilin_mortar.assemble(fbases[j],
-                                         fbases[i],
-                                         idx=(j, i),  # for jump sign
-                                         **params)
-    f[i] += lin_mortar.assemble(fbases[i], idx=(i,), **params)
-
-K = bmat(K, 'csr')
-f = np.concatenate(f)
-
-D1 = basis1.get_dofs('dirichlet').all()
-D2 = basis2.get_dofs('dirichlet').all() + K.blocks[0]
+D1 = bases[0].get_dofs('dirichlet').all()
+D2 = bases[1].get_dofs('dirichlet').all() + K.blocks[0]
 
 # initialize boundary conditions
-y1 = basis1.zeros()
-y2 = basis2.zeros()
-y1[basis1.get_dofs('dirichlet').all('u^1')] = .1
+y1 = bases[0].zeros()
+y2 = bases[1].zeros()
+y1[bases[0].get_dofs('dirichlet').all('u^1')] = .1
 y = np.concatenate((y1, y2))
 
 # linear solve
@@ -123,15 +111,15 @@ y = solve(*condense(K, f, D=np.concatenate((D1, D2)), x=y))
 # create a displaced mesh for visualization
 sf = 1
 y1, y2 = np.split(y, K.blocks)
-mdefo1 = m1.translated(sf * y1[basis1.nodal_dofs])
-mdefo2 = m2.translated(sf * y2[basis2.nodal_dofs])
+mdefo1 = m1.translated(sf * y1[bases[0].nodal_dofs])
+mdefo2 = m2.translated(sf * y2[bases[1].nodal_dofs])
 
 # calculate von Mises stress
 s1, s2 = {}, {}
-dg1 = basis1.with_element(ElementTriDG(ElementTriP1()))
-dg2 = basis2.with_element(ElementQuadDG(ElementQuad1()))
-u1 = basis1.interpolate(y1)
-u2 = basis2.interpolate(y2)
+dg1 = bases[0].with_element(ElementTriDG(ElementTriP1()))
+dg2 = bases[1].with_element(ElementQuadDG(ElementQuad1()))
+u1 = bases[0].interpolate(y1)
+u2 = bases[1].interpolate(y2)
 
 for i in [0, 1]:
     for j in [0, 1]:
