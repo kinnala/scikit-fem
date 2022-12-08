@@ -224,8 +224,15 @@ with respect to documented and/or tested features.
 - Added: `Mesh.trace` which turns facets into a trace mesh
 - Added: `skfem.utils.bmat`, a variant of `scipy.sparse.bmat` which adds the
   indices of the different blocks as an attribute `out.blocks`
+- Added: Plane strain to plane stress mapping under `skfem.models.elasticity`
+- Added: Various methods such as `Basis.interpolate` and `Basis.project`
+  now support specifying `dtype` and using complex fields
+- Fixed: `Basis.intepolate` did not work properly with `ElementComposite`
+  when the basis was defined only for a subset of elements
 - Fixed: `Basis.split` worked incorrectly for `ElementVector` and multiple DOFs
   of same type
+- Fixed: Caching of `ElementQuadP` basis for reused quadrature points
+  did not work correctly
 - Deprecated: `MappingMortar` and `MortarFacetBasis` in favor of
   plain `FacetBasis` and the upcoming `skfem.experimental.supermeshing` (see [`ex04.py`](https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex04.py))
 
