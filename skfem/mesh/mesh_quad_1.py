@@ -1,4 +1,4 @@
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, replace, field
 from itertools import dropwhile
 from typing import Optional, Type
 
@@ -22,11 +22,12 @@ class MeshQuad1(Mesh2D):
           0---1
 
     """
-    doflocs: ndarray = np.array([[0., 0.],
-                                 [1., 0.],
-                                 [1., 1.],
-                                 [0., 1.]], dtype=np.float64).T
-    t: ndarray = np.array([[0, 1, 2, 3]], dtype=np.int64).T
+    doflocs: ndarray = field(default_factory=lambda: np.array([[0., 0.],
+                                                               [1., 0.],
+                                                               [1., 1.],
+                                                               [0., 1.]], dtype=np.float64).T)
+    t: ndarray = field(default_factory=lambda: np.array(
+        [[0, 1, 2, 3]], dtype=np.int64).T)
     elem: Type[Element] = ElementQuad1
 
     def _uniform(self):

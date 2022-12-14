@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Type
 
 import numpy as np
@@ -12,16 +12,16 @@ from .mesh_tet_1 import MeshTet1
 @dataclass(repr=False)
 class MeshWedge1(Mesh3D):
 
-    doflocs: ndarray = np.array([[0., 0., 0.],
-                                 [0., 0., 1.],
-                                 [0., 1., 0.],
-                                 [1., 0., 0.],
-                                 [0., 1., 1.],
-                                 [1., 0., 1.],
-                                 [1., 1., 0.],
-                                 [1., 1., 1.]], dtype=np.float64).T
-    t: ndarray = np.array([[0, 2, 3, 1, 4, 5],
-                           [2, 3, 6, 4, 5, 7]], dtype=np.int64).T
+    doflocs: ndarray = field(default_factory=lambda: np.array([[0., 0., 0.],
+                                                               [0., 0., 1.],
+                                                               [0., 1., 0.],
+                                                               [1., 0., 0.],
+                                                               [0., 1., 1.],
+                                                               [1., 0., 1.],
+                                                               [1., 1., 0.],
+                                                               [1., 1., 1.]], dtype=np.float64).T)
+    t: ndarray = field(default_factory=lambda:  np.array([[0, 2, 3, 1, 4, 5],
+                                                         [2, 3, 6, 4, 5, 7]], dtype=np.int64).T)
     elem: Type[Element] = ElementWedge1
 
     def to_meshtet(self):
