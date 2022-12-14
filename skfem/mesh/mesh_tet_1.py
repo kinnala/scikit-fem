@@ -13,19 +13,33 @@ from .mesh_simplex import MeshSimplex
 class MeshTet1(MeshSimplex, Mesh3D):
     """A standard first-order tetrahedral mesh."""
 
-    doflocs: ndarray = field(default_factory=lambda: np.array([[0., 0., 0.],
-                                                               [0., 0., 1.],
-                                                               [0., 1., 0.],
-                                                               [1., 0., 0.],
-                                                               [0., 1., 1.],
-                                                               [1., 0., 1.],
-                                                               [1., 1., 0.],
-                                                               [1., 1., 1.]], dtype=np.float64).T)
-    t: ndarray = field(default_factory=lambda: np.array([[0, 1, 2, 3],
-                                                         [3, 5, 1, 7],
-                                                         [2, 3, 6, 7],
-                                                         [2, 3, 1, 7],
-                                                         [1, 2, 4, 7]], dtype=np.int64).T)
+    doflocs: ndarray = field(
+        default_factory=lambda: np.array(
+            [
+                [0.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0],
+                [0.0, 1.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [0.0, 1.0, 1.0],
+                [1.0, 0.0, 1.0],
+                [1.0, 1.0, 0.0],
+                [1.0, 1.0, 1.0],
+            ],
+            dtype=np.float64,
+        ).T
+    )
+    t: ndarray = field(
+        default_factory=lambda: np.array(
+            [
+                [0, 1, 2, 3],
+                [3, 5, 1, 7],
+                [2, 3, 6, 7],
+                [2, 3, 1, 7],
+                [1, 2, 4, 7],
+            ],
+            dtype=np.int64,
+        ).T
+    )
     elem: Type[Element] = ElementTetP1
     affine: bool = True
 

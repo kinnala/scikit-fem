@@ -13,15 +13,22 @@ from .mesh_2d_2 import Mesh2D2
 class MeshQuad2(Mesh2D2, MeshQuad1):
     """A quadratic quadrilateral mesh."""
 
-    doflocs: ndarray = field(default_factory=lambda: np.array([[0., 0.],
-                                                               [1., 0.],
-                                                               [1., 1.],
-                                                               [0., 1.],
-                                                               [.5, 0.],
-                                                               [0., .5],
-                                                               [1., .5],
-                                                               [.5, 1.],
-                                                               [.5, .5]], dtype=np.float64).T)
+    doflocs: ndarray = field(
+        default_factory=lambda: np.array(
+            [
+                [0.0, 0.0],
+                [1.0, 0.0],
+                [1.0, 1.0],
+                [0.0, 1.0],
+                [0.5, 0.0],
+                [0.0, 0.5],
+                [1.0, 0.5],
+                [0.5, 1.0],
+                [0.5, 0.5],
+            ],
+            dtype=np.float64,
+        ).T
+    )
     elem: Type[Element] = ElementQuad2
 
     def _uniform(self):

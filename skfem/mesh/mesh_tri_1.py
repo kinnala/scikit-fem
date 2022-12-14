@@ -13,12 +13,16 @@ from .mesh_simplex import MeshSimplex
 class MeshTri1(MeshSimplex, Mesh2D):
     """A standard first-order triangular mesh."""
 
-    doflocs: ndarray = field(default_factory=lambda: np.array([[0., 0.],
-                                                               [1., 0.],
-                                                               [0., 1.],
-                                                               [1., 1.]], dtype=np.float64).T)
-    t: ndarray = field(default_factory=lambda: np.array([[0, 1, 2],
-                                                         [1, 3, 2]], dtype=np.int64).T)
+    doflocs: ndarray = field(
+        default_factory=lambda: np.array(
+            [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]], dtype=np.float64
+        ).T
+    )
+    t: ndarray = field(
+        default_factory=lambda: np.array(
+            [[0, 1, 2], [1, 3, 2]], dtype=np.int64
+        ).T
+    )
     elem: Type[Element] = ElementTriP1
     affine: bool = True
     sort_t: bool = True
@@ -54,10 +58,10 @@ class MeshTri1(MeshSimplex, Mesh2D):
         t = np.zeros((3, 2 * nt))
         ix = ix.reshape(npy, npx, order='F').copy()
         t[0, :nt] = (ix[0:(npy-1), 0:(npx-1)].reshape(nt, 1, order='F')
-                     .copy()
+            .copy()
                      .flatten())
         t[1, :nt] = (ix[1:npy, 0:(npx-1)].reshape(nt, 1, order='F')
-                     .copy()
+            .copy()
                      .flatten())
         t[2, :nt] = (ix[1:npy, 1:npx].reshape(nt, 1, order='F')
                      .copy()
@@ -119,12 +123,12 @@ class MeshTri1(MeshSimplex, Mesh2D):
         p = np.array([[0., .5, 1., 0., .5, 1., 0., .5, 1.],
                       [0., 0., 0., .5, .5, .5, 1., 1., 1.]], dtype=np.float64)
         t = np.array([[0, 1, 4],
-                      [1, 2, 4],
-                      [2, 4, 5],
-                      [0, 3, 4],
-                      [3, 4, 6],
-                      [4, 6, 7],
-                      [4, 7, 8],
+                [1, 2, 4],
+                [2, 4, 5],
+                [0, 3, 4],
+                [3, 4, 6],
+                [4, 6, 7],
+                [4, 7, 8],
                       [4, 5, 8]], dtype=np.int64).T
         return cls(p, t)
 
@@ -213,10 +217,10 @@ class MeshTri1(MeshSimplex, Mesh2D):
             self,
             doflocs=np.hstack((p, p[:, self.facets].mean(axis=1))),
             t=np.hstack((
-                np.vstack((t[0], t2f[0] + sz, t2f[2] + sz)),
-                np.vstack((t[1], t2f[0] + sz, t2f[1] + sz)),
-                np.vstack((t[2], t2f[2] + sz, t2f[1] + sz)),
-                np.vstack((t2f[0] + sz, t2f[1] + sz, t2f[2] + sz)),
+                    np.vstack((t[0], t2f[0] + sz, t2f[2] + sz)),
+                    np.vstack((t[1], t2f[0] + sz, t2f[1] + sz)),
+                    np.vstack((t[2], t2f[2] + sz, t2f[1] + sz)),
+                    np.vstack((t2f[0] + sz, t2f[1] + sz, t2f[2] + sz)),
             )),
             _boundaries=None,
             _subdomains=None,
@@ -299,29 +303,29 @@ class MeshTri1(MeshSimplex, Mesh2D):
 
         # new red elements
         t_red = np.hstack((
-            np.vstack((m.t[0, red], ix[0, red], ix[2, red])),
-            np.vstack((m.t[1, red], ix[0, red], ix[1, red])),
-            np.vstack((m.t[2, red], ix[1, red], ix[2, red])),
-            np.vstack((ix[1, red], ix[2, red], ix[0, red])),
+                np.vstack((m.t[0, red], ix[0, red], ix[2, red])),
+                np.vstack((m.t[1, red], ix[0, red], ix[1, red])),
+                np.vstack((m.t[2, red], ix[1, red], ix[2, red])),
+                np.vstack((ix[1, red], ix[2, red], ix[0, red])),
         ))
 
         # new blue elements
         t_blue1 = np.hstack((
-            np.vstack((m.t[1, blue1], m.t[0, blue1], ix[2, blue1])),
-            np.vstack((m.t[1, blue1], ix[1, blue1], ix[2, blue1])),
-            np.vstack((m.t[2, blue1], ix[2, blue1], ix[1, blue1])),
+                np.vstack((m.t[1, blue1], m.t[0, blue1], ix[2, blue1])),
+                np.vstack((m.t[1, blue1], ix[1, blue1], ix[2, blue1])),
+                np.vstack((m.t[2, blue1], ix[2, blue1], ix[1, blue1])),
         ))
 
         t_blue2 = np.hstack((
-            np.vstack((m.t[0, blue2], ix[0, blue2], ix[2, blue2])),
-            np.vstack((ix[2, blue2], ix[0, blue2], m.t[1, blue2])),
-            np.vstack((m.t[2, blue2], ix[2, blue2], m.t[1, blue2])),
+                np.vstack((m.t[0, blue2], ix[0, blue2], ix[2, blue2])),
+                np.vstack((ix[2, blue2], ix[0, blue2], m.t[1, blue2])),
+                np.vstack((m.t[2, blue2], ix[2, blue2], m.t[1, blue2])),
         ))
 
         # new green elements
         t_green = np.hstack((
-            np.vstack((m.t[1, green], ix[2, green], m.t[0, green])),
-            np.vstack((m.t[2, green], ix[2, green], m.t[1, green])),
+                np.vstack((m.t[1, green], ix[2, green], m.t[0, green])),
+                np.vstack((m.t[2, green], ix[2, green], m.t[1, green])),
         ))
 
         # new nodes
@@ -362,7 +366,7 @@ class MeshTri1(MeshSimplex, Mesh2D):
             diff = 0
             for i, p in enumerate(np.sort(other.p[0])):
                 points = np.hstack((
-                    points,
+                        points,
                     np.vstack((self.p,
                                np.array(self.p.shape[1] * [p])))
                 ))
@@ -370,7 +374,7 @@ class MeshTri1(MeshSimplex, Mesh2D):
                     pass
                 else:
                     wedges = np.hstack((
-                        wedges,
+                            wedges,
                         np.vstack((self.t + diff,
                                    self.t + self.nvertices + diff))
                     ))
