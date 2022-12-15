@@ -63,7 +63,7 @@ class MeshHex1(Mesh3D):
         mid = np.arange(self.t.shape[1], dtype=np.int64) + np.max(t2f) + 1
 
         doflocs = np.hstack((
-                p,
+            p,
             .5 * np.sum(p[:, self.edges], axis=1),
             .25 * np.sum(p[:, self.facets], axis=1),
             .125 * np.sum(p[:, t], axis=1),
@@ -122,31 +122,31 @@ class MeshHex1(Mesh3D):
         ix = ix.reshape(npy, npx, npz, order='F').copy()
         t[0] = (ix[0:(npy - 1), 0:(npx - 1), 0:(npz - 1)]
                 .reshape(ne, 1, order='F')
-            .copy()
+                .copy()
                 .flatten())
         t[1] = (ix[1:npy, 0:(npx - 1), 0:(npz - 1)]
                 .reshape(ne, 1, order='F')
-            .copy()
+                .copy()
                 .flatten())
         t[2] = (ix[0:(npy - 1), 1:npx, 0:(npz - 1)]
                 .reshape(ne, 1, order='F')
-            .copy()
+                .copy()
                 .flatten())
         t[3] = (ix[0:(npy - 1), 0:(npx - 1), 1:npz]
                 .reshape(ne, 1, order='F')
-            .copy()
+                .copy()
                 .flatten())
         t[4] = (ix[1:npy, 1:npx, 0:(npz - 1)]
                 .reshape(ne, 1, order='F')
-            .copy()
+                .copy()
                 .flatten())
         t[5] = (ix[1:npy, 0:(npx - 1), 1:npz]
                 .reshape(ne, 1, order='F')
-            .copy()
+                .copy()
                 .flatten())
         t[6] = (ix[0:(npy - 1), 1:npx, 1:npz]
                 .reshape(ne, 1, order='F')
-            .copy()
+                .copy()
                 .flatten())
         t[7] = (ix[1:npy, 1:npx, 1:npz]
                 .reshape(ne, 1, order='F')
@@ -157,12 +157,12 @@ class MeshHex1(Mesh3D):
     def to_meshtet(self):
         """Split each hexahedron into six tetrahedra."""
         t = np.hstack((
-                self.t[[0, 1, 3, 4]],
-                self.t[[0, 3, 2, 4]],
-                self.t[[2, 3, 4, 6]],
-                self.t[[3, 4, 6, 7]],
-                self.t[[3, 4, 5, 7]],
-                self.t[[1, 3, 4, 5]],
+            self.t[[0, 1, 3, 4]],
+            self.t[[0, 3, 2, 4]],
+            self.t[[2, 3, 4, 6]],
+            self.t[[3, 4, 6, 7]],
+            self.t[[3, 4, 5, 7]],
+            self.t[[1, 3, 4, 5]],
         ))
 
         return MeshTet1(self.doflocs, t)

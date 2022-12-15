@@ -44,15 +44,15 @@ class MeshQuad1(Mesh2D):
         m = replace(
             self,
             doflocs=np.hstack((
-                    p,
-                    p[:, self.facets].mean(axis=1),
-                    p[:, self.t].mean(axis=1),
+                p,
+                p[:, self.facets].mean(axis=1),
+                p[:, self.t].mean(axis=1),
             )),
             t=np.hstack((
-                    np.vstack((t[0], t2f[0] + sz, mid, t2f[3] + sz)),
-                    np.vstack((t2f[0] + sz, t[1], t2f[1] + sz, mid)),
-                    np.vstack((mid, t2f[1] + sz, t[2], t2f[2] + sz)),
-                    np.vstack((t2f[3] + sz, mid, t2f[2] + sz, t[3])),
+                np.vstack((t[0], t2f[0] + sz, mid, t2f[3] + sz)),
+                np.vstack((t2f[0] + sz, t[1], t2f[1] + sz, mid)),
+                np.vstack((mid, t2f[1] + sz, t[2], t2f[2] + sz)),
+                np.vstack((t2f[3] + sz, mid, t2f[2] + sz, t[3])),
             )),
             _boundaries=None,
             _subdomains=None,
@@ -119,7 +119,7 @@ class MeshQuad1(Mesh2D):
         t = np.zeros((4, nt))
         ix = ix.reshape(npy, npx, order='F').copy()
         t[0] = (ix[0:(npy-1), 0:(npx-1)].reshape(nt, 1, order='F')
-            .copy()
+                .copy()
                 .flatten())
         t[1] = (ix[1:npy, 0:(npx-1)].reshape(nt, 1, order='F')
                 .copy()
@@ -149,13 +149,13 @@ class MeshQuad1(Mesh2D):
         """
         if style == 'x':
             tnew = np.arange(np.max(self.t) + 1,
-                np.max(self.t) + 1 + self.t.shape[1],
+                             np.max(self.t) + 1 + self.t.shape[1],
                              dtype=np.int64)
             t = np.hstack((
-                    np.vstack((self.t[[0, 1]], tnew)),
-                    np.vstack((self.t[[1, 2]], tnew)),
-                    np.vstack((self.t[[2, 3]], tnew)),
-                    np.vstack((self.t[[0, 3]], tnew)),
+                np.vstack((self.t[[0, 1]], tnew)),
+                np.vstack((self.t[[1, 2]], tnew)),
+                np.vstack((self.t[[2, 3]], tnew)),
+                np.vstack((self.t[[0, 3]], tnew)),
             ))
         else:
             t = np.hstack((self.t[[0, 1, 3]], self.t[[1, 2, 3]]))

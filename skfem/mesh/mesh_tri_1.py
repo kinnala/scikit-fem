@@ -58,10 +58,10 @@ class MeshTri1(MeshSimplex, Mesh2D):
         t = np.zeros((3, 2 * nt))
         ix = ix.reshape(npy, npx, order='F').copy()
         t[0, :nt] = (ix[0:(npy-1), 0:(npx-1)].reshape(nt, 1, order='F')
-            .copy()
+                     .copy()
                      .flatten())
         t[1, :nt] = (ix[1:npy, 0:(npx-1)].reshape(nt, 1, order='F')
-            .copy()
+                     .copy()
                      .flatten())
         t[2, :nt] = (ix[1:npy, 1:npx].reshape(nt, 1, order='F')
                      .copy()
@@ -123,12 +123,12 @@ class MeshTri1(MeshSimplex, Mesh2D):
         p = np.array([[0., .5, 1., 0., .5, 1., 0., .5, 1.],
                       [0., 0., 0., .5, .5, .5, 1., 1., 1.]], dtype=np.float64)
         t = np.array([[0, 1, 4],
-                [1, 2, 4],
-                [2, 4, 5],
-                [0, 3, 4],
-                [3, 4, 6],
-                [4, 6, 7],
-                [4, 7, 8],
+                      [1, 2, 4],
+                      [2, 4, 5],
+                      [0, 3, 4],
+                      [3, 4, 6],
+                      [4, 6, 7],
+                      [4, 7, 8],
                       [4, 5, 8]], dtype=np.int64).T
         return cls(p, t)
 
@@ -366,7 +366,7 @@ class MeshTri1(MeshSimplex, Mesh2D):
             diff = 0
             for i, p in enumerate(np.sort(other.p[0])):
                 points = np.hstack((
-                        points,
+                    points,
                     np.vstack((self.p,
                                np.array(self.p.shape[1] * [p])))
                 ))
@@ -374,7 +374,7 @@ class MeshTri1(MeshSimplex, Mesh2D):
                     pass
                 else:
                     wedges = np.hstack((
-                            wedges,
+                        wedges,
                         np.vstack((self.t + diff,
                                    self.t + self.nvertices + diff))
                     ))
