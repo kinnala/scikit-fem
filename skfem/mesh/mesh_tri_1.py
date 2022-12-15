@@ -217,10 +217,10 @@ class MeshTri1(MeshSimplex, Mesh2D):
             self,
             doflocs=np.hstack((p, p[:, self.facets].mean(axis=1))),
             t=np.hstack((
-                    np.vstack((t[0], t2f[0] + sz, t2f[2] + sz)),
-                    np.vstack((t[1], t2f[0] + sz, t2f[1] + sz)),
-                    np.vstack((t[2], t2f[2] + sz, t2f[1] + sz)),
-                    np.vstack((t2f[0] + sz, t2f[1] + sz, t2f[2] + sz)),
+                np.vstack((t[0], t2f[0] + sz, t2f[2] + sz)),
+                np.vstack((t[1], t2f[0] + sz, t2f[1] + sz)),
+                np.vstack((t[2], t2f[2] + sz, t2f[1] + sz)),
+                np.vstack((t2f[0] + sz, t2f[1] + sz, t2f[2] + sz)),
             )),
             _boundaries=None,
             _subdomains=None,
@@ -303,29 +303,29 @@ class MeshTri1(MeshSimplex, Mesh2D):
 
         # new red elements
         t_red = np.hstack((
-                np.vstack((m.t[0, red], ix[0, red], ix[2, red])),
-                np.vstack((m.t[1, red], ix[0, red], ix[1, red])),
-                np.vstack((m.t[2, red], ix[1, red], ix[2, red])),
-                np.vstack((ix[1, red], ix[2, red], ix[0, red])),
+            np.vstack((m.t[0, red], ix[0, red], ix[2, red])),
+            np.vstack((m.t[1, red], ix[0, red], ix[1, red])),
+            np.vstack((m.t[2, red], ix[1, red], ix[2, red])),
+            np.vstack((ix[1, red], ix[2, red], ix[0, red])),
         ))
 
         # new blue elements
         t_blue1 = np.hstack((
-                np.vstack((m.t[1, blue1], m.t[0, blue1], ix[2, blue1])),
-                np.vstack((m.t[1, blue1], ix[1, blue1], ix[2, blue1])),
-                np.vstack((m.t[2, blue1], ix[2, blue1], ix[1, blue1])),
+            np.vstack((m.t[1, blue1], m.t[0, blue1], ix[2, blue1])),
+            np.vstack((m.t[1, blue1], ix[1, blue1], ix[2, blue1])),
+            np.vstack((m.t[2, blue1], ix[2, blue1], ix[1, blue1])),
         ))
 
         t_blue2 = np.hstack((
-                np.vstack((m.t[0, blue2], ix[0, blue2], ix[2, blue2])),
-                np.vstack((ix[2, blue2], ix[0, blue2], m.t[1, blue2])),
-                np.vstack((m.t[2, blue2], ix[2, blue2], m.t[1, blue2])),
+            np.vstack((m.t[0, blue2], ix[0, blue2], ix[2, blue2])),
+            np.vstack((ix[2, blue2], ix[0, blue2], m.t[1, blue2])),
+            np.vstack((m.t[2, blue2], ix[2, blue2], m.t[1, blue2])),
         ))
 
         # new green elements
         t_green = np.hstack((
-                np.vstack((m.t[1, green], ix[2, green], m.t[0, green])),
-                np.vstack((m.t[2, green], ix[2, green], m.t[1, green])),
+            np.vstack((m.t[1, green], ix[2, green], m.t[0, green])),
+            np.vstack((m.t[2, green], ix[2, green], m.t[1, green])),
         ))
 
         # new nodes
