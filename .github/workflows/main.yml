@@ -34,3 +34,11 @@ jobs:
         uses: actions/checkout@v2
       - name: Run tests
         uses: kinnala/scikit-fem-docker-action@py310
+  run_tests_311:
+    runs-on: ubuntu-latest
+    name: Python 3.11
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run tests
+        uses: kinnala/scikit-fem-docker-action@py311
