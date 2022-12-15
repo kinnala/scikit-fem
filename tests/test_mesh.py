@@ -557,7 +557,7 @@ def test_saveload_cycle_vtk(m):
         ('.msh', {}),
         ('.msh', {'file_format': 'gmsh22'}),
         ('.vtk', {}),
-        ('.xdmf', {}),
+        #('.xdmf', {}),
         ('.vtu', {}),
         ('.med', {}),
     ]
