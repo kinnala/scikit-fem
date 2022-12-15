@@ -1,4 +1,4 @@
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, replace, field
 from typing import Type
 
 import numpy as np
@@ -13,15 +13,16 @@ from .mesh_2d_2 import Mesh2D2
 class MeshTri2(Mesh2D2, MeshTri1):
     """A quadratic triangular mesh."""
 
-    doflocs: ndarray = np.array([[0., 0.],
-                                 [1., 0.],
-                                 [0., 1.],
-                                 [1., 1.],
-                                 [.5, 0.],
-                                 [0., .5],
-                                 [.5, .5],
-                                 [1., .5],
-                                 [.5, 1.]], dtype=np.float64).T
+    doflocs: ndarray = field(
+        default_factory=lambda: np.array([[0., 0.],
+                                          [1., 0.],
+                                          [0., 1.],
+                                          [1., 1.],
+                                          [.5, 0.],
+                                          [0., .5],
+                                          [.5, .5],
+                                          [1., .5],
+                                          [.5, 1.]], dtype=np.float64).T)
     elem: Type[Element] = ElementTriP2
     affine: bool = False
     sort_t: bool = False

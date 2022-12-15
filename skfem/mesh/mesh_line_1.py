@@ -1,4 +1,4 @@
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, replace, field
 from typing import Type
 
 import numpy as np
@@ -15,8 +15,10 @@ from .mesh_simplex import MeshSimplex
 class MeshLine1(MeshSimplex, Mesh):
     """A one-dimensional mesh."""
 
-    doflocs: ndarray = np.array([[0., 1.]], dtype=np.float64)
-    t: ndarray = np.array([[0], [1]], dtype=np.int64)
+    doflocs: ndarray = field(
+        default_factory=lambda: np.array([[0., 1.]], dtype=np.float64))
+    t: ndarray = field(default_factory=lambda: np.array(
+        [[0], [1]], dtype=np.int64))
     elem: Type[Element] = ElementLineP1
     affine: bool = True
 

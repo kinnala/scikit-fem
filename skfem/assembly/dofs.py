@@ -1,4 +1,4 @@
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, replace, field
 from typing import Union, Any, List, Optional
 
 import numpy as np
@@ -14,14 +14,21 @@ class DofsView:
     """A subset of :class:`skfem.assembly.Dofs`."""
 
     obj: Any = None
-    nodal_ix: Union[ndarray, slice] = slice(None)
-    facet_ix: Union[ndarray, slice] = slice(None)
-    edge_ix: Union[ndarray, slice] = slice(None)
-    interior_ix: Union[ndarray, slice] = slice(None)
-    nodal_rows: Union[ndarray, slice] = slice(None)
-    facet_rows: Union[ndarray, slice] = slice(None)
-    edge_rows: Union[ndarray, slice] = slice(None)
-    interior_rows: Union[ndarray, slice] = slice(None)
+    nodal_ix: Union[ndarray, slice] = field(
+        default_factory=lambda: slice(None))
+    facet_ix: Union[ndarray, slice] = field(
+        default_factory=lambda: slice(None))
+    edge_ix: Union[ndarray, slice] = field(default_factory=lambda: slice(None))
+    interior_ix: Union[ndarray, slice] = field(
+        default_factory=lambda: slice(None))
+    nodal_rows: Union[ndarray, slice] = field(
+        default_factory=lambda: slice(None))
+    facet_rows: Union[ndarray, slice] = field(
+        default_factory=lambda: slice(None))
+    edge_rows: Union[ndarray, slice] = field(
+        default_factory=lambda: slice(None))
+    interior_rows: Union[ndarray, slice] = field(
+        default_factory=lambda: slice(None))
 
     def __repr__(self):
         nnodal = len(np.unique(
