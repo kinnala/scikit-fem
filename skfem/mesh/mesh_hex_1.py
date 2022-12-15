@@ -42,7 +42,7 @@ class MeshHex1(Mesh3D):
     t: ndarray = field(
         default_factory=lambda: np.array(
             [[0, 1, 2, 3, 4, 5, 6, 7]], dtype=np.int64
-        ).T_
+        ).T
     )
     elem: Type[Element] = ElementHex1
 
