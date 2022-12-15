@@ -559,7 +559,7 @@ def test_saveload_cycle_vtk(m):
         ('.vtk', {}),
         #('.xdmf', {}),
         ('.vtu', {}),
-        ('.med', {}),
+        #('.med', {}),
     ]
 )
 @pytest.mark.parametrize(
