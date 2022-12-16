@@ -227,6 +227,7 @@ with respect to documented and/or tested features.
 - Added: Plane strain to plane stress mapping under `skfem.models.elasticity`
 - Added: Various methods such as `Basis.interpolate` and `Basis.project`
   now support specifying `dtype` and using complex fields
+- Fixed:  Python 3.11
 - Fixed: `Basis.intepolate` did not work properly with `ElementComposite`
   when the basis was defined only for a subset of elements
 - Fixed: `Basis.split` worked incorrectly for `ElementVector` and multiple DOFs
