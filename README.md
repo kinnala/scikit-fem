@@ -211,6 +211,8 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+## [8.0.0] - 2022-12-16
+
 - Removed: The deprecated `Basis.find_dofs` method, see `Basis.get_dofs` for a
   replacement
 - Added: Renamed `ElementTetN0` to `ElementTriN1` and added alias for backwards
