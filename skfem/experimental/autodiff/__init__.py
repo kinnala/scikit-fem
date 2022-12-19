@@ -8,25 +8,27 @@ from autograd import make_jvp
 
 class NonlinearForm(Form):
 
-    def assemble(self, u0, basis, **kwargs):
+    def assemble(self, basis, x=None, **kwargs):
         """Assemble the Jacobian and the right-hand side.
 
         Parameters
         ----------
-        u0
-            The point at which the form is linearized.
         basis
             The basis used for all variables.
+        x
+            Optional point at which the form is linearized, default is zero.
 
         """
         # interpolate and cast to tuple
-        # make u0 compatible with u in forms
-        if isinstance(u0, ndarray):
-            u0 = basis.interpolate(u0)
-            if isinstance(u0, tuple):
-                u0 = tuple(c.astuple for c in u0)
+        # make x compatible with u in forms
+        if x is None:
+            x = basis.zeros()
+        if isinstance(x, ndarray):
+            x = basis.interpolate(x)
+            if isinstance(x, tuple):
+                x = tuple(c.astuple for c in x)
             else:
-                u0 = (u0.astuple,)
+                x = (x.astuple,)
 
         nt = basis.nelems
         dx = basis.dx
@@ -48,17 +50,17 @@ class NonlinearForm(Form):
         def _make_jacobian(V):
             if 'hessian' in self.params:
                 F = make_jvp(lambda U: self.form(*U, w))
-                return make_jvp(lambda W: F(W)(V)[1])(u0)
-            return make_jvp(lambda U: self.form(*U, *V, w))(u0)
+                return make_jvp(lambda W: F(W)(V)[1])(x)
+            return make_jvp(lambda U: self.form(*U, *V, w))(x)
 
         # # JAX version
         # def _make_jacobian(V):
         #     if 'hessian' in self.params:
         #         return linearize(
         #             lambda W: jvp(lambda U: self.form(*U, w), (W,), (V,))[1],
-        #             u0
+        #             x
         #         )
-        #     return linearize(lambda U: self.form(*U, *V, w), u0)
+        #     return linearize(lambda U: self.form(*U, *V, w), x)
 
         # loop over the indices of local stiffness matrix
         for i in range(basis.Nbfun):
@@ -87,7 +89,7 @@ class NonlinearForm(Form):
             ),
             COOData(
                 np.array([rows1]),
-                data1,
+                -data1,
                 (basis.N,),
                 (basis.Nbfun,)
             ).todefault()
