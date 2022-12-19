@@ -1,17 +1,30 @@
 import autograd.numpy as np
+from autograd.builtins import isinstance
 
 from skfem import DiscreteField
 
 
 def dot(u, v):
+    if isinstance(u, tuple):
+        u = u[0]
+    if isinstance(v, tuple):
+        v = v[0]
     return np.einsum('i...,i...', u, v)
 
 
 def ddot(u, v):
+    if isinstance(u, tuple):
+        u = u[0]
+    if isinstance(v, tuple):
+        v = v[0]
     return np.einsum('ij...,ij...', u, v)
 
 
 def dddot(u, v):
+    if isinstance(u, tuple):
+        u = u[0]
+    if isinstance(v, tuple):
+        v = v[0]
     return np.einsum('ijk...,ijk...', u, v)
 
 
@@ -40,16 +53,24 @@ def dd(u):
 
 
 def transpose(T):
+    if isinstance(T, tuple):
+        T = T[0]
     return np.einsum('ij...->ji...', T)
 
 
 def mul(A, B):
+    if isinstance(A, tuple):
+        A = A[0]
+    if isinstance(B, tuple):
+        B = B[0]
     if len(A.shape) == len(B.shape):
         return np.einsum('ij...,jk...->ik...', A, B)
     return np.einsum('ij...,j...->i...', A, B)
 
 
 def trace(T):
+    if isinstance(T, tuple):
+        T = T[0]
     return np.einsum('ii...', T)
 
 

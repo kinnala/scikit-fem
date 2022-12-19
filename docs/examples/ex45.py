@@ -26,9 +26,8 @@ D = m.boundary_nodes()
 x = np.sin(np.pi * m.p[0])
 
 for itr in range(100):
-    J, F = energy.assemble(x, basis)
     x_prev = x.copy()
-    x += solve(*condense(J, -F, D=D))
+    x += solve(*condense(*energy.assemble(basis, x=x), D=D))
     res = np.linalg.norm(x - x_prev)
     if res < 1e-8:
         break
