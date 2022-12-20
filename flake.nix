@@ -25,7 +25,10 @@
           pip
       ]);
     in {
-      devShells.x86_64-linux.default =
-        (pkgs.python310.withPackages requirements).env;
+      devShells.x86_64-linux.default = nixpkgs.legacyPackages.x86_64-linux.mkShell {
+        buildInputs = [
+          (pkgs.python310.withPackages requirements)
+        ];
+      };
     };
 }
