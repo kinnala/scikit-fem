@@ -5,12 +5,6 @@ on:
     branches: master
 
 jobs:
-  run_tests_37_nix:
-    name: Python 3.7 (Nix)
-    uses: ./.github/workflows/nix.yml
-    with:
-      cache_key: "py37"
-      flake_artifact: "#devShells.x86_64-linux.py37"
   run_tests_38_nix:
     name: Python 3.8 (Nix)
     uses: ./.github/workflows/nix.yml
@@ -29,3 +23,9 @@ jobs:
     with:
       cache_key: "py310"
       flake_artifact: "#devShells.x86_64-linux.default"
+  run_tests_311_nix:
+    name: Python 3.11 (Nix)
+    uses: ./.github/workflows/nix.yml
+    with:
+      cache_key: "py311"
+      flake_artifact: "#devShells.x86_64-linux.py311"
