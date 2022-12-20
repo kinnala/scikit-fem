@@ -2,46 +2,6 @@ name: tests
 on: [push, pull_request]
 
 jobs:
-  run_tests_37:
-    runs-on: ubuntu-latest
-    name: Python 3.7
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Run tests
-        uses: kinnala/scikit-fem-docker-action@py37
-  run_tests_38:
-    runs-on: ubuntu-latest
-    name: Python 3.8
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Run tests
-        uses: kinnala/scikit-fem-docker-action@py38
-  run_tests_39:
-    runs-on: ubuntu-latest
-    name: Python 3.9
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Run tests
-        uses: kinnala/scikit-fem-docker-action@py39
-  run_tests_310:
-    runs-on: ubuntu-latest
-    name: Python 3.10
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Run tests
-        uses: kinnala/scikit-fem-docker-action@py310
-  run_tests_311:
-    runs-on: ubuntu-latest
-    name: Python 3.11
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Run tests
-        uses: kinnala/scikit-fem-docker-action@py311
   run_tests_310_nix:
     runs-on: ubuntu-latest
     name: Python 3.10 (Nix)
