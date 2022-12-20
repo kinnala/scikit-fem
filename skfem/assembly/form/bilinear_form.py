@@ -14,7 +14,7 @@ from .form import Form, FormExtraParams
 logger = logging.getLogger(__name__)
 
 
-class BilinearForm(Form):
+class BugBilinearForm(Form):
     """A bilinear form for finite element assembly.
 
     Bilinear forms are defined using functions that takes three arguments:
