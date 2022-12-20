@@ -46,6 +46,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Python 3.10 (Nix)
     steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v3
       - name: "Cache Nix store"
         uses: actions/cache@v3.0.8
         id: nix-cache
