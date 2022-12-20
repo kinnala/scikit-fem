@@ -25,10 +25,17 @@
           pip
       ]);
     in {
+      devShells.x86_64-linux.py37 = nixpkgs.legacyPackages.x86_64-linux.mkShell {
+        buildInputs = [ (pkgs.python37.withPackages requirements) ];
+      };
+      devShells.x86_64-linux.py38 = nixpkgs.legacyPackages.x86_64-linux.mkShell {
+        buildInputs = [ (pkgs.python38.withPackages requirements) ];
+      };
+      devShells.x86_64-linux.py39 = nixpkgs.legacyPackages.x86_64-linux.mkShell {
+        buildInputs = [ (pkgs.python39.withPackages requirements) ];
+      };
       devShells.x86_64-linux.default = nixpkgs.legacyPackages.x86_64-linux.mkShell {
-        buildInputs = [
-          (pkgs.python310.withPackages requirements)
-        ];
+        buildInputs = [ (pkgs.python310.withPackages requirements) ];
       };
     };
 }
