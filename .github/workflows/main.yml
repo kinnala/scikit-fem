@@ -1,5 +1,8 @@
 name: tests
-on: [push, pull_request]
+on:
+  pull_request:
+  push:
+    branches: master
 
 jobs:
   run_tests_37_nix:
