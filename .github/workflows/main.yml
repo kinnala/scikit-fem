@@ -20,9 +20,9 @@ jobs:
           install_url: "https://releases.nixos.org/nix/nix-2.11.0/install"
       - name: "Import Nix store cache"
         if: "steps.nix-cache.outputs.cache-hit == 'true'"
-        run: "nix copy --from /tmp/nixcache ./#devShells.x86_64-linux.default --no-require-sigs"
+        run: "nix copy --from /tmp/nixcache ./#devShells.x86_64-linux.default --no-check-sigs"
       - name: "Run tests"
         run: 'nix develop --command bash -c "flake8 skfem && sphinx-build -W -a -b html docs docs/_build && sphinx-build -a -b doctest docs docs/_build && pytest"'
       - name: "Export Nix store cache"
         if: "steps.nix-cache.outputs.cache-hit != 'true'"
-        run: "nix copy --to /tmp/nixcache ./#devShells.x86_64-linux.default --no-require-sigs"
+        run: "nix copy --to /tmp/nixcache ./#devShells.x86_64-linux.default --no-check-sigs"
