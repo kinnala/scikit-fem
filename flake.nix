@@ -8,7 +8,19 @@
   outputs = inputs:
     let
       pkgs = import inputs.nixpkgs { system = "x86_64-linux"; };
-      requirements = with pkgs; (ps: with ps; [
+      testrequirements = with pkgs; (ps: with ps; [
+          numpy
+          scipy
+          meshio
+          matplotlib
+          pytest
+          pyamg
+          mypy
+          flake8
+          sphinx
+          autograd
+      ]);
+      devrequirements = with pkgs; (ps: with ps; [
           numpy
           scipy
           meshio
@@ -30,16 +42,16 @@
       ]);
     in {
       devShells.x86_64-linux.py38 = inputs.nixpkgs.legacyPackages.x86_64-linux.mkShell {
-        buildInputs = [ (pkgs.python38.withPackages requirements) ];
+        buildInputs = [ (pkgs.python38.withPackages testrequirements) ];
       };
       devShells.x86_64-linux.py39 = inputs.nixpkgs.legacyPackages.x86_64-linux.mkShell {
-        buildInputs = [ (pkgs.python39.withPackages requirements) ];
+        buildInputs = [ (pkgs.python39.withPackages testrequirements) ];
       };
       devShells.x86_64-linux.default = inputs.nixpkgs.legacyPackages.x86_64-linux.mkShell {
-        buildInputs = [ (pkgs.python310.withPackages requirements) ];
+        buildInputs = [ (pkgs.python310.withPackages devrequirements) ];
       };
       devShells.x86_64-linux.py311 = inputs.nixpkgs.legacyPackages.x86_64-linux.mkShell {
-        buildInputs = [ (pkgs.python311.withPackages requirements) ];
+        buildInputs = [ (pkgs.python311.withPackages testrequirements) ];
       };
     };
 }
