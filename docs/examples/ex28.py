@@ -60,7 +60,6 @@ from skfem.io import from_meshio
 from skfem.io.json import from_file
 from skfem.models.poisson import unit_load
 
-from matplotlib.pyplot import subplots
 import numpy as np
 
 
@@ -140,6 +139,7 @@ exit_interface_temperature = {
 if __name__ == '__main__':
     from pathlib import Path
     from skfem.visuals.matplotlib import plot, savefig
+    from matplotlib.pyplot import subplots
 
     plot(mesh, temperature)
     savefig(Path(__file__).with_suffix('.png'),

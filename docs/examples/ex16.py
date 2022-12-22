@@ -15,7 +15,6 @@ accessed inside the bilinear form as `w.x[0]`.
 
 """
 
-from matplotlib.pyplot import subplots, show
 import numpy as np
 from scipy.sparse.linalg import eigsh
 from scipy.special import legendre
@@ -43,6 +42,7 @@ u /= u[basis.get_dofs().nodal["u"][-1], :]
 
 
 if __name__ == "__main__":
+    from matplotlib.pyplot import subplots, show
     fig, ax = subplots()
     for n, (k, u) in enumerate(zip(ks, u.T)):
         dots, = ax.plot(x, u[basis.nodal_dofs[0]],

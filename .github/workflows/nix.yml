@@ -9,6 +9,9 @@ on:
       flake_artifact:
         required: true
         type: string
+      run_command:
+        required: true
+        type: string
 
 jobs:
   build:
@@ -30,7 +33,7 @@ jobs:
         if: "steps.nix-cache.outputs.cache-hit == 'true'"
         run: "nix copy --from /tmp/nixcache ./${{inputs.flake_artifact}} --no-check-sigs"
       - name: "Run tests"
-        run: 'nix develop .${{inputs.flake_artifact}} --command bash -c "flake8 skfem && sphinx-build -W -a -b html docs docs/_build && sphinx-build -a -b doctest docs docs/_build && pytest"'
+        run: 'nix develop .${{inputs.flake_artifact}} --command bash -c "${{inputs.run_command}}"'
       - name: "Export Nix store cache"
         if: "steps.nix-cache.outputs.cache-hit != 'true'"
         run: "nix copy --to /tmp/nixcache ./${{inputs.flake_artifact}} --no-check-sigs"

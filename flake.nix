@@ -8,6 +8,18 @@
   outputs = inputs:
     let
       pkgs = import inputs.nixpkgs { system = "x86_64-linux"; };
+      # todo: remove this after matplotlib is fixed for Python 3.11
+      py311testrequirements = with pkgs; (ps: with ps; [
+          numpy
+          scipy
+          meshio
+          pytest
+          pyamg
+          mypy
+          flake8
+          sphinx
+          autograd
+      ]);
       testrequirements = with pkgs; (ps: with ps; [
           numpy
           scipy
@@ -51,7 +63,7 @@
         buildInputs = [ (pkgs.python310.withPackages devrequirements) ];
       };
       devShells.x86_64-linux.py311 = inputs.nixpkgs.legacyPackages.x86_64-linux.mkShell {
-        buildInputs = [ (pkgs.python311.withPackages testrequirements) ];
+        buildInputs = [ (pkgs.python311.withPackages py311testrequirements) ];
       };
     };
 }
