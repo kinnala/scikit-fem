@@ -33,4 +33,4 @@ jobs:
       cache_key: "py311"
       flake_artifact: "#devShells.x86_64-linux.py311"
       # todo: add rest of the commands depending on matplotlib after it is fixed for Python 3.11
-      run_command: "flake8 skfem && mypy skfem && pytest --continue-on-collection-errors -k 'not test_visuals'"
+      run_command: "flake8 skfem && mypy skfem && pytest --ignore-glob tests/test_visuals.py"
