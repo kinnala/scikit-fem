@@ -1,0 +1,40 @@
+name: Run tests inside Nix shell
+
+on:
+  workflow_call:
+    inputs:
+      cache_key:
+        required: true
+        type: string
+      flake_artifact:
+        required: true
+        type: string
+      run_command:
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v3
+      - name: "Cache Nix store"
+        uses: actions/cache@v3.0.8
+        id: nix-cache
+        with:
+          path: /tmp/nixcache
+          key: ${{inputs.cache_key}}
+      - name: "Install Nix"
+        uses: cachix/install-nix-action@v17
+        with:
+          install_url: "https://releases.nixos.org/nix/nix-2.11.0/install"
+      - name: "Import Nix store cache"
+        if: "steps.nix-cache.outputs.cache-hit == 'true'"
+        run: "nix copy --from /tmp/nixcache ./${{inputs.flake_artifact}} --no-check-sigs"
+      - name: "Run tests"
+        run: 'nix develop .${{inputs.flake_artifact}} --command bash -c "${{inputs.run_command}}"'
+      - name: "Export Nix store cache"
+        if: "steps.nix-cache.outputs.cache-hit != 'true'"
+        run: "nix copy --to /tmp/nixcache ./${{inputs.flake_artifact}} --no-check-sigs"
+

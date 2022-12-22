@@ -58,7 +58,6 @@ from skfem.models.poisson import laplace, mass
 
 from pathlib import Path
 
-from matplotlib.pyplot import subplots
 import numpy as np
 from numpy.polynomial.polynomial import Polynomial
 from scipy.sparse import block_diag, bmat, csr_matrix
@@ -122,6 +121,7 @@ c['scikit-fem'] = eigs(pencil[0], M=pencil[1],
 
 
 if __name__ == '__main__':
+    from matplotlib.pyplot import subplots
 
     fig, ax = subplots()
     for (label, wavespeed), marker in zip(c.items(), 'o+'):

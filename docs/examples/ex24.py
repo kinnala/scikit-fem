@@ -12,8 +12,6 @@ one step-length upstream and 35 downstream.
 """
 
 from pathlib import Path
-
-from matplotlib.pyplot import subplots
 import numpy as np
 
 from skfem import *
@@ -66,6 +64,7 @@ if __name__ == '__main__':
     from sys import argv
 
     from matplotlib.tri import Triangulation
+    from matplotlib.pyplot import subplots
 
     from skfem.visuals.matplotlib import plot, savefig
 

@@ -1,7 +1,6 @@
 """Waveguide cutoff analysis."""
 
 import numpy as np
-import matplotlib.pyplot as plt
 from skfem import *
 from skfem.helpers import *
 
@@ -71,6 +70,7 @@ for mesh, elem in mesh_elem:
 
 
 if __name__ == "__main__":
+    import matplotlib.pyplot as plt
     fig, axs = plt.subplots(4, 1)
     for itr in range(4):
         (E, Ebasis), _ = basis.split(xs[:, itr])
