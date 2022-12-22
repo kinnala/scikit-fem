@@ -5,6 +5,14 @@ on:
     branches: master
 
 jobs:
+  run_tests_37:
+    runs-on: ubuntu-latest
+    name: Python 3.7
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run tests
+        uses: kinnala/scikit-fem-docker-action@py37
   run_tests_38_nix:
     name: Python 3.8
     uses: ./.github/workflows/nix.yml
