@@ -225,6 +225,7 @@ class Dofs:
     facet_dofs: Optional[ndarray] = None
     edge_dofs: Optional[ndarray] = None
     interior_dofs: Optional[ndarray] = None
+    global_dofs: Optional[ndarray] = None
 
     element_dofs: ndarray
     N: int = 0
@@ -270,6 +271,10 @@ class Dofs:
             np.arange(element.interior_dofs * topo.nelements, dtype=np.int64),
             (element.interior_dofs, topo.nelements),
             order='F') + offset
+        offset += element.interior_dofs * topo.nelements
+
+        self.global_dofs = np.arange(offset, offset + element.global_dofs,
+                                     dtype=np.int64)
 
         # global numbering
         self.element_dofs = np.zeros((0, topo.nelements), dtype=np.int64)
@@ -300,6 +305,14 @@ class Dofs:
         # interior dofs
         self.element_dofs = np.vstack((self.element_dofs,
                                        self.interior_dofs))
+
+        # global dofs
+        if element.global_dofs > 0:
+            self.element_dofs = np.vstack((self.element_dofs,
+                                           np.ones((len(self.global_dofs),
+                                                    topo.nelements),
+                                                   dtype=np.int64)
+                                           * self.global_dofs))
 
         # total dofs
         self.N = np.max(self.element_dofs) + 1
