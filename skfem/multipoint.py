@@ -1,7 +1,7 @@
-if __name__ == '__main__':
-    from pprint import pprint
-    import numpy as np
+import numpy as np
+from scipy.sparse import csr_array
 
+if __name__ == '__main__':
     from skfem import *
     from skfem.models import laplace, unit_load
 
@@ -35,8 +35,6 @@ if __name__ == '__main__':
 
 
 def multipoint(Dx, *Ixs):
-    from scipy.sparse import csr_array
-
     D,x = Dx
     if x is None:
         x = np.ones((D.N-len(D.flatten()),))
@@ -61,14 +59,9 @@ def combine(M1, M2):
     T1, I1 = M1
     T2, I2 = M2
 
-    II1 = [i for i,j in enumerate(I1) if j in I2]
-    II2_ = np.intersect1d(I1,I2)
-    II2 = [i for i,j in enumerate(I2) if j in I1]
-
-    return T1[:,II1]@T2[II2_,:][:,II2]
+    return T1[:,np.isin(I1, I2)]@T2[np.intersect1d(I1,I2),:][:,np.isin(I2, I1)]
 
 if __name__ == "__main__":
-
     T1, I1=multipoint((basis.get_dofs('left'), None), (basis.get_dofs('right'), [2]*len(basis.get_dofs('right').flatten())))
     T2, I2=multipoint((basis.get_dofs('top') + basis.get_dofs('bottom'),None))
 
