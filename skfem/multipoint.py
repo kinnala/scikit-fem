@@ -17,7 +17,11 @@ def multipoint(D, *Ixs, g=None):
     for Ix in Ixs:
         I, x = Ix
         result += csr_array(
-            (x, (D.flatten(), [I_columns.tolist().index(i) for i in I.flatten()])), shape=shape
+            (x,
+                (D.flatten(),
+                 [I_columns.tolist().index(i) for i in I.flatten()])
+             ),
+            shape=shape
         )
 
     if len(np.nonzero(g[I_columns])[0]):
@@ -29,7 +33,11 @@ def combine(M1, M2):
     T1, g1, I1 = M1
     T2, g2, I2 = M2
 
-    return T1[:, np.isin(I1, I2)]@T2[np.intersect1d(I1, I2), :][:, np.isin(I2, I1)], g1 + g2
+    return (
+        T1[:, np.isin(I1, I2)]
+        @ T2[np.intersect1d(I1, I2), :][:, np.isin(I2, I1)],
+        g1 + g2
+        )
 
 
 def apply(A, f, T, g):
@@ -41,7 +49,7 @@ def restore(y, T, g):
 
 
 if __name__ == "__main__":
-    from skfem import *
+    from skfem import MeshTri, ElementTriP1, Basis, FacetBasis, asm, BilinearForm, solve, condense
     from skfem.models import laplace, unit_load
 
     m = MeshTri().refined(6)
