@@ -49,7 +49,8 @@ def restore(y, T, g):
 
 
 if __name__ == "__main__":
-    from skfem import MeshTri, ElementTriP1, Basis, FacetBasis, asm, BilinearForm, solve, condense
+    from skfem import (MeshTri, ElementTriP1, Basis,
+                       FacetBasis, asm, BilinearForm, solve, condense)
     from skfem.models import laplace, unit_load
 
     m = MeshTri().refined(6)
