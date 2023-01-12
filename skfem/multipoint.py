@@ -79,7 +79,11 @@ if __name__ == "__main__":
     B = asm(penalty, fbases, fbases)
 
     y1 = solve(
-        *condense(A + B, f, D=basis.get_dofs({'top', 'bottom'}), x=basis.ones()))
+        *condense(A + B, f,
+                  D=basis.get_dofs({'top', 'bottom'}),
+                  x=basis.ones()
+                  )
+        )
 
     basis.plot(y1, colorbar=True, shading='gouraud', levels=5).show()
 
