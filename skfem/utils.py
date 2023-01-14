@@ -16,7 +16,7 @@ if "pyodide" in sys.modules:
 else:
     from scipy.sparse import spmatrix
 
-from skfem.assembly import  DofsView
+from skfem.assembly import DofsView
 
 
 logger = logging.getLogger(__name__)
@@ -224,7 +224,7 @@ def solve_linear(A: spmatrix,
 
 def solve(A: spmatrix,
           b: Union[ndarray, spmatrix],
-          restore = None,
+          restore: Optional[Callable[..., ndarray]] = None,
           solver: Optional[Union[LinearSolver, EigenSolver]] = None,
           **kwargs) -> Solution:
     """Solve a linear system or a generalized eigenvalue problem.
