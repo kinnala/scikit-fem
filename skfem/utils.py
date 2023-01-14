@@ -354,6 +354,7 @@ def enforce(A: spmatrix,
 
     """
     b, x, I, D = _init_bc(A, b, x, I, D)
+    assert isinstance(b, ndarray)
 
     Aout = A if overwrite else A.copy()
 

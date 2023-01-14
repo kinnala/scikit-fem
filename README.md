@@ -211,6 +211,16 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+- Changed: Functions such as `skfem.utils.condense` now return three parameters
+  instead of four parameters, the third parameter is a function which expands
+  the solution vector to the entire mesh after linear solve
+- Changed: Functions such as `skfem.utils.condense` and `skfem.utils.enforce`
+  now return a linear system (A, b) even if only a matrix A is passed.  In
+  such a case the vector b equals a zero vector.
+- Removed: The deprecated `FacetBasis.trace`
+- Removed: The deprecated `skfem.utils.project`
+- Removed: The deprecated `skfem.utils.projection`
+
 ## [8.0.0] - 2022-12-16
 
 - Removed: The deprecated `Basis.find_dofs` method, see `Basis.get_dofs` for a
