@@ -125,66 +125,6 @@ class FacetBasis(AbstractBasis):
                               ** (1. / (self.mesh.dim() - 1.)))
                              if self.mesh.dim() != 1 else np.array([0.]))
 
-    def _trace_project(self,
-                       x: ndarray,
-                       elem: Element) -> ndarray:
-        from skfem.utils import projection
-
-        fbasis = FacetBasis(self.mesh,
-                            elem,
-                            facets=self.find,
-                            quadrature=(self.X, self.W))
-        I = fbasis.get_dofs(self.find).all()
-        if len(I) == 0:  # special case: no facet DOFs
-            if fbasis.dofs.interior_dofs is not None:
-                if fbasis.dofs.interior_dofs.shape[0] > 1:
-                    # no one-to-one restriction: requires interpolation
-                    raise NotImplementedError
-                # special case: piecewise constant elem
-                I = fbasis.dofs.interior_dofs[:, self.tind].flatten()
-            else:
-                raise ValueError
-        return projection(x, fbasis, self, I=I)
-
-    @deprecated("Basis.interpolator + Basis.project")
-    def trace(self,
-              x: ndarray,
-              projection: Callable[[ndarray], ndarray],
-              target_elem: Optional[Element] = None) -> Tuple[CellBasis,
-                                                              ndarray]:
-
-        DEFAULT_TARGET = {
-            MeshTri: ElementTriP0,
-            MeshQuad: ElementQuad0,
-            MeshTet: ElementTetP0,
-            MeshHex: ElementHex0,
-        }
-
-        meshcls = type(self.mesh)
-        if meshcls not in DEFAULT_TARGET:
-            raise NotImplementedError("Mesh type not supported.")
-        if target_elem is None:
-            target_elem = DEFAULT_TARGET[meshcls]()
-
-        if type(target_elem) not in BOUNDARY_ELEMENT_MAP:
-            raise Exception("The specified element not supported.")
-        elemcls = BOUNDARY_ELEMENT_MAP[type(target_elem)]
-        target_meshcls = {
-            MeshTri: MeshLine,
-            MeshQuad: MeshLine,
-            MeshTet: MeshTri,
-            MeshHex: MeshQuad,
-        }[meshcls]
-
-        assert callable(target_meshcls)  # to satisfy mypy
-
-        p, t, _ = self.mesh._reix(self.mesh.facets[:, self.find])
-
-        return (
-            CellBasis(target_meshcls(projection(p), t), elemcls()),
-            self._trace_project(x, target_elem)
-        )
-
     def with_element(self, elem: Element) -> 'FacetBasis':
         """Return a similar basis using a different element."""
         return type(self)(

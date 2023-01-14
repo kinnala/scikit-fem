@@ -23,7 +23,6 @@ from skfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
                         MeshTri2, MeshTet2, MeshHex2, MeshTri1DG, MeshQuad1DG,
                         MeshHex1DG)
 from skfem.assembly import FacetBasis, Basis
-from skfem.utils import projection
 from skfem.models import laplace, unit_load, mass
 from skfem.helpers import grad, dot, ddot, sym_grad, curl
 from skfem.models import linear_stress
@@ -242,16 +241,6 @@ class NormalVectorTestTri(TestCase):
         @LinearForm
         def linf(v, w):
             return np.sum(w.n ** 2, axis=0) * v
-
-        b = asm(linf, basis)
-        ones = projection(lambda x: 1.0 + x[0] * 0.,
-                          basis,
-                          I=basis.get_dofs().flatten(),
-                          expand=True)
-
-        self.assertAlmostEqual(b @ ones,
-                               2 * m.p.shape[0],
-                               places=10)
 
         if self.test_integrate_volume:
             # by Gauss theorem this integrates to one
@@ -588,11 +577,7 @@ def test_matrix_element_projection(m, e):
 
     x = basis0.interpolate(np.random.random(basis0.N))
 
-    @LinearForm
-    def proj(v, _):
-        return ddot(C(sym_grad(x)), v)
-
-    y = projection(proj, basis1, basis0)
+    y = basis1.project(C(sym_grad(x)))
 
 
 @pytest.mark.parametrize(

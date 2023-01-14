@@ -7,7 +7,7 @@ import numpy as np
 from numpy.testing import (assert_allclose, assert_almost_equal,
                            assert_array_equal)
 
-from skfem import BilinearForm, LinearForm, asm, solve, condense, projection
+from skfem import BilinearForm, LinearForm, asm, solve, condense
 from skfem.mesh import (Mesh, MeshTri, MeshTet, MeshHex,
                         MeshQuad, MeshLine1, MeshWedge1)
 from skfem.assembly import (CellBasis, FacetBasis, Dofs, Functional,
@@ -174,7 +174,7 @@ class TestInterpolatorTet(TestCase):
     def runTest(self):
         m = self.prepare_mesh()
         basis = CellBasis(m, self.element_type())
-        x = projection(lambda x: x[0] ** 2, basis)
+        x = basis.project(lambda x: x[0] ** 2)
         fun = basis.interpolator(x)
         X = np.linspace(0, 1, 10)
         dim = m.dim()
@@ -262,53 +262,10 @@ def test_interpolator_probes(mtype, e, nrefs, npoints):
 
     basis = CellBasis(m, e)
 
-    y = projection(lambda x: x[0] + x[1], basis)
+    y = basis.project(lambda x: x[0] + x[1])
 
     assert_allclose(basis.probes(X) @ y, basis.interpolator(y)(X))
     assert_allclose(basis.probes(X) @ y, X[0] + X[1])
-
-
-@pytest.mark.parametrize(
-    "mtype,e1,e2,flat",
-    [
-        (MeshTri, ElementTriP1(), ElementTriP0(), False),
-        (MeshTri, ElementTriP1(), ElementTriP1(), False),
-        (MeshTri, ElementTriP2(), ElementTriP1(), False),
-        (MeshTri, ElementTriP2(), ElementTriP2(), False),
-        (MeshTri, ElementTriP1(), ElementTriP0(), True),
-        (MeshTri, ElementTriP1(), ElementTriP1(), True),
-        (MeshTri, ElementTriP2(), ElementTriP1(), True),
-        (MeshTri, ElementTriP2(), ElementTriP2(), True),
-        (MeshTri, ElementTriP2(), None, False),
-        (MeshTri, ElementTriP2(), None, True),
-        (MeshQuad, ElementQuad1(), ElementQuad0(), False),
-        (MeshQuad, ElementQuad1(), ElementQuad1(), False),
-        (MeshQuad, ElementQuad2(), ElementQuad2(), False),
-        (MeshQuad, ElementQuad1(), ElementQuad0(), True),
-        (MeshQuad, ElementQuad1(), ElementQuad1(), True),
-        (MeshQuad, ElementQuad2(), ElementQuad2(), True),
-        (MeshTet, ElementTetP1(), ElementTetP0(), False),
-        (MeshTet, ElementTetP2(), ElementTetP2(), False),
-        (MeshHex, ElementHex1(), ElementHex0(), False),
-        (MeshHex, ElementHex1(), ElementHex1(), False),
-        (MeshHex, ElementHex2(), ElementHex2(), False),
-    ],
-)
-def test_trace(mtype, e1, e2, flat):
-
-    m = mtype().refined(3)
-
-    # use the boundary where last coordinate is zero
-    basis = FacetBasis(m, e1, facets=m.facets_satisfying(lambda x: x[-1] == 0.0))
-    xfun = projection(lambda x: x[0], CellBasis(m, e1))
-    nbasis, y = basis.trace(xfun, lambda p: p[0] if flat else p[:-1], target_elem=e2)
-
-    @Functional
-    def integ(w):
-        return w.y
-
-    # integrate f(x) = x_1 over trace mesh
-    assert_almost_equal(integ.assemble(nbasis, y=nbasis.interpolate(y)), .5)
 
 
 @pytest.mark.parametrize(

@@ -23,8 +23,6 @@ __all__ = all_mesh + all_assembly + all_element + [  # noqa
     'condense',
     'enforce',
     'penalize',
-    'project',  # TODO remove due to deprecation
-    'projection',  # TODO remove due to deprecation
     'solve',
     'bmat',
     'solver_direct_scipy',

@@ -78,7 +78,7 @@ A = asm(vector_laplace, basis['u'])
 B = -asm(divergence, basis['u'], basis['p'])
 f = asm(body_force, basis['u'])
 D = basis['u'].get_dofs()
-Aint = condense(A, D=D, expand=False)
+Aint = condense(A, 0*f, D=D)[0]
 solver = solver_iter_pcg(M=build_pc_ilu(Aint))
 I = basis['u'].complement_dofs(D)
 

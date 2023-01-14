@@ -6,7 +6,7 @@ from numpy.testing import assert_almost_equal
 from skfem.assembly import CellBasis
 from skfem.element import ElementTriP1
 from skfem.mesh import MeshTri
-from skfem.utils import projection, enforce, condense, solve
+from skfem.utils import enforce, condense, solve
 from skfem.models import laplace, mass, unit_load
 
 
@@ -21,7 +21,7 @@ class InitializeScalarField(TestCase):
             x, y = X
             return x ** 2 + y ** 2
 
-        x = projection(fun, basis)
+        x = basis.project(fun)
         y = fun(mesh.p)
 
         normest = np.linalg.norm(x - y)
@@ -44,8 +44,8 @@ class TestEnforce(TestCase):
         M = mass.assemble(basis)
         D = m.boundary_nodes()
 
-        assert_almost_equal(enforce(A, D=D).toarray(), np.eye(A.shape[0]))
-        assert_almost_equal(enforce(M, D=D, diag=0.).toarray(),
+        assert_almost_equal(enforce(A, D=D)[0].toarray(), np.eye(A.shape[0]))
+        assert_almost_equal(enforce(M, D=D, diag=0.)[0].toarray(),
                             np.zeros(M.shape))
 
         enforce(A, D=D, overwrite=True)

@@ -223,7 +223,7 @@ from pathlib import Path
 
 from skfem.mesh import MeshTri
 from skfem.assembly import Basis, FacetBasis
-from skfem.utils import solve, asm, condense, projection
+from skfem.utils import solve, asm, condense
 from skfem.element import ElementTriP1
 from skfem.models.poisson import laplace, unit_load, mass
 from skfem.io.json import from_file

@@ -112,7 +112,7 @@ mass_matrix = block_diag([M, M, csr_matrix((basis['p'].N,)*2)], 'csr')
 walls = np.hstack([basis["u"].get_dofs(),
                    basis["u"].get_dofs("wall").all() + basis['u'].N])
 
-pencil = condense(stiffness, mass_matrix, D=walls, expand=False)
+pencil = condense(stiffness, mass_matrix, D=walls)[:2]
 c = {'Criminale et al': np.loadtxt(Path(__file__).with_suffix('.csv'),
                                    dtype=complex)}
 c['scikit-fem'] = eigs(pencil[0], M=pencil[1],

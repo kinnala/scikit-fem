@@ -11,7 +11,6 @@ from skfem.mesh import (Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
                         MeshQuad1DG, MeshHex2, MeshTri1DG)
 from skfem.assembly import Basis, LinearForm
 from skfem.element import ElementTetP1
-from skfem.utils import projection
 from skfem.io.meshio import to_meshio, from_meshio
 from skfem.io.json import to_dict, from_dict
 
@@ -255,12 +254,8 @@ def test_adaptive_splitting_3d_3():
     for itr in range(15):
         m = m.refined(m.f2t[0, m.facets_satisfying(lambda x: x[0] == 0)])
 
-    @LinearForm
-    def hproj(v, w):
-        return w.h * v
-
     basis = Basis(m, ElementTetP1())
-    h = projection(hproj, basis)
+    h = basis.project(basis.mesh_parameters())
 
     funh = basis.interpolator(h)
 

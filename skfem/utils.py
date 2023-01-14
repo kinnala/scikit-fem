@@ -31,13 +31,12 @@ logger = logging.getLogger(__name__)
 Solution = Union[ndarray, Tuple[ndarray, ndarray]]
 LinearSolver = Callable[..., ndarray]
 EigenSolver = Callable[..., Tuple[ndarray, ndarray]]
-LinearSystem = Union[spmatrix,
-                     Tuple[spmatrix, ndarray],
+LinearSystem = Union[Tuple[spmatrix, ndarray],
                      Tuple[spmatrix, spmatrix]]
-CondensedSystem = Union[LinearSystem,
-                        Tuple[spmatrix, ndarray, ndarray],
-                        Tuple[spmatrix, ndarray, ndarray, ndarray],
-                        Tuple[spmatrix, spmatrix, ndarray, ndarray]]
+CondensedSystem = Union[Tuple[spmatrix, ndarray],
+                        Tuple[spmatrix, spmatrix],
+                        Tuple[spmatrix, ndarray, Callable[..., ndarray]],
+                        Tuple[spmatrix, spmatrix, Callable[..., ndarray]]]
 DofsCollection = Union[ndarray, DofsView, Dict[str, DofsView]]
 
 
@@ -199,43 +198,36 @@ def solver_iter_cg(**kwargs):
 
 def solve_eigen(A: spmatrix,
                 M: spmatrix,
-                x: Optional[ndarray] = None,
-                I: Optional[ndarray] = None,
+                restore = None,
                 solver: Optional[EigenSolver] = None,
                 **kwargs) -> Tuple[ndarray, ndarray]:
 
     if solver is None:
         solver = solver_eigen_scipy(**kwargs)
 
-    if x is not None and I is not None:
+    if restore is not None:
         L, X = solver(A, M, **kwargs)
-        y = np.tile(x.copy()[:, None], (1, X.shape[1]))
-        y[I] = X
-        return L, y
+        return L, np.array([restore(x) for x in X.T]).T
     return solver(A, M, **kwargs)
 
 
 def solve_linear(A: spmatrix,
                  b: ndarray,
-                 x: Optional[ndarray] = None,
-                 I: Optional[ndarray] = None,
+                 restore = None,
                  solver: Optional[LinearSolver] = None,
                  **kwargs) -> ndarray:
 
     if solver is None:
         solver = solver_direct_scipy(**kwargs)
 
-    if x is not None and I is not None:
-        y = x.copy()
-        y[I] = solver(A, b, **kwargs)
-        return y
+    if restore is not None:
+        return restore(solver(A, b, **kwargs))
     return solver(A, b, **kwargs)
 
 
 def solve(A: spmatrix,
           b: Union[ndarray, spmatrix],
-          x: Optional[ndarray] = None,
-          I: Optional[ndarray] = None,
+          restore = None,
           solver: Optional[Union[LinearSolver, EigenSolver]] = None,
           **kwargs) -> Solution:
     """Solve a linear system or a generalized eigenvalue problem.
@@ -259,9 +251,9 @@ def solve(A: spmatrix,
     """
     logger.info("Solving linear system, shape={}.".format(A.shape))
     if isinstance(b, spmatrix):
-        out = solve_eigen(A, b, x, I, solver, **kwargs)  # type: ignore
+        out = solve_eigen(A, b, restore, solver, **kwargs)  # type: ignore
     elif isinstance(b, ndarray):
-        out = solve_linear(A, b, x, I, solver, **kwargs)  # type: ignore
+        out = solve_linear(A, b, restore, solver, **kwargs)  # type: ignore
     else:
         raise NotImplementedError("Provided argument types not supported")
     logger.info("Solving done.")
@@ -312,7 +304,8 @@ def _init_bc(A: spmatrix,
 
     if x is None:
         x = np.zeros(A.shape[0], dtype=A.dtype)
-    elif b is None:
+
+    if b is None:
         b = np.zeros_like(x)
 
     return b, x, I, D
@@ -381,17 +374,14 @@ def enforce(A: spmatrix,
     d[D] = diag
     Aout.setdiag(d)
 
-    if b is not None:
-        if isinstance(b, spmatrix):
-            # mass matrix (eigen- or initial value problem)
-            bout = enforce(b, D=D, diag=0., overwrite=overwrite)
-        else:
-            # set rhs to the given value
-            bout = b if overwrite else b.copy()
-            bout[D] = x[D]
-        return Aout, bout
-
-    return Aout
+    if isinstance(b, spmatrix):
+        # mass matrix (eigen- or initial value problem)
+        bout = enforce(b, D=D, diag=0., overwrite=overwrite)
+    else:
+        # set rhs to the given value
+        bout = b if overwrite else b.copy()
+        bout[D] = x[D]
+    return Aout, bout
 
 
 def penalize(A: spmatrix,
@@ -408,7 +398,7 @@ def penalize(A: spmatrix,
     A
         The system matrix
     b
-        Optionally, the right hand side vector.
+        The right hand side vector.
     x
         The values of the penalized degrees-of-freedom. If not given, assumed
         to be zero.
@@ -443,9 +433,6 @@ def penalize(A: spmatrix,
     d[D] = 1. / epsilon
     Aout.setdiag(d)
 
-    if b is None:
-        return Aout
-
     bout = b if overwrite else b.copy()
     # Nothing needs doing for mass matrix, but RHS vector needs penalty factor
     if not isinstance(b, spmatrix):
@@ -457,8 +444,7 @@ def condense(A: spmatrix,
              b: Optional[Union[ndarray, spmatrix]] = None,
              x: Optional[ndarray] = None,
              I: Optional[DofsCollection] = None,
-             D: Optional[DofsCollection] = None,
-             expand: bool = True) -> CondensedSystem:
+             D: Optional[DofsCollection] = None) -> CondensedSystem:
     r"""Eliminate degrees-of-freedom from a linear system.
 
     The user should provide the linear system ``A`` and ``b``
@@ -561,10 +547,6 @@ def condense(A: spmatrix,
         The set of degree-of-freedom indices to include.
     D
         The set of degree-of-freedom indices to dismiss.
-    expand
-        If ``True`` (default), returns also `x` and `I`. As a consequence,
-        :func:`skfem.utils.solve` will expand the solution vector
-        automatically.
 
     Returns
     -------
@@ -577,24 +559,50 @@ def condense(A: spmatrix,
 
     ret_value: CondensedSystem = (None,)
 
-    if b is None:
-        ret_value = (A[I].T[I].T,)
+    if isinstance(b, spmatrix):
+        # generalized eigenvalue problem: don't modify rhs
+        Aout = A[I].T[I].T
+        bout = b[I].T[I].T
+    elif isinstance(b, ndarray):
+        Aout = A[I].T[I].T
+        bout = b[I] - A[I].T[D].T @ x[D]
     else:
-        if isinstance(b, spmatrix):
-            # generalized eigenvalue problem: don't modify rhs
-            Aout = A[I].T[I].T
-            bout = b[I].T[I].T
-        elif isinstance(b, ndarray):
-            Aout = A[I].T[I].T
-            bout = b[I] - A[I].T[D].T @ x[D]
-        else:
-            raise Exception("Type of second arg not supported.")
-        ret_value = (Aout, bout)
+        raise Exception("Type of second arg not supported.")
 
-    if expand:
-        ret_value += (x, I)
+    def _restore(y):
+        z = x.copy()
+        z[I] = y
+        return z
 
-    return ret_value if len(ret_value) > 1 else ret_value[0]
+    return (Aout, bout, _restore)
+
+
+def mpc(A: spmatrix,
+        b: ndarray,
+        M: DofsCollection,
+        S: DofsCollection,
+        T: Optional[spmatrix] = None,
+        g: Optional[ndarray] = None) -> CondensedSystem:
+
+    M = _flatten_dofs(M)
+    S = _flatten_dofs(S)
+    assert len(M) == len(S)
+    U = np.setdiff1d(np.arange(A.shape[0]), np.concatenate((M, S)))
+
+    if T is None:
+        T = sp.eye(len(M))
+    if g is None:
+        g = np.zeros(len(M))
+
+    B = bmat([[A[U].T[U].T, A[U].T[M].T @ T],
+              [T.T @ A[M].T[U].T, T.T @ A[M].T[M].T @ T]], 'csr')
+    y = np.concatenate((b[U] - A[U].T[S].T @ g,
+                        b[M] - A[M].T[S].T @ g))
+
+    def _restore(x):
+        return np.concatenate((x[U], x[M], T @ x[M] + g))
+
+    return (B, y, _restore)
 
 
 # additional utilities
@@ -643,93 +651,3 @@ def adaptive_theta(est, theta=0.5, max=None):
         return np.nonzero(theta * np.max(est) < est)[0]
     else:
         return np.nonzero(theta * max < est)[0]
-
-
-@deprecated("Basis.project")
-def projection(fun,
-               basis_to: Optional[AbstractBasis] = None,
-               basis_from: Optional[AbstractBasis] = None,
-               diff: Optional[int] = None,
-               I: Optional[ndarray] = None,
-               expand: bool = False) -> ndarray:
-    """Perform projections onto a finite element basis.
-
-    Parameters
-    ----------
-    fun
-        A solution vector or a function handle.
-    basis_to
-        The finite element basis to project to.
-    basis_from
-        The finite element basis to project from.
-    diff
-        Differentiate with respect to the given dimension.
-    I
-        Index set for limiting the projection to a subset.
-    expand
-        Passed to :func:`skfem.utils.condense`.
-
-    Returns
-    -------
-    ndarray
-        The projected solution vector.
-
-    """
-
-    @BilinearForm
-    def mass(u, v, w):
-        from skfem.helpers import dot, ddot
-        p = 0
-        if len(u.shape) == 2:
-            p = u * v
-        elif len(u.shape) == 3:
-            p = dot(u, v)
-        elif len(u.shape) == 4:
-            p = ddot(u, v)
-        return p
-
-    if isinstance(fun, LinearForm):
-        funv = fun
-    else:
-        @LinearForm
-        def funv(v, w):
-            p = fun(w.x) * v
-            return sum(p) if isinstance(basis_to.elem, ElementVector) else p
-
-    @BilinearForm
-    def deriv(u, v, w):
-        from skfem.helpers import grad
-        du = grad(u)
-        return du[diff] * v
-
-    M = asm(mass, basis_to)
-
-    if not isinstance(fun, ndarray):
-        f = asm(funv, basis_to)
-    else:
-        if diff is not None:
-            f = asm(deriv, basis_from, basis_to) @ fun
-        else:
-            f = asm(mass, basis_from, basis_to) @ fun
-
-    if I is not None:
-        return solve_linear(*condense(M, f, I=I, expand=expand))
-
-    return solve_linear(M, f)
-
-
-@deprecated("Basis.project")
-def project(fun,
-            basis_from: Optional[AbstractBasis] = None,
-            basis_to: Optional[AbstractBasis] = None,
-            diff: Optional[int] = None,
-            I: Optional[ndarray] = None,
-            expand: bool = False) -> ndarray:
-    return projection(
-        fun,
-        basis_to=basis_to,
-        basis_from=basis_from,
-        diff=diff,
-        I=I,
-        expand=expand,
-    )
