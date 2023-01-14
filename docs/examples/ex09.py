@@ -60,7 +60,7 @@ if __name__ == "__main__":
 else:
     verbose = False
 
-Aint, bint, _ = condense(A, b, I=I)
+Aint, bint = condense(A, b, I=I)[:2]
 
 preconditioners = [None, build_pc_ilu(Aint, drop_tol=1e-3)]
 
