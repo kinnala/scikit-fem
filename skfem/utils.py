@@ -210,7 +210,10 @@ def solve_eigen(A: spmatrix,
     if x is not None and I is not None:
         L, X = solver(A, M, **kwargs)
         y = np.tile(x.copy()[:, None], (1, X.shape[1]))
-        y[I] = X
+        if isinstance(I, tuple):
+            y[I[0]] = np.array([I[1](x) for x in X.T]).T
+        else:
+            y[I] = X
         return L, y
     return solver(A, M, **kwargs)
 
@@ -227,7 +230,10 @@ def solve_linear(A: spmatrix,
 
     if x is not None and I is not None:
         y = x.copy()
-        y[I] = solver(A, b, **kwargs)
+        if isinstance(I, tuple):
+            y[I[0]] = I[1](solver(A, b, **kwargs))
+        else:
+            y[I] = solver(A, b, **kwargs)
         return y
     return solver(A, b, **kwargs)
 
@@ -595,6 +601,51 @@ def condense(A: spmatrix,
         ret_value += (x, I)
 
     return ret_value if len(ret_value) > 1 else ret_value[0]
+
+
+def mpc(A: spmatrix,
+        b: ndarray,
+        S: Optional[DofsCollection] = None,
+        M: Optional[DofsCollection] = None,
+        T: Optional[spmatrix] = None,
+        g: Optional[ndarray] = None) -> CondensedSystem:
+
+    if M is None:
+        M = np.array([])
+    else:
+        M = _flatten_dofs(M)
+    S = _flatten_dofs(S)
+
+    assert isinstance(S, ndarray) and isinstance(M, ndarray)
+    U = np.setdiff1d(np.arange(A.shape[0]), np.concatenate((M, S)))
+
+    if T is None:
+        T = sp.eye(len(S), len(M))
+    if g is None:
+        g = np.zeros(len(S))
+
+    B = bmat([
+        [
+            A[U].T[U].T,
+            A[U].T[M].T + A[U].T[S].T @ T,
+        ],
+        [
+            T.T @ A[S].T[U].T + A[M].T[U].T,
+            (A[M].T[M].T + T.T @ A[S].T[M].T + A[M].T[S].T @ T
+             + T.T @ A[S].T[S].T @ T),
+        ]], 'csr')
+    y = np.concatenate((b[U] - A[U].T[S].T @ g,
+                        b[M] - A[M].T[S].T @ g))
+
+    return (
+        B,
+        y,
+        np.zeros_like(b),
+        (
+            np.concatenate((U, M, S)),
+            lambda x: np.concatenate((x, T @ x[len(U):] + g)),
+        )
+    )
 
 
 # additional utilities
