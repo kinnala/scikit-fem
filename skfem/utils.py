@@ -511,7 +511,7 @@ def condense(A: spmatrix,
 
     .. doctest::
 
-       >>> AII, bI, xI, I = fem.condense(A, b, D=m.boundary_nodes())
+       >>> AII, bI, _ = fem.condense(A, b, D=m.boundary_nodes())
        >>> AII.toarray()
        array([[ 4.,  0.,  0.,  0., -1., -1., -1., -1.,  0.],
               [ 0.,  4.,  0.,  0., -1.,  0., -1.,  0.,  0.],
