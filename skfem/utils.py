@@ -575,28 +575,43 @@ def condense(A: spmatrix,
 
 def mpc(A: spmatrix,
         b: ndarray,
-        M: DofsCollection,
         S: DofsCollection,
+        M: DofsCollection = None,
         T: Optional[spmatrix] = None,
         g: Optional[ndarray] = None) -> CondensedSystem:
 
-    M = _flatten_dofs(M)
+    if M is None:
+        M = []
+    else:
+        M = _flatten_dofs(M)
     S = _flatten_dofs(S)
-    assert len(M) == len(S)
     U = np.setdiff1d(np.arange(A.shape[0]), np.concatenate((M, S)))
 
     if T is None:
-        T = sp.eye(len(M))
+        T = sp.eye(len(S), len(M))
     if g is None:
-        g = np.zeros(len(M))
+        g = np.zeros(len(S))
 
-    B = bmat([[A[U].T[U].T, A[U].T[M].T @ T],
-              [T.T @ A[M].T[U].T, T.T @ A[M].T[M].T @ T]], 'csr')
+    B = bmat([
+        [
+            A[U].T[U].T,
+            A[U].T[M].T + A[U].T[S].T @ T,
+        ],
+        [
+            T.T @ A[S].T[U].T + A[M].T[U].T,
+            (A[M].T[M].T + T.T @ A[S].T[M].T + A[M].T[S].T @ T
+             + T.T @ A[S].T[S].T @ T),
+        ]], 'csr')
     y = np.concatenate((b[U] - A[U].T[S].T @ g,
                         b[M] - A[M].T[S].T @ g))
 
     def _restore(x):
-        return np.concatenate((x[U], x[M], T @ x[M] + g))
+        xu, xm = np.split(x, [len(U)])
+        y = np.zeros(A.shape[0])
+        y[U] = xu
+        y[M] = xm
+        y[S] = T @ xm + g
+        return y
 
     return (B, y, _restore)
 
