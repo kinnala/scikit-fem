@@ -611,7 +611,7 @@ def mpc(A: spmatrix,
         g: Optional[ndarray] = None) -> CondensedSystem:
 
     if M is None:
-        M = np.array([])
+        M = np.array([], dtype=np.int64)
     else:
         M = _flatten_dofs(M)
     S = _flatten_dofs(S)

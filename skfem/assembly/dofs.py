@@ -78,6 +78,9 @@ class DofsView:
     def __str__(self):
         return self.__repr__()
 
+    def __len__(self):
+        return len(self.flatten())
+
     def flatten(self) -> ndarray:
         """Return all DOF indices as a single array."""
         return np.unique(
