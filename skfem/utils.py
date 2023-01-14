@@ -16,10 +16,7 @@ if "pyodide" in sys.modules:
 else:
     from scipy.sparse import spmatrix
 
-from skfem.assembly import asm, BilinearForm, LinearForm, DofsView
-from skfem.assembly.basis import AbstractBasis
-from skfem.element import ElementVector
-from skfem.generic_utils import deprecated
+from skfem.assembly import  DofsView
 
 
 logger = logging.getLogger(__name__)
@@ -198,7 +195,7 @@ def solver_iter_cg(**kwargs):
 
 def solve_eigen(A: spmatrix,
                 M: spmatrix,
-                restore = None,
+                restore: Optional[Callable[..., ndarray]] = None,
                 solver: Optional[EigenSolver] = None,
                 **kwargs) -> Tuple[ndarray, ndarray]:
 
@@ -213,7 +210,7 @@ def solve_eigen(A: spmatrix,
 
 def solve_linear(A: spmatrix,
                  b: ndarray,
-                 restore = None,
+                 restore: Optional[Callable[..., ndarray]] = None,
                  solver: Optional[LinearSolver] = None,
                  **kwargs) -> ndarray:
 
@@ -556,8 +553,6 @@ def condense(A: spmatrix,
 
     """
     b, x, I, D = _init_bc(A, b, x, I, D)
-
-    ret_value: CondensedSystem = (None,)
 
     if isinstance(b, spmatrix):
         # generalized eigenvalue problem: don't modify rhs

@@ -1,17 +1,14 @@
 import logging
-from typing import Callable, Optional, Tuple, Any
+from typing import Optional, Tuple, Any
 
 import numpy as np
 from numpy import ndarray
-from skfem.element import (BOUNDARY_ELEMENT_MAP, DiscreteField, Element,
-                           ElementHex0, ElementQuad0, ElementTetP0,
-                           ElementTriP0)
+from skfem.element import DiscreteField, Element
 from skfem.mapping import Mapping
-from skfem.mesh import Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
-from skfem.generic_utils import OrientedBoundary, deprecated
+from skfem.mesh import Mesh
+from skfem.generic_utils import OrientedBoundary
 
 from .abstract_basis import AbstractBasis
-from .cell_basis import CellBasis
 from ..dofs import Dofs
 
 
