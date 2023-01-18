@@ -117,7 +117,7 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> Axes:
     if "subdomain" in kwargs:
         y = np.zeros(m.t.shape[1])
         y[m.subdomains[kwargs['subdomain']]] = 1
-        plot_meshtri(m, y, ax=ax)
+        plot(m, y, ax=ax)
 
     if "boundaries" in kwargs:
         cm = plt.get_cmap('gist_rainbow')
