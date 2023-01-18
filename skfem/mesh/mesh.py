@@ -1016,7 +1016,8 @@ class Mesh:
             doflocs=p,
             t=t,
             _boundaries=None,
-            _subdomains={k: newt[np.intersect1d(self.subdomains[k], elements)] for k in self.subdomains},
+            _subdomains={k: newt[np.intersect1d(self.subdomains[k], elements)]
+                         for k in self.subdomains},
         )
 
     def remove_elements(self, element_indices: ndarray):
