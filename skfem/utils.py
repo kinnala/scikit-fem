@@ -609,11 +609,28 @@ def mpc(A: spmatrix,
         M: Optional[DofsCollection] = None,
         T: Optional[spmatrix] = None,
         g: Optional[ndarray] = None) -> CondensedSystem:
+    """Apply a multipoint constraint on the linear system.
 
+    Parameters
+    ----------
+    A
+    b
+        The linear system to constrain.
+    S
+        The set of DOFs that are eliminated from the system.
+    M
+        The set of DOFs that are kept in the system.
+    T
+    g
+        The constraint is of the form `x[M] = T @ x[S] + g`.
+
+    """
     if M is None:
         M = np.array([], dtype=np.int64)
     else:
         M = _flatten_dofs(M)
+    if S is None:
+        raise NotImplementedError("S must be specified.")
     S = _flatten_dofs(S)
 
     assert isinstance(S, ndarray) and isinstance(M, ndarray)
