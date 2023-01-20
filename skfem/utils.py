@@ -646,7 +646,11 @@ def mpc(A: spmatrix,
         M = np.setdiff1d(M, D)
         S = np.concatenate((S, D))
 
-    U = np.setdiff1d(np.arange(A.shape[0]), np.concatenate((M, S)))
+    # for mypy
+    assert isinstance(S, ndarray) and isinstance(M, ndarray)
+
+    U = np.setdiff1d(np.arange(A.shape[0], dtype=np.int64),
+                     np.concatenate((M, S)))
 
     if T is None:
         T = sp.eye(len(S), len(M))
