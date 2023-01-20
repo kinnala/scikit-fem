@@ -635,6 +635,9 @@ def mpc(A: spmatrix,
         raise NotImplementedError("S must be specified.")
     S = _flatten_dofs(S)
 
+    # for mypy
+    assert isinstance(S, ndarray) and isinstance(M, ndarray)
+
     # remove DOFs in D from (S, M) and add D to S
     if D is not None:
         D = _flatten_dofs(D)
@@ -642,7 +645,6 @@ def mpc(A: spmatrix,
         M = np.setdiff1d(M, D)
         S = np.concatenate((S, D))
 
-    assert isinstance(S, ndarray) and isinstance(M, ndarray)
     U = np.setdiff1d(np.arange(A.shape[0]), np.concatenate((M, S)))
 
     if T is None:
