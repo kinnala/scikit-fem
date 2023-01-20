@@ -634,13 +634,27 @@ def mpc(A: spmatrix,
             (A[M].T[M].T + T.T @ A[S].T[M].T + A[M].T[S].T @ T
              + T.T @ A[S].T[S].T @ T),
         ]], 'csr')
-    y = np.concatenate((b[U] - A[U].T[S].T @ g,
-                        b[M] - A[M].T[S].T @ g))
+
+    if b.ndim == 1:
+        y = np.concatenate((b[U] - A[U].T[S].T @ g,
+                            b[M] - A[M].T[S].T @ g))
+    else:
+        y = bmat([
+            [
+                b[U].T[U].T + sp.diags((A[U].T[S].T @ g, ), (0, )),
+                b[U].T[M].T + b[U].T[S].T @ T,
+            ],
+            [
+                T.T @ b[S].T[U].T + b[M].T[U].T,
+                (b[M].T[M].T + T.T @ b[S].T[M].T + b[M].T[S].T @ T
+                 + T.T @ b[S].T[S].T @ T
+                 + sp.diags((A[M].T[S].T @ g, ), (0, )))
+            ]], 'csr')
 
     return (
         B,
         y,
-        np.zeros_like(b),
+        np.zeros((b.shape[0]), dtype=B.dtype),
         (
             np.concatenate((U, M, S)),
             lambda x: np.concatenate((x, T @ x[len(U):] + g)),
