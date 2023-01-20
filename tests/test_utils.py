@@ -3,7 +3,7 @@ from unittest import TestCase
 import numpy as np
 from numpy.testing import assert_almost_equal
 
-from skfem.assembly import CellBasis, Basis
+from skfem.assembly import CellBasis, Basis, LinearForm
 from skfem.element import ElementTriP1, ElementQuad1
 from skfem.mesh import MeshTri, MeshQuad
 from skfem.utils import projection, enforce, condense, solve, mpc
@@ -88,6 +88,24 @@ def test_mpc_periodic():
     assert_almost_equal(y[basis.get_dofs('left')], y[basis.get_dofs(lambda x: x[0] == .5)])
 
 
+# def test_mpc_doubly_periodic():
+
+#     m = MeshQuad().refined(3)
+#     basis = Basis(m, ElementQuad1())
+#     A = laplace.assemble(basis)
+#     b = LinearForm(lambda v, w: (np.sin(2. * np.pi * w.x[0])
+#                                  * np.sin(2. * np.pi * w.x[1])) * v).assemble(basis)
+#     y = solve(*mpc(A, b,
+#                    S=np.concatenate((basis.get_dofs('left'), basis.get_dofs('top'))),
+#                    M=np.concatenate((basis.get_dofs('right'), basis.get_dofs('bottom'))),
+#                    D=basis.get_dofs(at=(.5, .5))))
+
+#     basis.plot(y).show()
+
+#     assert_almost_equal(y[basis.get_dofs('left')], y[basis.get_dofs('right')])
+#     assert_almost_equal(y[basis.get_dofs('left')], y[basis.get_dofs(lambda x: x[0] == .5)])
+
+
 def test_mpc_dirichlet():
 
     m = MeshTri().refined(3)
@@ -97,6 +115,9 @@ def test_mpc_dirichlet():
     # these two should be equal
     y1 = solve(*mpc(A, b, S=basis.get_dofs()))
     y2 = solve(*condense(A, b, D=basis.get_dofs()))
-
+    assert_almost_equal(y1, y2)
+    # inhomogeneous
+    y1 = solve(*mpc(A, b, D=basis.get_dofs(), x=m.p[0]))
+    y2 = solve(*condense(A, b, D=basis.get_dofs(), x=m.p[0]))
     assert_almost_equal(y1, y2)
 
