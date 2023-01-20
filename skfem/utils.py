@@ -584,15 +584,15 @@ def condense(A: spmatrix,
     ret_value: CondensedSystem = (None,)
 
     if b is None:
-        ret_value = (A[I].T[I].T,)
+        ret_value = (A[I][:, I],)
     else:
         if isinstance(b, spmatrix):
             # generalized eigenvalue problem: don't modify rhs
-            Aout = A[I].T[I].T
-            bout = b[I].T[I].T
+            Aout = A[I][:, I]
+            bout = b[I][:, I]
         elif isinstance(b, ndarray):
-            Aout = A[I].T[I].T
-            bout = b[I] - A[I].T[D].T @ x[D]
+            Aout = A[I][:, I]
+            bout = b[I] - A[I][:, D] @ x[D]
         else:
             raise Exception("Type of second arg not supported.")
         ret_value = (Aout, bout)
@@ -643,16 +643,16 @@ def mpc(A: spmatrix,
 
     B = bmat([
         [
-            A[U].T[U].T,
-            A[U].T[M].T + A[U].T[S].T @ T,
+            A[U][:, U],
+            A[U][:, M] + A[U][:, S] @ T,
         ],
         [
-            T.T @ A[S].T[U].T + A[M].T[U].T,
-            (A[M].T[M].T + T.T @ A[S].T[M].T + A[M].T[S].T @ T
-             + T.T @ A[S].T[S].T @ T),
+            T.T @ A[S][:, U] + A[M][:, U],
+            (A[M][:, M] + T.T @ A[S][:, M] + A[M][:, S] @ T
+             + T.T @ A[S][:, S] @ T),
         ]], 'csr')
-    y = np.concatenate((b[U] - A[U].T[S].T @ g,
-                        b[M] - A[M].T[S].T @ g))
+    y = np.concatenate((b[U] - A[U][:, S] @ g,
+                        b[M] - A[M][:, S] @ g))
 
     return (
         B,

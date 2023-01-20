@@ -3,10 +3,10 @@ from unittest import TestCase
 import numpy as np
 from numpy.testing import assert_almost_equal
 
-from skfem.assembly import CellBasis
+from skfem.assembly import CellBasis, Basis
 from skfem.element import ElementTriP1
 from skfem.mesh import MeshTri
-from skfem.utils import projection, enforce, condense, solve
+from skfem.utils import projection, enforce, condense, solve, mpc
 from skfem.models import laplace, mass, unit_load
 
 
@@ -71,3 +71,15 @@ def test_simple_cg_solver():
     x0 = A0.solve(f, D=D)
 
     assert_almost_equal(x0, x1)
+
+
+def test_mpc_periodic():
+
+    m = MeshTri().refined()
+    basis = Basis(m, ElementTriP1())
+    A = laplace.assemble(basis)
+    b = unit_load.assemble(basis)
+    y = solve(*mpc(A, b, S=basis.get_dofs('left'), M=basis.get_dofs('right')))
+
+    assert_almost_equal(y[basis.get_dofs('left')], y[basis.get_dofs('right')])
+    assert_almost_equal(y[basis.get_dofs('left')], y[basis.get_dofs(lambda x: x[0] == .5)])
