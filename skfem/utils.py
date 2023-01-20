@@ -622,7 +622,7 @@ def mpc(A: spmatrix,
         The set of DOFs that are kept in the system.
     T
     g
-        The constraint is of the form `x[M] = T @ x[S] + g`.
+        The constraint is of the form `x[S] = T @ x[M] + g`.
 
     """
     if M is None:
