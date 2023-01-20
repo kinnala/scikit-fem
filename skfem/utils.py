@@ -641,6 +641,7 @@ def mpc(A: spmatrix,
     # remove DOFs in D from (S, M) and add D to S
     if D is not None:
         D = _flatten_dofs(D)
+        assert isinstance(D, ndarray)
         S = np.setdiff1d(S, D)
         M = np.setdiff1d(M, D)
         S = np.concatenate((S, D))
