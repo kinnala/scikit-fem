@@ -211,7 +211,7 @@ def solve_eigen(A: spmatrix,
         L, X = solver(A, M, **kwargs)
         y = np.tile(x.copy()[:, None], (1, X.shape[1]))
         if isinstance(I, tuple):
-            y[I[0]] = np.array([I[1](x) for x in X.T]).T
+            np.add.at(y, I[0], np.array([I[1](x) for x in X.T]).T)
         else:
             y[I] = X
         return L, y
@@ -231,7 +231,7 @@ def solve_linear(A: spmatrix,
     if x is not None and I is not None:
         y = x.copy()
         if isinstance(I, tuple):
-            y[I[0]] = I[1](solver(A, b, **kwargs))
+            np.add.at(y, I[0], I[1](solver(A, b, **kwargs)))
         else:
             y[I] = solver(A, b, **kwargs)
         return y
@@ -609,11 +609,28 @@ def mpc(A: spmatrix,
         M: Optional[DofsCollection] = None,
         T: Optional[spmatrix] = None,
         g: Optional[ndarray] = None) -> CondensedSystem:
+    """Apply a multipoint constraint on the linear system.
 
+    Parameters
+    ----------
+    A
+    b
+        The linear system to constrain.
+    S
+        The set of DOFs that are eliminated from the system.
+    M
+        The set of DOFs that are kept in the system.
+    T
+    g
+        The constraint is of the form `x[M] = T @ x[S] + g`.
+
+    """
     if M is None:
         M = np.array([], dtype=np.int64)
     else:
         M = _flatten_dofs(M)
+    if S is None:
+        raise NotImplementedError("S must be specified.")
     S = _flatten_dofs(S)
 
     assert isinstance(S, ndarray) and isinstance(M, ndarray)

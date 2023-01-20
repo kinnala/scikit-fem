@@ -121,7 +121,8 @@ class AbstractBasis:
     def get_dofs(self,
                  facets: Optional[Any] = None,
                  elements: Optional[Any] = None,
-                 skip: Optional[List[str]] = None) -> Any:
+                 skip: Optional[List[str]] = None,
+                 at: Optional[List[float]] = None) -> Any:
         """Find global DOF numbers.
 
         Accepts an array of facet/element indices.  However, various argument
@@ -210,8 +211,16 @@ class AbstractBasis:
             An array of element indices.  See above.
         skip
             List of dofnames to skip.
+        at
+            List corresponding to a point. Return an array of DOF indices whose
+            locations are close to the point.
 
         """
+        if at is not None:
+            return np.nonzero(
+                (np.linalg.norm(self.doflocs - np.array(at)[:, None], axis=0)
+                 < 1e-13)
+            )[0]
         if isinstance(facets, dict):
             warn("Passing dict to get_dofs is deprecated.", DeprecationWarning)
 
