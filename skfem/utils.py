@@ -608,9 +608,7 @@ def mpc(A: spmatrix,
         S: Optional[ndarray] = None,
         M: Optional[ndarray] = None,
         T: Optional[spmatrix] = None,
-        g: Optional[ndarray] = None,
-        D: Optional[DofsCollection] = None,
-        x: Optional[ndarray] = None) -> CondensedSystem:
+        g: Optional[ndarray] = None) -> CondensedSystem:
     """Apply a multipoint constraint on the linear system.
 
     Parameters
@@ -619,40 +617,16 @@ def mpc(A: spmatrix,
     b
         The linear system to constrain.
     S
-        Array of DOFs that are eliminated from the system.
     M
-        Array of DOFs that are kept in the system.
     T
     g
         The constraint is of the form `x[S] = T @ x[M] + g`.
-    D
-        An array of additional DOFs that are set to a specific value.
-    x
-        An array of values to use together with `D`.
 
     """
     if M is None:
         M = np.array([], dtype=np.int64)
-    else:
-        M = _flatten_dofs(M)
     if S is None:
         S = np.array([], dtype=np.int64)
-    else:
-        S = _flatten_dofs(S)
-
-    # for mypy
-    assert isinstance(S, ndarray) and isinstance(M, ndarray)
-
-    # remove DOFs in D from (S, M) and add D to S
-    if D is not None:
-        D = _flatten_dofs(D)
-        assert isinstance(D, ndarray)
-        S = np.setdiff1d(S, D)
-        M = np.setdiff1d(M, D)
-        S = np.concatenate((S, D))
-
-    # for mypy
-    assert isinstance(S, ndarray) and isinstance(M, ndarray)
 
     U = np.setdiff1d(np.arange(A.shape[0], dtype=np.int64),
                      np.concatenate((M, S)))
@@ -661,11 +635,6 @@ def mpc(A: spmatrix,
         T = sp.eye(len(S), len(M))
     if g is None:
         g = np.zeros(len(S))
-
-    if x is None:
-        x = np.zeros(A.shape[0], dtype=A.dtype)
-    if D is not None:
-        g[-len(D):] = x[D]
 
     B = bmat([
         [

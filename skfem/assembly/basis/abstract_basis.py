@@ -1,7 +1,7 @@
 import logging
 import importlib
 from warnings import warn
-from typing import Any, List, Optional, Tuple, Type, Union
+from typing import Any, List, Optional, Tuple, Type, Union, Callable
 
 import numpy as np
 from numpy import ndarray
@@ -121,8 +121,8 @@ class AbstractBasis:
     def get_dofs(self,
                  facets: Optional[Any] = None,
                  elements: Optional[Any] = None,
-                 skip: Optional[List[str]] = None,
-                 at: Optional[List[float]] = None) -> Any:
+                 nodes: Optional[Any] = None,
+                 skip: Optional[List[str]] = None) -> Any:
         """Find global DOF numbers.
 
         Accepts an array of facet/element indices.  However, various argument
@@ -209,18 +209,12 @@ class AbstractBasis:
             If list, tuple or set, use the combined facet indices.
         elements
             An array of element indices.  See above.
+        nodes
+            An array of node indices.
         skip
             List of dofnames to skip.
-        at
-            List corresponding to a point. Return an array of DOF indices whose
-            locations are close to the point.
 
         """
-        if at is not None:
-            return np.nonzero(
-                (np.linalg.norm(self.doflocs - np.array(at)[:, None], axis=0)
-                 < 1e-13)
-            )[0]
         if isinstance(facets, dict):
             warn("Passing dict to get_dofs is deprecated.", DeprecationWarning)
 
@@ -233,15 +227,24 @@ class AbstractBasis:
                                                 skip_dofnames=skip)
                     for k in facets}
 
-        if elements is not None and facets is not None:
-            raise ValueError
-
         if elements is not None:
             elements = self.mesh.normalize_elements(elements)
             return self.dofs.get_element_dofs(elements, skip_dofnames=skip)
+        elif nodes is not None:
+            nodes = self.mesh.normalize_nodes(nodes)
+            return self.dofs.get_vertex_dofs(nodes, skip_dofnames=skip)
 
         facets = self.mesh.normalize_facets(facets)
         return self.dofs.get_facet_dofs(facets, skip_dofnames=skip)
+
+    def sort_dofs(self, dofs: ndarray,
+                  sort: Optional[Callable[[ndarray], ndarray]] = None) -> ndarray:
+        """Sort a set of DOFs based on output value of a given function."""
+        if sort is None:
+            sort = lambda x: sum(x)
+        dofs = dofs.flatten()
+        ix = np.argsort(sort(self.doflocs[:, dofs]))
+        return dofs[ix]
 
     def __repr__(self):
         size = sum([sum([y.size if hasattr(y, 'size') else 0

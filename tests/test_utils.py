@@ -1,9 +1,10 @@
 from unittest import TestCase
 
 import numpy as np
+import scipy.sparse
 from numpy.testing import assert_almost_equal
 
-from skfem.assembly import CellBasis, Basis, LinearForm
+from skfem.assembly import CellBasis, Basis, LinearForm, asm, BilinearForm
 from skfem.element import ElementTriP1, ElementQuad1
 from skfem.mesh import MeshTri, MeshQuad
 from skfem.utils import projection, enforce, condense, solve, mpc
@@ -80,9 +81,11 @@ def test_mpc_periodic():
     A = laplace.assemble(basis)
     b = unit_load.assemble(basis)
     y = solve(*mpc(A, b,
-                   S=basis.get_dofs('left'),
-                   M=basis.get_dofs('right'),
-                   D=basis.get_dofs({'top', 'bottom'})))
+                   S=np.concatenate((
+                       m.nodes_satisfying(lambda x: (x[0] == 0) * (x[1] < 1) * (x[1] > 0)),
+                       basis.get_dofs({'top', 'bottom'}),
+                   )),
+                   M=m.nodes_satisfying(lambda x: (x[0] == 1) * (x[1] < 1) * (x[1] > 0))))
 
     assert_almost_equal(y[basis.get_dofs('left')], y[basis.get_dofs('right')])
     assert_almost_equal(y[basis.get_dofs('left')], y[basis.get_dofs(lambda x: x[0] == .5)])
@@ -105,6 +108,50 @@ def test_mpc_periodic():
 #     assert_almost_equal(y[basis.get_dofs('left')], y[basis.get_dofs('right')])
 #     assert_almost_equal(y[basis.get_dofs('left')], y[basis.get_dofs(lambda x: x[0] == .5)])
 
+def test_mpc_doubly_periodic():
+
+    m = MeshTri.init_sqsymmetric().refined(5)
+    e = ElementTriP1()
+
+    basis = Basis(m, e)
+
+    left = basis.get_dofs(facets='left')
+    right = basis.get_dofs(facets='right')
+    top = basis.get_dofs(facets='top')
+    bottom = basis.get_dofs(facets='bottom')
+
+    topleft = basis.get_dofs(nodes=[0, 1])
+    topright = basis.get_dofs(nodes=[1, 1])
+    bottomright = basis.get_dofs(nodes=[1, 0])
+    bottomleft = basis.get_dofs(nodes=[0, 0])
+
+    A = asm(laplace, basis)
+    f = asm(LinearForm(lambda v, w: (np.sin(2. * np.pi * w.x[0]) + np.sin(2. * np.pi * w.x[1])) * v), basis)
+
+    # doubly periodic
+    M = np.concatenate((
+        basis.sort_dofs(np.setdiff1d(left, np.concatenate((topleft, bottomleft)))),
+        basis.sort_dofs(np.setdiff1d(top, np.concatenate((topleft, topright)))),
+        topleft,
+    ))
+    S = np.concatenate((
+        basis.sort_dofs(np.setdiff1d(right, np.concatenate((topright, bottomright)))),
+        basis.sort_dofs(np.setdiff1d(bottom, np.concatenate((bottomleft, bottomright)))),
+        topright,
+        bottomright,
+        bottomleft,
+    ))
+    T = scipy.sparse.eye(len(S), len(M)).tocsr()
+    T[-1, -1] = 1
+    T[-2, -1] = 1
+    T[-3, -1] = 1
+    # periodic x2
+    # M = right
+    # S = np.concatenate((left, top, bottom))
+    # T = 2 * scipy.sparse.eye(len(S), len(M))
+
+    y = solve(*mpc(A, f, M=M, S=S, T=T))
+
 
 def test_mpc_dirichlet():
 
@@ -112,12 +159,13 @@ def test_mpc_dirichlet():
     basis = Basis(m, ElementTriP1())
     A = laplace.assemble(basis)
     b = unit_load.assemble(basis)
+    D = basis.get_dofs()
     # these two should be equal
-    y1 = solve(*mpc(A, b, S=basis.get_dofs()))
-    y2 = solve(*condense(A, b, D=basis.get_dofs()))
+    y1 = solve(*mpc(A, b, S=D))
+    y2 = solve(*condense(A, b, D=D))
     assert_almost_equal(y1, y2)
     # inhomogeneous
-    y1 = solve(*mpc(A, b, D=basis.get_dofs(), x=m.p[0]))
-    y2 = solve(*condense(A, b, D=basis.get_dofs(), x=m.p[0]))
+    y1 = solve(*mpc(A, b, S=D, g=m.p[0, D]))
+    y2 = solve(*condense(A, b, D=D, x=m.p[0]))
     assert_almost_equal(y1, y2)
 

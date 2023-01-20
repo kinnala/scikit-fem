@@ -307,6 +307,32 @@ class Dofs:
         # total dofs
         self.N = np.max(self.element_dofs) + 1
 
+    def get_vertex_dofs(
+            self,
+            nodes: ndarray,
+            skip_dofnames: Optional[List[str]] = None) -> DofsView:
+        """Return a subset of DOFs corresponding to the given elements.
+
+        Parameters
+        ----------
+        nodes
+            An array of vertex indices.
+        skip_dofnames
+            An array of dofnames to skip.
+
+        """
+        if skip_dofnames is None:
+            skip_dofnames = []
+
+        return DofsView(
+            self,
+            nodes,
+            np.empty((0,), dtype=np.int64),
+            np.empty((0,), dtype=np.int64),
+            np.empty((0,), dtype=np.int64),
+            *self._dofnames_to_rows(skip_dofnames, skip=True)
+        )
+
     def get_element_dofs(
             self,
             elements: ndarray,
