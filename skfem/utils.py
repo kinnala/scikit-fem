@@ -608,7 +608,8 @@ def mpc(A: spmatrix,
         S: Optional[DofsCollection] = None,
         M: Optional[DofsCollection] = None,
         T: Optional[spmatrix] = None,
-        g: Optional[ndarray] = None) -> CondensedSystem:
+        g: Optional[ndarray] = None,
+        D: Optional[DofsCollection] = None) -> CondensedSystem:
     """Apply a multipoint constraint on the linear system.
 
     Parameters
@@ -623,6 +624,7 @@ def mpc(A: spmatrix,
     T
     g
         The constraint is of the form `x[S] = T @ x[M] + g`.
+    D
 
     """
     if M is None:
@@ -632,6 +634,13 @@ def mpc(A: spmatrix,
     if S is None:
         raise NotImplementedError("S must be specified.")
     S = _flatten_dofs(S)
+
+    # remove DOFs in D from (S, M) and add D to S
+    if D is not None:
+        D = _flatten_dofs(D)
+        S = np.setdiff1d(S, D)
+        M = np.setdiff1d(M, D)
+        S = np.concatenate((S, D))
 
     assert isinstance(S, ndarray) and isinstance(M, ndarray)
     U = np.setdiff1d(np.arange(A.shape[0]), np.concatenate((M, S)))
@@ -647,9 +656,8 @@ def mpc(A: spmatrix,
             A[U][:, M] + A[U][:, S] @ T,
         ],
         [
-            T.T @ A[S][:, U] + A[M][:, U],
-            (A[M][:, M] + T.T @ A[S][:, M] + A[M][:, S] @ T
-             + T.T @ A[S][:, S] @ T),
+            A[M][:, U],
+            A[M][:, M] + A[M][:, S] @ T,
         ]], 'csr')
     y = np.concatenate((b[U] - A[U][:, S] @ g,
                         b[M] - A[M][:, S] @ g))

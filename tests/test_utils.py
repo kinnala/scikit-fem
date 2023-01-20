@@ -4,8 +4,8 @@ import numpy as np
 from numpy.testing import assert_almost_equal
 
 from skfem.assembly import CellBasis, Basis
-from skfem.element import ElementTriP1
-from skfem.mesh import MeshTri
+from skfem.element import ElementTriP1, ElementQuad1
+from skfem.mesh import MeshTri, MeshQuad
 from skfem.utils import projection, enforce, condense, solve, mpc
 from skfem.models import laplace, mass, unit_load
 
@@ -75,11 +75,28 @@ def test_simple_cg_solver():
 
 def test_mpc_periodic():
 
-    m = MeshTri().refined()
-    basis = Basis(m, ElementTriP1())
+    m = MeshQuad().refined(3)
+    basis = Basis(m, ElementQuad1())
     A = laplace.assemble(basis)
     b = unit_load.assemble(basis)
-    y = solve(*mpc(A, b, S=basis.get_dofs('left'), M=basis.get_dofs('right')))
+    y = solve(*mpc(A, b,
+                   S=basis.get_dofs('left'),
+                   M=basis.get_dofs('right'),
+                   D=basis.get_dofs({'top', 'bottom'})))
 
     assert_almost_equal(y[basis.get_dofs('left')], y[basis.get_dofs('right')])
     assert_almost_equal(y[basis.get_dofs('left')], y[basis.get_dofs(lambda x: x[0] == .5)])
+
+
+def test_mpc_dirichlet():
+
+    m = MeshTri().refined(3)
+    basis = Basis(m, ElementTriP1())
+    A = laplace.assemble(basis)
+    b = unit_load.assemble(basis)
+    # these two should be equal
+    y1 = solve(*mpc(A, b, S=basis.get_dofs()))
+    y2 = solve(*condense(A, b, D=basis.get_dofs()))
+
+    assert_almost_equal(y1, y2)
+
