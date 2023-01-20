@@ -622,7 +622,7 @@ def mpc(A: spmatrix,
         The set of DOFs that are kept in the system.
     T
     g
-        The constraint is of the form `x[M] = T @ x[S] + g`.
+        The constraint is of the form `x[S] = T @ x[M] + g`.
 
     """
     if M is None:
@@ -671,7 +671,7 @@ def mpc(A: spmatrix,
     return (
         B,
         y,
-        np.zeros((b.shape[0]), dtype=B.dtype),
+        np.zeros(b.shape[0], dtype=B.dtype),
         (
             np.concatenate((U, M, S)),
             lambda x: np.concatenate((x, T @ x[len(U):] + g)),
