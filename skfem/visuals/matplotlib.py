@@ -114,6 +114,11 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> Axes:
             linewidth=kwargs['linewidth'] if 'linewidth' in kwargs else .5,
             **plot_kwargs)
 
+    if "subdomain" in kwargs:
+        y = np.zeros(m.t.shape[1])
+        y[m.subdomains[kwargs['subdomain']]] = 1
+        plot(m, y, ax=ax)
+
     if "boundaries" in kwargs:
         cm = plt.get_cmap('gist_rainbow')
         colors = [cm(1.*i/len(m.boundaries)) for i in range(len(m.boundaries))]
