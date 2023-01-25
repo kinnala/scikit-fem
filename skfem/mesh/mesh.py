@@ -1070,7 +1070,10 @@ class Mesh:
 
         """
         if isinstance(nodes, list):
-            return self.normalize_nodes(lambda x: np.linalg.norm(x - np.array(nodes)[:, None], axis=0) < 1e-12)
+            return self.normalize_nodes(
+                lambda x: np.linalg.norm(x - np.array(nodes)[:, None],
+                                         axis=0) < 1e-12
+            )
         if isinstance(nodes, tuple):
             return self.normalize_nodes(list(nodes))
         elif callable(nodes):
