@@ -237,11 +237,13 @@ class AbstractBasis:
         facets = self.mesh.normalize_facets(facets)
         return self.dofs.get_facet_dofs(facets, skip_dofnames=skip)
 
-    def sort_dofs(self, dofs: ndarray,
-                  sort: Optional[Callable[[ndarray], ndarray]] = None) -> ndarray:
+    def sort_dofs(
+            self, dofs: ndarray,
+            sort: Optional[Callable[[ndarray], ndarray]] = None) -> ndarray:
         """Sort a set of DOFs based on output value of a given function."""
         if sort is None:
-            sort = lambda x: sum(x)
+            def sort(x):
+                return sum(x)
         dofs = dofs.flatten()
         ix = np.argsort(sort(self.doflocs[:, dofs]))
         return dofs[ix]
