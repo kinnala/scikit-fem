@@ -91,23 +91,6 @@ def test_mpc_periodic():
     assert_almost_equal(y[basis.get_dofs('left')], y[basis.get_dofs(lambda x: x[0] == .5)])
 
 
-# def test_mpc_doubly_periodic():
-
-#     m = MeshQuad().refined(3)
-#     basis = Basis(m, ElementQuad1())
-#     A = laplace.assemble(basis)
-#     b = LinearForm(lambda v, w: (np.sin(2. * np.pi * w.x[0])
-#                                  * np.sin(2. * np.pi * w.x[1])) * v).assemble(basis)
-#     y = solve(*mpc(A, b,
-#                    S=np.concatenate((basis.get_dofs('left'), basis.get_dofs('top'))),
-#                    M=np.concatenate((basis.get_dofs('right'), basis.get_dofs('bottom'))),
-#                    D=basis.get_dofs(at=(.5, .5))))
-
-#     basis.plot(y).show()
-
-#     assert_almost_equal(y[basis.get_dofs('left')], y[basis.get_dofs('right')])
-#     assert_almost_equal(y[basis.get_dofs('left')], y[basis.get_dofs(lambda x: x[0] == .5)])
-
 def test_mpc_doubly_periodic():
 
     m = MeshTri.init_sqsymmetric().refined(5)
@@ -126,7 +109,8 @@ def test_mpc_doubly_periodic():
     bottomleft = basis.get_dofs(nodes=[0, 0])
 
     A = asm(laplace, basis)
-    f = asm(LinearForm(lambda v, w: (np.sin(2. * np.pi * w.x[0]) + np.sin(2. * np.pi * w.x[1])) * v), basis)
+    f = asm(LinearForm(lambda v, w: (np.sin(2. * np.pi * w.x[0])
+                                     + np.sin(2. * np.pi * w.x[1])) * v), basis)
 
     # doubly periodic
     M = np.concatenate((
