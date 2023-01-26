@@ -121,8 +121,8 @@ class AbstractBasis:
     def get_dofs(self,
                  facets: Optional[Any] = None,
                  elements: Optional[Any] = None,
-                 skip: Optional[List[str]] = None,
-                 at: Optional[List[float]] = None) -> Any:
+                 nodes: Optional[Any] = None,
+                 skip: Optional[List[str]] = None) -> Any:
         """Find global DOF numbers.
 
         Accepts an array of facet/element indices.  However, various argument
@@ -209,18 +209,12 @@ class AbstractBasis:
             If list, tuple or set, use the combined facet indices.
         elements
             An array of element indices.  See above.
+        nodes
+            An array of node indices.
         skip
             List of dofnames to skip.
-        at
-            List corresponding to a point. Return an array of DOF indices whose
-            locations are close to the point.
 
         """
-        if at is not None:
-            return np.nonzero(
-                (np.linalg.norm(self.doflocs - np.array(at)[:, None], axis=0)
-                 < 1e-13)
-            )[0]
         if isinstance(facets, dict):
             warn("Passing dict to get_dofs is deprecated.", DeprecationWarning)
 
@@ -233,15 +227,21 @@ class AbstractBasis:
                                                 skip_dofnames=skip)
                     for k in facets}
 
-        if elements is not None and facets is not None:
-            raise ValueError
-
         if elements is not None:
             elements = self.mesh.normalize_elements(elements)
-            return self.dofs.get_element_dofs(elements, skip_dofnames=skip)
+            return self.dofs.get_element_dofs(elements,
+                                              skip_dofnames=skip,
+                                              doflocs=self.doflocs)
+        elif nodes is not None:
+            nodes = self.mesh.normalize_nodes(nodes)
+            return self.dofs.get_vertex_dofs(nodes,
+                                             skip_dofnames=skip,
+                                             doflocs=self.doflocs)
 
         facets = self.mesh.normalize_facets(facets)
-        return self.dofs.get_facet_dofs(facets, skip_dofnames=skip)
+        return self.dofs.get_facet_dofs(facets,
+                                        skip_dofnames=skip,
+                                        doflocs=self.doflocs)
 
     def __repr__(self):
         size = sum([sum([y.size if hasattr(y, 'size') else 0

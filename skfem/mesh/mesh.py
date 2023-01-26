@@ -194,7 +194,8 @@ class Mesh:
             self,
             _subdomains={
                 **({} if self._subdomains is None else self._subdomains),
-                **{name: self.elements_satisfying(test)
+                **{name: (self.elements_satisfying(test)
+                          if callable(test) else test)
                    for name, test in subdomains.items()},
             },
         )
@@ -1007,13 +1008,21 @@ class Mesh:
 
         """
         elements = self.normalize_elements(elements)
-        p, t, _ = self._reix(self.t[:, elements])
+        p, t, ix = self._reix(self.t[:, elements])
+        newt = np.zeros(self.t.shape[1], dtype=np.int64) - 1
+        newt[elements] = np.arange(len(elements), dtype=np.int64)
+        newf = np.zeros(self.facets.shape[1], dtype=np.int64) - 1
+        facets = np.unique(self.t2f[:, elements])
+        newf[facets] = np.arange(len(facets), dtype=np.int64)
         return replace(
             self,
             doflocs=p,
             t=t,
-            _boundaries=None,
-            _subdomains=None,
+            _boundaries={k: np.extract(newf[self.boundaries[k]] >= 0,
+                                       newf[self.boundaries[k]])
+                         for k in self.boundaries},
+            _subdomains={k: newt[np.intersect1d(self.subdomains[k], elements)]
+                         for k in self.subdomains},
         )
 
     def remove_elements(self, element_indices: ndarray):
@@ -1059,12 +1068,41 @@ class Mesh:
         mod = importlib.import_module('skfem.visuals.{}'.format(visuals))
         return mod.plot(self, x, **kwargs)
 
+    def normalize_nodes(self, nodes) -> ndarray:
+        """Generate an array of node indices.
+
+        Parameters
+        ----------
+        nodes
+            Criteria of which nodes to include.  Function has different
+            behavior based on the type of this parameter.
+
+        """
+        if isinstance(nodes, tuple):
+            return self.normalize_nodes(
+                lambda x: np.linalg.norm(x - np.array(list(nodes))[:, None],
+                                         axis=0) < 1e-12
+            )
+        if isinstance(nodes, ndarray):
+            # assumed an array of nodes
+            return nodes
+        elif isinstance(nodes, (list, set)):
+            # Recurse over the list, building an array of all matching elements
+            return np.unique(
+                np.concatenate(
+                    [self.normalize_nodes(n) for n in nodes]
+                )
+            )
+        elif callable(nodes):
+            return self.nodes_satisfying(nodes)
+        raise NotImplementedError
+
     def normalize_facets(self, facets) -> ndarray:
         """Generate an array of facet indices.
 
         Parameters
         ----------
-        elements
+        facets
             Criteria of which facets to include.  Function has different
             behavior based on the type of this parameter.
 

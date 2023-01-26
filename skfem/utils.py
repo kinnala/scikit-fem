@@ -584,15 +584,15 @@ def condense(A: spmatrix,
     ret_value: CondensedSystem = (None,)
 
     if b is None:
-        ret_value = (A[I].T[I].T,)
+        ret_value = (A[I][:, I],)
     else:
         if isinstance(b, spmatrix):
             # generalized eigenvalue problem: don't modify rhs
-            Aout = A[I].T[I].T
-            bout = b[I].T[I].T
+            Aout = A[I][:, I]
+            bout = b[I][:, I]
         elif isinstance(b, ndarray):
-            Aout = A[I].T[I].T
-            bout = b[I] - A[I].T[D].T @ x[D]
+            Aout = A[I][:, I]
+            bout = b[I] - A[I][:, D] @ x[D]
         else:
             raise Exception("Type of second arg not supported.")
         ret_value = (Aout, bout)
@@ -605,8 +605,8 @@ def condense(A: spmatrix,
 
 def mpc(A: spmatrix,
         b: ndarray,
-        S: Optional[DofsCollection] = None,
-        M: Optional[DofsCollection] = None,
+        S: Optional[ndarray] = None,
+        M: Optional[ndarray] = None,
         T: Optional[spmatrix] = None,
         g: Optional[ndarray] = None) -> CondensedSystem:
     """Apply a multipoint constraint on the linear system.
@@ -617,24 +617,19 @@ def mpc(A: spmatrix,
     b
         The linear system to constrain.
     S
-        The set of DOFs that are eliminated from the system.
     M
-        The set of DOFs that are kept in the system.
     T
     g
-        The constraint is of the form `x[M] = T @ x[S] + g`.
+        The constraint is of the form `x[S] = T @ x[M] + g`.
 
     """
     if M is None:
         M = np.array([], dtype=np.int64)
-    else:
-        M = _flatten_dofs(M)
     if S is None:
-        raise NotImplementedError("S must be specified.")
-    S = _flatten_dofs(S)
+        S = np.array([], dtype=np.int64)
 
-    assert isinstance(S, ndarray) and isinstance(M, ndarray)
-    U = np.setdiff1d(np.arange(A.shape[0]), np.concatenate((M, S)))
+    U = np.setdiff1d(np.arange(A.shape[0], dtype=np.int64),
+                     np.concatenate((M, S)))
 
     if T is None:
         T = sp.eye(len(S), len(M))
@@ -643,18 +638,17 @@ def mpc(A: spmatrix,
 
     B = bmat([
         [
-            A[U].T[U].T,
-            A[U].T[M].T + A[U].T[S].T @ T,
+            A[U][:, U],
+            A[U][:, M] + A[U][:, S] @ T,
         ],
         [
-            T.T @ A[S].T[U].T + A[M].T[U].T,
-            (A[M].T[M].T + T.T @ A[S].T[M].T + A[M].T[S].T @ T
-             + T.T @ A[S].T[S].T @ T),
+            A[M][:, U],
+            A[M][:, M] + A[M][:, S] @ T,
         ]], 'csr')
 
     if b.ndim == 1:
-        y = np.concatenate((b[U] - A[U].T[S].T @ g,
-                            b[M] - A[M].T[S].T @ g))
+        y = np.concatenate((b[U] - A[U][:, S] @ g,
+                            b[M] - A[M][:, S] @ g))
     else:
         y = bmat([
             [

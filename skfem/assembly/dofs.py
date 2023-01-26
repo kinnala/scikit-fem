@@ -29,6 +29,7 @@ class DofsView:
         default_factory=lambda: slice(None))
     interior_rows: Union[ndarray, slice] = field(
         default_factory=lambda: slice(None))
+    doflocs: Any = None
 
     def __repr__(self):
         nnodal = len(np.unique(
@@ -99,6 +100,24 @@ class DofsView:
                  .flatten())
             ))
         )
+
+    def sort(self, sorting=None) -> ndarray:
+        """Sort a set of DOFs based on output value of a given function.
+
+        Parameters
+        ----------
+        sorting
+            Optionally, specify a function which takes in a set of DOF
+            locations and outputs a number.  Used for sorting the
+            DOFs.  By default, the function "sum(x)" is used.
+
+        """
+        if sorting is None:
+            def sorting(x):
+                return sum(x)
+        dofs = self.flatten()
+        ix = np.argsort(sorting(self.doflocs[:, dofs]))
+        return dofs[ix]
 
     def _intersect(self, a, b):
         if isinstance(a, slice):
@@ -307,10 +326,41 @@ class Dofs:
         # total dofs
         self.N = np.max(self.element_dofs) + 1
 
+    def get_vertex_dofs(
+            self,
+            nodes: ndarray,
+            skip_dofnames: Optional[List[str]] = None,
+            doflocs: Optional[ndarray] = None
+    ) -> DofsView:
+        """Return a subset of DOFs corresponding to the given elements.
+
+        Parameters
+        ----------
+        nodes
+            An array of vertex indices.
+        skip_dofnames
+            An array of dofnames to skip.
+
+        """
+        if skip_dofnames is None:
+            skip_dofnames = []
+
+        return DofsView(
+            self,
+            nodes,
+            np.empty((0,), dtype=np.int64),
+            np.empty((0,), dtype=np.int64),
+            np.empty((0,), dtype=np.int64),
+            *self._dofnames_to_rows(skip_dofnames, skip=True),
+            doflocs=doflocs,
+        )
+
     def get_element_dofs(
             self,
             elements: ndarray,
-            skip_dofnames: Optional[List[str]] = None) -> DofsView:
+            skip_dofnames: Optional[List[str]] = None,
+            doflocs: Optional[ndarray] = None
+    ) -> DofsView:
         """Return a subset of DOFs corresponding to the given elements.
 
         Parameters
@@ -341,12 +391,16 @@ class Dofs:
             facet_ix,
             edge_ix,
             interior_ix,
-            *self._dofnames_to_rows(skip_dofnames, skip=True)
+            *self._dofnames_to_rows(skip_dofnames, skip=True),
+            doflocs=doflocs
         )
 
-    def get_facet_dofs(self,
-                       facets: ndarray,
-                       skip_dofnames: Optional[List[str]] = None) -> DofsView:
+    def get_facet_dofs(
+            self,
+            facets: ndarray,
+            skip_dofnames: Optional[List[str]] = None,
+            doflocs: Optional[ndarray] = None
+    ) -> DofsView:
         """Return a subset of DOFs corresponding to the given facets.
 
         Parameters
@@ -379,7 +433,8 @@ class Dofs:
             facet_ix,
             edge_ix,
             np.empty((0,), dtype=np.int64),
-            *self._dofnames_to_rows(skip_dofnames, skip=True)
+            *self._dofnames_to_rows(skip_dofnames, skip=True),
+            doflocs=doflocs,
         )
 
     def _by_name(self,
