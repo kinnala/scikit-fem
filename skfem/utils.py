@@ -642,8 +642,9 @@ def mpc(A: spmatrix,
             A[U][:, M] + A[U][:, S] @ T,
         ],
         [
-            A[M][:, U],
-            A[M][:, M] + A[M][:, S] @ T,
+            T.T @ A[S][:, U] + A[M][:, U],
+            (A[M][:, M] + T.T @ A[S][:, M] + A[M][:, S] @ T
+             + T.T @ A[S][:, S] @ T),
         ]], 'csr')
 
     if b.ndim == 1:
@@ -652,14 +653,13 @@ def mpc(A: spmatrix,
     else:
         y = bmat([
             [
-                b[U].T[U].T + sp.diags((A[U].T[S].T @ g, ), (0, )),
-                b[U].T[M].T + b[U].T[S].T @ T,
+                b[U][:, U],
+                b[U][:, M] + b[U][:, S] @ T,
             ],
             [
-                T.T @ b[S].T[U].T + b[M].T[U].T,
-                (b[M].T[M].T + T.T @ b[S].T[M].T + b[M].T[S].T @ T
-                 + T.T @ b[S].T[S].T @ T
-                 + sp.diags((A[M].T[S].T @ g, ), (0, )))
+                T.T @ b[S][:, U] + b[M][:, U],
+                (b[M][:, M] + T.T @ b[S][:, M] + b[M][:, S] @ T
+                + T.T @ b[S][:, S] @ T),
             ]], 'csr')
 
     return (
