@@ -229,24 +229,19 @@ class AbstractBasis:
 
         if elements is not None:
             elements = self.mesh.normalize_elements(elements)
-            return self.dofs.get_element_dofs(elements, skip_dofnames=skip)
+            return self.dofs.get_element_dofs(elements,
+                                              skip_dofnames=skip,
+                                              doflocs=self.doflocs)
         elif nodes is not None:
             nodes = self.mesh.normalize_nodes(nodes)
-            return self.dofs.get_vertex_dofs(nodes, skip_dofnames=skip)
+            return self.dofs.get_vertex_dofs(nodes,
+                                             skip_dofnames=skip,
+                                             doflocs=self.doflocs)
 
         facets = self.mesh.normalize_facets(facets)
-        return self.dofs.get_facet_dofs(facets, skip_dofnames=skip)
-
-    def sort_dofs(
-            self, dofs: ndarray,
-            sort: Optional[Callable[[ndarray], ndarray]] = None) -> ndarray:
-        """Sort a set of DOFs based on output value of a given function."""
-        if sort is None:
-            def sort(x):
-                return sum(x)
-        dofs = dofs.flatten()
-        ix = np.argsort(sort(self.doflocs[:, dofs]))
-        return dofs[ix]
+        return self.dofs.get_facet_dofs(facets,
+                                        skip_dofnames=skip,
+                                        doflocs=self.doflocs)
 
     def __repr__(self):
         size = sum([sum([y.size if hasattr(y, 'size') else 0

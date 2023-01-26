@@ -98,32 +98,27 @@ def test_mpc_doubly_periodic():
 
     basis = Basis(m, e)
 
-    left = basis.get_dofs(facets='left')
-    right = basis.get_dofs(facets='right')
-    top = basis.get_dofs(facets='top')
-    bottom = basis.get_dofs(facets='bottom')
+    left = basis.get_dofs(facets='left').sort()
+    right = basis.get_dofs(facets='right').sort()
+    top = basis.get_dofs(facets='top').sort()
+    bottom = basis.get_dofs(facets='bottom').sort()
 
-    topleft = basis.get_dofs(nodes=[0, 1])
-    topright = basis.get_dofs(nodes=[1, 1])
-    bottomright = basis.get_dofs(nodes=[1, 0])
-    bottomleft = basis.get_dofs(nodes=[0, 0])
-
+    topleft = basis.get_dofs(nodes=(0, 1))
+    others = basis.get_dofs(nodes=[(1, 1), (1, 0), (0, 0)])
     A = asm(laplace, basis)
     f = asm(LinearForm(lambda v, w: (np.sin(2. * np.pi * w.x[0])
                                      + np.sin(2. * np.pi * w.x[1])) * v), basis)
 
     # doubly periodic
     M = np.concatenate((
-        basis.sort_dofs(np.setdiff1d(left, np.concatenate((topleft, bottomleft)))),
-        basis.sort_dofs(np.setdiff1d(top, np.concatenate((topleft, topright)))),
+        left[1:-1],
+        top[1:-1],
         topleft,
     ))
     S = np.concatenate((
-        basis.sort_dofs(np.setdiff1d(right, np.concatenate((topright, bottomright)))),
-        basis.sort_dofs(np.setdiff1d(bottom, np.concatenate((bottomleft, bottomright)))),
-        topright,
-        bottomright,
-        bottomleft,
+        right[1:-1],
+        bottom[1:-1],
+        others
     ))
     T = scipy.sparse.eye(len(S), len(M)).tocsr()
     T[-1, -1] = 1

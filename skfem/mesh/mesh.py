@@ -1078,13 +1078,21 @@ class Mesh:
             behavior based on the type of this parameter.
 
         """
-        if isinstance(nodes, list):
+        if isinstance(nodes, tuple):
             return self.normalize_nodes(
-                lambda x: np.linalg.norm(x - np.array(nodes)[:, None],
+                lambda x: np.linalg.norm(x - np.array(list(nodes))[:, None],
                                          axis=0) < 1e-12
             )
-        if isinstance(nodes, tuple):
-            return self.normalize_nodes(list(nodes))
+        if isinstance(nodes, ndarray):
+            # assumed an array of nodes
+            return nodes
+        elif isinstance(nodes, (list, set)):
+            # Recurse over the list, building an array of all matching elements
+            return np.unique(
+                np.concatenate(
+                    [self.normalize_nodes(n) for n in nodes]
+                )
+            )
         elif callable(nodes):
             return self.nodes_satisfying(nodes)
         raise NotImplementedError
