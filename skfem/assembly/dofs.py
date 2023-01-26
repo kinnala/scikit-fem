@@ -345,14 +345,19 @@ class Dofs:
         if skip_dofnames is None:
             skip_dofnames = []
 
+        r1, r2, r3, r4 = self._dofnames_to_rows(skip_dofnames, skip=True)
+
         return DofsView(
             self,
             nodes,
             np.empty((0,), dtype=np.int64),
             np.empty((0,), dtype=np.int64),
             np.empty((0,), dtype=np.int64),
-            *self._dofnames_to_rows(skip_dofnames, skip=True),
-            doflocs=doflocs,
+            r1,
+            r2,
+            r3,
+            r4,
+            doflocs
         )
 
     def get_element_dofs(
@@ -385,14 +390,19 @@ class Dofs:
         if skip_dofnames is None:
             skip_dofnames = []
 
+        r1, r2, r3, r4 = self._dofnames_to_rows(skip_dofnames, skip=True)
+
         return DofsView(
             self,
             nodal_ix,
             facet_ix,
             edge_ix,
             interior_ix,
-            *self._dofnames_to_rows(skip_dofnames, skip=True),
-            doflocs=doflocs
+            r1,
+            r2,
+            r3,
+            r4,
+            doflocs
         )
 
     def get_facet_dofs(
@@ -427,14 +437,19 @@ class Dofs:
         if skip_dofnames is None:
             skip_dofnames = []
 
+        r1, r2, r3, r4 = self._dofnames_to_rows(skip_dofnames, skip=True)
+
         return DofsView(
             self,
             nodal_ix,
             facet_ix,
             edge_ix,
             np.empty((0,), dtype=np.int64),
-            *self._dofnames_to_rows(skip_dofnames, skip=True),
-            doflocs=doflocs,
+            r1,
+            r2,
+            r3,
+            r4,
+            doflocs
         )
 
     def _by_name(self,
