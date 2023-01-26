@@ -645,16 +645,32 @@ def mpc(A: spmatrix,
             A[U][:, M] + A[U][:, S] @ T,
         ],
         [
-            A[M][:, U],
-            A[M][:, M] + A[M][:, S] @ T,
+            T.T @ A[S][:, U] + A[M][:, U],
+            (A[M][:, M] + T.T @ A[S][:, M] + A[M][:, S] @ T
+             + T.T @ A[S][:, S] @ T),
         ]], 'csr')
-    y = np.concatenate((b[U] - A[U][:, S] @ g,
-                        b[M] - A[M][:, S] @ g))
+
+    if b.ndim == 1:
+        y = np.concatenate((b[U] - A[U][:, S] @ g,
+                            b[M] - A[M][:, S] @ g))
+    else:
+        if np.any(np.nonzero(g)):
+            raise NotImplementedError('Not yet implemented for g != 0')
+        y = bmat([
+            [
+                b[U][:, U],
+                b[U][:, M] + b[U][:, S] @ T,
+            ],
+            [
+                T.T @ b[S][:, U] + b[M][:, U],
+                (b[M][:, M] + T.T @ b[S][:, M] + b[M][:, S] @ T
+                    + T.T @ b[S][:, S] @ T),
+            ]], 'csr')
 
     return (
         B,
         y,
-        np.zeros_like(b, dtype=B.dtype),
+        np.zeros(b.shape[0], dtype=B.dtype),
         (
             np.concatenate((U, M, S)),
             lambda x: np.concatenate((x, T @ x[len(U):] + g)),
