@@ -659,7 +659,7 @@ def mpc(A: spmatrix,
             [
                 T.T @ b[S][:, U] + b[M][:, U],
                 (b[M][:, M] + T.T @ b[S][:, M] + b[M][:, S] @ T
-                + T.T @ b[S][:, S] @ T),
+                    + T.T @ b[S][:, S] @ T),
             ]], 'csr')
 
     return (
