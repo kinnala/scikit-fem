@@ -1,7 +1,7 @@
 import logging
 import importlib
 from warnings import warn
-from typing import Any, List, Optional, Tuple, Type, Union, Callable
+from typing import Any, List, Optional, Tuple, Type, Union
 
 import numpy as np
 from numpy import ndarray
