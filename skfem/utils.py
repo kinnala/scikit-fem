@@ -636,6 +636,9 @@ def mpc(A: spmatrix,
     if g is None:
         g = np.zeros(len(S))
 
+    if T.shape[0] != len(S) or T.shape[1] != len(M) or len(g) != len(S):
+        raise ValueError("Inputs to mpc have incompatible shapes.")
+
     B = bmat([
         [
             A[U][:, U],

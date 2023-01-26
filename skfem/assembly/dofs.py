@@ -332,7 +332,7 @@ class Dofs:
             skip_dofnames: Optional[List[str]] = None,
             doflocs: Optional[ndarray] = None
     ) -> DofsView:
-        """Return a subset of DOFs corresponding to the given elements.
+        """Return a subset of DOFs corresponding to the given nodes.
 
         Parameters
         ----------

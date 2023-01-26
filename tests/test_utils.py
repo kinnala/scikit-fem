@@ -5,7 +5,7 @@ import scipy.sparse
 from numpy.testing import assert_almost_equal
 
 from skfem.assembly import CellBasis, Basis, LinearForm, asm, BilinearForm
-from skfem.element import ElementTriP1, ElementQuad1
+from skfem.element import ElementTriP1, ElementQuad1, ElementTriP2
 from skfem.mesh import MeshTri, MeshQuad
 from skfem.utils import projection, enforce, condense, solve, mpc
 from skfem.models import laplace, mass, unit_load
@@ -91,6 +91,31 @@ def test_mpc_periodic():
     assert_almost_equal(y[basis.get_dofs('left')], y[basis.get_dofs(lambda x: x[0] == .5)])
 
 
+def test_mpc_2x_periodic():
+
+    m = MeshTri.init_sqsymmetric().refined(4)
+    e = ElementTriP2()
+
+    basis = Basis(m, e)
+
+    left = basis.get_dofs(facets='left').sort()[1:-1]
+    right = basis.get_dofs(facets='right').sort()[1:-1]
+    dirichlet = basis.get_dofs(facets={'top', 'bottom'})
+
+    A = asm(laplace, basis)
+    f = asm(LinearForm(lambda v, w: 1. * v), basis)
+
+    # doubly periodic
+    M = left
+    S = np.concatenate((right, dirichlet))
+    T = 2. * scipy.sparse.eye(len(S), len(M)).tocsr()
+
+    y = solve(*mpc(A, f, M=M, S=S, T=T))
+
+    assert_almost_equal(2 * y[basis.get_dofs('left')], y[basis.get_dofs('right')])
+
+
+
 def test_mpc_doubly_periodic():
 
     m = MeshTri.init_sqsymmetric().refined(5)
@@ -130,6 +155,9 @@ def test_mpc_doubly_periodic():
     # T = 2 * scipy.sparse.eye(len(S), len(M))
 
     y = solve(*mpc(A, f, M=M, S=S, T=T))
+
+    assert_almost_equal(y[basis.get_dofs('left')], y[basis.get_dofs('right')])
+    assert_almost_equal(y[basis.get_dofs('bottom')], y[basis.get_dofs('top')])
 
 
 def test_mpc_dirichlet():

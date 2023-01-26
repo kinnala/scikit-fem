@@ -212,6 +212,11 @@ with respect to documented and/or tested features.
 ### Unreleased
 
 - Added: `Mesh.restrict` now preserves subdomains and boundaries
+- Added: `skfem.utils.mpc` for setting multipoint constraints
+- Added: `Basis.get_dofs` now supports fetching DOFs at specific nodes
+  through kwarg `nodes`
+- Added: `DofsView.sort` for sorting a set of DOFs returned by
+  `Basis.get_dofs`
 
 ## [8.0.0] - 2022-12-16
 

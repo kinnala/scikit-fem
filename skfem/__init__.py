@@ -27,6 +27,7 @@ __all__ = all_mesh + all_assembly + all_element + [  # noqa
     'projection',  # TODO remove due to deprecation
     'solve',
     'bmat',
+    'mpc',
     'solver_direct_scipy',
     'solver_eigen_scipy',
     'solver_eigen_scipy_sym',
