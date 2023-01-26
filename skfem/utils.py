@@ -210,7 +210,10 @@ def solve_eigen(A: spmatrix,
     if x is not None and I is not None:
         L, X = solver(A, M, **kwargs)
         y = np.tile(x.copy()[:, None], (1, X.shape[1]))
-        y[I] = X
+        if isinstance(I, tuple):
+            np.add.at(y, I[0], np.array([I[1](x) for x in X.T]).T)
+        else:
+            y[I] = X
         return L, y
     return solver(A, M, **kwargs)
 
@@ -227,7 +230,10 @@ def solve_linear(A: spmatrix,
 
     if x is not None and I is not None:
         y = x.copy()
-        y[I] = solver(A, b, **kwargs)
+        if isinstance(I, tuple):
+            np.add.at(y, I[0], I[1](solver(A, b, **kwargs)))
+        else:
+            y[I] = solver(A, b, **kwargs)
         return y
     return solver(A, b, **kwargs)
 
@@ -578,15 +584,15 @@ def condense(A: spmatrix,
     ret_value: CondensedSystem = (None,)
 
     if b is None:
-        ret_value = (A[I].T[I].T,)
+        ret_value = (A[I][:, I],)
     else:
         if isinstance(b, spmatrix):
             # generalized eigenvalue problem: don't modify rhs
-            Aout = A[I].T[I].T
-            bout = b[I].T[I].T
+            Aout = A[I][:, I]
+            bout = b[I][:, I]
         elif isinstance(b, ndarray):
-            Aout = A[I].T[I].T
-            bout = b[I] - A[I].T[D].T @ x[D]
+            Aout = A[I][:, I]
+            bout = b[I] - A[I][:, D] @ x[D]
         else:
             raise Exception("Type of second arg not supported.")
         ret_value = (Aout, bout)
@@ -595,6 +601,65 @@ def condense(A: spmatrix,
         ret_value += (x, I)
 
     return ret_value if len(ret_value) > 1 else ret_value[0]
+
+
+def mpc(A: spmatrix,
+        b: ndarray,
+        S: Optional[ndarray] = None,
+        M: Optional[ndarray] = None,
+        T: Optional[spmatrix] = None,
+        g: Optional[ndarray] = None) -> CondensedSystem:
+    """Apply a multipoint constraint on the linear system.
+
+    Parameters
+    ----------
+    A
+    b
+        The linear system to constrain.
+    S
+    M
+    T
+    g
+        The constraint is of the form `x[S] = T @ x[M] + g`.
+
+    """
+    if M is None:
+        M = np.array([], dtype=np.int64)
+    if S is None:
+        S = np.array([], dtype=np.int64)
+
+    U = np.setdiff1d(np.arange(A.shape[0], dtype=np.int64),
+                     np.concatenate((M, S)))
+
+    if T is None:
+        T = sp.eye(len(S), len(M))
+    if g is None:
+        g = np.zeros(len(S))
+
+    if T.shape[0] != len(S) or T.shape[1] != len(M) or len(g) != len(S):
+        raise ValueError("Inputs to mpc have incompatible shapes.")
+
+    B = bmat([
+        [
+            A[U][:, U],
+            A[U][:, M] + A[U][:, S] @ T,
+        ],
+        [
+            A[M][:, U],
+            A[M][:, M] + A[M][:, S] @ T,
+        ]], 'csr')
+    y = np.concatenate((b[U] - A[U][:, S] @ g,
+                        b[M] - A[M][:, S] @ g))
+
+    return (
+        B,
+        y,
+        np.zeros_like(b, dtype=B.dtype),
+        (
+            np.concatenate((U, M, S)),
+            lambda x: np.concatenate((x, T @ x[len(U):] + g)),
+        )
+    )
 
 
 # additional utilities

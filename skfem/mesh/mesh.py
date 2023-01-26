@@ -1068,12 +1068,41 @@ class Mesh:
         mod = importlib.import_module('skfem.visuals.{}'.format(visuals))
         return mod.plot(self, x, **kwargs)
 
+    def normalize_nodes(self, nodes) -> ndarray:
+        """Generate an array of node indices.
+
+        Parameters
+        ----------
+        nodes
+            Criteria of which nodes to include.  Function has different
+            behavior based on the type of this parameter.
+
+        """
+        if isinstance(nodes, tuple):
+            return self.normalize_nodes(
+                lambda x: np.linalg.norm(x - np.array(list(nodes))[:, None],
+                                         axis=0) < 1e-12
+            )
+        if isinstance(nodes, ndarray):
+            # assumed an array of nodes
+            return nodes
+        elif isinstance(nodes, (list, set)):
+            # Recurse over the list, building an array of all matching elements
+            return np.unique(
+                np.concatenate(
+                    [self.normalize_nodes(n) for n in nodes]
+                )
+            )
+        elif callable(nodes):
+            return self.nodes_satisfying(nodes)
+        raise NotImplementedError
+
     def normalize_facets(self, facets) -> ndarray:
         """Generate an array of facet indices.
 
         Parameters
         ----------
-        elements
+        facets
             Criteria of which facets to include.  Function has different
             behavior based on the type of this parameter.
 
