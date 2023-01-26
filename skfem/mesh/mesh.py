@@ -194,7 +194,8 @@ class Mesh:
             self,
             _subdomains={
                 **({} if self._subdomains is None else self._subdomains),
-                **{name: self.elements_satisfying(test)
+                **{name: (self.elements_satisfying(test)
+                          if callable(test) else test)
                    for name, test in subdomains.items()},
             },
         )
@@ -1007,13 +1008,21 @@ class Mesh:
 
         """
         elements = self.normalize_elements(elements)
-        p, t, _ = self._reix(self.t[:, elements])
+        p, t, ix = self._reix(self.t[:, elements])
+        newt = np.zeros(self.t.shape[1], dtype=np.int64) - 1
+        newt[elements] = np.arange(len(elements), dtype=np.int64)
+        newf = np.zeros(self.facets.shape[1], dtype=np.int64) - 1
+        facets = np.unique(self.t2f[:, elements])
+        newf[facets] = np.arange(len(facets), dtype=np.int64)
         return replace(
             self,
             doflocs=p,
             t=t,
-            _boundaries=None,
-            _subdomains=None,
+            _boundaries={k: np.extract(newf[self.boundaries[k]] >= 0,
+                                       newf[self.boundaries[k]])
+                         for k in self.boundaries},
+            _subdomains={k: newt[np.intersect1d(self.subdomains[k], elements)]
+                         for k in self.subdomains},
         )
 
     def remove_elements(self, element_indices: ndarray):
