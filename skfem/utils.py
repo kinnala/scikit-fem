@@ -665,7 +665,7 @@ def mpc(A: spmatrix,
     return (
         B,
         y,
-        np.zeros((b.shape[0]), dtype=B.dtype),
+        np.zeros(b.shape[0], dtype=B.dtype),
         (
             np.concatenate((U, M, S)),
             lambda x: np.concatenate((x, T @ x[len(U):] + g)),
