@@ -390,7 +390,7 @@ class Mesh:
 
         """
         midp = self.p[:, self.t].mean(axis=1)
-        return np.nonzero(test(midp))[0]
+        return np.nonzero(test(midp))[0].astype(np.uint64)
 
     def _expand_facets(self, ix: ndarray) -> Tuple[ndarray, ndarray]:
         """Return vertices and edges corresponding to given facet indices.
