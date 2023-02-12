@@ -444,7 +444,7 @@ class Dofs:
             nodal_ix,
             facet_ix,
             edge_ix,
-            np.empty((0,), dtype=np.int64),
+            np.empty((0,), dtype=np.uint64),
             r1,
             r2,
             r3,
