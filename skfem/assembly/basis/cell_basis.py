@@ -237,6 +237,16 @@ class CellBasis(AbstractBasis):
             elements=self.tind,
         )
 
+    def with_elements(self, elements: Optional[Any] = None) -> 'CellBasis':
+        """Return a similar basis on a subset of element indices."""
+        return type(self)(
+            self.mesh,
+            self.elem,
+            mapping=self.mapping,
+            quadrature=self.quadrature,
+            elements=elements,
+        )
+
     def boundary(self,
                  facets: Optional[Any] = None,
                  intorder: Optional[int] = None,
