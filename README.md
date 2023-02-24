@@ -217,6 +217,7 @@ with respect to documented and/or tested features.
   through kwarg `nodes`
 - Added: `DofsView.sort` for sorting a set of DOFs returned by
   `Basis.get_dofs`
+- Added: `CellBasis.with_elements` as a shortcut for initiating a new Basis with subset of elements
 
 ## [8.0.0] - 2022-12-16
 
