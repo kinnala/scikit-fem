@@ -707,3 +707,15 @@ class TestZerosOnes(TestCase):
         assert_array_equal(
             a.astype(float) + b, np.array([3., 3.])
         )
+
+
+def test_with_elements():
+    mesh = MeshTri().refined(3).with_subdomains({'a': lambda x: x[0] < .5})
+    basis = CellBasis(mesh, ElementTriP0())
+    basis_half = basis.with_elements('a')
+
+    assert basis.mesh == basis_half.mesh
+    assert basis.elem == basis_half.elem
+    assert basis.mapping == basis_half.mapping
+    assert basis.quadrature == basis_half.quadrature
+    assert all(basis_half.tind == basis.mesh.normalize_elements('a'))
