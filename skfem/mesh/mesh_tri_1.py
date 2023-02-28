@@ -331,10 +331,23 @@ class MeshTri1(MeshSimplex, Mesh2D):
         # new nodes
         p = .5 * (m.p[:, m.facets[0, facets == 1]] +
                   m.p[:, m.facets[1, facets == 1]])
+        
+        def old_to_new_subdomain(old_elements):
+            sums = [np.count_nonzero(section) for section in (rest, red, blue1, blue2, green)]
+            starts = np.cumsum(np.array((1,4,3,3,2)) * sums)
+
+            rest_t = np.cumsum(rest, dtype=np.uint64)[np.intersect1d(np.where(rest)[0].astype(np.uint64),old_elements)]-1
+
+            red_t = starts[0] + np.array([np.sum(red[:i])+j*sums[1] for i in old_elements if red[i] for j in range(4)], dtype=np.uint64)
+            blue1_t = starts[1] + np.array([np.sum(blue1[:i])+j*sums[2] for i in old_elements if blue1[i] for j in range(3)], dtype=np.uint64)
+            blue2_t = starts[2] + np.array([np.sum(blue2[:i])+j*sums[3] for i in old_elements if blue2[i] for j in range(3)], dtype=np.uint64)
+            green_t = starts[3] + np.array([np.sum(green[:i])+j*sums[4] for i in old_elements if green[i] for j in range(2)], dtype=np.uint64)
+            return np.hstack((rest_t, red_t, blue1_t, blue2_t, green_t), dtype=np.uint64)
 
         return (
             np.hstack((m.p, p)),
             np.hstack((m.t[:, rest], t_red, t_blue1, t_blue2, t_green)),
+            {k: old_to_new_subdomain(m.subdomains[k]) for k in m.subdomains}
         )
 
     def _adaptive(self, marked):
@@ -345,14 +358,14 @@ class MeshTri1(MeshSimplex, Mesh2D):
             sort_t=False,
         )
         facets = self._adaptive_find_facets(sorted_mesh, marked)
-        doflocs, t = self._adaptive_split_elements(sorted_mesh, facets)
+        doflocs, t, subdomains = self._adaptive_split_elements(sorted_mesh, facets)
 
         return replace(
             self,
             doflocs=doflocs,
             t=t,
             _boundaries=None,
-            _subdomains=None,
+            _subdomains=subdomains,
         )
 
     def __mul__(self, other):
