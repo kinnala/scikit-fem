@@ -345,7 +345,8 @@ class MeshTri1(MeshSimplex, Mesh2D):
             sort_t=False,
         )
         facets = self._adaptive_find_facets(sorted_mesh, marked)
-        doflocs, t, subdomains = self._adaptive_split_elements(sorted_mesh, facets)
+        doflocs, t = self._adaptive_split_elements(sorted_mesh,
+                                                   facets)
 
         return replace(
             self,
