@@ -752,16 +752,32 @@ class Mesh:
         """
         m = self
         has_boundaries = self.boundaries is not None
-        if self.subdomains is not None:
-            logger.warning("Named subdomains invalidated by a call to "
-                           "Mesh.refined()")
+        has_subdomains = self.subdomains is not None
         if isinstance(times_or_ix, int):
             for _ in range(times_or_ix):
-                m = m._uniform()
+                mtmp = m._uniform()
+                # fix subdomains for all mesh types
+                if m._subdomains is not None:
+                    N = int(mtmp.t.shape[1] / m.t.shape[1])
+                    new_t = np.zeros((N, m.t.shape[1]), dtype=np.int64)
+                    new_t[0] = np.arange(m.t.shape[1], dtype=np.int64)
+                    for itr in range(N - 1):
+                        new_t[itr + 1] = new_t[itr] + m.t.shape[1]
+                    mtmp = replace(
+                        mtmp,
+                        _subdomains={
+                            name: np.sort(new_t[:, ixs].flatten())
+                            for name, ixs in m._subdomains.items()
+                        },
+                    )
+                m = mtmp
         else:
             m = m._adaptive(times_or_ix)
         if has_boundaries and m.boundaries is None:
             logger.warning("Named boundaries invalidated by a call to "
+                           "Mesh.refined()")
+        if has_subdomains and self.subdomains is None:
+            logger.warning("Named subdomains invalidated by a call to "
                            "Mesh.refined()")
         return m
 
