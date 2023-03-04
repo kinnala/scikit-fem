@@ -664,6 +664,30 @@ def mpc(A: spmatrix,
 
 # additional utilities
 
+def bc(solver, x=None, I=None, D=None):
+    """Magical wrapper for setting boundary conditions."""
+
+    def wrapped_solver(*args, **kwargs):
+        nonlocal x, I, D
+        A = args[0]
+        b = args[1]
+        b, x, I, D = _init_bc(A, b, x, I, D)
+        if 'x0' in kwargs:
+            kwargs['x0'] = kwargs['x0'][I]
+        out = solver(A[I][:, I],
+                     (b[I].T - A[I][:, D] @ x[D]).T,
+                     **kwargs)
+        if isinstance(out, tuple):
+            # => one of the scipy iterative solvers
+            x[I] = out[0]
+            return (x,) + out[1:]
+        # support multiple rhs
+        x = np.broadcast_to(x, b.shape).copy()
+        x[I] = out
+        return x
+
+    return wrapped_solver
+
 
 def bmat(blocks, *args, **kwargs):
     """A variant of scipy bmat which adds block indices to out.blocks."""

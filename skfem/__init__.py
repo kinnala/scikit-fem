@@ -34,5 +34,6 @@ __all__ = all_mesh + all_assembly + all_element + [  # noqa
     'solver_iter_pcg',
     'solver_iter_krylov',
     'solver_iter_cg',
+    'bc',
     '__version__',
 ]
