@@ -61,13 +61,11 @@ using the `non-conforming Morley finite element
 <https://users.aalto.fi/~jakke74/WebFiles/Slides-Niiranen-ADMOS-09.pdf>`_ which
 is a piecewise quadratic :math:`C^0`-continuous element for biharmonic problems.
 
-The full source code of the example reads as follows:
-
-.. literalinclude:: examples/ex02.py
-    :start-after: EOF"""
+"""
+import numpy as np
 from skfem import *
 from skfem.models.poisson import unit_load
-import numpy as np
+from scipy.sparse.linalg import spsolve
 
 m = (
     MeshTri.init_symmetric()
@@ -82,11 +80,11 @@ m = (
 )
 
 e = ElementTriMorley()
-ib = Basis(m, e)
+basis = Basis(m, e)
 
 
 @BilinearForm
-def bilinf(u, v, w):
+def bilinf(u, v, _):
     from skfem.helpers import dd, ddot, trace, eye
     d = 0.1
     E = 200e9
@@ -95,25 +93,25 @@ def bilinf(u, v, w):
     def C(T):
         return E / (1 + nu) * (T + nu / (1 - nu) * eye(trace(T), 2))
 
-    return d**3 / 12.0 * ddot(C(dd(u)), dd(v))
+    return d ** 3 / 12.0 * ddot(C(dd(u)), dd(v))
 
 
-K = asm(bilinf, ib)
-f = 1e6 * asm(unit_load, ib)
+K = asm(bilinf, basis)
+f = 1e6 * asm(unit_load, basis)
 
-D = np.hstack([ib.get_dofs("left"), ib.get_dofs({"right", "top"}).all("u")])
-
-x = solve(*condense(K, f, D=D))
+D = np.concatenate((
+    basis.get_dofs("left"),
+    basis.get_dofs({"right", "top"}).all("u"),
+))
+x = bc(spsolve, D=D)(K, f)
 
 def visualize():
-    from skfem.visuals.matplotlib import draw, plot
-    ax = draw(m)
-    return plot(ib,
-                x,
-                ax=ax,
-                shading='gouraud',
-                colorbar=True,
-                nrefs=2)
+    ax = m.draw()
+    return basis.plot(x,
+                      ax=ax,
+                      shading='gouraud',
+                      colorbar=True,
+                      nrefs=2)
 
 if __name__ == "__main__":
     visualize().show()

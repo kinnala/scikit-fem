@@ -1,5 +1,6 @@
 from skfem import *
 from skfem.helpers import dot, grad
+from scipy.sparse.linalg import spsolve
 
 # # enable additional mesh validity checks, sacrificing performance
 # import logging
@@ -31,11 +32,9 @@ b = asm(rhs, basis)
 # A = laplace.assemble(basis)
 # b = rhs.assemble(basis)
 
-# enforce Dirichlet boundary conditions
-A, b = enforce(A, b, D=m.boundary_nodes())
+# enforce Dirichlet boundary conditions and solve
+x = bc(spsolve, D=m.boundary_nodes())(A, b)
 
-# solve -- can be anything that takes a sparse matrix and a right-hand side
-x = solve(A, b)
 
 def visualize():
     from skfem.visuals.matplotlib import plot
