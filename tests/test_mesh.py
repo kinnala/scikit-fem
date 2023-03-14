@@ -656,3 +656,12 @@ def test_point_outside_mesh():
     m = MeshTri.load(MESH_PATH / 'troublesome_mesh.vtk')
     elem_finder = m.element_finder()
     elem_finder(*m.p)
+
+
+def test_refine_subdomains():
+
+    sdef = {'left': lambda x: x[0] < 0.5}
+    m1 = MeshTri().refined(3).with_subdomains(sdef).refined([1,2,3,4,5,10,25])
+    m2 = MeshTri().refined(3).refined([1,2,3,4,5,10,25]).with_subdomains(sdef)
+
+    np.testing.assert_equal(m1.subdomains, m2.subdomains)
