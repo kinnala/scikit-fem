@@ -370,12 +370,16 @@ class MeshTri1(MeshSimplex, Mesh2D):
             new_t[2, blue2] = np.arange(sre + 4 * sr + 3 * sb1 + 2 * sb2,
                                         sre + 4 * sr + 3 * sb1 + 3 * sb2,
                                         dtype=np.int64)
-            new_t[0, green] = np.arange(sre + 4 * sr + 3 * sb1 + 3 * sb2,
-                                        sre + 4 * sr + 3 * sb1 + 3 * sb2 + sg,
-                                        dtype=np.int64)
-            new_t[1, green] = np.arange(sre + 4 * sr + 3 * sb1 + 3 * sb2 + sg,
-                                        sre + 4 * sr + 3 * sb1 + 3 * sb2 + 2 * sg,
-                                        dtype=np.int64)
+            new_t[0, green] = np.arange(
+                sre + 4 * sr + 3 * sb1 + 3 * sb2,
+                sre + 4 * sr + 3 * sb1 + 3 * sb2 + sg,
+                dtype=np.int64,
+            )
+            new_t[1, green] = np.arange(
+                sre + 4 * sr + 3 * sb1 + 3 * sb2 + sg,
+                sre + 4 * sr + 3 * sb1 + 3 * sb2 + 2 * sg,
+                dtype=np.int64,
+            )
             subdomains = {
                 name: np.setdiff1d(np.unique(new_t[:, ixs]), [-1])
                 for name, ixs in subdomains.items()
