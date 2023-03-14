@@ -288,7 +288,7 @@ class MeshTri1(MeshSimplex, Mesh2D):
         return facets
 
     @staticmethod
-    def _adaptive_split_elements(m, facets):
+    def _adaptive_split_elements(m, facets, subdomains):
         """Define new elements."""
         ix = (-1) * np.ones(m.facets.shape[1], dtype=np.int64)
         ix[facets == 1] = (np.arange(np.count_nonzero(facets))
@@ -332,9 +332,59 @@ class MeshTri1(MeshSimplex, Mesh2D):
         p = .5 * (m.p[:, m.facets[0, facets == 1]] +
                   m.p[:, m.facets[1, facets == 1]])
 
+        if subdomains is not None:
+            new_t = np.zeros((4, m.t.shape[1]), dtype=np.int64) - 1
+            sre = np.sum(rest)
+            sr = np.sum(red)
+            sb1 = np.sum(blue1)
+            sb2 = np.sum(blue2)
+            sg = np.sum(green)
+            new_t[0, rest] = np.arange(sre, dtype=np.int64)
+            new_t[0, red] = np.arange(sre,
+                                      sre + sr,
+                                      dtype=np.int64)
+            new_t[1, red] = np.arange(sre + sr,
+                                      sre + 2 * sr,
+                                      dtype=np.int64)
+            new_t[2, red] = np.arange(sre + 2 * sr,
+                                      sre + 3 * sr,
+                                      dtype=np.int64)
+            new_t[3, red] = np.arange(sre + 3 * sr,
+                                      sre + 4 * sr,
+                                      dtype=np.int64)
+            new_t[0, blue1] = np.arange(sre + 4 * sr,
+                                        sre + 4 * sr + sb1,
+                                        dtype=np.int64)
+            new_t[1, blue1] = np.arange(sre + 4 * sr + sb1,
+                                        sre + 4 * sr + 2 * sb1,
+                                        dtype=np.int64)
+            new_t[2, blue1] = np.arange(sre + 4 * sr + 2 * sb1,
+                                        sre + 4 * sr + 3 * sb1,
+                                        dtype=np.int64)
+            new_t[0, blue2] = np.arange(sre + 4 * sr + 3 * sb1,
+                                        sre + 4 * sr + 3 * sb1 + sb2,
+                                        dtype=np.int64)
+            new_t[1, blue2] = np.arange(sre + 4 * sr + 3 * sb1 + sb2,
+                                        sre + 4 * sr + 3 * sb1 + 2 * sb2,
+                                        dtype=np.int64)
+            new_t[2, blue2] = np.arange(sre + 4 * sr + 3 * sb1 + 2 * sb2,
+                                        sre + 4 * sr + 3 * sb1 + 3 * sb2,
+                                        dtype=np.int64)
+            new_t[0, green] = np.arange(sre + 4 * sr + 3 * sb1 + 3 * sb2,
+                                        sre + 4 * sr + 3 * sb1 + 3 * sb2 + sg,
+                                        dtype=np.int64)
+            new_t[1, green] = np.arange(sre + 4 * sr + 3 * sb1 + 3 * sb2 + sg,
+                                        sre + 4 * sr + 3 * sb1 + 3 * sb2 + 2 * sg,
+                                        dtype=np.int64)
+            subdomains = {
+                name: np.setdiff1d(np.unique(new_t[:, ixs]), [-1])
+                for name, ixs in subdomains.items()
+            }
+
         return (
             np.hstack((m.p, p)),
             np.hstack((m.t[:, rest], t_red, t_blue1, t_blue2, t_green)),
+            subdomains,
         )
 
     def _adaptive(self, marked):
@@ -345,15 +395,18 @@ class MeshTri1(MeshSimplex, Mesh2D):
             sort_t=False,
         )
         facets = self._adaptive_find_facets(sorted_mesh, marked)
-        doflocs, t = self._adaptive_split_elements(sorted_mesh,
-                                                   facets)
+        doflocs, t, subdomains = self._adaptive_split_elements(
+            sorted_mesh,
+            facets,
+            self._subdomains,
+        )
 
         return replace(
             self,
             doflocs=doflocs,
             t=t,
             _boundaries=None,
-            _subdomains=None,
+            _subdomains=subdomains,
         )
 
     def __mul__(self, other):
