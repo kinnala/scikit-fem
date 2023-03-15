@@ -334,52 +334,27 @@ class MeshTri1(MeshSimplex, Mesh2D):
 
         if subdomains is not None:
             new_t = np.zeros((4, m.t.shape[1]), dtype=np.int64) - 1
-            sre = np.sum(rest)
-            sr = np.sum(red)
-            sb1 = np.sum(blue1)
-            sb2 = np.sum(blue2)
-            sg = np.sum(green)
-            new_t[0, rest] = np.arange(sre, dtype=np.int64)
-            new_t[0, red] = np.arange(sre,
-                                      sre + sr,
-                                      dtype=np.int64)
-            new_t[1, red] = np.arange(sre + sr,
-                                      sre + 2 * sr,
-                                      dtype=np.int64)
-            new_t[2, red] = np.arange(sre + 2 * sr,
-                                      sre + 3 * sr,
-                                      dtype=np.int64)
-            new_t[3, red] = np.arange(sre + 3 * sr,
-                                      sre + 4 * sr,
-                                      dtype=np.int64)
-            new_t[0, blue1] = np.arange(sre + 4 * sr,
-                                        sre + 4 * sr + sb1,
-                                        dtype=np.int64)
-            new_t[1, blue1] = np.arange(sre + 4 * sr + sb1,
-                                        sre + 4 * sr + 2 * sb1,
-                                        dtype=np.int64)
-            new_t[2, blue1] = np.arange(sre + 4 * sr + 2 * sb1,
-                                        sre + 4 * sr + 3 * sb1,
-                                        dtype=np.int64)
-            new_t[0, blue2] = np.arange(sre + 4 * sr + 3 * sb1,
-                                        sre + 4 * sr + 3 * sb1 + sb2,
-                                        dtype=np.int64)
-            new_t[1, blue2] = np.arange(sre + 4 * sr + 3 * sb1 + sb2,
-                                        sre + 4 * sr + 3 * sb1 + 2 * sb2,
-                                        dtype=np.int64)
-            new_t[2, blue2] = np.arange(sre + 4 * sr + 3 * sb1 + 2 * sb2,
-                                        sre + 4 * sr + 3 * sb1 + 3 * sb2,
-                                        dtype=np.int64)
-            new_t[0, green] = np.arange(
-                sre + 4 * sr + 3 * sb1 + 3 * sb2,
-                sre + 4 * sr + 3 * sb1 + 3 * sb2 + sg,
-                dtype=np.int64,
-            )
-            new_t[1, green] = np.arange(
-                sre + 4 * sr + 3 * sb1 + 3 * sb2 + sg,
-                sre + 4 * sr + 3 * sb1 + 3 * sb2 + 2 * sg,
-                dtype=np.int64,
-            )
+            nred = np.sum(red)
+            nblue1 = np.sum(blue1)
+            nblue2 = np.sum(blue2)
+            ngreen = np.sum(green)
+            offset = np.sum(rest)
+            new_t[0, rest] = np.arange(offset, dtype=np.int64)
+            new_t[:, red] = np.arange(offset,
+                                      offset + 4 * nred,
+                                      dtype=np.int64).reshape(4, -1)
+            offset += 4 * nred
+            new_t[:3, blue1] = np.arange(offset,
+                                         offset + 3 * nblue1,
+                                         dtype=np.int64).reshape(3, -1)
+            offset += 3 * nblue1
+            new_t[:3, blue2] = np.arange(offset,
+                                         offset + 3 * nblue2,
+                                         dtype=np.int64).reshape(3, -1)
+            offset += 3 * nblue2
+            new_t[:2, green] = np.arange(offset,
+                                         offset + 2 * ngreen,
+                                         dtype=np.int64).reshape(2, -1)
             subdomains = {
                 name: np.setdiff1d(np.unique(new_t[:, ixs]), [-1])
                 for name, ixs in subdomains.items()
