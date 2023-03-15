@@ -288,7 +288,7 @@ class MeshTri1(MeshSimplex, Mesh2D):
         return facets
 
     @staticmethod
-    def _adaptive_split_elements(m, facets):
+    def _adaptive_split_elements(m, facets, subdomains):
         """Define new elements."""
         ix = (-1) * np.ones(m.facets.shape[1], dtype=np.int64)
         ix[facets == 1] = (np.arange(np.count_nonzero(facets))
@@ -332,9 +332,38 @@ class MeshTri1(MeshSimplex, Mesh2D):
         p = .5 * (m.p[:, m.facets[0, facets == 1]] +
                   m.p[:, m.facets[1, facets == 1]])
 
+        if subdomains is not None:
+            new_t = np.zeros((4, m.t.shape[1]), dtype=np.int64) - 1
+            nred = np.sum(red)
+            nblue1 = np.sum(blue1)
+            nblue2 = np.sum(blue2)
+            ngreen = np.sum(green)
+            offset = np.sum(rest)
+            new_t[0, rest] = np.arange(offset, dtype=np.int64)
+            new_t[:, red] = np.arange(offset,
+                                      offset + 4 * nred,
+                                      dtype=np.int64).reshape(4, -1)
+            offset += 4 * nred
+            new_t[:3, blue1] = np.arange(offset,
+                                         offset + 3 * nblue1,
+                                         dtype=np.int64).reshape(3, -1)
+            offset += 3 * nblue1
+            new_t[:3, blue2] = np.arange(offset,
+                                         offset + 3 * nblue2,
+                                         dtype=np.int64).reshape(3, -1)
+            offset += 3 * nblue2
+            new_t[:2, green] = np.arange(offset,
+                                         offset + 2 * ngreen,
+                                         dtype=np.int64).reshape(2, -1)
+            subdomains = {
+                name: np.setdiff1d(np.unique(new_t[:, ixs]), [-1])
+                for name, ixs in subdomains.items()
+            }
+
         return (
             np.hstack((m.p, p)),
             np.hstack((m.t[:, rest], t_red, t_blue1, t_blue2, t_green)),
+            subdomains,
         )
 
     def _adaptive(self, marked):
@@ -345,15 +374,18 @@ class MeshTri1(MeshSimplex, Mesh2D):
             sort_t=False,
         )
         facets = self._adaptive_find_facets(sorted_mesh, marked)
-        doflocs, t = self._adaptive_split_elements(sorted_mesh,
-                                                   facets)
+        doflocs, t, subdomains = self._adaptive_split_elements(
+            sorted_mesh,
+            facets,
+            self._subdomains,
+        )
 
         return replace(
             self,
             doflocs=doflocs,
             t=t,
             _boundaries=None,
-            _subdomains=None,
+            _subdomains=subdomains,
         )
 
     def __mul__(self, other):
