@@ -1034,11 +1034,13 @@ class Mesh:
             self,
             doflocs=p,
             t=t,
-            _boundaries={k: np.extract(newf[self.boundaries[k]] >= 0,
-                                       newf[self.boundaries[k]])
-                         for k in self.boundaries},
-            _subdomains={k: newt[np.intersect1d(self.subdomains[k], elements)]
-                         for k in self.subdomains},
+            _boundaries=({k: np.extract(newf[self.boundaries[k]] >= 0,
+                                        newf[self.boundaries[k]])
+                          for k in self.boundaries}
+                         if self.boundaries is not None else None),
+            _subdomains=({k: newt[np.intersect1d(self.subdomains[k], elements)]
+                          for k in self.subdomains}
+                         if self.subdomains is not None else None),
         )
 
     def remove_elements(self, element_indices: ndarray):
