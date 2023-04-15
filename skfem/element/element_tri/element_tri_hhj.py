@@ -10,7 +10,7 @@ class ElementTriHHJ(ElementMatrix):
     facet_dofs = 2
     interior_dofs = 3
     maxdeg = 1
-    dofnames = ['u^n^2', 'u^n^1', 'u^i^1', 'u^i^2', 'u^i^3']
+    dofnames = ['u^n', 'u^n', 'NA', 'NA', 'NA']
     doflocs = np.array([[.5, .0],
                         [.5, .0],
                         [.5, .5],
