@@ -17,9 +17,9 @@ class ElementTriHHJ(ElementMatrix):
                         [.5, .5],
                         [.0, .5],
                         [.0, .5],
-                        [.33, .33],
-                        [.33, .33],
-                        [.33, .33]])
+                        [np.nan, np.nan],
+                        [np.nan, np.nan],
+                        [np.nan, np.nan]])
     refdom = RefTri
 
     def lbasis(self, X, i):
@@ -39,10 +39,10 @@ class ElementTriHHJ(ElementMatrix):
                             [3*y-1, 0*x]])
         elif i == 4:
             phi = np.array([[-6*x-6*y+4, 3*x+3*y-2],
-                            [3*x+3*y-2,0*x]])
+                            [3*x+3*y-2, 0*x]])
         elif i == 5:
-            phi = np.array([[6*y-2,1-3*y],
-                            [1-3*y,0*x]])
+            phi = np.array([[6*y-2, 1-3*y],
+                            [1-3*y, 0*x]])
         # interior
         elif i == 6:
             phi = np.array([[6*x, -6*x-3*y+3],
