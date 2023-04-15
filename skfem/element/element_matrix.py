@@ -24,19 +24,30 @@ class ElementMatrix(Element):
     def gbasis(self, mapping, X, i, tind=None):
         """Matrix Piola transformation."""
         phi, _ = self.lbasis(X, i)
+        DF = mapping.DF(X, tind)
         invDF = mapping.invDF(X, tind)
         detDF = mapping.detDF(X, tind)
         orient = self.orient(mapping, i, tind)
-        if len(X.shape) == 2:
-            return (DiscreteField(
-                value=np.einsum('ijkl,jal,bakl,kl->ibkl', invDF, phi, invDF,
-                                np.abs(detDF) ** 2 * orient[:, None]),
-            ),)
+        # if len(X.shape) == 2:
+        #     return (DiscreteField(
+        #         value=np.einsum('ijkl,jal,bakl,kl->ibkl', invDF, phi, invDF,
+        #                         np.abs(detDF) ** 2 * orient[:, None]),
+        #     ),)
         # elif len(X.shape) == 3:
         #     return (DiscreteField(
-        #         value=np.einsum('ijkl,jkl,kl->ikl', DF, phi,
-        #                         1. / np.abs(detDF) * orient[:, None]),
+        #         value=np.einsum('ijkl,jakl,bakl,kl->ibkl', invDF, phi, invDF,
+        #                         np.abs(detDF) ** 2 * orient[:, None]),
         #     ),)
+        if len(X.shape) == 2:
+            return (DiscreteField(
+                value=np.einsum('ijkl,jal,bakl,kl->ibkl', DF, phi, DF,
+                                1 / (np.abs(detDF) ** 2) * orient[:, None]),
+            ),)
+        elif len(X.shape) == 3:
+            return (DiscreteField(
+                value=np.einsum('ijkl,jakl,bakl,kl->ibkl', DF, phi, DF,
+                                1 / (np.abs(detDF) ** 2) * orient[:, None]),
+            ),)
         raise NotImplementedError
 
     def lbasis(self, X, i):
