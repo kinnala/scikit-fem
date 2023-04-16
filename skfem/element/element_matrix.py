@@ -1,5 +1,4 @@
 import numpy as np
-from .element import Element
 from .element_hdiv import ElementHdiv
 from .discrete_field import DiscreteField
 
