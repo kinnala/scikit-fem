@@ -1,13 +1,10 @@
+"""Solve :math:`\Delta^2 u = 1` using HHJ element."""
 from skfem import *
-from skfem.helpers import *
+from skfem.helpers import ddot, prod, dot, dd, grad
 from skfem.models.poisson import unit_load
 import numpy as np
 
-m = (
-    MeshTri.init_symmetric()
-    .refined(4)
-)
-
+m = MeshTri.init_symmetric().refined(4)
 e = ElementTriHHJ() * ElementTriP2G()
 basis = Basis(m, e)
 ifbasis = [InteriorFacetBasis(m, e, side=i) for i in [0, 1]]

@@ -5,18 +5,18 @@ from ...refdom import RefTri
 
 
 class ElementTriHHJ(ElementMatrix):
-    """The first order Herman-Hellan-Johnson element."""
+    """The first order Hellan-Herrmann-Johnson element."""
 
     facet_dofs = 2
     interior_dofs = 3
     maxdeg = 1
     dofnames = ['u^n', 'u^n', 'NA', 'NA', 'NA']
-    doflocs = np.array([[.5, .0],
-                        [.5, .0],
-                        [.5, .5],
-                        [.5, .5],
-                        [.0, .5],
-                        [.0, .5],
+    doflocs = np.array([[1/3, .0],
+                        [2/3, .0],
+                        [2/3, 1/3],
+                        [1/3, 2/3],
+                        [.0, 1/3],
+                        [.0, 2/3],
                         [np.nan, np.nan],
                         [np.nan, np.nan],
                         [np.nan, np.nan]])
