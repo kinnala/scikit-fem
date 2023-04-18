@@ -11,15 +11,14 @@ class ElementMatrix(ElementHdiv):
         phi, _ = self.lbasis(X, i)
         DF = mapping.DF(X, tind)
         detDF = mapping.detDF(X, tind)
-        orient = self.orient(mapping, i, tind)
         if len(X.shape) == 2:
             return (DiscreteField(
                 value=np.einsum('ijkl,jal,bakl,kl->ibkl', DF, phi, DF,
-                                1 / (np.abs(detDF) ** 2) * orient[:, None]),
+                                1 / (np.abs(detDF) ** 2)),
             ),)
         elif len(X.shape) == 3:
             return (DiscreteField(
                 value=np.einsum('ijkl,jakl,bakl,kl->ibkl', DF, phi, DF,
-                                1 / (np.abs(detDF) ** 2) * orient[:, None]),
+                                1 / (np.abs(detDF) ** 2)),
             ),)
         raise NotImplementedError

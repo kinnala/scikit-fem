@@ -1,13 +1,16 @@
 """Solve :math:`\Delta^2 u = 1` using HHJ element."""
 from skfem import *
-from skfem.helpers import ddot, prod, dot, dd, grad
-from skfem.models.poisson import unit_load
+from skfem.helpers import *
 import numpy as np
 
-m = MeshTri.init_symmetric().refined(4)
-e = ElementTriHHJ() * ElementTriP2G()
+m = MeshTri.init_sqsymmetric().refined(4)
+
+e = ElementTriHHJ1() * ElementTriP2G()
+#e = ElementTriHHJ0() * ElementTriP1G()
 basis = Basis(m, e)
-ifbasis = [InteriorFacetBasis(m, e, side=i) for i in [0, 1]]
+fbasis = basis.boundary()
+ifbasis0 = InteriorFacetBasis(m, e, side=0)
+ifbasis1 = InteriorFacetBasis(m, e, side=1)
 
 
 @BilinearForm
@@ -17,7 +20,8 @@ def bilinf(sig, u, tau, v, w):
 
 @BilinearForm
 def jump(sig, u, tau, v, w):
-    return ddot(sig, prod(w.n, w.n)) * dot(grad(v), w.n)
+    return (ddot(sig, prod(w.n, w.n)) * dot(grad(v), w.n)
+            + ddot(tau, prod(w.n, w.n)) * dot(grad(u), w.n))
 
 
 @LinearForm
@@ -26,14 +30,23 @@ def linf(tau, v, w):
 
 
 K = asm(bilinf, basis)
-B = asm(jump, ifbasis)
+B1 = asm(jump, ifbasis0)
+B2 = asm(jump, ifbasis1)
+B3 = asm(jump, fbasis)
 f = asm(linf, basis)
 
 D = basis.get_dofs().all(['u^2'])
 
-x = solve(*condense(K + B + B.T, f, D=D))
+x = solve(*condense(K + (B1 - B2 + B3), f, D=D))
 
 (sig, sigbasis), (u, ubasis) = basis.split(x)
 
 if __name__ == "__main__":
-    ubasis.plot(u, colorbar=True, shading='gouraud').show()
+    basis0 = basis.with_element(ElementDG(ElementTriP1()))
+
+    for itr in range(2):
+        for jtr in range(2):
+            sig0 = basis0.project(sigbasis.interpolate(sig)[itr, jtr])
+            basis0.plot(sig0, colorbar=True)
+
+    ubasis.plot(u, colorbar=True).show()

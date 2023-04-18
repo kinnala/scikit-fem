@@ -4,8 +4,8 @@ from ..element_matrix import ElementMatrix
 from ...refdom import RefTri
 
 
-class ElementTriHHJ(ElementMatrix):
-    """The first order Hellan-Herrmann-Johnson element."""
+class ElementTriHHJ1(ElementMatrix):
+    """Piecewise linear Hellan-Herrmann-Johnson element."""
 
     facet_dofs = 2
     interior_dofs = 3
@@ -29,8 +29,8 @@ class ElementTriHHJ(ElementMatrix):
             phi = np.array([[0*x, 3*x+3*y-2],
                             [3*x+3*y-2, -6*x-6*y+4]])
         elif i == 1:
-            phi = np.array([[0*x, 1 - 3*x],
-                            [1 - 3*x, 6*x - 2]])
+            phi = np.array([[0*x, 1-3*x],
+                            [1-3*x, 6*x-2]])
         elif i == 2:
             phi = np.array([[0*x, 3*x-1],
                             [3*x-1, 0*x]])
@@ -53,6 +53,35 @@ class ElementTriHHJ(ElementMatrix):
         elif i == 8:
             phi = np.array([[0*x, -3*x-6*y+3],
                             [-3*x-6*y+3, 6*y]])
+        else:
+            self._index_error()
+
+        return phi, None
+
+
+class ElementTriHHJ0(ElementMatrix):
+    """Piecewise constant Hellan-Herrmann-Johnson element."""
+
+    facet_dofs = 1
+    maxdeg = 1
+    dofnames = ['u^n']
+    doflocs = np.array([[0.5, 0.0],
+                        [0.5, 0.5],
+                        [0.0, 0.5]])
+    refdom = RefTri
+
+    def lbasis(self, X, i):
+        x, y = X
+
+        if i == 0:
+            phi = np.array([[0*x, -.5 + 0*x],
+                            [-.5 + 0*x, 1 + 0*x]])
+        elif i == 1:
+            phi = np.array([[0*x, .5 + 0*x],
+                            [.5 + 0*x, 0*x]])
+        elif i == 2:
+            phi = np.array([[1 + 0*x, -.5 + 0*x],
+                            [-.5 + 0*x, 0*x]])
         else:
             self._index_error()
 

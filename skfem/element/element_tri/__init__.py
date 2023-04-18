@@ -19,4 +19,4 @@ from .element_tri_p2g import ElementTriP2G  # noqa
 from .element_tri_p2b import ElementTriP2B  # noqa
 from .element_tri_n1 import ElementTriN1  # noqa
 from .element_tri_n2 import ElementTriN2  # noqa
-from .element_tri_hhj import ElementTriHHJ  # noqa
+from .element_tri_hhj import ElementTriHHJ0, ElementTriHHJ1  # noqa
