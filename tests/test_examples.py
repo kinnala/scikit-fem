@@ -389,3 +389,10 @@ class TestEx47(TestCase):
     def runTest(self):
         import docs.examples.ex47 as ex47
         self.assertAlmostEqual(ex47.l2, 0, delta=1e-2)
+
+
+class TestEx48(TestCase):
+
+    def runTest(self):
+        import docs.examples.ex48 as ex48
+        self.assertAlmostEqual(np.max(ex48.u), 0.0012653264834919884)
