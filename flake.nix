@@ -39,8 +39,6 @@
           matplotlib
           ipython
           pytest
-          # pygmsh
-          # gmsh
           pyamg
           mypy
           flake8

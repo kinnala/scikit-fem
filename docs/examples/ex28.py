@@ -56,8 +56,6 @@ from pathlib import Path
 
 from skfem import *
 from skfem.helpers import grad, dot
-from skfem.io import from_meshio
-from skfem.io.json import from_file
 from skfem.models.poisson import unit_load
 
 import numpy as np

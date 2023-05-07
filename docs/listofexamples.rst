@@ -523,10 +523,6 @@ found in closed form: given a uniform heat flux over each of the walls, the
 temperature field asymptotically is the superposition of a uniform longitudinal
 gradient and a transverse profile.
 
-.. note::
-   This example requires the external package
-   `pygmsh <https://pypi.org/project/pygmsh/>`__.
-
 .. figure:: https://user-images.githubusercontent.com/973268/142778186-99d8e02e-d02e-4b54-ac09-53bda0591dac.png
 
    A comparison of inlet and outlet temperature profiles in Example 28.
