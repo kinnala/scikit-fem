@@ -211,6 +211,8 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+- Added: `ElementHexSkeleton0`, piecewise constant element on the skeleton
+  of a hexahedral mesh
 - Added: `ElementTriHHJ0` and `ElementTriHHJ1` matrix finite elements
   for implementing the Hellan-Hermann-Johnson mixed method (see [`ex48.py`](https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex48.py))
 - Added: `Mesh.restrict` now preserves subdomains and boundaries
