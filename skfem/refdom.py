@@ -205,6 +205,52 @@ class RefHex(Refdom):
     nedges = 12
     name = "Hexahedral"
 
+    @classmethod
+    def on_facet(cls, i, X):
+        if i == 0:
+            return ((X[1] > 0)
+                    * (X[2] < 1)
+                    * (X[2] < 1)
+                    * (X[2] > 0)
+                    * (X[0] < 1+1e-4)
+                    * (X[0] > 1-1e-4))
+        elif i == 1:
+            return ((X[0] > 0)
+                    * (X[0] < 1)
+                    * (X[1] < 1)
+                    * (X[1] > 0)
+                    * (X[2] < 1+1e-4)
+                    * (X[2] > 1-1e-4))
+        elif i == 2:
+            return ((X[0] > 0)
+                    * (X[0] < 1)
+                    * (X[2] < 1)
+                    * (X[2] > 0)
+                    * (X[1] < 1+1e-4)
+                    * (X[1] > 1-1e-4))
+        elif i == 3:
+            return ((X[0] > 0)
+                    * (X[0] < 1)
+                    * (X[2] < 1)
+                    * (X[2] > 0)
+                    * (X[1] < 1e-4)
+                    * (X[1] > -1e-4))
+        elif i == 4:
+            return ((X[0] > 0)
+                    * (X[0] < 1)
+                    * (X[1] < 1)
+                    * (X[1] > 0)
+                    * (X[2] < 1e-4)
+                    * (X[2] > -1e-4))
+        elif i == 5:
+            return ((X[1] > 0)
+                    * (X[2] < 1)
+                    * (X[2] < 1)
+                    * (X[2] > 0)
+                    * (X[0] < 1e-4)
+                    * (X[0] > -1e-4))
+        raise ValueError
+
 
 class RefWedge(Refdom):
 
