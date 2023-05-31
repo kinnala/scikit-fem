@@ -262,6 +262,8 @@ class MeshTri1(MeshSimplex, Mesh2D):
         ix12 = (l12 > l01) * (l12 > l02)
 
         # row swaps
+        t = t.copy()
+
         tmp = t[2, ix01]
         t[2, ix01] = t[1, ix01]
         t[1, ix01] = tmp
