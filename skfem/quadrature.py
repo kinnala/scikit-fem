@@ -5,8 +5,9 @@ from typing import Tuple, Type, Union
 import numpy as np
 from numpy.polynomial.legendre import leggauss
 from .refdom import (Refdom, RefPoint, RefLine, RefTri, RefQuad, RefTet,
-                     RefHex, RefWedge)
+                     RefHex, RefWedge, RefHexagon)
 from .element import Element
+from .mesh import MeshHexagon1
 
 
 def get_quadrature(refdom_or_elem: Union[Type[Refdom], Type[Element], Element],
@@ -41,6 +42,10 @@ def get_quadrature(refdom_or_elem: Union[Type[Refdom], Type[Element], Element],
         return get_quadrature_line(norder)
     elif refdom == RefPoint:
         return get_quadrature_point(norder)
+    elif refdom == RefHexagon:
+        X, W = get_quadrature_tri(norder)
+        X1 = MeshHexagon1().to_meshtri()._mapping().F(X)
+        return X1.reshape(2, -1), W.repeat(6)
     elif refdom == RefWedge:
         X1, W1 = get_quadrature_line(norder)
         X2, W2 = get_quadrature_tri(norder)

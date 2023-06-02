@@ -285,3 +285,29 @@ class RefWedge(Refdom):
     nfacets = 5
     nedges = 9
     name = "Wedge"
+
+
+class RefHexagon(Refdom):
+
+    p = np.array([[1.0, 0.0],
+                  [0.5, np.sqrt(3) / 2],
+                  [-0.5, np.sqrt(3) / 2],
+                  [-1.0, 0.0],
+                  [-0.5, -np.sqrt(3) / 2],
+                  [0.5, -np.sqrt(3) / 2]], dtype=np.float64).T
+    t = np.array([[0], [1], [2], [3], [4], [5]], dtype=np.int64)
+    # normals = np.array([[0., -1., 0.],
+    #                     [1., 1., 0.],
+    #                     [-1., 0., 0.],
+    #                     [0., 0., -1.],
+    #                     [0., 0., 1.]])
+    facets = [[0, 1],
+              [1, 2],
+              [2, 3],
+              [3, 4],
+              [4, 5],
+              [5, 0]]
+    brefdom = None
+    nnodes = 6
+    nfacets = 6
+    name = "Hexagon"
