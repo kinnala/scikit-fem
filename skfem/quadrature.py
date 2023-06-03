@@ -45,7 +45,7 @@ def get_quadrature(refdom_or_elem: Union[Type[Refdom], Type[Element], Element],
     elif refdom == RefHexagon:
         X, W = get_quadrature_tri(norder)
         X1 = MeshHexagon1().to_meshtri()._mapping().F(X)
-        return X1.reshape(2, -1), W.repeat(6)
+        return np.hstack([X1[:, itr, :] for itr in range(6)]), np.hstack(6 * (W,))
     elif refdom == RefWedge:
         X1, W1 = get_quadrature_line(norder)
         X2, W2 = get_quadrature_tri(norder)
