@@ -8,12 +8,14 @@ class ElementHexagon1(ElementH1):
     """Hexagonal element."""
 
     nodal_dofs = 1
-    maxdeg = 4
+    maxdeg = 2
     dofnames = ['u']
-    doflocs = np.array([[0., 0.],
-                        [1., 0.],
-                        [1., 1.],
-                        [0., 1.]])
+    doflocs = np.array([[1.0, 0.0],
+                        [0.5, np.sqrt(3) / 2],
+                        [-0.5, np.sqrt(3) / 2],
+                        [-1.0, 0.0],
+                        [-0.5, -np.sqrt(3) / 2],
+                        [0.5, -np.sqrt(3) / 2]])
     refdom = RefHexagon
 
     def lbasis(self, X, i):
