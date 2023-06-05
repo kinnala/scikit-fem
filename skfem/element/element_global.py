@@ -117,8 +117,8 @@ class ElementGlobal(Element):
             for diff in diffs:
                 #  desc = ''.join([str(d) for d in diff])
                 dx = sum([1 for d in diff if d == 0])
-                dy = sum([1 for d in diff if d == 1]) if dim == 2 else None
-                dz = sum([1 for d in diff if d == 2]) if dim == 3 else None
+                dy = sum([1 for d in diff if d == 1]) if dim >= 2 else None
+                dz = sum([1 for d in diff if d == 2]) if dim >= 3 else None
                 if dim == 1:
                     self._pbasis[diff] = [
                         self._pbasis_create(i=i, dx=dx)
@@ -151,7 +151,7 @@ class ElementGlobal(Element):
             'v': np.array([mesh.p[:, mesh.t[itr, tind]]
                            for itr in range(mesh.t.shape[0])]),
         }
-        if mesh.p.shape[0] >= 2:
+        if mesh.p.shape[0] == 2:
             w['e'] = np.array([
                 .5 * (w['v'][itr] + w['v'][(itr + 1) % mesh.t.shape[0]])
                 for itr in range(mesh.t.shape[0])
