@@ -211,10 +211,13 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
-- Added: `ElementHexSkeleton0`, piecewise constant element on the skeleton
-  of a hexahedral mesh
+## [8.1.0] - 2023-06-16
+
 - Added: `ElementTriHHJ0` and `ElementTriHHJ1` matrix finite elements
   for implementing the Hellan-Hermann-Johnson mixed method (see [`ex48.py`](https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex48.py))
+- Added: `ElementHexSkeleton0`, piecewise constant element on the skeleton
+  of a hexahedral mesh
+- Added: `ElementHexC1`, C1-continuous hexahedral element
 - Added: `Mesh.restrict` now preserves subdomains and boundaries
 - Added: `skfem.utils.mpc` for setting multipoint constraints
 - Added: `Basis.get_dofs` now supports fetching DOFs at specific nodes
@@ -223,6 +226,7 @@ with respect to documented and/or tested features.
   `Basis.get_dofs`
 - Added: `CellBasis.with_elements` as a shortcut for initiating a new Basis with subset of elements
 - Added: `Mesh.refined` now preserves subdomains in adaptive mesh refinement
+- Fixed: `Mesh.refined` used to modify the element connectivity of the original mesh
 
 ## [8.0.0] - 2022-12-16
 
