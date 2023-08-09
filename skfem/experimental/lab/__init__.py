@@ -1,4 +1,8 @@
 from skfem import *
+from skfem import (BilinearForm,
+                   LinearForm,
+                   ElementVector,
+                   ElementComposite)
 from skfem.experimental.autodiff import NonlinearForm
 import numpy as np
 from dataclasses import dataclass
@@ -67,18 +71,19 @@ class Tensor:
         return Tensor('transpose', self.order, [self])
 
     def __add__(self, other):
-        assert self.order == other.order
-        return Tensor('+', self.order, [self, other], True)
+        otherc = _cast_tensor(other)
+        assert self.order == otherc.order
+        return Tensor('+', self.order, [self, otherc], True)
 
     def __sub__(self, other):
-        assert self.order == other.order
-        return Tensor('-', self.order, [self, other], True)
+        otherc = _cast_tensor(other)
+        assert self.order == otherc.order
+        return Tensor('-', self.order, [self, otherc], True)
 
     def __mul__(self, other):
-        if isinstance(other, float) or isinstance(other, int):
-            other = Tensor(repr(other), order=0)
-        assert self.order == 0 or other.order == 0
-        return Tensor('*', max(self.order, other.order), [self, other], True)
+        otherc = _cast_tensor(other)
+        assert self.order == 0 or otherc.order == 0
+        return Tensor('*', max(self.order, otherc.order), [self, otherc], True)
 
     def __rmul__(self, other):
         return self * other
@@ -130,6 +135,8 @@ class Tensor:
               'tan': np.tan,
               'mul': mul,
               'eye': eye,
+              'maximum': np.maximum,
+              'minimum': np.minimum,
               '_': lambda a, i: a[i]},
              scope)
         return scope['fun']
@@ -158,12 +165,22 @@ class Tensor:
               'tan': anp.tan,
               'mul': mul,
               'eye': eye,
+              'maximum': anp.maximum,
+              'minimum': anp.minimum,
               '_': lambda a, i: a[i]},
              scope)
         return scope['fun']
 
     def coo_data(self, *args, **kwargs):
         NotImplementedError
+
+
+def _cast_tensor(a):
+    if isinstance(a, Tensor):
+        return a
+    if isinstance(a, float) or isinstance(a, int):
+        return Tensor(repr(a), order=0)
+    raise NotImplementedError
 
 
 def _find_order(elem):
@@ -229,8 +246,10 @@ def ddot(a, b):
 def sin(a):
     return Tensor('sin', a.order, [a])
 
+
 def cos(a):
     return Tensor('cos', a.order, [a])
+
 
 def tan(a):
     return Tensor('tan', a.order, [a])
@@ -240,7 +259,9 @@ def trace(a):
     assert a.order == 2
     return Tensor('trace', 0, [a])
 
+
 tr = trace
+
 
 def eye(w, n):
     return Tensor('eye', 2, [w, Tensor(str(n))])
@@ -250,3 +271,17 @@ def mul(a, b):
     assert ((a.order == 2 and b.order == 1)
             or (a.order == 2 and b.order == 2))
     return Tensor('mul', b.order, [a, b])
+
+
+def maximum(a, b):
+    ac = _cast_tensor(a)
+    bc = _cast_tensor(b)
+    assert ac.order == 0 or bc.order == 0
+    return Tensor('maximum', max(ac.order, bc.order), [ac, bc])
+
+
+def minimum(a, b):
+    ac = _cast_tensor(a)
+    bc = _cast_tensor(b)
+    assert ac.order == 0 or bc.order == 0
+    return Tensor('minimum', max(ac.order, bc.order), [ac, bc])
