@@ -1,4 +1,4 @@
-from skfem import *
+from skfem import *  # noqa
 from skfem import (BilinearForm,
                    LinearForm,
                    ElementVector,
@@ -206,7 +206,7 @@ def _test_functions(elem, expr='v'):
     else:
         elems = [elem]
     tests = ['{}{}'.format(expr, i + 1)
-              for i, e in enumerate(elems)]
+             for i, e in enumerate(elems)]
     return [Tensor(tests[i], order=_find_order(e), test=tests)
             for i, e in enumerate(elems)]
 
