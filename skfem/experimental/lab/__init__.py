@@ -67,8 +67,7 @@ class Tensor:
 
     @property
     def T(self):
-        assert self.order == 2
-        return Tensor('transpose', self.order, [self])
+        return transpose(self)
 
     def __add__(self, other):
         otherc = _cast_tensor(other)
@@ -211,8 +210,11 @@ def _test_functions(elem, expr='v'):
             for i, e in enumerate(elems)]
 
 
-def symbols(elem):
-    return tuple(_trial_functions(elem) + _test_functions(elem))
+_ORDER_DICT = {
+    'x': 1,
+    'h': 0,
+    'n': 1,
+}
 
 
 @dataclass(repr=False)
@@ -220,6 +222,13 @@ class Coefficient(Tensor):
 
     def __repr__(self):
         return "w['" + self.expr + "']"
+
+
+def symbols(elem, **kwargs):
+    extra_outputs = ()
+    for key in kwargs:
+        extra_outputs += (Coefficient(key, order=_ORDER_DICT[key] if key in _ORDER_DICT else 0),)
+    return tuple(_trial_functions(elem) + _test_functions(elem)) + extra_outputs
 
 
 def div(a):
@@ -285,3 +294,8 @@ def minimum(a, b):
     bc = _cast_tensor(b)
     assert ac.order == 0 or bc.order == 0
     return Tensor('minimum', max(ac.order, bc.order), [ac, bc])
+
+
+def transpose(a):
+    assert a.order == 2
+    return Tensor('transpose', a.order, [a])
