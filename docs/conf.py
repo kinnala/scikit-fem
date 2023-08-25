@@ -178,3 +178,5 @@ texinfo_documents = [
 import matplotlib
 matplotlib.use('agg')
 
+plot_html_show_source_link = False
+
