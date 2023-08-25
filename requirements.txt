@@ -8,7 +8,7 @@ pyamg
 mypy
 flake8
 dmsh
-sphinx
+sphinx~=6.1
 glvis
 autograd
 pep517
