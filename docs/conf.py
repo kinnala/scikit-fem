@@ -54,7 +54,7 @@ extensions = [
 extlinks = {
     'exlink': (
         "https://github.com/kinnala/scikit-fem/blob/{}/docs/examples/ex%s.py".format(previous_release),
-        "ex%s.py"
+        "example %s"
     ),
 }
 
