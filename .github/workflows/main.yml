@@ -5,14 +5,6 @@ on:
     branches: master
 
 jobs:
-  run_tests_37:
-    runs-on: ubuntu-latest
-    name: Python 3.7
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Run tests
-        uses: kinnala/scikit-fem-docker-action@py37
   run_tests_38_nix:
     name: Python 3.8
     uses: ./.github/workflows/nix.yml
@@ -40,5 +32,4 @@ jobs:
     with:
       cache_key: "py311"
       flake_artifact: "#devShells.x86_64-linux.py311"
-      # todo: add rest of the commands depending on matplotlib after it is fixed for Python 3.11
-      run_command: "flake8 skfem && mypy skfem && pytest --ignore-glob tests/test_visuals.py"
+      run_command: "flake8 skfem && sphinx-build -W -a -b html docs docs/_build && sphinx-build -a -b doctest docs docs/_build && mypy skfem && pytest"
