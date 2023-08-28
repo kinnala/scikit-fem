@@ -5,31 +5,36 @@ on:
     branches: master
 
 jobs:
-  run_tests_38_nix:
-    name: Python 3.8
-    uses: ./.github/workflows/nix.yml
-    with:
-      cache_key: "py38a"
-      flake_artifact: "#devShells.x86_64-linux.py38"
-      run_command: "flake8 skfem && sphinx-build -W -a -b html docs docs/_build && sphinx-build -a -b doctest docs docs/_build && mypy skfem && pytest"
-  run_tests_39_nix:
-    name: Python 3.9
-    uses: ./.github/workflows/nix.yml
-    with:
-      cache_key: "py39"
-      flake_artifact: "#devShells.x86_64-linux.py39"
-      run_command: "flake8 skfem && sphinx-build -W -a -b html docs docs/_build && sphinx-build -a -b doctest docs docs/_build && mypy skfem && pytest"
-  run_tests_310_nix:
-    name: Python 3.10
-    uses: ./.github/workflows/nix.yml
-    with:
-      cache_key: "py310"
-      flake_artifact: "#devShells.x86_64-linux.default"
-      run_command: "flake8 skfem && sphinx-build -W -a -b html docs docs/_build && sphinx-build -a -b doctest docs docs/_build && mypy skfem && pytest"
-  run_tests_311_nix:
-    name: Python 3.11
-    uses: ./.github/workflows/nix.yml
-    with:
-      cache_key: "py311"
-      flake_artifact: "#devShells.x86_64-linux.py311"
-      run_command: "flake8 skfem && sphinx-build -W -a -b html docs docs/_build && sphinx-build -a -b doctest docs docs/_build && mypy skfem && pytest"
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9, '3.10', 3.11]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+	pip install -r requirements.txt
+        pip install .
+    - name: Run flake8
+      run: |
+        flake8 skfem
+    - name: Run sphinx build
+      run: |
+        sphinx-build -W -a -b html docs docs/_build
+    - name: Run sphinx doctests
+      run: |
+        sphinx-build -W -a -b doctest docs docs/_build
+    - name: Run mypy
+      run: |
+        mypy skfem
+    - name: Run pytest
+      run: |
+        pytest
