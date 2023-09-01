@@ -212,6 +212,7 @@ with respect to documented and/or tested features.
 ### Unreleased
 
 - Removed: Python 3.7 support
+- Fixed: `MeshTet` uniform refine was reindexing subdomains incorrectly
 
 ## [8.1.0] - 2023-06-16
 

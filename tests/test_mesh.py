@@ -658,7 +658,7 @@ def test_point_outside_mesh():
     elem_finder(*m.p)
 
 
-def test_refine_subdomains():
+def test_refine_subdomains_adaptive():
 
     sdef = {'left': lambda x: x[0] < 0.5}
 
@@ -670,3 +670,33 @@ def test_refine_subdomains():
         m1 = MeshTri().refined(3).with_subdomains(sdef).refined(inds)
         m2 = MeshTri().refined(3).refined(inds).with_subdomains(sdef)
         np.testing.assert_equal(m1.subdomains, m2.subdomains)
+
+
+def test_refine_subdomains_uniform():
+
+    sdef = {'left': lambda x: x[0] < 0.5,
+            'top': lambda x: x[1] > 0.5}
+
+    m1 = MeshTri().refined(3).with_subdomains(sdef).refined()
+    m2 = MeshTri().refined(3).refined().with_subdomains(sdef)
+    np.testing.assert_equal(m1.subdomains, m2.subdomains)
+
+
+def test_refine_subdomains_uniform_tets():
+
+    sdef = {'left': lambda x: x[0] < 0.5,
+            'top': lambda x: x[1] > 0.5}
+
+    m1 = MeshTet().refined().with_subdomains(sdef).refined()
+    m2 = MeshTet().refined().refined().with_subdomains(sdef)
+    np.testing.assert_equal(m1.subdomains, m2.subdomains)
+
+
+def test_refine_subdomains_uniform_hexs():
+
+    sdef = {'left': lambda x: x[0] < 0.5,
+            'top': lambda x: x[1] > 0.5}
+
+    m1 = MeshHex().refined().with_subdomains(sdef).refined()
+    m2 = MeshHex().refined().refined().with_subdomains(sdef)
+    np.testing.assert_equal(m1.subdomains, m2.subdomains)
