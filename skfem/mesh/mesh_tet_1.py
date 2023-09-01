@@ -112,25 +112,57 @@ class MeshTet1(MeshSimplex, Mesh3D):
             np.vstack((t[2], t2e[1], t2e[2], t2e[5])),
             np.vstack((t[3], t2e[3], t2e[4], t2e[5])),
             np.vstack((t2e[2, c1], t2e[4, c1], t2e[0, c1], t2e[1, c1])),
-            np.vstack((t2e[2, c1], t2e[4, c1], t2e[0, c1], t2e[3, c1])),
-            np.vstack((t2e[2, c1], t2e[4, c1], t2e[1, c1], t2e[5, c1])),
-            np.vstack((t2e[2, c1], t2e[4, c1], t2e[3, c1], t2e[5, c1])),
             np.vstack((t2e[1, c2], t2e[3, c2], t2e[0, c2], t2e[4, c2])),
-            np.vstack((t2e[1, c2], t2e[3, c2], t2e[4, c2], t2e[5, c2])),
-            np.vstack((t2e[1, c2], t2e[3, c2], t2e[5, c2], t2e[2, c2])),
-            np.vstack((t2e[1, c2], t2e[3, c2], t2e[2, c2], t2e[0, c2])),
             np.vstack((t2e[0, c3], t2e[5, c3], t2e[1, c3], t2e[4, c3])),
+            np.vstack((t2e[2, c1], t2e[4, c1], t2e[0, c1], t2e[3, c1])),
+            np.vstack((t2e[1, c2], t2e[3, c2], t2e[4, c2], t2e[5, c2])),
             np.vstack((t2e[0, c3], t2e[5, c3], t2e[4, c3], t2e[3, c3])),
+            np.vstack((t2e[2, c1], t2e[4, c1], t2e[1, c1], t2e[5, c1])),
+            np.vstack((t2e[1, c2], t2e[3, c2], t2e[5, c2], t2e[2, c2])),
             np.vstack((t2e[0, c3], t2e[5, c3], t2e[3, c3], t2e[2, c3])),
+            np.vstack((t2e[2, c1], t2e[4, c1], t2e[3, c1], t2e[5, c1])),
+            np.vstack((t2e[1, c2], t2e[3, c2], t2e[2, c2], t2e[0, c2])),
             np.vstack((t2e[0, c3], t2e[5, c3], t2e[2, c3], t2e[1, c3])),
         ))
+
+        if self._subdomains is not None:
+            nt = t.shape[1]
+            new_t = np.zeros((8, nt), dtype=np.int64)
+            new_t[0] = np.arange(nt, dtype=np.int64)
+            new_t[1] = new_t[0] + nt
+            new_t[2] = new_t[1] + nt
+            new_t[3] = new_t[2] + nt
+            n1 = np.sum(c1)
+            n2 = np.sum(c2)
+            n3 = np.sum(c3)
+            if n1 > 0:
+                new_t[4, c1] = np.arange(n1, dtype=np.int64) + 4 * nt
+                new_t[5, c1] = np.arange(n1, dtype=np.int64) + 5 * nt
+                new_t[6, c1] = np.arange(n1, dtype=np.int64) + 6 * nt
+                new_t[7, c1] = np.arange(n1, dtype=np.int64) + 7 * nt
+            if n2 > 0:
+                new_t[4, c2] = np.arange(n2, dtype=np.int64) + 4 * nt + n1
+                new_t[5, c2] = np.arange(n2, dtype=np.int64) + 5 * nt + n1
+                new_t[6, c2] = np.arange(n2, dtype=np.int64) + 6 * nt + n1
+                new_t[7, c2] = np.arange(n2, dtype=np.int64) + 7 * nt + n1
+            if n3 > 0:
+                new_t[4, c3] = np.arange(n3, dtype=np.int64) + 4 * nt + n1 + n2
+                new_t[5, c3] = np.arange(n3, dtype=np.int64) + 5 * nt + n1 + n2
+                new_t[6, c3] = np.arange(n3, dtype=np.int64) + 6 * nt + n1 + n2
+                new_t[7, c3] = np.arange(n3, dtype=np.int64) + 7 * nt + n1 + n2
+            subdomains = {
+                name: np.sort(new_t[:, ixs].flatten())
+                for name, ixs in self._subdomains.items()
+            }
+        else:
+            subdomains = None
 
         return replace(
             self,
             doflocs=newp,
             t=newt,
             _boundaries=None,
-            _subdomains=None,
+            _subdomains=subdomains,
         )
 
     def _adaptive_sort_mesh(self, p, t, marked):
