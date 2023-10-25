@@ -212,6 +212,7 @@ with respect to documented and/or tested features.
 ### Unreleased
 
 - Removed: Python 3.7 support
+- Added: Python 3.12 support
 - Added: `Mesh.load` supports new keyword arguments
   `ignore_orientation=True` and `ignore_interior_facets=True` which
   will both speed up the loading of larger three-dimensional meshes by
