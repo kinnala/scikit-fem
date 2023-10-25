@@ -1,3 +1,4 @@
+# type: ignore
 """Drawing meshes and solutions using matplotlib."""
 
 from functools import singledispatch
