@@ -131,7 +131,9 @@ def from_meshio(m,
             if ignore_orientation:
                 a = np.array(sorted_facets[k])
                 b = mtmp.facets.T
-                boundaries[k] = np.nonzero((a == b[:, None]).all(axis=2).any(axis=1))[0]
+                boundaries[k] = np.nonzero((a == b[:, None])
+                                           .all(axis=2)
+                                           .any(axis=1))[0]
             else:
                 indices = []
                 oris = []
@@ -147,12 +149,15 @@ def from_meshio(m,
                             continue
                         if len(f) == 2:
                             # rotate tangent to find normal
-                            tangent = mtmp.p[:, facet[1]] - mtmp.p[:, facet[0]]
+                            tangent = (mtmp.p[:, facet[1]]
+                                       - mtmp.p[:, facet[0]]
                             normal = np.array([-tangent[1], tangent[0]])
                         elif len(f) == 3:
                             # cross product to find normal
-                            tangent1 = mtmp.p[:, facet[1]] - mtmp.p[:, facet[0]]
-                            tangent2 = mtmp.p[:, facet[2]] - mtmp.p[:, facet[0]]
+                            tangent1 = (mtmp.p[:, facet[1]]
+                                        - mtmp.p[:, facet[0]])
+                            tangent2 = (mtmp.p[:, facet[2]]
+                                        - mtmp.p[:, facet[0]])
                             normal = -np.cross(tangent1, tangent2)
                         else:
                             raise NotImplementedError
