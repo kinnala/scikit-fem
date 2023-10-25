@@ -150,7 +150,7 @@ def from_meshio(m,
                         if len(f) == 2:
                             # rotate tangent to find normal
                             tangent = (mtmp.p[:, facet[1]]
-                                       - mtmp.p[:, facet[0]]
+                                       - mtmp.p[:, facet[0]])
                             normal = np.array([-tangent[1], tangent[0]])
                         elif len(f) == 3:
                             # cross product to find normal
