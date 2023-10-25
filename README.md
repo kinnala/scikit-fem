@@ -212,6 +212,11 @@ with respect to documented and/or tested features.
 ### Unreleased
 
 - Removed: Python 3.7 support
+- Added: `Mesh.load` supports new keyword arguments
+  `ignore_orientation=True` and `ignore_interior_facets=True` which
+  will both speed up the loading of larger three-dimensional meshes by
+  ignoring facet orientation and all tags not on the boundary,
+  respectively.
 - Fixed: `MeshTet` uniform refine was reindexing subdomains incorrectly
 
 ## [8.1.0] - 2023-06-16

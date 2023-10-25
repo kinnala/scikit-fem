@@ -50,7 +50,9 @@ INV_HEX_MAPPING = [HEX_MAPPING.index(i)
 def from_meshio(m,
                 out=None,
                 int_data_to_sets=False,
-                force_meshio_type=None):
+                force_meshio_type=None,
+                ignore_orientation=False,
+                ignore_interior_facets=False):
 
     cells = m.cells_dict
     meshio_type = None
@@ -126,37 +128,49 @@ def from_meshio(m,
         }
         sorted_facets = {k: [tuple(np.sort(f)) for f in v]
                          for k, v in oriented_facets.items()}
-
         for k, v in oriented_facets.items():
-            indices = []
-            oris = []
-            for i, f in enumerate(map(tuple, mtmp.facets.T)):
-                if f in sorted_facets[k]:
-                    indices.append(i)
-                    ix = sorted_facets[k].index(f)
-                    facet = v[ix]
-                    t1, t2 = mtmp.f2t[:, i]
-                    if t2 == -1:
-                        # orientation on boundary is 0
-                        oris.append(0)
-                        continue
-                    if len(f) == 2:
-                        # rotate tangent to find normal
-                        tangent = mtmp.p[:, facet[1]] - mtmp.p[:, facet[0]]
-                        normal = np.array([-tangent[1], tangent[0]])
-                    elif len(f) == 3:
-                        # cross product to find normal
-                        tangent1 = mtmp.p[:, facet[1]] - mtmp.p[:, facet[0]]
-                        tangent2 = mtmp.p[:, facet[2]] - mtmp.p[:, facet[0]]
-                        normal = -np.cross(tangent1, tangent2)
-                    else:
-                        raise NotImplementedError
-                    # find another vector using node outside of boundary
-                    third = np.setdiff1d(mtmp.t[:, t1],
-                                         np.array(f))[0]
-                    outplane = mtmp.p[:, f[0]] - mtmp.p[:, third]
-                    oris.append(1 if np.dot(normal, outplane) > 0 else 0)
-            boundaries[k] = OrientedBoundary(indices, oris)
+            if ignore_orientation or ignore_interior_facets:
+                a = np.array(sorted_facets[k])
+                if ignore_interior_facets:
+                    b = mtmp.facets[:, mtmp.boundary_facets()].T
+                else:
+                    b = mtmp.facets.T
+                boundaries[k] = np.nonzero((a == b[:, None])
+                                           .all(axis=2)
+                                           .any(axis=1))[0]
+            else:
+                indices = []
+                oris = []
+                for i, f in enumerate(map(tuple, mtmp.facets.T)):
+                    if f in sorted_facets[k]:
+                        indices.append(i)
+                        ix = sorted_facets[k].index(f)
+                        facet = v[ix]
+                        t1, t2 = mtmp.f2t[:, i]
+                        if t2 == -1:
+                            # orientation on boundary is 0
+                            oris.append(0)
+                            continue
+                        if len(f) == 2:
+                            # rotate tangent to find normal
+                            tangent = (mtmp.p[:, facet[1]]
+                                       - mtmp.p[:, facet[0]])
+                            normal = np.array([-tangent[1], tangent[0]])
+                        elif len(f) == 3:
+                            # cross product to find normal
+                            tangent1 = (mtmp.p[:, facet[1]]
+                                        - mtmp.p[:, facet[0]])
+                            tangent2 = (mtmp.p[:, facet[2]]
+                                        - mtmp.p[:, facet[0]])
+                            normal = -np.cross(tangent1, tangent2)
+                        else:
+                            raise NotImplementedError
+                        # find another vector using node outside of boundary
+                        third = np.setdiff1d(mtmp.t[:, t1],
+                                             np.array(f))[0]
+                        outplane = mtmp.p[:, f[0]] - mtmp.p[:, third]
+                        oris.append(1 if np.dot(normal, outplane) > 0 else 0)
+                boundaries[k] = OrientedBoundary(indices, oris)
 
     # MSH 2.2 tag parsing
     if len(boundaries) == 0 and m.cell_data and m.field_data:
