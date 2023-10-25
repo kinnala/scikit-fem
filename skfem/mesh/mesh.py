@@ -756,8 +756,8 @@ class Mesh:
         if isinstance(times_or_ix, int):
             for _ in range(times_or_ix):
                 mtmp = m._uniform()
-                # fix subdomains for all mesh types
-                if m._subdomains is not None:
+                # fix subdomains for remaining mesh types
+                if m._subdomains is not None and mtmp._subdomains is None:
                     N = int(mtmp.t.shape[1] / m.t.shape[1])
                     new_t = np.zeros((N, m.t.shape[1]), dtype=np.int64)
                     new_t[0] = np.arange(m.t.shape[1], dtype=np.int64)

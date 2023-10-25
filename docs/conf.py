@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'scikit-fem'
-copyright = '2018-2022, scikit-fem developers'
+copyright = '2018-2023, scikit-fem developers'
 author = 'scikit-fem developers'
 
 
@@ -54,7 +54,7 @@ extensions = [
 extlinks = {
     'exlink': (
         "https://github.com/kinnala/scikit-fem/blob/{}/docs/examples/ex%s.py".format(previous_release),
-        "ex%s.py"
+        "example %s"
     ),
 }
 
@@ -177,4 +177,6 @@ texinfo_documents = [
 
 import matplotlib
 matplotlib.use('agg')
+
+plot_html_show_source_link = False
 

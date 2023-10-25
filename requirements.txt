@@ -7,8 +7,6 @@ pytest
 pyamg
 mypy
 flake8
-dmsh
-sphinx
-glvis
+sphinx~=6.1
 autograd
 pep517
