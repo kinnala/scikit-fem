@@ -578,7 +578,14 @@ def test_saveload_cycle_vtk(m):
         False,
     ]
 )
-def test_saveload_cycle_tags(fmt, kwargs, m, ignore_orientation):
+@pytest.mark.parametrize(
+    "ignore_interior_facets",
+    [
+        True,
+        False,
+    ]
+)
+def test_saveload_cycle_tags(fmt, kwargs, m, ignore_orientation, ignore_interior_facets):
 
     m = (m
          .refined(2)
@@ -589,7 +596,10 @@ def test_saveload_cycle_tags(fmt, kwargs, m, ignore_orientation):
     with NamedTemporaryFile(suffix=fmt) as f:
         m.save(f.name, point_data={'foo': m.p[0]}, **kwargs)
         out = ['point_data', 'cells_dict']
-        m2 = Mesh.load(f.name, out=out, ignore_orientation=ignore_orientation)
+        m2 = Mesh.load(f.name,
+                       out=out,
+                       ignore_orientation=ignore_orientation,
+                       ignore_interior_facets=ignore_interior_facets)
 
 
         assert_array_equal(m.p, m2.p)

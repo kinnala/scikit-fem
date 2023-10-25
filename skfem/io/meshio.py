@@ -51,7 +51,8 @@ def from_meshio(m,
                 out=None,
                 int_data_to_sets=False,
                 force_meshio_type=None,
-                ignore_orientation=False):
+                ignore_orientation=False,
+                ignore_interior_facets=False):
 
     cells = m.cells_dict
     meshio_type = None
@@ -128,9 +129,12 @@ def from_meshio(m,
         sorted_facets = {k: [tuple(np.sort(f)) for f in v]
                          for k, v in oriented_facets.items()}
         for k, v in oriented_facets.items():
-            if ignore_orientation:
+            if ignore_orientation or ignore_interior_facets:
                 a = np.array(sorted_facets[k])
-                b = mtmp.facets.T
+                if ignore_interior_facets:
+                    b = mtmp.facets[:, mtmp.boundary_facets()].T
+                else:
+                    b = mtmp.facets.T
                 boundaries[k] = np.nonzero((a == b[:, None])
                                            .all(axis=2)
                                            .any(axis=1))[0]
