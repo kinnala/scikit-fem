@@ -2,7 +2,7 @@
 
 import numpy as np
 from skfem import *
-from skfem.experimental.supermeshing import intersect, elementwise_quadrature
+from skfem.supermeshing import intersect, elementwise_quadrature
 
 
 m1 = MeshLine(np.linspace(1, 10, 20))
