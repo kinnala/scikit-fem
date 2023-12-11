@@ -52,7 +52,7 @@ from typing import Any
 from itertools import product
 
 from .basis import (Basis, CellBasis, FacetBasis, BoundaryFacetBasis,
-                    InteriorFacetBasis, MortarFacetBasis)
+                    InteriorFacetBasis)
 from .basis import InteriorBasis, ExteriorFacetBasis  # backwards compatibility
 from .dofs import Dofs, DofsView
 from .form import Form, TrilinearForm, BilinearForm, LinearForm, Functional
@@ -94,7 +94,6 @@ __all__ = [
     "FacetBasis",
     "BoundaryFacetBasis",
     "InteriorFacetBasis",
-    "MortarFacetBasis",
     "Dofs",
     "DofsView",
     "TrilinearForm",

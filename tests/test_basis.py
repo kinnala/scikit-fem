@@ -10,9 +10,8 @@ from numpy.testing import (assert_allclose, assert_almost_equal,
 from skfem import BilinearForm, LinearForm, asm, solve, condense, projection
 from skfem.mesh import (Mesh, MeshTri, MeshTet, MeshHex,
                         MeshQuad, MeshLine1, MeshWedge1)
-from skfem.assembly import (CellBasis, FacetBasis, Dofs, Functional,
-                            MortarFacetBasis)
-from skfem.mapping import MappingIsoparametric, MappingMortar
+from skfem.assembly import CellBasis, FacetBasis, Dofs, Functional
+from skfem.mapping import MappingIsoparametric
 from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
                            ElementTetP2, ElementHexS2, ElementHex2,
                            ElementQuad2, ElementLineP2, ElementTriP0,
@@ -358,78 +357,6 @@ def test_pickling():
         elem.doflocs,
         elem1.doflocs,
     )
-
-
-@pytest.mark.parametrize(
-    "m1, m2, lenright",
-    [
-        (
-            MeshTri().refined(3),
-            MeshTri().translated((1., 0.)).refined(2),
-            1.,
-        ),
-        (
-            MeshTri.init_refdom().refined(3).with_boundaries(
-                {'right': lambda x: x[0] + x[1] == 1}
-            ),
-            MeshTri().translated((1., 0.)).refined(2),
-            np.sqrt(2),
-        )
-    ]
-)
-def test_mortar_basis(m1, m2, lenright):
-    # some sanity checks for MortarBasis
-    e = ElementTriP1()
-
-    mort = MappingMortar.init_2D(m1,
-                                 m2,
-                                 m1.boundaries['right'],
-                                 m2.boundaries['left'],
-                                 [0., 1.])
-
-    mb = [
-        MortarFacetBasis(m1, e, mapping=mort, intorder=4, side=0),
-        MortarFacetBasis(m2, e, mapping=mort, intorder=4, side=1),
-    ]
-
-    @Functional
-    def unity(w):
-        return 1.
-
-    @LinearForm
-    def load(v, w):
-        return 1. * v
-
-    @BilinearForm
-    def mass(u, v, w):
-        return u * v
-
-    assert_allclose(mb[0].default_parameters()['h1'],
-                    mb[1].default_parameters()['h1'])
-
-    assert_allclose(mb[0].default_parameters()['h2'],
-                    mb[1].default_parameters()['h2'])
-
-    assert (mb[0].default_parameters()['h1']
-            < mb[0].default_parameters()['h2']).all()
-
-    assert_almost_equal(unity.assemble(mb[0]), lenright)
-    assert_almost_equal(unity.assemble(mb[1]), lenright)
-
-    assert_almost_equal(load.assemble(mb[0]).dot(m1.p[1]), .5 * lenright)
-    assert_almost_equal(load.assemble(mb[1]).dot(m2.p[1]), .5 * lenright)
-
-    # integral is over the domain of the first argument
-    assert_almost_equal((mass.assemble(mb[0], mb[1])
-                         .dot(m1.p[0] * 0. + 1.)
-                         .dot(m2.p[0] * 0. + 1.)), lenright)
-
-    assert_almost_equal((mass.assemble(mb[1], mb[0])
-                         .dot(m2.p[0] * 0. + 1.)
-                         .dot(m1.p[0] * 0. + 1.)), lenright)
-
-    assert_allclose(mass.assemble(mb[0], mb[1]).toarray(),
-                    mass.assemble(mb[1], mb[0]).T.toarray())
 
 
 @pytest.mark.parametrize(

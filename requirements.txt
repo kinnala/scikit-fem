@@ -10,3 +10,4 @@ flake8
 sphinx~=6.1
 autograd
 pep517
+shapely
