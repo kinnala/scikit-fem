@@ -30,7 +30,7 @@ class Form:
     form: Optional[Callable] = None
 
     def __init__(self,
-                 form: Optional[Union[Callable, Form]] = None,
+                 form: Optional[Union[Callable, 'Form']] = None,
                  dtype: Union[Type[np.float64],
                               Type[np.complex64]] = np.float64,
                  nthreads: int = 0,
