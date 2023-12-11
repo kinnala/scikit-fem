@@ -212,12 +212,16 @@ with respect to documented and/or tested features.
 ### Unreleased
 
 - Removed: Python 3.7 support
+- Removed: `MappingMortar` and `MortarFacetBasis` in favor of
+  `skfem.supermeshing`
 - Added: Python 3.12 support
 - Added: `Mesh.load` supports new keyword arguments
   `ignore_orientation=True` and `ignore_interior_facets=True` which
   will both speed up the loading of larger three-dimensional meshes by
   ignoring facet orientation and all tags not on the boundary,
   respectively.
+- Added: `skfem.supermeshing` (requires `shapely>=2`) for creating quadrature
+  rules for interpolating between two 1D or 2D meshes.
 - Fixed: `MeshTet` uniform refine was reindexing subdomains incorrectly
 
 ## [8.1.0] - 2023-06-16

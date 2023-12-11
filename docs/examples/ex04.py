@@ -8,7 +8,7 @@ They are useful also when solving variational inequalities such as
 
 import numpy as np
 from skfem import *
-from skfem.experimental.supermeshing import intersect, elementwise_quadrature
+from skfem.supermeshing import intersect, elementwise_quadrature
 from skfem.models.elasticity import (linear_elasticity, lame_parameters,
                                      linear_stress)
 from skfem.helpers import dot, sym_grad, jump, mul

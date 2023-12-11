@@ -4,7 +4,6 @@ import numpy as np
 from skfem.mesh import MeshHex, MeshQuad, MeshTri
 from skfem.element import ElementHex1, ElementQuad1, ElementHex2
 from skfem.assembly import FacetBasis
-from skfem.mapping import MappingMortar
 
 
 class TestIsoparamNormals(unittest.TestCase):
@@ -88,54 +87,3 @@ class TestInverseMappingHex2(TestInverseMappingHex):
     """This should be equivalent to TestInverseMappingHex."""
 
     element = ElementHex2
-
-
-class TestMortarPair(unittest.TestCase):
-    """Check that mapped points match."""
-
-    mesh1_type = MeshTri
-    mesh2_type = MeshTri
-    nrefs1 = 2
-    nrefs2 = 3
-    translate_y = 0.0
-
-    def init_meshes(self):
-        m1 = self.mesh1_type().refined(self.nrefs1)
-        m2 = self.mesh2_type().refined(self.nrefs2).translated((1.0, self.translate_y))
-        return m1, m2
-
-    def runTest(self):
-        m1, m2 = self.init_meshes()
-        mp = MappingMortar.init_2D(m1, m2,
-                                   m1.facets_satisfying(lambda x: x[0] == 1.),
-                                   m2.facets_satisfying(lambda x: x[0] == 1.),
-                                   np.array([0., 1.]))
-        test_points = np.array([np.linspace(0., 1., 7)])
-        self.assertTrue((mp.G(test_points) -
-                         mp.G(test_points) < 1e-10).all())
-
-
-class TestMortarPairTriQuad(TestMortarPair):
-
-    mesh1_type = MeshTri
-    mesh2_type = MeshQuad
-
-
-class TestMortarPairQuadQuad(TestMortarPair):
-
-    mesh1_type = MeshQuad
-    mesh2_type = MeshQuad
-
-
-class TestMortarPairNoMatch1(TestMortarPair):
-
-    mesh1_type = MeshQuad
-    mesh2_type = MeshTri
-    translate_y = 0.1
-
-
-class TestMortarPairNoMatch2(TestMortarPair):
-
-    mesh1_type = MeshQuad
-    mesh2_type = MeshTri
-    translate_y = -np.pi / 10.
