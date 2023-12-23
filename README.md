@@ -225,6 +225,8 @@ with respect to documented and/or tested features.
 - Added: `skfem.supermeshing` (requires `shapely>=2`) for creating quadrature
   rules for interpolating between two 1D or 2D meshes.
 - Fixed: `MeshTet` uniform refine was reindexing subdomains incorrectly
+- Fixed: `MeshDG.draw` did not work; now calls `Basis.draw` which
+  works for any mesh topology
 
 ## [8.1.0] - 2023-06-16
 
