@@ -166,6 +166,20 @@ class ElementGlobal(Element):
                                         -w['n'][itr, 0, :]])
                 w['n'][itr] /= np.linalg.norm(w['n'][itr], axis=0)
 
+            # swap
+            from skfem.assembly import FacetBasis
+            fb = FacetBasis(mesh, mesh.elem(), intorder=0)
+            ix = np.isin(mesh.t2f, mesh.boundary_facets())
+            sortix = np.argsort(mesh.t2f[ix])
+            norms1 = np.vstack((w['n'][:, 0, :][ix][sortix],
+                                w['n'][:, 1, :][ix][sortix]))
+            norms2 = fb.normals[:, :, 0]
+            signs = np.diag(norms1.T @ norms2)
+            signs1 = signs.copy()
+            signs1[sortix] = signs
+            w['n'][:, 0, :][ix] *= signs1
+            w['n'][:, 1, :][ix] *= signs1
+
         # evaluate dofs, gdof implemented in subclasses
         for itr in range(N):
             for jtr in range(N):

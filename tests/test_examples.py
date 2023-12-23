@@ -1,4 +1,6 @@
 from unittest import TestCase, main
+import pytest
+import sys
 
 import numpy as np
 
@@ -14,7 +16,8 @@ class TestEx02(TestCase):
 
     def runTest(self):
         import docs.examples.ex02 as ex02
-        self.assertAlmostEqual(np.max(ex02.x), 0.001217973811129439)
+        self.assertAlmostEqual(np.max(ex02.x[ex02.ib.nodal_dofs[0]]),
+                               0.00033840961095522285)
 
 
 class TestEx03(TestCase):
@@ -254,6 +257,8 @@ class TestEx31(TestCase):
         self.assertAlmostEqual(L[0], 22.597202568397734, delta=1e-6)
 
 
+@pytest.mark.skipif(sys.version_info > (3,12),
+                    reason="Python 3.12 has no setuptools; assumed by pyamg")
 class TestEx32(TestCase):
 
     def runTest(self):

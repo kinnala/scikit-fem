@@ -16,14 +16,23 @@ class MeshTri1DG(MeshDG, MeshTri1):
     doflocs: ndarray = field(
         default_factory=lambda: np.array(
             [
-                [0.0, 0.0],
-                [1.0, 0.0],
-                [0.0, 1.0],
-                [1.0, 0.0],
-                [0.0, 1.0],
-                [1.0, 1.0],
+                [0., 0.],
+                [1., 0.],
+                [1., 1.],
+                [0., 0.],
+                [0., 1.],
+                [1., 1.],
             ],
             dtype=np.float64,
+        ).T
+    )
+    t: ndarray = field(
+        default_factory=lambda: np.array(
+            [
+                [0, 1, 3],
+                [0, 2, 3],
+            ],
+            dtype=np.int64,
         ).T
     )
     elem: Type[Element] = ElementTriP1DG

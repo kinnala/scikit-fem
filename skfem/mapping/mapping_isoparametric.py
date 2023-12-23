@@ -66,6 +66,13 @@ class MappingIsoparametric(Mapping):
     def bndmap(self, i, X, find=None):
         p = self.mesh.doflocs
         facets = self.mesh.facets
+        if len(self.mesh.dofs.edge_dofs) > 0:
+            facets = np.vstack((facets,
+                                self.mesh.dofs.edge_dofs[0, self.mesh.f2e]))
+            # TODO currently supports only one DOF per edge (slice 0 idx)
+        if len(self.mesh.dofs.facet_dofs) > 0:
+            facets = np.vstack((facets,
+                                self.mesh.dofs.facet_dofs))
         if find is None:
             out = np.zeros((facets.shape[1], X.shape[1]))
             for itr in range(facets.shape[0]):
@@ -82,6 +89,13 @@ class MappingIsoparametric(Mapping):
     def bndJ(self, i, j, X, find=None):
         p = self.mesh.doflocs
         facets = self.mesh.facets
+        if len(self.mesh.dofs.edge_dofs) > 0:
+            facets = np.vstack((facets,
+                                self.mesh.dofs.edge_dofs[0, self.mesh.f2e]))
+            # TODO currently supports only one DOF per edge (slice 0 idx)
+        if len(self.mesh.dofs.facet_dofs) > 0:
+            facets = np.vstack((facets,
+                                self.mesh.dofs.facet_dofs))
         if find is None:
             out = np.zeros((facets.shape[1], X.shape[1]))
             for itr in range(facets.shape[0]):

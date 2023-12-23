@@ -11,3 +11,7 @@ class Mesh2D2:
     @classmethod
     def init_refdom(cls):
         return cls.__bases__[-1].init_refdom()
+
+    def draw(self, *args, **kwargs):
+        from ..assembly import CellBasis
+        return CellBasis(self, self.elem()).draw(*args, **kwargs)

@@ -717,29 +717,6 @@ def projection(fun,
                diff: Optional[int] = None,
                I: Optional[ndarray] = None,
                expand: bool = False) -> ndarray:
-    """Perform projections onto a finite element basis.
-
-    Parameters
-    ----------
-    fun
-        A solution vector or a function handle.
-    basis_to
-        The finite element basis to project to.
-    basis_from
-        The finite element basis to project from.
-    diff
-        Differentiate with respect to the given dimension.
-    I
-        Index set for limiting the projection to a subset.
-    expand
-        Passed to :func:`skfem.utils.condense`.
-
-    Returns
-    -------
-    ndarray
-        The projected solution vector.
-
-    """
 
     @BilinearForm
     def mass(u, v, w):
@@ -783,7 +760,7 @@ def projection(fun,
     return solve_linear(M, f)
 
 
-@deprecated("Basis.project")
+@deprecated("Basis.project (will be removed in the next release)")
 def project(fun,
             basis_from: Optional[AbstractBasis] = None,
             basis_to: Optional[AbstractBasis] = None,

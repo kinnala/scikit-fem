@@ -113,6 +113,15 @@ class Mesh:
         return self._f2t
 
     @property
+    def f2e(self):
+        if not hasattr(self, '_f2e'):
+            _, self._f2e = self.build_entities(
+                self.facets,
+                self.bndelem.refdom.facets,
+            )
+        return self._f2e
+
+    @property
     def edges(self):
         if not hasattr(self, '_edges'):
             self._init_edges()
@@ -573,6 +582,13 @@ class Mesh:
         logger.debug("Mesh validation completed with no warnings.")
         return True
 
+    @staticmethod
+    def _remove_duplicate_nodes(p, t):
+        tmp = np.ascontiguousarray(p.T)
+        tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]),
+                                  return_index=True, return_inverse=True)
+        return p[:, ixa], ixb[t]
+
     def __iter__(self):
         return iter((self.doflocs, self.t))
 
@@ -606,12 +622,7 @@ class Mesh:
         p = np.hstack((self.p.round(decimals=8),
                        other.p.round(decimals=8)))
         t = np.hstack((self.t, other.t + self.p.shape[1]))
-        tmp = np.ascontiguousarray(p.T)
-        tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]),
-                                  return_index=True, return_inverse=True)
-        p = p[:, ixa]
-        t = ixb[t]
-        return cls(p, t)
+        return cls(*self._remove_duplicate_nodes(p, t))
 
     def __repr__(self):
         rep = ""
@@ -1038,27 +1049,42 @@ class Mesh:
                                         newf[self.boundaries[k]])
                           for k in self.boundaries}
                          if self.boundaries is not None else None),
-            _subdomains=({k: newt[np.intersect1d(self.subdomains[k], elements)]
+            _subdomains=({k: newt[np.intersect1d(self.subdomains[k],
+                                                 elements).astype(np.int64)]
                           for k in self.subdomains}
                          if self.subdomains is not None else None),
         )
 
-    def remove_elements(self, element_indices: ndarray):
+    def remove_elements(self, elements):
         """Construct a new mesh by removing elements.
 
         Parameters
         ----------
-        element_indices
-            List of element indices to remove.
+        elements
+            Criteria of which elements to include.  This input is normalized
+            using ``self.normalize_elements``.
 
         """
-        p, t, _ = self._reix(np.delete(self.t, element_indices, axis=1))
+        elements = self.normalize_elements(elements)
+        return self.restrict(np.setdiff1d(np.arange(self.t.shape[1],
+                                                    dtype=np.int64),
+                                          elements))
+
+    def remove_unused_nodes(self):
+        p, t, _ = self._reix(self.t)
         return replace(
             self,
             doflocs=p,
             t=t,
-            _boundaries=None,
-            _subdomains=None,
+        )
+
+    def remove_duplicate_nodes(self):
+        p, t = self._remove_duplicate_nodes(self.doflocs,
+                                            self.t)
+        return replace(
+            self,
+            doflocs=p,
+            t=t,
         )
 
     def element_finder(self, mapping=None):

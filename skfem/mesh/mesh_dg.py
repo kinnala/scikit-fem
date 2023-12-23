@@ -109,3 +109,7 @@ class MeshDG:
 
     def element_finder(self, *args, **kwargs):
         raise NotImplementedError
+
+    def draw(self, *args, **kwargs):
+        from ..assembly import CellBasis
+        return CellBasis(self, self.elem()).draw(*args, **kwargs)

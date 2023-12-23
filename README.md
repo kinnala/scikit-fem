@@ -214,6 +214,8 @@ with respect to documented and/or tested features.
 - Removed: Python 3.7 support
 - Removed: `MappingMortar` and `MortarFacetBasis` in favor of
   `skfem.supermeshing`
+- Deprecated: `skfem.visuals.glvis`; current version is broken and no
+  replacement is being planned
 - Added: Python 3.12 support
 - Added: `Mesh.load` supports new keyword arguments
   `ignore_orientation=True` and `ignore_interior_facets=True` which
@@ -222,7 +224,18 @@ with respect to documented and/or tested features.
   respectively.
 - Added: `skfem.supermeshing` (requires `shapely>=2`) for creating quadrature
   rules for interpolating between two 1D or 2D meshes.
+- Added: `Mesh.remove_unused_nodes`
+- Added: `Mesh.remove_duplicate_nodes`
+- Added: `Mesh.remove_elements` now supports passing any subdomain
+  reference through `Mesh.normalize_elements`; subdomains and
+  boundaries are also properly preserved
 - Fixed: `MeshTet` uniform refine was reindexing subdomains incorrectly
+- Fixed: `MeshDG.draw` did not work; now calls `Basis.draw` which
+  works for any mesh topology
+- Fixed: `FacetBasis` now works with `MeshTri2`, `MeshQuad2`,
+  `MeshTet2` and `MeshHex2`
+- Fixed: `ElementGlobal` now uses outward normals to initialize DOFs
+  on boundary factes
 
 ## [8.1.0] - 2023-06-16
 
