@@ -221,10 +221,9 @@ potential difference across the capacitor. Thus
 from packaging import version
 from pathlib import Path
 
-from skfem.mesh import MeshTri
-from skfem.assembly import Basis, FacetBasis
-from skfem.utils import solve, asm, condense, projection
-from skfem.element import ElementTriP1
+from skfem import (MeshTri, Basis, FacetBasis,
+                   solve, asm, condense, projection,
+                   ElementTriP1)
 from skfem.models.poisson import laplace, unit_load, mass
 from skfem.io.json import from_file
 
