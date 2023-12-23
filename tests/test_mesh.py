@@ -737,3 +737,12 @@ def test_integrate_quadratic_boundary(fbasis, refval, dec):
 
     np.testing.assert_almost_equal(unit.assemble(fbasis),
                                    refval, decimal=dec)
+
+
+def test_remove_unused():
+
+    m = MeshTri()
+    m1 = MeshTri(m.p, m.t[:, [0]])
+
+    assert not m1.is_valid()
+    assert m1.remove_unused_nodes().is_valid()

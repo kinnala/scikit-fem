@@ -1047,28 +1047,34 @@ class Mesh:
                                         newf[self.boundaries[k]])
                           for k in self.boundaries}
                          if self.boundaries is not None else None),
-            _subdomains=({k: newt[np.intersect1d(self.subdomains[k], elements)]
+            _subdomains=({k: newt[np.intersect1d(self.subdomains[k],
+                                                 elements).astype(np.int64)]
                           for k in self.subdomains}
                          if self.subdomains is not None else None),
         )
 
-    def remove_elements(self, element_indices: ndarray):
+    def remove_elements(self, elements):
         """Construct a new mesh by removing elements.
 
         Parameters
         ----------
-        element_indices
-            List of element indices to remove.
+        elements
+            Criteria of which elements to include.  This input is normalized
+            using ``self.normalize_elements``.
 
         """
-        p, t, _ = self._reix(np.delete(self.t, element_indices, axis=1))
+        elements = self.normalize_elements(elements)
+        return self.restrict(np.setdiff1d(np.arange(self.t.shape[1],
+                                                    dtype=np.int64),
+                                          elements))
+
+    def remove_unused_nodes(self):
+        p, t, _ = self._reix(self.t)
         return replace(
             self,
             doflocs=p,
             t=t,
-            _boundaries=None,
-            _subdomains=None,
-        )
+        )   
 
     def element_finder(self, mapping=None):
         """Return a function handle from location to element index.
