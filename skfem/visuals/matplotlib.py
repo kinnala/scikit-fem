@@ -291,7 +291,7 @@ def plot_meshtri(m: MeshTri1, z: ndarray, **kwargs) -> Axes:
                       levels=kwargs["levels"],
                       **{**{'colors': 'k'}, **plot_kwargs})
 
-    if "colorbar" in kwargs:
+    if "colorbar" in kwargs and kwargs["colorbar"] is not False:
         if isinstance(kwargs["colorbar"], str):
             plt.colorbar(im, ax=ax, label=kwargs["colorbar"])
         elif isinstance(kwargs["colorbar"], dict):
