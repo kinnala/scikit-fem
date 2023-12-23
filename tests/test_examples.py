@@ -16,7 +16,8 @@ class TestEx02(TestCase):
 
     def runTest(self):
         import docs.examples.ex02 as ex02
-        self.assertAlmostEqual(np.max(ex02.x), 0.001217973811129439)
+        self.assertAlmostEqual(np.max(ex02.x[ex02.ib.nodal_dofs[0]]),
+                               0.00033840961095522285)
 
 
 class TestEx03(TestCase):

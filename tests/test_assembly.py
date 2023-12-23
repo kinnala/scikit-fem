@@ -747,3 +747,24 @@ def test_hcurl_projections_3d():
 
     assert_almost_equal(curly, curlx)
     assert_almost_equal(curly, curla)
+
+
+def test_element_global_boundary_normal():
+
+    mesh = MeshTri().refined(3)
+    basis = Basis(mesh, ElementTriMorley())
+
+    D = basis.get_dofs().all('u_n')
+    x = basis.zeros()
+    x[D] = 1
+
+    @BilinearForm
+    def bilinf(u, v, w):
+        return ddot(u.hess, v.hess)
+
+    A = bilinf.assemble(basis)
+    f = unit_load.assemble(basis)
+
+    y = solve(*condense(A, f, D=D, x=x))
+
+    assert (y[basis.get_dofs(elements=True).all('u')] < 0).all()
