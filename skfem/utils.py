@@ -718,7 +718,7 @@ def projection(fun,
                I: Optional[ndarray] = None,
                expand: bool = False) -> ndarray:
 
-    from skfem.assembly import asm, BilinearForm, LinearForm, 
+    from skfem.assembly import asm, BilinearForm, LinearForm
 
     @BilinearForm
     def mass(u, v, w):
