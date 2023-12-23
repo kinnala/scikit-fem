@@ -9,8 +9,9 @@ from numpy.testing import assert_array_equal, assert_almost_equal
 from skfem.mesh import (Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
                         MeshTri2, MeshQuad2, MeshTet2, MeshHex2, MeshLine1DG,
                         MeshQuad1DG, MeshHex2, MeshTri1DG)
-from skfem.assembly import Basis, LinearForm
-from skfem.element import ElementTetP1
+from skfem.assembly import Basis, LinearForm, Functional, FacetBasis
+from skfem.element import (ElementTetP1, ElementTriP0, ElementQuad0,
+                           ElementHex0)
 from skfem.utils import projection
 from skfem.io.meshio import to_meshio, from_meshio
 from skfem.io.json import to_dict, from_dict
@@ -717,3 +718,22 @@ def test_refine_subdomains_uniform_hexs():
     m1 = MeshHex().refined().with_subdomains(sdef).refined()
     m2 = MeshHex().refined().refined().with_subdomains(sdef)
     np.testing.assert_equal(m1.subdomains, m2.subdomains)
+
+
+@pytest.mark.parametrize(
+    "fbasis,refval,dec",
+    [
+        (FacetBasis(MeshTri2.init_circle(), ElementTriP0()), 2 * np.pi, 5),
+        (FacetBasis(MeshQuad2(), ElementQuad0()), 4, 5),
+        (FacetBasis(MeshTet2.init_ball(), ElementTetP1()), 4 * np.pi, 3),
+        (FacetBasis(MeshHex2(), ElementHex0()), 6, 3),
+    ]
+)
+def test_integrate_quadratic_boundary(fbasis, refval, dec):
+
+    @Functional
+    def unit(w):
+        return 1 + 0 * w.x[0]
+
+    np.testing.assert_almost_equal(unit.assemble(fbasis),
+                                   refval, decimal=dec)

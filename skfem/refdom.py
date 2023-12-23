@@ -104,6 +104,10 @@ class RefTet(Refdom):
              [0, 3],
              [1, 3],
              [2, 3]]
+    normals = np.array([[0., 0., -1.],
+                        [0., -1., 0.],
+                        [-1., 0., 0.],
+                        [1., 1., 1.]])
     brefdom = RefTri
     nnodes = 4
     nfacets = 4

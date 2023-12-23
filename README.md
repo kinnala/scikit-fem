@@ -227,6 +227,8 @@ with respect to documented and/or tested features.
 - Fixed: `MeshTet` uniform refine was reindexing subdomains incorrectly
 - Fixed: `MeshDG.draw` did not work; now calls `Basis.draw` which
   works for any mesh topology
+- Fixed: `FacetBasis` now works with `MeshTri2`, `MeshQuad2`,
+  `MeshTet2` and `MeshHex2`
 
 ## [8.1.0] - 2023-06-16
 

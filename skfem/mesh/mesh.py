@@ -113,6 +113,15 @@ class Mesh:
         return self._f2t
 
     @property
+    def f2e(self):
+        if not hasattr(self, '_f2e'):
+            _, self._f2e = self.build_entities(
+                self.facets,
+                self.bndelem.refdom.facets,
+            )
+        return self._f2e
+
+    @property
     def edges(self):
         if not hasattr(self, '_edges'):
             self._init_edges()
