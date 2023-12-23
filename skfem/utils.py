@@ -16,7 +16,7 @@ if "pyodide" in sys.modules:
 else:
     from scipy.sparse import spmatrix
 
-from skfem.assembly import DofsView
+from skfem.assembly import asm, BilinearForm, LinearForm, DofsView
 from skfem.assembly.basis import AbstractBasis
 from skfem.element import ElementVector
 from skfem.generic_utils import deprecated
@@ -717,8 +717,6 @@ def projection(fun,
                diff: Optional[int] = None,
                I: Optional[ndarray] = None,
                expand: bool = False) -> ndarray:
-
-    from skfem.assembly import asm, BilinearForm, LinearForm
 
     @BilinearForm
     def mass(u, v, w):
