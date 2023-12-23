@@ -746,3 +746,14 @@ def test_remove_unused():
 
     assert not m1.is_valid()
     assert m1.remove_unused_nodes().is_valid()
+
+
+def test_remove_duplicates():
+
+    m = MeshTri()
+    t = m.t
+    t[1, :] += 4
+    m1 = MeshTri(np.hstack((m.p, m.p)), t)
+
+    assert not m1.is_valid()
+    assert m1.remove_duplicate_nodes().is_valid()

@@ -225,6 +225,7 @@ with respect to documented and/or tested features.
 - Added: `skfem.supermeshing` (requires `shapely>=2`) for creating quadrature
   rules for interpolating between two 1D or 2D meshes.
 - Added: `Mesh.remove_unused_nodes`
+- Added: `Mesh.remove_duplicate_nodes`
 - Added: `Mesh.remove_elements` now supports passing any subdomain
   reference through `Mesh.normalize_elements`; subdomains and
   boundaries are also properly preserved
