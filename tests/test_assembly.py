@@ -751,7 +751,7 @@ def test_hcurl_projections_3d():
 
 def test_element_global_boundary_normal():
 
-    mesh = MeshTri().refined(3)
+    mesh = MeshTri.init_sqsymmetric().refined(3)
     basis = Basis(mesh, ElementTriMorley())
 
     D = basis.get_dofs().all('u_n')
