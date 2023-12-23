@@ -234,6 +234,8 @@ with respect to documented and/or tested features.
   works for any mesh topology
 - Fixed: `FacetBasis` now works with `MeshTri2`, `MeshQuad2`,
   `MeshTet2` and `MeshHex2`
+- Fixed: `ElementGlobal` now uses outward normals to initialize DOFs
+  on boundary factes
 
 ## [8.1.0] - 2023-06-16
 
