@@ -1,4 +1,5 @@
 from unittest import TestCase, main
+import sys
 
 import numpy as np
 
@@ -254,6 +255,8 @@ class TestEx31(TestCase):
         self.assertAlmostEqual(L[0], 22.597202568397734, delta=1e-6)
 
 
+@pytest.mark.skipif(sys.version_info > (3,12),
+                    reason="Python 3.12 has no setuptools; assumed by pyamg")
 class TestEx32(TestCase):
 
     def runTest(self):

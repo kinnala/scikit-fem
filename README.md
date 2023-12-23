@@ -214,6 +214,8 @@ with respect to documented and/or tested features.
 - Removed: Python 3.7 support
 - Removed: `MappingMortar` and `MortarFacetBasis` in favor of
   `skfem.supermeshing`
+- Deprecated: `skfem.visuals.glvis`; current version is broken and no
+  replacement is being planned
 - Added: Python 3.12 support
 - Added: `Mesh.load` supports new keyword arguments
   `ignore_orientation=True` and `ignore_interior_facets=True` which
