@@ -5,6 +5,8 @@ import numpy as np
 from typing import Optional
 from glvis import glvis
 
+from skfem.generic_utils import deprecated
+
 
 MESH_TYPE_MAPPING = {
     skfem.MeshTet1: 4,
@@ -64,6 +66,7 @@ def _to_float_string(arr):
     return s.getvalue().decode()
 
 
+@deprecated("skfem.visuals.matplotlib.plot (no replacement)")
 def plot(basis, x, keys: Optional[str] = None):
     m = basis.mesh
     if isinstance(basis.elem, skfem.ElementVector):
@@ -99,5 +102,6 @@ def plot(basis, x, keys: Optional[str] = None):
     ))
 
 
+@deprecated("skfem.visuals.matplotlib.draw (no replacement)")
 def draw(basis, keys: Optional[str] = None):
     return plot(basis, basis.zeros(), keys=keys)
