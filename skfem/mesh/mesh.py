@@ -1074,7 +1074,7 @@ class Mesh:
             self,
             doflocs=p,
             t=t,
-        )   
+        )
 
     def element_finder(self, mapping=None):
         """Return a function handle from location to element index.
