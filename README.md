@@ -235,9 +235,9 @@ with respect to documented and/or tested features.
 - Fixed: `FacetBasis` now works with `MeshTri2`, `MeshQuad2`,
   `MeshTet2` and `MeshHex2`
 - Fixed: `ElementGlobal` now uses outward normals to initialize DOFs
-  on boundary factes
+  on boundary facets
 
-## [8.1.0] - 2023-06-16
+### [8.1.0] - 2023-06-16
 
 - Added: `ElementTriHHJ0` and `ElementTriHHJ1` matrix finite elements
   for implementing the Hellan-Hermann-Johnson mixed method (see [`ex48.py`](https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex48.py))
@@ -254,7 +254,7 @@ with respect to documented and/or tested features.
 - Added: `Mesh.refined` now preserves subdomains in adaptive mesh refinement
 - Fixed: `Mesh.refined` used to modify the element connectivity of the original mesh
 
-## [8.0.0] - 2022-12-16
+### [8.0.0] - 2022-12-16
 
 - Removed: The deprecated `Basis.find_dofs` method, see `Basis.get_dofs` for a
   replacement
