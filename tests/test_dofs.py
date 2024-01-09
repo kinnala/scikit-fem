@@ -48,7 +48,7 @@ class TestDofsNodalSubsets(TestCase):
         self.assertEqual(len(all_dofs.drop('u').facet), 1)
 
         all_dofs = basis.dofs.get_facet_dofs(
-            m.facets_satisfying(lambda x: 1))
+            m.facets_satisfying(lambda x: 1 + x[0] * 0))
 
         self.assertEqual(len(all_dofs.keep('u_n').facet), 1)
         self.assertEqual(len(all_dofs.drop('u').facet), 1)

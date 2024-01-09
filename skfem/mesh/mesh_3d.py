@@ -43,7 +43,7 @@ class Mesh3D(Mesh):
         A = self.edges[:, edge_candidates].T
         B = boundary_edges
         dims = A.max(0) + 1
-        ix = np.where(np.in1d(
+        ix = np.where(np.isin(
             np.ravel_multi_index(A.T, dims),  # type: ignore
             np.ravel_multi_index(B.T, dims),  # type: ignore
         ))[0]
