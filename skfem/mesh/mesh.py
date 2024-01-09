@@ -152,7 +152,7 @@ class Mesh:
         A = self.edges[:, edge_candidates].T
         B = boundary_edges
         dims = A.max(0) + 1
-        ix = np.where(np.in1d(
+        ix = np.where(np.isin(
             np.ravel_multi_index(A.T, dims),  # type: ignore
             np.ravel_multi_index(B.T, dims),  # type: ignore
         ))[0]
@@ -271,7 +271,8 @@ class Mesh:
         return {
             **{
                 f"skfem:s:{name}": [
-                    np.isin(np.arange(self.t.shape[1]), subdomain).astype(int)
+                    np.isin(np.arange(self.t.shape[1],
+                                      dtype=np.int64), subdomain).astype(int)
                 ]
                 for name, subdomain in subdomains.items()
             },
@@ -295,7 +296,7 @@ class Mesh:
             elif subnames[1] == "b":
                 mask = (
                     (1 << np.arange(self.refdom.nfacets))[:, None]
-                    & data[0].astype(int)
+                    & data[0].astype(np.int64)
                 ).astype(bool)
                 facets = np.sort(self.t2f[mask])
                 cells = mask.nonzero()[1]
@@ -399,7 +400,7 @@ class Mesh:
 
         """
         midp = self.p[:, self.t].mean(axis=1)
-        return np.nonzero(test(midp))[0].astype(np.uint64)
+        return np.nonzero(test(midp))[0].astype(np.int64)
 
     def _expand_facets(self, ix: ndarray) -> Tuple[ndarray, ndarray]:
         """Return vertices and edges corresponding to given facet indices.

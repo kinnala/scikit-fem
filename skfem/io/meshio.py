@@ -111,7 +111,7 @@ def from_meshio(m,
 
     # parse any subdomains from cell_sets
     if m.cell_sets:
-        subdomains = {k: v[meshio_type].astype(np.uint64)
+        subdomains = {k: v[meshio_type].astype(np.int64)
                       for k, v in m.cell_sets_dict.items()
                       if meshio_type in v}
 
