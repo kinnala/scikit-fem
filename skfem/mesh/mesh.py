@@ -271,7 +271,8 @@ class Mesh:
         return {
             **{
                 f"skfem:s:{name}": [
-                    np.isin(np.arange(self.t.shape[1], dtype=np.int64), subdomain).astype(int)
+                    np.isin(np.arange(self.t.shape[1],
+                                      dtype=np.int64), subdomain).astype(int)
                 ]
                 for name, subdomain in subdomains.items()
             },
