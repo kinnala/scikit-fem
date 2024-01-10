@@ -236,6 +236,7 @@ with respect to documented and/or tested features.
   `MeshTet2` and `MeshHex2`
 - Fixed: `ElementGlobal` now uses outward normals to initialize DOFs
   on boundary facets
+- Fixed: `ElementVector` works also for split_bases/split_indices in case `mesh.dim() != elem.dim`
 
 ### [8.1.0] - 2023-06-16
 
