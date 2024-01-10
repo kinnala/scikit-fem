@@ -338,7 +338,7 @@ class AbstractBasis:
                                e.interior_dofs])
             return output
         elif isinstance(self.elem, ElementVector):
-            ndims = self.mesh.dim()
+            ndims = self.elem.dim
             e = self.elem.elem
             for k in range(ndims):
                 output.append(np.concatenate((
@@ -359,7 +359,7 @@ class AbstractBasis:
         elif isinstance(self.elem, ElementVector):
             return [type(self)(self.mesh, self.elem.elem, self.mapping,
                                quadrature=self.quadrature)
-                    for _ in range(self.mesh.dim())]
+                    for _ in range(self.elem.dim)]
         return [self]
 
     @property
