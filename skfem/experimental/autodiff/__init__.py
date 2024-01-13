@@ -35,7 +35,17 @@ class JaxDiscreteField(object):
         return self.value + other.value
 
     def __mul__(self, other):
-        return self.value * other.value
+        if isinstance(other, JaxDiscreteField):
+            return self.value * other.value
+        return self.value * other
+
+    def __rmul__(self, other):
+        if isinstance(other, JaxDiscreteField):
+            return self.value * other.value
+        return self.value * other
+
+    def __array__(self):
+        return self.value
 
     @property
     def astuple(self):
