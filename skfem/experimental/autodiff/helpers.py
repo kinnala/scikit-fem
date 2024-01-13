@@ -1,41 +1,23 @@
 import jax.numpy as jnp
 
-from skfem import DiscreteField
-
 
 def dot(u, v):
-    # if isinstance(u, tuple):
-    #     u = u[0]
-    # if isinstance(v, tuple):
-    #     v = v[0]
     return jnp.einsum('i...,i...', u, v)
 
 
 def ddot(u, v):
-    # if isinstance(u, tuple):
-    #     u = u[0]
-    # if isinstance(v, tuple):
-    #     v = v[0]
     return jnp.einsum('ij...,ij...', u, v)
 
 
 def dddot(u, v):
-    # if isinstance(u, tuple):
-    #     u = u[0]
-    # if isinstance(v, tuple):
-    #     v = v[0]
     return jnp.einsum('ijk...,ijk...', u, v)
 
 
 def grad(u):
-    # if isinstance(u, DiscreteField):
-    #     return u.grad
     return u.grad
 
 
 def sym_grad(u):
-    # if isinstance(u, DiscreteField):
-    #     return .5 * (u.grad + transpose(u.grad))
     return .5 * (u.grad + transpose(u.grad))
 
 

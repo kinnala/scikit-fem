@@ -1,6 +1,5 @@
 from skfem.assembly.form.form import Form, FormExtraParams
 from skfem.assembly.form.coo_data import COOData
-from skfem.element import DiscreteField
 from numpy import ndarray
 import numpy as np
 from jax import jvp, linearize, config
