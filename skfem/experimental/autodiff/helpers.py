@@ -1,5 +1,4 @@
-import autograd.numpy as np
-from autograd.builtins import isinstance
+import jax.numpy as np
 
 from skfem import DiscreteField
 

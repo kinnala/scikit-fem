@@ -2,8 +2,10 @@ from skfem.assembly.form.form import Form, FormExtraParams
 from skfem.assembly.form.coo_data import COOData
 from numpy import ndarray
 import numpy as np
+from jax import jvp, linearize, config
 
-from autograd import make_jvp
+
+config.update("jax_enable_x64", True)
 
 
 class NonlinearForm(Form):
@@ -47,26 +49,27 @@ class NonlinearForm(Form):
         data1 = np.zeros(sz1, dtype=self.dtype)
         rows1 = np.zeros(sz1, dtype=np.int64)
 
-        def _make_jacobian(V):
-            if 'hessian' in self.params:
-                F = make_jvp(lambda U: self.form(*U, w))
-                return make_jvp(lambda W: F(W)(V)[1])(x)
-            return make_jvp(lambda U: self.form(*U, *V, w))(x)
-
-        # # JAX version
+        # # autograd version
         # def _make_jacobian(V):
         #     if 'hessian' in self.params:
-        #         return linearize(
-        #             lambda W: jvp(lambda U: self.form(*U, w), (W,), (V,))[1],
-        #             x
-        #         )
-        #     return linearize(lambda U: self.form(*U, *V, w), x)
+        #         F = make_jvp(lambda U: self.form(*U, w))
+        #         return make_jvp(lambda W: F(W)(V)[1])(x)
+        #     return make_jvp(lambda U: self.form(*U, *V, w))(x)
+
+        # JAX version
+        def _make_jacobian(V):
+            if 'hessian' in self.params:
+                return linearize(
+                    lambda W: jvp(lambda U: self.form(*U, w), (W,), (V,))[1],
+                    x
+                )
+            return linearize(lambda U: self.form(*U, *V, w), x)
 
         # loop over the indices of local stiffness matrix
         for i in range(basis.Nbfun):
-            DF = _make_jacobian(tuple(c.astuple for c in basis.basis[i]))
+            y, DF = _make_jacobian(tuple(c.astuple for c in basis.basis[i]))
             for j in range(basis.Nbfun):
-                y, DFU = DF(tuple(c.astuple for c in basis.basis[j]))
+                DFU = DF(tuple(c.astuple for c in basis.basis[j]))
                 # Jacobian
                 ixs = slice(nt * (basis.Nbfun * j + i),
                             nt * (basis.Nbfun * j + i + 1))

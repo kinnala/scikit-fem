@@ -8,6 +8,7 @@ pyamg
 mypy
 flake8
 sphinx~=6.1
-autograd
+jax
+jaxlib
 pep517
 shapely
