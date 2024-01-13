@@ -1,15 +1,29 @@
 import jax.numpy as jnp
 
+from . import JaxDiscreteField
+
 
 def dot(u, v):
+    if isinstance(u, JaxDiscreteField):
+        u = u.value
+    if isinstance(v, JaxDiscreteField):
+        v = v.value
     return jnp.einsum('i...,i...', u, v)
 
 
 def ddot(u, v):
+    if isinstance(u, JaxDiscreteField):
+        u = u.value
+    if isinstance(v, JaxDiscreteField):
+        v = v.value
     return jnp.einsum('ij...,ij...', u, v)
 
 
 def dddot(u, v):
+    if isinstance(u, JaxDiscreteField):
+        u = u.value
+    if isinstance(v, JaxDiscreteField):
+        v = v.value
     return jnp.einsum('ijk...,ijk...', u, v)
 
 
@@ -32,16 +46,24 @@ def dd(u):
 
 
 def transpose(T):
+    if isinstance(T, JaxDiscreteField):
+        T = T.value
     return jnp.einsum('ij...->ji...', T)
 
 
 def mul(A, B):
+    if isinstance(A, JaxDiscreteField):
+        A = A.value
+    if isinstance(B, JaxDiscreteField):
+        B = B.value
     if len(A.shape) == len(B.shape):
         return jnp.einsum('ij...,jk...->ik...', A, B)
     return jnp.einsum('ij...,j...->i...', A, B)
 
 
 def trace(T):
+    if isinstance(T, JaxDiscreteField):
+        T = T.value
     return jnp.einsum('ii...', T)
 
 

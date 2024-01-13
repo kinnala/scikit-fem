@@ -32,7 +32,14 @@ class JaxDiscreteField(object):
         self.grad6 = grad6
 
     def __add__(self, other):
-        return self.value + other.value
+        if isinstance(other, JaxDiscreteField):
+            return self.value + other.value
+        return self.value + other
+
+    def __sub__(self, other):
+        if isinstance(other, JaxDiscreteField):
+            return self.value - other.value
+        return self.value - other
 
     def __mul__(self, other):
         if isinstance(other, JaxDiscreteField):
@@ -46,6 +53,10 @@ class JaxDiscreteField(object):
 
     def __array__(self):
         return self.value
+
+    @property
+    def shape(self):
+        return self.value.shape
 
     @property
     def astuple(self):
