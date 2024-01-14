@@ -54,6 +54,9 @@ class JaxDiscreteField(object):
     def __array__(self):
         return self.value
 
+    def __getitem__(self, index):
+        return self.value[index]
+
     @property
     def shape(self):
         return self.value.shape

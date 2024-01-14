@@ -6,9 +6,11 @@ from numpy.testing import (assert_array_almost_equal,
 from skfem.experimental.autodiff import NonlinearForm
 from skfem.experimental.autodiff.helpers import (grad, dot,
                                                  ddot, mul,
-                                                 div, sym_grad)
+                                                 div, sym_grad,
+                                                 transpose,
+                                                 eye, trace)
 from skfem.assembly import Basis
-from skfem.mesh import MeshTri
+from skfem.mesh import MeshTri, MeshQuad
 from skfem.element import (ElementTriP1, ElementTriP2,
                            ElementVector)
 from skfem.utils import solve, condense
@@ -88,3 +90,34 @@ def test_navier_stokes():
     (u, ubasis), (p, pbasis) = basis.split(x)
 
     assert_almost_equal(np.max(p), 5212.45466, decimal=5)
+
+
+def test_nonlin_elast():
+
+    m = MeshQuad.init_tensor(np.linspace(0, 5, 20),
+                         np.linspace(0, 0.5, 5)).to_meshtri(style='x')
+    e = ElementVector(ElementTriP1())
+    basis = Basis(m, e)
+    x = basis.zeros()
+
+    @NonlinearForm
+    def elast(u, v, w):
+        epsu = .5 * (grad(u) + transpose(grad(u))
+                     + mul(transpose(grad(u)), grad(u)))
+        epsv = .5 * (grad(v) + transpose(grad(v)))
+        sigu = 2 * 10 * epsu + 1. * eye(trace(epsu), 2)
+        return ddot(sigu, epsv) - w.t * 2e-2 * v[1]
+
+
+    for itr in range(50):
+        xp = x.copy()
+        x += solve(*condense(*elast.assemble(basis,
+                                             x=x,
+                                             t=np.minimum((itr + 1) / 5, 1)),
+                             D=basis.get_dofs({'left'}).all()))
+        res = jnp.linalg.norm(x - xp)
+        print(res)
+        if res < 1e-8:
+            break
+
+    assert_almost_equal(np.max(x), 2.83411524813795)
