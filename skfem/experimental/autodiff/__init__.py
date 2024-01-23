@@ -118,8 +118,11 @@ class NonlinearForm(Form):
         # to jnp.ndarray promotion issues
         w = FormExtraParams({
             **{
-                k: JaxDiscreteField(*tuple(jnp.asarray(x)
-                                           for x in defaults[k].astuple))
+                k: JaxDiscreteField(*tuple(
+                    jnp.asarray(x)
+                    if x is not None else None
+                    for x in defaults[k].astuple
+                ))
                 for k in defaults
             },
             **self._normalize_asm_kwargs(kwargs, basis),
