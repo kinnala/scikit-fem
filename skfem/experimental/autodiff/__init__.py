@@ -114,9 +114,12 @@ class NonlinearForm(Form):
         dx = basis.dx
 
         defaults = basis.default_parameters()
+        # turn defaults into JaxDiscreteField to avoid np.ndarray
+        # to jnp.ndarray promotion issues
         w = FormExtraParams({
             **{
-                k: JaxDiscreteField(*tuple(jnp.asarray(x) for x in defaults[k].astuple))
+                k: JaxDiscreteField(*tuple(jnp.asarray(x)
+                                           for x in defaults[k].astuple))
                 for k in defaults
             },
             **self._normalize_asm_kwargs(kwargs, basis),
