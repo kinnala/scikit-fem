@@ -4,6 +4,7 @@ from numpy import ndarray
 import numpy as np
 from jax import jvp, linearize, config
 from jax.tree_util import register_pytree_node
+import jax.numpy as jnp
 
 
 config.update("jax_enable_x64", True)
@@ -50,6 +51,9 @@ class JaxDiscreteField(object):
         if isinstance(other, JaxDiscreteField):
             return self.value * other.value
         return self.value * other
+
+    def __pow__(self, ix):
+        return self.value ** ix
 
     def __array__(self):
         return self.value
@@ -108,8 +112,13 @@ class NonlinearForm(Form):
 
         nt = basis.nelems
         dx = basis.dx
+
+        defaults = basis.default_parameters()
         w = FormExtraParams({
-            **basis.default_parameters(),
+            **{
+                k: JaxDiscreteField(*tuple(jnp.asarray(x) for x in defaults[k].astuple))
+                for k in defaults
+            },
             **self._normalize_asm_kwargs(kwargs, basis),
         })
 
