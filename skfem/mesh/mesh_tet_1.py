@@ -381,13 +381,13 @@ class MeshTet1(MeshSimplex, Mesh3D):
                 .copy()
                 .flatten())
 
-        T = np.zeros((4, 0))
-        T = np.hstack((T, t[[0, 1, 5, 7]]))
-        T = np.hstack((T, t[[0, 1, 4, 7]]))
-        T = np.hstack((T, t[[0, 2, 4, 7]]))
-        T = np.hstack((T, t[[0, 3, 5, 7]]))
-        T = np.hstack((T, t[[0, 2, 6, 7]]))
-        T = np.hstack((T, t[[0, 3, 6, 7]]))
+        T = np.zeros((4, 6 * ne))
+        T[:, :ne] = t[[0, 1, 5, 7]]
+        T[:, ne:(2 * ne)] = t[[0, 1, 4, 7]]
+        T[:, (2 * ne):(3 * ne)] = t[[0, 2, 4, 7]]
+        T[:, (3 * ne):(4 * ne)] = t[[0, 3, 5, 7]]
+        T[:, (4 * ne):(5 * ne)] = t[[0, 2, 6, 7]]
+        T[:, (5 * ne):] = t[[0, 3, 6, 7]]
 
         return cls(p, T.astype(np.int64))
 
