@@ -1,93 +1,87 @@
-import autograd.numpy as np
-from autograd.builtins import isinstance
+import jax.numpy as jnp
 
-from skfem import DiscreteField
+from . import JaxDiscreteField
 
 
 def dot(u, v):
-    if isinstance(u, tuple):
-        u = u[0]
-    if isinstance(v, tuple):
-        v = v[0]
-    return np.einsum('i...,i...', u, v)
+    if isinstance(u, JaxDiscreteField):
+        u = u.value
+    if isinstance(v, JaxDiscreteField):
+        v = v.value
+    return jnp.einsum('i...,i...', u, v)
 
 
 def ddot(u, v):
-    if isinstance(u, tuple):
-        u = u[0]
-    if isinstance(v, tuple):
-        v = v[0]
-    return np.einsum('ij...,ij...', u, v)
+    if isinstance(u, JaxDiscreteField):
+        u = u.value
+    if isinstance(v, JaxDiscreteField):
+        v = v.value
+    return jnp.einsum('ij...,ij...', u, v)
 
 
 def dddot(u, v):
-    if isinstance(u, tuple):
-        u = u[0]
-    if isinstance(v, tuple):
-        v = v[0]
-    return np.einsum('ijk...,ijk...', u, v)
+    if isinstance(u, JaxDiscreteField):
+        u = u.value
+    if isinstance(v, JaxDiscreteField):
+        v = v.value
+    return jnp.einsum('ijk...,ijk...', u, v)
 
 
 def grad(u):
-    if isinstance(u, DiscreteField):
-        return u.grad
-    return u[1]
+    return u.grad
 
 
 def sym_grad(u):
-    if isinstance(u, DiscreteField):
-        return .5 * (u.grad + transpose(u.grad))
-    return .5 * (u[1] + transpose(u[1]))
+    return .5 * (u.grad + transpose(u.grad))
 
 
 def div(u):
-    if len(u[1].shape) == 4:
-        return np.einsum('ii...', u[1])
-    return u[2]
+    if len(u.grad.shape) == 4:
+        return jnp.einsum('ii...', u.grad)
+    return u.div
 
 
 def dd(u):
-    if isinstance(u, DiscreteField):
-        return u.hess
-    return u[4]
+    return u.hess
 
 
 def transpose(T):
-    if isinstance(T, tuple):
-        T = T[0]
-    return np.einsum('ij...->ji...', T)
+    if isinstance(T, JaxDiscreteField):
+        T = T.value
+    return jnp.einsum('ij...->ji...', T)
 
 
 def mul(A, B):
-    if isinstance(A, tuple):
-        A = A[0]
-    if isinstance(B, tuple):
-        B = B[0]
+    if isinstance(A, JaxDiscreteField):
+        A = A.value
+    if isinstance(B, JaxDiscreteField):
+        B = B.value
     if len(A.shape) == len(B.shape):
-        return np.einsum('ij...,jk...->ik...', A, B)
-    return np.einsum('ij...,j...->i...', A, B)
+        return jnp.einsum('ij...,jk...->ik...', A, B)
+    return jnp.einsum('ij...,j...->i...', A, B)
 
 
 def trace(T):
-    if isinstance(T, tuple):
-        T = T[0]
-    return np.einsum('ii...', T)
+    if isinstance(T, JaxDiscreteField):
+        T = T.value
+    return jnp.einsum('ii...', T)
 
 
 def eye(w, size):
-    return np.array([[w if i == j else 0. * w for i in range(size)]
+    return jnp.array([[w if i == j else 0. * w
+                       for i in range(size)]
                      for j in range(size)])
 
 
 def det(A):
-    detA = np.zeros_like(A[0, 0])
+    detA = jnp.zeros_like(A[0, 0])
     if A.shape[0] == 3:
-        detA = A[0, 0] * (A[1, 1] * A[2, 2] -
-                          A[1, 2] * A[2, 1]) -\
-               A[0, 1] * (A[1, 0] * A[2, 2] -
-                          A[1, 2] * A[2, 0]) +\
-               A[0, 2] * (A[1, 0] * A[2, 1] -
-                          A[1, 1] * A[2, 0])
+        detA = (A[0, 0] * (A[1, 1] * A[2, 2]
+                           - A[1, 2] * A[2, 1])
+                - A[0, 1] * (A[1, 0] * A[2, 2] -
+                             - A[1, 2] * A[2, 0])
+                + A[0, 2] * (A[1, 0] * A[2, 1]
+                             - A[1, 1] * A[2, 0]))
     elif A.shape[0] == 2:
         detA = A[0, 0] * A[1, 1] - A[1, 0] * A[0, 1]
     return detA
