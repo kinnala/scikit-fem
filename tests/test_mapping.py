@@ -1,9 +1,10 @@
 import unittest
 import numpy as np
 
-from skfem.mesh import MeshHex, MeshQuad, MeshTri
+from skfem.mesh import MeshHex, MeshQuad, MeshTri, MeshTet
 from skfem.element import ElementHex1, ElementQuad1, ElementHex2
 from skfem.assembly import FacetBasis
+from skfem.mapping import MappingAffine
 
 
 class TestIsoparamNormals(unittest.TestCase):
@@ -87,3 +88,16 @@ class TestInverseMappingHex2(TestInverseMappingHex):
     """This should be equivalent to TestInverseMappingHex."""
 
     element = ElementHex2
+
+
+def test_mapping_memory_optimization():
+
+    m = MeshTet.init_tensor(np.linspace(0, 1, 100),
+                            np.linspace(0, 1, 100),
+                            np.linspace(0, 1, 100))
+    m = m.with_subdomains({
+        'omega0': [0, 1, 2, 3, 4, 5],
+    })
+    orig = MappingAffine(m)
+    opt = MappingAffine(m, tind=m.subdomains['omega0'])
+    assert len(orig.detA) > len(opt.detA)
