@@ -6,9 +6,23 @@ from .mapping import Mapping
 class MappingAffine(Mapping):
     """An affine mapping for simplical elements."""
 
-    def __init__(self, mesh):
+    def __init__(self, mesh, tind=None):
+        """Local-to-global mappings for simplex elements.
+
+        Parameters
+        ----------
+        mesh
+            An object of type :class:`~skfem.mesh.Mesh`.
+        tind
+            An optional array of element indices for memory
+            optimizations.  If provided, only the included element
+            indices are used and all methods will ignore the
+            respective tind parameter.
+
+        """
         self.dim = mesh.p.shape[0]
         self.mesh = mesh
+        self.tind = tind
 
     @property
     def A(self):
@@ -41,22 +55,33 @@ class MappingAffine(Mapping):
     def _init_Ab(self):
         """For lazy evaluation of interior mapping."""
         if self.mesh.t.shape[0] > 0:  # todo: why this guard exists?
-            nt = self.mesh.t.shape[1]
+            nt = self.mesh.t.shape[1] if self.tind is None else len(self.tind)
             dim = self.dim
             # initialize the affine mapping
             self._A = np.empty((dim, dim, nt))
             self._b = np.empty((dim, nt))
 
-            for i in range(dim):
-                self._b[i] = self.mesh.p[i, self.mesh.t[0]]
-                for j in range(dim):
-                    self._A[i, j] = (self.mesh.p[i, self.mesh.t[j + 1]] -
-                                     self.mesh.p[i, self.mesh.t[0]])
+            if self.tind is None:
+                for i in range(dim):
+                    self._b[i] = self.mesh.p[i, self.mesh.t[0]]
+                    for j in range(dim):
+                        self._A[i, j] = (
+                            self.mesh.p[i, self.mesh.t[j + 1]] -
+                            self.mesh.p[i, self.mesh.t[0]]
+                        )
+            else:
+                for i in range(dim):
+                    self._b[i] = self.mesh.p[i, self.mesh.t[0, self.tind]]
+                    for j in range(dim):
+                        self._A[i, j] = (
+                            self.mesh.p[i, self.mesh.t[j + 1, self.tind]] -
+                            self.mesh.p[i, self.mesh.t[0, self.tind]]
+                        )
 
     def _init_invA(self):
         """For lazy evaluation of interior mapping."""
         if self.mesh.t.shape[0] > 0:  # todo: why this guard exists?
-            nt = self.mesh.t.shape[1]
+            nt = self.mesh.t.shape[1] if self.tind is None else len(self.tind)
             dim = self.dim
             # determinants
             if dim == 1:
@@ -156,7 +181,7 @@ class MappingAffine(Mapping):
             raise Exception("Not implemented for the given dimension.")
 
     def F(self, X, tind=None):
-        if tind is None:
+        if tind is None or self.tind is not None:
             A, b = self.A, self.b
         else:
             A, b = self.A[:, :, tind], self.b[:, tind]
@@ -168,7 +193,7 @@ class MappingAffine(Mapping):
         raise NotImplementedError
 
     def invF(self, x, tind=None):
-        if tind is None:
+        if tind is None or self.tind is not None:
             invA, b = self.invA, self.b
         else:
             invA, b = self.invA[:, :, tind], self.b[:, tind]
@@ -178,7 +203,7 @@ class MappingAffine(Mapping):
         return np.einsum('ijk,jkl->ikl', invA, y)
 
     def detDF(self, X, tind=None):
-        if tind is None:
+        if tind is None or self.tind is not None:
             detDF = self.detA
         else:
             detDF = self.detA[tind]
@@ -186,7 +211,7 @@ class MappingAffine(Mapping):
         return np.tile(detDF, (X.shape[-1], 1)).T
 
     def DF(self, X, tind=None):
-        if tind is None:
+        if tind is None or self.tind is not None:
             DF = self.A
         else:
             DF = self.A[:, :, tind]
@@ -198,7 +223,7 @@ class MappingAffine(Mapping):
         raise NotImplementedError
 
     def invDF(self, X, tind=None):
-        if tind is None:
+        if tind is None or self.tind is not None:
             invDF = self.invA
         else:
             invDF = self.invA[:, :, tind]
