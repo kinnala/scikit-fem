@@ -66,7 +66,7 @@ class MappingAffine(Mapping):
                               self.A[0, 1] * self.A[1, 0])
             elif dim == 3:
                 self._detA = (self.A[0, 0] * (self.A[1, 1] * self.A[2, 2] -
-                                             self.A[1, 2] * self.A[2, 1]) -
+                                              self.A[1, 2] * self.A[2, 1]) -
                               self.A[0, 1] * (self.A[1, 0] * self.A[2, 2] -
                                               self.A[1, 2] * self.A[2, 0]) +
                               self.A[0, 2] * (self.A[1, 0] * self.A[2, 1] -
