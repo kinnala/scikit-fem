@@ -4,6 +4,7 @@ import numpy as np
 from skfem.mesh import MeshHex, MeshQuad, MeshTri, MeshTet
 from skfem.element import ElementHex1, ElementQuad1, ElementHex2
 from skfem.assembly import FacetBasis
+from skfem.mapping import MappingAffine
 
 
 class TestIsoparamNormals(unittest.TestCase):
