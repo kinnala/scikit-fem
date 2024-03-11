@@ -7,69 +7,124 @@ class MappingAffine(Mapping):
     """An affine mapping for simplical elements."""
 
     def __init__(self, mesh):
-        dim = mesh.p.shape[0]
+        self.dim = mesh.p.shape[0]
+        self.mesh = mesh
 
-        if mesh.t.shape[0] > 0:
-            nt = mesh.t.shape[1]
+    @property
+    def A(self):
+        """Affine mapping matrix."""
+        if not hasattr(self, '_A'):
+            self._init_Ab()
+        return self._A
+
+    @property
+    def b(self):
+        """Affine mapping constant."""
+        if not hasattr(self, '_b'):
+            self._init_Ab()
+        return self._b
+
+    @property
+    def detA(self):
+        """Affine mapping determinant."""
+        if not hasattr(self, '_detA'):
+            self._init_invA()
+        return self._detA
+
+    @property
+    def invA(self):
+        """Affine mapping matrix inverse."""
+        if not hasattr(self, '_invA'):
+            self._init_invA()
+        return self._invA
+
+    def _init_Ab(self):
+        """For lazy evaluation of interior mapping."""
+        if self.mesh.t.shape[0] > 0:  # todo: why this guard exists?
+            nt = self.mesh.t.shape[1]
+            dim = self.dim
             # initialize the affine mapping
-            self.A = np.empty((dim, dim, nt))
-            self.b = np.empty((dim, nt))
+            self._A = np.empty((dim, dim, nt))
+            self._b = np.empty((dim, nt))
 
             for i in range(dim):
-                self.b[i] = mesh.p[i, mesh.t[0]]
+                self._b[i] = self.mesh.p[i, self.mesh.t[0]]
                 for j in range(dim):
-                    self.A[i, j] = (mesh.p[i, mesh.t[j + 1]] -
-                                    mesh.p[i, mesh.t[0]])
+                    self._A[i, j] = (self.mesh.p[i, self.mesh.t[j + 1]] -
+                                     self.mesh.p[i, self.mesh.t[0]])
 
+    def _init_invA(self):
+        """For lazy evaluation of interior mapping."""
+        if self.mesh.t.shape[0] > 0:  # todo: why this guard exists?
+            nt = self.mesh.t.shape[1]
+            dim = self.dim
             # determinants
             if dim == 1:
-                self.detA = self.A[0, 0]
+                self._detA = self.A[0, 0]
             elif dim == 2:
-                self.detA = (self.A[0, 0] * self.A[1, 1] -
-                             self.A[0, 1] * self.A[1, 0])
+                self._detA = (self.A[0, 0] * self.A[1, 1] -
+                              self.A[0, 1] * self.A[1, 0])
             elif dim == 3:
-                self.detA = self.A[0, 0] * (self.A[1, 1] * self.A[2, 2] -
-                                            self.A[1, 2] * self.A[2, 1]) -\
-                            self.A[0, 1] * (self.A[1, 0] * self.A[2, 2] -
-                                            self.A[1, 2] * self.A[2, 0]) +\
-                            self.A[0, 2] * (self.A[1, 0] * self.A[2, 1] -
-                                            self.A[1, 1] * self.A[2, 0])
+                self._detA = (self.A[0, 0] * (self.A[1, 1] * self.A[2, 2] -
+                                             self.A[1, 2] * self.A[2, 1]) -
+                              self.A[0, 1] * (self.A[1, 0] * self.A[2, 2] -
+                                              self.A[1, 2] * self.A[2, 0]) +
+                              self.A[0, 2] * (self.A[1, 0] * self.A[2, 1] -
+                                              self.A[1, 1] * self.A[2, 0]))
             else:
                 raise Exception("Not implemented for the given dimension.")
 
             # affine mapping inverses
-            self.invA = np.empty((dim, dim, nt))
+            self._invA = np.empty((dim, dim, nt))
             if dim == 1:
-                self.invA[0, 0] = 1. / self.A[0, 0]
+                self._invA[0, 0] = 1. / self.A[0, 0]
             elif dim == 2:
-                self.invA[0, 0] =  self.A[1, 1] / self.detA  # noqa
-                self.invA[0, 1] = -self.A[0, 1] / self.detA
-                self.invA[1, 0] = -self.A[1, 0] / self.detA
-                self.invA[1, 1] =  self.A[0, 0] / self.detA  # noqa
+                self._invA[0, 0] =  self.A[1, 1] / self.detA  # noqa
+                self._invA[0, 1] = -self.A[0, 1] / self.detA
+                self._invA[1, 0] = -self.A[1, 0] / self.detA
+                self._invA[1, 1] =  self.A[0, 0] / self.detA  # noqa
             elif dim == 3:
-                self.invA[0, 0] = (-self.A[1, 2] * self.A[2, 1] +
-                                   self.A[1, 1] * self.A[2, 2]) / self.detA
-                self.invA[1, 0] = (self.A[1, 2] * self.A[2, 0] -
-                                   self.A[1, 0] * self.A[2, 2]) / self.detA
-                self.invA[2, 0] = (-self.A[1, 1] * self.A[2, 0] +
-                                   self.A[1, 0] * self.A[2, 1]) / self.detA
-                self.invA[0, 1] = (self.A[0, 2] * self.A[2, 1] -
-                                   self.A[0, 1] * self.A[2, 2]) / self.detA
-                self.invA[1, 1] = (-self.A[0, 2] * self.A[2, 0] +
-                                   self.A[0, 0] * self.A[2, 2]) / self.detA
-                self.invA[2, 1] = (self.A[0, 1] * self.A[2, 0] -
-                                   self.A[0, 0] * self.A[2, 1]) / self.detA
-                self.invA[0, 2] = (-self.A[0, 2] * self.A[1, 1] +
-                                   self.A[0, 1] * self.A[1, 2]) / self.detA
-                self.invA[1, 2] = (self.A[0, 2] * self.A[1, 0] -
-                                   self.A[0, 0] * self.A[1, 2]) / self.detA
-                self.invA[2, 2] = (-self.A[0, 1] * self.A[1, 0] +
-                                   self.A[0, 0] * self.A[1, 1]) / self.detA
+                self._invA[0, 0] = (-self.A[1, 2] * self.A[2, 1] +
+                                    self.A[1, 1] * self.A[2, 2]) / self.detA
+                self._invA[1, 0] = (self.A[1, 2] * self.A[2, 0] -
+                                    self.A[1, 0] * self.A[2, 2]) / self.detA
+                self._invA[2, 0] = (-self.A[1, 1] * self.A[2, 0] +
+                                    self.A[1, 0] * self.A[2, 1]) / self.detA
+                self._invA[0, 1] = (self.A[0, 2] * self.A[2, 1] -
+                                    self.A[0, 1] * self.A[2, 2]) / self.detA
+                self._invA[1, 1] = (-self.A[0, 2] * self.A[2, 0] +
+                                    self.A[0, 0] * self.A[2, 2]) / self.detA
+                self._invA[2, 1] = (self.A[0, 1] * self.A[2, 0] -
+                                    self.A[0, 0] * self.A[2, 1]) / self.detA
+                self._invA[0, 2] = (-self.A[0, 2] * self.A[1, 1] +
+                                    self.A[0, 1] * self.A[1, 2]) / self.detA
+                self._invA[1, 2] = (self.A[0, 2] * self.A[1, 0] -
+                                    self.A[0, 0] * self.A[1, 2]) / self.detA
+                self._invA[2, 2] = (-self.A[0, 1] * self.A[1, 0] +
+                                    self.A[0, 0] * self.A[1, 1]) / self.detA
             else:
                 raise Exception("Not implemented for the given dimension.")
 
-        self.dim = dim
-        self.mesh = mesh  # this is required in ElementH2
+    @property
+    def B(self):
+        """Boundary affine mapping matrix."""
+        if not hasattr(self, '_B'):
+            self._init_boundary_mapping()
+        return self._B
+
+    @property
+    def c(self):
+        """Boundary affine mapping constant."""
+        if not hasattr(self, '_c'):
+            self._init_boundary_mapping()
+        return self._c
+
+    @property
+    def detB(self):
+        """Boundary affine mapping determinant."""
+        if not hasattr(self, '_detB'):
+            self._init_boundary_mapping()
+        return self._detB
 
     def _init_boundary_mapping(self):
         """For lazy evaluation of boundary mapping."""
@@ -99,24 +154,6 @@ class MappingAffine(Mapping):
                                   self._B[1, 0] * self._B[0, 1]) ** 2)
         else:
             raise Exception("Not implemented for the given dimension.")
-
-    @property
-    def B(self):
-        if not hasattr(self, '_B'):
-            self._init_boundary_mapping()
-        return self._B
-
-    @property
-    def c(self):
-        if not hasattr(self, '_c'):
-            self._init_boundary_mapping()
-        return self._c
-
-    @property
-    def detB(self):
-        if not hasattr(self, '_detB'):
-            self._init_boundary_mapping()
-        return self._detB
 
     def F(self, X, tind=None):
         if tind is None:
