@@ -100,4 +100,4 @@ def test_mapping_memory_optimization():
     })
     orig = MappingAffine(m)
     opt = MappingAffine(m, tind=m.subdomains['omega0'])
-    assert orig.detA > opt.detA
+    assert len(orig.detA) > len(opt.detA)
