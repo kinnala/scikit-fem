@@ -47,7 +47,8 @@ class AbstractBasis:
                  intorder: Optional[int] = None,
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
                  refdom: Type[Refdom] = Refdom,
-                 dofs: Optional[Dofs] = None):
+                 dofs: Optional[Dofs] = None,
+                 disable_doflocs: bool = False):
 
         if mesh.refdom != elem.refdom:
             raise ValueError("Incompatible Mesh and Element.")
@@ -56,17 +57,18 @@ class AbstractBasis:
         self.dofs = Dofs(mesh, elem) if dofs is None else dofs
 
         # global degree-of-freedom location
-        try:
-            doflocs = self.mapping.F(elem.doflocs.T)
-            self.doflocs = np.zeros((doflocs.shape[0], self.N))
+        if not disable_doflocs:
+            try:
+                doflocs = self.mapping.F(elem.doflocs.T)
+                self.doflocs = np.zeros((doflocs.shape[0], self.N))
 
-            # match mapped dofs and global dof numbering
-            for itr in range(doflocs.shape[0]):
-                for jtr in range(self.dofs.element_dofs.shape[0]):
-                    self.doflocs[itr, self.dofs.element_dofs[jtr]] =\
-                        doflocs[itr, :, jtr]
-        except Exception:
-            logger.warning("Unable to calculate global DOF locations.")
+                # match mapped dofs and global dof numbering
+                for itr in range(doflocs.shape[0]):
+                    for jtr in range(self.dofs.element_dofs.shape[0]):
+                        self.doflocs[itr, self.dofs.element_dofs[jtr]] =\
+                            doflocs[itr, :, jtr]
+            except Exception:
+                logger.warning("Unable to calculate global DOF locations.")
 
         self.mesh = mesh
         self.elem = elem

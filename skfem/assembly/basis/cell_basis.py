@@ -46,7 +46,8 @@ class CellBasis(AbstractBasis):
                  intorder: Optional[int] = None,
                  elements: Optional[Any] = None,
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
-                 dofs: Optional[Dofs] = None):
+                 dofs: Optional[Dofs] = None,
+                 disable_doflocs: bool = False):
         """Combine :class:`~skfem.mesh.Mesh` and
         :class:`~skfem.element.Element` into a set of precomputed global basis
         functions.
@@ -70,6 +71,10 @@ class CellBasis(AbstractBasis):
             Optional tuple of quadrature points and weights.
         dofs
             Optional :class:`~skfem.assembly.Dofs` object.
+        disable_doflocs
+            If `True`, the computation of global DOF locations is
+            disabled.  This may save memory on large meshes if DOF
+            locations are not required.
 
         """
         logger.info("Initializing {}({}, {})".format(type(self).__name__,
@@ -83,6 +88,7 @@ class CellBasis(AbstractBasis):
             quadrature,
             mesh.refdom,
             dofs,
+            disable_doflocs,
         )
 
         if elements is None:
