@@ -29,7 +29,8 @@ class FacetBasis(AbstractBasis):
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
                  facets: Optional[Any] = None,
                  dofs: Optional[Dofs] = None,
-                 side: int = 0):
+                 side: int = 0,
+                 disable_doflocs: bool = False):
         """Precomputed global basis on boundary facets.
 
         Parameters
@@ -51,6 +52,10 @@ class FacetBasis(AbstractBasis):
             Optional subset of facet indices.
         dofs
             Optional :class:`~skfem.assembly.Dofs` object.
+        disable_doflocs
+            If `True`, the computation of global DOF locations is
+            disabled.  This may save memory on large meshes if DOF
+            locations are not required.
 
         """
         typestr = ("{}({}, {})".format(type(self).__name__,
@@ -65,6 +70,7 @@ class FacetBasis(AbstractBasis):
             quadrature,
             mesh.brefdom,
             dofs,
+            disable_doflocs,
         )
 
         # by default use boundary facets

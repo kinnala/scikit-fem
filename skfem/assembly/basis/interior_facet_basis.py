@@ -25,7 +25,8 @@ class InteriorFacetBasis(FacetBasis):
                  quadrature: Optional[Tuple[ndarray, ndarray]] = None,
                  facets: Optional[Any] = None,
                  dofs: Optional[Dofs] = None,
-                 side: int = 0):
+                 side: int = 0,
+                 disable_doflocs: bool = False):
         """Precomputed global basis on interior facets."""
 
         if facets is None:
@@ -42,4 +43,5 @@ class InteriorFacetBasis(FacetBasis):
             facets=facets,
             dofs=dofs,
             side=side,
+            disable_doflocs=disable_doflocs,
         )

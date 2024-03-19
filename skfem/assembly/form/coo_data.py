@@ -55,7 +55,6 @@ class COOData:
         if self.local_shape is None:
             raise NotImplementedError("Cannot build local matrices if "
                                       "local_shape is not specified.")
-        assert len(self.local_shape) == 2
 
         local = np.moveaxis(self.data.reshape(self.local_shape + (-1,),
                                               order='C'), -1, 0)
