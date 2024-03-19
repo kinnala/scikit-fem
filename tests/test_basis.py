@@ -10,7 +10,8 @@ from numpy.testing import (assert_allclose, assert_almost_equal,
 from skfem import BilinearForm, LinearForm, asm, solve, condense, projection
 from skfem.mesh import (Mesh, MeshTri, MeshTet, MeshHex,
                         MeshQuad, MeshLine1, MeshWedge1)
-from skfem.assembly import CellBasis, FacetBasis, Dofs, Functional
+from skfem.assembly import (CellBasis, FacetBasis, Dofs, Functional,
+                            InteriorFacetBasis)
 from skfem.mapping import MappingIsoparametric
 from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
                            ElementTetP2, ElementHexS2, ElementHex2,
@@ -646,3 +647,20 @@ def test_with_elements():
     assert basis.mapping == basis_half.mapping
     assert basis.quadrature == basis_half.quadrature
     assert all(basis_half.tind == basis.mesh.normalize_elements('a'))
+
+
+def test_disable_doflocs():
+    mesh = MeshTri().refined(3)
+    basis = CellBasis(mesh, ElementTriP1())
+    basisd = CellBasis(mesh, ElementTriP1(), disable_doflocs=True)
+    fbasis = FacetBasis(mesh, ElementTriP1())
+    fbasisd = FacetBasis(mesh, ElementTriP1(), disable_doflocs=True)
+    ifbasis = InteriorFacetBasis(mesh, ElementTriP1())
+    ifbasisd = InteriorFacetBasis(mesh, ElementTriP1(),
+                                  disable_doflocs=True)
+    assert not hasattr(fbasisd, 'doflocs')
+    assert hasattr(fbasis, 'doflocs')
+    assert not hasattr(basisd, 'doflocs')
+    assert hasattr(basis, 'doflocs')
+    assert not hasattr(ifbasisd, 'doflocs')
+    assert hasattr(ifbasis, 'doflocs')
