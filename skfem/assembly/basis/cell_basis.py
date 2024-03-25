@@ -297,6 +297,8 @@ class CellBasis(AbstractBasis):
         elements
             Optionally perform the projection on a subset of elements.  The
             values of the remaining DOFs are zero.
+        dtype
+            Set to `np.complex64` or similar to use complex numbers.
 
         """
         from skfem.utils import solve, condense
