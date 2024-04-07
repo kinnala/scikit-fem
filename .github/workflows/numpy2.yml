@@ -1,4 +1,4 @@
-name: tests
+name: tests with numpy 2
 
 on:
   pull_request:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.8, 3.9, '3.10', 3.11, 3.12]
+        python-version: [3.9, '3.10', 3.11, 3.12]
 
     steps:
     - uses: actions/checkout@v3
@@ -23,6 +23,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        pip install --pre numpy==2.0.0rc1
         pip install .
     - name: Run flake8
       run: |
@@ -38,4 +39,4 @@ jobs:
         mypy skfem
     - name: Run pytest
       run: |
-        pytest
+        pytest -k 'not TestEx09 and not TestEx32 and not TestEx49'

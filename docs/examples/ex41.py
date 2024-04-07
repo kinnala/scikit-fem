@@ -19,6 +19,7 @@ elements that have nodal degrees-of-freedom.  Support for higher-order elements
 on mixed meshes is work-in-progress.
 
 """
+import numpy as np
 from pathlib import Path
 from skfem import *
 from skfem.models import laplace, unit_load
@@ -35,7 +36,7 @@ basis = list(map(Basis, m, e))
 A = asm(laplace, basis)
 f = asm(unit_load, basis)
 
-y = solve(*condense(A, f, D=out[0]['boundary']['line']))
+y = solve(*condense(A, f, D=out[0]['boundary']['line'].astype(np.int64)))
 
 def visualize():
     from skfem.visuals.matplotlib import plot, draw

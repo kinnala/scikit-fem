@@ -588,7 +588,16 @@ class Mesh:
         tmp = np.ascontiguousarray(p.T)
         tmp, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]),
                                   return_index=True, return_inverse=True)
-        return p[:, ixa], ixb[t]
+        return p[:, ixa], Mesh._squeeze_if(ixb[t])
+
+    @staticmethod
+    def _squeeze_if(arr):
+        # Workaround for the additional dimension introduced in
+        # numpy 2.0 for the output of np.unique when using
+        # return_index=True
+        if len(arr.shape) > 2:
+            return arr.squeeze(axis=2)
+        return arr
 
     def __iter__(self):
         return iter((self.doflocs, self.t))
@@ -609,8 +618,8 @@ class Mesh:
                                     return_index=True, return_inverse=True)
             p = p[:, ixa]
             return [
-                cls(p, ixb[self.t]),
-                *[type(m)(p, ixb[m.t + self.p.shape[1]])
+                cls(p, self._squeeze_if(ixb[self.t])),
+                *[type(m)(p, self._squeeze_if(ixb[m.t + self.p.shape[1]]))
                   for i, m in enumerate(other)],
             ]
         raise NotImplementedError
