@@ -307,9 +307,9 @@ def _init_bc(A: spmatrix,
     if I is None and D is None:
         raise Exception("Either I or D must be given!")
     elif I is None and D is not None:
-        I = np.setdiff1d(np.arange(A.shape[0]), D)
+        I = np.setdiff1d(np.arange(A.shape[0], dtype=np.int64), D)
     elif D is None and I is not None:
-        D = np.setdiff1d(np.arange(A.shape[0]), I)
+        D = np.setdiff1d(np.arange(A.shape[0], dtype=np.int64), I)
     else:
         raise Exception("Give only I or only D!")
 
