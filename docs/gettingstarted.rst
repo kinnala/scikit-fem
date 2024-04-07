@@ -194,4 +194,4 @@ Thus, it makes sense to verify that the error is small.
    ...     u = np.sin(np.pi * x) * np.sin(np.pi * y) / (2. * np.pi ** 2)
    ...     return (uh - u) ** 2
    >>> str(round(error.assemble(Vh, uh=Vh.interpolate(x)), 9))
-   1.069e-06
+   '1.069e-06'
