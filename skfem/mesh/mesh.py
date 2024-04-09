@@ -133,6 +133,18 @@ class Mesh:
             self._init_edges()
         return self._t2e
 
+    @property
+    def f2p(self):
+        """Return incidence matrix between facets and vertices."""
+        from scipy.sparse import coo_matrix
+        facets = self.facets.flatten('C')
+        return coo_matrix(
+            (np.ones(len(facets)),
+             (np.concatenate((np.arange(self.nfacets, dtype=np.int64),)
+                             * self.facets.shape[0]),
+              facets)), shape=(self.nfacets, self.nvertices)
+        ).tocsc()
+
     def dim(self):
         return self.elem.refdom.dim()
 
