@@ -134,15 +134,41 @@ class Mesh:
         return self._t2e
 
     @property
-    def f2p(self):
-        """Return incidence matrix between facets and vertices."""
+    def p2f(self):
+        """Incidence matrix between facets and vertices.
+
+        Examples
+        --------
+        To find facets with point 5:
+
+        >>> import numpy as np
+        >>> from skfem import MeshTet
+        >>> mesh = MeshTet().refined()
+        >>> np.nonzero(mesh.p2f[:, 5])[0]
+        array([33, 34, 35], dtype=int32)
+
+        """
         from scipy.sparse import coo_matrix
         facets = self.facets.flatten('C')
         return coo_matrix(
-            (np.ones(len(facets)),
-             (np.concatenate((np.arange(self.nfacets, dtype=np.int64),)
-                             * self.facets.shape[0]),
-              facets)), shape=(self.nfacets, self.nvertices)
+            (np.ones(len(facets), dtype=np.int32),
+             (np.concatenate((np.arange(self.nfacets),)
+                             * self.facets.shape[0]), facets)),
+            shape=(self.nfacets, self.nvertices),
+            dtype=np.int32,
+        ).tocsc()
+
+    @property
+    def p2t(self):
+        """Return incidence matrix between elements and vertices."""
+        from scipy.sparse import coo_matrix
+        t = self.t.flatten('C')
+        return coo_matrix(
+            (np.ones(len(t), dtype=np.int32),
+             (np.concatenate((np.arange(self.nelements),)
+                             * self.nnodes), t)),
+            shape=(self.nelements, self.nvertices),
+            dtype=np.int32,
         ).tocsc()
 
     def dim(self):

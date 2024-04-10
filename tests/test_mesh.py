@@ -757,3 +757,23 @@ def test_remove_duplicates():
 
     assert not m1.is_valid()
     assert m1.remove_duplicate_nodes().is_valid()
+
+
+@pytest.mark.parametrize(
+    "mesh",
+    [
+        MeshTri().refined(3),
+        MeshTet().refined(3),
+        MeshQuad().refined(3),
+        MeshHex().refined(3),
+    ]
+)
+def test_incidence(mesh):
+
+    p2t = mesh.p2t
+    for itr in range(0, 50, 3):
+       assert np.sum((mesh.t == itr).any(axis=0)) == len(p2t[:, itr].data)
+
+    p2f = mesh.p2f
+    for itr in range(0, 50, 3):
+       assert np.sum((mesh.facets == itr).any(axis=0)) == len(p2f[:, itr].data)
