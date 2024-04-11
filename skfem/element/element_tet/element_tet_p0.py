@@ -10,7 +10,7 @@ class ElementTetP0(ElementH1):
     interior_dofs = 1
     maxdeg = 0
     dofnames = ['u']
-    doflocs = np.array([[.5, .5, .5]])
+    doflocs = np.array([[.25, .25, .25]])
     refdom = RefTet
 
     def lbasis(self, X, i):
