@@ -513,6 +513,21 @@ def test_meshio_cycle_boundaries(boundaries_only, m):
 
 
 @pytest.mark.parametrize(
+    "mtype, path, ignore_orientation",
+    [
+        (MeshTet, MESH_PATH / 'box.msh', False),
+        (MeshTet, MESH_PATH / 'box.msh', True),
+        (MeshTri, MESH_PATH / 'tagged_gmsh4.msh', False),
+        (MeshTri, MESH_PATH / 'tagged_gmsh4.msh', True),
+    ]
+)
+def test_load_file(mtype, path, ignore_orientation):
+
+    m = mtype.load(path, ignore_orientation=ignore_orientation)
+    assert len(m.boundaries) > 0
+
+
+@pytest.mark.parametrize(
     "m",
     [
         MeshTri(),
@@ -555,7 +570,7 @@ def test_saveload_cycle_vtk(m):
 @pytest.mark.parametrize(
     "fmt, kwargs",
     [
-        ('.msh', {}),
+        ('.msh', {'file_format': 'gmsh'}),
         ('.msh', {'file_format': 'gmsh22'}),
         ('.vtk', {}),
         #('.xdmf', {}),
