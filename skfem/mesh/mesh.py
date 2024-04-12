@@ -160,7 +160,7 @@ class Mesh:
 
     @property
     def p2t(self):
-        """Return incidence matrix between elements and vertices."""
+        """Incidence matrix between elements and vertices."""
         from scipy.sparse import coo_matrix
         t = self.t.flatten('C')
         return coo_matrix(
@@ -170,6 +170,13 @@ class Mesh:
             shape=(self.nelements, self.nvertices),
             dtype=np.int32,
         ).tocsc()
+
+    @property
+    def p2e(self):
+        """Incidence matrix between edges and vertices."""
+        p2t = self.p2t
+        edges = self.edges
+        return p2t[:, edges[0]].multiply(p2t[:, edges[1]])
 
     def dim(self):
         return self.elem.refdom.dim()
