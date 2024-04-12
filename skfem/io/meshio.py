@@ -121,24 +121,25 @@ def from_meshio(m,
 
     # parse boundaries from cell_sets
     if m.cell_sets and bnd_type in m.cells_dict:
-        oriented_facets = {
-            k: [tuple(f) for f in m.cells_dict[bnd_type][v[bnd_type]]]
-            for k, v in m.cell_sets_dict.items()
-            if bnd_type in v and k.split(":")[0] != "gmsh"
-        }
-        sorted_facets = {k: [tuple(np.sort(f)) for f in v]
-                         for k, v in oriented_facets.items()}
-        for k, v in oriented_facets.items():
-            if ignore_orientation or ignore_interior_facets:
-                a = np.array(sorted_facets[k])
-                if ignore_interior_facets:
-                    b = mtmp.facets[:, mtmp.boundary_facets()].T
-                else:
-                    b = mtmp.facets.T
-                boundaries[k] = np.nonzero((a == b[:, None])
-                                           .all(axis=2)
-                                           .any(axis=1))[0]
-            else:
+        if ignore_orientation:
+            p2f = mtmp.p2f
+            for k, v in m.cell_sets_dict.items():
+                if bnd_type in v and k.split(":")[0] != "gmsh":
+                    facets = np.sort(m.cells_dict[bnd_type][v[bnd_type]].T,
+                                     axis=0)
+                    ind = p2f[:, facets[0]]
+                    for itr in range(facets.shape[0] - 1):
+                        ind = ind.multiply(p2f[:, facets[itr + 1]])
+                    boundaries[k] = np.nonzero(ind)[0]
+        else:
+            oriented_facets = {
+                k: [tuple(f) for f in m.cells_dict[bnd_type][v[bnd_type]]]
+                for k, v in m.cell_sets_dict.items()
+                if bnd_type in v and k.split(":")[0] != "gmsh"
+            }
+            sorted_facets = {k: [tuple(np.sort(f)) for f in v]
+                             for k, v in oriented_facets.items()}
+            for k, v in oriented_facets.items():
                 indices = []
                 oris = []
                 for i, f in enumerate(map(tuple, mtmp.facets.T)):
