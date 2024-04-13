@@ -212,8 +212,11 @@ with respect to documented and/or tested features.
 ### Unreleased
 
 - Fixed: Tests now pass with `numpy==2.0rc1`
-- Fixed: `MappingAffine` uses lazy evaluation also for element mappings
-- Fixed: `MeshTet.init_tensor` uses less memory for large meshes
+- Fixed: `MappingAffine` now uses lazy evaluation also for element
+  mappings, in addition to boundary mappings
+- Fixed: `MeshTet.init_tensor` uses significantly less memory for
+  large meshes
+- Fixed: `Mesh.load` uses less memory when loading and matching tags
 - Added: `Basis` has new optional `disable_doflocs` kwarg which
   can be set to `True` to avoid computing `Basis.doflocs`, to reduce memory
   usage

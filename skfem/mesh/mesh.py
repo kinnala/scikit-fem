@@ -133,6 +133,51 @@ class Mesh:
             self._init_edges()
         return self._t2e
 
+    @property
+    def p2f(self):
+        """Incidence matrix between facets and vertices.
+
+        Examples
+        --------
+        To find facets with point 5:
+
+        >>> import numpy as np
+        >>> from skfem import MeshTet
+        >>> mesh = MeshTet().refined()
+        >>> np.nonzero(mesh.p2f[:, 5])[0]
+        array([33, 34, 35], dtype=int32)
+
+        """
+        from scipy.sparse import coo_matrix
+        facets = self.facets.flatten('C')
+        return coo_matrix(
+            (np.ones(len(facets), dtype=np.int32),
+             (np.concatenate((np.arange(self.nfacets),)
+                             * self.facets.shape[0]), facets)),
+            shape=(self.nfacets, self.nvertices),
+            dtype=np.int32,
+        ).tocsc()
+
+    @property
+    def p2t(self):
+        """Incidence matrix between elements and vertices."""
+        from scipy.sparse import coo_matrix
+        t = self.t.flatten('C')
+        return coo_matrix(
+            (np.ones(len(t), dtype=np.int32),
+             (np.concatenate((np.arange(self.nelements),)
+                             * self.nnodes), t)),
+            shape=(self.nelements, self.nvertices),
+            dtype=np.int32,
+        ).tocsc()
+
+    @property
+    def p2e(self):
+        """Incidence matrix between edges and vertices."""
+        p2t = self.p2t
+        edges = self.edges
+        return p2t[:, edges[0]].multiply(p2t[:, edges[1]])
+
     def dim(self):
         return self.elem.refdom.dim()
 

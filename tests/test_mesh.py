@@ -513,6 +513,21 @@ def test_meshio_cycle_boundaries(boundaries_only, m):
 
 
 @pytest.mark.parametrize(
+    "mtype, path, ignore_orientation",
+    [
+        (MeshTet, MESH_PATH / 'box.msh', False),
+        (MeshTet, MESH_PATH / 'box.msh', True),
+        (MeshTri, MESH_PATH / 'tagged_gmsh4.msh', False),
+        (MeshTri, MESH_PATH / 'tagged_gmsh4.msh', True),
+    ]
+)
+def test_load_file(mtype, path, ignore_orientation):
+
+    m = mtype.load(path, ignore_orientation=ignore_orientation)
+    assert len(m.boundaries) > 0
+
+
+@pytest.mark.parametrize(
     "m",
     [
         MeshTri(),
@@ -555,7 +570,7 @@ def test_saveload_cycle_vtk(m):
 @pytest.mark.parametrize(
     "fmt, kwargs",
     [
-        ('.msh', {}),
+        ('.msh', {'file_format': 'gmsh'}),
         ('.msh', {'file_format': 'gmsh22'}),
         ('.vtk', {}),
         #('.xdmf', {}),
@@ -757,3 +772,23 @@ def test_remove_duplicates():
 
     assert not m1.is_valid()
     assert m1.remove_duplicate_nodes().is_valid()
+
+
+@pytest.mark.parametrize(
+    "mesh",
+    [
+        MeshTri().refined(3),
+        MeshTet().refined(3),
+        MeshQuad().refined(3),
+        MeshHex().refined(3),
+    ]
+)
+def test_incidence(mesh):
+
+    p2t = mesh.p2t
+    for itr in range(0, 50, 3):
+       assert np.sum((mesh.t == itr).any(axis=0)) == len(p2t[:, itr].data)
+
+    p2f = mesh.p2f
+    for itr in range(0, 50, 3):
+       assert np.sum((mesh.facets == itr).any(axis=0)) == len(p2f[:, itr].data)
