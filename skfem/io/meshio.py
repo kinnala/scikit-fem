@@ -155,13 +155,14 @@ def from_meshio(m,
                         else:
                             raise NotImplementedError
                         for itr in range(mtmp.t.shape[0]):
-                            ori += np.sum(normals * (mtmp.p[:, facets[0]]
-                                                     - mtmp.p[:, mtmp.t[itr, t1]]),
+                            ori += np.sum(normals
+                                          * (mtmp.p[:, facets[0]]
+                                             - mtmp.p[:, mtmp.t[itr, t1]]),
                                           axis=0)
                         ori = 1 * (ori > 0)
                         boundaries[k] = OrientedBoundary(boundaries[k],
                                                          ori)
-                    except:
+                    except Exception:
                         logger.warning("Failure to orient a boundary.")
 
     # MSH 2.2 tag parsing
