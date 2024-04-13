@@ -1,5 +1,6 @@
 """Import/export any formats supported by meshio."""
 
+import logging
 from pathlib import Path
 
 import meshio
@@ -8,6 +9,9 @@ import numpy as np
 from skfem.mesh import (MeshTet1, MeshTet2, MeshHex1, MeshHex2, MeshWedge1,
                         MeshTri1, MeshTri2, MeshQuad1, MeshQuad2, MeshLine1)
 from skfem.generic_utils import OrientedBoundary
+
+
+logger = logging.getLogger(__name__)
 
 
 MESH_TYPE_MAPPING = {
@@ -53,6 +57,9 @@ def from_meshio(m,
                 force_meshio_type=None,
                 ignore_orientation=False,
                 ignore_interior_facets=False):
+
+    if ignore_interior_facets:
+        logger.warning("kwarg ignore_interior_facets is unused.")
 
     cells = m.cells_dict
     meshio_type = None
@@ -121,57 +128,41 @@ def from_meshio(m,
 
     # parse boundaries from cell_sets
     if m.cell_sets and bnd_type in m.cells_dict:
-        if ignore_orientation:
-            p2f = mtmp.p2f
-            for k, v in m.cell_sets_dict.items():
-                if bnd_type in v and k.split(":")[0] != "gmsh":
-                    facets = np.sort(m.cells_dict[bnd_type][v[bnd_type]].T,
-                                     axis=0)
-                    ind = p2f[:, facets[0]]
-                    for itr in range(facets.shape[0] - 1):
-                        ind = ind.multiply(p2f[:, facets[itr + 1]])
-                    boundaries[k] = np.nonzero(ind)[0]
-        else:
-            oriented_facets = {
-                k: [tuple(f) for f in m.cells_dict[bnd_type][v[bnd_type]]]
-                for k, v in m.cell_sets_dict.items()
-                if bnd_type in v and k.split(":")[0] != "gmsh"
-            }
-            sorted_facets = {k: [tuple(np.sort(f)) for f in v]
-                             for k, v in oriented_facets.items()}
-            for k, v in oriented_facets.items():
-                indices = []
-                oris = []
-                for i, f in enumerate(map(tuple, mtmp.facets.T)):
-                    if f in sorted_facets[k]:
-                        indices.append(i)
-                        ix = sorted_facets[k].index(f)
-                        facet = v[ix]
-                        t1, t2 = mtmp.f2t[:, i]
-                        if t2 == -1:
-                            # orientation on boundary is 0
-                            oris.append(0)
-                            continue
-                        if len(f) == 2:
-                            # rotate tangent to find normal
-                            tangent = (mtmp.p[:, facet[1]]
-                                       - mtmp.p[:, facet[0]])
-                            normal = np.array([-tangent[1], tangent[0]])
-                        elif len(f) == 3:
-                            # cross product to find normal
-                            tangent1 = (mtmp.p[:, facet[1]]
-                                        - mtmp.p[:, facet[0]])
-                            tangent2 = (mtmp.p[:, facet[2]]
-                                        - mtmp.p[:, facet[0]])
-                            normal = -np.cross(tangent1, tangent2)
+        p2f = mtmp.p2f
+        for k, v in m.cell_sets_dict.items():
+            if bnd_type in v and k.split(":")[0] != "gmsh":
+                facets = m.cells_dict[bnd_type][v[bnd_type]].T
+                sorted_facets = np.sort(facets, axis=0)
+                ind = p2f[:, sorted_facets[0]]
+                for itr in range(sorted_facets.shape[0] - 1):
+                    ind = ind.multiply(p2f[:, sorted_facets[itr + 1]])
+                boundaries[k] = np.nonzero(ind)[0]
+
+                if not ignore_orientation:
+                    try:
+                        ori = np.zeros_like(boundaries[k], dtype=np.float64)
+                        t1, _ = mtmp.f2t[:, boundaries[k]]
+                        if facets.shape[0] == 2:
+                            tangents = (mtmp.p[:, facets[1]]
+                                        - mtmp.p[:, facets[0]])
+                            normals = np.array([-tangents[1], tangents[0]])
+                        elif facets.shape[0] == 3:
+                            tangents1 = (mtmp.p[:, facets[1]]
+                                         - mtmp.p[:, facets[0]])
+                            tangents2 = (mtmp.p[:, facets[2]]
+                                         - mtmp.p[:, facets[0]])
+                            normals = -np.cross(tangents1.T, tangents2.T).T
                         else:
                             raise NotImplementedError
-                        # find another vector using node outside of boundary
-                        third = np.setdiff1d(mtmp.t[:, t1],
-                                             np.array(f))[0]
-                        outplane = mtmp.p[:, f[0]] - mtmp.p[:, third]
-                        oris.append(1 if np.dot(normal, outplane) > 0 else 0)
-                boundaries[k] = OrientedBoundary(indices, oris)
+                        for itr in range(mtmp.t.shape[0]):
+                            ori += np.sum(normals * (mtmp.p[:, facets[0]]
+                                                     - mtmp.p[:, mtmp.t[itr, t1]]),
+                                          axis=0)
+                        ori = 1 * (ori > 0)
+                        boundaries[k] = OrientedBoundary(boundaries[k],
+                                                         ori)
+                    except:
+                        logger.warning("Failure to orient a boundary.")
 
     # MSH 2.2 tag parsing
     if len(boundaries) == 0 and m.cell_data and m.field_data:
@@ -213,7 +204,7 @@ def from_meshio(m,
                 boundaries[find_tagname(tag)] = index[tagindex, 1]
 
         except Exception:
-            pass
+            logger.warning("Failure to parse tags from meshio.")
 
     # attempt parsing skfem tags
     if m.cell_data:
