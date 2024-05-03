@@ -792,3 +792,66 @@ def test_incidence(mesh):
     p2f = mesh.p2f
     for itr in range(0, 50, 3):
        assert np.sum((mesh.facets == itr).any(axis=0)) == len(p2f[:, itr].data)
+
+
+def test_restrict_tags_boundary():
+
+    m = MeshTri().refined(3)
+    m = m.with_subdomains({
+        'left': lambda x: x[0] <= 0.5,
+        'bottom': lambda x: x[1] <= 0.5,
+    })
+
+    mr = m.restrict('left')
+
+    # test boundary retag
+    topleftp = m.p[0, np.unique(m.facets[:, m.boundaries['top']].flatten())]
+    topleftp = np.sort(topleftp[topleftp <= 0.5])
+    topleftpr = np.sort(mr.p[0, np.unique(mr.facets[:, mr.boundaries['top']].flatten())])
+
+    assert_array_equal(topleftp, topleftpr)
+
+
+def test_restrict_tags_subdomain():
+
+    m = MeshTri().refined(3)
+    m = m.with_subdomains({
+        'left': lambda x: x[0] <= 0.5,
+        'bottom': lambda x: x[1] <= 0.5,
+    })
+
+    mr = m.restrict('left')
+
+    # test subdomain retag
+    bottomleftp = m.p[:, np.unique(m.t[:, m.subdomains['bottom']].flatten())]
+    bottomleftp = bottomleftp[:, bottomleftp[0] <= 0.5]
+    ix = np.argsort(bottomleftp[0] + 0.1 * bottomleftp[1])
+    bottomleftp = bottomleftp[:, ix]
+
+    bottomleftpr = mr.p[:, np.unique(mr.t[:, mr.subdomains['bottom']].flatten())]
+    ix = np.argsort(bottomleftpr[0] + 0.1 * bottomleftpr[1])
+    bottomleftpr = bottomleftpr[:, ix]
+    
+    assert_array_equal(bottomleftp, bottomleftpr)
+
+
+def test_restrict_reverse_map():
+
+    m = MeshTri().refined(3)
+    m = m.with_subdomains({
+        'left': lambda x: x[0] <= 0.5,
+        'bottom': lambda x: x[1] <= 0.5,
+    })
+
+    mr, ix = m.restrict('left', return_mapping=True)
+
+
+    p1 = mr.p
+    I = np.argsort(p1[0] + 0.1 * p1[1])
+    p1 = p1[:, I]
+
+    p2 = m.p[:, ix]
+    I = np.argsort(p2[0] + 0.1 * p2[1])
+    p2 = p2[:, I]
+
+    assert_array_equal(p1, p2)

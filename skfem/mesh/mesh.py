@@ -1079,7 +1079,11 @@ class Mesh:
             t
         ), facets
 
-    def restrict(self, elements):
+    def restrict(self,
+                 elements,
+                 return_mapping=False,
+                 skip_boundaries=False,
+                 skip_subdomains=False):
         """Restrict the mesh to a subset of elements.
 
         Parameters
@@ -1087,28 +1091,52 @@ class Mesh:
         elements
             Criteria of which elements to include.  This input is normalized
             using ``self.normalize_elements``.
+        return_mapping
+            Optionally, return the index mapping for vertices.
+        skip_boundaries
+            Optionally, skip retagging boundaries.
+        skip_subdomains
+            Optionally, skip retagging subdomains.
 
         """
         elements = self.normalize_elements(elements)
         p, t, ix = self._reix(self.t[:, elements])
-        newt = np.zeros(self.t.shape[1], dtype=np.int64) - 1
-        newt[elements] = np.arange(len(elements), dtype=np.int64)
-        newf = np.zeros(self.facets.shape[1], dtype=np.int64) - 1
-        facets = np.unique(self.t2f[:, elements])
-        newf[facets] = np.arange(len(facets), dtype=np.int64)
-        return replace(
+
+        new_subdomains = None
+        if not skip_subdomains and self.subdomains is not None:
+            # map from old to new element index
+            newt = np.zeros(self.t.shape[1], dtype=np.int64) - 1
+            newt[elements] = np.arange(len(elements), dtype=np.int64)
+            # remove 'elements' from each subdomain and remap
+            new_subdomains = {
+                k: newt[np.intersect1d(self.subdomains[k],
+                                       elements).astype(np.int64)]
+                for k in self.subdomains
+            }
+
+        new_boundaries = None
+        if not skip_boundaries and self.boundaries is not None:
+            # map from old to new facet index
+            newf = np.zeros(self.facets.shape[1], dtype=np.int64) - 1
+            facets = np.unique(self.t2f[:, elements])
+            newf[facets] = np.arange(len(facets), dtype=np.int64)
+            new_boundaries = {k: newf[self.boundaries[k]]
+                              for k in self.boundaries}
+            # filter facets not existing in the new mesh, value is -1
+            new_boundaries = {k: v[v >= 0]
+                              for k, v in new_boundaries.items()}
+
+        out = replace(
             self,
             doflocs=p,
             t=t,
-            _boundaries=({k: np.extract(newf[self.boundaries[k]] >= 0,
-                                        newf[self.boundaries[k]])
-                          for k in self.boundaries}
-                         if self.boundaries is not None else None),
-            _subdomains=({k: newt[np.intersect1d(self.subdomains[k],
-                                                 elements).astype(np.int64)]
-                          for k in self.subdomains}
-                         if self.subdomains is not None else None),
+            _boundaries=new_boundaries,
+            _subdomains=new_subdomains,
         )
+
+        if return_mapping:
+            return out, ix
+        return out
 
     def remove_elements(self, elements):
         """Construct a new mesh by removing elements.
