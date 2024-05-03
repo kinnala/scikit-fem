@@ -1108,9 +1108,11 @@ class Mesh:
             newt = np.zeros(self.t.shape[1], dtype=np.int64) - 1
             newt[elements] = np.arange(len(elements), dtype=np.int64)
             # remove 'elements' from each subdomain and remap
-            new_subdomains = {k: newt[np.intersect1d(self.subdomains[k],
-                                                     elements).astype(np.int64)]
-                              for k in self.subdomains}
+            new_subdomains = {
+                k: newt[np.intersect1d(self.subdomains[k],
+                                       elements).astype(np.int64)]
+                for k in self.subdomains
+            }
 
         new_boundaries = None
         if not skip_boundaries and self.boundaries is not None:
