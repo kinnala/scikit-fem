@@ -80,10 +80,26 @@ def get_quadrature(refdom_or_elem: Union[Type[Refdom], Type[Element], Element],
 def get_quadrature_tet(norder: int) -> Tuple[np.ndarray, np.ndarray]:
     """Return a nth order accurate quadrature rule for the reference
     tetrahedron (0,0,0) (0,0,1) (0,1,0) (1,0,0)."""
-    if norder <= 1:
-        norder = 2
+    if norder < 1:
+        norder = 1
     try:
         return {
+            1: (
+                np.array(
+                    [
+                        [
+                            .25,
+                        ],
+                        [
+                            .25,
+                        ],
+                        [
+                            .25,
+                        ],
+                    ]
+                ),
+                np.array([1 / 6]),
+            ),
             2: (
                 np.array(
                     [
