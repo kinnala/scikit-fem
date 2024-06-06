@@ -209,6 +209,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 with respect to documented and/or tested features.
 
+### Unreleased
+
+- Added: The lowest order, one point integration rule for tetrahedral elements
+- Changed: Initializing `Basis` for `ElementTetP0` without specifying
+  `intorder` or `quadrature` will now automatically fall back to a one
+  point integration rule
+
 ### [9.1.1] - 2024-04-23
 
 - Fixed: Tests now pass with `numpy==2.0rc1`
