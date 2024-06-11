@@ -787,12 +787,23 @@ def test_incidence(mesh):
 
     p2t = mesh.p2t
     for itr in range(0, 50, 3):
-       assert np.sum((mesh.t == itr).any(axis=0)) == len(p2t[:, itr].data)
+        assert np.sum((mesh.t == itr).any(axis=0)) == len(p2t[:, itr].data)
 
     p2f = mesh.p2f
     for itr in range(0, 50, 3):
-       assert np.sum((mesh.facets == itr).any(axis=0)) == len(p2f[:, itr].data)
+        assert np.sum((mesh.facets == itr).any(axis=0)) == len(p2f[:, itr].data)
 
+    p2e = mesh.p2e
+    for itr in range(0, 50, 3):
+        assert np.sum((mesh.edges == itr).any(axis=0)) == len(p2e[:, itr].data)
+
+    e2t = mesh.e2t
+    for itr in range(0, 50, 3):
+        e = mesh.edges[:, itr]
+        datalen = np.sum(
+            (mesh.t == e[0]).any(axis=0) & (mesh.t == e[1]).any(axis=0)
+        )
+        assert datalen == len(e2t[:, itr].data)
 
 def test_restrict_tags_boundary():
 
