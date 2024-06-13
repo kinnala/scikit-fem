@@ -458,7 +458,7 @@ class Mesh:
         """
         vertices = np.unique(self.facets[:, ix].flatten())
 
-        if self.dim() == 3:
+        if self.dim() == 3 and self.bndelem is not None:
             edges = np.unique(self.f2e[:, ix])
         else:
             edges = np.array([], dtype=np.int64)
