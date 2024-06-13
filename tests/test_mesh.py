@@ -7,8 +7,8 @@ from scipy.spatial import Delaunay
 from numpy.testing import assert_array_equal, assert_almost_equal
 
 from skfem.mesh import (Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
-                        MeshTri2, MeshQuad2, MeshTet2, MeshHex2, MeshLine1DG,
-                        MeshQuad1DG, MeshHex2, MeshTri1DG)
+                        MeshTet1, MeshHex1, MeshLine1DG, MeshQuad1DG, 
+                        MeshTri1DG, MeshTri2, MeshQuad2, MeshTet2, MeshHex2)
 from skfem.assembly import Basis, LinearForm, Functional, FacetBasis
 from skfem.element import (ElementTetP1, ElementTriP0, ElementQuad0,
                            ElementHex0)
