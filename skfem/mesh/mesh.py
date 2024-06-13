@@ -459,15 +459,7 @@ class Mesh:
         vertices = np.unique(self.facets[:, ix].flatten())
 
         if self.dim() == 3:
-            edge_candidates = self.t2e[:, self.f2t[0, ix]].flatten()
-            # subset of edges that share all points with the given facets
-            subset = np.nonzero(
-                np.prod(np.isin(self.edges[:, edge_candidates],
-                                self.facets[:, ix].flatten()),
-                        axis=0)
-            )[0]
-            edges = np.intersect1d(self.boundary_edges(),
-                                   edge_candidates[subset])
+            edges = np.unique(self.f2e[:, ix])
         else:
             edges = np.array([], dtype=np.int64)
 
