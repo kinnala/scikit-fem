@@ -211,6 +211,8 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+- Fixed: `Mesh.p2e` returned incorrect incidence
+- Fixed: `InteriorFacetBasis.get_dofs` did not return all edge DOFs for 3D elements
 - Added: The lowest order, one point integration rule for tetrahedral elements
 - Changed: Initializing `Basis` for `ElementTetP0` without specifying
   `intorder` or `quadrature` will now automatically fall back to a one
