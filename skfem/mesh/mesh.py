@@ -174,6 +174,19 @@ class Mesh:
     @property
     def p2e(self):
         """Incidence matrix between edges and vertices."""
+        from scipy.sparse import coo_matrix
+        edges = self.edges.flatten('C')
+        return coo_matrix(
+            (np.ones(len(edges), dtype=np.int32),
+             (np.concatenate((np.arange(self.nedges),)
+                             * self.edges.shape[0]), edges)),
+            shape=(self.nedges, self.nvertices),
+            dtype=np.int32,
+        ).tocsc()
+
+    @property
+    def e2t(self):
+        """Incidence matrix between elements and edges."""
         p2t = self.p2t
         edges = self.edges
         return p2t[:, edges[0]].multiply(p2t[:, edges[1]])
