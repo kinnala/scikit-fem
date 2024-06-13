@@ -67,27 +67,15 @@ The full source code of the example reads as follows:
     :start-after: EOF"""
 from skfem import *
 from skfem.models.poisson import unit_load
+from skfem.helpers import dd, ddot, trace, eye
 import numpy as np
 
-m = (
-    MeshTri.init_symmetric()
-    .refined(3)
-    .with_boundaries(
-        {
-            "left": lambda x: x[0] == 0,
-            "right": lambda x: x[0] == 1,
-            "top": lambda x: x[1] == 1,
-        }
-    )
-)
-
-e = ElementTriMorley()
-ib = Basis(m, e)
+m = MeshTri.init_symmetric().refined(3)
+basis = Basis(m, ElementTriMorley())
 
 
 @BilinearForm
-def bilinf(u, v, w):
-    from skfem.helpers import dd, ddot, trace, eye
+def bilinf(u, v, _):
     d = 0.1
     E = 200e9
     nu = 0.3
@@ -95,20 +83,23 @@ def bilinf(u, v, w):
     def C(T):
         return E / (1 + nu) * (T + nu / (1 - nu) * eye(trace(T), 2))
 
-    return d**3 / 12.0 * ddot(C(dd(u)), dd(v))
+    return d ** 3 / 12.0 * ddot(C(dd(u)), dd(v))
 
 
-K = asm(bilinf, ib)
-f = 1e6 * asm(unit_load, ib)
+K = asm(bilinf, basis)
+f = 1e6 * asm(unit_load, basis)
 
-D = np.hstack([ib.get_dofs("left"), ib.get_dofs({"right", "top"}).all("u")])
+D = np.hstack((
+    basis.get_dofs("left"),
+    basis.get_dofs({"right", "top"}).all("u"),
+))
 
 x = solve(*condense(K, f, D=D))
 
 def visualize():
     from skfem.visuals.matplotlib import draw, plot
     ax = draw(m)
-    return plot(ib,
+    return plot(basis,
                 x,
                 ax=ax,
                 shading='gouraud',

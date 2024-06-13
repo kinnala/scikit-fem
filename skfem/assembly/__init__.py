@@ -77,6 +77,17 @@ def asm(form: Form,
     supports assembling multiple bases at once and summing the result.
 
     """
+    if not isinstance(form, Form) and callable(form):
+        # wrap the function
+        nargs = form.__code__.co_argcount
+        wrapper = [
+            Functional,
+            LinearForm,
+            BilinearForm,
+            TrilinearForm,
+        ][nargs - 1]
+        form = wrapper(form)
+
     assert form.form is not None
     logger.info("Assembling '{}'.".format(form.form.__name__))
     nargs = [[arg] if not isinstance(arg, list) else arg for arg in args]

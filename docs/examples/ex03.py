@@ -7,52 +7,41 @@ import numpy as np
 
 m1 = MeshLine(np.linspace(0, 5, 50))
 m2 = MeshLine(np.linspace(0, 1, 10))
-m = (m1 * m2).with_boundaries(
-    {
-        "left": lambda x: x[0] == 0.0
-    }
-)
+m = m1 * m2
 
 e1 = ElementQuad1()
-
-mapping = MappingIsoparametric(m, e1)
-
 e = ElementVector(e1)
 
-gb = Basis(m, e, mapping, 2)
+basis = Basis(m, e, intorder=2)
 
 lam = 1.
 mu = 1.
-K = asm(linear_elasticity(lam, mu), gb)
+K = asm(linear_elasticity(lam, mu), basis)
 
 @BilinearForm
 def mass(u, v, w):
     return dot(u, v)
 
-M = asm(mass, gb)
+M = asm(mass, basis)
 
-D = gb.get_dofs("left")
-y = gb.zeros()
+D = basis.get_dofs("left")
 
-I = gb.complement_dofs(D)
-
-L, x = solve(*condense(K, M, I=I),
+L, x = solve(*condense(K, M, D=D),
              solver=solver_eigen_scipy_sym(k=6, sigma=0.0))
 
-y = x[:, 4]
-
 # calculate stress
-sgb = gb.with_element(ElementVector(e))
+y = x[:, 4]
+sbasis = basis.with_element(ElementVector(e))
 C = linear_stress(lam, mu)
-yi = gb.interpolate(y)
-sigma = sgb.project(C(sym_grad(yi)))
+yi = basis.interpolate(y)
+sigma = sbasis.project(C(sym_grad(yi)))
 
 def visualize():
     from skfem.visuals.matplotlib import plot, draw
-    M = MeshQuad(np.array(m.p + .5 * y[gb.nodal_dofs]), m.t)
+    M = MeshQuad(np.array(m.p + .5 * y[basis.nodal_dofs]), m.t)
     ax = draw(M)
     return plot(M,
-                sigma[sgb.nodal_dofs[0]],
+                sigma[sbasis.nodal_dofs[0]],
                 ax=ax,
                 colorbar='$\sigma_{xx}$',
                 shading='gouraud')
