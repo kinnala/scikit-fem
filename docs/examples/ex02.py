@@ -73,21 +73,27 @@ import numpy as np
 m = MeshTri.init_symmetric().refined(3)
 basis = Basis(m, ElementTriMorley())
 
+d = 0.1
+E = 200e9
+nu = 0.3
+
+
+def C(T):
+    return E / (1 + nu) * (T + nu / (1 - nu) * eye(trace(T), 2))
+
 
 @BilinearForm
 def bilinf(u, v, _):
-    d = 0.1
-    E = 200e9
-    nu = 0.3
-
-    def C(T):
-        return E / (1 + nu) * (T + nu / (1 - nu) * eye(trace(T), 2))
-
     return d ** 3 / 12.0 * ddot(C(dd(u)), dd(v))
 
 
-K = asm(bilinf, basis)
-f = 1e6 * asm(unit_load, basis)
+@LinearForm
+def load(v, _):
+    return 1e6 * v
+
+
+K = bilinf.assemble(basis)
+f = load.assemble(basis)
 
 D = np.hstack((
     basis.get_dofs("left"),

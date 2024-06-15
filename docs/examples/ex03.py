@@ -1,8 +1,7 @@
 """Linear elastic eigenvalue problem."""
 
 from skfem import *
-from skfem.helpers import dot, ddot, sym_grad
-from skfem.models.elasticity import linear_elasticity, linear_stress
+from skfem.helpers import dot, ddot, sym_grad, eye, trace
 import numpy as np
 
 m1 = MeshLine(np.linspace(0, 5, 50))
@@ -16,13 +15,24 @@ basis = Basis(m, e, intorder=2)
 
 lam = 1.
 mu = 1.
-K = asm(linear_elasticity(lam, mu), basis)
+
+
+def C(T):
+    return 2. * mu * T + lam * eye(trace(T), T.shape[0])
+
+
+@BilinearForm
+def stiffness(u, v, w):
+    return ddot(C(sym_grad(u)), sym_grad(v))
+
 
 @BilinearForm
 def mass(u, v, w):
     return dot(u, v)
 
-M = asm(mass, basis)
+
+K = stiffness.assemble(basis)
+M = mass.assemble(basis)
 
 D = basis.get_dofs("left")
 
@@ -32,7 +42,6 @@ L, x = solve(*condense(K, M, D=D),
 # calculate stress
 y = x[:, 4]
 sbasis = basis.with_element(ElementVector(e))
-C = linear_stress(lam, mu)
 yi = basis.interpolate(y)
 sigma = sbasis.project(C(sym_grad(yi)))
 
