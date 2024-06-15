@@ -1,8 +1,6 @@
-r"""
+r"""Kirchhoff plate problem.
 
-This example demonstrates the solution of a slightly more complicated problem
-with multiple boundary conditions and a fourth-order differential operator. We
-consider the `Kirchhoff plate bending problem
+This example demonstrates the solution a fourth order `Kirchhoff plate bending problem
 <https://en.wikipedia.org/wiki/Kirchhoff%E2%80%93Love_plate_theory>`_ which
 finds its applications in solid mechanics. For a stationary plate of constant
 thickness :math:`d`, the governing equation reads: find the deflection :math:`u
@@ -16,20 +14,6 @@ In this example, we analyse a :math:`1\,\text{m}^2` plate of steel with thicknes
 The Young's modulus of steel is :math:`E = 200 \cdot 10^9\,\text{Pa}` and Poisson
 ratio :math:`\nu = 0.3`.
 
-In reality, the operator
-
-.. math::
-    \frac{Ed^3}{12(1-\nu^2)} \Delta^2 
-is a combination of multiple first-order operators:
-
-.. math::
-    \boldsymbol{K}(u) = - \boldsymbol{\varepsilon}(\nabla u), \quad \boldsymbol{\varepsilon}(\boldsymbol{w}) = \frac12(\nabla \boldsymbol{w} + \nabla \boldsymbol{w}^T),
-.. math::
-    \boldsymbol{M}(u) = \frac{d^3}{12} \mathbb{C} \boldsymbol{K}(u), \quad \mathbb{C} \boldsymbol{T} = \frac{E}{1+\nu}\left( \boldsymbol{T} + \frac{\nu}{1-\nu}(\text{tr}\,\boldsymbol{T})\boldsymbol{I}\right),
-where :math:`\boldsymbol{I}` is the identity matrix. In particular,
-
-.. math::
-    \frac{Ed^3}{12(1-\nu^2)} \Delta^2 u = - \text{div}\,\textbf{div}\,\boldsymbol{M}(u).
 There are several boundary conditions that the problem can take.
 The *fully clamped* boundary condition reads
 
@@ -61,10 +45,7 @@ using the `non-conforming Morley finite element
 <https://users.aalto.fi/~jakke74/WebFiles/Slides-Niiranen-ADMOS-09.pdf>`_ which
 is a piecewise quadratic :math:`C^0`-continuous element for biharmonic problems.
 
-The full source code of the example reads as follows:
-
-.. literalinclude:: examples/ex02.py
-    :start-after: EOF"""
+"""
 from skfem import *
 from skfem.models.poisson import unit_load
 from skfem.helpers import dd, ddot, trace, eye
