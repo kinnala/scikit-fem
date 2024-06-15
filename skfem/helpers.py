@@ -12,8 +12,7 @@ FieldOrArray = Union[DiscreteField, ndarray]
 
 def jump(w: FormExtraParams, *args):
     if not hasattr(w, 'idx'):
-        raise NotImplementedError("jump() can be used only if the form is "
-                                  "assembled through asm().")
+        return args
     out = []
     for i, arg in enumerate(args):
         out.append((-1.) ** w.idx[i] * arg)
