@@ -3,7 +3,6 @@ r"""Minimal surface problem.
 This example solves the nonlinear minimal surface problem using Newton's method.
 
 """
-
 from skfem import *
 from skfem.helpers import grad, dot
 import numpy as np
@@ -32,6 +31,8 @@ x = basis.zeros()
 D = m.boundary_nodes()
 x[D] = np.sin(np.pi * m.p[0, D])
 
+
+# Newton iterations
 for itr in range(100):
     w = basis.interpolate(x)
     J = asm(jacobian, basis, prev=w)
@@ -42,6 +43,7 @@ for itr in range(100):
         break
     if __name__ == "__main__":
         print(np.linalg.norm(x - x_prev))
+
 
 if __name__ == "__main__":
     from skfem.visuals.matplotlib import plot3, show

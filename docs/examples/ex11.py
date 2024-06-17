@@ -1,39 +1,44 @@
 r"""Linear elasticity.
 
-This example solves the linear elasticity problem using trilinear elements.  The
-weak form of the linear elasticity problem is defined in
-:func:`skfem.models.elasticity.linear_elasticity`.
+This example solves the linear elasticity problem using trilinear elements.
 
 """
-
 import numpy as np
 from skfem import *
-from skfem.models.elasticity import linear_elasticity, lame_parameters
+from skfem.helpers import ddot, sym_grad, eye, trace
+from skfem.models.elasticity import lame_parameters
+
 
 m = MeshHex().refined(3)
-e1 = ElementHex1()
-e = ElementVector(e1)
-ib = Basis(m, e, MappingIsoparametric(m, e1), 3)
+e = ElementVector(ElementHex1())
+basis = Basis(m, e, intorder=3)
 
-K = asm(linear_elasticity(*lame_parameters(1e3, 0.3)), ib)
+# calculate Lamé parameters from Young's modulus and Poisson ratio
+lam, mu = lame_parameters(1e3, 0.3)
 
-dofs = {
-    'left' : ib.get_dofs(lambda x: x[0] == 0.0),
-    'right': ib.get_dofs(lambda x: x[0] == 1.0),
-}
 
-u = ib.zeros()
-u[dofs['right'].nodal['u^1']] = 0.3
+def C(T):
+    return 2. * mu * T + lam * eye(trace(T), T.shape[0])
 
-I = ib.complement_dofs(dofs)
 
-u = solve(*condense(K, x=u, I=I))
+@BilinearForm
+def stiffness(u, v, w):
+    return ddot(C(sym_grad(u)), sym_grad(v))
+
+
+K = stiffness.assemble(basis)
+
+u = basis.zeros()
+u[basis.get_dofs('right').nodal['u^1']] = 0.3
+
+u = solve(*condense(K, x=u, D=basis.get_dofs({'left', 'right'})))
 
 sf = 1.0
-m = m.translated(sf * u[ib.nodal_dofs])
+m = m.translated(sf * u[basis.nodal_dofs])
 
 if __name__ == "__main__":
     from os.path import splitext
     from sys import argv
-    
+
+    # save to VTK for visualization in Paraview
     m.save(splitext(argv[0])[0] + '.vtk')
