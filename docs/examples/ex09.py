@@ -1,9 +1,5 @@
 r"""Preconditioned conjugate gradient for 3-D Poisson.
 
-.. note::
-
-   This example will make use of the external packages `PyAMG <https://pypi.org/project/pyamg/>`_ or `pyamgcl <https://pypi.org/project/pyamgcl/>`_, if installed.
-
 Whereas most of the examples thus far have used direct linear solvers, this is
 not appropriate for larger problems, which includes most of those posed in
 three dimensions.
@@ -69,7 +65,8 @@ Aint, bint = condense(A, b, I=I, expand=False)
 preconditioners = [None, build_pc_ilu(Aint, drop_tol=1e-3)]
 
 
-# try importing algebraic multigrid from external package
+# note: pyamg does not support numpy 2.0
+# import algebraic multigrid from external package
 try:
     from pyamg import smoothed_aggregation_solver
 
@@ -79,7 +76,7 @@ try:
 
     preconditioners.append(build_pc_amgsa(Aint))
 
-except ImportError:
+except:
     print('Skipping PyAMG')
 
 
