@@ -761,12 +761,37 @@ class Mesh:
 
     @classmethod
     def from_dict(cls, d):
-        from skfem.io.json import from_dict
-        return from_dict(cls, d)
+
+        if 'p' not in data or 't' not in data:
+            raise ValueError("Dictionary must contain keys 'p' and 't'.")
+        else:
+            data['p'] = np.ascontiguousarray(np.array(data['p']).T)
+            data['t'] = np.ascontiguousarray(np.array(data['t']).T)
+        if 'boundaries' in data and data['boundaries'] is not None:
+            data['boundaries'] = {k: np.array(v)
+                                  for k, v in data['boundaries'].items()}
+        if 'subdomains' in data and data['subdomains'] is not None:
+            data['subdomains'] = {k: np.array(v)
+                                  for k, v in data['subdomains'].items()}
+        data['doflocs'] = data.pop('p')
+        data['_subdomains'] = data.pop('subdomains')
+        data['_boundaries'] = data.pop('boundaries')
+        return cls(**data)
 
     def to_dict(self):
-        from skfem.io.json import to_dict
-        return to_dict(self)
+
+        boundaries = None
+        subdomains = None
+        if self.boundaries is not None:
+            boundaries = {k: v.tolist() for k, v in self.boundaries.items()}
+        if self.subdomains is not None:
+            subdomains = {k: v.tolist() for k, v in self.subdomains.items()}
+        return {
+            'p': self.p.T.tolist(),
+            't': self.t.T.tolist(),
+            'boundaries': boundaries,
+            'subdomains': subdomains,
+        }
 
     @classmethod
     def from_mesh(cls, mesh, t: Optional[ndarray] = None):
