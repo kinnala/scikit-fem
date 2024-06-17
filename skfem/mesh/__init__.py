@@ -16,7 +16,6 @@ Default constructor creates a mesh for the unit square:
   Number of elements: 2
   Number of vertices: 4
   Number of nodes: 4
-  Named boundaries [# facets]: left [1], bottom [1], right [1], top [1]
 
 Each mesh type has several constructors; see the docstring, e.g.,
 ``help(MeshTri)`` or click :class:`~skfem.mesh.MeshTri` in the online
