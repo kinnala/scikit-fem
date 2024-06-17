@@ -832,7 +832,15 @@ class Mesh:
         return cls(cls.elem.refdom.p, cls.elem.refdom.t, validate=False)
 
     def morphed(self, *args):
-        """Morph the mesh using functions."""
+        """Morph the mesh using functions.
+
+        Parameters
+        ----------
+        funcs
+            One function per dimension, input is `p` and output is the
+            new coordinate of `p[i]', with `i=1,..,ndim`.
+
+        """
         p = self.p.copy()
         for i, arg in enumerate(args):
             if arg is None:
