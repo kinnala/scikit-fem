@@ -84,19 +84,18 @@ unit square:
 
 .. doctest::
 
-   >>> mesh = fem.MeshTri().refined(3).with_default_tags()  # refine thrice
+   >>> mesh = fem.MeshTri().refined(3)  # refine thrice
    >>> mesh
    <skfem MeshTri1 object>
      Number of elements: 128
      Number of vertices: 81
      Number of nodes: 81
-     Named boundaries [# facets]: left [8], bottom [8], right [8], top [8]
 
 
 .. plot::
 
    from skfem import *
-   MeshTri().refined(3).with_default_tags().draw(boundaries=True)
+   MeshTri().refined(3).draw()
 
 
 Step 4: Define a basis
