@@ -808,7 +808,7 @@ def test_incidence(mesh):
 
 def test_restrict_tags_boundary():
 
-    m = MeshTri().refined(3).with_default_tags()
+    m = MeshTri().refined(3).with_defaults()
     m = m.with_subdomains({
         'left': lambda x: x[0] <= 0.5,
         'bottom': lambda x: x[1] <= 0.5,

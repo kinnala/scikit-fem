@@ -598,13 +598,13 @@ def test_matrix_element_projection(m, e):
 @pytest.mark.parametrize(
     "basis",
     [
-        Basis(MeshTri().refined(6).with_default_tags(),
+        Basis(MeshTri().refined(6).with_defaults(),
               ElementTriRT1()),
-        Basis(MeshTri().refined(4).with_default_tags(),
+        Basis(MeshTri().refined(4).with_defaults(),
               ElementTriRT2()),
-        Basis(MeshTri().refined(5).with_default_tags(),
+        Basis(MeshTri().refined(5).with_defaults(),
               ElementTriBDM1()),
-        Basis(MeshQuad().refined(4).with_default_tags(),
+        Basis(MeshQuad().refined(4).with_defaults(),
               ElementQuadRT1()),
     ]
 )
@@ -630,9 +630,9 @@ def test_hdiv_boundary_integration(basis):
 @pytest.mark.parametrize(
     "basis",
     [
-        Basis(MeshTet().refined(4).with_default_tags(),
+        Basis(MeshTet().refined(4).with_defaults(),
               ElementTetRT1()),
-        Basis(MeshHex().refined(4).with_default_tags(),
+        Basis(MeshHex().refined(4).with_defaults(),
               ElementHexRT1()),
     ]
 )
@@ -657,11 +657,11 @@ def test_hdiv_boundary_integration_3d(basis):
 @pytest.mark.parametrize(
     "basis",
     [
-        Basis(MeshTri().refined(4).with_default_tags(),
+        Basis(MeshTri().refined(4).with_defaults(),
               ElementTriN1()),
-        Basis(MeshTri().refined(4).with_default_tags(),
+        Basis(MeshTri().refined(4).with_defaults(),
               ElementTriN2()),
-        Basis(MeshQuad().refined(3).with_default_tags(),
+        Basis(MeshQuad().refined(3).with_defaults(),
               ElementQuadN1()),
     ]
 )
@@ -686,7 +686,7 @@ def test_hcurl_boundary_integration(basis):
 @pytest.mark.parametrize(
     "basis",
     [
-        Basis(MeshTet().refined(2).with_default_tags(),
+        Basis(MeshTet().refined(2).with_defaults(),
               ElementTetN1()),
     ]
 )

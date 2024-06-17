@@ -6,7 +6,7 @@ import numpy as np
 
 m1 = MeshLine(np.linspace(0, 5, 50))
 m2 = MeshLine(np.linspace(0, 1, 10))
-m = (m1 * m2).with_default_tags()
+m = (m1 * m2).with_defaults()
 
 e1 = ElementQuad1()
 e = ElementVector(e1)

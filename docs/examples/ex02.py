@@ -54,7 +54,7 @@ import numpy as np
 m = (MeshTri
      .init_symmetric()
      .refined(3)
-     .with_default_tags())
+     .with_defaults())
 basis = Basis(m, ElementTriMorley())
 
 d = 0.1

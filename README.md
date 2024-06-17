@@ -221,7 +221,7 @@ with respect to documented and/or tested features.
   point integration rule
 - Changed: Default tags ('left', 'right', 'top', ...) are no more
   added automatically during mesh initialization, as a workaround you
-  can add them explicitly by calling `mesh = mesh.with_default_tags()`
+  can add them explicitly by calling `mesh = mesh.with_defaults()`
 
 ### [9.1.1] - 2024-04-23
 

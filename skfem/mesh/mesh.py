@@ -216,7 +216,7 @@ class Mesh:
         ))[0]
         return edge_candidates[ix]
 
-    def with_default_tags(self):
+    def with_defaults(self):
         """Return a copy with the default tags ('left', 'right', ...)."""
         return self.with_boundaries(self._build_default_tags())
 

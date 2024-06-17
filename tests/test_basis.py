@@ -92,7 +92,7 @@ class TestCompositeFacetAssembly(TestCase):
 
     def runTest(self):
 
-        m = MeshTri().with_default_tags()
+        m = MeshTri().with_defaults()
 
         fbasis1 = FacetBasis(m, ElementTriP1() * ElementTriP1(),
                              facets=m.facets_satisfying(lambda x: x[0] == 0))

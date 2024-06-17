@@ -76,7 +76,7 @@ def test_simple_cg_solver():
 
 def test_mpc_periodic():
 
-    m = MeshQuad().refined(3).with_default_tags()
+    m = MeshQuad().refined(3).with_defaults()
     basis = Basis(m, ElementQuad1())
     A = laplace.assemble(basis)
     b = unit_load.assemble(basis)
@@ -93,7 +93,7 @@ def test_mpc_periodic():
 
 def test_mpc_2x_periodic():
 
-    m = MeshTri.init_sqsymmetric().refined(4).with_default_tags()
+    m = MeshTri.init_sqsymmetric().refined(4).with_defaults()
     e = ElementTriP2()
 
     basis = Basis(m, e)
@@ -118,7 +118,7 @@ def test_mpc_2x_periodic():
 
 def test_mpc_doubly_periodic():
 
-    m = MeshTri.init_sqsymmetric().refined(5).with_default_tags()
+    m = MeshTri.init_sqsymmetric().refined(5).with_defaults()
     e = ElementTriP1()
 
     basis = Basis(m, e)

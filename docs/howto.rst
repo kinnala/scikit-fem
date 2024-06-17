@@ -16,7 +16,7 @@ the boundary.  Currently the main tool for finding DOFs is
 .. doctest::
 
    >>> from skfem import MeshTri, Basis, ElementTriP2
-   >>> m = MeshTri().refined(2).with_default_tags()
+   >>> m = MeshTri().refined(2).with_defaults()
    >>> basis = Basis(m, ElementTriP2())
 
 .. plot::
@@ -118,7 +118,7 @@ as follows:
 
    from skfem import *
    from skfem.visuals.matplotlib import *
-   m = MeshTri().refined(2).with_default_tags()
+   m = MeshTri().refined(2).with_defaults()
    basis = Basis(m, ElementTriP2())
    dofs = basis.get_dofs('left')
    ax = draw(m)
