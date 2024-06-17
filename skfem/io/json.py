@@ -3,9 +3,6 @@
 import json
 from os import PathLike
 from typing import Type
-
-import numpy as np
-
 from skfem.mesh import MeshLine1, MeshTri, MeshQuad, MeshTet, MeshHex, Mesh
 
 
