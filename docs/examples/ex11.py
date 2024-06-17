@@ -9,7 +9,7 @@ from skfem.helpers import ddot, sym_grad, eye, trace
 from skfem.models.elasticity import lame_parameters
 
 
-m = MeshHex().refined(3)
+m = MeshHex().refined(3).with_default_tags()
 e = ElementVector(ElementHex1())
 basis = Basis(m, e, intorder=3)
 

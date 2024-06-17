@@ -68,7 +68,7 @@ def test_obstacle_problem():
 
 def test_navier_stokes():
 
-    m = MeshTri.init_sqsymmetric().refined(2)
+    m = MeshTri.init_sqsymmetric().refined(2).with_default_tags()
     basis = Basis(m, ElementVector(ElementTriP2()) * ElementTriP1())
     x = basis.zeros()
 
@@ -97,8 +97,11 @@ def test_navier_stokes():
 
 def test_nonlin_elast():
 
-    m = MeshQuad.init_tensor(np.linspace(0, 5, 20),
-                         np.linspace(0, 0.5, 5)).to_meshtri(style='x')
+    m = (MeshQuad
+         .init_tensor(np.linspace(0, 5, 20),
+                      np.linspace(0, 0.5, 5))
+         .to_meshtri(style='x')
+         .with_default_tags())
     e = ElementVector(ElementTriP1())
     basis = Basis(m, e)
     x = basis.zeros()

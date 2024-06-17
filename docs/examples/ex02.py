@@ -51,7 +51,10 @@ from skfem.models.poisson import unit_load
 from skfem.helpers import dd, ddot, trace, eye
 import numpy as np
 
-m = MeshTri.init_symmetric().refined(3)
+m = (MeshTri
+     .init_symmetric()
+     .refined(3)
+     .with_default_tags())
 basis = Basis(m, ElementTriMorley())
 
 d = 0.1

@@ -598,10 +598,14 @@ def test_matrix_element_projection(m, e):
 @pytest.mark.parametrize(
     "basis",
     [
-        Basis(MeshTri().refined(6), ElementTriRT1()),
-        Basis(MeshTri().refined(4), ElementTriRT2()),
-        Basis(MeshTri().refined(5), ElementTriBDM1()),
-        Basis(MeshQuad().refined(4), ElementQuadRT1()),
+        Basis(MeshTri().refined(6).with_default_tags(),
+              ElementTriRT1()),
+        Basis(MeshTri().refined(4).with_default_tags(),
+              ElementTriRT2()),
+        Basis(MeshTri().refined(5).with_default_tags(),
+              ElementTriBDM1()),
+        Basis(MeshQuad().refined(4).with_default_tags(),
+              ElementQuadRT1()),
     ]
 )
 def test_hdiv_boundary_integration(basis):
@@ -626,12 +630,10 @@ def test_hdiv_boundary_integration(basis):
 @pytest.mark.parametrize(
     "basis",
     [
-        Basis(MeshTet().refined(4).with_boundaries({
-            'right': lambda x: x[0] == 1
-        }), ElementTetRT1()),
-        Basis(MeshHex().refined(4).with_boundaries({
-            'right': lambda x: x[0] == 1
-        }), ElementHexRT1()),
+        Basis(MeshTet().refined(4).with_default_tags(),
+              ElementTetRT1()),
+        Basis(MeshHex().refined(4).with_default_tags(),
+              ElementHexRT1()),
     ]
 )
 def test_hdiv_boundary_integration_3d(basis):
@@ -655,9 +657,12 @@ def test_hdiv_boundary_integration_3d(basis):
 @pytest.mark.parametrize(
     "basis",
     [
-        Basis(MeshTri().refined(4), ElementTriN1()),
-        Basis(MeshTri().refined(4), ElementTriN2()),
-        Basis(MeshQuad().refined(3), ElementQuadN1()),
+        Basis(MeshTri().refined(4).with_default_tags(),
+              ElementTriN1()),
+        Basis(MeshTri().refined(4).with_default_tags(),
+              ElementTriN2()),
+        Basis(MeshQuad().refined(3).with_default_tags(),
+              ElementQuadN1()),
     ]
 )
 def test_hcurl_boundary_integration(basis):
@@ -681,7 +686,8 @@ def test_hcurl_boundary_integration(basis):
 @pytest.mark.parametrize(
     "basis",
     [
-        Basis(MeshTet().refined(2), ElementTetN1()),
+        Basis(MeshTet().refined(2).with_default_tags(),
+              ElementTetN1()),
     ]
 )
 def test_hcurl_boundary_integration(basis):
