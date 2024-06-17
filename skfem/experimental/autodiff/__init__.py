@@ -131,12 +131,12 @@ class NonlinearForm(Form):
         # initialize COO data structures
         sz = basis.Nbfun * basis.Nbfun * nt
         data = np.zeros((basis.Nbfun, basis.Nbfun, nt), dtype=self.dtype)
-        rows = np.zeros(sz, dtype=np.int64)
-        cols = np.zeros(sz, dtype=np.int64)
+        rows = np.zeros(sz, dtype=np.int32)
+        cols = np.zeros(sz, dtype=np.int32)
 
         sz1 = basis.Nbfun * nt
         data1 = np.zeros(sz1, dtype=self.dtype)
-        rows1 = np.zeros(sz1, dtype=np.int64)
+        rows1 = np.zeros(sz1, dtype=np.int32)
 
         # # autograd version
         # def _make_jacobian(V):

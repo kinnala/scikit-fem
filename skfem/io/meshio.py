@@ -118,7 +118,7 @@ def from_meshio(m,
 
     # parse any subdomains from cell_sets
     if m.cell_sets:
-        subdomains = {k: v[meshio_type].astype(np.int64)
+        subdomains = {k: v[meshio_type].astype(np.int32)
                       for k, v in m.cell_sets_dict.items()
                       if meshio_type in v}
 
@@ -136,7 +136,7 @@ def from_meshio(m,
                 ind = p2f[:, sorted_facets[0]]
                 for itr in range(sorted_facets.shape[0] - 1):
                     ind = ind.multiply(p2f[:, sorted_facets[itr + 1]])
-                boundaries[k] = np.nonzero(ind)[0]
+                boundaries[k] = np.nonzero(ind)[0].astype(np.int32)
 
                 if not ignore_orientation:
                     try:
@@ -179,7 +179,7 @@ def from_meshio(m,
                 return None
 
             for tag in tags:
-                t_set = np.nonzero(tag == elements_tag)[0]
+                t_set = np.nonzero(tag == elements_tag)[0].astype(np.int32)
                 subdomains[find_tagname(tag)] = t_set
 
             # find tagged boundaries
@@ -201,7 +201,7 @@ def from_meshio(m,
             tags = index[:, 0]
             boundaries = {}
             for tag in np.unique(tags):
-                tagindex = np.nonzero(tags == tag)[0]
+                tagindex = np.nonzero(tags == tag)[0].astype(np.int32)
                 boundaries[find_tagname(tag)] = index[tagindex, 1]
 
         except Exception:

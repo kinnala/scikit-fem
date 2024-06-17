@@ -36,7 +36,7 @@ basis = list(map(Basis, m, e))
 A = asm(laplace, basis)
 f = asm(unit_load, basis)
 
-y = solve(*condense(A, f, D=out[0]['boundary']['line'].astype(np.int64)))
+y = solve(*condense(A, f, D=out[0]['boundary']['line'].astype(np.int32)))
 
 def visualize():
     from skfem.visuals.matplotlib import plot, draw

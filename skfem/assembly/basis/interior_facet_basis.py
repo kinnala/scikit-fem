@@ -30,7 +30,7 @@ class InteriorFacetBasis(FacetBasis):
         """Precomputed global basis on interior facets."""
 
         if facets is None:
-            facets = np.nonzero(mesh.f2t[1] != -1)[0]
+            facets = np.nonzero(mesh.f2t[1] != -1)[0].astype(np.int32)
 
         facets = mesh.normalize_facets(facets)
 

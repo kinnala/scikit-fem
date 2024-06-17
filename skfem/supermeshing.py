@@ -62,8 +62,8 @@ def _intersect2d(p1, t1, p2, t2):
                 ix2.append(jtr)
     return (
         MeshTri(p, t),
-        np.array(ix1, dtype=np.int64),
-        np.array(ix2, dtype=np.int64),
+        np.array(ix1, dtype=np.int32),
+        np.array(ix2, dtype=np.int32),
     )
 
 

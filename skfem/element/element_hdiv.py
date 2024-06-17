@@ -16,7 +16,7 @@ class ElementHdiv(Element):
             # TODO support edge DOFs
             # TODO can you just skip np.arange here? len(tind)?
             return np.ones(len(np.arange(mapping.mesh.t.shape[1])[tind]),
-                           dtype=np.int64)
+                           dtype=np.int32)
         ori = -1 + 2 * (mapping.mesh.f2t[0, mapping.mesh.t2f[ix]]
                         == np.arange(mapping.mesh.t.shape[1]))
         return ori[tind]

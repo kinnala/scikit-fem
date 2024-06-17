@@ -18,7 +18,7 @@ class MeshLine1(MeshSimplex, Mesh):
     doflocs: ndarray = field(
         default_factory=lambda: np.array([[0., 1.]], dtype=np.float64))
     t: ndarray = field(default_factory=lambda: np.array(
-        [[0], [1]], dtype=np.int64))
+        [[0], [1]], dtype=np.int32))
     elem: Type[Element] = ElementLineP1
     affine: bool = True
 
@@ -84,7 +84,7 @@ class MeshLine1(MeshSimplex, Mesh):
             xin = x.copy()  # bring endpoint inside for np.digitize
             xin[x == self.p[0, ix[-1]]] = self.p[0, ix[-2:]].mean()
             elems = np.nonzero(ix[np.digitize(xin, self.p[0, ix])][:, None]
-                               == maxt)[1]
+                               == maxt)[1].astype(np.int32)
             if len(elems) < len(x):
                 raise ValueError("Point is outside of the mesh.")
             return elems

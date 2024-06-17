@@ -272,7 +272,7 @@ class MappingAffine(Mapping):
         N = np.empty((self.dim, len(find)))
 
         for itr in range(Nref.shape[0]):
-            ix = np.nonzero(t2f[itr, tind] == find)[0]
+            ix = np.nonzero(t2f[itr, tind] == find)[0].astype(np.int32)
             for jtr in range(Nref.shape[1]):
                 N[jtr, ix] = Nref[itr, jtr]
 

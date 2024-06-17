@@ -260,7 +260,7 @@ class Dofs:
         self.element = element
 
         self.nodal_dofs = np.reshape(
-            np.arange(element.nodal_dofs * topo.nvertices, dtype=np.int64),
+            np.arange(element.nodal_dofs * topo.nvertices, dtype=np.int32),
             (element.nodal_dofs, topo.nvertices),
             order='F') + offset
         offset += element.nodal_dofs * topo.nvertices
@@ -269,32 +269,32 @@ class Dofs:
         if element.dim == 3 and element.edge_dofs > 0:
             self.edge_dofs = np.reshape(
                 np.arange(element.edge_dofs * topo.nedges,
-                          dtype=np.int64),
+                          dtype=np.int32),
                 (element.edge_dofs, topo.nedges),
                 order='F') + offset
             offset += element.edge_dofs * topo.nedges
         else:
-            self.edge_dofs = np.empty((0, 0), dtype=np.int64)
+            self.edge_dofs = np.empty((0, 0), dtype=np.int32)
 
         # facet dofs
         if element.facet_dofs > 0:
             self.facet_dofs = np.reshape(
                 np.arange(element.facet_dofs * topo.nfacets,
-                          dtype=np.int64),
+                          dtype=np.int32),
                 (element.facet_dofs, topo.nfacets),
                 order='F') + offset
             offset += element.facet_dofs * topo.nfacets
         else:
-            self.facet_dofs = np.empty((0, 0), dtype=np.int64)
+            self.facet_dofs = np.empty((0, 0), dtype=np.int32)
 
         # interior dofs
         self.interior_dofs = np.reshape(
-            np.arange(element.interior_dofs * topo.nelements, dtype=np.int64),
+            np.arange(element.interior_dofs * topo.nelements, dtype=np.int32),
             (element.interior_dofs, topo.nelements),
             order='F') + offset
 
         # global numbering
-        self.element_dofs = np.zeros((0, topo.nelements), dtype=np.int64)
+        self.element_dofs = np.zeros((0, topo.nelements), dtype=np.int32)
 
         # nodal dofs
         for itr in range(topo.t.shape[0]):
@@ -350,9 +350,9 @@ class Dofs:
         return DofsView(
             self,
             nodes,
-            np.empty((0,), dtype=np.int64),
-            np.empty((0,), dtype=np.int64),
-            np.empty((0,), dtype=np.int64),
+            np.empty((0,), dtype=np.int32),
+            np.empty((0,), dtype=np.int32),
+            np.empty((0,), dtype=np.int32),
             r1,
             r2,
             r3,
@@ -376,13 +376,13 @@ class Dofs:
             An array of dofnames to skip.
 
         """
-        nodal_ix = (np.empty((0,), dtype=np.int64)
+        nodal_ix = (np.empty((0,), dtype=np.int32)
                     if self.element.nodal_dofs == 0
                     else np.unique(self.topo.t[:, elements]))
-        edge_ix = (np.empty((0,), dtype=np.int64)
+        edge_ix = (np.empty((0,), dtype=np.int32)
                    if self.element.edge_dofs == 0
                    else np.unique(self.topo.t2e[:, elements]))
-        facet_ix = (np.empty((0,), dtype=np.int64)
+        facet_ix = (np.empty((0,), dtype=np.int32)
                     if self.element.facet_dofs == 0
                     else np.unique(self.topo.t2f[:, elements]))
         interior_ix = elements
@@ -424,13 +424,13 @@ class Dofs:
         if self.element.nodal_dofs > 0 or self.element.edge_dofs > 0:
             nodal_ix, edge_ix = self.topo._expand_facets(facets)
 
-        nodal_ix = (np.empty((0,), dtype=np.int64)
+        nodal_ix = (np.empty((0,), dtype=np.int32)
                     if self.element.nodal_dofs == 0
                     else nodal_ix)
-        edge_ix = (np.empty((0,), dtype=np.int64)
+        edge_ix = (np.empty((0,), dtype=np.int32)
                    if self.element.edge_dofs == 0
                    else edge_ix)
-        facet_ix = (np.empty((0,), dtype=np.int64)
+        facet_ix = (np.empty((0,), dtype=np.int32)
                     if self.element.facet_dofs == 0
                     else facets)
 
@@ -444,7 +444,7 @@ class Dofs:
             nodal_ix,
             facet_ix,
             edge_ix,
-            np.empty((0,), dtype=np.int64),
+            np.empty((0,), dtype=np.int32),
             r1,
             r2,
             r3,
@@ -466,7 +466,7 @@ class Dofs:
 
         ents = {
             self.element.dofnames[rows[i] + off]: np.zeros((0, n_ents),
-                                                           dtype=np.int64)
+                                                           dtype=np.int32)
             for i in range(n_dofs)
         }
         for i in range(n_dofs):

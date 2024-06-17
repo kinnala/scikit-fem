@@ -80,15 +80,15 @@ def plot(basis, x, keys: Optional[str] = None):
         m.dim(),
         m.nelements,
         _to_int_string(np.hstack((
-            np.ones(m.nelements, dtype=np.int64)[:, None],
-            (np.zeros(m.nelements, dtype=np.int64)[:, None]
+            np.ones(m.nelements, dtype=np.int32)[:, None],
+            (np.zeros(m.nelements, dtype=np.int32)[:, None]
              + MESH_TYPE_MAPPING[type(m)]),
             m.t.T,
         ))),
         nbfacets,
         _to_int_string(np.hstack((
-            np.ones(nbfacets, dtype=np.int64)[:, None],
-            (np.zeros(nbfacets, dtype=np.int64)[:, None]
+            np.ones(nbfacets, dtype=np.int32)[:, None],
+            (np.zeros(nbfacets, dtype=np.int32)[:, None]
              + BOUNDARY_TYPE_MAPPING[MESH_TYPE_MAPPING[type(m)]]),
             m.facets[:, bfacets].T,
         ))),

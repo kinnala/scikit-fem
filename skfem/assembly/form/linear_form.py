@@ -36,7 +36,7 @@ class LinearForm(Form):
         # initialize COO data structures
         sz = vbasis.Nbfun * nt
         data = np.zeros(sz, dtype=self.dtype)
-        rows = np.zeros(sz, dtype=np.int64)
+        rows = np.zeros(sz, dtype=np.int32)
 
         for i in range(vbasis.Nbfun):
             ixs = slice(nt * i, nt * (i + 1))

@@ -29,7 +29,8 @@ class Mesh3D(Mesh):
             belonging to the output set.
 
         """
-        return np.nonzero(test(self.p[:, self.edges].mean(1)))[0]
+        return (np.nonzero(test(self.p[:, self.edges].mean(1)))[0]
+                .astype(np.int32))
 
     def boundary_edges(self) -> ndarray:
         """Return an array of boundary edge indices."""
@@ -51,5 +52,5 @@ class Mesh3D(Mesh):
 
     def interior_edges(self) -> ndarray:
         """Return an array of interior edge indices."""
-        return np.setdiff1d(np.arange(self.edges.shape[1], dtype=np.int64),
+        return np.setdiff1d(np.arange(self.edges.shape[1], dtype=np.int32),
                             self.boundary_edges())

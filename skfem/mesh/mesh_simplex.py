@@ -11,7 +11,7 @@ class MeshSimplex:
         mapping = self._mapping()
         return (np.sign(mapping.detDF(np.zeros(self.p.shape[0])[:, None]))
                 .flatten()
-                .astype(np.int64))
+                .astype(np.int32))
 
     def oriented(self):
         """Return a oriented mesh with positive Jacobian determinant.
@@ -19,7 +19,7 @@ class MeshSimplex:
         For triangular meshes this corresponds to CCW orientation.
 
         """
-        flip = np.nonzero(self.orientation() == -1)[0]
+        flip = np.nonzero(self.orientation() == -1)[0].astype(np.int32)
         t = self.t.copy()
         t0 = t[0, flip]
         t1 = t[1, flip]

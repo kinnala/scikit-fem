@@ -33,9 +33,9 @@ class TrilinearForm(Form):
         # initialize COO data structures
         sz = (ubasis.Nbfun, vbasis.Nbfun, wbasis.Nbfun, nt)
         data = np.zeros(sz, dtype=self.dtype)
-        rows = np.zeros(sz, dtype=np.int64)
-        cols = np.zeros(sz, dtype=np.int64)
-        mats = np.zeros(sz, dtype=np.int64)
+        rows = np.zeros(sz, dtype=np.int32)
+        cols = np.zeros(sz, dtype=np.int32)
+        mats = np.zeros(sz, dtype=np.int32)
 
         # loop over the indices of local stiffness matrix
         for k in range(ubasis.Nbfun):

@@ -58,7 +58,7 @@ class MeshLineConstructor:
             p = np.atleast_2d(p)
 
         if p is not None and t is None:
-            tmp = np.arange(p.shape[1] - 1, dtype=np.int64)
+            tmp = np.arange(p.shape[1] - 1, dtype=np.int32)
             t = np.vstack((tmp, tmp + 1))
             return MeshLine1(p, t, **kwargs)
 

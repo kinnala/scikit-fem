@@ -34,14 +34,14 @@ class Refdom:
 class RefPoint(Refdom):
 
     p = np.array([[0.]], dtype=np.float64)
-    t = np.array([[0]], dtype=np.int64)
+    t = np.array([[0]], dtype=np.int32)
     name = "Zero-dimensional"
 
 
 class RefLine(Refdom):
 
     p = np.array([[0., 1.]], dtype=np.float64)
-    t = np.array([[0], [1]], dtype=np.int64)
+    t = np.array([[0], [1]], dtype=np.int32)
     normals = np.array([[-1.],
                         [1.]])
     facets = [[0],
@@ -56,7 +56,7 @@ class RefTri(Refdom):
 
     p = np.array([[0., 1., 0.],
                   [0., 0., 1.]], dtype=np.float64)
-    t = np.array([[0], [1], [2]], dtype=np.int64)
+    t = np.array([[0], [1], [2]], dtype=np.int32)
     normals = np.array([[0., -1.],
                         [1., 1.],
                         [-1., 0.]])
@@ -93,7 +93,7 @@ class RefTet(Refdom):
     p = np.array([[0., 1., 0., 0.],
                   [0., 0., 1., 0.],
                   [0., 0., 0., 1.]], dtype=np.float64)
-    t = np.array([[0], [1], [2], [3]], dtype=np.int64)
+    t = np.array([[0], [1], [2], [3]], dtype=np.int32)
     facets = [[0, 1, 2],
               [0, 1, 3],
               [0, 2, 3],
@@ -153,7 +153,7 @@ class RefQuad(Refdom):
 
     p = np.array([[0., 1., 1., 0.],
                   [0., 0., 1., 1.]], dtype=np.float64)
-    t = np.array([[0], [1], [2], [3]], dtype=np.int64)
+    t = np.array([[0], [1], [2], [3]], dtype=np.int32)
     normals = np.array([[0., -1.],
                         [1., 0.],
                         [0., 1.],
@@ -178,7 +178,7 @@ class RefHex(Refdom):
                   [0., 1., 0.],
                   [0., 0., 1.],
                   [0., 0., 0.]], dtype=np.float64).T
-    t = np.array([[0], [1], [2], [3], [4], [5], [6], [7]], dtype=np.int64)
+    t = np.array([[0], [1], [2], [3], [4], [5], [6], [7]], dtype=np.int32)
     normals = np.array([[1., 0., 0.],
                         [0., 0., 1.],
                         [0., 1., 0.],
@@ -264,7 +264,7 @@ class RefWedge(Refdom):
                   [0., 0., 1.],
                   [1., 0., 1.],
                   [0., 1., 1.]], dtype=np.float64).T
-    t = np.array([[0], [1], [2], [3], [4], [5]], dtype=np.int64)
+    t = np.array([[0], [1], [2], [3], [4], [5]], dtype=np.int32)
     normals = np.array([[0., -1., 0.],
                         [1., 1., 0.],
                         [-1., 0., 0.],

@@ -41,7 +41,7 @@ class MeshHex1(Mesh3D):
     )
     t: ndarray = field(
         default_factory=lambda: np.array(
-            [[0, 1, 2, 3, 4, 5, 6, 7]], dtype=np.int64
+            [[0, 1, 2, 3, 4, 5, 6, 7]], dtype=np.int32
         ).T
     )
     elem: Type[Element] = ElementHex1
@@ -60,7 +60,7 @@ class MeshHex1(Mesh3D):
         sz = p.shape[1]
         t2e = self.t2e.copy() + sz
         t2f = self.t2f.copy() + np.max(t2e) + 1
-        mid = np.arange(self.t.shape[1], dtype=np.int64) + np.max(t2f) + 1
+        mid = np.arange(self.t.shape[1], dtype=np.int32) + np.max(t2f) + 1
 
         doflocs = np.hstack((
             p,
@@ -152,7 +152,7 @@ class MeshHex1(Mesh3D):
                 .reshape(ne, 1, order='F')
                 .copy()
                 .flatten())
-        return cls(p, t.astype(np.int64))
+        return cls(p, t.astype(np.int32))
 
     def to_meshtet(self):
         """Split each hexahedron into six tetrahedra."""

@@ -324,7 +324,7 @@ class AbstractBasis:
         output: List[ndarray] = []
         if isinstance(self.elem, ElementComposite):
             nelems = len(self.elem.elems)
-            o = np.zeros(4, dtype=np.int64)
+            o = np.zeros(4, dtype=np.int32)
             for k in range(nelems):
                 e = self.elem.elems[k]
                 output.append(np.concatenate((
@@ -333,7 +333,7 @@ class AbstractBasis:
                     self.facet_dofs[o[2]:(o[2] + e.facet_dofs)].flatten('F'),
                     (self.interior_dofs[o[3]:(o[3] + e.interior_dofs)]
                      .flatten('F'))
-                )).astype(np.int64))
+                )).astype(np.int32))
                 o += np.array([e.nodal_dofs,
                                e.edge_dofs,
                                e.facet_dofs,
@@ -348,7 +348,7 @@ class AbstractBasis:
                     self.edge_dofs[k::ndims].flatten('F'),
                     self.facet_dofs[k::ndims].flatten('F'),
                     self.interior_dofs[k::ndims].flatten('F'),
-                )).astype(np.int64))
+                )).astype(np.int32))
             return output
         return [np.unique(self.dofs.element_dofs)]
 
