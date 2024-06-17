@@ -16,7 +16,7 @@ class TestEx02(TestCase):
 
     def runTest(self):
         import docs.examples.ex02 as ex02
-        self.assertAlmostEqual(np.max(ex02.x[ex02.ib.nodal_dofs[0]]),
+        self.assertAlmostEqual(np.max(ex02.x[ex02.basis.nodal_dofs[0]]),
                                0.00033840961095522285)
 
 
@@ -82,7 +82,7 @@ class TestEx11(TestCase):
     def runTest(self):
         import docs.examples.ex11 as ex11
         u = ex11.u
-        ib = ex11.ib
+        ib = ex11.basis
         # since the mesh is symmetric, the mean values should equal to zero
         self.assertAlmostEqual(np.mean(u[ib.nodal_dofs[2, :]]), 0.0)
         self.assertAlmostEqual(np.mean(u[ib.nodal_dofs[1, :]]), 0.0)

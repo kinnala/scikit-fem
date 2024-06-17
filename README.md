@@ -214,9 +214,14 @@ with respect to documented and/or tested features.
 - Fixed: `Mesh.p2e` returned incorrect incidence
 - Fixed: `InteriorFacetBasis.get_dofs` did not return all edge DOFs for 3D elements
 - Added: The lowest order, one point integration rule for tetrahedral elements
+- Added: `asm` will now wrap functions with three arguments using `BilinearForm`,
+  functions with two arguments using `LinearForm`, etc.
 - Changed: Initializing `Basis` for `ElementTetP0` without specifying
   `intorder` or `quadrature` will now automatically fall back to a one
   point integration rule
+- Changed: Default tags ('left', 'right', 'top', ...) are no more
+  added automatically during mesh initialization, as a workaround you
+  can add them explicitly by calling `mesh = mesh.with_defaults()`
 
 ### [9.1.1] - 2024-04-23
 

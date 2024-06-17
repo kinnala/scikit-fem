@@ -15,17 +15,19 @@ on a part of the boundary of the domain :math:`\Gamma \subset \partial \Omega`
  to a saddle point system.
 
 """
-
 from skfem import *
 from skfem.helpers import dot, grad
 from skfem.models.poisson import laplace
+import numpy as np
+import scipy.sparse
+
 
 m = MeshTri().refined(5).with_boundaries({"plate": lambda x: x[1] == 0.0})
 
 e = ElementTriP1()
 
-ib = Basis(m, e)
-fb = FacetBasis(m, e)
+basis = Basis(m, e)
+fbasis = FacetBasis(m, e)
 
 
 @BilinearForm
@@ -42,19 +44,18 @@ def facetlinf(v, w):
     return -dot(grad(v), n) * (x[0] == 1.0)
 
 
-A = asm(laplace, ib)
-B = asm(facetbilinf, fb)
+A = laplace.assemble(basis)
+B = facetbilinf.assemble(fbasis)
+b = facetlinf.assemble(fbasis)
 
-b = asm(facetlinf, fb)
+I = basis.complement_dofs(basis.get_dofs("plate"))
 
-I = ib.complement_dofs(ib.get_dofs("plate"))
 
-import scipy.sparse
 b = scipy.sparse.csr_matrix(b)
-K = scipy.sparse.bmat([[A+B, b.T], [b, None]], 'csr')
 
-import numpy as np
-f = np.concatenate((ib.zeros(), -1.0*np.ones(1)))
+# create a block system with an extra Lagrange multiplier
+K = scipy.sparse.bmat([[A + B, b.T], [b, None]], 'csr')
+f = np.concatenate((basis.zeros(), -1.0 * np.ones(1)))
 
 I = np.append(I, K.shape[0] - 1)
 

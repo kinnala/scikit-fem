@@ -14,7 +14,6 @@ from skfem.element import (ElementTetP1, ElementTriP0, ElementQuad0,
                            ElementHex0)
 from skfem.utils import projection
 from skfem.io.meshio import to_meshio, from_meshio
-from skfem.io.json import to_dict, from_dict
 
 
 MESH_PATH = Path(__file__).parents[1] / 'docs' / 'examples' / 'meshes'
@@ -114,7 +113,7 @@ class SerializeUnserializeCycle(TestCase):
                  .refined(2)
                  .with_boundaries({'down': lambda x: x[0] == 0,})
                  .with_subdomains({'up': lambda x: x[0] > 0.5}))
-            M = from_dict(cls, to_dict(m))
+            M = cls.from_dict(m.to_dict())
             self.assertTrue(np.sum(m.p - M.p) < 1e-13)
             self.assertTrue(np.sum(m.t - M.t) < 1e-13)
             for k in m.boundaries:
@@ -808,7 +807,7 @@ def test_incidence(mesh):
 
 def test_restrict_tags_boundary():
 
-    m = MeshTri().refined(3)
+    m = MeshTri().refined(3).with_defaults()
     m = m.with_subdomains({
         'left': lambda x: x[0] <= 0.5,
         'bottom': lambda x: x[1] <= 0.5,

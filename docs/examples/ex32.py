@@ -61,21 +61,13 @@ from scipy.sparse.linalg import LinearOperator, minres
 
 
 try:
-    try:
-        from pyamgcl import amgcl  # v. 1.3.99+
-    except ImportError:
-        from pyamgcl import amg as amgcl
-    from scipy.sparse.linalg import aslinearoperator
-
-    def build_pc_amg(A: spmatrix, **kwargs) -> LinearOperator:
-        """AMG preconditioner"""
-        return aslinearoperator(amgcl(A, **kwargs))
-
-except ImportError:
     from pyamg import smoothed_aggregation_solver
 
-    def build_pc_amg(A: spmatrix, **kwargs) -> LinearOperator:
+    def build_pc(A: spmatrix, **kwargs) -> LinearOperator:
         return smoothed_aggregation_solver(A, **kwargs).aspreconditioner()
+
+except:
+    build_pc = lambda A: build_pc_ilu(A, drop_tol=1e-3)
 
 
 class Sphere(NamedTuple):
@@ -132,7 +124,7 @@ D = basis['u'].get_dofs()
 Kint, fint, u, I = condense(K, f, D=D)
 Aint = Kint[:-(basis['p'].N), :-(basis['p'].N)]
 
-Apc = build_pc_amg(Aint)
+Apc = build_pc(Aint)
 diagQ = Q.diagonal()
 
 

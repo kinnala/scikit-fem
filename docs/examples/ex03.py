@@ -1,58 +1,56 @@
 """Linear elastic eigenvalue problem."""
 
 from skfem import *
-from skfem.helpers import dot, ddot, sym_grad
-from skfem.models.elasticity import linear_elasticity, linear_stress
+from skfem.helpers import dot, ddot, sym_grad, eye, trace
 import numpy as np
 
 m1 = MeshLine(np.linspace(0, 5, 50))
 m2 = MeshLine(np.linspace(0, 1, 10))
-m = (m1 * m2).with_boundaries(
-    {
-        "left": lambda x: x[0] == 0.0
-    }
-)
+m = (m1 * m2).with_defaults()
 
 e1 = ElementQuad1()
-
-mapping = MappingIsoparametric(m, e1)
-
 e = ElementVector(e1)
 
-gb = Basis(m, e, mapping, 2)
+basis = Basis(m, e, intorder=2)
 
 lam = 1.
 mu = 1.
-K = asm(linear_elasticity(lam, mu), gb)
+
+
+def C(T):
+    return 2. * mu * T + lam * eye(trace(T), T.shape[0])
+
+
+@BilinearForm
+def stiffness(u, v, w):
+    return ddot(C(sym_grad(u)), sym_grad(v))
+
 
 @BilinearForm
 def mass(u, v, w):
     return dot(u, v)
 
-M = asm(mass, gb)
 
-D = gb.get_dofs("left")
-y = gb.zeros()
+K = stiffness.assemble(basis)
+M = mass.assemble(basis)
 
-I = gb.complement_dofs(D)
+D = basis.get_dofs("left")
 
-L, x = solve(*condense(K, M, I=I),
+L, x = solve(*condense(K, M, D=D),
              solver=solver_eigen_scipy_sym(k=6, sigma=0.0))
 
-y = x[:, 4]
-
 # calculate stress
-sgb = gb.with_element(ElementVector(e))
-C = linear_stress(lam, mu)
-yi = gb.interpolate(y)
-sigma = sgb.project(C(sym_grad(yi)))
+y = x[:, 4]
+sbasis = basis.with_element(ElementVector(e))
+yi = basis.interpolate(y)
+sigma = sbasis.project(C(sym_grad(yi)))
 
 def visualize():
     from skfem.visuals.matplotlib import plot, draw
-    M = MeshQuad(np.array(m.p + .5 * y[gb.nodal_dofs]), m.t)
+    M = MeshQuad(np.array(m.p + .5 * y[basis.nodal_dofs]), m.t)
     ax = draw(M)
     return plot(M,
-                sigma[sgb.nodal_dofs[0]],
+                sigma[sbasis.nodal_dofs[0]],
                 ax=ax,
                 colorbar='$\sigma_{xx}$',
                 shading='gouraud')

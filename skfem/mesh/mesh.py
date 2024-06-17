@@ -216,6 +216,10 @@ class Mesh:
         ))[0]
         return edge_candidates[ix]
 
+    def with_defaults(self):
+        """Return a copy with the default tags ('left', 'right', ...)."""
+        return self.with_boundaries(self._build_default_tags())
+
     def with_boundaries(self,
                         boundaries: Dict[str, Union[Callable[[ndarray],
                                                              ndarray],
@@ -245,12 +249,14 @@ class Mesh:
         )
 
     def with_subdomains(self,
-                        subdomains: Dict[str, Callable[[ndarray], ndarray]]):
+                        subdomains: Dict[str, Union[Callable[[ndarray],
+                                                             ndarray],
+                                                    ndarray]]):
         """Return a copy of the mesh with named subdomains.
 
         Parameters
         ----------
-        boundaries
+        subdomains
             A dictionary of lambda functions with the names of the subdomains
             as keys.  The midpoint of the element should return ``True`` for
             the corresponding lambda function if the element belongs to the
@@ -266,6 +272,25 @@ class Mesh:
                    for name, test in subdomains.items()},
             },
         )
+
+    def _build_default_tags(self):
+
+        boundaries = {}
+        # default boundary names along the dimensions
+        minnames = ['left', 'bottom', 'front']
+        maxnames = ['right', 'top', 'back']
+        for d in range(self.doflocs.shape[0]):
+            dmin = np.min(self.doflocs[d])
+            ix = self.facets_satisfying(lambda x: x[d] == dmin)
+            if len(ix) >= 1:
+                boundaries[minnames[d]] = ix
+        for d in range(self.doflocs.shape[0]):
+            dmax = np.max(self.doflocs[d])
+            ix = self.facets_satisfying(lambda x: x[d] == dmax)
+            if len(ix) >= 1:
+                boundaries[maxnames[d]] = ix
+
+        return boundaries
 
     def _encode_point_data(self) -> Dict[str, List[ndarray]]:
 
@@ -529,6 +554,7 @@ class Mesh:
         M = self.elem.refdom.nnodes
 
         if self.nnodes > M and self.elem is not Element:
+            # this is for high-order meshes, input in a different format
             # reorder DOFs to the expected format: vertex DOFs are first
             # note: not run if elem is not set
             p, t = self.doflocs, self.t
@@ -556,28 +582,6 @@ class Mesh:
                 logger.warning("Transforming over 1000 elements "
                                "to C_CONTIGUOUS.")
             self.t = np.ascontiguousarray(self.t)
-
-        # try adding default boundary tags
-        if ((self._boundaries is None
-             and self.doflocs.shape[1] < 1e3
-             and self.elem is not Element)):
-            # note: not run if elem is not set
-            boundaries = {}
-            # default boundary names along the dimensions
-            minnames = ['left', 'bottom', 'front']
-            maxnames = ['right', 'top', 'back']
-            for d in range(self.doflocs.shape[0]):
-                dmin = np.min(self.doflocs[d])
-                ix = self.facets_satisfying(lambda x: x[d] == dmin)
-                if len(ix) >= 1:
-                    boundaries[minnames[d]] = ix
-            for d in range(self.doflocs.shape[0]):
-                dmax = np.max(self.doflocs[d])
-                ix = self.facets_satisfying(lambda x: x[d] == dmax)
-                if len(ix) >= 1:
-                    boundaries[maxnames[d]] = ix
-            if len(boundaries) > 0:
-                self._boundaries = boundaries
 
         # run validation
         if self.validate and logger.getEffectiveLevel() <= logging.DEBUG:
@@ -756,13 +760,38 @@ class Mesh:
                          **kwargs)
 
     @classmethod
-    def from_dict(cls, d):
-        from skfem.io.json import from_dict
-        return from_dict(cls, d)
+    def from_dict(cls, data):
+
+        if 'p' not in data or 't' not in data:
+            raise ValueError("Dictionary must contain keys 'p' and 't'.")
+        else:
+            data['p'] = np.ascontiguousarray(np.array(data['p']).T)
+            data['t'] = np.ascontiguousarray(np.array(data['t']).T)
+        if 'boundaries' in data and data['boundaries'] is not None:
+            data['boundaries'] = {k: np.array(v)
+                                  for k, v in data['boundaries'].items()}
+        if 'subdomains' in data and data['subdomains'] is not None:
+            data['subdomains'] = {k: np.array(v)
+                                  for k, v in data['subdomains'].items()}
+        data['doflocs'] = data.pop('p')
+        data['_subdomains'] = data.pop('subdomains')
+        data['_boundaries'] = data.pop('boundaries')
+        return cls(**data)
 
     def to_dict(self):
-        from skfem.io.json import to_dict
-        return to_dict(self)
+
+        boundaries = None
+        subdomains = None
+        if self.boundaries is not None:
+            boundaries = {k: v.tolist() for k, v in self.boundaries.items()}
+        if self.subdomains is not None:
+            subdomains = {k: v.tolist() for k, v in self.subdomains.items()}
+        return {
+            'p': self.p.T.tolist(),
+            't': self.t.T.tolist(),
+            'boundaries': boundaries,
+            'subdomains': subdomains,
+        }
 
     @classmethod
     def from_mesh(cls, mesh, t: Optional[ndarray] = None):
@@ -803,7 +832,15 @@ class Mesh:
         return cls(cls.elem.refdom.p, cls.elem.refdom.t, validate=False)
 
     def morphed(self, *args):
-        """Morph the mesh using functions."""
+        """Morph the mesh using functions.
+
+        Parameters
+        ----------
+        funcs
+            One function per dimension, input is `p` and output is the
+            new coordinate of `p[i]', with `i=1,..,ndim`.
+
+        """
         p = self.p.copy()
         for i, arg in enumerate(args):
             if arg is None:

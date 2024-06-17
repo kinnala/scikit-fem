@@ -10,26 +10,25 @@ from skfem.helpers import dot, grad
 m = MeshTri().refined(6)
 # or, with your own points and cells:
 # m = MeshTri(points, cells)
+# or, load from file
+# m = MeshTri.load("mesh.msh")
 
 e = ElementTriP1()
 basis = Basis(m, e)
 
-# this method could also be imported from skfem.models.laplace
+
 @BilinearForm
 def laplace(u, v, _):
     return dot(grad(u), grad(v))
 
 
-# this method could also be imported from skfem.models.unit_load
 @LinearForm
 def rhs(v, _):
     return 1.0 * v
 
-A = asm(laplace, basis)
-b = asm(rhs, basis)
-# or:
-# A = laplace.assemble(basis)
-# b = rhs.assemble(basis)
+
+A = laplace.assemble(basis)
+b = rhs.assemble(basis)
 
 # enforce Dirichlet boundary conditions
 A, b = enforce(A, b, D=m.boundary_nodes())

@@ -11,7 +11,6 @@ following:
   Number of elements: 2
   Number of vertices: 4
   Number of nodes: 4
-  Named boundaries [# facets]: left [1], bottom [1], right [1], top [1]
 
 2. Create :class:`~skfem.assembly.CellBasis` or
    :class:`~skfem.assembly.FacetBasis` objects.
@@ -77,6 +76,17 @@ def asm(form: Form,
     supports assembling multiple bases at once and summing the result.
 
     """
+    if not isinstance(form, Form) and callable(form):
+        # wrap the function
+        nargs = form.__code__.co_argcount
+        wrapper = [
+            Functional,
+            LinearForm,
+            BilinearForm,
+            TrilinearForm,
+        ][nargs - 1]
+        form = wrapper(form)
+
     assert form.form is not None
     logger.info("Assembling '{}'.".format(form.form.__name__))
     nargs = [[arg] if not isinstance(arg, list) else arg for arg in args]

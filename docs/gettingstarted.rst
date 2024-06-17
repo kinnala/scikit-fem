@@ -90,13 +90,12 @@ unit square:
      Number of elements: 128
      Number of vertices: 81
      Number of nodes: 81
-     Named boundaries [# facets]: left [8], bottom [8], right [8], top [8]
 
 
 .. plot::
 
    from skfem import *
-   MeshTri().refined(3).draw(boundaries=True)
+   MeshTri().refined(3).draw()
 
 
 Step 4: Define a basis
