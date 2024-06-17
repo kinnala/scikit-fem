@@ -96,7 +96,7 @@ unit square:
 .. plot::
 
    from skfem import *
-   MeshTri().refined(3).draw(boundaries=True)
+   MeshTri().refined(3).with_default_tags().draw(boundaries=True)
 
 
 Step 4: Define a basis
