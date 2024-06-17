@@ -84,7 +84,7 @@ unit square:
 
 .. doctest::
 
-   >>> mesh = fem.MeshTri().refined(3)  # refine thrice
+   >>> mesh = fem.MeshTri().refined(3).with_default_tags()  # refine thrice
    >>> mesh
    <skfem MeshTri1 object>
      Number of elements: 128
