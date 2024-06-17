@@ -760,7 +760,7 @@ class Mesh:
                          **kwargs)
 
     @classmethod
-    def from_dict(cls, d):
+    def from_dict(cls, data):
 
         if 'p' not in data or 't' not in data:
             raise ValueError("Dictionary must contain keys 'p' and 't'.")
