@@ -3,7 +3,7 @@ import tempfile
 
 def draw(m, backend=False, **kwargs):
     """Visualize meshes."""
-    from vedo import Plotter, UnstructuredGrid, show
+    from vedo import Plotter, UnstructuredGrid
     vp = Plotter()
     grid = None
     with tempfile.NamedTemporaryFile() as tmp:
