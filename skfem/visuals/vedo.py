@@ -3,7 +3,7 @@ import tempfile
 
 def draw(m, backend=False, **kwargs):
     """Visualize meshes."""
-    from vedo import Plotter, UGrid
+    from vedo import Plotter, UnstructuredGrid, show
     vp = Plotter()
     grid = None
     with tempfile.NamedTemporaryFile() as tmp:
@@ -11,9 +11,10 @@ def draw(m, backend=False, **kwargs):
                encode_cell_data=False,
                encode_point_data=True,
                **kwargs)
-        grid = UGrid(tmp.name + '.vtk')
+        grid = UnstructuredGrid(tmp.name + '.vtk')
+        vp += grid.tomesh()
         # save these for further use
-        grid.show = lambda: vp.show([grid.tomesh()]).close()
+        grid.show = lambda: vp.show()
         grid.plotter = vp
     return grid
 

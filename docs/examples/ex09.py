@@ -35,35 +35,41 @@ where :math:`\Omega = (0,1)^3`.
 *  Demidov, D. (2019). AMGCL: an efficient, flexible, and extensible algebraic multigrid implementation. `arXiv:1811.05704 <https://arxiv.org/abs/1811.05704>`_
 
 """
-
 from skfem import *
-from skfem.models.poisson import *
+from skfem.helpers import *
 import numpy as np
 from scipy.sparse import spmatrix
 from scipy.sparse.linalg import LinearOperator
 
+
 p = np.linspace(0, 1, 16)
 m = MeshTet.init_tensor(*(p,) * 3)
+basis = Basis(m, ElementTetP1())
 
-e = ElementTetP1()
-basis = Basis(m, e)
 
-A = asm(laplace, basis)
-b = asm(unit_load, basis)
+@BilinearForm
+def laplace(u, v, _):
+    return dot(grad(u), grad(v))
+
+
+@LinearForm
+def unit_load(v, _):
+    return 1. * v
+
+
+A = laplace.assemble(basis)
+b = unit_load.assemble(basis)
 
 I = m.interior_nodes()
-
 x = 0. * b
 
-if __name__ == "__main__":
-    verbose = True
-else:
-    verbose = False
 
 Aint, bint = condense(A, b, I=I, expand=False)
 
 preconditioners = [None, build_pc_ilu(Aint, drop_tol=1e-3)]
 
+
+# try importing algebraic multigrid from external package
 try:
     from pyamg import smoothed_aggregation_solver
 
@@ -76,29 +82,17 @@ try:
 except ImportError:
     print('Skipping PyAMG')
 
-try:
-    import pyamgcl
 
-    def build_pc_amgcl(A: spmatrix, **kwargs) -> LinearOperator:
-        """AMG preconditioner"""
-
-        if hasattr(pyamgcl, 'amgcl'):  # v. 1.3.99+
-            return pyamgcl.amgcl(A, **kwargs)
-        else:
-            return pyamgcl.amg(A, **kwargs)
-
-    preconditioners.append(build_pc_amgcl(Aint))
-
-except ImportError:
-    print('Skipping pyamgcl')
-
+# solve for each preconditioner
 for pc in preconditioners:
-    x[I] = solve(Aint, bint, solver=solver_iter_pcg(verbose=verbose, M=pc))
+    x[I] = solve(Aint, bint, solver=solver_iter_pcg(verbose=True, M=pc))
 
 
-if verbose:
+if __name__ == "__main__":
     from os.path import splitext
     from sys import argv
 
-    m.draw('vedo', point_data={'potential': x}).show()
-    #m.save(splitext(argv[0])[0] + ".vtk", {'potential': x})
+    # use vedo: press 5 to visualize potential, X for cutter tool
+    basis.plot(x, 'vedo').show()
+    # preferred: save to vtk for visualization in Paraview
+    #m.save(splitext(argv[0])[0] + ".vtk", point_data{'potential': x})
