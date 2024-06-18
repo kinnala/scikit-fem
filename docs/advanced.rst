@@ -238,7 +238,7 @@ The remaining DOFs are internal to the element and not shared:
 .. doctest::
 
    >>> basis.interior_dofs
-   array([[26]])
+   array([[26]], dtype=int32)
    
 Each DOF is associated either with a node (``nodal_dofs``), a facet
 (``facet_dofs``), an edge (``edge_dofs``), or an element (``interior_dofs``).
