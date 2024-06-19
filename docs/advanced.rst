@@ -185,7 +185,7 @@ The DOFs corresponding to the nodes (or vertices) of the mesh are
 .. doctest::
 
    >>> basis.nodal_dofs
-   array([[0, 1, 2, 3, 4, 5, 6, 7]], dtype=int32)
+   array([[0, 1, 2, 3, 4, 5, 6, 7]])
 
 This means that the first (zeroth) entry in the DOF array corresponds to the
 first node/vertex in the finite element mesh (see ``m.p`` for a list of
