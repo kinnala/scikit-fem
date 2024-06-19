@@ -137,7 +137,7 @@ class AbstractBasis:
         >>> m = MeshTri().refined()
         >>> basis = Basis(m, ElementTriP1())
         >>> basis.get_dofs().flatten()
-        array([0, 1, 2, 3, 4, 5, 7, 8])
+        array([0, 1, 2, 3, 4, 5, 7, 8], dtype=int32)
 
         Get DOFs via a function query:
 
@@ -146,7 +146,7 @@ class AbstractBasis:
         >>> m = MeshTri().refined()
         >>> basis = Basis(m, ElementTriP1())
         >>> basis.get_dofs(lambda x: np.isclose(x[0], 0)).flatten()
-        array([0, 2, 5])
+        array([0, 2, 5], dtype=int32)
 
         Get DOFs via named boundaries:
 
@@ -157,7 +157,7 @@ class AbstractBasis:
         ...      .with_boundaries({'left': lambda x: np.isclose(x[0], 0)}))
         >>> basis = Basis(m, ElementTriP1())
         >>> basis.get_dofs('left').flatten()
-        array([0, 2, 5])
+        array([0, 2, 5], dtype=int32)
 
         Get DOFs via named subdomains:
 
@@ -167,7 +167,7 @@ class AbstractBasis:
         ...      .with_subdomains({'left': lambda x: x[0] < .5}))
         >>> basis = Basis(m, ElementTriP1())
         >>> basis.get_dofs(elements='left').flatten()
-        array([0, 2, 4, 5, 6, 8])
+        array([0, 2, 4, 5, 6, 8], dtype=int32)
 
         Further reduce the set of DOFs:
 
@@ -178,7 +178,7 @@ class AbstractBasis:
         >>> basis.get_dofs(lambda x: np.isclose(x[0], 0)).nodal.keys()
         dict_keys(['u', 'u_x', 'u_y', 'u_xx', 'u_xy', 'u_yy'])
         >>> basis.get_dofs(lambda x: np.isclose(x[0], 0)).all(['u', 'u_x'])
-        array([ 0,  1, 12, 13, 30, 31])
+        array([ 0,  1, 12, 13, 30, 31], dtype=int32)
 
         Skip some DOF names altogether:
 
@@ -199,7 +199,7 @@ class AbstractBasis:
         ...                        'right': lambda x: np.isclose(x[0], 1)}))
         >>> basis = Basis(m, ElementTriP1())
         >>> basis.get_dofs({'left', 'right'}).flatten()
-        array([0, 1, 2, 3])
+        array([0, 1, 2, 3], dtype=int32)
 
         Parameters
         ----------
