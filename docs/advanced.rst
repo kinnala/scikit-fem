@@ -185,7 +185,7 @@ The DOFs corresponding to the nodes (or vertices) of the mesh are
 .. doctest::
 
    >>> basis.nodal_dofs
-   array([[0, 1, 2, 3, 4, 5, 6, 7]])
+   array([[0, 1, 2, 3, 4, 5, 6, 7]], dtype=int32)
 
 This means that the first (zeroth) entry in the DOF array corresponds to the
 first node/vertex in the finite element mesh (see ``m.p`` for a list of
@@ -207,9 +207,9 @@ edges) and the facets (``m.facets`` for a list of facets) of the mesh are
 .. doctest::
 
    >>> basis.edge_dofs
-   array([[ 8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]])
+   array([[ 8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]], dtype=int32)
    >>> basis.facet_dofs
-   array([[20, 21, 22, 23, 24, 25]])
+   array([[20, 21, 22, 23, 24, 25]], dtype=int32)
 
 .. plot::
 
