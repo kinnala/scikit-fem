@@ -29,7 +29,7 @@ class MeshQuad1(Mesh2D):
         ).T
     )
     t: ndarray = field(
-        default_factory=lambda: np.array([[0, 1, 2, 3]], dtype=np.int64).T
+        default_factory=lambda: np.array([[0, 1, 2, 3]], dtype=np.int32).T
     )
     elem: Type[Element] = ElementQuad1
 
@@ -39,7 +39,7 @@ class MeshQuad1(Mesh2D):
         t = self.t
         sz = p.shape[1]
         t2f = self.t2f.copy()
-        mid = np.arange(t.shape[1], dtype=np.int64) + np.max(t2f) + sz + 1
+        mid = np.arange(t.shape[1], dtype=np.int32) + np.max(t2f) + sz + 1
 
         m = replace(
             self,
@@ -60,8 +60,8 @@ class MeshQuad1(Mesh2D):
 
         if self._boundaries is not None:
             # mapping of indices between old and new facets
-            new_facets = np.zeros((2, self.facets.shape[1]), dtype=np.int64)
-            ix0 = np.arange(t.shape[1], dtype=np.int64)
+            new_facets = np.zeros((2, self.facets.shape[1]), dtype=np.int32)
+            ix0 = np.arange(t.shape[1], dtype=np.int32)
             ix1 = ix0 + t.shape[1]
             ix2 = ix0 + 2 * t.shape[1]
             ix3 = ix0 + 3 * t.shape[1]
@@ -130,7 +130,7 @@ class MeshQuad1(Mesh2D):
         t[3] = (ix[0:(npy-1), 1:npx].reshape(nt, 1, order='F')
                 .copy()
                 .flatten())
-        return cls(p, t.astype(np.int64))
+        return cls(p, t.astype(np.int32))
 
     def to_meshtri(self,
                    x: Optional[ndarray] = None,
@@ -150,7 +150,7 @@ class MeshQuad1(Mesh2D):
         if style == 'x':
             tnew = np.arange(np.max(self.t) + 1,
                              np.max(self.t) + 1 + self.t.shape[1],
-                             dtype=np.int64)
+                             dtype=np.int32)
             t = np.hstack((
                 np.vstack((self.t[[0, 1]], tnew)),
                 np.vstack((self.t[[1, 2]], tnew)),

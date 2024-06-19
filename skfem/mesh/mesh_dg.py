@@ -10,8 +10,8 @@ class MeshDG:
                     *args,
                     periodic=[]):
         mesh = cls.__bases__[-1].init_tensor(*args)
-        ix = np.empty((0,), dtype=np.int64)
-        ix0 = np.empty((0,), dtype=np.int64)
+        ix = np.empty((0,), dtype=np.int32)
+        ix0 = np.empty((0,), dtype=np.int32)
         for dim in periodic:
             argmin = args[dim].min()
             argmax = args[dim].max()
@@ -59,12 +59,12 @@ class MeshDG:
                              "creation of a periodic mesh should be equal.")
 
         # reorder vertices: eliminated nodes must have highest index values
-        remap = np.empty(mesh.nvertices, dtype=np.int64)
+        remap = np.empty(mesh.nvertices, dtype=np.int32)
         remap[ix] = np.arange(mesh.nvertices - len(ix),
                               mesh.nvertices,
-                              dtype=np.int64)
-        oix = np.setdiff1d(np.arange(mesh.nvertices, dtype=np.int64), ix)
-        remap[oix] = np.arange(mesh.nvertices - len(ix), dtype=np.int64)
+                              dtype=np.int32)
+        oix = np.setdiff1d(np.arange(mesh.nvertices, dtype=np.int32), ix)
+        remap[oix] = np.arange(mesh.nvertices - len(ix), dtype=np.int32)
 
         doflocs = np.hstack((mesh.doflocs[:, oix], mesh.doflocs[:, ix]))
         t = remap[mesh.t]
@@ -77,7 +77,7 @@ class MeshDG:
         )
 
         # make periodic
-        reremap = np.arange(mesh.nvertices, dtype=np.int64)
+        reremap = np.arange(mesh.nvertices, dtype=np.int32)
         ix1 = remap[ix]
         ix2 = remap[ix0]
         reremap[ix1] = ix2

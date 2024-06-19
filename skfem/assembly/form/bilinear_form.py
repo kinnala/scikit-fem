@@ -79,8 +79,8 @@ class BilinearForm(Form):
         # initialize COO data structures
         sz = ubasis.Nbfun * vbasis.Nbfun * nt
         data = np.zeros((ubasis.Nbfun, vbasis.Nbfun, nt), dtype=self.dtype)
-        rows = np.zeros(sz, dtype=np.int64)
-        cols = np.zeros(sz, dtype=np.int64)
+        rows = np.zeros(sz, dtype=np.int32)
+        cols = np.zeros(sz, dtype=np.int32)
 
         # loop over the indices of local stiffness matrix
         for j in range(ubasis.Nbfun):

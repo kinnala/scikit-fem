@@ -222,6 +222,11 @@ with respect to documented and/or tested features.
 - Changed: Default tags ('left', 'right', 'top', ...) are no more
   added automatically during mesh initialization, as a workaround you
   can add them explicitly by calling `mesh = mesh.with_defaults()`
+- Changed: All indices within the library are now using `np.int32` for
+  around 10% boost in performance and the corresponding reduction in
+  memory usage for larger meshes - theoretically, the largest possible
+  tetrahedral tensor product mesh is roughly 550 ** 3 = 166 M vertices
+  and 993 M elements, without the facet indexing wrapping over INT_MAX
 
 ### [9.1.1] - 2024-04-23
 

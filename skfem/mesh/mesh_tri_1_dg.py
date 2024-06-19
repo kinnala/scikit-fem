@@ -32,7 +32,7 @@ class MeshTri1DG(MeshDG, MeshTri1):
                 [0, 1, 3],
                 [0, 2, 3],
             ],
-            dtype=np.int64,
+            dtype=np.int32,
         ).T
     )
     elem: Type[Element] = ElementTriP1DG

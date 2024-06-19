@@ -37,7 +37,7 @@ class MeshTet1(MeshSimplex, Mesh3D):
                 [2, 3, 1, 7],
                 [1, 2, 4, 7],
             ],
-            dtype=np.int64,
+            dtype=np.int32,
         ).T
     )
     elem: Type[Element] = ElementTetP1
@@ -63,7 +63,7 @@ class MeshTet1(MeshSimplex, Mesh3D):
                 _, ix_ind = np.unique(ix, return_index=True)
                 ix = ix[np.sort(ix_ind)]
             else:
-                ix = np.arange(nelems, dtype=np.int64)
+                ix = np.arange(nelems, dtype=np.int32)
 
             X = mapping.invF(np.array([x, y, z])[:, None], ix)
             eps = np.finfo(X.dtype).eps
@@ -127,8 +127,8 @@ class MeshTet1(MeshSimplex, Mesh3D):
 
         if self._subdomains is not None:
             nt = t.shape[1]
-            new_t = np.zeros((8, nt), dtype=np.int64)
-            new_t[0] = np.arange(nt, dtype=np.int64)
+            new_t = np.zeros((8, nt), dtype=np.int32)
+            new_t[0] = np.arange(nt, dtype=np.int32)
             new_t[1] = new_t[0] + nt
             new_t[2] = new_t[1] + nt
             new_t[3] = new_t[2] + nt
@@ -136,20 +136,20 @@ class MeshTet1(MeshSimplex, Mesh3D):
             n2 = np.sum(c2)
             n3 = np.sum(c3)
             if n1 > 0:
-                new_t[4, c1] = np.arange(n1, dtype=np.int64) + 4 * nt
-                new_t[5, c1] = np.arange(n1, dtype=np.int64) + 5 * nt
-                new_t[6, c1] = np.arange(n1, dtype=np.int64) + 6 * nt
-                new_t[7, c1] = np.arange(n1, dtype=np.int64) + 7 * nt
+                new_t[4, c1] = np.arange(n1, dtype=np.int32) + 4 * nt
+                new_t[5, c1] = np.arange(n1, dtype=np.int32) + 5 * nt
+                new_t[6, c1] = np.arange(n1, dtype=np.int32) + 6 * nt
+                new_t[7, c1] = np.arange(n1, dtype=np.int32) + 7 * nt
             if n2 > 0:
-                new_t[4, c2] = np.arange(n2, dtype=np.int64) + 4 * nt + n1
-                new_t[5, c2] = np.arange(n2, dtype=np.int64) + 5 * nt + n1
-                new_t[6, c2] = np.arange(n2, dtype=np.int64) + 6 * nt + n1
-                new_t[7, c2] = np.arange(n2, dtype=np.int64) + 7 * nt + n1
+                new_t[4, c2] = np.arange(n2, dtype=np.int32) + 4 * nt + n1
+                new_t[5, c2] = np.arange(n2, dtype=np.int32) + 5 * nt + n1
+                new_t[6, c2] = np.arange(n2, dtype=np.int32) + 6 * nt + n1
+                new_t[7, c2] = np.arange(n2, dtype=np.int32) + 7 * nt + n1
             if n3 > 0:
-                new_t[4, c3] = np.arange(n3, dtype=np.int64) + 4 * nt + n1 + n2
-                new_t[5, c3] = np.arange(n3, dtype=np.int64) + 5 * nt + n1 + n2
-                new_t[6, c3] = np.arange(n3, dtype=np.int64) + 6 * nt + n1 + n2
-                new_t[7, c3] = np.arange(n3, dtype=np.int64) + 7 * nt + n1 + n2
+                new_t[4, c3] = np.arange(n3, dtype=np.int32) + 4 * nt + n1 + n2
+                new_t[5, c3] = np.arange(n3, dtype=np.int32) + 5 * nt + n1 + n2
+                new_t[6, c3] = np.arange(n3, dtype=np.int32) + 6 * nt + n1 + n2
+                new_t[7, c3] = np.arange(n3, dtype=np.int32) + 7 * nt + n1 + n2
             subdomains = {
                 name: np.sort(new_t[:, ixs].flatten())
                 for name, ixs in self._subdomains.items()
@@ -237,29 +237,29 @@ class MeshTet1(MeshSimplex, Mesh3D):
     def _adaptive(self, marked):
         """Longest edge bisection."""
         if isinstance(marked, list):
-            marked = np.array(marked, dtype=np.int64)
+            marked = np.array(marked, dtype=np.int32)
         marked = np.unique(marked)
         nt = self.t.shape[1]
         nv = self.p.shape[1]
         p = np.zeros((3, 9 * nv), dtype=np.float64)
-        t = np.zeros((4, 8 * nt), dtype=np.int64)
+        t = np.zeros((4, 8 * nt), dtype=np.int32)
         p[:, :nv] = self.p.copy()
         t[:, :nt] = self.t.copy()
 
         nonconf = np.ones(8 * nv, dtype=np.int8)
-        split_edge = np.zeros((3, 8 * nv), dtype=np.int64)
+        split_edge = np.zeros((3, 8 * nv), dtype=np.int32)
         ns = 0
 
         while len(marked) > 0:
             nm = len(marked)
-            tnew = np.zeros(nm, dtype=np.int64) - 1
+            tnew = np.zeros(nm, dtype=np.int32) - 1
             t = self._adaptive_sort_mesh(p, t, marked)
             t0, t1, t2, t3 = t[:, marked]
 
             if ns == 0:
-                ix = np.arange(nm, dtype=np.int64)
+                ix = np.arange(nm, dtype=np.int32)
             else:
-                nonconf_edge = np.nonzero(nonconf[:ns])[0]
+                nonconf_edge = np.nonzero(nonconf[:ns])[0].astype(np.int32)
                 i, j = self._find_nz(
                     np.hstack((split_edge[0, nonconf_edge],
                                split_edge[1, nonconf_edge])),
@@ -268,7 +268,7 @@ class MeshTet1(MeshSimplex, Mesh3D):
                     lambda I: I[t0].multiply(I[t1])
                 )
                 tnew[i] = j
-                ix = np.nonzero(tnew == -1)[0]
+                ix = np.nonzero(tnew == -1)[0].astype(np.int32)
 
             if len(ix) > 0:
                 i, j = self._find_nz(
@@ -280,7 +280,7 @@ class MeshTet1(MeshSimplex, Mesh3D):
 
                 split_edge[0, nix] = i
                 split_edge[1, nix] = j
-                split_edge[2, nix] = np.arange(nv, nv + nn, dtype=np.int64)
+                split_edge[2, nix] = np.arange(nv, nv + nn, dtype=np.int32)
 
                 # add new points
                 p[:, nv:(nv + nn)] = .5 * (p[:, i] + p[:, j])
@@ -301,10 +301,11 @@ class MeshTet1(MeshSimplex, Mesh3D):
             t[:, nt:(nt + nm)] = np.vstack((t2, t1, t3, tnew))
             nt += nm
 
-            check = np.nonzero(nonconf[:ns])[0]
-            check_node = np.zeros(nv, dtype=np.int64)
+            check = np.nonzero(nonconf[:ns])[0].astype(np.int32)
+            check_node = np.zeros(nv, dtype=np.int32)
             check_node[split_edge[:2, check]] = 1
-            check_elem = np.nonzero(check_node[t[:, :nt]].sum(axis=0))[0]
+            check_elem = (np.nonzero(check_node[t[:, :nt]].sum(axis=0))[0]
+                          .astype(np.int32))
 
             i, j = self._find_nz(
                 t[:, check_elem],
@@ -389,7 +390,7 @@ class MeshTet1(MeshSimplex, Mesh3D):
         T[:, (4 * ne):(5 * ne)] = t[[0, 2, 6, 7]]
         T[:, (5 * ne):] = t[[0, 3, 6, 7]]
 
-        return cls(p, T.astype(np.int64))
+        return cls(p, T.astype(np.int32))
 
     @classmethod
     def init_ball(cls: Type,
@@ -416,7 +417,7 @@ class MeshTet1(MeshSimplex, Mesh3D):
                       [0, 2, 3, 4],
                       [0, 4, 5, 3],
                       [0, 4, 6, 2],
-                      [0, 5, 6, 1]], dtype=np.int64).T
+                      [0, 5, 6, 1]], dtype=np.int32).T
         m = cls(p, t)
         for _ in range(nrefs):
             m = m.refined()

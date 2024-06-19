@@ -29,7 +29,7 @@ class MeshWedge1(Mesh3D):
     )
     t: ndarray = field(
         default_factory=lambda: np.array(
-            [[0, 2, 3, 1, 4, 5], [2, 3, 6, 4, 5, 7]], dtype=np.int64
+            [[0, 2, 3, 1, 4, 5], [2, 3, 6, 4, 5, 7]], dtype=np.int32
         ).T
     )
     elem: Type[Element] = ElementWedge1

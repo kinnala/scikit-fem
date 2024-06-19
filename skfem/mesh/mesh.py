@@ -196,7 +196,7 @@ class Mesh:
 
     def boundary_facets(self) -> ndarray:
         """Return an array of boundary facet indices."""
-        return np.nonzero(self.f2t[1] == -1)[0]
+        return np.nonzero(self.f2t[1] == -1)[0].astype(np.int32)
 
     def boundary_edges(self) -> ndarray:
         """Return an array of boundary edge indices."""
@@ -355,7 +355,7 @@ class Mesh:
             **{
                 f"skfem:s:{name}": [
                     np.isin(np.arange(self.t.shape[1],
-                                      dtype=np.int64), subdomain).astype(int)
+                                      dtype=np.int32), subdomain).astype(int)
                 ]
                 for name, subdomain in subdomains.items()
             },
@@ -379,7 +379,7 @@ class Mesh:
             elif subnames[1] == "b":
                 mask = (
                     (1 << np.arange(self.refdom.nfacets))[:, None]
-                    & data[0].astype(np.int64)
+                    & data[0].astype(np.int32)
                 ).astype(bool)
                 facets = np.sort(self.t2f[mask])
                 cells = mask.nonzero()[1]
@@ -413,7 +413,7 @@ class Mesh:
             If ``True``, include only boundary facets.
 
         """
-        nodes = np.nonzero(test(self.p))[0]
+        nodes = np.nonzero(test(self.p))[0].astype(np.int32)
         if boundaries_only:
             nodes = np.intersect1d(nodes, self.boundary_nodes())
         return nodes
@@ -436,7 +436,7 @@ class Mesh:
 
         """
         midp = self.p[:, self.facets].mean(axis=1)
-        facets = np.nonzero(test(midp))[0]
+        facets = np.nonzero(test(midp))[0].astype(np.int32)
         if boundaries_only:
             facets = np.intersect1d(facets, self.boundary_facets())
         if normal is not None:
@@ -466,9 +466,11 @@ class Mesh:
         facets, counts = np.unique(self.t2f[:, elements], return_counts=True)
         facets = facets[counts == 1]
         if flip:
-            ori = np.nonzero(~np.isin(self.f2t[:, facets], elements).T)[1]
+            ori = (np.nonzero(~np.isin(self.f2t[:, facets], elements).T)[1]
+                   .astype(np.int32))
         else:
-            ori = np.nonzero(np.isin(self.f2t[:, facets], elements).T)[1]
+            ori = (np.nonzero(np.isin(self.f2t[:, facets], elements).T)[1]
+                   .astype(np.int32))
         return OrientedBoundary(facets, ori)
 
     def elements_satisfying(self,
@@ -483,7 +485,7 @@ class Mesh:
 
         """
         midp = self.p[:, self.t].mean(axis=1)
-        return np.nonzero(test(midp))[0].astype(np.int64)
+        return np.nonzero(test(midp))[0].astype(np.int32)
 
     def _expand_facets(self, ix: ndarray) -> Tuple[ndarray, ndarray]:
         """Return vertices and edges corresponding to given facet indices.
@@ -499,7 +501,7 @@ class Mesh:
         if self.dim() == 3 and self.bndelem is not None:
             edges = np.unique(self.f2e[:, ix])
         else:
-            edges = np.array([], dtype=np.int64)
+            edges = np.array([], dtype=np.int32)
 
         return vertices, edges
 
@@ -549,7 +551,7 @@ class Mesh:
             self.t = np.sort(self.t, axis=0)
 
         self.doflocs = np.asarray(self.doflocs, dtype=np.float64, order="K")
-        self.t = np.asarray(self.t, dtype=np.int64, order="K")
+        self.t = np.asarray(self.t, dtype=np.int32, order="K")
 
         M = self.elem.refdom.nnodes
 
@@ -560,7 +562,7 @@ class Mesh:
             p, t = self.doflocs, self.t
             t_nodes = t[:M]
             uniq, ix = np.unique(t_nodes, return_inverse=True)
-            self.t = (np.arange(len(uniq), dtype=np.int64)[ix]
+            self.t = (np.arange(len(uniq), dtype=np.int32)[ix]
                       .reshape(t_nodes.shape))
             doflocs = np.hstack((
                 p[:, uniq],
@@ -582,6 +584,18 @@ class Mesh:
                 logger.warning("Transforming over 1000 elements "
                                "to C_CONTIGUOUS.")
             self.t = np.ascontiguousarray(self.t)
+
+        # normalize data types
+        # if self._boundaries is not None:
+        #     self._boundaries = {
+        #         k: v.astype(np.int32)
+        #         for k, v in self._boundaries.items()
+        #     }
+        # if self._subdomains is not None:
+        #     self._subdomains = {
+        #         k: v.astype(np.int32)
+        #         for k, v in self._subdomains.items()
+        #     }
 
         # run validation
         if self.validate and logger.getEffectiveLevel() <= logging.DEBUG:
@@ -867,8 +881,8 @@ class Mesh:
                 # fix subdomains for remaining mesh types
                 if m._subdomains is not None and mtmp._subdomains is None:
                     N = int(mtmp.t.shape[1] / m.t.shape[1])
-                    new_t = np.zeros((N, m.t.shape[1]), dtype=np.int64)
-                    new_t[0] = np.arange(m.t.shape[1], dtype=np.int64)
+                    new_t = np.zeros((N, m.t.shape[1]), dtype=np.int32)
+                    new_t[0] = np.arange(m.t.shape[1], dtype=np.int32)
                     for itr in range(N - 1):
                         new_t[itr + 1] = new_t[itr] + m.t.shape[1]
                     mtmp = replace(
@@ -1069,7 +1083,7 @@ class Mesh:
         e_last, ix_last = np.unique(e[::-1], return_index=True)
         ix_last = e.shape[0] - ix_last - 1
 
-        inverse = np.zeros((2, np.max(mapping) + 1), dtype=np.int64)
+        inverse = np.zeros((2, np.max(mapping) + 1), dtype=np.int32)
         inverse[0, e_first] = tix[ix_first]
         inverse[1, e_last] = tix[ix_last]
 
@@ -1089,8 +1103,8 @@ class Mesh:
     def _reix(self, ix: ndarray) -> Tuple[ndarray, ndarray, ndarray]:
         """Connect ``self.p`` based on the indices ``ix``."""
         ixuniq = np.unique(ix)
-        t = np.zeros(np.max(ix) + 1, dtype=np.int64)
-        t[ixuniq] = np.arange(len(ixuniq), dtype=np.int64)
+        t = np.zeros(np.max(ix) + 1, dtype=np.int32)
+        t[ixuniq] = np.arange(len(ixuniq), dtype=np.int32)
         return (
             np.ascontiguousarray(self.p[:, ixuniq]),
             np.ascontiguousarray(t[ix]),
@@ -1147,21 +1161,21 @@ class Mesh:
         new_subdomains = None
         if not skip_subdomains and self.subdomains is not None:
             # map from old to new element index
-            newt = np.zeros(self.t.shape[1], dtype=np.int64) - 1
-            newt[elements] = np.arange(len(elements), dtype=np.int64)
+            newt = np.zeros(self.t.shape[1], dtype=np.int32) - 1
+            newt[elements] = np.arange(len(elements), dtype=np.int32)
             # remove 'elements' from each subdomain and remap
             new_subdomains = {
                 k: newt[np.intersect1d(self.subdomains[k],
-                                       elements).astype(np.int64)]
+                                       elements).astype(np.int32)]
                 for k in self.subdomains
             }
 
         new_boundaries = None
         if not skip_boundaries and self.boundaries is not None:
             # map from old to new facet index
-            newf = np.zeros(self.facets.shape[1], dtype=np.int64) - 1
+            newf = np.zeros(self.facets.shape[1], dtype=np.int32) - 1
             facets = np.unique(self.t2f[:, elements])
-            newf[facets] = np.arange(len(facets), dtype=np.int64)
+            newf[facets] = np.arange(len(facets), dtype=np.int32)
             new_boundaries = {k: newf[self.boundaries[k]]
                               for k in self.boundaries}
             # filter facets not existing in the new mesh, value is -1
@@ -1192,7 +1206,7 @@ class Mesh:
         """
         elements = self.normalize_elements(elements)
         return self.restrict(np.setdiff1d(np.arange(self.t.shape[1],
-                                                    dtype=np.int64),
+                                                    dtype=np.int32),
                                           elements))
 
     def remove_unused_nodes(self):
@@ -1317,7 +1331,7 @@ class Mesh:
 
         """
         if isinstance(elements, bool) and elements:
-            return np.arange(self.nelements, dtype=np.int64)
+            return np.arange(self.nelements, dtype=np.int32)
         if isinstance(elements, int):
             # Make  normalize_elements([1,2,3]) have the same behavior as
             # normalize_elements(np.array([1,2,3]))

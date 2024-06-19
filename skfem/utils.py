@@ -307,9 +307,9 @@ def _init_bc(A: spmatrix,
     if I is None and D is None:
         raise Exception("Either I or D must be given!")
     elif I is None and D is not None:
-        I = np.setdiff1d(np.arange(A.shape[0], dtype=np.int64), D)
+        I = np.setdiff1d(np.arange(A.shape[0], dtype=np.int32), D)
     elif D is None and I is not None:
-        D = np.setdiff1d(np.arange(A.shape[0], dtype=np.int64), I)
+        D = np.setdiff1d(np.arange(A.shape[0], dtype=np.int32), I)
     else:
         raise Exception("Give only I or only D!")
 
@@ -377,7 +377,7 @@ def enforce(A: spmatrix,
     start = Aout.indptr[D]
     stop = Aout.indptr[D + 1]
     count = stop - start
-    idx = np.ones(count.sum(), dtype=np.int64)
+    idx = np.ones(count.sum(), dtype=np.int32)
     idx[np.cumsum(count)[:-1]] -= count[:-1]
     idx = np.repeat(start, count) + np.cumsum(idx) - 1
     Aout.data[idx] = 0.
@@ -624,11 +624,11 @@ def mpc(A: spmatrix,
 
     """
     if M is None:
-        M = np.array([], dtype=np.int64)
+        M = np.array([], dtype=np.int32)
     if S is None:
-        S = np.array([], dtype=np.int64)
+        S = np.array([], dtype=np.int32)
 
-    U = np.setdiff1d(np.arange(A.shape[0], dtype=np.int64),
+    U = np.setdiff1d(np.arange(A.shape[0], dtype=np.int32),
                      np.concatenate((M, S)))
 
     if T is None:
@@ -705,9 +705,9 @@ def rcm(A: spmatrix,
 def adaptive_theta(est, theta=0.5, max=None):
     """For choosing which elements to refine in an adaptive strategy."""
     if max is None:
-        return np.nonzero(theta * np.max(est) < est)[0]
+        return np.nonzero(theta * np.max(est) < est)[0].astype(np.int32)
     else:
-        return np.nonzero(theta * max < est)[0]
+        return np.nonzero(theta * max < est)[0].astype(np.int32)
 
 
 @deprecated("Basis.project")

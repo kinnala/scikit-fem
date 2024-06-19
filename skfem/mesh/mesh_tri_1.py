@@ -20,7 +20,7 @@ class MeshTri1(MeshSimplex, Mesh2D):
     )
     t: ndarray = field(
         default_factory=lambda: np.array(
-            [[0, 1, 2], [1, 3, 2]], dtype=np.int64
+            [[0, 1, 2], [1, 3, 2]], dtype=np.int32
         ).T
     )
     elem: Type[Element] = ElementTriP1
@@ -76,7 +76,7 @@ class MeshTri1(MeshSimplex, Mesh2D):
                      .copy()
                      .flatten())
 
-        return cls(p, t.astype(np.int64))
+        return cls(p, t.astype(np.int32))
 
     @classmethod
     def init_symmetric(cls: Type) -> Mesh2D:
@@ -100,7 +100,7 @@ class MeshTri1(MeshSimplex, Mesh2D):
         t = np.array([[0, 1, 4],
                       [1, 2, 4],
                       [2, 3, 4],
-                      [0, 3, 4]], dtype=np.int64).T
+                      [0, 3, 4]], dtype=np.int32).T
         return cls(p, t)
 
     @classmethod
@@ -129,7 +129,7 @@ class MeshTri1(MeshSimplex, Mesh2D):
                       [3, 4, 6],
                       [4, 6, 7],
                       [4, 7, 8],
-                      [4, 5, 8]], dtype=np.int64).T
+                      [4, 5, 8]], dtype=np.int32).T
         return cls(p, t)
 
     @classmethod
@@ -156,7 +156,7 @@ class MeshTri1(MeshSimplex, Mesh2D):
                       [0, 6, 3],
                       [0, 7, 4],
                       [0, 4, 5],
-                      [0, 3, 5]], dtype=np.int64).T
+                      [0, 3, 5]], dtype=np.int32).T
         return cls(p, t)
 
     @classmethod
@@ -194,7 +194,7 @@ class MeshTri1(MeshSimplex, Mesh2D):
         t = np.array([[0, 1, 2],
                       [0, 1, 4],
                       [0, 2, 3],
-                      [0, 3, 4]], dtype=np.int64).T
+                      [0, 3, 4]], dtype=np.int32).T
         m = cls(p, t)
         for _ in range(nrefs):
             m = m.refined()
@@ -228,8 +228,8 @@ class MeshTri1(MeshSimplex, Mesh2D):
 
         if self._boundaries is not None:
             # mapping of indices between old and new facets
-            new_facets = np.zeros((2, self.facets.shape[1]), dtype=np.int64)
-            ix0 = np.arange(t.shape[1], dtype=np.int64)
+            new_facets = np.zeros((2, self.facets.shape[1]), dtype=np.int32)
+            ix0 = np.arange(t.shape[1], dtype=np.int32)
             ix1 = ix0 + t.shape[1]
             ix2 = ix0 + 2 * t.shape[1]
 
@@ -277,7 +277,7 @@ class MeshTri1(MeshSimplex, Mesh2D):
     @staticmethod
     def _adaptive_find_facets(m, marked_elems):
         """Find the facets to split."""
-        facets = np.zeros(m.facets.shape[1], dtype=np.int64)
+        facets = np.zeros(m.facets.shape[1], dtype=np.int32)
         facets[m.t2f[:, marked_elems].flatten('F')] = 1
         prev_nnz = -1e10
 
@@ -292,7 +292,7 @@ class MeshTri1(MeshSimplex, Mesh2D):
     @staticmethod
     def _adaptive_split_elements(m, facets, subdomains):
         """Define new elements."""
-        ix = (-1) * np.ones(m.facets.shape[1], dtype=np.int64)
+        ix = (-1) * np.ones(m.facets.shape[1], dtype=np.int32)
         ix[facets == 1] = (np.arange(np.count_nonzero(facets))
                            + m.p.shape[1])
         ix = ix[m.t2f]
@@ -335,28 +335,28 @@ class MeshTri1(MeshSimplex, Mesh2D):
                   m.p[:, m.facets[1, facets == 1]])
 
         if subdomains is not None:
-            new_t = np.zeros((4, m.t.shape[1]), dtype=np.int64) - 1
+            new_t = np.zeros((4, m.t.shape[1]), dtype=np.int32) - 1
             nred = np.sum(red)
             nblue1 = np.sum(blue1)
             nblue2 = np.sum(blue2)
             ngreen = np.sum(green)
             offset = np.sum(rest)
-            new_t[0, rest] = np.arange(offset, dtype=np.int64)
+            new_t[0, rest] = np.arange(offset, dtype=np.int32)
             new_t[:, red] = np.arange(offset,
                                       offset + 4 * nred,
-                                      dtype=np.int64).reshape(4, -1)
+                                      dtype=np.int32).reshape(4, -1)
             offset += 4 * nred
             new_t[:3, blue1] = np.arange(offset,
                                          offset + 3 * nblue1,
-                                         dtype=np.int64).reshape(3, -1)
+                                         dtype=np.int32).reshape(3, -1)
             offset += 3 * nblue1
             new_t[:3, blue2] = np.arange(offset,
                                          offset + 3 * nblue2,
-                                         dtype=np.int64).reshape(3, -1)
+                                         dtype=np.int32).reshape(3, -1)
             offset += 3 * nblue2
             new_t[:2, green] = np.arange(offset,
                                          offset + 2 * ngreen,
-                                         dtype=np.int64).reshape(2, -1)
+                                         dtype=np.int32).reshape(2, -1)
             subdomains = {
                 name: np.setdiff1d(np.unique(new_t[:, ixs]), [-1])
                 for name, ixs in subdomains.items()
@@ -397,7 +397,7 @@ class MeshTri1(MeshSimplex, Mesh2D):
 
         if isinstance(other, MeshLine1):
             points = np.zeros((3, 0), dtype=np.float64)
-            wedges = np.zeros((6, 0), dtype=np.int64)
+            wedges = np.zeros((6, 0), dtype=np.int32)
             diff = 0
             for i, p in enumerate(np.sort(other.p[0])):
                 points = np.hstack((
@@ -438,7 +438,7 @@ class MeshTri1(MeshSimplex, Mesh2D):
                 _, ix_ind = np.unique(ix, return_index=True)
                 ix = ix[np.sort(ix_ind)]
             else:
-                ix = np.arange(nelems, dtype=np.int64)
+                ix = np.arange(nelems, dtype=np.int32)
 
             X = mapping.invF(np.array([x, y])[:, None], ix)
             eps = np.finfo(X.dtype).eps

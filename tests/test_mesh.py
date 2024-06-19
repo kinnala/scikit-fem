@@ -242,7 +242,7 @@ def test_adaptive_splitting_3d_1():
 def test_adaptive_splitting_3d_2():
     m = MeshTet()
     for itr in range(5):
-        m = m.refined(np.arange(m.nelements, dtype=np.int64))
+        m = m.refined(np.arange(m.nelements, dtype=np.int32))
         assert m.is_valid()
 
 def test_adaptive_splitting_3d_3():

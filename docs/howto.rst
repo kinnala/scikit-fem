@@ -37,9 +37,9 @@ DOFs on the matching facets:
 
    >>> dofs = basis.get_dofs(lambda x: x[0] == 0.)
    >>> dofs.nodal
-   {'u': array([ 0,  2,  5, 10, 14])}
+   {'u': array([ 0,  2,  5, 10, 14], dtype=int32)}
    >>> dofs.facet
-   {'u': array([26, 30, 39, 40])}
+   {'u': array([26, 30, 39, 40], dtype=int32)}
 
 This element has one DOF per node and one DOF per facet.  The facets have their
 own numbering scheme starting from zero, however, the corresponding DOFs are
@@ -48,7 +48,7 @@ offset by the total number of nodal DOFs:
 .. doctest::
 
    >>> dofs.facet['u']
-   array([26, 30, 39, 40])
+   array([26, 30, 39, 40], dtype=int32)
 
 .. plot::
 
@@ -92,9 +92,9 @@ An array of all DOFs with the key ``u`` can be obtained as follows:
 .. doctest::
 
    >>> dofs.all(['u'])
-   array([ 0,  2,  5, 10, 14, 26, 30, 39, 40])
+   array([ 0,  2,  5, 10, 14, 26, 30, 39, 40], dtype=int32)
    >>> dofs.flatten()  # all DOFs, no matter which key
-   array([ 0,  2,  5, 10, 14, 26, 30, 39, 40])
+   array([ 0,  2,  5, 10, 14, 26, 30, 39, 40], dtype=int32)
 
 If a set of facets is tagged, the name of the tag can be passed
 to :meth:`~skfem.assembly.basis.AbstractBasis.get_dofs`:
@@ -103,7 +103,7 @@ to :meth:`~skfem.assembly.basis.AbstractBasis.get_dofs`:
 
    >>> dofs = basis.get_dofs('left')
    >>> dofs.flatten()
-   array([ 0,  2,  5, 10, 14, 26, 30, 39, 40])
+   array([ 0,  2,  5, 10, 14, 26, 30, 39, 40], dtype=int32)
    
 Many DOF types have a well-defined location.  These DOF locations can be found
 as follows:

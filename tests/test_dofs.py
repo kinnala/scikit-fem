@@ -28,7 +28,7 @@ class TestDofsKeepSkipOperations(TestCase):
         assert_allclose(all_dofs,
                         all_dofs.drop('does_not_exist'))
 
-        assert_allclose(np.empty((0,), dtype=np.int64),
+        assert_allclose(np.empty((0,), dtype=np.int32),
                         all_dofs.keep('does_not_exist'))
 
 
