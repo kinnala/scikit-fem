@@ -408,3 +408,11 @@ class TestEx49(TestCase):
     def runTest(self):
         import docs.examples.ex49 as ex49
         self.assertLess(np.abs(ex49.l2), 0.0012)
+
+
+class TestEx50(TestCase):
+
+    def runTest(self):
+        import docs.examples.ex50 as ex50
+        self.assertAlmostEqual(ex50.u.max(),
+                               1.0026836382652844)
