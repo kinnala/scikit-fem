@@ -454,6 +454,24 @@ This example solves the advection equation on a periodic square mesh.
 See the source code of :exlink:`42`
 for more information.
 
+Example 50: Advection-diffusion in non-uniform flow
+---------------------------------------------------
+
+This example solves the advection-diffusion problem
+for the temperature distribution around a cold sphere
+in a warm liquid. The liquid flow is modeled using
+the Stokes flow field. The thermal diffusivity to
+advection ratio is controlled by the Peclet number.
+The problem is solved in a cylindrical coordinate
+system (hence a different definition of the Laplacian).
+
+.. figure:: https://github.com/turczyneq/fem_advection_diffusion/assets/51670923/271b5b86-71f1-49fb-b32e-3c9d012a29ee
+
+   Temperature distribution of Example 50. Liquid behind the sphere is colder than the incoming one.
+
+See the source code of :exlink:`50` for more information.
+
+
 Heat transfer
 =============
 
