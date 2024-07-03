@@ -8,8 +8,8 @@
 # Peclet number.
 
 import numpy as np
-import matplotlib.pyplot as plt
 
+from pathlib import Path
 from skfem import MeshTri, Basis, ElementTriP1, BilinearForm
 from skfem import asm, solve, condense
 from skfem.helpers import grad, dot
@@ -61,19 +61,10 @@ peclet = 30
 #     }
 # )
 
-mesh = MeshTri.load("./meshes/cylinder_stokes.msh")
+mesh = MeshTri.load(Path(__file__).parent / 'meshes' / 'cylinder_stokes.msh')
 
 # Define the basis for the finite element method
 basis = Basis(mesh, ElementTriP1())
-
-bottom_nodes = mesh.p[:, basis.get_dofs("bottom").flatten()]
-ball_nodes = mesh.p[:, basis.get_dofs("ball").flatten()]
-
-# Draw the mesh
-mesh.draw()
-plt.plot(bottom_nodes[0], bottom_nodes[1], "x")
-plt.plot(ball_nodes[0], ball_nodes[1], "o")
-plt.show()
 
 
 @BilinearForm
@@ -87,7 +78,7 @@ def advection(k, l, m):
     a = 1  # ball size
 
     # Stokes flow around a sphere of size `a`
-    w = r**2 + z**2
+    w = r ** 2 + z ** 2
     v_r = ((3 * a * r * z * u) / (4 * w**0.5)) * ((a / w) ** 2 - (1 / w))
     v_z = u + ((3 * a * u) / (4 * w**0.5)) * (
         (2 * a**2 + 3 * r**2) / (3 * w) - ((a * r) / w) ** 2 - 2
@@ -117,19 +108,6 @@ u[basis.get_dofs("ball")] = 0.0
 u = solve(*condense(A, x=u, I=interior))
 
 if __name__ == "__main__":
-    # mesh.draw()
 
-    plt.tripcolor(
-        mesh.p[0],
-        mesh.p[1],
-        mesh.t.T,
-        u,
-        shading="gouraud",
-        cmap="viridis",
-    )
-    plt.colorbar()
-    plt.clim(vmin=0, vmax=1)
-    plt.gca().set_aspect("equal", "box")
-    plt.tight_layout()
-
-    plt.show()
+    mesh.draw(boundaries=True).show()
+    basis.plot(u, shading='gouraud', cmap='viridis').show()
