@@ -26,35 +26,44 @@ class CompositeBasis(AbstractBasis):
         self.dx = bases[0].dx
         self.default_parameters = bases[0].default_parameters
 
+        # for caching
+        self._element_dofs = None
+        self._basis = None
+
     @property
     def element_dofs(self):
 
-        dofs = []
-        offset = 0
-        for basis in self.bases:
-            dofs.append(basis.element_dofs + offset)
-            if not self.equal_dofnum:
-                offset += basis.N
+        if self._element_dofs is None:
+            dofs = []
+            offset = 0
+            for basis in self.bases:
+                dofs.append(basis.element_dofs + offset)
+                if not self.equal_dofnum:
+                    offset += basis.N
+            self._element_dofs = np.vstack(dofs)
 
-        return np.vstack(dofs)
+        return self._element_dofs
 
     @property
     def basis(self):
 
-        bases = []
-        M = len(self.bases)
+        if self._basis is None:
+            bases = []
+            M = len(self.bases)
 
-        for i in range(M):
-            for j in range(len(self.bases[i].basis)):
-                tmp = []
-                for k in range(M):
-                    if k == i:
-                        tmp.append(self.bases[i].basis[j][0])
-                    else:
-                        tmp.append(self.bases[i].basis[j][0].zeros())
-                bases.append(tuple(tmp))
+            for i in range(M):
+                for j in range(len(self.bases[i].basis)):
+                    tmp = []
+                    for k in range(M):
+                        if k == i:
+                            tmp.append(self.bases[i].basis[j][0])
+                        else:
+                            tmp.append(self.bases[i].basis[j][0].zeros())
+                    bases.append(tuple(tmp))
 
-        return bases
+            self._basis = bases
+
+        return self._basis
 
     @property
     def N(self):
