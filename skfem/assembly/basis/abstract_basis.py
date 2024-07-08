@@ -451,3 +451,11 @@ class AbstractBasis:
             logger.warning("First argument, 'visuals', must be a string.")
         mod = importlib.import_module('skfem.visuals.{}'.format(visuals))
         return mod.draw(self, **kwargs)
+
+    def __matmul__(self, other):
+        from .composite_basis import CompositeBasis
+        return CompositeBasis(self, other, equal_dofnum=True)
+
+    def __mul__(self, other):
+        from .composite_basis import CompositeBasis
+        return CompositeBasis(self, other)
