@@ -3,9 +3,9 @@ import numpy as np
 from .abstract_basis import AbstractBasis
 from skfem.element import ElementComposite
 
-# TODO caching?
 
 class CompositeBasis(AbstractBasis):
+    """A combination of two or more Basis objects."""
 
     def __init__(self, *bases, equal_dofnum=False):
 
@@ -18,6 +18,8 @@ class CompositeBasis(AbstractBasis):
                 raise NotImplementedError("ElementComposite not "
                                           "supported.")
 
+        self.X = bases[0].X
+        self.W = bases[0].W
         self.bases = bases
         self.equal_dofnum = equal_dofnum
         self.nelems = bases[0].nelems
@@ -73,5 +75,9 @@ class CompositeBasis(AbstractBasis):
         return Nbfun
 
     def split(self, x):
-        pass
+        return list(zip(
+            np.split(x, np.cumsum([basis.N
+                                   for basis in self.bases])[:-1]),
+            self.bases,
+        ))
         

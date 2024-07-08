@@ -38,19 +38,16 @@ m2t, orig2 = m2.trace('contact', mtype=MeshLine, project=lambda p: p[1:])
 # create a supermesh for integration
 m12, t1, t2 = intersect(m1t, m2t)
 
-bases = [
-    Basis(m1, e1),
-    Basis(m2, e2),
-]
+basis1 = Basis(m1, e1)
+basis2 = Basis(m2, e2)
 
-fbases = [
-    FacetBasis(m1, e1,
-               quadrature=elementwise_quadrature(m1t, m12, t1),
-               facets=orig1[t1]),
-    FacetBasis(m2, e2,
-               quadrature=elementwise_quadrature(m2t, m12, t2),
-               facets=orig2[t2]),
-]
+fbasis1 = FacetBasis(m1, e1,
+                     quadrature=elementwise_quadrature(m1t, m12, t1),
+                     facets=orig1[t1])
+fbasis2 = FacetBasis(m2, e2,
+                     quadrature=elementwise_quadrature(m2t, m12, t2),
+                     facets=orig2[t2])
+fbasis = fbasis1 * fbasis2
 
 # problem definition
 youngs_modulus = 1000.0
@@ -64,10 +61,13 @@ limit = 0.3
 
 # mortar forms
 @BilinearForm
-def bilin_mortar(u, v, w):
-    ju, jv = jump(w, dot(u, w.n), dot(v, w.n))
-    mu = .5 * dot(w.n, mul(C(sym_grad(u)), w.n))
-    mv = .5 * dot(w.n, mul(C(sym_grad(v)), w.n))
+def bilin_mortar(u1, u2, v1, v2, w):
+    ju = dot(u1 - u2, w.n)
+    jv = dot(v1 - v2, w.n)
+    mu = .5 * (dot(w.n, mul(C(sym_grad(u1)), w.n))
+               + dot(w.n, mul(C(sym_grad(u2)), w.n)))
+    mv = .5 * (dot(w.n, mul(C(sym_grad(v1)), w.n))
+               + dot(w.n, mul(C(sym_grad(v2)), w.n)))
     return ((1. / (alpha * w.h) * ju * jv - mu * jv - mv * ju)
             * (np.abs(w.x[1]) <= limit))
 
@@ -75,34 +75,35 @@ def gap(x):
     return (1. - np.sqrt(1. - x[1] ** 2))
 
 @LinearForm
-def lin_mortar(v, w):
-    jv = jump(w, dot(v, w.n))
-    mv = .5 * dot(w.n, mul(C(sym_grad(v)), w.n))
+def lin_mortar(v1, v2, w):
+    jv = dot(v1 - v2, w.n)
+    mv = .5 * (dot(w.n, mul(C(sym_grad(v1)), w.n))
+               + dot(w.n, mul(C(sym_grad(v2)), w.n)))
     return ((1. / (alpha * w.h) * gap(w.x) * jv - gap(w.x) * mv)
             * (np.abs(w.x[1]) <= limit))
 
 # fix mesh parameter and normals from m2
 params = {
-    'h': fbases[1].mesh_parameters(),
-    'n': -fbases[1].normals,
+    'h': fbasis2.mesh_parameters(),
+    'n': -fbasis2.normals,
 }
 
 # assemble the block system
-A = asm(weakform, bases, to=list)
-B = asm(bilin_mortar, fbases, fbases, **params, to=list)
-b = asm(lin_mortar, fbases, **params, to=list)
+A1 = asm(weakform, basis1)
+A2 = asm(weakform, basis2)
+B = asm(bilin_mortar, fbasis, **params)
+f = asm(lin_mortar, fbasis, **params)
 
-K = bmat([[A[0] + B[0], B[2]],
-          [B[1], A[1] + B[3]]], 'csr')
-f = np.concatenate(b)
+K = bmat([[A1, None],
+          [None, A2]], 'csr') + B
 
-D1 = bases[0].get_dofs('dirichlet').all()
-D2 = bases[1].get_dofs('dirichlet').all() + K.blocks[0]
+D1 = basis1.get_dofs('dirichlet').all()
+D2 = basis2.get_dofs('dirichlet').all() + basis1.N
 
 # initialize boundary conditions
-y1 = bases[0].zeros()
-y2 = bases[1].zeros()
-y1[bases[0].get_dofs('dirichlet').all('u^1')] = .1
+y1 = basis1.zeros()
+y2 = basis2.zeros()
+y1[basis1.get_dofs('dirichlet').all('u^1')] = .1
 y = np.concatenate((y1, y2))
 
 # linear solve
@@ -110,16 +111,16 @@ y = solve(*condense(K, f, D=np.concatenate((D1, D2)), x=y))
 
 # create a displaced mesh for visualization
 sf = 1
-y1, y2 = np.split(y, K.blocks)
-mdefo1 = m1.translated(sf * y1[bases[0].nodal_dofs])
-mdefo2 = m2.translated(sf * y2[bases[1].nodal_dofs])
+(y1, _), (y2, _) = fbasis.split(y)
+mdefo1 = m1.translated(sf * y1[basis1.nodal_dofs])
+mdefo2 = m2.translated(sf * y2[basis2.nodal_dofs])
 
 # calculate von Mises stress
 s1, s2 = {}, {}
-dg1 = bases[0].with_element(ElementTriDG(ElementTriP1()))
-dg2 = bases[1].with_element(ElementQuadDG(ElementQuad1()))
-u1 = bases[0].interpolate(y1)
-u2 = bases[1].interpolate(y2)
+dg1 = basis1.with_element(ElementTriDG(ElementTriP1()))
+dg2 = basis2.with_element(ElementQuadDG(ElementQuad1()))
+u1 = basis1.interpolate(y1)
+u2 = basis2.interpolate(y2)
 
 for i in [0, 1]:
     for j in [0, 1]:
