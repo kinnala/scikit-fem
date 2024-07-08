@@ -80,4 +80,3 @@ class CompositeBasis(AbstractBasis):
                                    for basis in self.bases])[:-1]),
             self.bases,
         ))
-        
