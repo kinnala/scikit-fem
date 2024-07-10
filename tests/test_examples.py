@@ -332,9 +332,9 @@ class TestEx40(TestCase):
         import docs.examples.ex40 as ex
 
         self.assertAlmostEqual(ex.u1.max(), 0.0748, delta=1e-3)
-        self.assertAlmostEqual(ex.u2.max(), 0.0748, delta=1e-3)
+        self.assertAlmostEqual(ex.ut.max(), 0.0748, delta=1e-3)
         self.assertAlmostEqual(ex.u1.min(), 0.0, delta=3e-3)
-        self.assertAlmostEqual(ex.u2.min(), 0.0, delta=3e-3)
+        self.assertAlmostEqual(ex.ut.min(), 0.0, delta=3e-3)
 
 
 class TestEx41(TestCase):
