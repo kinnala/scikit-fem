@@ -89,3 +89,9 @@ class CompositeBasis(AbstractBasis):
                                    for basis in self.bases])[:-1]),
             self.bases,
         ))
+
+    def __repr__(self):
+        rep = ""
+        rep += "<skfem CompositeBasis object>\n"
+        rep += "  {}\n".format(repr(self.bases))
+        return rep
