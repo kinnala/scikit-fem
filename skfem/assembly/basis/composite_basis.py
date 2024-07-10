@@ -95,3 +95,13 @@ class CompositeBasis(AbstractBasis):
         rep += "<skfem CompositeBasis object>\n"
         rep += "  {}\n".format(repr(self.bases))
         return rep
+
+    def interpolate(self, x):
+
+        # find slice indices
+        ixs = [0]
+        for basis in self.bases:
+            ixs.append(basis.N + ixs[-1])
+
+        return tuple(basis.interpolate(x[ixs[itr]:ixs[itr + 1]])
+                     for itr, basis in enumerate(self.bases))
