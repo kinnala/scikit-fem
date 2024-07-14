@@ -9,11 +9,15 @@ class CompositeBasis(AbstractBasis):
 
     def __init__(self, *bases, equal_dofnum=False):
 
+        nelem = bases[0].element_dofs.shape[1]
         nqp = len(bases[0].W)
         for basis in bases:
             if len(basis.W) != nqp:
                 raise ValueError("Each Basis must have the same "
                                  "number of quadrature points.")
+            if bases[0].element_dofs.shape[1] != nelem:
+                raise ValueError("Each Basis must have the same "
+                                 "number of elements.")
             if isinstance(basis.elem, ElementComposite):
                 raise NotImplementedError("ElementComposite not "
                                           "supported.")
