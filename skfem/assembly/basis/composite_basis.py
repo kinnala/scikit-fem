@@ -97,7 +97,8 @@ class CompositeBasis(AbstractBasis):
     def __repr__(self):
         rep = ""
         rep += "<skfem CompositeBasis object>\n"
-        rep += "  {}\n".format(repr(self.bases))
+        rep += "  Number of DOFs: {}\n".format(self.N)
+        rep += "  Consist of: {}\n".format(repr(self.bases))
         return rep
 
     def interpolate(self, x):
