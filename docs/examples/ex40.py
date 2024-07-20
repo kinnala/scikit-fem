@@ -14,24 +14,23 @@ finite elements defined on the mesh skeleton.
 """
 
 from skfem import *
+from skfem.helpers import grad, dot, jump
 import numpy as np
 
 m = MeshTri().refined(3)
 e = ElementTriP1DG() * ElementTriSkeletonP1()
 ibasis = Basis(m, e)
-tbasis = [
-    *[InteriorFacetBasis(m, e, side=i) for i in [0, 1]],
-    FacetBasis(m, e)
-]
+tbasis1 = InteriorFacetBasis(m, e, side=0)
+tbasis2 = InteriorFacetBasis(m, e, side=1)
+fbasis = FacetBasis(m, e)
+
 
 @BilinearForm
 def laplace(u, ut, v, vt, w):
-    from skfem.helpers import grad, dot
     return dot(grad(u), grad(v))
 
 @BilinearForm
 def hdg(u, ut, v, vt, w):
-    from skfem.helpers import grad, dot, jump
     # outwards normal
     n = jump(w, w.n)
     return dot(n, grad(u)) * (vt - v) + dot(n, grad(v)) * (ut - u)\
@@ -41,17 +40,19 @@ def hdg(u, ut, v, vt, w):
 def load(v, vt, w):
     return 1. * v
 
-A = asm(laplace, ibasis) + asm(hdg, tbasis)
+
+A = asm(laplace, ibasis)
+B = asm(hdg, [tbasis1, tbasis2, fbasis])
 f = asm(load, ibasis)
 
-y = solve(*condense(A, f, D=ibasis.get_dofs()))
+y = solve(*condense(A + B, f, D=ibasis.get_dofs()))
 
-(u1, ibasis1), (u2, ibasis2) = ibasis.split(y)
+(u1, _), (ut, skelebasis) = ibasis.split(y)
 
 def visualize():
     from skfem.visuals.matplotlib import plot
-    return plot(ibasis2,
-                u2,
+    return plot(skelebasis,
+                ut,
                 Nrefs=4,
                 colorbar=True,
                 shading='gouraud')

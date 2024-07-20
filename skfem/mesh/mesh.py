@@ -845,6 +845,9 @@ class Mesh:
         """Initialize a mesh corresponding to the reference domain."""
         return cls(cls.elem.refdom.p, cls.elem.refdom.t, validate=False)
 
+    def copy(self):
+        return replace(self)
+
     def morphed(self, *args):
         """Morph the mesh using functions.
 

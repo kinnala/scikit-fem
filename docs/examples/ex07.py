@@ -10,25 +10,32 @@ alpha = 1e-3
 
 ib = Basis(m, e)
 bb = FacetBasis(m, e)
-fb = [InteriorFacetBasis(m, e, side=i) for i in [0, 1]]
+fb = InteriorFacetBasis(m, e, side=0) @ InteriorFacetBasis(m, e, side=1)
 
 
 @BilinearForm
-def dgform(u, v, w):
-    ju, jv = jump(w, u, v)
+def dgform(u1, u2, v1, v2, w):
+    ju, jv = u1 - u2, v1 - v2
     h = w.h
     n = w.n
-    return ju * jv / (alpha * h) - dot(grad(u), n) * jv - dot(grad(v), n) * ju
+    mu, mv = (
+        0.5 * (dot(grad(u1), n) + dot(grad(u2), n)),
+        0.5 * (dot(grad(v1), n) + dot(grad(v2), n)),
+    )
+    return ju * jv / (alpha * h) - mu * jv - mv * ju
+
+
+@BilinearForm
+def nitscheform(u, v, w):
+    h = w.h
+    n = w.n
+    return u * v / (alpha * h) - dot(grad(u), n) * v - dot(grad(v), n) * u
 
 
 A = laplace.assemble(ib)
-C = dgform.assemble(bb)
 b = unit_load.assemble(ib)
-
-# calling asm(form, [...], [...]) will automatically
-# assemble all combinations from the lists and sum
-# the result
-B = asm(dgform, fb, fb)
+C = nitscheform.assemble(bb)
+B = dgform.assemble(fb)
 
 x = solve(A + B + C, b)
 

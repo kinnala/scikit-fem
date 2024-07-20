@@ -31,8 +31,8 @@ class TestEx04(TestCase):
 
     def runTest(self):
         import docs.examples.ex04 as ex04
-        self.assertAlmostEqual(np.max(ex04.vonmises1), 61.42437154384301)
-        self.assertAlmostEqual(np.max(ex04.vonmises2), 64.5756996946833)
+        self.assertAlmostEqual(np.max(ex04.vonmises1), 62.142012862607004)
+        self.assertAlmostEqual(np.max(ex04.vonmises2), 65.29106691804004)
 
 
 class TestEx05(TestCase):
@@ -53,7 +53,7 @@ class TestEx07(TestCase):
 
     def runTest(self):
         import docs.examples.ex07 as ex07
-        self.assertAlmostEqual(np.max(ex07.x), 0.0737144219329924)
+        self.assertAlmostEqual(np.max(ex07.x), 0.07367139175949584)
 
 
 class TestEx08(TestCase):
@@ -332,9 +332,9 @@ class TestEx40(TestCase):
         import docs.examples.ex40 as ex
 
         self.assertAlmostEqual(ex.u1.max(), 0.0748, delta=1e-3)
-        self.assertAlmostEqual(ex.u2.max(), 0.0748, delta=1e-3)
+        self.assertAlmostEqual(ex.ut.max(), 0.0748, delta=1e-3)
         self.assertAlmostEqual(ex.u1.min(), 0.0, delta=3e-3)
-        self.assertAlmostEqual(ex.u2.min(), 0.0, delta=3e-3)
+        self.assertAlmostEqual(ex.ut.min(), 0.0, delta=3e-3)
 
 
 class TestEx41(TestCase):
@@ -416,3 +416,13 @@ class TestEx50(TestCase):
         import docs.examples.ex50 as ex50
         self.assertAlmostEqual(ex50.u.max(),
                                1.0026836382652844)
+
+
+class TestEx51(TestCase):
+
+    def runTest(self):
+        import docs.examples.ex51 as ex51
+        self.assertAlmostEqual(ex51.x1.max(),
+                               0.15983570088457588)
+        self.assertAlmostEqual(ex51.x2.max(),
+                               0.4062806125571157)

@@ -341,6 +341,19 @@ of a hyperelastic Neo-Hookean solid.
 
 See the source code of :exlink:`43` for more information.
 
+Example 51: Contact problem
+---------------------------
+
+This example solves the so-called large deformation
+contact problem between
+two nonlinear elastic solids.
+
+.. figure:: https://private-user-images.githubusercontent.com/973268/349649283-7527098e-b511-4f41-a359-d590a4479039.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MjEyNDUyNDUsIm5iZiI6MTcyMTI0NDk0NSwicGF0aCI6Ii85NzMyNjgvMzQ5NjQ5MjgzLTc1MjcwOThlLWI1MTEtNGY0MS1hMzU5LWQ1OTBhNDQ3OTAzOS5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjQwNzE3JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI0MDcxN1QxOTM1NDVaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0yZDhlZGI5NmMzOGI1MTZhMDQ1OTUyZWUxNDg5N2MyYTUzMDAzNmU3Y2FkZWQ0ZWQ1NTM0NzkxYWMzOTEzZTg1JlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCZhY3Rvcl9pZD0wJmtleV9pZD0wJnJlcG9faWQ9MCJ9.GVSzG1xLmxGgi9GxoE1IwGKAhuMEdcFo17WB7zpMZ1w
+
+   The deformed mesh and stress of Example 51.
+
+See the source code of :exlink:`51` for more information.
+
 Fluid mechanics
 ===============
 
