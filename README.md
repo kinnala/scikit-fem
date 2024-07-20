@@ -219,14 +219,14 @@ with respect to documented and/or tested features.
 - Changed: Initializing `Basis` for `ElementTetP0` without specifying
   `intorder` or `quadrature` will now automatically fall back to a one
   point integration rule
-- Changed: Default tags ('left', 'right', 'top', ...) are no more
+- Changed: Default tags (left, right, top, ...) are no more
   added automatically during mesh initialization, as a workaround you
   can add them explicitly by calling `mesh = mesh.with_defaults()`
 - Changed: All indices within the library are now using `np.int32` for
   around 10% boost in performance and the corresponding reduction in
   memory usage for larger meshes - theoretically, the largest possible
-  tetrahedral tensor product mesh is roughly 550 ** 3 = 166 M vertices
-  and 993 M elements, without the facet indexing wrapping over INT_MAX
+  tetrahedral tensor product mesh is now roughly 550 ** 3 = 166 M vertices
+  and 993 M elements, without the facet indexing wrapping over 2 ** 32
 
 ### [9.1.1] - 2024-04-23
 
@@ -242,7 +242,7 @@ with respect to documented and/or tested features.
 
 ### [9.0.1] - 2024-01-12
 
-- Fixed: `ElementVector` works also for split_bases/split_indices in case `mesh.dim() != elem.dim`
+- Fixed: `ElementVector` now works also for split_bases/split_indices in case `mesh.dim() != elem.dim`
 
 ### [9.0.0] - 2023-12-24
 

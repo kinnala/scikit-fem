@@ -22,17 +22,31 @@ class CompositeBasis(AbstractBasis):
                 raise NotImplementedError("ElementComposite not "
                                           "supported.")
 
-        self.X = bases[0].X
-        self.W = bases[0].W
         self.bases = bases
         self.equal_dofnum = equal_dofnum
-        self.nelems = bases[0].nelems
-        self.dx = bases[0].dx
-        self.default_parameters = bases[0].default_parameters
 
         # for caching
         self._element_dofs = None
         self._basis = None
+
+    def default_parameters(self):
+        return self.bases[0].default_parameters()
+
+    @property
+    def dx(self):
+        return self.bases[0].dx
+
+    @property
+    def nelems(self):
+        return self.bases[0].nelems
+
+    @property
+    def X(self):
+        return self.bases[0].X
+
+    @property
+    def W(self):
+        return self.bases[0].W
 
     @property
     def element_dofs(self):
@@ -110,3 +124,6 @@ class CompositeBasis(AbstractBasis):
 
         return tuple(basis.interpolate(x[ixs[itr]:ixs[itr + 1]])
                      for itr, basis in enumerate(self.bases))
+
+    def get_dofs(self, *args, **kwargs):
+        raise NotImplementedError
