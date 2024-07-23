@@ -3,7 +3,7 @@
 =============================
 
 `scikit-fem <https://github.com/kinnala/scikit-fem>`_ is a pure
-Python 3.7+ library for performing `finite element assembly
+Python 3.8+ library for performing `finite element assembly
 <https://en.wikipedia.org/wiki/Finite_element_method>`_. Its main purpose is
 the transformation of bilinear forms into sparse matrices and linear forms into
 vectors.  The library supports triangular, quadrilateral, tetrahedral and

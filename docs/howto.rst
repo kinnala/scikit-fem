@@ -10,14 +10,41 @@ Finding degrees-of-freedom
 ==========================
 
 Often the goal is to constrain DOFs on a specific part of
-the boundary.  Currently the main tool for finding DOFs is
+the boundary.  The DOF numbers have one-to-one correspondence with
+the rows and the columns of the finite element system matrix,
+and the DOFs are typically passed to functions
+such as :func:`~skfem.utils.condense` or :func:`~skfem.utils.enforce`
+that modify the linear system to implement the boundary conditions.
+
+Currently the main tool for finding DOFs is
 :meth:`~skfem.assembly.basis.AbstractBasis.get_dofs`.
+Let us look at the use of this method through an example
+with a triangular mesh
+and the quadratic Lagrange element:
 
 .. doctest::
 
    >>> from skfem import MeshTri, Basis, ElementTriP2
    >>> m = MeshTri().refined(2).with_defaults()
    >>> basis = Basis(m, ElementTriP2())
+
+Normally, a list of facet indices is provided
+for :meth:`~skfem.assembly.basis.AbstractBasis.get_dofs`
+and it will find the matching DOF indices.
+However, for convenience,
+we can provide an indicator function to
+:meth:`~skfem.assembly.basis.AbstractBasis.get_dofs` and it will find the
+DOFs on the matching facets (via their midpoints):
+
+.. doctest::
+
+   >>> dofs = basis.get_dofs(lambda x: x[0] == 0.)
+   >>> dofs.nodal
+   {'u': array([ 0,  2,  5, 10, 14], dtype=int32)}
+   >>> dofs.facet
+   {'u': array([26, 30, 39, 40], dtype=int32)}
+
+Here is a visualization of the nodal DOFs:
 
 .. plot::
 
@@ -29,26 +56,17 @@ the boundary.  Currently the main tool for finding DOFs is
    for dof in basis.nodal_dofs.flatten():
        ax.text(*basis.doflocs[:, dof], str(dof))
 
-We can provide an indicator function to
-:meth:`~skfem.assembly.basis.AbstractBasis.get_dofs` and it will find the
-DOFs on the matching facets:
-
-.. doctest::
-
-   >>> dofs = basis.get_dofs(lambda x: x[0] == 0.)
-   >>> dofs.nodal
-   {'u': array([ 0,  2,  5, 10, 14], dtype=int32)}
-   >>> dofs.facet
-   {'u': array([26, 30, 39, 40], dtype=int32)}
-
-This element has one DOF per node and one DOF per facet.  The facets have their
-own numbering scheme starting from zero, however, the corresponding DOFs are
-offset by the total number of nodal DOFs:
+This quadratic Lagrange element has one DOF per node and one DOF per
+facet.  Globally, the facets have their own numbering scheme starting
+from zero, while the corresponding DOFs are offset by the total
+number of nodal DOFs:
 
 .. doctest::
 
    >>> dofs.facet['u']
    array([26, 30, 39, 40], dtype=int32)
+
+Here is a visualization of the facet DOFs:
 
 .. plot::
 
@@ -84,10 +102,11 @@ the following table:
 +-----------+---------------------------------------------------------------+
 | ``u^1^1`` | First component of the first component in a composite field   |
 +-----------+---------------------------------------------------------------+
-| ``NA``    | Description not available (e.g., hierarchical or bubble DOF's)|
+| ``NA``    | Description not available (e.g., hierarchical or bubble DOFs) |
 +-----------+---------------------------------------------------------------+
 
-An array of all DOFs with the key ``u`` can be obtained as follows:
+Most of the time we just want an array of all DOFs with the key ``u``.
+This can be obtained as follows:
 
 .. doctest::
 
@@ -97,7 +116,7 @@ An array of all DOFs with the key ``u`` can be obtained as follows:
    array([ 0,  2,  5, 10, 14, 26, 30, 39, 40], dtype=int32)
 
 If a set of facets is tagged, the name of the tag can be passed
-to :meth:`~skfem.assembly.basis.AbstractBasis.get_dofs`:
+also to :meth:`~skfem.assembly.basis.AbstractBasis.get_dofs`:
 
 .. doctest::
 
@@ -133,19 +152,25 @@ See :ref:`dofindexing` for more details.
 Performing projections
 ======================
 
+A common issue in finite element analysis is that you have either
+an analytical function with a given expression or a finite element
+function defined on one basis, while what you would like to have
+instead is the same function defined on another finite element basis.
+
 We can use :math:`L^2` projection to find discrete counterparts of functions or
-transform from one finite element basis to another.  Suppose we have
+transform from one finite element basis to another.  For example,
+suppose we have
 :math:`u_0(x,y) = x^3 y^3` defined on the boundary of the domain and want to
 find the corresponding discrete function which is extended by zero in the
-interior of the domain.  You could explicitly assemble and solve the linear
+interior of the domain.  Technically, you could explicitly assemble and solve the linear
 system corresponding to: find :math:`\widetilde{u_0} \in V_h` satisfying
 
 .. math::
 
    \int_{\partial \Omega} \widetilde{u_0} v\,\mathrm{d}s = \int_{\partial \Omega} u_0 v\,\mathrm{d}s\quad \forall v \in V_h.
 
-However, this is so common that we have a shortcut
-:meth:`~skfem.assembly.AbstractBasis.project`:
+However, this is so common that we have a shortcut command
+:meth:`~skfem.assembly.basis.AbstractBasis.project`:
 
 .. doctest::
 
@@ -174,7 +199,7 @@ However, this is so common that we have a shortcut
    ax = draw(ibasis)
    plot(ibasis, u0t, nrefs=3, ax=ax, colorbar=True, shading='gouraud')
 
-We can also project over the entire domain:
+As another example, we can also project over the entire domain:
 
 .. doctest::
 
@@ -198,7 +223,8 @@ We can also project over the entire domain:
    ax = draw(basis)
    plot(basis, fh, nrefs=3, ax=ax, colorbar=True, shading='gouraud')
 
-We can project from one finite element basis to another:
+Or alternatively, we can use the same command to
+project from one finite element basis to another:
 
 .. doctest::
 
@@ -222,7 +248,7 @@ We can project from one finite element basis to another:
    ax = draw(basis)
    plot(basis0, fh, nrefs=3, ax=ax, colorbar=True, shading='gouraud')
 
-We can interpolate the gradient at quadrature points and project:
+We can also interpolate the gradient at quadrature points and then project:
 
 .. doctest::
 
@@ -250,11 +276,16 @@ We can interpolate the gradient at quadrature points and project:
 
 .. _predefined:
 
-Discrete functions in forms
-===========================
+Discrete functions in the forms
+===============================
 
-We can use finite element functions inside the form by interpolating them at
-quadrature points.  For example, consider a fixed-point iteration for the
+It is a common pattern to reuse an existing finite element function in the forms.
+Everything within the form is expressed at the quadrature points and
+the finite element functions must be interpolated
+from nodes to the
+quadrature points through :meth:`~skfem.assembly.basis.AbstractBasis.interpolate`.
+
+For example, consider a fixed-point iteration for the
 nonlinear problem
 
 .. math::
@@ -264,14 +295,14 @@ nonlinear problem
       u &= 0 \quad \text{on $\partial \Omega$}.
    \end{aligned}
 
-We repeatedly find :math:`u_{k+1} \in H^1_0(\Omega)` which satisfies
+We can repeatedly find :math:`u_{k+1} \in H^1_0(\Omega)` which satisfies
 
 .. math::
 
-   \int_\Omega (u_{k} + \tfrac{1}{10}) \nabla u_{k+1} \cdot \nabla v \,\mathrm{d}x = \int_\Omega v\,\mathrm{d}x
+   \int_\Omega (u_{k} + \tfrac{1}{10}) \nabla u_{k+1} \cdot \nabla v \,\mathrm{d}x = \int_\Omega v\,\mathrm{d}x \quad \forall v \in H^1_0(\Omega).
 
-for every :math:`v \in H^1_0(\Omega)`.
-The bilinear form depends on the previous solution :math:`u_k`.
+The bilinear form depends on the previous solution :math:`u_k`
+which can be defined as follows:
 
 .. doctest::
 
@@ -341,39 +372,3 @@ The previous solution :math:`u_k` is interpolated at quadrature points using
     arguments and additional default keys.  By default, ``w['x']`` (accessible
     also as ``w.x``) corresponds to the global coordinates and ``w['h']``
     (accessible also as ``w.h``) corresponds to the local mesh parameter.
-
-Assembling jump terms
-=====================
-
-The shorthand :func:`~skfem.assembly.asm`
-supports special syntax for assembling the same form over lists of
-bases and summing the result.  The form
-
-.. math::
-
-   b(u,v) = \sum_{E \in \mathcal{E}_h} \int_{E} [u][v]\,\mathrm{d}s
-
-with jumps
-:math:`[u] = u_1 - u_2` and :math:`[v] = v_1 - v_2`
-over the interior edges can be split as
-
-.. math::
-
-   b(u,v) = \sum_{E \in \mathcal{E}_h} \left(\int_{E} u_1 v_1\,\mathrm{d}s - \int_{E} u_1 v_2\,\mathrm{d}s - \int_{E} u_2 v_1\,\mathrm{d}s + \int_{E} u_2 v_2\,\mathrm{d}s\right)
-
-and normally we would assemble all of the four forms separately.
-
-We can instead provide a list of bases during a call to :func:`skfem.assembly.asm`:
-
-.. doctest::
-
-   >>> import skfem as fem
-   >>> m = fem.MeshTri()
-   >>> e = fem.ElementTriP0()
-   >>> bases = [fem.InteriorFacetBasis(m, e, side=k) for k in [0, 1]]
-   >>> jumpform = fem.BilinearForm(lambda u, v, p: (-1) ** sum(p.idx) * u * v)
-   >>> fem.asm(jumpform, bases, bases).toarray()
-   array([[ 1.41421356, -1.41421356],
-          [-1.41421356,  1.41421356]])
-
-For an example of practical usage, see :ref:`ex07`.
