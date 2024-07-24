@@ -209,7 +209,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 with respect to documented and/or tested features.
 
-### Unreleased
+### [10.0.0] - 2024-07-25
 
 - Fixed: `Mesh.p2e` returned incorrect incidence
 - Fixed: `InteriorFacetBasis.get_dofs` did not return all edge DOFs for 3D elements
