@@ -251,3 +251,8 @@ Module: skfem.helpers
 .. autofunction:: skfem.helpers.prod
 
 .. autofunction:: skfem.helpers.inv
+
+Module: skfem.visuals
+=====================
+
+.. autofunction:: skfem.visuals.matplotlib.plot

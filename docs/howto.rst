@@ -372,3 +372,153 @@ The previous solution :math:`u_k` is interpolated at quadrature points using
     arguments and additional default keys.  By default, ``w['x']`` (accessible
     also as ``w.x``) corresponds to the global coordinates and ``w['h']``
     (accessible also as ``w.h``) corresponds to the local mesh parameter.
+
+.. _postprocessing:
+
+Postprocessing the solution
+===========================
+
+After solving the finite element system :math:`Ax=b`, it is common to
+calculate derived quantities.
+The most common techniques are:
+
+* Calculating gradient fields using the technique described at the end of :ref:`l2proj`.
+* Using :class:`~skfem.assembly.form.functional.Functional` wrapper to calculate integrals
+  over the finite element solution.
+
+The latter consists of writing the integrand as a function
+and decorating it using :class:`~skfem.assembly.form.functional.Functional`.
+This is similar to the use of :class:`~skfem.assembly.form.bilinear_form.BilinearForm`
+and :class:`~skfem.assembly.form.linear_form.LinearForm` wrappers
+expect that the function wrapped by :class:`~skfem.assembly.form.functional.Functional`
+should accept only a single argument ``w``.
+
+The parameter ``w`` is a dictionary containing all the default keys
+(e.g., ``w['h']`` for mesh parameter and ``w['x']`` for global
+coordinates) and any user provided arguments that can
+be arbitrary finite element functions interpolated at the quadrature points
+using :meth:`~skfem.assembly.basis.AbstractBasis.interpolate`.
+As a simple example, we calculate the integral of the finite element
+solution to the Poisson problem with a unit load:
+
+.. doctest::
+
+   >>> from skfem import *
+   >>> from skfem.models.poisson import laplace, unit_load
+   >>> mesh = MeshTri().refined(2).with_defaults()
+   >>> basis = Basis(mesh, ElementTriP2())
+   >>> A = laplace.assemble(basis)
+   >>> b = unit_load.assemble(basis)
+   >>> x = solve(*condense(A, b, D=basis.get_dofs('left')))
+   >>> @Functional
+   ... def integral(w):
+   ...    return w['uh']  # grad, dot, etc. can be used here
+   >>> round(integral.assemble(basis, uh=basis.interpolate(x)), 5)
+   0.33333
+
+.. plot::
+
+   from skfem import *
+   from skfem.models.poisson import laplace, unit_load
+   basis = Basis(MeshTri().refined(2).with_defaults(), ElementTriP2())
+   A = laplace.assemble(basis)
+   b = unit_load.assemble(basis)
+   x = solve(*condense(A, b, D=basis.get_dofs('left')))
+   from skfem.visuals.matplotlib import plot
+   plot(basis, x, nrefs=3, shading='gouraud', colorbar=True)
+
+Similarly we can calculate the integral of its derivative:
+
+   >>> @Functional
+   ... def diffintegral(w):
+   ...    return w['uh'].grad[0]  # derivative wrt x
+   >>> round(diffintegral.assemble(basis, uh=basis.interpolate(x)), 5)
+   0.5
+
+We can also calculate integrals over the boundary
+using :class:`~skfem.assembly.basis.facet_basis.FacetBasis`:
+
+   >>> fbasis = basis.boundary('left')
+   >>> @Functional
+   ... def bndintegral(w):
+   ...    return w['uh'].grad[1]  # derivative wrt y
+   >>> round(bndintegral.assemble(fbasis, uh=fbasis.interpolate(x)), 5)
+   0.0
+
+.. _visualizing:
+
+Visualizing the solution
+========================
+
+After solving the finite element system :math:`Ax=b`, it is common to
+visualize the solution or other
+derived fields.  The library includes some basic 2D visualization
+routines implemented using matplotlib.  For more complex
+visualizations, we suggest that the solution is saved to VTK and a
+visualization is created using Paraview.
+
+The main routine for creating 2D visualizations using matplotlib is
+:func:`skfem.visuals.matplotlib.plot` and it accepts the basis
+object and the solution vector as its arguments:
+
+.. doctest::
+
+   >>> from skfem import *
+   >>> from skfem.models.poisson import laplace, unit_load
+   >>> mesh = MeshTri().refined(2)
+   >>> basis = Basis(mesh, ElementTriP2())
+   >>> A = laplace.assemble(basis)
+   >>> b = unit_load.assemble(basis)
+   >>> x = solve(*condense(A, b, D=basis.get_dofs()))
+   >>> from skfem.visuals.matplotlib import plot
+   >>> plot(basis, x)
+   <Axes: >
+
+.. plot::
+
+   from skfem import *
+   from skfem.models.poisson import laplace, unit_load
+   basis = Basis(MeshTri().refined(2), ElementTriP2())
+   A = laplace.assemble(basis)
+   b = unit_load.assemble(basis)
+   x = solve(*condense(A, b, D=basis.get_dofs()))
+   from skfem.visuals.matplotlib import plot
+   plot(basis, x)
+
+It accepts various optional arguments to make the plots
+nicer, some of which have been demonstrated in :ref:`gallery`.
+For example, here is the same solution as above with different settings:
+
+.. doctest::
+
+   >>> plot(basis, x, shading='gouraud', colorbar={'orientation': 'horizontal'}, nrefs=3)
+   <Axes: >
+
+.. plot::
+
+   from skfem import *
+   from skfem.models.poisson import laplace, unit_load
+   basis = Basis(MeshTri().refined(2), ElementTriP2())
+   A = laplace.assemble(basis)
+   b = unit_load.assemble(basis)
+   x = solve(*condense(A, b, D=basis.get_dofs()))
+   from skfem.visuals.matplotlib import plot
+   plot(basis, x, shading='gouraud', colorbar={'orientation': 'horizontal'}, nrefs=3)
+
+The routine is based on `matplotlib.pyplot.tripcolor <https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.tripcolor.html>`_ command and shares
+its limitations.
+For more control we suggest that the solution is saved to a VTK file for
+visualization in Paraview.  Saving of the solution is done through the
+mesh object and it requires giving one number per node of the mesh.
+Thus, for other than piecewise linear finite element bases,
+the mesh must be refined and the solution interpolated for visualization:
+
+.. doctest::
+
+   >>> rmesh, rx = basis.refinterp(x, nrefs=3)  # refine and interpolate
+   >>> rmesh.save('sol.vtk', point_data={'x': rx})
+
+Another option would be to first project the solution
+onto a piecewise linear finite element basis
+as described in :ref:`l2proj`.
+Please see :ref:`gallery` for more examples of visualization.
