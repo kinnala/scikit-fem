@@ -413,7 +413,7 @@ solution to the Poisson problem with a unit load:
    >>> @Functional
    ... def integral(w):
    ...    return w['uh']  # grad, dot, etc. can be used here
-   >>> round(integral.assemble(basis, uh=basis.interpolate(x)), 5)
+   >>> float(round(integral.assemble(basis, uh=basis.interpolate(x)), 5))
    0.33333
 
 .. plot::
@@ -432,7 +432,7 @@ Similarly we can calculate the integral of its derivative:
    >>> @Functional
    ... def diffintegral(w):
    ...    return w['uh'].grad[0]  # derivative wrt x
-   >>> round(diffintegral.assemble(basis, uh=basis.interpolate(x)), 5)
+   >>> float(round(diffintegral.assemble(basis, uh=basis.interpolate(x)), 5))
    0.5
 
 We can also calculate integrals over the boundary
@@ -442,7 +442,7 @@ using :class:`~skfem.assembly.basis.facet_basis.FacetBasis`:
    >>> @Functional
    ... def bndintegral(w):
    ...    return w['uh'].grad[1]  # derivative wrt y
-   >>> round(bndintegral.assemble(fbasis, uh=fbasis.interpolate(x)), 5)
+   >>> float(round(bndintegral.assemble(fbasis, uh=fbasis.interpolate(x)), 5))
    0.0
 
 .. _visualizing:
