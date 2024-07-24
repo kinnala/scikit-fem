@@ -13,8 +13,8 @@ install the package via
 
 Specifying ``[all]`` includes ``meshio`` for mesh input/output, and
 ``matplotlib`` for simple visualizations.  The minimal dependencies are
-``numpy`` and ``scipy``.  You can also install scikit-fem in `Google Colab
-<https://colab.research.google.com/>`_ by executing
+``numpy`` and ``scipy``.  You can also install scikit-fem in Jupyter Notebook
+or in `Google Colab <https://colab.research.google.com/>`_ by executing
 
 .. code-block:: bash
 
@@ -52,7 +52,7 @@ Next we write the forms
 
 .. math::
 
-   a(u, v) = \int_\Omega \nabla u \cdot \nabla v \,\mathrm{d}x \quad \text{and} \quad L(v) = \int_\Omega f v \,\mathrm{d}x
+   a(u, v) = \int_\Omega \nabla u \cdot \nabla v \,\mathrm{d}x \quad \text{and} \quad l(v) = \int_\Omega f v \,\mathrm{d}x
 
 as source code.  Each form is written as a function and
 decorated as follows:
@@ -69,7 +69,7 @@ decorated as follows:
 
    >>> import numpy as np
    >>> @fem.LinearForm
-   ... def L(v, w):
+   ... def l(v, w):
    ...     x, y = w.x  # global coordinates
    ...     f = np.sin(np.pi * x) * np.sin(np.pi * y)
    ...     return f * v
@@ -124,10 +124,10 @@ and the load vector has the type ``ndarray``.
 .. doctest::
 
    >>> A = a.assemble(Vh)
-   >>> l = L.assemble(Vh)
+   >>> b = l.assemble(Vh)
    >>> A.shape
    (81, 81)
-   >>> l.shape
+   >>> b.shape
    (81,)
 
 Step 6: Find boundary DOFs
@@ -144,18 +144,21 @@ the boundary.  Empty call to
    <skfem DofsView(MeshTri1, ElementTriP1) object>
      Number of nodal DOFs: 32 ['u']
 
+:ref:`finddofs` explains how to match other subsets of DOFs.
+
 Step 7: Eliminate boundary DOFs and solve
 =========================================
 
-The boundary DOFs must be eliminated from the linear system :math:`Ax=l`
+The boundary DOFs must be eliminated from the linear system :math:`Ax=b`
 to set :math:`u=0` on the boundary.
-This can be done using :func:`~skfem.utils.condense`.
+This can be done using :func:`~skfem.utils.condense`
+which can be useful also for inhomogeneous Dirichlet conditions.
 The output can be passed to :func:`~skfem.utils.solve`
 which is a simple wrapper to ``scipy`` sparse solver:
 
 .. doctest::
 
-   >>> x = fem.solve(*fem.condense(A, l, D=D))
+   >>> x = fem.solve(*fem.condense(A, b, D=D))
    >>> x.shape
    (81,)
 
@@ -167,12 +170,14 @@ which is a simple wrapper to ``scipy`` sparse solver:
    import numpy as np
    basis = Basis(MeshTri().refined(3), ElementTriP1())
    a = BilinearForm(lambda u, v, _: dot(grad(u), grad(v)))
-   L = LinearForm(lambda v, w: np.sin(np.pi * w.x[0]) * np.sin(np.pi * w.x[1]) * v)
-   y = solve(*condense(a.assemble(basis), L.assemble(basis), D=basis.get_dofs()))
+   b = LinearForm(lambda v, w: np.sin(np.pi * w.x[0]) * np.sin(np.pi * w.x[1]) * v)
+   y = solve(*condense(a.assemble(basis), b.assemble(basis), D=basis.get_dofs()))
    ax = draw(basis)
    plot(basis, y, ax=ax, nrefs=2, colorbar=True, shading='gouraud')
 
-
+:ref:`visualizing` has some guidelines for visualization
+and various other examples can be found in :ref:`gallery`.
+   
 Step 8: Calculate error
 =======================
 
@@ -182,7 +187,8 @@ The exact solution is known to be
 
    u(x, y) = \frac{1}{2 \pi^2} \sin \pi x \sin \pi y.
 
-Thus, it makes sense to verify that the error is small.
+Thus, it makes sense to verify that the error is small
+by calculating the error in the :math:`L^2` norm:
 
 .. doctest::
 
@@ -194,3 +200,5 @@ Thus, it makes sense to verify that the error is small.
    ...     return (uh - u) ** 2
    >>> str(round(error.assemble(Vh, uh=Vh.interpolate(x)), 9))
    '1.069e-06'
+
+:ref:`postprocessing` covers some ideas behind the use of :class:`~skfem.assembly.form.functional.Functional` wrapper.

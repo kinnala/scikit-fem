@@ -431,6 +431,11 @@ class AbstractBasis:
         )
 
     def project(self, interp, **kwargs):
+        """Perform :math:`L^2` projection onto the basis.
+
+        See :ref:`l2proj` for more information.
+
+        """
         raise NotImplementedError
 
     def plot(self, x, visuals='matplotlib', **kwargs):
