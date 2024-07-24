@@ -175,7 +175,9 @@ which is a simple wrapper to ``scipy`` sparse solver:
    ax = draw(basis)
    plot(basis, y, ax=ax, nrefs=2, colorbar=True, shading='gouraud')
 
-
+:ref:`visualizing` has some guidelines for visualization
+and various other examples can be found in :ref:`gallery`.
+   
 Step 8: Calculate error
 =======================
 
@@ -198,3 +200,5 @@ by calculating the error in the :math:`L^2` norm:
    ...     return (uh - u) ** 2
    >>> str(round(error.assemble(Vh, uh=Vh.interpolate(x)), 9))
    '1.069e-06'
+
+:ref:`postprocessing` covers some ideas behind the use of :class:`~skfem.assembly.form.functional.Functional` wrapper.
