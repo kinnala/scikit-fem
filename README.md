@@ -199,7 +199,7 @@ for first timers include:
 - Reporting a [bug](https://github.com/kinnala/scikit-fem/issues)
 - Writing an [example](https://github.com/kinnala/scikit-fem/tree/master/docs/examples)
 - Improving the [tests](https://github.com/kinnala/scikit-fem/tree/master/tests)
-- Finding typos in the documentation.
+- Suggesting improvements in the [documentation](https://scikit-fem.readthedocs.io).
 
 *By contributing code to scikit-fem, you are agreeing to release it under BSD-3-Clause, see LICENSE.md.*
 

@@ -435,7 +435,7 @@ Similarly we can calculate the integral of its derivative:
    >>> float(round(diffintegral.assemble(basis, uh=basis.interpolate(x)), 5))
    0.5
 
-We can also calculate integrals over the boundary
+We can also calculate integrals over (a subset of) the boundary
 using :class:`~skfem.assembly.basis.facet_basis.FacetBasis`:
 
    >>> fbasis = basis.boundary('left')
@@ -509,16 +509,95 @@ The routine is based on `matplotlib.pyplot.tripcolor <https://matplotlib.org/sta
 its limitations.
 For more control we suggest that the solution is saved to a VTK file for
 visualization in Paraview.  Saving of the solution is done through the
-mesh object and it requires giving one number per node of the mesh.
-Thus, for other than piecewise linear finite element bases,
-the mesh must be refined and the solution interpolated for visualization:
+mesh object method :meth:`skfem.mesh.Mesh.save`
+and it requires giving an array with one value per node of the mesh.
+
+In order to properly visualize other than piecewise linear finite element bases,
+the mesh must be refined and the solution interpolated for visualization only:
 
 .. doctest::
 
    >>> rmesh, rx = basis.refinterp(x, nrefs=3)  # refine and interpolate
    >>> rmesh.save('sol.vtk', point_data={'x': rx})
 
-Another option would be to first project the solution
+Another option to visualize high order finite element functions
+would be to first project the solution
 onto a piecewise linear finite element basis
 as described in :ref:`l2proj`.
+Piecewise linear finite element solutions can be passed directly
+to ``point_data`` keyword argument of :meth:`skfem.mesh.Mesh.save`.
+
 Please see :ref:`gallery` for more examples of visualization.
+
+.. _tagging:
+
+Using tags
+==========
+
+In scikit-fem, a "tag" refers to a human-interpretable name given to a
+subset of elements (subdomains) or a subset of facets (boundaries).
+Tags are used
+
+- to assemble forms over named subdomains or named boundaries
+- to impose boundary conditions on named boundaries.
+
+In simple cases tagging subdomains can be done
+using :meth:`skfem.mesh.Mesh.with_subdomains` and
+tagging boundaries can be done
+using :meth:`skfem.mesh.Mesh.with_boundaries`.
+Both methods take in a dictionary with the tag name (string)
+as the key and an array of element or facet indices as the value.
+If a function is passed instead of the array,
+then element or facet midpoints are passed as an argument
+to the function and the points evaluating to ``True``
+will be included in the subset:
+
+.. doctest::
+
+   >>> from skfem import *
+   >>> mesh = MeshTri().refined().with_boundaries({
+   ...     'left': lambda x: x[0] == 0.,
+   ... }).with_subdomains({
+   ...     'right': lambda x: x[0] > 0.5,
+   ... })
+   >>> mesh
+   <skfem MeshTri1 object>
+     Number of elements: 8
+     Number of vertices: 9
+     Number of nodes: 9
+     Named subdomains [# elements]: right [4]
+     Named boundaries [# facets]: left [2]
+
+In complex cases, the most versatile way to tag the mesh is to use an
+external mesh generator such as Gmsh, save the mesh to a file, and
+load the mesh file using the constructor :meth:`skfem.mesh.Mesh.load`.
+
+After the mesh has been tagged, there are several commands that support tags.
+The basis initialization can be done over subdomains or named boundaries:
+
+.. doctest::
+
+   >>> Basis(mesh, ElementTriP1(), elements='right')
+   <skfem CellBasis(MeshTri1, ElementTriP1) object>
+     Number of elements: 4
+     Number of DOFs: 9
+     Size: 864 B
+
+.. doctest::
+
+   >>> FacetBasis(mesh, ElementTriP1(), facets='left')
+   <skfem FacetBasis(MeshTri1, ElementTriP1) object>
+     Number of elements: 2
+     Number of DOFs: 9
+     Size: 288 B
+
+The resulting objects can be used to assemble forms where the integral
+is over a subset only instead of the entire domain.
+
+In addition, DOFs can be now found based on the tags:
+
+.. doctest::
+
+   >>> basis = Basis(mesh, ElementTriP1())
+   >>> basis.get_dofs('left').all()
+   array([0, 2, 5], dtype=int32)

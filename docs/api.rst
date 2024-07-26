@@ -14,7 +14,7 @@ Abstract class: Mesh
 --------------------
 
 .. autoclass:: skfem.mesh.Mesh
-   :members: load, save, refined, facets_satisfying, nodes_satisfying, elements_satisfying
+   :members: load, save, refined, facets_satisfying, nodes_satisfying, elements_satisfying, with_subdomains, with_boundaries
 
 Class: MeshTri
 **************
