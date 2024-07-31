@@ -136,7 +136,8 @@ def from_meshio(m,
                 ind = p2f[:, sorted_facets[0]]
                 for itr in range(sorted_facets.shape[0] - 1):
                     ind = ind.multiply(p2f[:, sorted_facets[itr + 1]])
-                # does not preserve order: boundaries[k] = np.nonzero(ind)[0].astype(np.int32)
+                # does not preserve order:
+                # boundaries[k] = np.nonzero(ind)[0].astype(np.int32)
                 ii, jj = ind.nonzero()
                 boundaries[k] = ii[np.argsort(jj)]
 
