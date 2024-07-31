@@ -11,9 +11,10 @@ from skfem.mesh import (Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
                         MeshTri1DG, MeshTri2, MeshQuad2, MeshTet2, MeshHex2)
 from skfem.assembly import Basis, LinearForm, Functional, FacetBasis
 from skfem.element import (ElementTetP1, ElementTriP0, ElementQuad0,
-                           ElementHex0)
+                           ElementHex0, ElementTriP1)
 from skfem.utils import projection
 from skfem.io.meshio import to_meshio, from_meshio
+from skfem.helpers import dot
 
 
 MESH_PATH = Path(__file__).parents[1] / 'docs' / 'examples' / 'meshes'
@@ -866,3 +867,23 @@ def test_restrict_reverse_map():
     p2 = p2[:, I]
 
     assert_array_equal(p1, p2)
+
+
+@pytest.mark.parametrize(
+    "mesh, volume",
+    [
+        (MeshTri.load(MESH_PATH / 'oriented_squares.msh'), 0.2 ** 2),
+    ]
+)
+def test_load_orientation(mesh, volume):
+
+    for k, v in mesh.boundaries.items():
+        fbasis = FacetBasis(mesh, ElementTriP1(), facets=k)
+
+        @Functional
+        def form(w):
+            return dot(w.x / 2, w.n)
+
+        np.testing.assert_almost_equal(form.assemble(fbasis),
+                                       volume,
+                                       1e-10)
