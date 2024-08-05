@@ -190,15 +190,20 @@ class CellBasis(AbstractBasis):
                 for k in range(self.Nbfun)
             ]
         ).flatten()
+        #number of components of the current base functions
+        try:
+            comp=len(self.elem.lbasis(self.elem.dim*[0],0)[0])
+        except:    
+            comp=1
         return coo_matrix(
             (
                 phis,
                 (
-                    np.tile(np.arange(x.shape[1]), self.Nbfun),
-                    self.element_dofs[:, cells].flatten(),
+                    np.tile(np.arange(comp*x.shape[1]), self.Nbfun),
+                    self.element_dofs[:, np.tile(cells,comp)].flatten(),
                 ),
             ),
-            shape=(x.shape[1], self.N),
+            shape=(comp*x.shape[1], self.N),
         )
 
     def point_source(self, x: ndarray) -> ndarray:
