@@ -869,19 +869,32 @@ def test_restrict_reverse_map():
     assert_array_equal(p1, p2)
 
 
+HELPER_TETMESH = MeshTet().refined(2).with_subdomains({'sub': lambda x: ((x[0] < 0.75)
+                                                                         * (x[1] < 0.75)
+                                                                         * (x[2] < 0.75)
+                                                                         * (x[0] > 0.25)
+                                                                         * (x[1] > 0.25)
+                                                                         * (x[2] > 0.25))})
+
+
 @pytest.mark.parametrize(
-    "mesh, volume",
+    "mesh, volume, etype",
     [
-        (MeshTri.load(MESH_PATH / 'oriented_squares.msh'), 0.2 ** 2),
+        (MeshTri.load(MESH_PATH / 'oriented_squares.msh'), 0.2 ** 2, ElementTriP1),
+        (HELPER_TETMESH.with_boundaries({'subif': HELPER_TETMESH.facets_around('sub')}),
+         0.5 ** 3, ElementTetP1),
+        (MeshTet.load(MESH_PATH / 'cube_oriented_sub.msh'),
+         0.5 ** 3, ElementTetP1),
     ]
 )
-def test_load_orientation(mesh, volume):
+def test_load_orientation(mesh, volume, etype):
 
     for k, v in mesh.boundaries.items():
-        fbasis = FacetBasis(mesh, ElementTriP1(), facets=k)
+        fbasis = FacetBasis(mesh, etype(), facets=k)
 
         @Functional
         def form(w):
+            # calculate volume using Gauss divergence theorem
             return dot(w.x / 2, w.n)
 
         np.testing.assert_almost_equal(form.assemble(fbasis),
