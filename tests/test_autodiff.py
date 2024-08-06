@@ -2,6 +2,7 @@ import pytest
 import numpy as np
 from numpy.testing import (assert_array_almost_equal,
                            assert_almost_equal)
+
 try:
     import jax.numpy as jnp
     from skfem.experimental.autodiff import NonlinearForm
@@ -10,8 +11,10 @@ try:
                                                      div, sym_grad,
                                                      transpose,
                                                      eye, trace)
-except:
-    pass
+except Exception:
+    def NonlinearForm(x):
+        raise Exception("jax failed to import")
+
 from skfem.assembly import Basis
 from skfem.mesh import MeshTri, MeshQuad
 from skfem.element import (ElementTriP1, ElementTriP2,

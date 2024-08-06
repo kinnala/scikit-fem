@@ -136,7 +136,10 @@ def from_meshio(m,
                 ind = p2f[:, sorted_facets[0]]
                 for itr in range(sorted_facets.shape[0] - 1):
                     ind = ind.multiply(p2f[:, sorted_facets[itr + 1]])
-                boundaries[k] = np.nonzero(ind)[0].astype(np.int32)
+                # does not preserve order:
+                # boundaries[k] = np.nonzero(ind)[0].astype(np.int32)
+                ii, jj = ind.nonzero()
+                boundaries[k] = ii[np.argsort(jj)]
 
                 if not ignore_orientation:
                     try:
@@ -154,6 +157,8 @@ def from_meshio(m,
                             normals = -np.cross(tangents1.T, tangents2.T).T
                         else:
                             raise NotImplementedError
+                        # perform a dot product between the proposed normal
+                        # and the edges of the element to fix the orientation
                         for itr in range(mtmp.t.shape[0]):
                             ori += np.sum(normals
                                           * (mtmp.p[:, facets[0]]

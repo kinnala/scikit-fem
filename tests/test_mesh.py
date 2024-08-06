@@ -11,9 +11,10 @@ from skfem.mesh import (Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
                         MeshTri1DG, MeshTri2, MeshQuad2, MeshTet2, MeshHex2)
 from skfem.assembly import Basis, LinearForm, Functional, FacetBasis
 from skfem.element import (ElementTetP1, ElementTriP0, ElementQuad0,
-                           ElementHex0)
+                           ElementHex0, ElementTriP1)
 from skfem.utils import projection
 from skfem.io.meshio import to_meshio, from_meshio
+from skfem.helpers import dot
 
 
 MESH_PATH = Path(__file__).parents[1] / 'docs' / 'examples' / 'meshes'
@@ -866,3 +867,36 @@ def test_restrict_reverse_map():
     p2 = p2[:, I]
 
     assert_array_equal(p1, p2)
+
+
+HELPER_TETMESH = MeshTet().refined(2).with_subdomains({'sub': lambda x: ((x[0] < 0.75)
+                                                                         * (x[1] < 0.75)
+                                                                         * (x[2] < 0.75)
+                                                                         * (x[0] > 0.25)
+                                                                         * (x[1] > 0.25)
+                                                                         * (x[2] > 0.25))})
+
+
+@pytest.mark.parametrize(
+    "mesh, volume, etype",
+    [
+        (MeshTri.load(MESH_PATH / 'oriented_squares.msh'), 0.2 ** 2, ElementTriP1),
+        (HELPER_TETMESH.with_boundaries({'subif': HELPER_TETMESH.facets_around('sub')}),
+         0.5 ** 3, ElementTetP1),
+        (MeshTet.load(MESH_PATH / 'cube_oriented_sub.msh'),
+         0.5 ** 3, ElementTetP1),
+    ]
+)
+def test_load_orientation(mesh, volume, etype):
+
+    for k, v in mesh.boundaries.items():
+        fbasis = FacetBasis(mesh, etype(), facets=k)
+
+        @Functional
+        def form(w):
+            # calculate volume using Gauss divergence theorem
+            return dot(w.x / 2, w.n)
+
+        np.testing.assert_almost_equal(form.assemble(fbasis),
+                                       volume,
+                                       1e-10)
