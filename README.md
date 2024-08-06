@@ -209,6 +209,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 with respect to documented and/or tested features.
 
+### [10.0.1] - 2024-08-06
+
+- Fixed: `Mesh.load` returned incorrect orientation for some Gmsh
+  meshes with tagged interfaces
+
 ### [10.0.0] - 2024-07-25
 
 - Fixed: `Mesh.p2e` returned incorrect incidence
