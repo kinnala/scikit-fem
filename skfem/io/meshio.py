@@ -144,7 +144,7 @@ def from_meshio(m,
                 if not ignore_orientation:
                     try:
                         ori = np.zeros_like(boundaries[k], dtype=np.float64)
-                        t1, _ = mtmp.f2t[:, boundaries[k]]
+                        t1, t2 = mtmp.f2t[:, boundaries[k]]
                         if facets.shape[0] == 2:
                             tangents = (mtmp.p[:, facets[1]]
                                         - mtmp.p[:, facets[0]])
@@ -165,6 +165,10 @@ def from_meshio(m,
                                              - mtmp.p[:, mtmp.t[itr, t1]]),
                                           axis=0)
                         ori = 1 * (ori > 0)
+                        # check that the orientation is not 'illegal'
+                        # this might happen for a hole
+                        # as a consequence, choose the only valid ori
+                        ori[t2 == -1] = 0
                         boundaries[k] = OrientedBoundary(boundaries[k],
                                                          ori)
                     except Exception:

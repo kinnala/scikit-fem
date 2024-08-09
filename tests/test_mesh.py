@@ -900,3 +900,35 @@ def test_load_orientation(mesh, volume, etype):
         np.testing.assert_almost_equal(form.assemble(fbasis),
                                        volume,
                                        1e-10)
+
+
+def test_hole_orientation():
+
+    # check that a mesh with a tagged hole is oriented correctly
+
+    m = MeshTri.load(MESH_PATH / 'annulus.msh')
+    mig = MeshTri.load(MESH_PATH / 'annulus.msh',
+                       ignore_orientation=True)
+
+    fbasisint = FacetBasis(m, ElementTriP1(),
+                           facets='inter')
+    fbasisext = FacetBasis(m, ElementTriP1(),
+                           facets='exter')
+
+    fbasisintig = FacetBasis(mig, ElementTriP1(),
+                             facets='inter')
+    fbasisextig = FacetBasis(mig, ElementTriP1(),
+                             facets='exter')
+
+    assert (str(type(m.boundaries['inter']))
+            == "<class 'skfem.generic_utils.OrientedBoundary'>")
+
+    np.testing.assert_almost_equal(
+        fbasisint.normals,
+        fbasisintig.normals,
+    )
+
+    np.testing.assert_almost_equal(
+        fbasisext.normals,
+        fbasisextig.normals,
+    )

@@ -55,7 +55,10 @@ class DiscreteField(ndarray):
     def __getitem__(self, key):
         return np.array(self)[key]
 
-    def __array_wrap__(self, out_arr, context=None):
+    def __array_wrap__(self,
+                       out_arr,
+                       context=None,
+                       return_scalar=False):
         # invalidate attributes after ufuncs
         return np.array(out_arr)
 
