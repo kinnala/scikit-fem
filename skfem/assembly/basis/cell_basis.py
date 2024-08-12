@@ -90,7 +90,8 @@ class CellBasis(AbstractBasis):
             dofs,
             disable_doflocs,
         )
-
+        
+                  
         if elements is None:
             self.tind = None
             self.nelems = mesh.nelements
@@ -105,6 +106,22 @@ class CellBasis(AbstractBasis):
                    * np.broadcast_to(self.W, (self.nelems, self.W.shape[-1])))
         logger.info("Initializing finished.")
 
+    @property
+    def _base_tensor_order(self):
+        if hasattr(self.elem, "lbasis"):
+            loc_pts = self.elem.dim*[0]
+            base_obj = self.elem.lbasis(loc_pts,0)[0]    
+        elif hasattr(self.elem, "gbasis"):
+            loc_pts = np.zeros((self.elem.dim ,1))[:,:,np.newaxis]
+            base_obj = np.array(self.elem.gbasis(self.mapping,loc_pts, 0, tind=[0]))[0,:,0][:,0]
+        else:
+            raise NotImplementedError("Can not detect tensor order of base function!")
+        
+        if isinstance(base_obj,np.ndarray):
+            return base_obj.shape
+        else:
+            return 1 
+        
     def default_parameters(self):
         """Return default parameters for `~skfem.assembly.asm`."""
         return {'x': self.global_coordinates(),
@@ -190,21 +207,15 @@ class CellBasis(AbstractBasis):
                 for k in range(self.Nbfun)
             ]
         ).flatten()
-        #number of components of the current base functions
-        try:
-            comp=len(self.elem.lbasis(self.elem.dim*[0],0)[0])
-        except:    
-            comp=1
-        return coo_matrix(
-            (
-                phis,
-                (
-                    np.tile(np.arange(comp*x.shape[1]), self.Nbfun),
-                    self.element_dofs[:, np.tile(cells,comp)].flatten(),
-                ),
-            ),
-            shape=(comp*x.shape[1], self.N),
-        )
+        # number of components of a base functions
+        comp = np.prod(self._base_tensor_order)
+        # row indices
+        rows = np.tile(np.arange(comp*x.shape[1]), self.Nbfun)
+        # col indices
+        cols = self.element_dofs[:, np.tile(cells,comp)].flatten()
+        # shape
+        sh = (comp*x.shape[1], self.N)
+        return coo_matrix( (phis,(rows,cols,)) , shape=sh )
 
     def point_source(self, x: ndarray) -> ndarray:
         """Return right-hand side vector for unit source at `x`,
@@ -231,6 +242,9 @@ class CellBasis(AbstractBasis):
                 shape = x.shape
                 x = x.reshape(shape[0], -1)
             out = self.probes(x) @ y
+            # reshape output for tensor like base functions
+            if isinstance(self._base_tensor_order,tuple):
+                out = out.reshape( self._base_tensor_order + (x.shape[1],) )
             # reshape output back to original shape
             if shape is not None:
                 return out.reshape(*shape[1:])
