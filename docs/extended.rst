@@ -48,9 +48,9 @@ This is easy enough to draw in ``matplotlib``. The first row in the points
 array contains the x locations of each point and the second row
 contains the y locations.
 
-.. sourcecode::
+.. doctest::
 
-   >>> plt.plot(mesh.p[0], mesh.p[1], 'ok')
+   >>> plt.plot(mesh.p[0], mesh.p[1], 'ok')   # doctest: +SKIP
 
 .. plot::
 
@@ -82,8 +82,8 @@ lines to the plot.
        plt.plot(mesh.p[0,[t[2],t[0]]], mesh.p[1,[t[2],t[0]]], 'k')  # from vertex 2 back to 0
 
 This is the most basic triangulation of the unit square. ``skfem`` has
-utilities to refined this mesh into more and smaller triangles as well
-as translate it or map it into different coordinates. It also has
+utilities to refine this mesh into more and smaller triangles as well
+as translate it or map it into different coordinates. It also has some
 basic visualization functions to make drawing the mesh on an ``matplotlib`` axis
 easier.
 
