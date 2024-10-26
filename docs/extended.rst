@@ -50,7 +50,7 @@ contains the y locations.
 
 .. sourcecode::
 
-   >>> plt.plot(mesh.p[0], mesh.p[1], 'ok')
+   plt.plot(mesh.p[0], mesh.p[1], 'ok')
 
 .. plot::
 
@@ -65,11 +65,11 @@ lines to the plot.
 
 .. sourcecode::
 
-   >>> plt.plot(mesh.p[0], mesh.p[1], 'ok')   # doctest: +SKIP
-   >>> for t in mesh.t.T: # transpose to iterate over columns
-   ...     plt.plot(mesh.p[0,[t[0],t[1]]], mesh.p[1,[t[0],t[1]]], 'k')  # from vertex 0 to 1
-   ...     plt.plot(mesh.p[0,[t[1],t[2]]], mesh.p[1,[t[1],t[2]]], 'k')  # from vertex 1 to 2
-   ...     plt.plot(mesh.p[0,[t[2],t[0]]], mesh.p[1,[t[2],t[0]]], 'k')  # from vertex 2 back to 0
+   plt.plot(mesh.p[0], mesh.p[1], 'ok')
+   for t in mesh.t.T: # transpose to iterate over columns
+       plt.plot(mesh.p[0,[t[0],t[1]]], mesh.p[1,[t[0],t[1]]], 'k')  # from vertex 0 to 1
+       plt.plot(mesh.p[0,[t[1],t[2]]], mesh.p[1,[t[1],t[2]]], 'k')  # from vertex 1 to 2
+       plt.plot(mesh.p[0,[t[2],t[0]]], mesh.p[1,[t[2],t[0]]], 'k')  # from vertex 2 back to 0
 
 .. plot::
 
@@ -89,10 +89,10 @@ easier.
 
 .. sourcecode::
 
-   >>> import skfem.visuals.matplotlib
-   >>> mesh = skfem.MeshTri().refined(1)
-   >>> plt.subplots(figsize=(5,5))
-   >>> skfem.visuals.matplotlib.draw(mesh, ax=plt.gca())  # gca: "get current axis"
+   import skfem.visuals.matplotlib
+   mesh = skfem.MeshTri().refined(1)
+   plt.subplots(figsize=(5,5))
+   skfem.visuals.matplotlib.draw(mesh, ax=plt.gca())  # gca: "get current axis"
 
 .. plot::
 
@@ -151,7 +151,7 @@ length and initialized to zeros, we will use our basis object.
 
 .. sourcecode::
 
-   >>> fe_approximation = basis_p1.zeros()
+   fe_approximation = basis_p1.zeros()
    
 Although this is a simple ``numpy`` array, there are not many things we
 can do with it directly, since out at this level of the code we don't
@@ -168,11 +168,11 @@ functions we've represented in our finite element space.
 
 .. sourcecode::
 
-   >>> fe_approximation[:] = 1  # a function that is 1 everywhere; [:] means "all dofs"
-   >>> plt.subplots(figsize=(6,5))
-   >>> skfem.visuals.matplotlib.plot(basis_p1, fe_approximation, vmin=0, vmax=2, ax=plt.gca(), colorbar=True)
-   >>> skfem.visuals.matplotlib.draw(mesh, ax=plt.gca())
-   >>> plt.xlabel('x[0]'); plt.ylabel('x[1]');
+   fe_approximation[:] = 1  # a function that is 1 everywhere; [:] means "all dofs"
+   plt.subplots(figsize=(6,5))
+   skfem.visuals.matplotlib.plot(basis_p1, fe_approximation, vmin=0, vmax=2, ax=plt.gca(), colorbar=True)
+   skfem.visuals.matplotlib.draw(mesh, ax=plt.gca())
+   plt.xlabel('x[0]'); plt.ylabel('x[1]');
 
 .. plot::
 
@@ -204,14 +204,14 @@ concept of polynomial degree.)
 
 .. sourcecode::
 
-   >>> def is_on_left_edge(x):
-   >>>     return x[0] < 0.1
-   >>> dof_subset_left_edge = basis_p1.get_dofs(facets=is_on_left_edge)
-   >>> fe_approximation[dof_subset_left_edge] = 0
-   >>> plt.subplots(figsize=(6,5))
-   >>> skfem.visuals.matplotlib.plot(basis_p1, fe_approximation, vmin=0, vmax=2, ax=plt.gca(), colorbar=True, shading='gouraud')
-   >>> skfem.visuals.matplotlib.draw(mesh, ax=plt.gca())
-   >>> plt.xlabel('x[0]'); plt.ylabel('x[1]');
+   def is_on_left_edge(x):
+       return x[0] < 0.1
+   dof_subset_left_edge = basis_p1.get_dofs(facets=is_on_left_edge)
+   fe_approximation[dof_subset_left_edge] = 0
+   plt.subplots(figsize=(6,5))
+   skfem.visuals.matplotlib.plot(basis_p1, fe_approximation, vmin=0, vmax=2, ax=plt.gca(), colorbar=True, shading='gouraud')
+   skfem.visuals.matplotlib.draw(mesh, ax=plt.gca())
+   plt.xlabel('x[0]'); plt.ylabel('x[1]');
 
 .. plot::
 
@@ -241,12 +241,12 @@ more descriptive and readable.
 
 .. sourcecode::
 
-   >>> dof_subset_right_edge = basis_p1.get_dofs(facets=lambda x: x[1] > 0.9)
-   >>> fe_approximation[dof_subset_right_edge] = 2
-   >>> plt.subplots(figsize=(6,5))
-   >>> skfem.visuals.matplotlib.plot(basis_p1, fe_approximation, vmin=0, vmax=2, ax=plt.gca(), colorbar=True, shading='gouraud')
-   >>> skfem.visuals.matplotlib.draw(mesh, ax=plt.gca())
-   >>> plt.xlabel('x[0]'); plt.ylabel('x[1]');
+   dof_subset_right_edge = basis_p1.get_dofs(facets=lambda x: x[1] > 0.9)
+   fe_approximation[dof_subset_right_edge] = 2
+   plt.subplots(figsize=(6,5))
+   skfem.visuals.matplotlib.plot(basis_p1, fe_approximation, vmin=0, vmax=2, ax=plt.gca(), colorbar=True, shading='gouraud')
+   skfem.visuals.matplotlib.draw(mesh, ax=plt.gca())
+   plt.xlabel('x[0]'); plt.ylabel('x[1]');
 
 .. plot::
 
@@ -274,14 +274,14 @@ In a directly analogous manner, we can specify values over entire elements inste
 
 .. sourcecode::
 
-    >>> # reset the function to be 1 everywhere
-    >>> fe_approximation[:] = 1
-    >>> dof_subset_bottom_left = basis_p1.get_dofs(elements=lambda x: np.logical_and(x[0]<.3, x[1]<.3))
-    >>> fe_approximation[dof_subset_bottom_left] = 0
-    >>> plt.subplots(figsize=(6,5))
-    >>> skfem.visuals.matplotlib.plot(basis_p1, fe_approximation, vmin=0, vmax=2, ax=plt.gca(), colorbar=True, shading='gouraud')
-    >>> skfem.visuals.matplotlib.draw(mesh, ax=plt.gca())
-    >>> plt.xlabel('x[0]'); plt.ylabel('x[1]');
+   # reset the function to be 1 everywhere
+   fe_approximation[:] = 1
+   dof_subset_bottom_left = basis_p1.get_dofs(elements=lambda x: np.logical_and(x[0]<.3, x[1]<.3))
+   fe_approximation[dof_subset_bottom_left] = 0
+   plt.subplots(figsize=(6,5))
+   skfem.visuals.matplotlib.plot(basis_p1, fe_approximation, vmin=0, vmax=2, ax=plt.gca(), colorbar=True, shading='gouraud')
+   skfem.visuals.matplotlib.draw(mesh, ax=plt.gca())
+   plt.xlabel('x[0]'); plt.ylabel('x[1]');
 
 .. plot::
 
@@ -329,14 +329,14 @@ our trial function while still leaving x available as an argument for
 
 .. sourcecode::
 
-   >>> def plot_query_points(x, ax, style, label):
-   >>>     ax.plot(x[0], x[1], style, label=label)
-   >>>     return x[0] * 0
-   >>> plt.subplots(figsize=(5,5))
-   >>> skfem.visuals.matplotlib.draw(mesh, ax=plt.gca())
-   >>> basis_p1.get_dofs(facets=lambda x: plot_query_points(x, plt.gca(), 'or', 'facets'))
-   >>> basis_p1.get_dofs(elements=lambda x: plot_query_points(x, plt.gca(), 'ob', 'elements'))
-   >>> plt.legend()
+   def plot_query_points(x, ax, style, label):
+       ax.plot(x[0], x[1], style, label=label)
+       return x[0] * 0
+   plt.subplots(figsize=(5,5))
+   skfem.visuals.matplotlib.draw(mesh, ax=plt.gca())
+   basis_p1.get_dofs(facets=lambda x: plot_query_points(x, plt.gca(), 'or', 'facets'))
+   basis_p1.get_dofs(elements=lambda x: plot_query_points(x, plt.gca(), 'ob', 'elements'))
+   plt.legend()
 
 .. plot::
 
@@ -369,13 +369,13 @@ labelling facets and elements during mesh construction.)
 
 .. sourcecode::
 
-   >>> dof_subset_vertical_centerline = basis_p1.get_dofs(facets=lambda x: np.isclose(x[0], 0.5))
-   >>> fe_approximation[:] = 2
-   >>> fe_approximation[dof_subset_vertical_centerline] = 0
-   >>> plt.subplots(figsize=(6,5))
-   >>> skfem.visuals.matplotlib.plot(basis_p1, fe_approximation, vmin=0, vmax=2, ax=plt.gca(), colorbar=True, shading='gouraud')
-   >>> skfem.visuals.matplotlib.draw(mesh, ax=plt.gca())
-   >>> plt.xlabel('x[0]'); plt.ylabel('x[1]');
+   dof_subset_vertical_centerline = basis_p1.get_dofs(facets=lambda x: np.isclose(x[0], 0.5))
+   fe_approximation[:] = 2
+   fe_approximation[dof_subset_vertical_centerline] = 0
+   plt.subplots(figsize=(6,5))
+   skfem.visuals.matplotlib.plot(basis_p1, fe_approximation, vmin=0, vmax=2, ax=plt.gca(), colorbar=True, shading='gouraud')
+   skfem.visuals.matplotlib.draw(mesh, ax=plt.gca())
+   plt.xlabel('x[0]'); plt.ylabel('x[1]');
 
 .. plot::
 
@@ -416,13 +416,13 @@ function values at those points.
 
 .. sourcecode::
 
-   >>> def f(x):
-   >>>     return 4 * abs(x[1] - 0.5)
-   >>> fe_approximation = basis_p1.project(f)
-   >>> plt.subplots(figsize=(6,5))
-   >>> skfem.visuals.matplotlib.plot(basis_p1, fe_approximation, vmin=0, vmax=2, ax=plt.gca(), colorbar=True, shading='gouraud')
-   >>> skfem.visuals.matplotlib.draw(mesh, ax=plt.gca())
-   >>> plt.xlabel('x[0]'); plt.ylabel('x[1]');
+   def f(x):
+       return 4 * abs(x[1] - 0.5)
+   fe_approximation = basis_p1.project(f)
+   plt.subplots(figsize=(6,5))
+   skfem.visuals.matplotlib.plot(basis_p1, fe_approximation, vmin=0, vmax=2, ax=plt.gca(), colorbar=True, shading='gouraud')
+   skfem.visuals.matplotlib.draw(mesh, ax=plt.gca())
+   plt.xlabel('x[0]'); plt.ylabel('x[1]');
 
 .. plot::
 
@@ -479,9 +479,9 @@ or reference, triangle is on with vertexes and (0, 0), (1, 0), and (0, 1).
 
 .. sourcecode::
 
-   >>> plt.subplots(figsize=(5,5))
-   >>> plt.plot([0,1,0,0], [0,0,1,0], 'k')
-   >>> plt.xlabel('x[0] (local coords)'); plt.ylabel('x[1] (local coords)');
+   plt.subplots(figsize=(5,5))
+   plt.plot([0,1,0,0], [0,0,1,0], 'k')
+   plt.xlabel('x[0] (local coords)'); plt.ylabel('x[1] (local coords)');
 
 .. plot::
 
@@ -498,11 +498,11 @@ reference triangle.
 
 .. sourcecode::
 
-   >>> plt.subplots(figsize=(5,5))
-   >>> plt.plot([0,1,0,0], [0,0,1,0], 'k')
-   >>> points, weights = basis_p1.quadrature
-   >>> plt.plot(points[0], points[1], 'or')
-   >>> plt.xlabel('x[0] (local coords)'); plt.ylabel('x[1] (local coords)');
+   plt.subplots(figsize=(5,5))
+   plt.plot([0,1,0,0], [0,0,1,0], 'k')
+   points, weights = basis_p1.quadrature
+   plt.plot(points[0], points[1], 'or')
+   plt.xlabel('x[0] (local coords)'); plt.ylabel('x[1] (local coords)');
 
 .. plot::
 
@@ -524,11 +524,11 @@ mapping the local coordinates to each of the triangles in our mesh.
 
 .. sourcecode::
 
-   >>> global_points = basis_p1.mapping.F(points)
-   >>> plt.subplots(figsize=(5,5))
-   >>> plt.plot(global_points[0], global_points[1], 'or')
-   >>> skfem.visuals.matplotlib.draw(mesh, ax=plt.gca())
-   >>> plt.xlabel('x[0]'); plt.ylabel('x[1]');
+   global_points = basis_p1.mapping.F(points)
+   plt.subplots(figsize=(5,5))
+   plt.plot(global_points[0], global_points[1], 'or')
+   skfem.visuals.matplotlib.draw(mesh, ax=plt.gca())
+   plt.xlabel('x[0]'); plt.ylabel('x[1]');
 
 .. plot::
 
@@ -561,20 +561,20 @@ basis object on a function projected into finite element space.
 
 .. sourcecode::
 
-   >>> def f(x):
-   >>>     return x[0] + x[1]
-   >>> fe_approximation = basis_p1.project(f)
-   >>> interpolation = basis_p1.interpolate(fe_approximation)
-   >>> global_points = basis_p1.mapping.F(points).reshape(2, -1)
-   >>> fig, ax = plt.subplots(1, 2, figsize=(12,6))
-   >>> skfem.visuals.matplotlib.draw(mesh, ax=ax[0])
-   >>> for value, p in zip(interpolation.value.reshape(-1), global_points.T):
-   >>>     ax[0].plot(p[0], p[1], 'or')
-   >>>     ax[0].annotate(f'{value:.2f}', [p[0], p[1]])
-   >>> skfem.visuals.matplotlib.plot(basis_p1, fe_approximation, vmin=0, vmax=2, ax=ax[1], shading='gouraud', colorbar=True)
-   >>> skfem.visuals.matplotlib.draw(mesh, ax=ax[1])
-   >>> ax[1].plot(global_points[0], global_points[1], 'or')
-   >>> plt.xlabel('x[0]'); plt.ylabel('x[1]');
+   def f(x):
+       return x[0] + x[1]
+   fe_approximation = basis_p1.project(f)
+   interpolation = basis_p1.interpolate(fe_approximation)
+   global_points = basis_p1.mapping.F(points).reshape(2, -1)
+   fig, ax = plt.subplots(1, 2, figsize=(12,6))
+   skfem.visuals.matplotlib.draw(mesh, ax=ax[0])
+   for value, p in zip(interpolation.value.reshape(-1), global_points.T):
+       ax[0].plot(p[0], p[1], 'or')
+       ax[0].annotate(f'{value:.2f}', [p[0], p[1]])
+   skfem.visuals.matplotlib.plot(basis_p1, fe_approximation, vmin=0, vmax=2, ax=ax[1], shading='gouraud', colorbar=True)
+   skfem.visuals.matplotlib.draw(mesh, ax=ax[1])
+   ax[1].plot(global_points[0], global_points[1], 'or')
+   plt.xlabel('x[0]'); plt.ylabel('x[1]');
 
 
 .. plot::
@@ -623,7 +623,7 @@ of the highest order basis set.
 
 .. sourcecode::
 
-   >>> basis_p0 = basis_p1.with_element(skfem.ElementTriP0())
+   basis_p0 = basis_p1.with_element(skfem.ElementTriP0())
 
 The P0 space has functions that are constant over a cell/element in the mesh
 and consequently discontinuous on the facets between cells/elements. It also
@@ -643,3 +643,271 @@ were used for P1 projection: ``get_dofs()`` and ``project()``. As the first
 example, we will examine ``get_dofs()`` and compare it to one of the
 previous examples we used in P1: the lower left triangle should be 0
 and 1 everywhere else in the mesh.
+
+.. sourcecode::
+
+   # reset the function to be 1 everywhere
+   projection_p1 = basis_p1.zeros()
+   projection_p0 = basis_p0.zeros()
+   projection_p1[:] = 1
+   projection_p0[:] = 1
+   
+   def is_bottom_left(x):
+       return np.logical_and(x[0]<.3, x[1]<.3)
+   
+   p1_bottom_left = basis_p1.get_dofs(elements=is_bottom_left)
+   p0_bottom_left = basis_p0.get_dofs(elements=is_bottom_left)
+   projection_p1[p1_bottom_left] = 0
+   projection_p0[p0_bottom_left] = 0
+   
+   fig, ax = plt.subplots(1, 2, figsize=(12,6))
+   skfem.visuals.matplotlib.plot(basis_p1, projection_p1, vmin=0, vmax=2, ax=ax[0], shading='gouraud', colorbar=True)
+   skfem.visuals.matplotlib.draw(mesh, ax=ax[0])
+   skfem.visuals.matplotlib.plot(basis_p0, projection_p0, vmin=0, vmax=2, ax=ax[1], shading='gouraud', colorbar=True)
+   skfem.visuals.matplotlib.draw(mesh, ax=ax[1])
+   ax[0].set_xlabel('x[0]'); ax[0].set_ylabel('x[1]')
+   ax[1].set_xlabel('x[0]'); ax[1].set_ylabel('x[1]')
+   ax[0].set_title('projection_p1'); ax[1].set_title('projection_p0');
+
+.. plot::
+
+   import skfem
+   import matplotlib.pyplot as plt
+   import numpy as np
+   import skfem.visuals.matplotlib
+   
+   mesh = skfem.MeshTri().refined(1)
+   basis_p1 = skfem.Basis(mesh, skfem.ElementTriP1())
+   basis_p0 = basis_p1.with_element(skfem.ElementTriP0())
+   # reset the function to be 1 everywhere
+   projection_p1 = basis_p1.zeros()
+   projection_p0 = basis_p0.zeros()
+   projection_p1[:] = 1
+   projection_p0[:] = 1
+   
+   def is_bottom_left(x):
+       return np.logical_and(x[0]<.3, x[1]<.3)
+   
+   p1_bottom_left = basis_p1.get_dofs(elements=is_bottom_left)
+   p0_bottom_left = basis_p0.get_dofs(elements=is_bottom_left)
+   projection_p1[p1_bottom_left] = 0
+   projection_p0[p0_bottom_left] = 0
+   
+   fig, ax = plt.subplots(1, 2, figsize=(12,6))
+   skfem.visuals.matplotlib.plot(basis_p1, projection_p1, vmin=0, vmax=2, ax=ax[0], shading='gouraud', colorbar=True)
+   skfem.visuals.matplotlib.draw(mesh, ax=ax[0])
+   skfem.visuals.matplotlib.plot(basis_p0, projection_p0, vmin=0, vmax=2, ax=ax[1], shading='gouraud', colorbar=True)
+   skfem.visuals.matplotlib.draw(mesh, ax=ax[1])
+   ax[0].set_xlabel('x[0]'); ax[0].set_ylabel('x[1]')
+   ax[1].set_xlabel('x[0]'); ax[1].set_ylabel('x[1]')
+   ax[0].set_title('projection_p1'); ax[1].set_title('projection_p0');
+
+A second example of functions projected into P0 uses ``project()``:
+
+.. sourcecode::
+
+   def f(x):
+       return 2 * abs(x[0] + x[1] - 1)
+   projection_p1 = basis_p1.project(f)
+   projection_p0 = basis_p0.project(f)
+   fig, ax = plt.subplots(1, 2, figsize=(12,6))
+   skfem.visuals.matplotlib.plot(basis_p1, projection_p1, vmin=0, vmax=2, ax=ax[0], shading='gouraud', colorbar=True)
+   skfem.visuals.matplotlib.draw(mesh, ax=ax[0])
+   skfem.visuals.matplotlib.plot(basis_p0, projection_p0, vmin=0, vmax=2, ax=ax[1], shading='gouraud', colorbar=True)
+   skfem.visuals.matplotlib.draw(mesh, ax=ax[1])
+   ax[0].set_xlabel('x[0]'); ax[0].set_ylabel('x[1]')
+   ax[1].set_xlabel('x[0]'); ax[1].set_ylabel('x[1]')
+   ax[0].set_title('projection_p1'); ax[1].set_title('projection_p0');
+
+
+.. plot::
+
+   import skfem
+   import matplotlib.pyplot as plt
+   import numpy as np
+   import skfem.visuals.matplotlib
+   
+   mesh = skfem.MeshTri().refined(1)
+   basis_p1 = skfem.Basis(mesh, skfem.ElementTriP1())
+   basis_p0 = basis_p1.with_element(skfem.ElementTriP0())
+   def f(x):
+       return 2 * abs(x[0] + x[1] - 1)
+   projection_p1 = basis_p1.project(f)
+   projection_p0 = basis_p0.project(f)
+   fig, ax = plt.subplots(1, 2, figsize=(12,6))
+   skfem.visuals.matplotlib.plot(basis_p1, projection_p1, vmin=0, vmax=2, ax=ax[0], shading='gouraud', colorbar=True)
+   skfem.visuals.matplotlib.draw(mesh, ax=ax[0])
+   skfem.visuals.matplotlib.plot(basis_p0, projection_p0, vmin=0, vmax=2, ax=ax[1], shading='gouraud', colorbar=True)
+   skfem.visuals.matplotlib.draw(mesh, ax=ax[1])
+   ax[0].set_xlabel('x[0]'); ax[0].set_ylabel('x[1]')
+   ax[1].set_xlabel('x[0]'); ax[1].set_ylabel('x[1]')
+   ax[0].set_title('projection_p1'); ax[1].set_title('projection_p0');
+
+It is critical to realize in both of the previous two examples, the
+identical "real" function was projected into each of the P1 and P0
+spaces, and the plots are showing the closest approximation to the
+"real" function available in the respective spaces.
+
+To gain further insight into how well these projections are matching
+our "real" functions, it would be useful to examine these projections
+along a line through the space. For this, we can use the ``probes`` method
+on the basis objects we have constructed. Let's use ``f(x) = 4 * abs(x[0] - 0.5)``
+to illustrate how this works.
+
+.. sourcecode::
+
+   N_query_pts = 100
+   x1_value = 0.25
+   query_pts = np.vstack([
+       np.linspace(0,1,N_query_pts),  # x[0] coordinate values
+       x1_value*np.ones(N_query_pts),  # x[1] coordinate values
+   ])
+   p1_probes = basis_p1.probes(query_pts)
+   p0_probes = basis_p0.probes(query_pts)
+   
+   def f(x):
+       return 4 * abs(x[0] - 0.5)
+   
+   projection_p1 = basis_p1.project(f)
+   projection_p0 = basis_p0.project(f)
+   
+   fig, ax = plt.subplots(2, 2, figsize=(12,12))
+   skfem.visuals.matplotlib.plot(basis_p1, projection_p1, vmin=0, vmax=2, ax=ax[0][0], shading='gouraud')
+   skfem.visuals.matplotlib.draw(mesh, ax=ax[0][0])
+   ax[0][0].plot(query_pts[0], query_pts[1], '--r')
+   skfem.visuals.matplotlib.plot(basis_p0, projection_p0, vmin=0, vmax=2, ax=ax[0][1], shading='gouraud')
+   skfem.visuals.matplotlib.draw(mesh, ax=ax[0][1])
+   ax[0][1].plot(query_pts[0], query_pts[1], '--r')
+   ax[0][0].set_xlabel('x[0]'); ax[0][0].set_ylabel('x[1]')
+   ax[0][1].set_xlabel('x[0]'); ax[0][1].set_ylabel('x[1]')
+   ax[0][0].set_title('projection_p1'); ax[0][1].set_title('projection_p0');
+   
+   ax[1][0].plot(query_pts[0], p1_probes @ projection_p1)
+   ax[1][0].set_xlabel('x[0]'); ax[1][0].set_ylabel('f')
+   ax[1][1].plot(query_pts[0], p0_probes @ projection_p0)
+   ax[1][1].set_xlabel('x[0]'); ax[1][1].set_ylabel('f');
+
+
+.. plot::
+
+   import skfem
+   import matplotlib.pyplot as plt
+   import numpy as np
+   import skfem.visuals.matplotlib
+   
+   mesh = skfem.MeshTri().refined(1)
+   basis_p1 = skfem.Basis(mesh, skfem.ElementTriP1())
+   basis_p0 = basis_p1.with_element(skfem.ElementTriP0())
+   N_query_pts = 100
+   x1_value = 0.25
+   query_pts = np.vstack([
+       np.linspace(0,1,N_query_pts),  # x[0] coordinate values
+       x1_value*np.ones(N_query_pts),  # x[1] coordinate values
+   ])
+   p1_probes = basis_p1.probes(query_pts)
+   p0_probes = basis_p0.probes(query_pts)
+   
+   def f(x):
+       return 4 * abs(x[0] - 0.5)
+   
+   projection_p1 = basis_p1.project(f)
+   projection_p0 = basis_p0.project(f)
+   
+   fig, ax = plt.subplots(2, 2, figsize=(12,12))
+   skfem.visuals.matplotlib.plot(basis_p1, projection_p1, vmin=0, vmax=2, ax=ax[0][0], shading='gouraud')
+   skfem.visuals.matplotlib.draw(mesh, ax=ax[0][0])
+   ax[0][0].plot(query_pts[0], query_pts[1], '--r')
+   skfem.visuals.matplotlib.plot(basis_p0, projection_p0, vmin=0, vmax=2, ax=ax[0][1], shading='gouraud')
+   skfem.visuals.matplotlib.draw(mesh, ax=ax[0][1])
+   ax[0][1].plot(query_pts[0], query_pts[1], '--r')
+   ax[0][0].set_xlabel('x[0]'); ax[0][0].set_ylabel('x[1]')
+   ax[0][1].set_xlabel('x[0]'); ax[0][1].set_ylabel('x[1]')
+   ax[0][0].set_title('projection_p1'); ax[0][1].set_title('projection_p0');
+   
+   ax[1][0].plot(query_pts[0], p1_probes @ projection_p1)
+   ax[1][0].set_xlabel('x[0]'); ax[1][0].set_ylabel('f')
+   ax[1][1].plot(query_pts[0], p0_probes @ projection_p0)
+   ax[1][1].set_xlabel('x[0]'); ax[1][1].set_ylabel('f');
+
+One more example, using a more refined mesh and a ``f(x) = sin(2 * pi * x[1])``.
+Note that since we are changing the mesh here, we must
+also reconstruct the basis objects.
+
+.. sourcecode::
+
+   mesh = skfem.MeshTri().refined(5)
+   basis_p1 = skfem.Basis(mesh, skfem.ElementTriP1())
+   basis_p0 = basis_p1.with_element(skfem.ElementTriP0())
+   
+   N_query_pts = 200
+   x0_value = .5
+   query_pts = np.vstack([
+       x0_value * np.ones(N_query_pts),  # x[0] coordinate values
+       np.linspace(0,1,N_query_pts),  # x[1] coordinate values
+   ])
+   p1_probes = basis_p1.probes(query_pts)
+   p0_probes = basis_p0.probes(query_pts)
+   
+   def f(x):
+       return np.sin(2 * np.pi * x[1])
+   
+   projection_p1 = basis_p1.project(f)
+   projection_p0 = basis_p0.project(f)
+   
+   fig, ax = plt.subplots(2, 2, figsize=(12,12))
+   skfem.visuals.matplotlib.plot(basis_p1, projection_p1, vmin=0, vmax=2, ax=ax[0][0], shading='gouraud')
+   skfem.visuals.matplotlib.draw(mesh, ax=ax[0][0])
+   ax[0][0].plot(query_pts[0], query_pts[1], '--r')
+   skfem.visuals.matplotlib.plot(basis_p0, projection_p0, vmin=0, vmax=2, ax=ax[0][1], shading='gouraud')
+   skfem.visuals.matplotlib.draw(mesh, ax=ax[0][1])
+   ax[0][1].plot(query_pts[0], query_pts[1], '--r')
+   ax[0][0].set_xlabel('x[0]'); ax[0][0].set_ylabel('x[1]')
+   ax[0][1].set_xlabel('x[0]'); ax[0][1].set_ylabel('x[1]')
+   ax[0][0].set_title('projection_p1'); ax[0][1].set_title('projection_p0');
+   
+   ax[1][0].plot(query_pts[1], p1_probes @ projection_p1)
+   ax[1][0].set_xlabel('x[1]'); ax[1][0].set_ylabel('f')
+   ax[1][1].plot(query_pts[1], p0_probes @ projection_p0)
+   ax[1][1].set_xlabel('x[1]'); ax[1][1].set_ylabel('f');
+
+.. plot::
+
+   import skfem
+   import matplotlib.pyplot as plt
+   import numpy as np
+   import skfem.visuals.matplotlib
+
+   mesh = skfem.MeshTri().refined(5)
+   basis_p1 = skfem.Basis(mesh, skfem.ElementTriP1())
+   basis_p0 = basis_p1.with_element(skfem.ElementTriP0())
+   
+   N_query_pts = 200
+   x0_value = .5
+   query_pts = np.vstack([
+       x0_value * np.ones(N_query_pts),  # x[0] coordinate values
+       np.linspace(0,1,N_query_pts),  # x[1] coordinate values
+   ])
+   p1_probes = basis_p1.probes(query_pts)
+   p0_probes = basis_p0.probes(query_pts)
+   
+   def f(x):
+       return np.sin(2 * np.pi * x[1])
+   
+   projection_p1 = basis_p1.project(f)
+   projection_p0 = basis_p0.project(f)
+   
+   fig, ax = plt.subplots(2, 2, figsize=(12,12))
+   skfem.visuals.matplotlib.plot(basis_p1, projection_p1, vmin=0, vmax=2, ax=ax[0][0], shading='gouraud')
+   skfem.visuals.matplotlib.draw(mesh, ax=ax[0][0])
+   ax[0][0].plot(query_pts[0], query_pts[1], '--r')
+   skfem.visuals.matplotlib.plot(basis_p0, projection_p0, vmin=0, vmax=2, ax=ax[0][1], shading='gouraud')
+   skfem.visuals.matplotlib.draw(mesh, ax=ax[0][1])
+   ax[0][1].plot(query_pts[0], query_pts[1], '--r')
+   ax[0][0].set_xlabel('x[0]'); ax[0][0].set_ylabel('x[1]')
+   ax[0][1].set_xlabel('x[0]'); ax[0][1].set_ylabel('x[1]')
+   ax[0][0].set_title('projection_p1'); ax[0][1].set_title('projection_p0');
+   
+   ax[1][0].plot(query_pts[1], p1_probes @ projection_p1)
+   ax[1][0].set_xlabel('x[1]'); ax[1][0].set_ylabel('f')
+   ax[1][1].plot(query_pts[1], p0_probes @ projection_p0)
+   ax[1][1].set_xlabel('x[1]'); ax[1][1].set_ylabel('f');
