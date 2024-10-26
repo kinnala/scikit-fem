@@ -1,8 +1,8 @@
 .. _extended:
 
-========================
- Extended documentation
-========================
+===================
+ Extended tutorial
+===================
 
 It is extremely helpful when working with ``skfem`` to understand the
 concepts of quadrature points and degrees-of-freedom, and how these
@@ -325,6 +325,7 @@ our trial function while still leaving x available as an argument for
 
    >>> def plot_query_points(x, ax, style, label):
    >>>     ax.plot(x[0], x[1], style, label=label)
+   >>>     return x[0] * 0
    >>> plt.subplots(figsize=(5,5))
    >>> skfem.visuals.matplotlib.draw(mesh, ax=plt.gca())
    >>> basis_p1.get_dofs(facets=lambda x: plot_query_points(x, plt.gca(), 'or', 'facets'))
@@ -342,6 +343,7 @@ our trial function while still leaving x available as an argument for
    basis_p1 = skfem.Basis(mesh, skfem.ElementTriP1())
    def plot_query_points(x, ax, style, label):
        ax.plot(x[0], x[1], style, label=label)
+       return x[0] * 0
    plt.subplots(figsize=(5,5))
    skfem.visuals.matplotlib.draw(mesh, ax=plt.gca())
    basis_p1.get_dofs(facets=lambda x: plot_query_points(x, plt.gca(), 'or', 'facets'))
