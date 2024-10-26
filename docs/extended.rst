@@ -241,8 +241,8 @@ more descriptive and readable.
 
 .. sourcecode::
 
-   dof_subset_right_edge = basis_p1.get_dofs(facets=lambda x: x[1] > 0.9)
-   fe_approximation[dof_subset_right_edge] = 2
+   dof_subset_top_edge = basis_p1.get_dofs(facets=lambda x: x[1] > 0.9)
+   fe_approximation[dof_subset_top_edge] = 2
    plt.subplots(figsize=(6,5))
    skfem.visuals.matplotlib.plot(basis_p1, fe_approximation, vmin=0, vmax=2, ax=plt.gca(), colorbar=True, shading='gouraud')
    skfem.visuals.matplotlib.draw(mesh, ax=plt.gca())
@@ -263,8 +263,8 @@ more descriptive and readable.
        return x[0] < 0.1
    dof_subset_left_edge = basis_p1.get_dofs(facets=is_on_left_edge)
    fe_approximation[dof_subset_left_edge] = 0
-   dof_subset_right_edge = basis_p1.get_dofs(facets=lambda x: x[1] > 0.9)
-   fe_approximation[dof_subset_right_edge] = 2
+   dof_subset_top_edge = basis_p1.get_dofs(facets=lambda x: x[1] > 0.9)
+   fe_approximation[dof_subset_top_edge] = 2
    plt.subplots(figsize=(6,5))
    skfem.visuals.matplotlib.plot(basis_p1, fe_approximation, vmin=0, vmax=2, ax=plt.gca(), colorbar=True, shading='gouraud')
    skfem.visuals.matplotlib.draw(mesh, ax=plt.gca())
@@ -298,8 +298,8 @@ In a directly analogous manner, we can specify values over entire elements inste
        return x[0] < 0.1
    dof_subset_left_edge = basis_p1.get_dofs(facets=is_on_left_edge)
    fe_approximation[dof_subset_left_edge] = 0
-   dof_subset_right_edge = basis_p1.get_dofs(facets=lambda x: x[1] > 0.9)
-   fe_approximation[dof_subset_right_edge] = 2
+   dof_subset_top_edge = basis_p1.get_dofs(facets=lambda x: x[1] > 0.9)
+   fe_approximation[dof_subset_top_edge] = 2
    # reset the function to be 1 everywhere
    fe_approximation[:] = 1
    dof_subset_bottom_left = basis_p1.get_dofs(elements=lambda x: np.logical_and(x[0]<.3, x[1]<.3))
@@ -392,8 +392,8 @@ labelling facets and elements during mesh construction.)
        return x[0] < 0.1
    dof_subset_left_edge = basis_p1.get_dofs(facets=is_on_left_edge)
    fe_approximation[dof_subset_left_edge] = 0
-   dof_subset_right_edge = basis_p1.get_dofs(facets=lambda x: x[1] > 0.9)
-   fe_approximation[dof_subset_right_edge] = 2
+   dof_subset_top_edge = basis_p1.get_dofs(facets=lambda x: x[1] > 0.9)
+   fe_approximation[dof_subset_top_edge] = 2
    # reset the function to be 1 everywhere
    fe_approximation[:] = 1
    dof_subset_bottom_left = basis_p1.get_dofs(elements=lambda x: np.logical_and(x[0]<.3, x[1]<.3))
@@ -439,8 +439,8 @@ function values at those points.
        return x[0] < 0.1
    dof_subset_left_edge = basis_p1.get_dofs(facets=is_on_left_edge)
    fe_approximation[dof_subset_left_edge] = 0
-   dof_subset_right_edge = basis_p1.get_dofs(facets=lambda x: x[1] > 0.9)
-   fe_approximation[dof_subset_right_edge] = 2
+   dof_subset_top_edge = basis_p1.get_dofs(facets=lambda x: x[1] > 0.9)
+   fe_approximation[dof_subset_top_edge] = 2
    # reset the function to be 1 everywhere
    fe_approximation[:] = 1
    dof_subset_bottom_left = basis_p1.get_dofs(elements=lambda x: np.logical_and(x[0]<.3, x[1]<.3))
@@ -475,7 +475,7 @@ important to understand their relationship with the projections we've
 been constructing. To start this discussion, however, it is important
 to distinguish between "local" coordinates and "global"
 coordinates. In this triangulation we've been working in, the local,
-or reference, triangle is on with vertexes and (0, 0), (1, 0), and (0, 1).
+or reference, triangle is within the unit square with vertexes and (0, 0), (1, 0), and (0, 1).
 
 .. sourcecode::
 
