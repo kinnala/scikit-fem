@@ -27,6 +27,7 @@ Table of contents
 
    self
    gettingstarted
+   extended
    howto
    advanced
    listofexamples

@@ -242,3 +242,5 @@ The remaining DOFs are internal to the element and not shared:
    
 Each DOF is associated either with a node (``nodal_dofs``), a facet
 (``facet_dofs``), an edge (``edge_dofs``), or an element (``interior_dofs``).
+
+
