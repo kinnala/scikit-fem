@@ -4,6 +4,12 @@
  Extended tutorial
 ===================
 
+.. note::
+
+   This is a tutorial for understanding the classes ``Mesh`` and ``Basis``
+   and how they relate to ``numpy`` arrays used in ``skfem`` to represent
+   finite element functions.
+
 It is extremely helpful when working with ``skfem`` to understand the
 concepts of quadrature points and degrees-of-freedom, and how these
 concepts relate to symbolic math expressions, Python functions, and
@@ -42,7 +48,7 @@ This is easy enough to draw in ``matplotlib``. The first row in the points
 array contains the x locations of each point and the second row
 contains the y locations.
 
-.. doctest::
+.. sourcecode::
 
    >>> plt.plot(mesh.p[0], mesh.p[1], 'ok')
 
@@ -606,7 +612,9 @@ precision of the computer. Using more quadrature points than necessary
 does not further improve accuracy and slightly increases computation
 time, but it can provide a common space to perform computations on
 functions that were projected into different finite element
-spaces. For this reason, it is usually preferred to construct the
+spaces.
+
+For this reason, it is usually preferred to construct the
 highest order basis set first (in the present consideration that is
 P1) and then derive the lower order basis set from it. This will
 ensure the basis sets share a common set of quadrature points, and
@@ -619,7 +627,7 @@ of the highest order basis set.
 
 The P0 space has functions that are constant over a cell/element in the mesh
 and consequently discontinuous on the facets between cells/elements. It also
-has fewer degrees of freedom than a P1 basis constructed on the same
+has fewer degrees-of-freedom than a P1 basis constructed on the same
 mesh. Specifically, the P0 basis will have a degree-of-freedom for
 each cell/element in the mesh.
 
