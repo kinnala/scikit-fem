@@ -48,9 +48,9 @@ This is easy enough to draw in ``matplotlib``. The first row in the points
 array contains the x locations of each point and the second row
 contains the y locations.
 
-.. doctest::
+.. sourcecode::
 
-   >>> plt.plot(mesh.p[0], mesh.p[1], 'ok')   # doctest: +SKIP
+   >>> plt.plot(mesh.p[0], mesh.p[1], 'ok')
 
 .. plot::
 
@@ -63,13 +63,13 @@ together to form triangles. Each column specifes the indexes of the
 points that defined the vertexes of the triangle. We can add these
 lines to the plot.
 
-.. doctest::
+.. sourcecode::
 
-   >>> plt.plot(mesh.p[0], mesh.p[1], 'ok')
+   >>> plt.plot(mesh.p[0], mesh.p[1], 'ok')   # doctest: +SKIP
    >>> for t in mesh.t.T: # transpose to iterate over columns
-   >>>     plt.plot(mesh.p[0,[t[0],t[1]]], mesh.p[1,[t[0],t[1]]], 'k')  # from vertex 0 to 1
-   >>>     plt.plot(mesh.p[0,[t[1],t[2]]], mesh.p[1,[t[1],t[2]]], 'k')  # from vertex 1 to 2
-   >>>     plt.plot(mesh.p[0,[t[2],t[0]]], mesh.p[1,[t[2],t[0]]], 'k')  # from vertex 2 back to 0
+   ...     plt.plot(mesh.p[0,[t[0],t[1]]], mesh.p[1,[t[0],t[1]]], 'k')  # from vertex 0 to 1
+   ...     plt.plot(mesh.p[0,[t[1],t[2]]], mesh.p[1,[t[1],t[2]]], 'k')  # from vertex 1 to 2
+   ...     plt.plot(mesh.p[0,[t[2],t[0]]], mesh.p[1,[t[2],t[0]]], 'k')  # from vertex 2 back to 0
 
 .. plot::
 
@@ -87,7 +87,7 @@ as translate it or map it into different coordinates. It also has some
 basic visualization functions to make drawing the mesh on an ``matplotlib`` axis
 easier.
 
-.. doctest::
+.. sourcecode::
 
    >>> import skfem.visuals.matplotlib
    >>> mesh = skfem.MeshTri().refined(1)
@@ -149,7 +149,7 @@ this will always be equal to the number of nodes in the mesh. However,
 this is in general not true, so to get a ``numpy`` array of the correct
 length and initialized to zeros, we will use our basis object.
 
-.. doctest::
+.. sourcecode::
 
    >>> fe_approximation = basis_p1.zeros()
    
@@ -166,7 +166,7 @@ helper function from ``skfem`` to visualize the functions we
 construct. Later we'll explore other ways to interrogate and visualize
 functions we've represented in our finite element space.
 
-.. doctest::
+.. sourcecode::
 
    >>> fe_approximation[:] = 1  # a function that is 1 everywhere; [:] means "all dofs"
    >>> plt.subplots(figsize=(6,5))
@@ -202,7 +202,7 @@ triangles "cells"/"elements". In this context, "cell"/"element" is purely geomet
 and should not be confused with the "finite element" which includes a
 concept of polynomial degree.)
 
-.. doctest::
+.. sourcecode::
 
    >>> def is_on_left_edge(x):
    >>>     return x[0] < 0.1
@@ -239,7 +239,7 @@ make the code more compact. In general though, lambda functions should
 only be used in trivial circumstances. The verbose naming above is
 more descriptive and readable.
 
-.. doctest::
+.. sourcecode::
 
    >>> dof_subset_right_edge = basis_p1.get_dofs(facets=lambda x: x[1] > 0.9)
    >>> fe_approximation[dof_subset_right_edge] = 2
@@ -272,7 +272,7 @@ more descriptive and readable.
 
 In a directly analogous manner, we can specify values over entire elements instead of just edges.
 
-.. doctest::
+.. sourcecode::
 
     >>> # reset the function to be 1 everywhere
     >>> fe_approximation[:] = 1
@@ -327,7 +327,7 @@ using. Note the use of lambda here to supply most of the arguments to
 our trial function while still leaving x available as an argument for
 ``get_dofs()``.
 
-.. doctest::
+.. sourcecode::
 
    >>> def plot_query_points(x, ax, style, label):
    >>>     ax.plot(x[0], x[1], style, label=label)
@@ -367,7 +367,7 @@ red dots on the vertical pair of facets in the center, we should write
 as follows. (Later we will show more robust and precise ways of
 labelling facets and elements during mesh construction.)
 
-.. doctest::
+.. sourcecode::
 
    >>> dof_subset_vertical_centerline = basis_p1.get_dofs(facets=lambda x: np.isclose(x[0], 0.5))
    >>> fe_approximation[:] = 2
@@ -414,7 +414,7 @@ function into the finite element space. The corresponding Python function must
 accept a single argument of point vectors and return an array of
 function values at those points.
 
-.. doctest::
+.. sourcecode::
 
    >>> def f(x):
    >>>     return 4 * abs(x[1] - 0.5)
@@ -477,7 +477,7 @@ to distinguish between "local" coordinates and "global"
 coordinates. In this triangulation we've been working in, the local,
 or reference, triangle is on with vertexes and (0, 0), (1, 0), and (0, 1).
 
-.. doctest::
+.. sourcecode::
 
    >>> plt.subplots(figsize=(5,5))
    >>> plt.plot([0,1,0,0], [0,0,1,0], 'k')
@@ -496,7 +496,7 @@ quadrature points used are available via the basis object we
 constructed previously, so we can plot their locations on the
 reference triangle.
 
-.. doctest::
+.. sourcecode::
 
    >>> plt.subplots(figsize=(5,5))
    >>> plt.plot([0,1,0,0], [0,0,1,0], 'k')
@@ -522,7 +522,7 @@ reference triangle.
 We can get a global visualization of the quadrature points by reverse
 mapping the local coordinates to each of the triangles in our mesh.
 
-.. doctest::
+.. sourcecode::
 
    >>> global_points = basis_p1.mapping.F(points)
    >>> plt.subplots(figsize=(5,5))
@@ -549,7 +549,7 @@ mapping the local coordinates to each of the triangles in our mesh.
 
 The ``global_points`` array is organized as (coordinate, element_index, quadrature_index):
 
-.. doctest::
+.. sourcecode::
 
    >>> global_points.shape  # 2 dimensional, 8 elements, 3 points/element
    (2, 8, 3)
@@ -559,7 +559,7 @@ quadrature points with the values of a (projected) function sampled at
 those locations. To do this, we'll use the ``interpolate`` method of our
 basis object on a function projected into finite element space.
 
-.. doctest::
+.. sourcecode::
 
    >>> def f(x):
    >>>     return x[0] + x[1]
@@ -621,7 +621,7 @@ ensure the basis sets share a common set of quadrature points, and
 that there are enough quadrature points to perform exact integration
 of the highest order basis set.
 
-.. doctest::
+.. sourcecode::
 
    >>> basis_p0 = basis_p1.with_element(skfem.ElementTriP0())
 
@@ -631,7 +631,7 @@ has fewer degrees-of-freedom than a P1 basis constructed on the same
 mesh. Specifically, the P0 basis will have a degree-of-freedom for
 each cell/element in the mesh.
 
-.. doctest::
+.. sourcecode::
 
    >>> print(f'{basis_p1.zeros().shape[0]} dofs in P1 == {mesh.p.shape[1]} nodes in the mesh')
    >>> print(f'{basis_p0.zeros().shape[0]} dofs in P0 == {mesh.t.shape[1]} elements in the mesh')
