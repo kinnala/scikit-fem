@@ -32,6 +32,8 @@ class Element:
         numbering.
     edge_dofs
         Number of DOFs per edge.  Used to define the global DOF numbering.
+    global_dofs
+        Number of DOFs unrelated to any topological entities.
     dim
         The spatial dimension.
     maxdeg
@@ -45,6 +47,7 @@ class Element:
     facet_dofs: int = 0
     interior_dofs: int = 0
     edge_dofs: int = 0
+    global_dofs: int = 0
     maxdeg: int = -1
     dofnames: List[str] = []
     refdom: Type[Refdom] = Refdom
@@ -142,7 +145,8 @@ class Element:
         return np.array([self.nodal_dofs * self.refdom.nnodes,
                          self.edge_dofs * self.refdom.nedges,
                          self.facet_dofs * self.refdom.nfacets,
-                         self.interior_dofs])
+                         self.interior_dofs,
+                         self.global_dofs])
 
     def __mul__(self, other):
 
