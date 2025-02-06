@@ -42,6 +42,11 @@ class JaxDiscreteField(object):
             return self.value - other.value
         return self.value - other
 
+    def __rsub__(self, other):
+        if isinstance(other, JaxDiscreteField):
+            return other.value - self.value
+        return other - self.value
+
     def __mul__(self, other):
         if isinstance(other, JaxDiscreteField):
             return self.value * other.value
