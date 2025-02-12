@@ -57,6 +57,16 @@ class JaxDiscreteField(object):
             return self.value * other.value
         return self.value * other
 
+    def __truediv__(self, other):
+        if isinstance(other, JaxDiscreteField):
+            return self.value / other.value
+        return self.value / other
+
+    def __rtruediv__(self, other):
+        if isinstance(other, JaxDiscreteField):
+            return other.value / self.value
+        return other / self.value
+
     def __pow__(self, ix):
         return self.value ** ix
 
