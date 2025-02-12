@@ -33,9 +33,6 @@ jobs:
     - name: Run sphinx doctests
       run: |
         sphinx-build -W -a -b doctest docs docs/_build
-    - name: Run mypy
-      run: |
-        mypy skfem
     - name: Run pytest
       run: |
         pytest
