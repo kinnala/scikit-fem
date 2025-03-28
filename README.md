@@ -40,6 +40,7 @@ pip install scikit-fem[all]
 Remove `[all]` to not install the optional dependencies `meshio` for mesh
 input/output, and `matplotlib` for creating simple visualizations.
 The minimal dependencies are `numpy` and `scipy`.
+Some submodules require other optional dependencies: `skfem.autodiff` requires `jax` and `jaxlib`, `skfem.supermeshing` requires `shapely`.
 You can also try the library in browser through [Google Colab](https://colab.research.google.com/github/kinnala/scikit-fem-notebooks/blob/master/ex1.ipynb).
 
 ## Examples
@@ -116,8 +117,8 @@ More examples can be found in the [gallery](https://scikit-fem.readthedocs.io/en
 
 *The following benchmark (`docs/examples/performance.py`) demonstrates the time
 spent on finite element assembly in comparison to the time spent on linear
-solve.  The given numbers were calculated using a ThinkPad X1 Carbon laptop (7th
-gen).  Note that the timings are only illustrative as they depend on, e.g., the
+solve.  The given numbers were calculated using Macbook Pro M2 laptop.
+Note that the timings are only illustrative as they depend on, e.g., the
 type of element used, the number of quadrature points used, the type of linear
 solver, and the complexity of the forms.  This benchmark solves the Laplace
 equation using linear tetrahedral elements and the default direct sparse solver
@@ -125,16 +126,27 @@ of `scipy.sparse.linalg.spsolve`.*
 
 | Degrees-of-freedom | Assembly (s) | Linear solve (s) |
 | --- | --- | --- |
-| 4096 | 0.04805 | 0.04241 |
-| 8000 | 0.09804 | 0.16269 |
-| 15625 | 0.20347 | 0.87741 |
-| 32768 | 0.46399 | 5.98163 |
-| 64000 | 1.00143 | 36.47855 |
-| 125000 | 2.05274 | nan |
-| 262144 | 4.48825 | nan |
-| 512000 | 8.82814 | nan |
-| 1030301 | 18.25461 | nan |
+| 64 | 0.00633 | 0.00159 |
+| 125 | 0.00275 | 0.00092 |
+| 216 | 0.00334 | 0.00068 |
+| 512 | 0.00593 | 0.00100 |
+| 1000 | 0.00823 | 0.00182 |
+| 1728 | 0.01239 | 0.00374 |
+| 4096 | 0.02679 | 0.07657 |
+| 8000 | 0.05288 | 0.33537 |
+| 15625 | 0.11714 | 1.81805 |
+| 32768 | 0.26042 | 11.48140 |
+| 64000 | 0.54313 | 62.69441 |
+| 125000 | 1.10499 | nan |
+| 262144 | 2.72761 | nan |
+| 512000 | 5.61395 | nan |
+| 1030301 | 12.58563 | nan |
 
+The conclusion is that in many cases the
+time spent on linear solve will significantly dominate
+and a Python package such as `scikit-fem`
+can be fast enough for assembling
+the finite element matrices.
 
 ## Documentation
 
