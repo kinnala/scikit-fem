@@ -1,7 +1,7 @@
 """Contact problem."""
 from skfem import *
-from skfem.experimental.autodiff import *
-from skfem.experimental.autodiff.helpers import *
+from skfem.autodiff import *
+from skfem.autodiff.helpers import *
 from skfem.supermeshing import intersect, elementwise_quadrature
 import jax.numpy as jnp
 import numpy as np
