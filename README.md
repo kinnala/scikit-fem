@@ -212,6 +212,15 @@ with respect to documented and/or tested features.
 ### Unreleased
 
 - Added: Support for Python 3.13.
+- Added: `skfem.autodiff` module for linearizing nonlinear variational forms
+  and solving them using the Newton method.
+  This is done
+  with the help of the new decorator `NonlinearForm`.
+  There are currently two examples using this functionality: ex45 and ex51.
+  The use of `skfem.autodiff` requires the optional
+  dependency [JAX](https://docs.jax.dev/en/latest/quickstart.html).
+- Added: A corresponding set of helper functions `skfem.autodiff.helpers`
+  for defining nonlinear variational forms.
 - Removed: Support for Python 3.8.
 
 ### [10.0.2] - 2024-09-03
