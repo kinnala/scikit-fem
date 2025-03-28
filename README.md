@@ -1,6 +1,6 @@
 # scikit-fem
 
-`scikit-fem` is a pure Python 3.8+ library for performing [finite element
+`scikit-fem` is a pure Python 3.9+ library for performing [finite element
 assembly](https://en.wikipedia.org/wiki/Finite_element_method). Its main
 purpose is the transformation of bilinear forms into sparse matrices and linear
 forms into vectors.
@@ -208,6 +208,11 @@ for first timers include:
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 with respect to documented and/or tested features.
+
+### Unreleased
+
+- Added: Support for Python 3.13.
+- Removed: Support for Python 3.8.
 
 ### [10.0.2] - 2024-09-03
 
