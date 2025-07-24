@@ -116,63 +116,88 @@ def from_meshio(m,
     subdomains = {}
     boundaries = {}
 
-    # parse any subdomains from cell_sets
-    if m.cell_sets:
-        subdomains = {k: v[meshio_type].astype(np.int32)
-                      for k, v in m.cell_sets_dict.items()
-                      if meshio_type in v}
+    ###################################################################################
+    # NOTE: Create a cell_index_dict dictionary that holds the name of the physical
+    # region, element type, and element indices using the form:
+    # {region: {element type: element indices}}
+
+    # HACK: only the "names" of the physical groups are read
+    cell_index_dict = {k: v for k, v in m.cell_sets_dict.items() if "gmsh" not in k}
+
+    # HACK: check if tags are provided to the mesh as integer cell functions.
+    # If so, load them as cell_index_dict. This is tested for Gmsh 4.1 msh files,
+    # and Salome med files.
+    if not cell_index_dict:
+        subdomain_tag_key = None
+        for key in ["gmsh:physical", "cell_tags"]:
+            if key in m.cell_data_dict:
+                subdomain_tag_key = key
+                break
+        if subdomain_tag_key:
+            cell_type_dict = m.cell_data_dict[subdomain_tag_key]
+            for k, v in cell_type_dict.items():
+                unique_tags = np.unique(v)
+                for tag in unique_tags:
+                    cell_index_dict[str(tag)] = (
+                        {k: np.where(v == tag)[0]}
+                        if str(tag) not in cell_index_dict
+                        else cell_index_dict[str(tag)].update(
+                            {k: np.where(v == tag)[0]}
+                        )
+                    )
 
     # create temporary mesh for matching boundary elements
     mtmp = mesh_type(p, t, validate=False)
     bnd_type = BOUNDARY_TYPE_MAPPING[meshio_type]
 
-    # parse boundaries from cell_sets
-    if m.cell_sets and bnd_type in m.cells_dict:
-        p2f = mtmp.p2f
-        for k, v in m.cell_sets_dict.items():
-            if bnd_type in v and k.split(":")[0] != "gmsh":
-                facets = m.cells_dict[bnd_type][v[bnd_type]].T
-                sorted_facets = np.sort(facets, axis=0)
-                ind = p2f[:, sorted_facets[0]]
-                for itr in range(sorted_facets.shape[0] - 1):
-                    ind = ind.multiply(p2f[:, sorted_facets[itr + 1]])
-                # does not preserve order:
-                # boundaries[k] = np.nonzero(ind)[0].astype(np.int32)
-                ii, jj = ind.nonzero()
-                boundaries[k] = ii[np.argsort(jj)]
+    for k, v in cell_index_dict.items():
+        # parse any subdomains
+        if meshio_type in v:
+            subdomains[k] = v[meshio_type]
 
-                if not ignore_orientation:
-                    try:
-                        ori = np.zeros_like(boundaries[k], dtype=np.float64)
-                        t1, t2 = mtmp.f2t[:, boundaries[k]]
-                        if facets.shape[0] == 2:
-                            tangents = (mtmp.p[:, facets[1]]
-                                        - mtmp.p[:, facets[0]])
-                            normals = np.array([-tangents[1], tangents[0]])
-                        elif facets.shape[0] == 3:
-                            tangents1 = (mtmp.p[:, facets[1]]
-                                         - mtmp.p[:, facets[0]])
-                            tangents2 = (mtmp.p[:, facets[2]]
-                                         - mtmp.p[:, facets[0]])
-                            normals = -np.cross(tangents1.T, tangents2.T).T
-                        else:
-                            raise NotImplementedError
-                        # perform a dot product between the proposed normal
-                        # and the edges of the element to fix the orientation
-                        for itr in range(mtmp.t.shape[0]):
-                            ori += np.sum(normals
-                                          * (mtmp.p[:, facets[0]]
-                                             - mtmp.p[:, mtmp.t[itr, t1]]),
-                                          axis=0)
-                        ori = 1 * (ori > 0)
-                        # check that the orientation is not 'illegal'
-                        # this might happen for a hole
-                        # as a consequence, choose the only valid ori
-                        ori[t2 == -1] = 0
-                        boundaries[k] = OrientedBoundary(boundaries[k],
-                                                         ori)
-                    except Exception:
-                        logger.warning("Failure to orient a boundary.")
+        # parse boundaries
+        if bnd_type in v:
+            p2f = mtmp.p2f
+            facets = m.cells_dict[bnd_type][v[bnd_type]].T
+            sorted_facets = np.sort(facets, axis=0)
+            ind = p2f[:, sorted_facets[0]]
+            for itr in range(sorted_facets.shape[0] - 1):
+                ind = ind.multiply(p2f[:, sorted_facets[itr + 1]])
+            # does not preserve order:
+            # boundaries[k] = np.nonzero(ind)[0].astype(np.int32)
+            ii, jj = ind.nonzero()
+            boundaries[k] = ii[np.argsort(jj)]
+
+            if not ignore_orientation:
+                try:
+                    ori = np.zeros_like(boundaries[k], dtype=np.float64)
+                    t1, t2 = mtmp.f2t[:, boundaries[k]]
+                    if facets.shape[0] == 2:
+                        tangents = mtmp.p[:, facets[1]] - mtmp.p[:, facets[0]]
+                        normals = np.array([-tangents[1], tangents[0]])
+                    elif facets.shape[0] == 3:
+                        tangents1 = mtmp.p[:, facets[1]] - mtmp.p[:, facets[0]]
+                        tangents2 = mtmp.p[:, facets[2]] - mtmp.p[:, facets[0]]
+                        normals = -np.cross(tangents1.T, tangents2.T).T
+                    else:
+                        raise NotImplementedError
+                    # perform a dot product between the proposed normal
+                    # and the edges of the element to fix the orientation
+                    for itr in range(mtmp.t.shape[0]):
+                        ori += np.sum(
+                            normals
+                            * (mtmp.p[:, facets[0]] - mtmp.p[:, mtmp.t[itr, t1]]),
+                            axis=0,
+                        )
+                    ori = 1 * (ori > 0)
+                    # check that the orientation is not 'illegal'
+                    # this might happen for a hole
+                    # as a consequence, choose the only valid ori
+                    ori[t2 == -1] = 0
+                    boundaries[k] = OrientedBoundary(boundaries[k], ori)
+                except Exception:
+                    logger.warning("Failure to orient a boundary.")
+#######################################################################################
 
     # MSH 2.2 tag parsing
     if len(boundaries) == 0 and m.cell_data and m.field_data:
