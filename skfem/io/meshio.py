@@ -138,10 +138,15 @@ def from_meshio(m,
             for k, v in cell_type_dict.items():
                 unique_tags = np.unique(v)
                 for tag in unique_tags:
-                    cell_index_dict[str(tag)] = (
+                    name_tag = (
+                        m.cell_tags[tag][0]
+                        if (hasattr(m, "cell_tags") and (tag in m.cell_tags))
+                        else str(tag)
+                    )
+                    cell_index_dict[name_tag] = (
                         {k: np.where(v == tag)[0]}
-                        if str(tag) not in cell_index_dict
-                        else cell_index_dict[str(tag)].update(
+                        if name_tag not in cell_index_dict
+                        else cell_index_dict[name_tag].update(
                             {k: np.where(v == tag)[0]}
                         )
                     )
