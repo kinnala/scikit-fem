@@ -141,7 +141,7 @@ def from_meshio(m,
                     name_tag = (
                         m.cell_tags[tag][0]
                         if (hasattr(m, "cell_tags") and (tag in m.cell_tags))
-                        else str(tag)
+                        else int(tag)
                     )
                     cell_index_dict[name_tag] = (
                         {k: np.where(v == tag)[0]}
