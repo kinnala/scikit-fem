@@ -143,13 +143,10 @@ def from_meshio(m,
                         if (hasattr(m, "cell_tags") and (tag in m.cell_tags))
                         else int(tag)
                     )
-                    cell_index_dict[name_tag] = (
-                        {k: np.where(v == tag)[0]}
-                        if name_tag not in cell_index_dict
-                        else cell_index_dict[name_tag].update(
-                            {k: np.where(v == tag)[0]}
-                        )
-                    )
+                    if name_tag not in cell_index_dict:
+                        cell_index_dict[name_tag] = {k: np.where(v == tag)[0]}
+                    else:
+                        cell_index_dict[name_tag].update({k: np.where(v == tag)[0]})
 
     # create temporary mesh for matching boundary elements
     mtmp = mesh_type(p, t, validate=False)
