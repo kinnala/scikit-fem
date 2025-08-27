@@ -116,17 +116,19 @@ def from_meshio(m,
     subdomains = {}
     boundaries = {}
 
-    ###################################################################################
-    # NOTE: Create a cell_index_dict dictionary that holds the name of the physical
-    # region, element type, and element indices using the form:
+    ###########################################################################
+    # NOTE: Create a cell_index_dict dictionary that holds the name of the
+    # physical region, element type, and element indices using the form:
     # {region: {element type: element indices}}
 
     # HACK: only the "names" of the physical groups are read
-    cell_index_dict = {k: v for k, v in m.cell_sets_dict.items() if "gmsh" not in k}
+    cell_index_dict = {
+        k: v for k, v in m.cell_sets_dict.items() if "gmsh" not in k
+    }
 
     # HACK: check if tags are provided to the mesh as integer cell functions.
-    # If so, load them as cell_index_dict. This is tested for Gmsh 4.1 msh files,
-    # and Salome med files.
+    # If so, load them as cell_index_dict. This is tested for Gmsh 4.1 msh
+    # files, and Salome med files.
     if not cell_index_dict:
         subdomain_tag_key = None
         for key in ["gmsh:physical", "cell_tags"]:
@@ -138,15 +140,26 @@ def from_meshio(m,
             for k, v in cell_type_dict.items():
                 unique_tags = np.unique(v)
                 for tag in unique_tags:
-                    name_tag = (
-                        m.cell_tags[tag][0]
-                        if (hasattr(m, "cell_tags") and (tag in m.cell_tags))
-                        else int(tag)
-                    )
+                    if hasattr(m, "cell_tags") and (tag in m.cell_tags):
+                        name_tag = m.cell_tags[tag][0]
+                    elif m.field_data:
+                        rev_field_data = {
+                            v[0]: i for i, v in m.field_data.items()
+                        }
+                        name_tag = (
+                            rev_field_data[tag]
+                            if tag in rev_field_data
+                            else int(tag)
+                        )
+                    else:
+                        name_tag = int(tag)
+
                     if name_tag not in cell_index_dict:
                         cell_index_dict[name_tag] = {k: np.where(v == tag)[0]}
                     else:
-                        cell_index_dict[name_tag].update({k: np.where(v == tag)[0]})
+                        cell_index_dict[name_tag].update(
+                            {k: np.where(v == tag)[0]}
+                        )
 
     # create temporary mesh for matching boundary elements
     mtmp = mesh_type(p, t, validate=False)
@@ -188,7 +201,9 @@ def from_meshio(m,
                     for itr in range(mtmp.t.shape[0]):
                         ori += np.sum(
                             normals
-                            * (mtmp.p[:, facets[0]] - mtmp.p[:, mtmp.t[itr, t1]]),
+                            * (mtmp.p[:, facets[0]]
+                               - mtmp.p[:, mtmp.t[itr, t1]]
+                               ),
                             axis=0,
                         )
                     ori = 1 * (ori > 0)
@@ -199,7 +214,7 @@ def from_meshio(m,
                     boundaries[k] = OrientedBoundary(boundaries[k], ori)
                 except Exception:
                     logger.warning("Failure to orient a boundary.")
-#######################################################################################
+###############################################################################
 
     # MSH 2.2 tag parsing
     if len(boundaries) == 0 and m.cell_data and m.field_data:
