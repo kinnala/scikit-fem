@@ -27,6 +27,18 @@ def dddot(u, v):
     return jnp.einsum('ijk...,ijk...', u, v)
 
 
+def prod(u, v, w=None):
+    if isinstance(u, JaxDiscreteField):
+        u = u.value
+    if isinstance(v, JaxDiscreteField):
+        v = v.value
+    if isinstance(w, JaxDiscreteField):
+        w = w.value
+    if w is None:
+        return jnp.einsum('i...,j...->ij...', u, v)
+    return jnp.einsum('i...,j...,k...->ijk...', u, v, w)
+
+
 def grad(u):
     return u.grad
 
