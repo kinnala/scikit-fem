@@ -1361,3 +1361,63 @@ class Mesh:
             else:
                 raise ValueError("Subdomain '{}' not found.".format(elements))
         raise NotImplementedError
+
+    def distribute(self, comm):
+        """Split mesh using pymetis and distribute for PETSc.
+
+        Parameters
+        ----------
+        comm
+            PETSc Comm object.
+
+        """
+        import pymetis
+
+        # number of ranks
+        N = comm.size
+        mpicomm = comm.tompi4py()  # use mpi4py to send/recv data
+        assert N > 1
+
+        if comm.rank == 0:
+
+            # split based on number of ranks
+            _, _, mship = pymetis.part_mesh(N, self.t.T)
+            mship = np.array(mship, dtype=np.int32)
+            
+            # reorder mesh so that nodes belonging to 0 come first etc.
+            # this is used in rank 0 for post processing etc.
+            ix = np.argsort(mship)
+            rix = np.argsort(ix)
+            p = self.p[:, ix]
+            t = rix[self.t]
+            
+            # TODO reindex subdomains and boundaries
+            remesh = replace(
+                self,
+                doflocs=p,
+                t=t,
+            )
+
+            nglob = p.shape[1]
+            #_, counts = np.unique(mship, return_counts=True)
+            tmship = mship[self.t]
+            for rank in range(N):
+                domain = np.nonzero((tmship == rank).all(axis=0))[0]
+                halo = np.nonzero((tmship == rank).any(axis=0))[0]
+                restr, rmap = (remesh
+                               .with_subdomains({'domain': domain})
+                               .restrict(halo, return_mapping=True))
+                interior = np.nonzero(
+                    np.in1d(rmap,
+                            np.unique(remesh.t[:, domain].flatten())))[0]
+                
+                data = (restr, rmap[interior], interior, nglob)
+                
+                if rank > 0:
+                    mpicomm.send(data, dest=rank)
+                else:
+                    retval = data
+
+            return retval
+
+        return mpicomm.recv(source=0)
