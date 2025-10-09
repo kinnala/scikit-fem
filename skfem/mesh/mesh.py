@@ -1381,43 +1381,34 @@ class Mesh:
         if comm.rank == 0:
 
             # split based on number of ranks
-            _, _, mship = pymetis.part_mesh(N, self.t.T)
-            mship = np.array(mship, dtype=np.int32)
-            
-            # reorder mesh so that nodes belonging to 0 come first etc.
-            # this is used in rank 0 for post processing etc.
-            ix = np.argsort(mship)
-            rix = np.argsort(ix)
-            p = self.p[:, ix]
-            t = rix[self.t]
-            
-            # TODO reindex subdomains and boundaries
-            remesh = replace(
-                self,
-                doflocs=p,
-                t=t,
-            )
 
-            nglob = p.shape[1]
-            #_, counts = np.unique(mship, return_counts=True)
-            tmship = mship[self.t]
+            _, mship, _ = pymetis.part_mesh(
+                N,
+                self.t.T,
+                gtype=pymetis.GType.DUAL,
+                ncommon=len(self.elem.refdom.facets[0])
+            )
+            mship = np.array(mship, dtype=np.int32)
+
+            subs = []
+
             for rank in range(N):
-                domain = np.nonzero((tmship == rank).all(axis=0))[0]
-                halo = np.nonzero((tmship == rank).any(axis=0))[0]
-                restr, rmap = (remesh
-                               .with_subdomains({'domain': domain})
-                               .restrict(halo, return_mapping=True))
-                interior = np.nonzero(
-                    np.in1d(rmap,
-                            np.unique(remesh.t[:, domain].flatten())))[0]
-                
-                data = (restr, rmap[interior], interior, nglob)
+                sub = np.nonzero(mship == rank)[0]
+                restr, rmap = self.restrict(sub, return_mapping=True)
+                subs.append(sub)
                 
                 if rank > 0:
-                    mpicomm.send(data, dest=rank)
+                    mpicomm.send(restr, dest=rank)
                 else:
-                    retval = data
+                    retval = restr
 
+            # rank == 0
+            retval._subs = subs
+            retval._comm = comm
+            retval._orig = self
             return retval
 
-        return mpicomm.recv(source=0)
+        # rank > 0
+        retval = mpicomm.recv(source=0)
+        retval._comm = comm
+        return retval
