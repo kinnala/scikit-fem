@@ -151,6 +151,27 @@ class MappingAffine(Mapping):
             self._init_boundary_mapping()
         return self._detB
 
+    @property
+    def C(self):
+        """Edge affine mapping matrix."""
+        if not hasattr(self, '_C'):
+            self._init_edge_mapping()
+        return self._C
+
+    @property
+    def d(self):
+        """Edge affine mapping constant."""
+        if not hasattr(self, '_d'):
+            self._init_edge_mapping()
+        return self._d
+
+    @property
+    def detC(self):
+        """Edge affine mapping determinant."""
+        if not hasattr(self, '_detC'):
+            self._init_edge_mapping()
+        return self._detC
+
     def _init_boundary_mapping(self):
         """For lazy evaluation of boundary mapping."""
         dim = self.dim
@@ -179,6 +200,26 @@ class MappingAffine(Mapping):
                                   self._B[1, 0] * self._B[0, 1]) ** 2)
         else:
             raise Exception("Not implemented for the given dimension.")
+
+    def _init_edge_mapping(self):
+        """For lazy evaluation of edge mapping."""
+        dim = self.dim
+        assert dim == 3
+
+        ne = self.mesh.edges.shape[1]
+        # initialize the boundary mapping
+        self._C = np.empty((dim, 1, ne))
+        self._d = np.empty((dim, ne))
+
+        for i in range(dim):
+            self._d[i] = self.mesh.p[i, self.mesh.edges[0]]
+            self._C[i, 0] = (self.mesh.p[i, self.mesh.edges[1]] -
+                             self.mesh.p[i, self.mesh.edges[0]])
+
+        # length scaling
+        self._detC = np.sqrt(self._C[0, 0] ** 2
+                             + self._C[1, 0] ** 2
+                             + self._C[2, 0] ** 2)
 
     def F(self, X, tind=None):
         if tind is None or self.tind is not None:
@@ -251,6 +292,27 @@ class MappingAffine(Mapping):
             detDG = self.detB[find]
 
         return np.tile(detDG, (X.shape[-1], 1)).T
+
+    def H(self, X, eind=None):
+        if eind is None:
+            C, d = self.C, self.d
+        else:
+            C, d = self.C[:, :, eind], self.d[:, eind]
+
+        if len(X.shape) == 2:
+            return (np.einsum('ijk,jl', C, X).T + d.T).T
+        elif len(X.shape) == 3:
+            return (np.einsum('ijk,jkl->ikl', C, X).T + d.T).T
+
+        raise Exception("Wrong dimension of input.")
+
+    def detDH(self, X, eind=None):
+        if eind is None:
+            detDH = self.detC
+        else:
+            detDH = self.detC[eind]
+
+        return np.tile(detDH, (X.shape[-1], 1)).T
 
     def normals(self, X, tind, find, t2f):
         if self.dim == 1:
