@@ -115,6 +115,23 @@ class COOData:
             out[tuple(self.indices[:, itr])] += self.data[itr]
         return out
 
+    def topetsc(self):
+        """Convert to PETSc matrix."""
+        import petsc4py.PETSc as petsc
+
+        if len(self.shape) == 1:
+            f = self.toarray()
+            return petsc.Vec().createWithArray(f, comm=petsc.COMM_SELF)
+        elif len(self.shape) == 2:
+            K = self.tocsr()
+            return petsc.Mat().createAIJ(size=K.shape,
+                                         csr=(K.indptr,
+                                              K.indices,
+                                              K.data),
+                                         comm=petsc.COMM_SELF)
+
+        raise NotImplementedError
+
     def astuple(self):
         return self.indices, self.data, self.shape
 

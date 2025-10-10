@@ -71,6 +71,7 @@ class Form:
         return self.assemble(self.kernel(*args))
 
     def assemble(self, *args, **kwargs) -> Any:
+        """Assemble system matrix as SciPy CSR sparse matrix."""
         assert self.form is not None
         logger.info("Assembling '{}'.".format(self.form.__name__))
         out = (COOData(*self._assemble(*args, **kwargs))  # type: ignore
@@ -78,8 +79,14 @@ class Form:
         logger.info("Assembling finished.")
         return out
 
-    def coo_data(self, *args, **kwargs) -> COOData:
+    def elemental(self, *args, **kwargs) -> COOData:
+        """Build elemental matrices without full assembly."""
         return COOData(*self._assemble(*args, **kwargs))  # type: ignore
+
+    def coo_data(self, *args, **kwargs):
+        # for backwards compatibility
+        # use Form.elemental instead
+        return COOData(*self._assemble(*args, **kwargs))
 
     @staticmethod
     def _normalize_asm_kwargs(w, basis):

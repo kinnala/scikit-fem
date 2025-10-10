@@ -1379,9 +1379,7 @@ class Mesh:
         assert N > 1
 
         if comm.rank == 0:
-
             # split based on number of ranks
-
             _, mship, _ = pymetis.part_mesh(
                 N,
                 self.t.T,
@@ -1389,14 +1387,12 @@ class Mesh:
                 ncommon=len(self.elem.refdom.facets[0])
             )
             mship = np.array(mship, dtype=np.int32)
-
             subs = []
 
             for rank in range(N):
                 sub = np.nonzero(mship == rank)[0]
-                restr, rmap = self.restrict(sub, return_mapping=True)
+                restr = self.restrict(sub)
                 subs.append(sub)
-                
                 if rank > 0:
                     mpicomm.send(restr, dest=rank)
                 else:
