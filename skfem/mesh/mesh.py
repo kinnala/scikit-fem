@@ -1362,7 +1362,7 @@ class Mesh:
                 raise ValueError("Subdomain '{}' not found.".format(elements))
         raise NotImplementedError
 
-    def distribute(self, comm):
+    def distributed(self, comm):
         """Split mesh using pymetis and distribute for PETSc.
 
         Parameters
@@ -1398,7 +1398,6 @@ class Mesh:
                 else:
                     retval = restr
 
-            # rank == 0
             retval._subs = subs
             retval._comm = comm
             retval._orig = self

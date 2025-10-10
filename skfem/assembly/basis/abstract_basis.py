@@ -56,6 +56,28 @@ class AbstractBasis:
         self.mapping = mesh._mapping() if mapping is None else mapping
         self.dofs = Dofs(mesh, elem) if dofs is None else dofs
 
+        # if mesh is distributed
+        # construct local-to-global DOF mapping ("globnums")
+        if hasattr(mesh, '_comm'):
+            # distributed mesh is detected
+            comm = mesh._comm
+            mpicomm = comm.tompi4py()
+
+            if comm.rank == 0:
+                gdofs = Dofs(mesh._orig, elem)
+                for rank in range(comm.size):
+                    ldofs = gdofs.element_dofs[:, mesh._subs[rank]]
+                    if rank > 0:
+                        mpicomm.send((ldofs, gdofs.N), dest=rank)
+                    else:
+                        self._globnums = np.zeros(self.dofs.N, dtype=np.int32)
+                        self._globnums[self.dofs.element_dofs] = ldofs
+                        self._nglob = gdofs.N
+            else:
+                ldofs, self._nglob = mpicomm.recv(source=0)
+                self._globnums = np.zeros(self.dofs.N, dtype=np.int32)
+                self._globnums[self.dofs.element_dofs] = ldofs
+
         # global degree-of-freedom location
         if not disable_doflocs:
             try:
