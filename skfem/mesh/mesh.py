@@ -1398,12 +1398,14 @@ class Mesh:
                 else:
                     retval = restr
 
-            retval._subs = subs
-            retval._comm = comm
-            retval._orig = self
+            retval._dist = {}
+            retval._dist['subs'] = subs
+            retval._dist['comm'] = comm
+            retval._dist['orig'] = self
             return retval
 
         # rank > 0
         retval = mpicomm.recv(source=0)
-        retval._comm = comm
+        retval._dist = {}
+        retval._dist['comm'] = comm
         return retval

@@ -115,20 +115,59 @@ class COOData:
             out[tuple(self.indices[:, itr])] += self.data[itr]
         return out
 
-    def topetsc(self):
-        """Convert to PETSc matrix."""
+    def topetsc(self, dofs=None):
+        """Convert to PETSc matrix.
+
+        Parameters
+        ----------
+        dofs
+            If given, then the matrix will be distributed ("mpiaij" in
+            PETSc jargon).  Otherwise, a local matrix is returned.
+
+        """
         import petsc4py.PETSc as petsc
 
         if len(self.shape) == 1:
             f = self.toarray()
-            return petsc.Vec().createWithArray(f, comm=petsc.COMM_SELF)
+            locvec = petsc.Vec().createWithArray(f, comm=petsc.COMM_SELF)
+            if dofs is None:
+                return locvec
+
+            comm = dofs.topo._dist['comm']
+            vec = petsc.Vec().create(comm=comm)
+            vec.setSizes(dofs._dist['nglob'])
+            vec.setType(petsc.Vec.Type.MPI)
+            scat = petsc.Scatter().create(
+                locvec,
+                None,
+                vec,
+                dofs._dist['iset'],
+            )
+            scat.scatter(locvec, vec, addv=petsc.InsertMode.ADD)
+
+            return vec
+            
         elif len(self.shape) == 2:
             K = self.tocsr()
-            return petsc.Mat().createAIJ(size=K.shape,
-                                         csr=(K.indptr,
-                                              K.indices,
-                                              K.data),
-                                         comm=petsc.COMM_SELF)
+            locmat = petsc.Mat().createAIJ(size=K.shape,
+                                           csr=(K.indptr,
+                                                K.indices,
+                                                K.data),
+                                           comm=petsc.COMM_SELF)
+            if dofs is None:
+                return locmat
+
+            comm = dofs.topo._dist['comm']
+            mat = petsc.Mat().create(comm=comm)
+            mat.setSizes((dofs._dist['nglob'],
+                          dofs._dist['nglob']), bsize=1)
+            mat.setType(petsc.Mat.Type.IS)
+            mat.setLGMap(dofs._dist['lgmap'])
+            mat.setISLocalMat(locmat)
+            mat.assemble()
+            mat.convert("mpiaij")
+
+            return mat
 
         raise NotImplementedError
 
