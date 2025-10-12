@@ -12,3 +12,4 @@ jax
 jaxlib
 pep517
 shapely
+petsc4py
