@@ -1,0 +1,23 @@
+name: tests-mamba
+
+on:
+  pull_request:
+  push:
+    branches: master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: mamba-org/setup-micromamba@v2
+      with:
+        environment-file: environment.yml
+        init-shell: >-
+          bash
+        cache-environment: true
+      post-cleanup: 'all'
+    - name: Run tests in micromamba environment
+      run: pytest -k test_mamba
+      shell: micromamba-shell {0}
