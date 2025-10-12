@@ -5,6 +5,10 @@ channels:
 dependencies:
   - petsc=3.24.0
   - petsc4py=3.24.0
+  - matplotlib=3.10.6
+  - matplotlib-base=3.10.6
+  - matplotlib-inline=0.1.7
+  - metis=5.1.0
   - pip:
     - meshio==5.3.5
     - pymetis==2025.2.1
