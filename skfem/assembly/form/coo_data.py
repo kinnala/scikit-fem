@@ -146,7 +146,7 @@ class COOData:
             scat.scatter(locvec, vec, addv=petsc.InsertMode.ADD)
 
             return vec
-            
+
         elif len(self.shape) == 2:
             K = self.tocsr()
             locmat = petsc.Mat().createAIJ(size=K.shape,

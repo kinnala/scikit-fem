@@ -6,7 +6,7 @@ on:
     branches: master
 
 jobs:
-  build:
+  build-mamba:
 
     runs-on: ubuntu-latest
     steps:

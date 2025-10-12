@@ -346,7 +346,8 @@ class Dofs:
                         # send elementwise global DOF numbers to the ranks
                         mpicomm.send((ldofs, gdofs.N), dest=rank)
                     else:
-                        self._dist['globnums'] = np.zeros(self.N, dtype=np.int32)
+                        self._dist['globnums'] = np.zeros(self.N,
+                                                          dtype=np.int32)
                         self._dist['globnums'][self.element_dofs] = ldofs
                         self._dist['nglob'] = gdofs.N
             else:
