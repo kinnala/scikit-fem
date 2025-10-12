@@ -17,7 +17,7 @@ jobs:
         init-shell: >-
           bash
         cache-environment: true
-      post-cleanup: 'all'
+        post-cleanup: 'all'
     - name: Run tests in micromamba environment
       run: pytest -k test_mamba
       shell: micromamba-shell {0}
