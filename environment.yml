@@ -9,6 +9,8 @@ dependencies:
   - matplotlib-base=3.10.6
   - matplotlib-inline=0.1.7
   - metis=5.1.0
+  - mpi=1.0
+  - mpi4py=4.1.0
   - scipy=1.16.2
   - pip:
     - meshio==5.3.5
