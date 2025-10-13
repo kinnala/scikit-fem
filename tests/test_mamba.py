@@ -18,4 +18,4 @@ class TestEx52(TestCase):
 def test_ex_53():
 
     import docs.examples.ex53 as ex53
-    assert assert_almost_equal(ex53.xmax, 0.9996111271291415)
+    assert_almost_equal(ex53.xmax, 0.9996111271291415)
