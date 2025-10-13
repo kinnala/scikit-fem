@@ -18,6 +18,9 @@ jobs:
           bash
         cache-environment: true
         post-cleanup: 'all'
-    - name: Run tests in micromamba environment
+    - name: Run non-mpi tests
       run: pytest -k test_mamba
+      shell: micromamba-shell {0}
+    - name: Run mpi tests
+      run: mpirun -n 2 pytest -k test_mamba --with-mpi
       shell: micromamba-shell {0}

@@ -14,3 +14,4 @@ dependencies:
     - meshio==5.3.5
     - pymetis==2025.2.1
     - pytest==8.4.2
+    - pytest-mpi==0.6

@@ -379,6 +379,17 @@ class Dofs:
         ix = np.array(ix, dtype=np.int32)
         return self._dist['lgmap'].apply(ix)
 
+    def loc(self, x):
+        """Local array corresponding to distributed PETSc vector.
+
+        Parameters
+        ----------
+        x
+            Distributed PETSc vector.
+
+        """
+        return x.getSubVector(self._dist['iset']).getArray()
+
     def get_vertex_dofs(
             self,
             nodes: ndarray,
