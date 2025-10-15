@@ -115,6 +115,14 @@ class NonlinearForm(Form):
             Optional point at which the form is linearized, default is zero.
 
         """
+        mat, vec = self._assemble(basis, x=x, **kwargs)
+        return (
+            COOData._assemble_scipy_csr(*mat),
+            COOData(*vec).todefault()
+        )
+
+    def _assemble(self, basis, x=None, **kwargs):
+
         # make x compatible with u in forms
         if x is None:
             x = basis.zeros()
@@ -190,16 +198,30 @@ class NonlinearForm(Form):
         data = data.flatten('C')
 
         return (
-            COOData._assemble_scipy_csr(
+            (
                 np.array([rows, cols]),
                 data,
                 (basis.N, basis.N),
                 (basis.Nbfun, basis.Nbfun),
             ),
-            COOData(
+            (
                 np.array([rows1]),
                 -data1,
                 (basis.N,),
                 (basis.Nbfun,)
-            ).todefault()
+            )
         )
+
+    def elemental(self, basis, x=None, **kwargs):
+        """Return COOData for the Jacobian and the right-hand side.
+
+        Parameters
+        ----------
+        basis
+            The basis used for all variables.
+        x
+            Optional point at which the form is linearized, default is zero.
+
+        """
+        mat, vec = self._assemble(basis, x=x, **kwargs)
+        return COOData(*mat), COOData(*vec)

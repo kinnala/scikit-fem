@@ -17,3 +17,4 @@ dependencies:
     - pymetis==2025.2.1
     - pytest==8.4.2
     - pytest-mpi==0.6
+    - jax==0.7.2

@@ -1376,7 +1376,6 @@ class Mesh:
         # number of ranks
         N = comm.size
         mpicomm = comm.tompi4py()  # use mpi4py to send/recv data
-        assert N > 1
 
         if comm.rank == 0:
             # split based on number of ranks
