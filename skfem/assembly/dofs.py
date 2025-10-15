@@ -190,7 +190,9 @@ class DofsView:
             return self.flatten()
         return self.keep(key).flatten()
 
-    def __array__(self):
+    def __array__(self, dtype=None, copy=None):
+        if dtype is not None:
+            return self.flatten().astype(dtype)
         return self.flatten()
 
     @property
@@ -325,6 +327,68 @@ class Dofs:
 
         # total dofs
         self.N = np.max(self.element_dofs) + 1
+
+        # distributed mesh is detected
+        if hasattr(topo, '_dist'):
+            import petsc4py.PETSc as petsc
+
+            comm = topo._dist['comm']
+            mpicomm = comm.tompi4py()
+            self._dist = {}
+
+            # enumerate DOFs for the global mesh and distribute
+            # the DOFs corresponding to local elements
+            if comm.rank == 0:
+                gdofs = Dofs(topo._dist['orig'], element)
+                for rank in range(comm.size):
+                    ldofs = gdofs.element_dofs[:, topo._dist['subs'][rank]]
+                    if rank > 0:
+                        # send elementwise global DOF numbers to the ranks
+                        mpicomm.send((ldofs, gdofs.N), dest=rank)
+                    else:
+                        self._dist['globnums'] = np.zeros(self.N,
+                                                          dtype=np.int32)
+                        self._dist['globnums'][self.element_dofs] = ldofs
+                        self._dist['nglob'] = gdofs.N
+            else:
+                ldofs, self._dist['nglob'] = mpicomm.recv(source=0)
+                self._dist['globnums'] = np.zeros(self.N, dtype=np.int32)
+                self._dist['globnums'][self.element_dofs] = ldofs
+
+            # create data structures for PETSc local-to-global mapping
+            self._dist['iset'] = petsc.IS().createBlock(
+                bsize=1,
+                indices=self._dist['globnums'],
+                comm=comm,
+            )
+            self._dist['lgmap'] = petsc.LGMap().create(
+                self._dist['globnums'],
+                bsize=1,
+                comm=comm,
+            )
+
+    def l2g(self, ix: ndarray):
+        """Map DOFs from local-to-global indexing.
+
+        Parameters
+        ----------
+        ix
+            Array of local indices.
+
+        """
+        ix = np.array(ix, dtype=np.int32)
+        return self._dist['lgmap'].apply(ix)
+
+    def loc(self, x):
+        """Local array corresponding to distributed PETSc vector.
+
+        Parameters
+        ----------
+        x
+            Distributed PETSc vector.
+
+        """
+        return x.getSubVector(self._dist['iset']).getArray()
 
     def get_vertex_dofs(
             self,
