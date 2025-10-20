@@ -367,6 +367,39 @@ class Dofs:
                 comm=comm,
             )
 
+    def decompose(self, filename: str, nparts: int):
+
+        from pymetis import part_mesh, GType
+
+        print('Calling pymetis ...')
+        _, mship, _ = part_mesh(
+                nparts,
+                self.topo.t.T,
+                gtype=GType.DUAL,
+                ncommon=len(self.topo.elem.refdom.facets[0]),
+        )
+        mship = np.array(mship, dtype=np.int32)
+
+        for rank in range(nparts):
+            print('Processing subdomain {}...'.format(rank))
+            subix = np.nonzero(mship == rank)[0]
+            subm = self.topo.restrict(subix)
+            subdofs = Dofs(subm, self.element)
+            globnums = np.zeros(subdofs.N, dtype=np.int32)
+            globnums[subdofs.element_dofs] = self.element_dofs[:, subix]
+            boundaries = {} if subm.boundaries is None else subm.boundaries
+            subdomains = {} if subm.subdomains is None else subm.subdomains
+            boundaries = {'b_' + key: value for key, value in boundaries.items()}
+            subdomains = {'s_' + key: value for key, value in subdomains.items()}
+            np.savez(
+                filename.format(rank),
+                doflocs=subm.doflocs,
+                t=subm.t,
+                globnums=np.append(globnums, self.N),
+                **boundaries,
+                **subdomains,
+            )
+
     def l2g(self, ix: ndarray):
         """Map DOFs from local-to-global indexing.
 

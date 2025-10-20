@@ -8,13 +8,23 @@ from skfem.helpers import *
 import petsc4py.PETSc as petsc
 import time
 
-# this mesh has 230 945 vertices
-# split the mesh to ranks using pymetis
+
 comm = petsc.COMM_WORLD
-m = MeshTet().refined(6).with_defaults().distributed(comm)
+nparts = 5
+
+if comm.size == 1:
+    # preprocess: create and partition mesh, stop
+    m = MeshTet().refined(6).with_defaults()
+    dofs = Dofs(m, ElementTetP1())
+    dofs.decompose('ex53mesh.{}.npz', nparts)
+    raise SystemExit(0)
+elif comm.size == nparts:
+    # load subdomain and continue execution
+    m = MeshTet.load_npz('ex53mesh.{}.npz'.format(comm.rank))
+else:
+    raise Exception
+
 basis = Basis(m, ElementTetP1())
-# m = MeshTri().refined(6).with_defaults().distributed(comm)
-# basis = Basis(m, ElementTriP1())
 
 
 @BilinearForm
@@ -33,8 +43,8 @@ start = time.time()
 
 # Dofs object contains local-to-global DOF mapping
 # it is required for distributed assembly
-A = bilinf.elemental(basis).topetsc(basis.dofs)
-b = linf.elemental(basis).topetsc(basis.dofs)
+A = bilinf.elemental(basis).topetsc(dofs)
+b = linf.elemental(basis).topetsc(dofs)
 print("--- %s seconds ---" % (time.time() - start))
 
 x = A.createVecRight()

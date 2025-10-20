@@ -1362,6 +1362,30 @@ class Mesh:
                 raise ValueError("Subdomain '{}' not found.".format(elements))
         raise NotImplementedError
 
+    @classmethod
+    def load_npz(cls, filename: str):
+
+        data = np.load(filename)
+
+        boundaries = {key[2:]: data[key]
+                      for key in data.files
+                      if key[:2] == 'b_'}
+        subdomains = {key[2:]: data[key]
+                      for key in data.files
+                      if key[:2] == 's_'}
+
+        out = cls(
+            data['doflocs'],
+            data['t'],
+            _boundaries=boundaries,
+            _subdomains=subdomains,
+        )
+
+        if 'globnums' in data.files:
+            out._globnums = data['globnums']
+
+        return out
+
     def distributed(self, comm):
         """Split mesh using pymetis and distribute for PETSc.
 
