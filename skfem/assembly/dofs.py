@@ -413,19 +413,6 @@ class Dofs:
             else:
                 subdofs._comm = comm
                 retval = (subm, subdofs)
-            
-            # boundaries = {} if subm.boundaries is None else subm.boundaries
-            # subdomains = {} if subm.subdomains is None else subm.subdomains
-            # boundaries = {'b_' + key: value for key, value in boundaries.items()}
-            # subdomains = {'s_' + key: value for key, value in subdomains.items()}
-            # np.savez(
-            #     filename.format(rank),
-            #     doflocs=subm.doflocs,
-            #     t=subm.t,
-            #     globnums=np.append(globnums, self.N),
-            #     **boundaries,
-            #     **subdomains,
-            # )
 
         return retval
 

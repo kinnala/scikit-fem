@@ -1367,7 +1367,7 @@ class Mesh:
 
         data = np.load(filename)
 
-        out = cls(
+        return cls(
             data['doflocs'],
             data['t'],
             _boundaries={
@@ -1382,10 +1382,20 @@ class Mesh:
             },
         )
 
-        if 'globnums' in data.files:
-            out._globnums = data['globnums']
+    def save_npz(filename: str):
 
-        return out
+        boundaries = {} if subm.boundaries is None else subm.boundaries
+        subdomains = {} if subm.subdomains is None else subm.subdomains
+        boundaries = {'b_' + key: value for key, value in boundaries.items()}
+        subdomains = {'s_' + key: value for key, value in subdomains.items()}
+        np.savez(
+            filename.format(rank),
+            doflocs=subm.doflocs,
+            t=subm.t,
+            globnums=np.append(globnums, self.N),
+            **boundaries,
+            **subdomains,
+        )
 
     def distributed(self, comm):
         """Split mesh using pymetis and distribute for PETSc.
