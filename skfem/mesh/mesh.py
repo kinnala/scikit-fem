@@ -1382,7 +1382,7 @@ class Mesh:
             },
         )
 
-    def save_npz(filename: str):
+    def save_npz(self, filename: str):
 
         boundaries = {} if self.boundaries is None else self.boundaries
         subdomains = {} if self.subdomains is None else self.subdomains
