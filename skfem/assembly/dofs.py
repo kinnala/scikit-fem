@@ -256,7 +256,7 @@ class Dofs:
     topo: Mesh
     element: Element
 
-    def __init__(self, topo, element, offset=0):
+    def __init__(self, topo, element, offset=0, comm=None):
 
         self.topo = topo
         self.element = element
@@ -328,48 +328,64 @@ class Dofs:
         # total dofs
         self.N = np.max(self.element_dofs) + 1
 
-        # distributed mesh is detected
-        if hasattr(topo, '_dist'):
-            import petsc4py.PETSc as petsc
+    @property
+    def _iset(self):
 
-            comm = topo._dist['comm']
+        import petsc4py.PETSc as petsc
+
+        return petsc.IS().createBlock(
+            bsize=1,
+            indices=self._globnums,
+            comm=self._comm,
+        )
+
+    @property
+    def _lgmap(self):
+
+        import petsc4py.PETSc as petsc
+
+        return petsc.LGMap().create(
+            self._globnums,
+            bsize=1,
+            comm=self._comm,
+        )
+
+    @classmethod
+    def distribute(cls, comm):
+
+        import functools
+
+        def _recv(comm):
+
             mpicomm = comm.tompi4py()
-            self._dist = {}
+            dofs = mpicomm.recv(source=0)
+            dofs._comm = comm
 
-            # enumerate DOFs for the global mesh and distribute
-            # the DOFs corresponding to local elements
-            if comm.rank == 0:
-                gdofs = Dofs(topo._dist['orig'], element)
-                for rank in range(comm.size):
-                    ldofs = gdofs.element_dofs[:, topo._dist['subs'][rank]]
-                    if rank > 0:
-                        # send elementwise global DOF numbers to the ranks
-                        mpicomm.send((ldofs, gdofs.N), dest=rank)
-                    else:
-                        self._dist['globnums'] = np.zeros(self.N,
-                                                          dtype=np.int32)
-                        self._dist['globnums'][self.element_dofs] = ldofs
-                        self._dist['nglob'] = gdofs.N
-            else:
-                ldofs, self._dist['nglob'] = mpicomm.recv(source=0)
-                self._dist['globnums'] = np.zeros(self.N, dtype=np.int32)
-                self._dist['globnums'][self.element_dofs] = ldofs
+            return dofs.topo, dofs
 
-            # create data structures for PETSc local-to-global mapping
-            self._dist['iset'] = petsc.IS().createBlock(
-                bsize=1,
-                indices=self._dist['globnums'],
-                comm=comm,
-            )
-            self._dist['lgmap'] = petsc.LGMap().create(
-                self._dist['globnums'],
-                bsize=1,
-                comm=comm,
-            )
+        def _decorate(og_builder):
 
-    def decompose(self, filename: str, nparts: int):
+            @functools.wraps(og_builder)
+            def wrapped_builder():
+
+                if comm.rank == 0:
+
+                    mesh, dofs = og_builder()
+                    return dofs._decompose(comm)
+
+                else:
+
+                    return _recv(comm)
+
+            return wrapped_builder
+
+        return _decorate
+
+    def _decompose(self, comm):
 
         from pymetis import part_mesh, GType
+
+        nparts = comm.size
 
         print('Calling pymetis ...')
         _, mship, _ = part_mesh(
@@ -379,6 +395,8 @@ class Dofs:
                 ncommon=len(self.topo.elem.refdom.facets[0]),
         )
         mship = np.array(mship, dtype=np.int32)
+        mpicomm = comm.tompi4py()
+        retval = None
 
         for rank in range(nparts):
             print('Processing subdomain {}...'.format(rank))
@@ -387,18 +405,29 @@ class Dofs:
             subdofs = Dofs(subm, self.element)
             globnums = np.zeros(subdofs.N, dtype=np.int32)
             globnums[subdofs.element_dofs] = self.element_dofs[:, subix]
-            boundaries = {} if subm.boundaries is None else subm.boundaries
-            subdomains = {} if subm.subdomains is None else subm.subdomains
-            boundaries = {'b_' + key: value for key, value in boundaries.items()}
-            subdomains = {'s_' + key: value for key, value in subdomains.items()}
-            np.savez(
-                filename.format(rank),
-                doflocs=subm.doflocs,
-                t=subm.t,
-                globnums=np.append(globnums, self.N),
-                **boundaries,
-                **subdomains,
-            )
+            subdofs._globnums = globnums
+            subdofs._nglob = self.N
+
+            if rank > 0:
+                mpicomm.send(subdofs, rank)
+            else:
+                subdofs._comm = comm
+                retval = (subm, subdofs)
+            
+            # boundaries = {} if subm.boundaries is None else subm.boundaries
+            # subdomains = {} if subm.subdomains is None else subm.subdomains
+            # boundaries = {'b_' + key: value for key, value in boundaries.items()}
+            # subdomains = {'s_' + key: value for key, value in subdomains.items()}
+            # np.savez(
+            #     filename.format(rank),
+            #     doflocs=subm.doflocs,
+            #     t=subm.t,
+            #     globnums=np.append(globnums, self.N),
+            #     **boundaries,
+            #     **subdomains,
+            # )
+
+        return retval
 
     def l2g(self, ix: ndarray):
         """Map DOFs from local-to-global indexing.
@@ -410,7 +439,7 @@ class Dofs:
 
         """
         ix = np.array(ix, dtype=np.int32)
-        return self._dist['lgmap'].apply(ix)
+        return self._lgmap.apply(ix)
 
     def loc(self, x):
         """Local array corresponding to distributed PETSc vector.
@@ -421,7 +450,7 @@ class Dofs:
             Distributed PETSc vector.
 
         """
-        return x.getSubVector(self._dist['iset']).getArray()
+        return x.getSubVector(self._iset).getArray()
 
     def get_vertex_dofs(
             self,

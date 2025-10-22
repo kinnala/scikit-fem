@@ -133,15 +133,15 @@ class COOData:
             if dofs is None:
                 return locvec
 
-            comm = dofs.topo._dist['comm']
+            comm = dofs._comm
             vec = petsc.Vec().create(comm=comm)
-            vec.setSizes(dofs._dist['nglob'])
+            vec.setSizes(dofs._nglob)
             vec.setType(petsc.Vec.Type.MPI)
             scat = petsc.Scatter().create(
                 locvec,
                 None,
                 vec,
-                dofs._dist['iset'],
+                dofs._iset,
             )
             scat.scatter(locvec, vec, addv=petsc.InsertMode.ADD)
 
@@ -157,12 +157,12 @@ class COOData:
             if dofs is None:
                 return locmat
 
-            comm = dofs.topo._dist['comm']
+            comm = dofs._comm
             mat = petsc.Mat().create(comm=comm)
-            mat.setSizes((dofs._dist['nglob'],
-                          dofs._dist['nglob']), bsize=1)
+            mat.setSizes((dofs._nglob,
+                          dofs._nglob), bsize=1)
             mat.setType(petsc.Mat.Type.IS)
-            mat.setLGMap(dofs._dist['lgmap'])
+            mat.setLGMap(dofs._lgmap)
             mat.setISLocalMat(locmat)
             mat.assemble()
             mat.convert("mpiaij")

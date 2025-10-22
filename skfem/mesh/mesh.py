@@ -1367,18 +1367,19 @@ class Mesh:
 
         data = np.load(filename)
 
-        boundaries = {key[2:]: data[key]
-                      for key in data.files
-                      if key[:2] == 'b_'}
-        subdomains = {key[2:]: data[key]
-                      for key in data.files
-                      if key[:2] == 's_'}
-
         out = cls(
             data['doflocs'],
             data['t'],
-            _boundaries=boundaries,
-            _subdomains=subdomains,
+            _boundaries={
+                key[2:]: data[key]
+                for key in data.files
+                if key[:2] == 'b_'
+            },
+            _subdomains={
+                key[2:]: data[key]
+                for key in data.files
+                if key[:2] == 's_'
+            },
         )
 
         if 'globnums' in data.files:

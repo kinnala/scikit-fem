@@ -10,19 +10,17 @@ import time
 
 
 comm = petsc.COMM_WORLD
-nparts = 5
 
-if comm.size == 1:
-    # preprocess: create and partition mesh, stop
+
+@Dofs.distribute(comm)  # pass other options to cache to files?
+def builder():
     m = MeshTet().refined(6).with_defaults()
     dofs = Dofs(m, ElementTetP1())
-    dofs.decompose('ex53mesh.{}.npz', nparts)
-    raise SystemExit(0)
-elif comm.size == nparts:
-    # load subdomain and continue execution
-    m = MeshTet.load_npz('ex53mesh.{}.npz'.format(comm.rank))
-else:
-    raise Exception
+    return m, dofs
+
+
+m, dofs = builder()
+
 
 basis = Basis(m, ElementTetP1())
 
@@ -54,7 +52,7 @@ x = A.createVecRight()
 # boundary is different than global boundary: must use tags 'left',
 # 'right', ...
 A.zeroRowsColumns(
-    basis.dofs.l2g(basis.get_dofs({
+    dofs.l2g(basis.get_dofs({
         'left',
         'right',
         'bottom',

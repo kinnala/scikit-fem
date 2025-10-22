@@ -7,12 +7,23 @@ import petsc4py.PETSc as petsc
 
 
 comm = petsc.COMM_WORLD
-m = MeshHex.init_tensor(
-    np.linspace(0, 5, 20),
-    np.linspace(0, 1, 6),
-    np.linspace(0, 1, 6),
-).refined(3).with_defaults().distributed(comm)
-basis = Basis(m, ElementHex1(), intorder=3)
+
+
+@Dofs.distribute(comm)
+def builder():
+    m = MeshHex.init_tensor(
+        np.linspace(0, 5, 20),
+        np.linspace(0, 1, 6),
+        np.linspace(0, 1, 6),
+    ).refined().with_defaults()
+    dofs = Dofs(m, ElementHex1())
+    return m, dofs
+
+
+m, dofs = builder()
+
+
+basis = Basis(m, ElementHex1())
 
 
 @NonlinearForm
@@ -23,8 +34,8 @@ def nonlinf(u, v, _):
 # initialize solution
 x = basis.zeros()
 J, f = nonlinf.elemental(basis, x=x)
-J = J.topetsc(basis.dofs)
-f = f.topetsc(basis.dofs)
+J = J.topetsc(dofs)
+f = f.topetsc(dofs)
 y = J.createVecRight()
 
 # create solver instance
@@ -38,11 +49,11 @@ ksp.setTolerances(rtol=1e-7, atol=0, divtol=1e16, max_it=400)
 for itr in range(100):
     x_prev = x.copy()
     J, f = nonlinf.elemental(basis, x=x)
-    J = J.topetsc(basis.dofs)
-    f = f.topetsc(basis.dofs)
+    J = J.topetsc(dofs)
+    f = f.topetsc(dofs)
 
     J.zeroRowsColumns(
-        basis.dofs.l2g(basis.get_dofs({
+        dofs.l2g(basis.get_dofs({
             'left',
             'right',
         })),
@@ -63,7 +74,7 @@ for itr in range(100):
     if comm.rank == 0:
         print(res)
 
-    dx = basis.dofs.loc(y)
+    dx = dofs.loc(y)
     x += 0.95 * dx
 
 
