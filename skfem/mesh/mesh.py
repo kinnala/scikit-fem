@@ -1384,15 +1384,14 @@ class Mesh:
 
     def save_npz(filename: str):
 
-        boundaries = {} if subm.boundaries is None else subm.boundaries
-        subdomains = {} if subm.subdomains is None else subm.subdomains
+        boundaries = {} if self.boundaries is None else self.boundaries
+        subdomains = {} if self.subdomains is None else self.subdomains
         boundaries = {'b_' + key: value for key, value in boundaries.items()}
         subdomains = {'s_' + key: value for key, value in subdomains.items()}
         np.savez(
-            filename.format(rank),
-            doflocs=subm.doflocs,
-            t=subm.t,
-            globnums=np.append(globnums, self.N),
+            filename,
+            doflocs=self.doflocs,
+            t=self.t,
             **boundaries,
             **subdomains,
         )
