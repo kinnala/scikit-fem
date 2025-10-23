@@ -12,14 +12,17 @@ import time
 comm = petsc.COMM_WORLD
 
 
-@Dofs.distribute(comm)  # pass other options to cache to files?
-def builder():
-    m = MeshTet().refined(6).with_defaults()
+# use cache kwarg to cache to files
+# subsequent runs will load from files
+# and no decomposition is required
+@Dofs.decompose(comm, cache='ex53mesh.{}')
+def builder(nrefs):
+    m = MeshTet().refined(nrefs).with_defaults()
     dofs = Dofs(m, ElementTetP1())
     return m, dofs
 
 
-m, dofs = builder()
+m, dofs = builder(6)
 
 
 basis = Basis(m, ElementTetP1())

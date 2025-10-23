@@ -1,3 +1,8 @@
+import functools
+import os.path
+import pickle
+
+from datetime import datetime
 from dataclasses import dataclass, replace, field
 from typing import Union, Any, List, Optional
 
@@ -351,43 +356,69 @@ class Dofs:
         )
 
     @classmethod
-    def distribute(cls, comm):
+    def decompose(cls, comm, cache=None):
 
-        import functools
+        use_cache = False
+        load_cache = False
+        if isinstance(cache, str):
+            use_cache = True
+            # detect if cache has been used
+            # by checking the existence of rank 0 submesh
+            if os.path.isfile(cache.format(0) + '.m'):
+                load_cache = True
 
         def _recv(comm):
 
-            mpicomm = comm.tompi4py()
-            dofs = mpicomm.recv(source=0)
-            dofs._comm = comm
+            if use_cache:
+                fname = cache.format(comm.rank)
 
-            return dofs.topo, dofs
+                print(comm.rank)
+                with open(fname + '.m', "rb") as handle:
+                    m = pickle.load(handle)
+                with open(fname + '.dofs', "rb") as handle:
+                    dofs = pickle.load(handle)
+                dofs._comm = comm
+            else:
+                mpicomm = comm.tompi4py()
+                dofs = mpicomm.recv(source=0)
+                m = dofs.topo
+                dofs._comm = comm
+
+            return m, dofs
 
         def _decorate(og_builder):
 
             @functools.wraps(og_builder)
-            def wrapped_builder():
+            def wrapped_builder(*args, **kwargs):
 
-                if comm.rank == 0:
+                if comm.rank == 0 and not load_cache:
 
-                    mesh, dofs = og_builder()
-                    return dofs._decompose(comm)
+                    mesh, dofs = og_builder(*args, **kwargs)
+                    retval = dofs._decompose(comm,
+                                             cache=cache,
+                                             use_cache=use_cache)
 
-                else:
+                if use_cache:
 
-                    return _recv(comm)
+                    comm.barrier()
+
+                if comm.rank > 0 or load_cache:
+
+                    retval = _recv(comm)
+
+                return retval
 
             return wrapped_builder
 
         return _decorate
 
-    def _decompose(self, comm):
+    def _decompose(self, comm, cache=None, use_cache=None):
 
         from pymetis import part_mesh, GType
 
         nparts = comm.size
 
-        print('Calling pymetis ...')
+        print('{}: Calling METIS ...'.format(datetime.now()))
         _, mship, _ = part_mesh(
                 nparts,
                 self.topo.t.T,
@@ -399,7 +430,8 @@ class Dofs:
         retval = None
 
         for rank in range(nparts):
-            print('Processing subdomain {}...'.format(rank))
+            print('{}: Processing subdomain {}...'.format(datetime.now(),
+                                                          rank))
             subix = np.nonzero(mship == rank)[0]
             subm = self.topo.restrict(subix)
             subdofs = Dofs(subm, self.element)
@@ -408,11 +440,28 @@ class Dofs:
             subdofs._globnums = globnums
             subdofs._nglob = self.N
 
-            if rank > 0:
-                mpicomm.send(subdofs, rank)
+            if use_cache:
+                fname = cache.format(rank)
+                print(('{}: Saving subdomain {} to file...'
+                       .format(datetime.now(),
+                               rank)))
+                with open(fname + '.m', "wb") as handle:
+                    pickle.dump(subm, handle)
+                with open(fname + '.dofs', "wb") as handle:
+                    pickle.dump(subdofs, handle)
+                if rank == 0:
+                    subdofs._comm = comm
+                    retval = (subm, subdofs)
+
             else:
-                subdofs._comm = comm
-                retval = (subm, subdofs)
+                if rank > 0:
+                    print(('{}: Sending subdomain {} over MPI...'
+                           .format(datetime.now(),
+                                   rank)))
+                    mpicomm.send(subdofs, rank)
+                else:
+                    subdofs._comm = comm
+                    retval = (subm, subdofs)
 
         return retval
 

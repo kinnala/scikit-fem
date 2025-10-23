@@ -9,7 +9,7 @@ import petsc4py.PETSc as petsc
 comm = petsc.COMM_WORLD
 
 
-@Dofs.distribute(comm)
+@Dofs.decompose(comm)
 def builder():
     m = MeshHex.init_tensor(
         np.linspace(0, 5, 20),
