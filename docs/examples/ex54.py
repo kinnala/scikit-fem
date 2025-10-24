@@ -1,4 +1,9 @@
-"""Distributed solution of nonlinear problem using PETSc."""
+"""Distributed solution of nonlinear problem using PETSc.
+
+This is a problem with mild nonlinearity for testing the distributed
+solver.
+
+"""
 from skfem import *
 from skfem.autodiff import *
 from skfem.autodiff.helpers import *

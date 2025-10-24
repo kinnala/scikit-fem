@@ -261,7 +261,7 @@ class Dofs:
     topo: Mesh
     element: Element
 
-    def __init__(self, topo, element, offset=0, comm=None):
+    def __init__(self, topo, element, offset=0):
 
         self.topo = topo
         self.element = element
@@ -356,7 +356,10 @@ class Dofs:
         )
 
     @classmethod
-    def decompose(cls, comm, cache=None):
+    def decompose(cls,
+                  comm,
+                  cache=None,
+                  nparts=None):
 
         use_cache = False
         load_cache = False
@@ -372,7 +375,6 @@ class Dofs:
             if use_cache:
                 fname = cache.format(comm.rank)
 
-                print(comm.rank)
                 with open(fname + '.m', "rb") as handle:
                     m = pickle.load(handle)
                 with open(fname + '.dofs', "rb") as handle:
@@ -396,7 +398,8 @@ class Dofs:
                     mesh, dofs = og_builder(*args, **kwargs)
                     retval = dofs._decompose(comm,
                                              cache=cache,
-                                             use_cache=use_cache)
+                                             use_cache=use_cache,
+                                             nparts=nparts)
 
                 if use_cache:
 
@@ -412,13 +415,22 @@ class Dofs:
 
         return _decorate
 
-    def _decompose(self, comm, cache=None, use_cache=None):
+    def _decompose(self,
+                   comm,
+                   cache=None,
+                   use_cache=None,
+                   nparts=None):
 
         from pymetis import part_mesh, GType
 
-        nparts = comm.size
+        preprocess_only = False
+        if nparts is None:
+            nparts = comm.size
+        else:
+            preprocess_only = True
 
-        print('{}: Calling METIS ...'.format(datetime.now()))
+        print(('{}: Calling METIS to decompose into {} subdomains...'
+               .format(datetime.now(), nparts)))
         _, mship, _ = part_mesh(
                 nparts,
                 self.topo.t.T,
@@ -449,6 +461,7 @@ class Dofs:
                     pickle.dump(subm, handle)
                 with open(fname + '.dofs', "wb") as handle:
                     pickle.dump(subdofs, handle)
+
                 if rank == 0:
                     subdofs._comm = comm
                     retval = (subm, subdofs)
@@ -462,6 +475,10 @@ class Dofs:
                 else:
                     subdofs._comm = comm
                     retval = (subm, subdofs)
+
+        if preprocess_only:
+            raise SystemExit("'nparts' has been set: decomposition "
+                             "was saved to files and process terminated")
 
         return retval
 
