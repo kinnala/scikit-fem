@@ -365,9 +365,11 @@ class Dofs:
         load_cache = False
         if isinstance(cache, str):
             use_cache = True
-            # detect if cache has been used
+            # detect if cache has been filled
             # by checking the existence of rank 0 submesh
-            if os.path.isfile(cache.format(0) + '.m'):
+            # NOTE: do not cache if 'nparts' is given
+            if (os.path.isfile(cache.format(0) + '.m')
+                and nparts is None):
                 load_cache = True
 
         def _recv(comm):
