@@ -360,6 +360,32 @@ class Dofs:
                   comm,
                   cache=None,
                   nparts=None):
+        """Decorator for building distributed meshes.
+
+        The wrapped function must return `(mesh, dofs)`,
+        i.e. :class:`skfem.mesh.Mesh` and :class:`skfem.assembly.Dofs`
+        objects.
+
+        Domain decomposition is then automatically performed using
+        METIS. The parameters to the wrapper are as follows:
+
+        Parameters
+        ----------
+        comm
+            The MPI communicator object, e.g.,
+            `petsc4py.PETSc.COMM_WORLD`
+        cache
+            Optional filename for caching the
+            decomposition. Must contain `{}`
+            which is then replaced by the index
+            of the subdomain.
+        nparts
+            Optional number of subdomains.  If given, only METIS is
+            run, the decomposition is saved to files, and the process
+            terminated.  This is used, e.g., for running METIS in a
+            separate high-memory SLURM task.
+
+        """
 
         use_cache = False
         load_cache = False
@@ -487,6 +513,9 @@ class Dofs:
     def l2g(self, ix: ndarray):
         """Map DOFs from local-to-global indexing.
 
+        The output can be passed to PETSc functions/methods that
+        require global indexing (almost all of them).
+
         Parameters
         ----------
         ix
@@ -497,7 +526,7 @@ class Dofs:
         return self._lgmap.apply(ix)
 
     def loc(self, x):
-        """Local array corresponding to distributed PETSc vector.
+        """Local array corresponding to a distributed PETSc vector.
 
         Parameters
         ----------
