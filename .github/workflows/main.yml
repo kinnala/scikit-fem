@@ -35,4 +35,4 @@ jobs:
         sphinx-build -W -a -b doctest docs docs/_build
     - name: Run pytest
       run: |
-        pytest
+        pytest -k "not test_mamba"

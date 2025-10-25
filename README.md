@@ -221,6 +221,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 with respect to documented and/or tested features.
 
+### Unreleased
+
+- Added: Basic support for assembling PETSc matrices via
+  `form.elemental(basis).topetsc()`, see ex52.
+  Requires the optional dependency `petsc4py`.
+- Added: Basic support for distributed assembly of PETSc matrices via
+  decorator `Dofs.decompose`.  Requires the optional dependencies
+  `petsc4py` and `pymetis`.  The decorator `Dofs.decompose` is applied
+  on a function which returns 2-tuple with `Mesh` and `Dofs` objects.
+  This will run METIS on the mesh and distribute the
+  degrees-of-freedom according to the decomposition.  It is then
+  possible to use the standard objects in scikit-fem such as `Basis`
+  and `BilinearForm` to assemble matrices for each of the subdomains
+  in parallel, assuming the script is run using `mpirun`.  These can
+  be turned into distributed PETSc matrices via
+  `form.elemental(basis).topetsc(dofs)`. See ex53 and ex54 for
+  examples.
+
 ### [11.0.0] - 2025-04-24
 
 - Added: Support for Python 3.13.

@@ -115,6 +115,62 @@ class COOData:
             out[tuple(self.indices[:, itr])] += self.data[itr]
         return out
 
+    def topetsc(self, dofs=None):
+        """Convert to PETSc matrix.
+
+        Parameters
+        ----------
+        dofs
+            If given, then the matrix will be distributed ("mpiaij" in
+            PETSc jargon).  Otherwise, a local matrix is returned.
+
+        """
+        import petsc4py.PETSc as petsc
+
+        if len(self.shape) == 1:
+            f = self.toarray()
+            locvec = petsc.Vec().createWithArray(f, comm=petsc.COMM_SELF)
+            if dofs is None:
+                return locvec
+
+            comm = dofs._comm
+            vec = petsc.Vec().create(comm=comm)
+            vec.setSizes(dofs._nglob)
+            vec.setType(petsc.Vec.Type.MPI)
+            scat = petsc.Scatter().create(
+                locvec,
+                None,
+                vec,
+                dofs._iset,
+            )
+            scat.scatter(locvec, vec, addv=petsc.InsertMode.ADD)
+
+            return vec
+
+        elif len(self.shape) == 2:
+            K = self.tocsr()
+            locmat = petsc.Mat().createAIJ(size=K.shape,
+                                           csr=(K.indptr,
+                                                K.indices,
+                                                K.data),
+                                           comm=petsc.COMM_SELF)
+            if dofs is None:
+                return locmat
+
+            comm = dofs._comm
+            mat = petsc.Mat().create(comm=comm)
+            mat.setSizes((dofs._nglob,
+                          dofs._nglob), bsize=1)
+            mat.setType(petsc.Mat.Type.IS)
+            mat.setLGMap(dofs._lgmap)
+            mat.setISLocalMat(locmat)
+            mat.assemble()
+            mat.convert("mpiaij")
+
+            return mat
+
+        raise NotImplementedError
+
     def astuple(self):
         return self.indices, self.data, self.shape
 

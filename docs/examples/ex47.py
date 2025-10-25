@@ -1,4 +1,4 @@
-"""Projection between two meshes using supermesh."""
+"""Projection between two meshes using supermesh in 1D."""
 
 import numpy as np
 from skfem import *
