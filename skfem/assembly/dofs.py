@@ -1,3 +1,8 @@
+import functools
+import os.path
+import pickle
+
+from datetime import datetime
 from dataclasses import dataclass, replace, field
 from typing import Union, Any, List, Optional
 
@@ -190,7 +195,9 @@ class DofsView:
             return self.flatten()
         return self.keep(key).flatten()
 
-    def __array__(self):
+    def __array__(self, dtype=None, copy=None):
+        if dtype is not None:
+            return self.flatten().astype(dtype)
         return self.flatten()
 
     @property
@@ -325,6 +332,209 @@ class Dofs:
 
         # total dofs
         self.N = np.max(self.element_dofs) + 1
+
+    @property
+    def _iset(self):
+
+        import petsc4py.PETSc as petsc
+
+        return petsc.IS().createBlock(
+            bsize=1,
+            indices=self._globnums,
+            comm=self._comm,
+        )
+
+    @property
+    def _lgmap(self):
+
+        import petsc4py.PETSc as petsc
+
+        return petsc.LGMap().create(
+            self._globnums,
+            bsize=1,
+            comm=self._comm,
+        )
+
+    @classmethod
+    def decompose(cls,
+                  comm,
+                  cache=None,
+                  nparts=None):
+        """Decorator for building distributed meshes.
+
+        The wrapped function must return `(mesh, dofs)`,
+        i.e. :class:`skfem.mesh.Mesh` and :class:`skfem.assembly.Dofs`
+        objects.
+
+        Domain decomposition is then automatically performed using
+        METIS. The parameters to the wrapper are as follows:
+
+        Parameters
+        ----------
+        comm
+            The MPI communicator object, e.g.,
+            `petsc4py.PETSc.COMM_WORLD`
+        cache
+            Optional filename for caching the
+            decomposition. Must contain `{}`
+            which is then replaced by the index
+            of the subdomain.
+        nparts
+            Optional number of subdomains.  If given, only METIS is
+            run, the decomposition is saved to files, and the process
+            terminated.  This is used, e.g., for running METIS in a
+            separate high-memory SLURM task.
+
+        """
+
+        use_cache = False
+        load_cache = False
+        if isinstance(cache, str):
+            use_cache = True
+            # detect if cache has been filled
+            # by checking the existence of rank 0 submesh
+            # NOTE: do not cache if 'nparts' is given
+            if os.path.isfile(cache.format(0) + '.m'):
+                if nparts is None:
+                    load_cache = True
+
+        def _recv(comm):
+
+            if use_cache:
+                fname = cache.format(comm.rank)
+
+                with open(fname + '.m', "rb") as handle:
+                    m = pickle.load(handle)
+                with open(fname + '.dofs', "rb") as handle:
+                    dofs = pickle.load(handle)
+                dofs._comm = comm
+            else:
+                mpicomm = comm.tompi4py()
+                dofs = mpicomm.recv(source=0)
+                m = dofs.topo
+                dofs._comm = comm
+
+            return m, dofs
+
+        def _decorate(og_builder):
+
+            @functools.wraps(og_builder)
+            def wrapped_builder(*args, **kwargs):
+
+                if comm.rank == 0 and not load_cache:
+
+                    mesh, dofs = og_builder(*args, **kwargs)
+                    retval = dofs._decompose(comm,
+                                             cache=cache,
+                                             use_cache=use_cache,
+                                             nparts=nparts)
+
+                if use_cache:
+
+                    comm.barrier()
+
+                if comm.rank > 0 or load_cache:
+
+                    retval = _recv(comm)
+
+                return retval
+
+            return wrapped_builder
+
+        return _decorate
+
+    def _decompose(self,
+                   comm,
+                   cache=None,
+                   use_cache=None,
+                   nparts=None):
+
+        from pymetis import part_mesh, GType
+
+        preprocess_only = False
+        if nparts is None:
+            nparts = comm.size
+        else:
+            preprocess_only = True
+
+        print(('{}: Calling METIS to decompose into {} subdomains...'
+               .format(datetime.now(), nparts)))
+        _, mship, _ = part_mesh(
+                nparts,
+                self.topo.t.T,
+                gtype=GType.DUAL,
+                ncommon=len(self.topo.elem.refdom.facets[0]),
+        )
+        mship = np.array(mship, dtype=np.int32)
+        mpicomm = comm.tompi4py()
+        retval = None
+
+        for rank in range(nparts):
+            print('{}: Processing subdomain {}...'.format(datetime.now(),
+                                                          rank))
+            subix = np.nonzero(mship == rank)[0]
+            subm = self.topo.restrict(subix)
+            subdofs = Dofs(subm, self.element)
+            globnums = np.zeros(subdofs.N, dtype=np.int32)
+            globnums[subdofs.element_dofs] = self.element_dofs[:, subix]
+            subdofs._globnums = globnums
+            subdofs._nglob = self.N
+
+            if use_cache:
+                fname = cache.format(rank)
+                print(('{}: Saving subdomain {} to file...'
+                       .format(datetime.now(),
+                               rank)))
+                with open(fname + '.m', "wb") as handle:
+                    pickle.dump(subm, handle)
+                with open(fname + '.dofs', "wb") as handle:
+                    pickle.dump(subdofs, handle)
+
+                if rank == 0:
+                    subdofs._comm = comm
+                    retval = (subm, subdofs)
+
+            else:
+                if rank > 0:
+                    print(('{}: Sending subdomain {} over MPI...'
+                           .format(datetime.now(),
+                                   rank)))
+                    mpicomm.send(subdofs, rank)
+                else:
+                    subdofs._comm = comm
+                    retval = (subm, subdofs)
+
+        if preprocess_only:
+            raise SystemExit("'nparts' has been set: decomposition "
+                             "was saved to files and process terminated")
+
+        return retval
+
+    def l2g(self, ix: ndarray):
+        """Map DOFs from local-to-global indexing.
+
+        The output can be passed to PETSc functions/methods that
+        require global indexing (almost all of them).
+
+        Parameters
+        ----------
+        ix
+            Array of local indices.
+
+        """
+        ix = np.array(ix, dtype=np.int32)
+        return self._lgmap.apply(ix)
+
+    def loc(self, x):
+        """Local array corresponding to a distributed PETSc vector.
+
+        Parameters
+        ----------
+        x
+            Distributed PETSc vector.
+
+        """
+        return x.getSubVector(self._iset).getArray()
 
     def get_vertex_dofs(
             self,

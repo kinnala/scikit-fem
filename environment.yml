@@ -1,0 +1,20 @@
+name: fem
+channels:
+  - anaconda
+  - conda-forge
+dependencies:
+  - petsc=3.24.0
+  - petsc4py=3.24.0
+  - matplotlib=3.10.6
+  - matplotlib-base=3.10.6
+  - matplotlib-inline=0.1.7
+  - metis=5.1.0
+  - mpi=1.0
+  - mpi4py=4.1.0
+  - scipy=1.16.2
+  - pip:
+    - meshio==5.3.5
+    - pymetis==2025.2.1
+    - pytest==8.4.2
+    - pytest-mpi==0.6
+    - jax==0.7.2
