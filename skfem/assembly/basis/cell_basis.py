@@ -90,8 +90,7 @@ class CellBasis(AbstractBasis):
             dofs,
             disable_doflocs,
         )
-        
-                  
+
         if elements is None:
             self.tind = None
             self.nelems = mesh.nelements
@@ -110,15 +109,18 @@ class CellBasis(AbstractBasis):
     def _base_tensor_order(self):
 
         loc_pts = np.zeros((self.elem.dim, 1))[:, :, np.newaxis]
-        base_obj = np.array(self.elem.gbasis(
+        base_obj = self.elem.gbasis(
             self.mapping,
             loc_pts,
             0,
             tind=np.array([0], dtype=np.int32)
-        ))[0, 0]
+        )
 
-        return len(base_obj.shape)
-        
+        if len(base_obj) > 1:
+            raise NotImplementedError
+
+        return base_obj[0].shape[:-2]
+
     def default_parameters(self):
         """Return default parameters for `~skfem.assembly.asm`."""
         return {'x': self.global_coordinates(),
@@ -205,9 +207,10 @@ class CellBasis(AbstractBasis):
             ]
         ).flatten()
         # number of components of a base functions
-        comp = np.prod(self._base_tensor_order)
+        comp = int(np.prod(self._base_tensor_order))
         # row indices
-        rows = np.tile(np.arange(comp * x.shape[1]), self.Nbfun)
+        rows = np.tile(np.arange(comp * x.shape[1],
+                                 dtype=np.int32), self.Nbfun)
         # col indices
         cols = self.element_dofs[:, np.tile(cells, comp)].flatten()
         # shape
@@ -240,8 +243,8 @@ class CellBasis(AbstractBasis):
                 x = x.reshape(shape[0], -1)
             out = self.probes(x) @ y
             # reshape output for tensor like base functions
-            if isinstance(self._base_tensor_order,tuple):
-                out = out.reshape( self._base_tensor_order + (x.shape[1],) )
+            if len(self._base_tensor_order) > 0:
+                out = out.reshape(self._base_tensor_order + (x.shape[1],))
             # reshape output back to original shape
             if shape is not None:
                 return out.reshape(*shape[1:])

@@ -14,7 +14,7 @@ class ElementTriN1(ElementHcurl):
                         [.5, .5],
                         [.0, .5]])
     refdom = RefTri
-    
+
     def lbasis(self, X, i):
         x, y = X
 
