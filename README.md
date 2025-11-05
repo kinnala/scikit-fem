@@ -223,6 +223,8 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+- Added: `Basis.interpolator` now supports interpolating
+  vectorial and tensorial elements
 - Added: Basic support for assembling PETSc matrices via
   `form.elemental(basis).topetsc()`, see ex52.
   Requires the optional dependency `petsc4py`.
