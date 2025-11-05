@@ -105,6 +105,22 @@ class CellBasis(AbstractBasis):
                    * np.broadcast_to(self.W, (self.nelems, self.W.shape[-1])))
         logger.info("Initializing finished.")
 
+    @property
+    def _base_tensor_order(self):
+
+        loc_pts = np.zeros((self.elem.dim, 1))[:, :, np.newaxis]
+        base_obj = self.elem.gbasis(
+            self.mapping,
+            loc_pts,
+            0,
+            tind=np.array([0], dtype=np.int32)
+        )
+
+        if len(base_obj) > 1:
+            raise NotImplementedError
+
+        return base_obj[0].shape[:-2]
+
     def default_parameters(self):
         """Return default parameters for `~skfem.assembly.asm`."""
         return {'x': self.global_coordinates(),
@@ -190,16 +206,16 @@ class CellBasis(AbstractBasis):
                 for k in range(self.Nbfun)
             ]
         ).flatten()
-        return coo_matrix(
-            (
-                phis,
-                (
-                    np.tile(np.arange(x.shape[1]), self.Nbfun),
-                    self.element_dofs[:, cells].flatten(),
-                ),
-            ),
-            shape=(x.shape[1], self.N),
-        )
+        # number of components of a base functions
+        comp = int(np.prod(self._base_tensor_order))
+        # row indices
+        rows = np.tile(np.arange(comp * x.shape[1],
+                                 dtype=np.int32), self.Nbfun)
+        # col indices
+        cols = self.element_dofs[:, np.tile(cells, comp)].flatten()
+        # shape
+        sh = (comp * x.shape[1], self.N)
+        return coo_matrix((phis, (rows, cols,)), shape=sh)
 
     def point_source(self, x: ndarray) -> ndarray:
         """Return right-hand side vector for unit source at `x`,
@@ -226,6 +242,9 @@ class CellBasis(AbstractBasis):
                 shape = x.shape
                 x = x.reshape(shape[0], -1)
             out = self.probes(x) @ y
+            # reshape output for tensor like base functions
+            if len(self._base_tensor_order) > 0:
+                out = out.reshape(self._base_tensor_order + (x.shape[1],))
             # reshape output back to original shape
             if shape is not None:
                 return out.reshape(*shape[1:])

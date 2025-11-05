@@ -18,7 +18,7 @@ from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementQuadRT1, ElementTetRT1, ElementHexRT1,
                            ElementTriN1, ElementTriP0, ElementTetN0,
                            ElementQuadN1, ElementQuad0, ElementTriN2,
-                           ElementTetN1)
+                           ElementTetN1, ElementTriHHJ1)
 from skfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
                         MeshTri2, MeshTet2, MeshHex2, MeshTri1DG, MeshQuad1DG,
                         MeshHex1DG)
@@ -183,6 +183,27 @@ class BasisInterpolator(TestCase):
 
         X = np.array([np.sin(m.p[0, :]), np.sin(3. * m.p[1, :])])
         self.assertTrue(np.sum(f(X) - 1.0) < 1.0e-10)
+
+
+class BasisInterpolatorVec(BasisInterpolator):
+
+    case = (MeshTri, lambda: ElementVector(ElementTriP1()))
+
+
+class BasisInterpolatorTensor(BasisInterpolator):
+
+    def initOnes(self, basis):
+        return basis.project(lambda x: np.array([x, x]) * 0 + 1)
+
+    case = (MeshTri, ElementTriHHJ1)
+
+
+class BasisInterpolatorN1(BasisInterpolator):
+
+    def initOnes(self, basis):
+        return basis.project(lambda x: x * 0 + 1)
+
+    case = (MeshTri, ElementTriN1)
 
 
 class BasisInterpolatorTriP2(BasisInterpolator):
@@ -774,3 +795,42 @@ def test_element_global_boundary_normal():
     y = solve(*condense(A, f, D=basis.get_dofs(), x=x))
 
     assert (y[basis.get_dofs(elements=True).all('u')] <= 0).all()
+
+
+@pytest.mark.parametrize(
+    "basis",
+    [
+        Basis(MeshTri().refined(6), ElementTriN1()),
+        Basis(MeshTri().refined(2),
+              ElementVector(ElementTriP1())),
+    ]
+)
+def test_vectorial_interpolator(basis):
+
+    m = basis.mesh
+    y = basis.project(lambda x: x)
+    yfun = basis.interpolator(y)
+
+    X = np.array([np.sin(m.p[0, :]), np.sin(3. * m.p[1, :])])
+    assert_almost_equal(yfun(X), X, decimal=2)
+
+
+@pytest.mark.parametrize(
+    "basis",
+    [
+        Basis(MeshTri().refined(2),
+              ElementVector(ElementVector(ElementTriP1()))),
+        Basis(MeshTri().refined(2),
+              ElementTriHHJ1()),
+    ]
+)
+def test_tensorial_interpolator(basis):
+
+    m = basis.mesh
+    y = basis.project(lambda x: np.array([[x[0], x[1]],
+                                          [x[1], x[0]]]))
+    yfun = basis.interpolator(y)
+
+    X = np.array([np.sin(m.p[0, :]), np.sin(3. * m.p[1, :])])
+    assert_almost_equal(yfun(X), np.array([[X[0], X[1]],
+                                           [X[1], X[0]]]), decimal=4)
