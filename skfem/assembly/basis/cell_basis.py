@@ -108,19 +108,16 @@ class CellBasis(AbstractBasis):
 
     @property
     def _base_tensor_order(self):
-        if hasattr(self.elem, "lbasis"):
-            loc_pts = self.elem.dim*[0]
-            base_obj = self.elem.lbasis(loc_pts,0)[0]    
-        elif hasattr(self.elem, "gbasis"):
-            loc_pts = np.zeros((self.elem.dim ,1))[:,:,np.newaxis]
-            base_obj = np.array(self.elem.gbasis(self.mapping,loc_pts, 0, tind=[0]))[0,:,0][:,0]
-        else:
-            raise NotImplementedError("Can not detect tensor order of base function!")
-        
-        if isinstance(base_obj,np.ndarray):
-            return base_obj.shape
-        else:
-            return 1 
+
+        loc_pts = np.zeros((self.elem.dim, 1))[:, :, np.newaxis]
+        base_obj = np.array(self.elem.gbasis(
+            self.mapping,
+            loc_pts,
+            0,
+            tind=np.array([0], dtype=np.int32)
+        ))[0, 0]
+
+        return len(base_obj.shape)
         
     def default_parameters(self):
         """Return default parameters for `~skfem.assembly.asm`."""
@@ -210,12 +207,12 @@ class CellBasis(AbstractBasis):
         # number of components of a base functions
         comp = np.prod(self._base_tensor_order)
         # row indices
-        rows = np.tile(np.arange(comp*x.shape[1]), self.Nbfun)
+        rows = np.tile(np.arange(comp * x.shape[1]), self.Nbfun)
         # col indices
-        cols = self.element_dofs[:, np.tile(cells,comp)].flatten()
+        cols = self.element_dofs[:, np.tile(cells, comp)].flatten()
         # shape
-        sh = (comp*x.shape[1], self.N)
-        return coo_matrix( (phis,(rows,cols,)) , shape=sh )
+        sh = (comp * x.shape[1], self.N)
+        return coo_matrix((phis, (rows, cols,)), shape=sh)
 
     def point_source(self, x: ndarray) -> ndarray:
         """Return right-hand side vector for unit source at `x`,
