@@ -223,6 +223,15 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+- Changed: `Mesh.with_defaults` now uses `np.isclose` for
+  finding facets matching `left`, `right`, `top`, `bottom`, etc.
+  instead of direct floating point comparison.
+  Tolerance for `np.isclose` is calculated automatically from
+  the smallest element size.
+  This may result in backwards-incompatible behaviour, i.e.,
+  more edge cases are now covered by the matching and
+  it is more likely that `Mesh.boundaries` gets filled
+  by the call.
 - Added: `Basis.interpolator` now supports interpolating
   vectorial and tensorial elements
 - Added: Basic support for assembling PETSc matrices via

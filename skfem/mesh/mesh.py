@@ -279,14 +279,19 @@ class Mesh:
         # default boundary names along the dimensions
         minnames = ['left', 'bottom', 'front']
         maxnames = ['right', 'top', 'back']
+        atol = np.min(self.params()) / 1e2
         for d in range(self.doflocs.shape[0]):
             dmin = np.min(self.doflocs[d])
-            ix = self.facets_satisfying(lambda x: x[d] == dmin)
+            ix = self.facets_satisfying(lambda x: np.isclose(x[d],
+                                                             dmin,
+                                                             atol=atol))
             if len(ix) >= 1:
                 boundaries[minnames[d]] = ix
         for d in range(self.doflocs.shape[0]):
             dmax = np.max(self.doflocs[d])
-            ix = self.facets_satisfying(lambda x: x[d] == dmax)
+            ix = self.facets_satisfying(lambda x: np.isclose(x[d],
+                                                             dmax,
+                                                             atol=atol))
             if len(ix) >= 1:
                 boundaries[maxnames[d]] = ix
 
