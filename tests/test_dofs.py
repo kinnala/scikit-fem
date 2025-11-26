@@ -4,9 +4,9 @@ import numpy as np
 from numpy.testing import assert_allclose
 import pytest
 
-from skfem.mesh import MeshTri
-from skfem.element import ElementTriArgyris, ElementTriP2
-from skfem.assembly import Dofs, CellBasis
+from cudaskfem.mesh import MeshTri
+from cudaskfem.element import ElementTriArgyris, ElementTriP2
+from cudaskfem.assembly import Dofs, CellBasis
 
 
 class TestDofsKeepSkipOperations(TestCase):

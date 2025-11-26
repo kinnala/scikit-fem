@@ -2,12 +2,12 @@ import unittest
 
 import numpy as np
 
-from skfem import BilinearForm, CellBasis, LinearForm, asm, solve
-from skfem.element import (ElementTetP0, ElementTetRT0, ElementTriP0,
+from cudaskfem import BilinearForm, CellBasis, LinearForm, asm, solve
+from cudaskfem.element import (ElementTetP0, ElementTetRT0, ElementTriP0,
                            ElementTriRT0, ElementTriBDM1, ElementDG,
                            ElementQuadRT0, ElementQuad0, ElementTriRT2,
                            ElementTriP1, ElementHexRT1, ElementHex0)
-from skfem.mesh import MeshTet, MeshTri, MeshQuad, MeshHex
+from cudaskfem.mesh import MeshTet, MeshTri, MeshQuad, MeshHex
 
 
 class ConvergenceRaviartThomas(unittest.TestCase):
@@ -21,7 +21,7 @@ class ConvergenceRaviartThomas(unittest.TestCase):
 
         @BilinearForm
         def bilinf_A(sigma, tau, w):
-            from skfem.helpers import dot
+            from cudaskfem.helpers import dot
             return dot(sigma, tau)
 
         @BilinearForm

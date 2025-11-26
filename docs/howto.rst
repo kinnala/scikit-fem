@@ -24,7 +24,7 @@ and the quadratic Lagrange element:
 
 .. doctest::
 
-   >>> from skfem import MeshTri, Basis, ElementTriP2
+   >>> from cudaskfem import MeshTri, Basis, ElementTriP2
    >>> m = MeshTri().refined(2).with_defaults()
    >>> basis = Basis(m, ElementTriP2())
 
@@ -48,8 +48,8 @@ Here is a visualization of the nodal DOFs:
 
 .. plot::
 
-   from skfem import *
-   from skfem.visuals.matplotlib import *
+   from cudaskfem import *
+   from cudaskfem.visuals.matplotlib import *
    m = MeshTri().refined(2)
    basis = Basis(m, ElementTriP2())
    ax = draw(m)
@@ -70,8 +70,8 @@ Here is a visualization of the facet DOFs:
 
 .. plot::
 
-   from skfem import *
-   from skfem.visuals.matplotlib import *
+   from cudaskfem import *
+   from cudaskfem.visuals.matplotlib import *
    m = MeshTri().refined(2)
    basis = Basis(m, ElementTriP2())
    ax = draw(m)
@@ -135,8 +135,8 @@ as follows:
 
 .. plot::
 
-   from skfem import *
-   from skfem.visuals.matplotlib import *
+   from cudaskfem import *
+   from cudaskfem.visuals.matplotlib import *
    m = MeshTri().refined(2).with_defaults()
    basis = Basis(m, ElementTriP2())
    dofs = basis.get_dofs('left')
@@ -175,7 +175,7 @@ However, this is so common that we have a shortcut command
 .. doctest::
 
    >>> import numpy as np
-   >>> from skfem import *
+   >>> from cudaskfem import *
    >>> m = MeshQuad().refined(2)
    >>> basis = FacetBasis(m, ElementQuad1())
    >>> u0 = lambda x: x[0] ** 3 * x[1] ** 3
@@ -195,7 +195,7 @@ However, this is so common that we have a shortcut command
    u0 = lambda x: x[0] ** 3 * x[1] ** 3
    u0t = basis.project(u0)
    ibasis = fem.InteriorBasis(m, fem.ElementQuad1())
-   from skfem.visuals.matplotlib import plot, draw
+   from cudaskfem.visuals.matplotlib import plot, draw
    ax = draw(ibasis)
    plot(ibasis, u0t, nrefs=3, ax=ax, colorbar=True, shading='gouraud')
 
@@ -219,7 +219,7 @@ As another example, we can also project over the entire domain:
    basis = fem.CellBasis(m, fem.ElementQuad1())
    f = lambda x: np.sin(2. * np.pi * x[0]) + 1.
    fh = basis.project(f)
-   from skfem.visuals.matplotlib import plot, draw
+   from cudaskfem.visuals.matplotlib import plot, draw
    ax = draw(basis)
    plot(basis, fh, nrefs=3, ax=ax, colorbar=True, shading='gouraud')
 
@@ -237,14 +237,14 @@ project from one finite element basis to another:
 
 .. plot::
 
-   from skfem import *
+   from cudaskfem import *
    m = MeshQuad().refined(2)
    basis = CellBasis(m, ElementQuad1())
    basis0 = basis.with_element(ElementQuad0())
    f = lambda x: np.sin(2. * np.pi * x[0]) + 1.
    fh = basis.project(f)
    fh = basis0.project(basis.interpolate(fh))
-   from skfem.visuals.matplotlib import plot, draw
+   from cudaskfem.visuals.matplotlib import plot, draw
    ax = draw(basis)
    plot(basis0, fh, nrefs=3, ax=ax, colorbar=True, shading='gouraud')
 
@@ -263,14 +263,14 @@ We can also interpolate the gradient at quadrature points and then project:
 
 .. plot::
 
-   from skfem import *
+   from cudaskfem import *
    m = MeshQuad().refined(2)
    basis = CellBasis(m, ElementQuad1())
    basis0 = basis.with_element(ElementQuad0())
    f = lambda x: np.sin(2. * np.pi * x[0]) + 1.
    fh = basis.project(f)
    fh = basis.project(basis.interpolate(fh).grad[0])
-   from skfem.visuals.matplotlib import plot, draw
+   from cudaskfem.visuals.matplotlib import plot, draw
    ax = draw(basis)
    plot(basis, fh, nrefs=3, ax=ax, colorbar=True, shading='gouraud')
 
@@ -307,8 +307,8 @@ which can be defined as follows:
 .. doctest::
 
    >>> import skfem as fem
-   >>> from skfem.models.poisson import unit_load
-   >>> from skfem.helpers import grad, dot
+   >>> from cudaskfem.models.poisson import unit_load
+   >>> from cudaskfem.helpers import grad, dot
    >>> @fem.BilinearForm
    ... def bilinf(u, v, w):
    ...     return (w.u_k + .1) * dot(grad(u), grad(v))
@@ -351,8 +351,8 @@ The previous solution :math:`u_k` is interpolated at quadrature points using
 .. plot::
 
    import skfem as fem
-   from skfem.models.poisson import unit_load
-   from skfem.helpers import grad, dot
+   from cudaskfem.models.poisson import unit_load
+   from cudaskfem.helpers import grad, dot
    @fem.BilinearForm
    def bilinf(u, v, w):
        return (w.u_k + .1) * dot(grad(u), grad(v))
@@ -363,7 +363,7 @@ The previous solution :math:`u_k` is interpolated at quadrature points using
    for itr in range(20):  # fixed point iteration
        A = bilinf.assemble(basis, u_k=basis.interpolate(x))
        x = fem.solve(*fem.condense(A, b, I=m.interior_nodes()))
-   from skfem.visuals.matplotlib import *
+   from cudaskfem.visuals.matplotlib import *
    plot(basis, x, colorbar=True, nrefs=3, shading='gouraud')
 
 .. note::
@@ -403,8 +403,8 @@ solution to the Poisson problem with a unit load:
 
 .. doctest::
 
-   >>> from skfem import *
-   >>> from skfem.models.poisson import laplace, unit_load
+   >>> from cudaskfem import *
+   >>> from cudaskfem.models.poisson import laplace, unit_load
    >>> mesh = MeshTri().refined(2).with_defaults()
    >>> basis = Basis(mesh, ElementTriP2())
    >>> A = laplace.assemble(basis)
@@ -418,13 +418,13 @@ solution to the Poisson problem with a unit load:
 
 .. plot::
 
-   from skfem import *
-   from skfem.models.poisson import laplace, unit_load
+   from cudaskfem import *
+   from cudaskfem.models.poisson import laplace, unit_load
    basis = Basis(MeshTri().refined(2).with_defaults(), ElementTriP2())
    A = laplace.assemble(basis)
    b = unit_load.assemble(basis)
    x = solve(*condense(A, b, D=basis.get_dofs('left')))
-   from skfem.visuals.matplotlib import plot
+   from cudaskfem.visuals.matplotlib import plot
    plot(basis, x, nrefs=3, shading='gouraud', colorbar=True)
 
 Similarly we can calculate the integral of its derivative:
@@ -463,26 +463,26 @@ object and the solution vector as its arguments:
 
 .. doctest::
 
-   >>> from skfem import *
-   >>> from skfem.models.poisson import laplace, unit_load
+   >>> from cudaskfem import *
+   >>> from cudaskfem.models.poisson import laplace, unit_load
    >>> mesh = MeshTri().refined(2)
    >>> basis = Basis(mesh, ElementTriP2())
    >>> A = laplace.assemble(basis)
    >>> b = unit_load.assemble(basis)
    >>> x = solve(*condense(A, b, D=basis.get_dofs()))
-   >>> from skfem.visuals.matplotlib import plot
+   >>> from cudaskfem.visuals.matplotlib import plot
    >>> plot(basis, x)
    <Axes: >
 
 .. plot::
 
-   from skfem import *
-   from skfem.models.poisson import laplace, unit_load
+   from cudaskfem import *
+   from cudaskfem.models.poisson import laplace, unit_load
    basis = Basis(MeshTri().refined(2), ElementTriP2())
    A = laplace.assemble(basis)
    b = unit_load.assemble(basis)
    x = solve(*condense(A, b, D=basis.get_dofs()))
-   from skfem.visuals.matplotlib import plot
+   from cudaskfem.visuals.matplotlib import plot
    plot(basis, x)
 
 It accepts various optional arguments to make the plots
@@ -496,13 +496,13 @@ For example, here is the same solution as above with different settings:
 
 .. plot::
 
-   from skfem import *
-   from skfem.models.poisson import laplace, unit_load
+   from cudaskfem import *
+   from cudaskfem.models.poisson import laplace, unit_load
    basis = Basis(MeshTri().refined(2), ElementTriP2())
    A = laplace.assemble(basis)
    b = unit_load.assemble(basis)
    x = solve(*condense(A, b, D=basis.get_dofs()))
-   from skfem.visuals.matplotlib import plot
+   from cudaskfem.visuals.matplotlib import plot
    plot(basis, x, shading='gouraud', colorbar={'orientation': 'horizontal'}, nrefs=3)
 
 The routine is based on `matplotlib.pyplot.tripcolor <https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.tripcolor.html>`_ command and shares
@@ -554,7 +554,7 @@ will be included in the subset:
 
 .. doctest::
 
-   >>> from skfem import *
+   >>> from cudaskfem import *
    >>> mesh = MeshTri().refined().with_boundaries({
    ...     'left': lambda x: x[0] == 0.,
    ... }).with_subdomains({

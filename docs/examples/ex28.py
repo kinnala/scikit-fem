@@ -54,9 +54,9 @@ restricted to the elements belonging to a particular subdomain.
 from packaging import version
 from pathlib import Path
 
-from skfem import *
-from skfem.helpers import grad, dot
-from skfem.models.poisson import unit_load
+from cudaskfem import *
+from cudaskfem.helpers import grad, dot
+from cudaskfem.models.poisson import unit_load
 
 import numpy as np
 
@@ -136,7 +136,7 @@ exit_interface_temperature = {
 
 if __name__ == '__main__':
     from pathlib import Path
-    from skfem.visuals.matplotlib import plot, savefig
+    from cudaskfem.visuals.matplotlib import plot, savefig
     from matplotlib.pyplot import subplots
 
     plot(mesh, temperature)

@@ -26,8 +26,8 @@ function:
 
 .. doctest::
 
-   >>> from skfem import BilinearForm
-   >>> from skfem.helpers import grad, dot
+   >>> from cudaskfem import BilinearForm
+   >>> from cudaskfem.helpers import grad, dot
    >>> @BilinearForm
    ... def integrand(u, v, w):
    ...    return dot(grad(u), grad(v))
@@ -51,7 +51,7 @@ This can be written as
 .. doctest::
 
    >>> import numpy as np
-   >>> from skfem import LinearForm
+   >>> from cudaskfem import LinearForm
    >>> @LinearForm
    ... def loading(v, w):
    ...    return np.sin(np.pi * w.x[0]) * np.sin(np.pi * w.x[1]) * v
@@ -76,8 +76,8 @@ which can be written as
 
 .. doctest::
 
-   >>> from skfem import LinearForm
-   >>> from skfem.helpers import dot
+   >>> from cudaskfem import LinearForm
+   >>> from cudaskfem.helpers import dot
    >>> @LinearForm
    ... def loading(v, w):
    ...    return dot(w.n, v)
@@ -88,8 +88,8 @@ verified using the Python debugger:
 
 .. code-block:: python
 
-   from skfem import *
-   from skfem.helpers import grad, dot
+   from cudaskfem import *
+   from cudaskfem.helpers import grad, dot
    @BilinearForm
    def integrand(u, v, w):
        import pdb; pdb.set_trace()  # breakpoint
@@ -160,7 +160,7 @@ cube mesh:
 
 .. doctest::
 
-   >>> from skfem import *
+   >>> from cudaskfem import *
    >>> m = MeshHex()
    >>> m
    <skfem MeshHex1 object>
@@ -176,8 +176,8 @@ cube mesh:
 
 .. plot::
 
-   from skfem import *
-   from skfem.visuals.matplotlib import *
+   from cudaskfem import *
+   from cudaskfem.visuals.matplotlib import *
    draw(MeshHex())
 
 The DOFs corresponding to the nodes (or vertices) of the mesh are
@@ -193,8 +193,8 @@ nodes/vertices).
 
 .. plot::
 
-   from skfem import *
-   from skfem.visuals.matplotlib import *
+   from cudaskfem import *
+   from cudaskfem.visuals.matplotlib import *
    m = MeshHex()
    basis = Basis(m, ElementHex2())
    ax = draw(m)
@@ -213,8 +213,8 @@ edges) and the facets (``m.facets`` for a list of facets) of the mesh are
 
 .. plot::
 
-   from skfem import *
-   from skfem.visuals.matplotlib import *
+   from cudaskfem import *
+   from cudaskfem.visuals.matplotlib import *
    m = MeshHex()
    basis = Basis(m, ElementHex2())
    ax = draw(m)
@@ -223,8 +223,8 @@ edges) and the facets (``m.facets`` for a list of facets) of the mesh are
 
 .. plot::
 
-   from skfem import *
-   from skfem.visuals.matplotlib import *
+   from cudaskfem import *
+   from cudaskfem.visuals.matplotlib import *
    m = MeshHex()
    basis = Basis(m, ElementHex2())
    ax = draw(m)

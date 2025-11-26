@@ -31,8 +31,8 @@ where :math:`\Omega = (0,1)^3`.
 *  Demidov, D. (2019). AMGCL: an efficient, flexible, and extensible algebraic multigrid implementation. `arXiv:1811.05704 <https://arxiv.org/abs/1811.05704>`_
 
 """
-from skfem import *
-from skfem.helpers import *
+from cudaskfem import *
+from cudaskfem.helpers import *
 import numpy as np
 from scipy.sparse import spmatrix
 from scipy.sparse.linalg import LinearOperator

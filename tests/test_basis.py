@@ -7,13 +7,13 @@ import numpy as np
 from numpy.testing import (assert_allclose, assert_almost_equal,
                            assert_array_equal)
 
-from skfem import BilinearForm, LinearForm, asm, solve, condense, projection
-from skfem.mesh import (Mesh, MeshTri, MeshTet, MeshHex,
+from cudaskfem import BilinearForm, LinearForm, asm, solve, condense, projection
+from cudaskfem.mesh import (Mesh, MeshTri, MeshTet, MeshHex,
                         MeshQuad, MeshLine1, MeshWedge1)
-from skfem.assembly import (CellBasis, FacetBasis, Dofs, Functional,
+from cudaskfem.assembly import (CellBasis, FacetBasis, Dofs, Functional,
                             InteriorFacetBasis)
-from skfem.mapping import MappingIsoparametric
-from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
+from cudaskfem.mapping import MappingIsoparametric
+from cudaskfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
                            ElementTetP2, ElementHexS2, ElementHex2,
                            ElementQuad2, ElementLineP2, ElementTriP0,
                            ElementLineP0, ElementQuad1, ElementQuad0,
@@ -21,10 +21,10 @@ from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
                            ElementHex0, ElementLineP1, ElementLineMini,
                            ElementWedge1, ElementTriRT0, ElementQuadRT0,
                            ElementTriP1)
-from skfem.helpers import dot, grad
-from skfem.utils import enforce
-from skfem.io.meshio import to_meshio, from_meshio
-from skfem.models.poisson import laplace
+from cudaskfem.helpers import dot, grad
+from cudaskfem.utils import enforce
+from cudaskfem.io.meshio import to_meshio, from_meshio
+from cudaskfem.models.poisson import laplace
 
 
 MESH_PATH = Path(__file__).parents[1] / 'docs' / 'examples' / 'meshes'
@@ -47,7 +47,7 @@ class TestCompositeSplitting(TestCase):
 
         @BilinearForm
         def bilinf(u, p, v, q, w):
-            from skfem.helpers import grad, ddot, div
+            from cudaskfem.helpers import grad, ddot, div
             return (ddot(grad(u), grad(v)) - div(u) * q - div(v) * p
                     - 1e-2 * p * q)
 

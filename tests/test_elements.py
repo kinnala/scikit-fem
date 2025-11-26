@@ -4,7 +4,7 @@ import numpy as np
 from numpy.testing import assert_allclose, assert_array_equal
 import pytest
 
-from skfem.element import (
+from cudaskfem.element import (
     ElementHex1,
     ElementHexS2,
     ElementLineP0,
@@ -48,9 +48,9 @@ from skfem.element import (
     ElementHexDG,
     ElementWedge1,
 )
-from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
-from skfem.assembly import InteriorBasis, Functional
-from skfem.mapping import MappingAffine
+from cudaskfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
+from cudaskfem.assembly import InteriorBasis, Functional
+from cudaskfem.mapping import MappingAffine
 
 
 class TestNodality(TestCase):
@@ -159,7 +159,7 @@ class TestNodalityQuadRT0(TestCase):
 class TestComposite(TestCase):
 
     def runTest(self):
-        from skfem.element.element_composite import ElementComposite
+        from cudaskfem.element.element_composite import ElementComposite
 
         self.check_equivalence(
             ElementComposite(ElementTriP1(),

@@ -46,9 +46,9 @@ using the `non-conforming Morley finite element
 is a piecewise quadratic :math:`C^0`-continuous element for biharmonic problems.
 
 """
-from skfem import *
-from skfem.models.poisson import unit_load
-from skfem.helpers import dd, ddot, trace, eye
+from cudaskfem import *
+from cudaskfem.models.poisson import unit_load
+from cudaskfem.helpers import dd, ddot, trace, eye
 import numpy as np
 
 m = (MeshTri
@@ -87,7 +87,7 @@ D = np.hstack((
 x = solve(*condense(K, f, D=D))
 
 def visualize():
-    from skfem.visuals.matplotlib import draw, plot
+    from cudaskfem.visuals.matplotlib import draw, plot
     ax = draw(m)
     return plot(basis,
                 x,

@@ -27,8 +27,8 @@ from typing import Iterator, Tuple
 import numpy as np
 from scipy.sparse.linalg import splu
 
-from skfem import *
-from skfem.models.poisson import laplace, mass
+from cudaskfem import *
+from cudaskfem.models.poisson import laplace, mass
 
 
 halfwidth = 2.0

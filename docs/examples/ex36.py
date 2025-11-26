@@ -77,8 +77,8 @@ for a nearly incompressible solid, should be close to the initial undeformed vol
 """
 import numpy as np
 from scipy.sparse import bmat
-from skfem.helpers import grad, transpose, det, inv, identity
-from skfem import *
+from cudaskfem.helpers import grad, transpose, det, inv, identity
+from cudaskfem import *
 
 
 mu, lmbda = 1., 1.e4

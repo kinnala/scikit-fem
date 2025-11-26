@@ -26,8 +26,8 @@ elements are defined using an isoparametric local-to-global mapping.
 
 """
 
-from skfem import *
-from skfem.models.poisson import laplace, unit_load
+from cudaskfem import *
+from cudaskfem.models.poisson import laplace, unit_load
 
 m = MeshQuad().refined(2)
 
@@ -46,7 +46,7 @@ M, X = basis.refinterp(x, 3)
 if __name__ == "__main__":
     from os.path import splitext
     from sys import argv
-    from skfem.visuals.matplotlib import *
+    from cudaskfem.visuals.matplotlib import *
     ax = draw(m)
     plot(M, X, ax=ax, shading='gouraud')
     savefig(splitext(argv[0])[0] + '_solution.png')

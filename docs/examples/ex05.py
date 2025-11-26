@@ -15,9 +15,9 @@ on a part of the boundary of the domain :math:`\Gamma \subset \partial \Omega`
  to a saddle point system.
 
 """
-from skfem import *
-from skfem.helpers import dot, grad
-from skfem.models.poisson import laplace
+from cudaskfem import *
+from cudaskfem.helpers import dot, grad
+from cudaskfem.models.poisson import laplace
 import numpy as np
 import scipy.sparse
 
@@ -64,6 +64,6 @@ x = solve(*condense(K, f, I=I))
 if __name__ == "__main__":
     from os.path import splitext
     from sys import argv
-    from skfem.visuals.matplotlib import plot, savefig
+    from cudaskfem.visuals.matplotlib import plot, savefig
     plot(m, x[:-1], colorbar=True, shading='gouraud')
     savefig(splitext(argv[0])[0] + '_solution.png')

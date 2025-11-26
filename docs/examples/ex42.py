@@ -16,8 +16,8 @@ resulting solution is also periodic.
 """
 import numpy as np
 
-from skfem import *
-from skfem.models import laplace
+from cudaskfem import *
+from cudaskfem.models import laplace
 
 
 @BilinearForm
@@ -48,6 +48,6 @@ x = solve(*condense(A, f, D=basis.get_dofs()))
 if __name__ == '__main__':
     from os.path import splitext
     from sys import argv
-    from skfem.visuals.matplotlib import plot, savefig
+    from cudaskfem.visuals.matplotlib import plot, savefig
     plot(basis, x, shading='gouraud', colorbar=True)
     savefig(splitext(argv[0])[0] + '_solution.png')

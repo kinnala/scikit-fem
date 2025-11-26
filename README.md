@@ -47,8 +47,8 @@ You can also try the library in browser through [Google Colab](https://colab.res
 
 Solve the Poisson problem (see also [`ex01.py`](https://github.com/kinnala/scikit-fem/blob/master/docs/examples/ex01.py)):
 ```python
-from skfem import *
-from skfem.helpers import dot, grad
+from cudaskfem import *
+from cudaskfem.helpers import dot, grad
 
 # create the mesh
 mesh = MeshTri().refined(4)
@@ -86,7 +86,7 @@ constructors:
 
 ```python
 import numpy as np
-from skfem import MeshLine, MeshTri, MeshTet
+from cudaskfem import MeshLine, MeshTri, MeshTet
 
 mesh = MeshLine(np.array([0., .5, 1.]))
 mesh = MeshTri(
@@ -104,7 +104,7 @@ elements](https://github.com/kinnala/scikit-fem/blob/master/skfem/element/__init
 Below the stiffness matrix is assembled using second-order tetrahedra:
 
 ```python
-from skfem import Basis, ElementTetP2
+from cudaskfem import Basis, ElementTetP2
 
 basis = Basis(mesh, ElementTetP2())  # quadratic tetrahedron
 A = laplace.assemble(basis)  # type: scipy.sparse.csr_matrix

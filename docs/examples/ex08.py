@@ -1,6 +1,6 @@
 """Visualize Argyris basis."""
 
-from skfem import *
+from cudaskfem import *
 import numpy as np
 
 m = MeshTri.init_sqsymmetric()
@@ -10,7 +10,7 @@ ib = Basis(m, e, intorder=5)
 
 def visualize():
     import matplotlib.pyplot as plt
-    from skfem.visuals.matplotlib import plot, draw
+    from cudaskfem.visuals.matplotlib import plot, draw
     f, axes = plt.subplots(3,3)
 
     ixs = [(0,0),(0,1),(0,2),(1,0),(1,2),(2,0)]

@@ -52,9 +52,9 @@ segments.
 * Mamou, M. & Khalid, M. (2004). Finite element solution of the Orr–Sommerfeld equation using high precision Hermite elements: plane Poiseuille flow. *International Journal for Numerical Methods in Fluids* 44. pp. 721–735. `doi:10.1002/fld.661 <https://doi.org/10.1002%2ffld.661>`_
 
 """
-from skfem import *
-from skfem.models.general import divergence
-from skfem.models.poisson import laplace, mass
+from cudaskfem import *
+from cudaskfem.models.general import divergence
+from cudaskfem.models.poisson import laplace, mass
 
 from pathlib import Path
 

@@ -19,9 +19,9 @@ evaluated by interpolation.
 """
 from pathlib import Path
 
-from skfem import *
-from skfem.models.poisson import laplace, unit_load
-from skfem.io.json import from_file
+from cudaskfem import *
+from cudaskfem.models.poisson import laplace, unit_load
+from cudaskfem.io.json import from_file
 
 import numpy as np
 
@@ -39,7 +39,7 @@ k = b @ x / area**2
 k1, = basis.probes(np.zeros((2, 1))) @ x / area
 
 def visualize():
-    from skfem.visuals.matplotlib import plot
+    from cudaskfem.visuals.matplotlib import plot
     return plot(basis, x, shading='gouraud', colorbar=True)
 
 if __name__ == '__main__':

@@ -10,9 +10,9 @@
 import numpy as np
 
 from pathlib import Path
-from skfem import MeshTri, Basis, ElementTriP1, BilinearForm
-from skfem import asm, solve, condense
-from skfem.helpers import grad, dot
+from cudaskfem import MeshTri, Basis, ElementTriP1, BilinearForm
+from cudaskfem import asm, solve, condense
+from cudaskfem.helpers import grad, dot
 
 # Define the Peclet number
 peclet = 30

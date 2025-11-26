@@ -14,10 +14,10 @@ one step-length upstream and 35 downstream.
 from pathlib import Path
 import numpy as np
 
-from skfem import *
-from skfem.models.poisson import vector_laplace, laplace
-from skfem.models.general import divergence, rot
-from skfem.io.json import from_file
+from cudaskfem import *
+from cudaskfem.models.poisson import vector_laplace, laplace
+from cudaskfem.models.general import divergence, rot
+from cudaskfem.io.json import from_file
 
 mesh = from_file(Path(__file__).parent / 'meshes' / 'backward-facing_step.json')
 
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     from matplotlib.tri import Triangulation
     from matplotlib.pyplot import subplots
 
-    from skfem.visuals.matplotlib import plot, savefig
+    from cudaskfem.visuals.matplotlib import plot, savefig
 
     name = splitext(argv[0])[0]
 

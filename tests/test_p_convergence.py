@@ -2,10 +2,10 @@ import unittest
 
 import numpy as np
 
-from skfem import (MeshLine, ElementLinePp, InteriorBasis, LinearForm, asm,
+from cudaskfem import (MeshLine, ElementLinePp, InteriorBasis, LinearForm, asm,
                    solve, condense, MeshQuad, ElementQuadP)
 
-from skfem.models.poisson import laplace
+from cudaskfem.models.poisson import laplace
 
 
 class ConvergenceLinePp(unittest.TestCase):

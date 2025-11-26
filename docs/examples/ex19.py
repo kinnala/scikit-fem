@@ -42,8 +42,8 @@ from typing import Iterator, Tuple
 import numpy as np
 from scipy.sparse.linalg import splu
 
-from skfem import *
-from skfem.models.poisson import laplace, mass
+from cudaskfem import *
+from cudaskfem.models.poisson import laplace, mass
 
 
 halfwidth = np.array([2., 3.])
@@ -96,7 +96,7 @@ if __name__ == '__main__':
     from matplotlib.animation import FuncAnimation
     import matplotlib.pyplot as plt
 
-    from skfem.visuals.matplotlib import plot
+    from cudaskfem.visuals.matplotlib import plot
 
     parser = ArgumentParser(description='heat equation in a rectangle')
     parser.add_argument('-g', '--gif', action='store_true', 

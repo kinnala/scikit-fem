@@ -1,8 +1,8 @@
 """Mixed Poisson equation and Raviart-Thomas basis"""
 
 import numpy as np
-from skfem import *
-from skfem.helpers import dot, div
+from cudaskfem import *
+from cudaskfem.helpers import dot, div
 
 
 p = np.linspace(0, 1, 10)

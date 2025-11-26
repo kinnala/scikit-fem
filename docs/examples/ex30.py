@@ -53,9 +53,9 @@ central deflection is known to be approximately 0.162/128 [LOVE]_.
 .. [LOVE] Love, A. E. H. (1944). *A Treatise on the Mathematical Theory of Elasticity.* Dover
 
 """
-from skfem import *
-from skfem.models.poisson import vector_laplace, laplace, mass
-from skfem.models.general import divergence, rot
+from cudaskfem import *
+from cudaskfem.models.poisson import vector_laplace, laplace, mass
+from cudaskfem.models.general import divergence, rot
 
 import numpy as np
 from scipy.sparse import csr_matrix
@@ -122,7 +122,7 @@ if __name__ == '__main__':
     from sys import argv
 
     from matplotlib.tri import Triangulation
-    from skfem.visuals.matplotlib import plot, draw
+    from cudaskfem.visuals.matplotlib import plot, draw
 
     print(psi0)
 

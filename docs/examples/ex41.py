@@ -15,8 +15,8 @@ degrees-of-freedom.
 """
 import numpy as np
 from pathlib import Path
-from skfem import *
-from skfem.models import laplace, unit_load
+from cudaskfem import *
+from cudaskfem.models import laplace, unit_load
 
 fname = Path(__file__).parent / 'meshes' / 'mixedtriquad.msh'
 out = ['cell_sets_dict']  # read boundary nodes from meshio
@@ -31,7 +31,7 @@ f = asm(unit_load, [basis_tri, basis_quad])
 y = solve(*condense(A, f, D=out[0]['boundary']['line'].astype(np.int32)))
 
 def visualize():
-    from skfem.visuals.matplotlib import plot, draw
+    from cudaskfem.visuals.matplotlib import plot, draw
     ax = plot(basis_tri, y, Nrefs=4, colorbar=True)
     draw(basis_tri, ax=ax)
     plot(basis_quad, y, ax=ax, Nrefs=4)

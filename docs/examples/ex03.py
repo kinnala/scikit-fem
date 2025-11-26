@@ -1,7 +1,7 @@
 """Linear elastic eigenvalue problem."""
 
-from skfem import *
-from skfem.helpers import dot, ddot, sym_grad, eye, trace
+from cudaskfem import *
+from cudaskfem.helpers import dot, ddot, sym_grad, eye, trace
 import numpy as np
 
 m1 = MeshLine(np.linspace(0, 5, 50))
@@ -46,7 +46,7 @@ yi = basis.interpolate(y)
 sigma = sbasis.project(C(sym_grad(yi)))
 
 def visualize():
-    from skfem.visuals.matplotlib import plot, draw
+    from cudaskfem.visuals.matplotlib import plot, draw
     M = MeshQuad(np.array(m.p + .5 * y[basis.nodal_dofs]), m.t)
     ax = draw(M)
     return plot(M,

@@ -4,9 +4,9 @@ This is a problem with mild nonlinearity for testing the distributed
 solver.
 
 """
-from skfem import *
-from skfem.autodiff import *
-from skfem.autodiff.helpers import *
+from cudaskfem import *
+from cudaskfem.autodiff import *
+from cudaskfem.autodiff.helpers import *
 import numpy as np
 import petsc4py.PETSc as petsc
 

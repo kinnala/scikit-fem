@@ -40,10 +40,10 @@ where :math:`\boldsymbol{rot}` is the adjoint of :math:`\mathrm{rot}`:
     \boldsymbol{rot}\,\phi \equiv \frac{\partial\phi}{\partial y}\hat{i} - \frac{\partial\phi}{\partial x}\hat{j}.
 
 """
-from skfem import *
-from skfem.io.json import from_file
-from skfem.models.poisson import vector_laplace, mass, laplace
-from skfem.models.general import divergence, rot
+from cudaskfem import *
+from cudaskfem.io.json import from_file
+from cudaskfem.models.poisson import vector_laplace, mass, laplace
+from cudaskfem.models.general import divergence, rot
 
 from pathlib import Path
 
@@ -90,7 +90,7 @@ if __name__ == '__main__':
 
     from matplotlib.tri import Triangulation
 
-    from skfem.visuals.matplotlib import plot, draw, savefig
+    from cudaskfem.visuals.matplotlib import plot, draw, savefig
 
     name = splitext(argv[0])[0]
 

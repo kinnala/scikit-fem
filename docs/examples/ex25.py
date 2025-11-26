@@ -15,8 +15,8 @@ The equations here have been nondimensionalized by the width of the channel and 
 Because the problem is symmetric about :math:`y = \frac{1}{2}`, only half is solved here, with natural boundary conditions along the centreline.
 
 """
-from skfem import *
-from skfem.models.poisson import laplace, mass
+from cudaskfem import *
+from cudaskfem.models.poisson import laplace, mass
 
 from math import ceil
 
@@ -36,7 +36,7 @@ basis = Basis(mesh, ElementQuad2())
 
 @BilinearForm
 def advection(u, v, w):
-    from skfem.helpers import grad
+    from cudaskfem.helpers import grad
     _, y = w.x
     velocity_0 = 6 * y * (height - y)  # parabolic plane Poiseuille
     return v * velocity_0 * grad(u)[0]
@@ -56,7 +56,7 @@ t0 = solve(asm(mass, basis0),
 
 if __name__ == '__main__':
     from pathlib import Path
-    from skfem.visuals.matplotlib import plot, savefig
+    from cudaskfem.visuals.matplotlib import plot, savefig
 
     plot(mesh, t0)
     savefig(Path(__file__).with_suffix('.png'),

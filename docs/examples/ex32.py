@@ -50,10 +50,10 @@ then be passed to the MINRES sparse iterative solver from SciPy.
 """
 from typing import NamedTuple
 
-from skfem import *
-from skfem.io.meshio import from_meshio
-from skfem.models.poisson import vector_laplace, mass
-from skfem.models.general import divergence
+from cudaskfem import *
+from cudaskfem.io.meshio import from_meshio
+from cudaskfem.models.poisson import vector_laplace, mass
+from cudaskfem.models.general import divergence
 
 import numpy as np
 from scipy.sparse import bmat, spmatrix

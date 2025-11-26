@@ -4,9 +4,9 @@ This example solves the linear elasticity problem using trilinear elements.
 
 """
 import numpy as np
-from skfem import *
-from skfem.helpers import ddot, sym_grad, eye, trace
-from skfem.models.elasticity import lame_parameters
+from cudaskfem import *
+from cudaskfem.helpers import ddot, sym_grad, eye, trace
+from cudaskfem.models.elasticity import lame_parameters
 
 
 m = MeshHex().refined(3).with_defaults()

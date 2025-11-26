@@ -60,7 +60,7 @@ decorated as follows:
 .. doctest::
 
    >>> import skfem as fem
-   >>> from skfem.helpers import dot, grad  # helpers make forms look nice
+   >>> from cudaskfem.helpers import dot, grad  # helpers make forms look nice
    >>> @fem.BilinearForm
    ... def a(u, v, _):
    ...     return dot(grad(u), grad(v))
@@ -94,7 +94,7 @@ unit square:
 
 .. plot::
 
-   from skfem import *
+   from cudaskfem import *
    MeshTri().refined(3).draw()
 
 
@@ -164,9 +164,9 @@ which is a simple wrapper to ``scipy`` sparse solver:
 
 .. plot::
 
-   from skfem import *
-   from skfem.visuals.matplotlib import *
-   from skfem.helpers import dot, grad
+   from cudaskfem import *
+   from cudaskfem.visuals.matplotlib import *
+   from cudaskfem.helpers import dot, grad
    import numpy as np
    basis = Basis(MeshTri().refined(3), ElementTriP1())
    a = BilinearForm(lambda u, v, _: dot(grad(u), grad(v)))

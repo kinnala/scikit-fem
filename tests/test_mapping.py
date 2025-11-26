@@ -1,10 +1,10 @@
 import unittest
 import numpy as np
 
-from skfem.mesh import MeshHex, MeshQuad, MeshTri, MeshTet
-from skfem.element import ElementHex1, ElementQuad1, ElementHex2
-from skfem.assembly import FacetBasis
-from skfem.mapping import MappingAffine
+from cudaskfem.mesh import MeshHex, MeshQuad, MeshTri, MeshTet
+from cudaskfem.element import ElementHex1, ElementQuad1, ElementHex2
+from cudaskfem.assembly import FacetBasis
+from cudaskfem.mapping import MappingAffine
 
 
 class TestIsoparamNormals(unittest.TestCase):

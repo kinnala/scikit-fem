@@ -7,12 +7,12 @@ They are useful also when solving variational inequalities such as
 """
 
 import numpy as np
-from skfem import *
-from skfem.supermeshing import intersect, elementwise_quadrature
-from skfem.models.elasticity import (linear_elasticity, lame_parameters,
+from cudaskfem import *
+from cudaskfem.supermeshing import intersect, elementwise_quadrature
+from cudaskfem.models.elasticity import (linear_elasticity, lame_parameters,
                                      linear_stress)
-from skfem.helpers import dot, sym_grad, jump, mul
-from skfem.io.json import from_file
+from cudaskfem.helpers import dot, sym_grad, jump, mul
+from cudaskfem.io.json import from_file
 from pathlib import Path
 
 
@@ -142,7 +142,7 @@ vonmises2 = np.sqrt(.5 * ((s2[0, 0] - s2[1, 1]) ** 2 +
 
 
 def visualize():
-    from skfem.visuals.matplotlib import plot, draw
+    from cudaskfem.visuals.matplotlib import plot, draw
     pdg1 = Basis(mdefo1, dg1.elem)
     pdg2 = Basis(mdefo2, dg2.elem)
     ax = plot(pdg1,

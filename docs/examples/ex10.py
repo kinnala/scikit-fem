@@ -3,8 +3,8 @@ r"""Minimal surface problem.
 This example solves the nonlinear minimal surface problem using Newton's method.
 
 """
-from skfem import *
-from skfem.helpers import grad, dot
+from cudaskfem import *
+from cudaskfem.helpers import grad, dot
 import numpy as np
 
 m = MeshTri().refined(5)
@@ -46,6 +46,6 @@ for itr in range(100):
 
 
 if __name__ == "__main__":
-    from skfem.visuals.matplotlib import plot3, show
+    from cudaskfem.visuals.matplotlib import plot3, show
     plot3(m, x)
     show()

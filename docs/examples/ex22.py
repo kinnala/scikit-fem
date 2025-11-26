@@ -12,9 +12,9 @@ for each element :math:`K`, and
 for each edge :math:`E`.
 
 """
-from skfem import *
-from skfem.models.poisson import laplace
-from skfem.helpers import grad
+from cudaskfem import *
+from cudaskfem.models.poisson import laplace
+from cudaskfem.helpers import grad
 import numpy as np
 
 m = MeshTri.init_lshaped().refined(2)
@@ -62,7 +62,7 @@ def eval_estimator(m, u):
     return eta_K + eta_E
 
 if __name__ == "__main__":
-    from skfem.visuals.matplotlib import draw
+    from cudaskfem.visuals.matplotlib import draw
     draw(m)
 
 for itr in reversed(range(6)):
@@ -79,7 +79,7 @@ for itr in reversed(range(6)):
 
 
 def visualize():
-    from skfem.visuals.matplotlib import draw, plot
+    from cudaskfem.visuals.matplotlib import draw, plot
     ax = draw(m)
     return plot(m, u, ax=ax, shading='gouraud', colorbar=True)
 

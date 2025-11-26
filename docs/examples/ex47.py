@@ -1,8 +1,8 @@
 """Projection between two meshes using supermesh in 1D."""
 
 import numpy as np
-from skfem import *
-from skfem.supermeshing import intersect, elementwise_quadrature
+from cudaskfem import *
+from cudaskfem.supermeshing import intersect, elementwise_quadrature
 
 
 m1 = MeshLine(np.linspace(1, 10, 20))

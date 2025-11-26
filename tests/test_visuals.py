@@ -3,12 +3,12 @@ import pytest
 
 import matplotlib.pyplot as plt
 
-from skfem.assembly import CellBasis
-from skfem.mesh import (MeshTri, MeshQuad, MeshTet, MeshLine1, MeshTri2,
+from cudaskfem.assembly import CellBasis
+from cudaskfem.mesh import (MeshTri, MeshQuad, MeshTet, MeshLine1, MeshTri2,
                         MeshQuad2)
-from skfem.visuals.matplotlib import draw, plot, plot3
-from skfem.visuals.svg import draw as drawsvg
-from skfem.visuals.svg import plot as plotsvg
+from cudaskfem.visuals.matplotlib import draw, plot, plot3
+from cudaskfem.visuals.svg import draw as drawsvg
+from cudaskfem.visuals.svg import plot as plotsvg
 
 
 class CallDraw(TestCase):

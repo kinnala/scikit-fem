@@ -27,10 +27,10 @@ polynomial solution with circular stream-lines:
 
 """
 
-from skfem import *
-from skfem.models.poisson import unit_load
-from skfem.models.general import curluv
-from skfem.helpers import ddot, dd
+from cudaskfem import *
+from cudaskfem.models.poisson import unit_load
+from cudaskfem.models.general import curluv
+from cudaskfem.helpers import ddot, dd
 
 import numpy as np
 
@@ -60,7 +60,7 @@ velocity = asm(
 if __name__ == "__main__":
     from os.path import splitext
     from sys import argv
-    from skfem.visuals.matplotlib import draw
+    from cudaskfem.visuals.matplotlib import draw
     from matplotlib.tri import Triangulation
 
     print("psi0 = {} (cf. exact = 1/64 = {})".format(psi0, 1 / 64))

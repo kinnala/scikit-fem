@@ -1,8 +1,8 @@
 """Discontinuous Galerkin method."""
 
-from skfem import *
-from skfem.helpers import grad, dot, jump
-from skfem.models.poisson import laplace, unit_load
+from cudaskfem import *
+from cudaskfem.helpers import grad, dot, jump
+from cudaskfem.models.poisson import laplace, unit_load
 
 m = MeshTri.init_sqsymmetric().refined()
 e = ElementTriDG(ElementTriP4())
@@ -42,7 +42,7 @@ x = solve(A + B + C, b)
 M, X = ib.refinterp(x, 4)
 
 def visualize():
-    from skfem.visuals.matplotlib import plot, draw
+    from cudaskfem.visuals.matplotlib import plot, draw
     ax = draw(M, boundaries_only=True)
     return plot(M, X, shading="gouraud", ax=ax, colorbar=True)
 

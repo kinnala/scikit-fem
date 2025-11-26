@@ -30,10 +30,10 @@ from typing import Optional
 
 import numpy as np
 
-from skfem import *
-from skfem.helpers import dot, grad
-from skfem.models.poisson import mass, unit_load
-from skfem.io.json import from_file
+from cudaskfem import *
+from cudaskfem.helpers import dot, grad
+from cudaskfem.models.poisson import mass, unit_load
+from cudaskfem.io.json import from_file
 
 joule_heating = 5.
 heat_transfer_coefficient = 7.
@@ -94,7 +94,7 @@ if __name__ == '__main__':
 
     from os.path import splitext
     from sys import argv
-    from skfem.visuals.matplotlib import draw, plot, savefig
+    from cudaskfem.visuals.matplotlib import draw, plot, savefig
 
     ax = draw(mesh)
     plot(basis, temperature, ax=ax, colorbar=True)

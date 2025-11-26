@@ -20,8 +20,8 @@ recommended as more general.
 
 """
 
-from skfem import *
-from skfem.models.poisson import laplace
+from cudaskfem import *
+from cudaskfem.models.poisson import laplace
 
 import numpy as np
 
@@ -43,7 +43,7 @@ u = solve(*condense(A, x=u, D=basis.get_dofs()))
 
 
 def visualize():
-    from skfem.visuals.matplotlib import plot, show
+    from cudaskfem.visuals.matplotlib import plot, show
     return plot(basis,
                 u,
                 shading='gouraud',

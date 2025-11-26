@@ -6,9 +6,9 @@ This example solves the minimal surface problem from example 10 using automatic
 differentation in order to derive the tangent system for Newton's method.
 
 """
-from skfem import *
-from skfem.autodiff import NonlinearForm
-from skfem.autodiff.helpers import grad, dot
+from cudaskfem import *
+from cudaskfem.autodiff import NonlinearForm
+from cudaskfem.autodiff.helpers import grad, dot
 import numpy as np
 import jax.numpy as jnp
 
@@ -35,7 +35,7 @@ for itr in range(100):
         print(res)
 
 if __name__ == "__main__":
-    from skfem.visuals.matplotlib import plot3, show
+    from cudaskfem.visuals.matplotlib import plot3, show
     plot3(m, x)
     show()
 

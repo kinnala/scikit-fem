@@ -17,9 +17,9 @@ so the conductance (for unit potential difference and conductivity) is
 
 """
 
-from skfem import *
-from skfem.models.poisson import laplace, mass
-from skfem.io import from_meshio
+from cudaskfem import *
+from cudaskfem.models.poisson import laplace, mass
+from cudaskfem.io import from_meshio
 
 import numpy as np
 
@@ -54,7 +54,7 @@ conductance = {'skfem': u @ A @ u,
 
 @Functional
 def port_flux(w):
-    from skfem.helpers import dot, grad
+    from cudaskfem.helpers import dot, grad
     return dot(w.n, grad(w['u']))
 
 
@@ -64,7 +64,7 @@ for port, boundary in mesh.boundaries.items():
     current[port] = asm(port_flux, fbasis, u=u)
 
 def visualize():
-    from skfem.visuals.matplotlib import plot, show
+    from cudaskfem.visuals.matplotlib import plot, show
     return plot(basis, u, shading='gouraud', colorbar=True)
 
 if __name__ == '__main__':

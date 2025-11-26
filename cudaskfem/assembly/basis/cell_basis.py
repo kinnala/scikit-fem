@@ -1,0 +1,331 @@
+import logging
+import sys
+from typing import Callable, Optional, Tuple, Any
+
+import numpy as np
+from numpy import ndarray
+from cudaskfem.element import DiscreteField, Element
+from cudaskfem.mapping import Mapping
+from cudaskfem.mesh import Mesh
+
+if "pyodide" in sys.modules:
+    from scipy.sparse.coo import coo_matrix
+else:
+    from scipy.sparse import coo_matrix
+
+from .abstract_basis import AbstractBasis
+from ..dofs import Dofs
+
+
+logger = logging.getLogger(__name__)
+
+
+class CellBasis(AbstractBasis):
+    """For fields defined inside the domain.
+
+    :class:`~skfem.assembly.CellBasis` object is a combination of
+    :class:`~skfem.mesh.Mesh` and :class:`~skfem.element.Element`.
+
+    >>> from cudaskfem import *
+    >>> m = MeshTri.init_symmetric()
+    >>> e = ElementTriP1()
+    >>> basis = CellBasis(m, e)
+
+    The resulting objects are used in the assembly.
+
+    >>> from cudaskfem.models.poisson import laplace
+    >>> K = asm(laplace, basis)
+    >>> K.shape
+    (5, 5)
+
+    """
+    def __init__(self,
+                 mesh: Mesh,
+                 elem: Element,
+                 mapping: Optional[Mapping] = None,
+                 intorder: Optional[int] = None,
+                 elements: Optional[Any] = None,
+                 quadrature: Optional[Tuple[ndarray, ndarray]] = None,
+                 dofs: Optional[Dofs] = None,
+                 disable_doflocs: bool = False):
+        """Combine :class:`~skfem.mesh.Mesh` and
+        :class:`~skfem.element.Element` into a set of precomputed global basis
+        functions.
+
+        Parameters
+        ----------
+        mesh
+            An object of type :class:`~skfem.mesh.Mesh`.
+        elem
+            An object of type :class:`~skfem.element.Element`.
+        mapping
+            An object of type :class:`skfem.mapping.Mapping`. If `None`, uses
+            `mesh.mapping`.
+        intorder
+            Optional integration order, i.e. the degree of polynomials that are
+            integrated exactly by the used quadrature. Not used if `quadrature`
+            is specified.
+        elements
+            Optional subset of element indices.
+        quadrature
+            Optional tuple of quadrature points and weights.
+        dofs
+            Optional :class:`~skfem.assembly.Dofs` object.
+        disable_doflocs
+            If `True`, the computation of global DOF locations is
+            disabled.  This may save memory on large meshes if DOF
+            locations are not required.
+
+        """
+        logger.info("Initializing {}({}, {})".format(type(self).__name__,
+                                                     type(mesh).__name__,
+                                                     type(elem).__name__))
+        super(CellBasis, self).__init__(
+            mesh,
+            elem,
+            mapping,
+            intorder,
+            quadrature,
+            mesh.refdom,
+            dofs,
+            disable_doflocs,
+        )
+
+        if elements is None:
+            self.tind = None
+            self.nelems = mesh.nelements
+        else:
+            self.tind = mesh.normalize_elements(elements)
+            self.nelems = len(self.tind)
+
+        self.basis = [self.elem.gbasis(self.mapping, self.X, j, tind=self.tind)
+                      for j in range(self.Nbfun)]
+
+        self.dx = (np.abs(self.mapping.detDF(self.X, tind=self.tind))
+                   * np.broadcast_to(self.W, (self.nelems, self.W.shape[-1])))
+        logger.info("Initializing finished.")
+
+    @property
+    def _base_tensor_order(self):
+
+        loc_pts = np.zeros((self.elem.dim, 1))[:, :, np.newaxis]
+        base_obj = self.elem.gbasis(
+            self.mapping,
+            loc_pts,
+            0,
+            tind=np.array([0], dtype=np.int32)
+        )
+
+        if len(base_obj) > 1:
+            raise NotImplementedError
+
+        return base_obj[0].shape[:-2]
+
+    def default_parameters(self):
+        """Return default parameters for `~skfem.assembly.asm`."""
+        return {'x': self.global_coordinates(),
+                'h': self.mesh_parameters()}
+
+    def global_coordinates(self) -> DiscreteField:
+        return DiscreteField(self.mapping.F(self.X, tind=self.tind))
+
+    def mesh_parameters(self) -> DiscreteField:
+        return DiscreteField(np.abs(self.mapping.detDF(self.X, self.tind))
+                             ** (1. / self.mesh.dim()))
+
+    def refinterp(self,
+                  y: ndarray,
+                  nrefs: int = 1,
+                  Nrefs: Optional[int] = None) -> Tuple[Mesh, ndarray]:
+        """Refine and interpolate (for plotting)."""
+        if Nrefs is not None:
+            nrefs = Nrefs  # for backwards compatibility
+        # mesh reference domain, refine and take the vertices
+        meshclass = type(self.mesh)
+        m = meshclass.init_refdom().refined(nrefs)
+
+        if self.mesh.dim() == 1:
+            # this workaround makes sorting preserve correct order of duplicate
+            # nodes in skfem.visuals.matplotlib.plot_meshline
+            X = (1. - 1e-10) * m.p + 5e-11
+        else:
+            X = m.p
+
+        # map vertices to global elements
+        x = self.mapping.F(X)
+
+        # interpolate some previous discrete function at the vertices
+        # of the refined mesh
+        test = self.elem.gbasis(self.mapping, X, 0)[0]
+        if len(test.shape) == 3:
+            w = np.zeros_like(x, dtype=y.dtype)
+        elif len(test.shape) == 2:
+            w = np.zeros_like(x[0], dtype=y.dtype)
+        else:
+            raise NotImplementedError
+        for j in range(self.Nbfun):
+            basis = self.elem.gbasis(self.mapping, X, j)
+            w += y[self.element_dofs[j]][:, None] * basis[0]
+
+        # create connectivity for the new mesh
+        nt = self.nelems
+        t = np.tile(m.t, (1, nt))
+        dt = np.max(t)
+        t += (dt + 1) *\
+            (np.tile(np.arange(nt), (m.t.shape[0] * m.t.shape[1], 1))
+             .flatten('F')
+             .reshape((-1, m.t.shape[0])).T)
+
+        if X.shape[0] == 1:
+            p = np.array([x.flatten()])
+        else:
+            p = x[0].flatten()
+            for itr in range(len(x) - 1):
+                p = np.vstack((p, x[itr + 1].flatten()))
+
+        M = meshclass(p, t)
+
+        return M, w.flatten()
+
+    def probes(self, x: ndarray):
+        """Return matrix which acts on a solution vector to find its values
+        on points `x`.
+
+        The product of this with a finite element function vector is like the
+        result of assembling a `Functional` and it can be thought of as the
+        matrix of inner products of the test functions of the basis with Dirac
+        deltas at `x` but because its action is concentrated at points it is
+        not assembled with the usual quadratures.
+
+        """
+        cells = self.mesh.element_finder(mapping=self.mapping)(*x)
+        pts = self.mapping.invF(x[:, :, np.newaxis], tind=cells)
+        phis = np.array(
+            [
+                self.elem.gbasis(self.mapping, pts, k, tind=cells)[0]
+                for k in range(self.Nbfun)
+            ]
+        ).flatten()
+        # number of components of a base functions
+        comp = int(np.prod(self._base_tensor_order))
+        # row indices
+        rows = np.tile(np.arange(comp * x.shape[1],
+                                 dtype=np.int32), self.Nbfun)
+        # col indices
+        cols = self.element_dofs[:, np.tile(cells, comp)].flatten()
+        # shape
+        sh = (comp * x.shape[1], self.N)
+        return coo_matrix((phis, (rows, cols,)), shape=sh)
+
+    def point_source(self, x: ndarray) -> ndarray:
+        """Return right-hand side vector for unit source at `x`,
+
+        i.e. the vector of inner products of a Dirac delta at `x`
+        with the test functions of the basis.
+
+        This is like what is obtained by assembling a `LinearForm`
+        but because its action is concentrated at points it is not
+        assembled with the usual quadratures.
+
+        """
+        return self.probes(x[:, None]).toarray()[0]
+
+    def interpolator(self, y: ndarray) -> Callable[[ndarray], ndarray]:
+        """Return a function handle, which can be used for finding
+        values of the given solution vector `y` on given points."""
+
+        def interpfun(x: ndarray) -> ndarray:
+            # reshape to 2-array to support trailing axes
+            # this is useful, e.g., to pass interpfun to Basis.project
+            shape = None
+            if len(x.shape) > 2:
+                shape = x.shape
+                x = x.reshape(shape[0], -1)
+            out = self.probes(x) @ y
+            # reshape output for tensor like base functions
+            if len(self._base_tensor_order) > 0:
+                out = out.reshape(self._base_tensor_order + (x.shape[1],))
+            # reshape output back to original shape
+            if shape is not None:
+                return out.reshape(*shape[1:])
+            return out
+
+        return interpfun
+
+    def with_element(self, elem: Element) -> 'CellBasis':
+        """Return a similar basis using a different element."""
+        return type(self)(
+            self.mesh,
+            elem,
+            mapping=self.mapping,
+            quadrature=self.quadrature,
+            elements=self.tind,
+        )
+
+    def with_elements(self, elements: Optional[Any] = None) -> 'CellBasis':
+        """Return a similar basis on a subset of element indices."""
+        return type(self)(
+            self.mesh,
+            self.elem,
+            mapping=self.mapping,
+            quadrature=self.quadrature,
+            elements=elements,
+        )
+
+    def boundary(self,
+                 facets: Optional[Any] = None,
+                 intorder: Optional[int] = None,
+                 quadrature: Optional[Tuple[ndarray, ndarray]] = None):
+        """Return corresponding :class:`~skfem.assembly.basis.FacetBasis`.
+
+        Parameters
+        ----------
+        facets
+            Anything that can be passed to ``FacetBasis(..., facets=facets)``.
+        intorder
+            Optionally, specify integration order.
+        quadrature
+            Optionally, specify quadrature.
+
+        """
+        from cudaskfem.assembly.basis.facet_basis import FacetBasis
+        if self.tind is not None:
+            raise NotImplementedError("Boundary of subdomain not supported.")
+        return FacetBasis(
+            self.mesh,
+            self.elem,
+            mapping=self.mapping,
+            facets=facets,
+            intorder=intorder,
+            quadrature=quadrature,
+        )
+
+    def project(self, interp, elements=None, dtype=None):
+        """Perform :math:`L^2` projection onto the basis.
+
+        See :ref:`l2proj` for more information.
+
+        Parameters
+        ----------
+        interp
+            An object of type :class:`~skfem.element.DiscreteField` which is a
+            function (to be projected) evaluated at global quadrature points.
+            If a function is given, then :class:`~skfem.element.DiscreteField`
+            is created by passing an array of global quadrature point locations
+            to the function.
+        elements
+            Optionally perform the projection on a subset of elements.  The
+            values of the remaining DOFs are zero.
+        dtype
+            Set to `np.complex64` or similar to use complex numbers.
+
+        """
+        from cudaskfem.utils import solve, condense
+
+        M, f = self._projection(interp, dtype=dtype)
+
+        if elements is not None:
+            return solve(*condense(M, f, I=self.get_dofs(elements=elements)))
+        elif self.tind is not None:
+            return solve(*condense(M, f, I=self.get_dofs(elements=self.tind)))
+        return solve(M, f)

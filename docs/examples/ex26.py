@@ -23,8 +23,8 @@ The novelty here is that the temperature is defined as a finite element function
 throughout the mesh (:math:`r < b`) but only solved on a subdomain.
 
 """
-from skfem import *
-from skfem.models.poisson import laplace, unit_load
+from cudaskfem import *
+from cudaskfem.models.poisson import laplace, unit_load
 
 import numpy as np
 
@@ -50,7 +50,7 @@ T0 = {
 if __name__ == '__main__':
     from os.path import splitext
     from sys import argv
-    from skfem.visuals.matplotlib import draw, plot
+    from cudaskfem.visuals.matplotlib import draw, plot
 
     ax = draw(mesh)
     plot(mesh, temperature[basis.nodal_dofs.flatten()],

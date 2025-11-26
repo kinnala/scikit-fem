@@ -5,9 +5,9 @@ import numpy as np
 from numpy.testing import (assert_equal, assert_almost_equal,
                            assert_array_almost_equal)
 
-from skfem import (TrilinearForm, BilinearForm, LinearForm, Functional, asm,
+from cudaskfem import (TrilinearForm, BilinearForm, LinearForm, Functional, asm,
                    solve, condense)
-from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
+from cudaskfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementHexS2, ElementTetP0, ElementTetP1,
                            ElementTetP2, ElementTriP1, ElementQuad2,
                            ElementTriMorley, ElementVectorH1, ElementQuadP,
@@ -19,14 +19,14 @@ from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementTriN1, ElementTriP0, ElementTetN0,
                            ElementQuadN1, ElementQuad0, ElementTriN2,
                            ElementTetN1, ElementTriHHJ1)
-from skfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
+from cudaskfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
                         MeshTri2, MeshTet2, MeshHex2, MeshTri1DG, MeshQuad1DG,
                         MeshHex1DG)
-from skfem.assembly import FacetBasis, Basis
-from skfem.utils import projection
-from skfem.models import laplace, unit_load, mass
-from skfem.helpers import grad, dot, ddot, sym_grad, curl
-from skfem.models import linear_stress
+from cudaskfem.assembly import FacetBasis, Basis
+from cudaskfem.utils import projection
+from cudaskfem.models import laplace, unit_load, mass
+from cudaskfem.helpers import grad, dot, ddot, sym_grad, curl
+from cudaskfem.models import linear_stress
 
 
 class IntegrateOneOverBoundaryQ1(TestCase):
@@ -383,7 +383,7 @@ class TestCompositeAssembly(TestCase):
 
         @BilinearForm
         def bilinf_ev(u, v, w):
-            from skfem.helpers import dot
+            from cudaskfem.helpers import dot
             return dot(u, v)
 
         @BilinearForm
@@ -406,7 +406,7 @@ class TestFieldInterpolation(TestCase):
 
         @Functional
         def feqx(w):
-            from skfem.helpers import grad
+            from cudaskfem.helpers import grad
             f = w['func']  # f(x) = x
             return grad(f)[0]  # f'(x) = 1
 
@@ -426,7 +426,7 @@ class TestFieldInterpolation_2(TestCase):
 
         @Functional
         def feqx(w):
-            from skfem.helpers import grad
+            from cudaskfem.helpers import grad
             f = w['func']  # f(x, y) = x
             g = w['gunc']  # g(x, y) = y
             return grad(f)[0] + grad(g)[1]

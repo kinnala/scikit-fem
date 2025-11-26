@@ -1,5 +1,5 @@
-from skfem import *
-from skfem.helpers import dot, grad
+from cudaskfem import *
+from cudaskfem.helpers import dot, grad
 
 # # enable additional mesh validity checks, sacrificing performance
 # import logging
@@ -37,7 +37,7 @@ A, b = enforce(A, b, D=m.boundary_nodes())
 x = solve(A, b)
 
 def visualize():
-    from skfem.visuals.matplotlib import plot
+    from cudaskfem.visuals.matplotlib import plot
     return plot(m, x, shading='gouraud', colorbar=True)
 
 if __name__ == "__main__":

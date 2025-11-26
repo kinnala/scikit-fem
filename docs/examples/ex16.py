@@ -19,9 +19,9 @@ import numpy as np
 from scipy.sparse.linalg import eigsh
 from scipy.special import legendre
 
-from skfem import *
-from skfem.helpers import d, dot
-from skfem.models.poisson import mass
+from cudaskfem import *
+from cudaskfem.helpers import d, dot
+from cudaskfem.models.poisson import mass
 
 x = np.linspace(-1, 1)
 m = MeshLine(x)

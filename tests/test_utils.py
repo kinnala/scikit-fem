@@ -4,11 +4,11 @@ import numpy as np
 import scipy.sparse
 from numpy.testing import assert_almost_equal
 
-from skfem.assembly import CellBasis, Basis, LinearForm, asm, BilinearForm
-from skfem.element import ElementTriP1, ElementQuad1, ElementTriP2
-from skfem.mesh import MeshTri, MeshQuad
-from skfem.utils import projection, enforce, condense, solve, mpc
-from skfem.models import laplace, mass, unit_load
+from cudaskfem.assembly import CellBasis, Basis, LinearForm, asm, BilinearForm
+from cudaskfem.element import ElementTriP1, ElementQuad1, ElementTriP2
+from cudaskfem.mesh import MeshTri, MeshQuad
+from cudaskfem.utils import projection, enforce, condense, solve, mpc
+from cudaskfem.models import laplace, mass, unit_load
 
 
 class InitializeScalarField(TestCase):

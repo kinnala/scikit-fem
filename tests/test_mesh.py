@@ -6,15 +6,15 @@ import pytest
 from scipy.spatial import Delaunay
 from numpy.testing import assert_array_equal, assert_almost_equal
 
-from skfem.mesh import (Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
+from cudaskfem.mesh import (Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
                         MeshTet1, MeshHex1, MeshLine1DG, MeshQuad1DG, 
                         MeshTri1DG, MeshTri2, MeshQuad2, MeshTet2, MeshHex2)
-from skfem.assembly import Basis, LinearForm, Functional, FacetBasis
-from skfem.element import (ElementTetP1, ElementTriP0, ElementQuad0,
+from cudaskfem.assembly import Basis, LinearForm, Functional, FacetBasis
+from cudaskfem.element import (ElementTetP1, ElementTriP0, ElementQuad0,
                            ElementHex0, ElementTriP1)
-from skfem.utils import projection
-from skfem.io.meshio import to_meshio, from_meshio
-from skfem.helpers import dot
+from cudaskfem.utils import projection
+from cudaskfem.io.meshio import to_meshio, from_meshio
+from cudaskfem.helpers import dot
 
 
 MESH_PATH = Path(__file__).parents[1] / 'docs' / 'examples' / 'meshes'

@@ -221,11 +221,11 @@ potential difference across the capacitor. Thus
 from packaging import version
 from pathlib import Path
 
-from skfem import (MeshTri, Basis, FacetBasis,
+from cudaskfem import (MeshTri, Basis, FacetBasis,
                    solve, asm, condense, projection,
                    ElementTriP1)
-from skfem.models.poisson import laplace, unit_load, mass
-from skfem.io.json import from_file
+from cudaskfem.models.poisson import laplace, unit_load, mass
+from cudaskfem.io.json import from_file
 
 import numpy as np
 
@@ -345,7 +345,7 @@ print(f'v={v} c')
 if __name__ == '__main__':
     from os.path import splitext
     from sys import argv
-    from skfem.visuals.matplotlib import plot, savefig
+    from cudaskfem.visuals.matplotlib import plot, savefig
     import matplotlib.pyplot as plt
 
     Ai = global_basis.interpolate(A)

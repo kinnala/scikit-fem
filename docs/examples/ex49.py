@@ -1,8 +1,8 @@
 """Projection between two meshes using supermesh in 2D."""
 
 import numpy as np
-from skfem import *
-from skfem.supermeshing import intersect, elementwise_quadrature
+from cudaskfem import *
+from cudaskfem.supermeshing import intersect, elementwise_quadrature
 
 
 m1 = MeshTri.init_tensor(np.linspace(0, 1, 4),

@@ -13,8 +13,8 @@ finite elements defined on the mesh skeleton.
 
 """
 
-from skfem import *
-from skfem.helpers import grad, dot, jump
+from cudaskfem import *
+from cudaskfem.helpers import grad, dot, jump
 import numpy as np
 
 m = MeshTri().refined(3)
@@ -50,7 +50,7 @@ y = solve(*condense(A + B, f, D=ibasis.get_dofs()))
 (u1, _), (ut, skelebasis) = ibasis.split(y)
 
 def visualize():
-    from skfem.visuals.matplotlib import plot
+    from cudaskfem.visuals.matplotlib import plot
     return plot(skelebasis,
                 ut,
                 Nrefs=4,

@@ -19,9 +19,9 @@ Turmetov, & Torebek 2015).
 from functools import partial
 from pathlib import Path
 
-from skfem import *
-from skfem.models.poisson import laplace, mass, unit_load
-from skfem.io.json import from_file
+from cudaskfem import *
+from cudaskfem.models.poisson import laplace, mass, unit_load
+from cudaskfem.io.json import from_file
 
 import numpy as np
 
@@ -53,7 +53,7 @@ error = x - exact
 l2error = np.sqrt(error @ mass.assemble(basis) @ error)
 
 def visualize():
-    from skfem.visuals.matplotlib import plot
+    from cudaskfem.visuals.matplotlib import plot
     return plot(basis,
                 x,
                 shading='gouraud',

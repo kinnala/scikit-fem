@@ -14,7 +14,7 @@ n|_{\partial \Omega} = 0` using the lowest order Nédélec edge element.
 """
 import numpy as np
 
-from skfem import *
+from cudaskfem import *
 
 m = MeshTet.init_tensor(
     np.linspace(-1, 1, 15),
@@ -27,7 +27,7 @@ basis = Basis(m, e)
 
 @BilinearForm
 def dudv(E, v, w):
-    from skfem.helpers import curl, dot
+    from cudaskfem.helpers import curl, dot
     return dot(curl(E), curl(v)) + dot(E, v)
 
 def f(x, y, z):
@@ -39,7 +39,7 @@ def f(x, y, z):
 
 @LinearForm
 def fv(v, w):
-    from skfem.helpers import dot
+    from cudaskfem.helpers import dot
     return dot(f(*w.x), v)
 
 

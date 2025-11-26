@@ -1,6 +1,6 @@
 """Solve problems that have manufactured solutions."""
 
-from skfem.utils import penalize
+from cudaskfem.utils import penalize
 from unittest import TestCase
 from pathlib import Path
 
@@ -9,19 +9,19 @@ import pytest
 import numpy as np
 from numpy.testing import assert_almost_equal
 
-from skfem import (LinearForm, Functional, asm, condense, solve, projection,
+from cudaskfem import (LinearForm, Functional, asm, condense, solve, projection,
                    enforce)
-from skfem.assembly import FacetBasis, Basis
-from skfem.element import (ElementHex1, ElementHex2, ElementHexS2,
+from cudaskfem.assembly import FacetBasis, Basis
+from cudaskfem.element import (ElementHex1, ElementHex2, ElementHexS2,
                            ElementLineMini, ElementLineP1, ElementLineP2,
                            ElementQuad1, ElementQuad2, ElementTetP1,
                            ElementTetP2, ElementTriP1, ElementTriP2,
                            ElementLinePp)
-from skfem.mesh import (MeshHex, MeshLine, MeshQuad, MeshQuad2, MeshTet,
+from cudaskfem.mesh import (MeshHex, MeshLine, MeshQuad, MeshQuad2, MeshTet,
                         MeshTet2, MeshTri, MeshTri2, MeshTri1DG,
                         MeshHex1DG, MeshLine1DG, MeshQuad1DG)
-from skfem.models.poisson import laplace, mass, unit_load
-from skfem.helpers import dot
+from cudaskfem.models.poisson import laplace, mass, unit_load
+from cudaskfem.helpers import dot
 
 
 class Line1D(TestCase):

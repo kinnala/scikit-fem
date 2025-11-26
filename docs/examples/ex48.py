@@ -1,6 +1,6 @@
 """Solve :math:`\Delta^2 u = 1` using HHJ element."""
-from skfem import *
-from skfem.helpers import *
+from cudaskfem import *
+from cudaskfem.helpers import *
 import numpy as np
 
 m = MeshTri.init_sqsymmetric().refined(4)

@@ -5,8 +5,8 @@ from numpy.testing import (assert_array_almost_equal,
 
 try:
     import jax.numpy as jnp
-    from skfem.experimental.autodiff import NonlinearForm
-    from skfem.experimental.autodiff.helpers import (grad, dot,
+    from cudaskfem.experimental.autodiff import NonlinearForm
+    from cudaskfem.experimental.autodiff.helpers import (grad, dot,
                                                      ddot, mul,
                                                      div, sym_grad,
                                                      transpose,
@@ -15,11 +15,11 @@ except Exception:
     def NonlinearForm(x):
         raise Exception("jax failed to import")
 
-from skfem.assembly import Basis
-from skfem.mesh import MeshTri, MeshQuad
-from skfem.element import (ElementTriP1, ElementTriP2,
+from cudaskfem.assembly import Basis
+from cudaskfem.mesh import MeshTri, MeshQuad
+from cudaskfem.element import (ElementTriP1, ElementTriP2,
                            ElementVector)
-from skfem.utils import solve, condense
+from cudaskfem.utils import solve, condense
 
 
 def test_linear_poisson():
