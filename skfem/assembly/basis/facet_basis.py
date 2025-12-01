@@ -125,7 +125,8 @@ class FacetBasis(AbstractBasis):
 
     def global_coordinates(self) -> DiscreteField:
         if self._global_coordinates is None:
-            self._global_coordinates = DiscreteField(self.mapping.G(self.X, find=self.find))
+            self._global_coordinates = DiscreteField(self.mapping.G(self.X,
+                                                                    find=self.find))
         return self._global_coordinates
 
     def mesh_parameters(self) -> DiscreteField:

@@ -42,7 +42,6 @@ class AbstractBasis:
     _mesh_parameters: Optional[DiscreteField] = None
     _global_coordinates: Optional[DiscreteField] = None
 
-
     def __init__(self,
                  mesh: Mesh,
                  elem: Element,
