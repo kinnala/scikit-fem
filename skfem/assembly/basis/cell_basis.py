@@ -128,8 +128,9 @@ class CellBasis(AbstractBasis):
 
     def global_coordinates(self) -> DiscreteField:
         if self._global_coordinates is None:
-            self._global_coordinates = DiscreteField(self.mapping.F(self.X,
-                                                                    tind=self.tind))
+            self._global_coordinates = DiscreteField(
+                self.mapping.F(self.X, tind=self.tind)
+            )
         return self._global_coordinates
 
     def mesh_parameters(self) -> DiscreteField:
