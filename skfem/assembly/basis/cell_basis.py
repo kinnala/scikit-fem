@@ -127,11 +127,18 @@ class CellBasis(AbstractBasis):
                 'h': self.mesh_parameters()}
 
     def global_coordinates(self) -> DiscreteField:
-        return DiscreteField(self.mapping.F(self.X, tind=self.tind))
+        if self._global_coordinates is None:
+            self._global_coordinates = DiscreteField(
+                self.mapping.F(self.X, tind=self.tind)
+            )
+        return self._global_coordinates
 
     def mesh_parameters(self) -> DiscreteField:
-        return DiscreteField(np.abs(self.mapping.detDF(self.X, self.tind))
-                             ** (1. / self.mesh.dim()))
+        if self._mesh_parameters is None:
+            self._mesh_parameters = DiscreteField(
+                np.abs(self.mapping.detDF(self.X, self.tind))
+                ** (1. / self.mesh.dim()))
+        return self._mesh_parameters
 
     def refinterp(self,
                   y: ndarray,
