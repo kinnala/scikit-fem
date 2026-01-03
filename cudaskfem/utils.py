@@ -108,13 +108,32 @@ def solver_eigen_scipy_sym(**kwargs) -> EigenSolver:
     return solver
 
 
-def solver_direct_scipy(**kwargs) -> LinearSolver:
-    """The default linear solver of SciPy."""
+def solver_direct_scipy(method='cg', tol=1e-5, maxiter=None, **kwargs):  
+    import cupy as cp
+    from cupyx.scipy.sparse import csr_matrix as cpx_csr
+    from cupyx.scipy.sparse.linalg import cg
+    from cupyx.scipy.sparse.linalg import cg, gmres, cgs, minres
 
+    solvers = {'cg': cg, 'gmres': gmres, 'cgs': cgs, 'minres': minres}
+    solve_func = solvers[method]
     def solver(A, b, **solve_time_kwargs):
         kwargs.update(solve_time_kwargs)
-        return spl.spsolve(A, b, **kwargs)
-
+        
+        A_gpu = cpx_csr(A, dtype=cp.float64)
+        b_gpu = cp.asarray(b, dtype=cp.float64)
+        
+        x_gpu, info = solve_func(A_gpu, b_gpu, tol=tol, maxiter=maxiter)
+        
+        if info != 0:
+            print(f"Warning: {method} didn't converge (info={info})")
+        
+        x = cp.asnumpy(x_gpu)
+        
+        del A_gpu, b_gpu, x_gpu
+        cp.get_default_memory_pool().free_all_blocks()
+        
+        return x
+        
     return solver
 
 
