@@ -223,6 +223,10 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+### [12.0.1] - 2026-01-19
+
+- Fixed: License year updated while changing to a different build system (flit).
+
 ### [12.0.0] - 2026-01-19
 
 - Changed: `Mesh.with_defaults` now uses `np.isclose` for

@@ -1,4 +1,8 @@
-"""Support for wildcard import."""
+"""scikit-fem is a package for finite element assembly."""
+
+
+__version__ = "12.0.1"
+
 
 from skfem.mesh import *  # noqa
 from skfem.assembly import *  # noqa
@@ -9,8 +13,6 @@ from skfem.utils import *  # noqa
 from skfem.assembly import __all__ as all_assembly
 from skfem.mesh import __all__ as all_mesh
 from skfem.element import __all__ as all_element
-
-from .__about__ import __version__
 
 
 __all__ = all_mesh + all_assembly + all_element + [  # noqa
