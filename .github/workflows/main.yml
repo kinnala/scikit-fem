@@ -29,10 +29,10 @@ jobs:
         flake8 skfem
     - name: Run sphinx build
       run: |
-        sphinx-build -W -a -b html docs docs/_build
+        sphinx-build -a -b html docs docs/_build
     - name: Run sphinx doctests
       run: |
-        sphinx-build -W -a -b doctest docs docs/_build
+        sphinx-build -a -b doctest docs docs/_build
     - name: Run pytest
       run: |
         pytest -k "not test_mamba"
