@@ -26,7 +26,7 @@ docs:
 
 release:
 	@echo "Steps for release:"
-	@echo "1. Update changelog in README.md and modify version number in setup.cfg"
+	@echo "1. Update changelog in README.md and modify version number in skfem/__init__.py"
 	@echo "2. Create a commit, e.g., 'Bump up version number'"
 	@echo "3. Push (and wait for CI to run successfully to minimize bugs)"
 	@echo "4. Run 'make release'"
@@ -36,7 +36,6 @@ release:
 	-rm -r dist
 	-rm -r build
 	-rm -r scikit_fem.egg-info
-	python -m pep517.build --source --binary .
-	twine upload dist/*
+	flit publish --no-use-vcs
 
 .PHONY: docs
