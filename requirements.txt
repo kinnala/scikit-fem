@@ -7,7 +7,7 @@ pytest
 pyamg
 mypy
 flake8
-sphinx~=6.1
+sphinx
 jax
 jaxlib
 pep517
