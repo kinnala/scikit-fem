@@ -1,6 +1,6 @@
 # scikit-fem
 
-`scikit-fem` is a pure Python 3.9+ library for performing [finite element
+`scikit-fem` is a pure Python 3.10+ library for performing [finite element
 assembly](https://en.wikipedia.org/wiki/Finite_element_method). Its main
 purpose is the transformation of bilinear forms into sparse matrices and linear
 forms into vectors.
@@ -223,6 +223,8 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+### [12.0.0] - 2026-01-19
+
 - Changed: `Mesh.with_defaults` now uses `np.isclose` for
   finding facets matching `left`, `right`, `top`, `bottom`, etc.
   instead of direct floating point comparison.
@@ -251,7 +253,7 @@ with respect to documented and/or tested features.
   examples.
 - Added: `ElementTriN3`, a third order Nedelec element for triangular meshes.
 - Added: Support for Python 3.14.
-- Removed: Support for Pythobn 3.9.
+- Removed: Support for Python 3.9.
 
 ### [11.0.0] - 2025-04-24
 
