@@ -124,12 +124,19 @@ class FacetBasis(AbstractBasis):
         }
 
     def global_coordinates(self) -> DiscreteField:
-        return DiscreteField(self.mapping.G(self.X, find=self.find))
+        if self._global_coordinates is None:
+            self._global_coordinates = DiscreteField(
+                self.mapping.G(self.X, find=self.find)
+            )
+        return self._global_coordinates
 
     def mesh_parameters(self) -> DiscreteField:
-        return DiscreteField((np.abs(self.mapping.detDG(self.X, self.find))
-                              ** (1. / (self.mesh.dim() - 1.)))
-                             if self.mesh.dim() != 1 else np.array([0.]))
+        if self._mesh_parameters is None:
+            self._mesh_parameters = DiscreteField(
+                (np.abs(self.mapping.detDG(self.X, self.find))
+                 ** (1. / (self.mesh.dim() - 1.)))
+                if self.mesh.dim() != 1 else np.array([0.]))
+        return self._mesh_parameters
 
     def _trace_project(self,
                        x: ndarray,
