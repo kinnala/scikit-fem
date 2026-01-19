@@ -250,6 +250,8 @@ with respect to documented and/or tested features.
   `form.elemental(basis).topetsc(dofs)`. See ex53 and ex54 for
   examples.
 - Added: `ElementTriN3`, a third order Nedelec element for triangular meshes.
+- Added: Support for Python 3.14.
+- Removed: Support for Pythobn 3.9.
 
 ### [11.0.0] - 2025-04-24
 

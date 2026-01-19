@@ -27,7 +27,7 @@ radii = [1., 2.]
 lcar = .1
 
 mesh = (MeshTri
-        .init_tensor(np.linspace(*radii, 1 + int(np.diff(radii) / lcar)),
+        .init_tensor(np.linspace(*radii, 1 + int(np.diff(radii)[0] / lcar)),
                      np.linspace(0, np.pi/2, 1 + int(3*np.pi/4 / lcar)))
         .with_boundaries({
             'ground': lambda xi: xi[1] == 0.,
