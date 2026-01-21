@@ -1,3 +1,7 @@
+<div align="center">
+<img src="https://raw.githubusercontent.com/kinnala/scikit-fem/master/logo.png" alt="logo"></img>
+</div>
+
 # scikit-fem
 
 `scikit-fem` is a pure Python 3.10+ library for performing [finite element
@@ -75,10 +79,15 @@ A, b = enforce(A, b, D=mesh.boundary_nodes())
 x = solve(A, b)
 
 # plot using matplotlib
-mesh.plot(x, shading='gouraud', colorbar=True).show()
+ax = mesh.plot(x, shading='gouraud', colorbar=True)
+mesh.draw(ax=ax)
 # or, save to external file:
 # mesh.save('output.vtk', point_data={'solution': x})
 ```
+
+<div align="center">
+<img src="https://raw.githubusercontent.com/kinnala/scikit-fem/master/poisson.png" alt="Poisson equation solution"></img>
+</div>
 
 Meshes can be initialized manually, loaded from external files using
 [meshio](https://github.com/nschloe/meshio), or created with the help of special
