@@ -1,5 +1,5 @@
 <div align="center">
-<img src="https://raw.githubusercontent.com/kinnala/scikit-fem/master/logo.png" alt="logo"></img>
+<img src="https://raw.githubusercontent.com/kinnala/scikit-fem/master/logo.png" width="250px" alt="logo"></img>
 </div>
 
 # scikit-fem
