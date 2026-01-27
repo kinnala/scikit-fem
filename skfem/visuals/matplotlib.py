@@ -351,7 +351,7 @@ def plot3_meshtri(m: MeshTri1, z: ndarray, **kwargs) -> Axes:
     Returns
     -------
     Axes
-        The Matplotlib axes onto which the mesh was plotted.
+        The Matplotlib axes onto which the graph was plotted.
 
     """
     ax = kwargs.get("ax", plt.figure().add_subplot(1, 1, 1, projection='3d'))
@@ -367,6 +367,26 @@ def plot3_meshtri(m: MeshTri1, z: ndarray, **kwargs) -> Axes:
 
     ax.show = lambda: plt.show()
     return ax
+
+
+@plot3.register(MeshQuad1)
+def plot3_meshquad(m: MeshQuad1, z: ndarray, **kwargs) -> Axes:
+    """Visualise piecewise-bilinear function, 3D plot.
+
+    Parameters
+    ----------
+    z
+        An array of nodal values (Nvertices).
+    ax (optional)
+        Plot onto the given preinitialised Matplotlib axes.
+
+    Returns
+    -------
+    Axes
+        The Matplotlib axes onto which the graph was plotted.
+
+    """
+    return plot3_meshtri(m.to_meshtri(), z, **kwargs)
 
 
 @plot3.register(CellBasis)
