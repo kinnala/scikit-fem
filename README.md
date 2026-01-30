@@ -232,6 +232,9 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+- Fixed: `matplotlib.visuals.plot3` now supports `MeshQuad1` by splitting
+  it into triangle mesh and using the respective plotting routine.
+
 ### [12.0.1] - 2026-01-19
 
 - Fixed: License year updated while changing to a different build system (flit).
