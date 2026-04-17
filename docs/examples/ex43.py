@@ -66,7 +66,7 @@ which may be alternatively formulated by expressions of the trace:
 ..  math::
 
     \Delta\delta\psi(\boldsymbol{F}) = \mu \Delta\boldsymbol{F} :
-    \delta\boldsymbol{F} + (\lambda \ln(J) - \mu)
+    \delta\boldsymbol{F} - (\lambda \ln(J) - \mu)
         \text{tr}(\Delta\boldsymbol{F} \boldsymbol{F}^{-1}
                   \delta\boldsymbol{F} \boldsymbol{F}^{-1})
     + \lambda \text{tr}(\delta\boldsymbol{F} \boldsymbol{F}^{-1})

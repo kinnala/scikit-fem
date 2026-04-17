@@ -426,3 +426,10 @@ class TestEx51(TestCase):
                                0.15983570088457588)
         self.assertAlmostEqual(ex51.x2.max(),
                                0.4062806125571157)
+        
+class TestEx55(TestCase):
+
+    def runTest(self):
+        import docs.examples.ex55 as ex
+
+        self.assertAlmostEqual(ex.u.max(), 0.2466622622014594, delta=1e-8)

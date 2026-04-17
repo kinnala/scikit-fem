@@ -330,11 +330,11 @@ for nearly incompressible Neo-Hookean solids.
 See the source code of :exlink:`36` for more information.
 
 
-Example 43: Hyperelasticity
----------------------------
+Example 43: Hyperelasticity - Total Lagrangian formulation
+----------------------------------------------------------
 
 This example demonstrates Newton's method applied to the classical formulation
-of a hyperelastic Neo-Hookean solid.
+of a hyperelastic Neo-Hookean solid using the Total Lagrangian formulation.
 
 .. figure:: https://user-images.githubusercontent.com/973268/147790182-64f4abf4-3909-4ec0-89ac-2add304b133d.png
 
@@ -342,6 +342,26 @@ of a hyperelastic Neo-Hookean solid.
    The figure was created using `vedo <https://github.com/marcomusy/vedo>`__.
 
 See the source code of :exlink:`43` for more information.
+
+Example 55: Hyperelasticity - Update-Lagrangian formulation
+------------------------------------------------------------
+
+This example demonstrates Newton's method applied to the classical formulation
+of a hyperelastic Neo-Hookean solid using the Updated Lagrangian formulation where the 
+weak form and derivatives therein are evaluated w.r.t. the current configuration. The
+non-linearity of the material model relies on the deformatoin gradient which needs
+the spatial derivatives w.r.t. the reference configuration.
+To that end we use two meshes whereas on is updated in every iteration to provide the spatial
+deriavtives w.r.t. the current configuration and the other mesh is used to provide the derivatives
+w.r.t. to the reference configuration.
+
+.. figure:: https://user-images.githubusercontent.com/973268/147790182-64f4abf4-3909-4ec0-89ac-2add304b133d.png
+
+   The deformed mesh of Example 55 matches the one of example 43 exaxtly.
+   The figure was created using `vedo <https://github.com/marcomusy/vedo>`__.
+
+See the source code of :exlink:`55` for more information.
+
 
 Example 51: Contact problem
 ---------------------------
