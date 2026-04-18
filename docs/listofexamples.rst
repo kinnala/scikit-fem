@@ -351,7 +351,7 @@ of a hyperelastic Neo-Hookean solid using the Updated Lagrangian formulation whe
 weak form and derivatives therein are evaluated w.r.t. the current configuration. The
 non-linearity of the material model relies on the deformatoin gradient which needs
 the spatial derivatives w.r.t. the reference configuration.
-To that end we use two meshes whereas on is updated in every iteration to provide the spatial
+To that end we use two meshes whereas one is updated in every iteration to provide the spatial
 deriavtives w.r.t. the current configuration and the other mesh is used to provide the derivatives
 w.r.t. to the reference configuration.
 
