@@ -343,7 +343,7 @@ of a hyperelastic Neo-Hookean solid using the Total Lagrangian formulation.
 
 See the source code of :exlink:`43` for more information.
 
-Example 55: Hyperelasticity - Update-Lagrangian formulation
+Example 55: Hyperelasticity - Updated Lagrangian formulation
 ------------------------------------------------------------
 
 This example demonstrates Newton's method applied to the classical formulation
