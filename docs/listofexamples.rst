@@ -357,7 +357,7 @@ w.r.t. to the reference configuration.
 
 .. figure:: https://user-images.githubusercontent.com/973268/147790182-64f4abf4-3909-4ec0-89ac-2add304b133d.png
 
-   The deformed mesh of Example 55 matches the one of example 43 exaxtly.
+   The deformed mesh of Example 55 matches the one of example 43 exactly.
    The figure was created using `vedo <https://github.com/marcomusy/vedo>`__.
 
 See the source code of :exlink:`55` for more information.
