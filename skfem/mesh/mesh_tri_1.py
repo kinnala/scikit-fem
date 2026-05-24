@@ -444,7 +444,7 @@ class MeshTri1(MeshSimplex, Mesh2D):
             eps = np.finfo(X.dtype).eps
             inside = ((X[0] >= -eps) *
                       (X[1] >= -eps) *
-                      (1 - X[0] - X[1] >= -eps))
+                      (1 - X[0] - X[1] >= -2 * eps))
 
             if not inside.max(axis=0).all():
                 if _search_all:

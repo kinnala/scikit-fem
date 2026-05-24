@@ -70,7 +70,7 @@ class MeshTet1(MeshSimplex, Mesh3D):
             inside = ((X[0] >= -eps) *
                       (X[1] >= -eps) *
                       (X[2] >= -eps) *
-                      (1 - X[0] - X[1] - X[2] >= -eps))
+                      (1 - X[0] - X[1] - X[2] >= -3 * eps))
 
             if not inside.max(axis=0).all():
                 if _search_all:
