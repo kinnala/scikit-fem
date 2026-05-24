@@ -232,6 +232,7 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+- Fixed: `models.elasticity.plane_stress` contained incorrect formula
 - Fixed: `matplotlib.visuals.plot3` now supports `MeshQuad1` by splitting
   it into triangle mesh and using the respective plotting routine.
 - Fixed: `supermeshing.intersect` will now properly restrict the supermesh to the
