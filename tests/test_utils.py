@@ -53,6 +53,54 @@ class TestEnforce(TestCase):
         assert_almost_equal(A.toarray(), np.eye(A.shape[0]))
 
 
+def test_enforce_handles_empty_rows():
+    """Regression: ``enforce`` must work when some enforced rows have no
+    nonzeros to begin with -- this happens whenever an assembled matrix has
+    rows belonging to elements that contribute only Dirichlet dofs (e.g.
+    a p-Laplacian Hessian whose surface dofs see no neighbours through the
+    bulk form). The previous implementation built an offset array via
+    ``np.cumsum(np.ones(...))`` and silently produced out-of-range indices
+    on any zero-row, raising ``IndexError``. See issue #1195.
+    """
+    m = MeshTri().refined(1)
+    basis = CellBasis(m, ElementTriP1())
+
+    # Build a matrix with at least one entirely-zero row among the boundary
+    # dofs by assembling a bilinear form whose coefficient vanishes
+    # everywhere -- this mirrors what happens when surface dofs end up
+    # with no in-bulk neighbours.
+    @BilinearForm
+    def zero_form(u, v, w):
+        return 0. * u * v
+
+    A = zero_form.assemble(basis)
+    D = m.boundary_nodes()
+
+    # Confirm we really have empty rows in D (otherwise the test would
+    # silently pass even with the old buggy code).
+    counts = A.indptr[D + 1] - A.indptr[D]
+    assert (counts == 0).any(), "test setup did not produce any empty rows"
+
+    Aout = enforce(A, D=D)
+
+    # Every enforced row must end up with diag = 1 and no off-diagonal
+    # nonzeros; non-enforced rows must be untouched.
+    dense = Aout.toarray()
+    for d in D:
+        row = dense[d]
+        assert row[d] == 1.0
+        row[d] = 0.0
+        assert not row.any()
+    rest = np.setdiff1d(np.arange(A.shape[0]), D)
+    assert_almost_equal(dense[rest], A.toarray()[rest])
+
+    # And with a right-hand side ``b`` the enforced entries must be set.
+    b = np.ones(A.shape[0])
+    _, bout = enforce(A, b, D=D)
+    assert_almost_equal(bout[D], 0.)
+    assert_almost_equal(bout[rest], b[rest])
+
+
 def test_simple_cg_solver():
 
     m = MeshTri().refined(3)
