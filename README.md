@@ -232,6 +232,7 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+- Fixed: `skfem.utils.enforce` now works correctly with rows that have no nonzero entries
 - Fixed: Slightly relax the condition in `MeshTri` and `MeshTet.element_finder` to decide whether a point is on the element (due to possible float error accumulation)
 - Fixed: `models.elasticity.plane_stress` contained incorrect formula
 - Fixed: `matplotlib.visuals.plot3` now supports `MeshQuad1` by splitting
