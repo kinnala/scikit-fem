@@ -373,14 +373,25 @@ def enforce(A: spmatrix,
 
     Aout = A if overwrite else A.copy()
 
-    # set rows on lhs to zero
+    # Zero the rows of `Aout` whose indices are in `D`. Each such row
+    # contributes ``count[i]`` data entries to ``Aout.data``, starting at
+    # ``Aout.indptr[D[i]]``. We build the flat list of data positions to
+    # zero by repeating each row's start and adding the within-row offset
+    # ``0 .. count[i] - 1``.
+    #
+    # The previous incremental construction (cumsum/subtract) silently
+    # produced out-of-range indices when any row in ``D`` had no nonzeros
+    # (e.g. an element with only Dirichlet dofs); see issue #1195. The
+    # form below handles ``count[i] == 0`` correctly because both
+    # ``np.repeat`` and the ``np.arange`` subtraction contribute nothing
+    # for an empty row.
     start = Aout.indptr[D]
-    stop = Aout.indptr[D + 1]
-    count = stop - start
-    idx = np.ones(count.sum(), dtype=np.int32)
-    idx[np.cumsum(count)[:-1]] -= count[:-1]
-    idx = np.repeat(start, count) + np.cumsum(idx) - 1
-    Aout.data[idx] = 0.
+    count = Aout.indptr[D + 1] - start
+    if count.sum() > 0:
+        offsets = (np.arange(count.sum())
+                   - np.repeat(np.cumsum(count) - count, count))
+        idx = np.repeat(start, count) + offsets
+        Aout.data[idx] = 0.
 
     # set diagonal value
     d = Aout.diagonal()
