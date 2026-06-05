@@ -1,7 +1,7 @@
 """scikit-fem is a package for finite element assembly."""
 
 
-__version__ = "12.0.1"
+__version__ = "12.0.2"
 
 
 from skfem.mesh import *  # noqa
