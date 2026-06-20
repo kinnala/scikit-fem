@@ -1,3 +1,4 @@
+import os
 from unittest import TestCase
 from pathlib import Path
 
@@ -559,9 +560,16 @@ def test_saveload_cycle_vtk(m):
 
     from tempfile import NamedTemporaryFile
     m = m.refined(2)
-    with NamedTemporaryFile(suffix='.vtk') as f:
-        m.save(f.name)
-        m2 = Mesh.load(f.name)
+    # delete=False and explicit unlink: on Windows the OS keeps an exclusive
+    # lock on an open NamedTemporaryFile, so m.save() reopening the same path
+    # raises PermissionError (issue #882).
+    with NamedTemporaryFile(suffix='.vtk', delete=False) as f:
+        tmpname = f.name
+    try:
+        m.save(tmpname)
+        m2 = Mesh.load(tmpname)
+    finally:
+        os.unlink(tmpname)
 
     assert_array_equal(m.p, m2.p)
     assert_array_equal(m.t, m2.t)
@@ -609,10 +617,15 @@ def test_saveload_cycle_tags(fmt, kwargs, m, ignore_orientation, ignore_interior
          .with_boundaries({'test': lambda x: (x[0] == 0) * (x[1] < 0.6),
                            'set': lambda x: (x[0] == 0) * (x[1] > 0.3)}))
     from tempfile import NamedTemporaryFile
-    with NamedTemporaryFile(suffix=fmt) as f:
-        m.save(f.name, point_data={'foo': m.p[0]}, **kwargs)
+    # delete=False and explicit unlink: on Windows the OS keeps an exclusive
+    # lock on an open NamedTemporaryFile, so m.save() reopening the same path
+    # raises PermissionError (issue #882).
+    with NamedTemporaryFile(suffix=fmt, delete=False) as f:
+        tmpname = f.name
+    try:
+        m.save(tmpname, point_data={'foo': m.p[0]}, **kwargs)
         out = ['point_data', 'cells_dict']
-        m2 = Mesh.load(f.name,
+        m2 = Mesh.load(tmpname,
                        out=out,
                        ignore_orientation=ignore_orientation,
                        ignore_interior_facets=ignore_interior_facets)
@@ -627,6 +640,8 @@ def test_saveload_cycle_tags(fmt, kwargs, m, ignore_orientation, ignore_interior
         for key in m.boundaries:
             assert_array_equal(m2.boundaries[key].sort(),
                                m.boundaries[key].sort())
+    finally:
+        os.unlink(tmpname)
 
 
 def test_periodic_failure():
