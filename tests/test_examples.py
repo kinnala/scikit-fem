@@ -433,3 +433,15 @@ class TestEx55(TestCase):
         import docs.examples.ex55 as ex
 
         self.assertAlmostEqual(ex.u.max(), 0.2466622622014594, delta=1e-8)
+
+
+class TestEx56(TestCase):
+
+    def runTest(self):
+        import docs.examples.ex56 as ex
+
+        self.assertAlmostEqual(ex.err, 0.03535851780, delta=1e-6)
+        self.assertAlmostEqual(ex.var_ratio, 1.09800363220, delta=1e-6)
+        self.assertGreater(ex.lopsided, 3.)
+        self.assertLess(ex.blocked, 0.1)
+        self.assertGreater(ex.routed, 2.)
