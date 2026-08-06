@@ -682,3 +682,19 @@ u_{xx}` by reducing it to a first order system.
    The results of Example 44.
 
 See the source code of :exlink:`44` for more information.
+
+Example 56: Matérn covariance as a sparse precision matrix
+----------------------------------------------------------
+
+This example assembles the precision matrix of the Gaussian Markov random field
+that approximates a Gaussian field with the Matérn covariance.  The mass and
+stiffness matrices give the precision, which is sparse because the mass is
+lumped, and the panels show correlations computed from it.
+
+.. plot::
+   :caption: The results of Example 56.
+
+   from docs.examples.ex56 import visualize
+   visualize()
+
+See the source code of :exlink:`56` for more information.
