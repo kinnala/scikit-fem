@@ -66,7 +66,10 @@ class MeshDG:
         oix = np.setdiff1d(np.arange(mesh.nvertices, dtype=np.int32), ix)
         remap[oix] = np.arange(mesh.nvertices - len(ix), dtype=np.int32)
 
-        doflocs = np.hstack((mesh.doflocs[:, oix], mesh.doflocs[:, ix]))
+        doflocs = np.hstack((
+            np.take(mesh.doflocs, oix, axis=1),
+            np.take(mesh.doflocs, ix, axis=1),
+        ))
         t = remap[mesh.t]
 
         reordered_mesh = replace(
