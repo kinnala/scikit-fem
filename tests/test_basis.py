@@ -461,6 +461,55 @@ def test_basis_interpolate_project(m, e):
     assert_almost_equal(x, X)
 
 
+@pytest.mark.parametrize(
+    "e",
+    [
+        ElementTriP2(),
+        ElementVectorH1(ElementTriP1()),
+        ElementTriP2() * ElementTriP1(),
+    ],
+)
+def test_basis_interpolate_multiple(e):
+
+    basis = CellBasis(MeshTri().refined(), e)
+    x = (np.arange(3 * basis.N).reshape(basis.N, 3)
+         * (1. + 1.j))
+    actual = basis.interpolate_multiple(x)
+    expected = [basis.interpolate(x[:, k]) for k in range(x.shape[1])]
+
+    if isinstance(actual, tuple):
+        for c, component in enumerate(actual):
+            assert_allclose(component,
+                            np.stack([y[c] for y in expected], axis=-1))
+    else:
+        assert_allclose(actual, np.stack(expected, axis=-1))
+
+
+def test_basis_interpolate_multiple_input_shape():
+
+    basis = CellBasis(MeshTri(), ElementTriP1())
+    with pytest.raises(ValueError):
+        basis.interpolate_multiple(basis.zeros())
+    with pytest.raises(ValueError):
+        basis.interpolate_multiple(np.empty((basis.N + 1, 2)))
+
+
+def test_basis_interpolate_multiple_assembly():
+
+    basis = CellBasis(MeshTri(), ElementTriP1())
+
+    @LinearForm
+    def sum_fields(v, w):
+        return np.sum(w.x, axis=-1) * v
+
+    actual = sum_fields.assemble(
+        basis,
+        x=basis.interpolate_multiple(np.ones((basis.N, 3))),
+    )
+    expected = 3. * LinearForm(lambda v, _: v).assemble(basis)
+    assert_allclose(actual, expected)
+
+
 def test_subdomain_facet_assembly():
 
     def subdomain(x):

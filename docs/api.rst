@@ -79,7 +79,7 @@ Subclasses of :class:`~skfem.assembly.basis.AbstractBasis` represent a global
 finite element basis evaluated at quadrature points.
 
 .. autoclass:: skfem.assembly.basis.AbstractBasis
-   :members: get_dofs, interpolate, project
+   :members: get_dofs, interpolate, interpolate_multiple, project
 
 Class: CellBasis
 ****************
@@ -87,7 +87,7 @@ Class: CellBasis
 .. autoclass:: skfem.assembly.Basis
 
 .. autoclass:: skfem.assembly.CellBasis
-   :members: __init__, interpolate, project
+   :members: __init__, interpolate, interpolate_multiple, project
 
 
 Class: FacetBasis
