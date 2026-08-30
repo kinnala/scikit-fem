@@ -2,7 +2,7 @@ from unittest import TestCase, main
 
 import pytest
 import numpy as np
-from numpy.testing import (assert_equal, assert_almost_equal,
+from numpy.testing import (assert_allclose, assert_equal, assert_almost_equal,
                            assert_array_almost_equal)
 
 from skfem import (TrilinearForm, BilinearForm, LinearForm, Functional, asm,
@@ -23,6 +23,7 @@ from skfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
                         MeshTri2, MeshTet2, MeshHex2, MeshTri1DG, MeshQuad1DG,
                         MeshHex1DG)
 from skfem.assembly import FacetBasis, Basis
+from skfem.assembly.form.coo_data import COOData
 from skfem.utils import projection
 from skfem.models import laplace, unit_load, mass
 from skfem.helpers import grad, dot, ddot, sym_grad, curl
@@ -495,6 +496,144 @@ class TestThreadedAssembly(TestCase):
             nonsym.assemble(basis).toarray(),
             threaded_nonsym.assemble(basis).toarray(),
         )
+
+
+def test_cached_assembly_reuses_basis_sparsity():
+    basis = Basis(MeshTri().refined(), ElementTriP1())
+
+    @BilinearForm
+    def scaled_mass(u, v, w):
+        return w.scale * u * v
+
+    zero = scaled_mass.assemble(basis, scale=0., cache=True)
+    uncached_zero = scaled_mass.assemble(basis, scale=0.)
+    factorization = basis._csr_cache[basis]
+
+    @BilinearForm
+    def stiffness(u, v, w):
+        return dot(grad(u), grad(v))
+
+    cached = asm(stiffness, basis, cache=True)
+    expected = asm(stiffness, basis)
+    repeated = stiffness.assemble(basis, cache=True)
+
+    assert zero.nnz > 0
+    assert np.count_nonzero(zero.data) == 0
+    assert uncached_zero.nnz == 0
+    assert basis._csr_cache[basis] is factorization
+    assert_allclose(cached.toarray(), expected.toarray())
+    assert_allclose(repeated.toarray(), expected.toarray())
+    assert not np.shares_memory(cached.indices, repeated.indices)
+    assert not np.shares_memory(cached.indptr, repeated.indptr)
+
+
+def test_cached_assembly_retains_explicit_zeros():
+    basis = Basis(MeshTri().refined(), ElementVector(ElementTriP1()))
+
+    @BilinearForm
+    def vector_mass(u, v, w):
+        return dot(u, v)
+
+    cached = vector_mass.assemble(basis, cache=True)
+    expected = vector_mass.assemble(basis)
+
+    assert cached.nnz > expected.nnz
+    assert np.count_nonzero(cached.data == 0) > 0
+    assert_allclose(cached.toarray(), expected.toarray())
+
+
+def test_cached_assembly_rectangular_and_complex():
+    mesh = MeshTri().refined()
+    ubasis = Basis(mesh, ElementTriP1(), intorder=4)
+    vbasis = Basis(mesh, ElementTriP2(), intorder=4)
+
+    @BilinearForm(dtype=np.complex64)
+    def complex_mass(u, v, w):
+        return 1j * u * v
+
+    cached = complex_mass.assemble(ubasis, vbasis, cache=True)
+    expected = complex_mass.assemble(ubasis, vbasis)
+
+    assert cached.dtype == np.complex64
+    assert cached.shape == (vbasis.N, ubasis.N)
+    assert_allclose(cached.toarray(), expected.toarray())
+
+
+@pytest.mark.parametrize(
+    "basis_type,selection",
+    [(Basis, 'elements'), (FacetBasis, 'facets')],
+)
+def test_cached_assembly_empty_pattern(basis_type, selection):
+    basis = basis_type(
+        MeshTri(),
+        ElementTriP1(),
+        **{selection: np.array([], dtype=np.int32)},
+    )
+
+    uncached = mass.assemble(basis)
+    cached = mass.assemble(basis, cache=True)
+    factorization = basis._csr_cache[basis]
+    repeated = asm(mass, basis, cache=True)
+
+    assert cached.shape == uncached.shape == repeated.shape
+    assert cached.dtype == uncached.dtype == repeated.dtype
+    assert cached.nnz == uncached.nnz == repeated.nnz == 0
+    assert basis._csr_cache[basis] is factorization
+    assert_allclose(cached.toarray(), uncached.toarray())
+    assert_allclose(repeated.toarray(), uncached.toarray())
+
+
+@pytest.mark.parametrize("listed_argument", ['only', 'trial', 'test'])
+def test_cached_asm_reuses_combined_sparsity(monkeypatch, listed_argument):
+    mesh = MeshTri().refined()
+    listed = [Basis(mesh, ElementTriP1()),
+              Basis(mesh, ElementTriP1())]
+    other = Basis(mesh, ElementTriP1())
+    if listed_argument == 'only':
+        args = (listed,)
+    elif listed_argument == 'trial':
+        args = (listed, other)
+    else:
+        args = (other, listed)
+    expected_mass = asm(mass, *args)
+    expected_laplace = asm(laplace, *args)
+
+    factorization_calls = 0
+    factorize = COOData._factorize_scipy_csr
+
+    def counting_factorize(self):
+        nonlocal factorization_calls
+        factorization_calls += 1
+        return factorize(self)
+
+    monkeypatch.setattr(COOData, '_factorize_scipy_csr', counting_factorize)
+    cached = asm(mass, *args, cache=True)
+
+    assert factorization_calls == 1
+
+    def reject_fallback(*args, **kwargs):
+        pytest.fail("repeated assembly used the COO-to-CSR fallback")
+
+    monkeypatch.setattr(COOData,
+                        '_assemble_scipy_csr',
+                        staticmethod(reject_fallback))
+    repeated = asm(laplace, *args, cache=True)
+
+    assert factorization_calls == 1
+    assert_allclose(cached.toarray(), expected_mass.toarray())
+    assert_allclose(repeated.toarray(), expected_laplace.toarray())
+
+
+def test_adding_cached_coodata_discards_factorization():
+    basis = Basis(MeshTri(), ElementTriP1())
+    first = mass.coo_data(basis, cache=True)
+    second = mass.coo_data(basis, cache=True)
+
+    combined = first + second
+
+    assert combined._csr is None
+    assert_allclose(combined.tocsr().toarray(),
+                    2. * mass.assemble(basis).toarray())
 
 
 @pytest.mark.parametrize(

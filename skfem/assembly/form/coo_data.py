@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from typing import Tuple, Any, Optional
 
 import numpy as np
@@ -17,12 +17,77 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
+class _CSRData:
+
+    indices: ndarray
+    indptr: ndarray
+    shape: Tuple[int, ...]
+    coo_to_csr: Any
+
+    @classmethod
+    def from_coo(cls, indices: ndarray, shape: Tuple[int, ...]):
+        ncoo = indices.shape[1]
+        structure = coo_matrix(
+            (
+                np.ones(ncoo, dtype=np.int8),
+                (indices[0], indices[1]),
+            ),
+            shape=shape,
+        ).tocsr()
+        index_dtype = (
+            np.int64
+            if max(ncoo, structure.nnz, *shape) > np.iinfo(np.int32).max
+            else np.int32
+        )
+        if ncoo == 0:
+            rows = np.empty(0, dtype=index_dtype)
+        else:
+            global_to_csr = type(structure)(
+                (
+                    np.arange(structure.nnz, dtype=index_dtype),
+                    structure.indices,
+                    structure.indptr,
+                ),
+                shape=shape,
+            )
+            rows = np.asarray(
+                global_to_csr[indices[0], indices[1]]
+            ).ravel()
+        coo_to_csr = coo_matrix(
+            (
+                np.ones(ncoo, dtype=np.int8),
+                (rows, np.arange(ncoo, dtype=index_dtype)),
+            ),
+            shape=(structure.nnz, ncoo),
+        ).tocsr()
+        return cls(
+            structure.indices.copy(),
+            structure.indptr.copy(),
+            shape,
+            coo_to_csr,
+        )
+
+    def assemble(self, data: ndarray):
+        return type(self.coo_to_csr)(
+            (
+                self.coo_to_csr @ data,
+                self.indices.copy(),
+                self.indptr.copy(),
+            ),
+            shape=self.shape,
+        )
+
+
+@dataclass
 class COOData:
 
     indices: ndarray
     data: ndarray
     shape: Tuple[int, ...]
     local_shape: Optional[Tuple[int, ...]]
+    _csr: Optional[_CSRData] = field(default=None,
+                                     repr=False,
+                                     compare=False)
 
     @staticmethod
     def _assemble_scipy_csr(
@@ -88,16 +153,27 @@ class COOData:
             shape=tuple(max(self.shape[i],
                             other.shape[i]) for i in range(len(self.shape))),
             local_shape=None,
+            _csr=None,
         )
 
     def tocsr(self):
         """Return a sparse SciPy CSR matrix."""
+        if self._csr is not None:
+            return self._csr.assemble(self.data)
         return self._assemble_scipy_csr(
             self.indices,
             self.data,
             self.shape,
             self.local_shape,
         )
+
+    def _factorize_scipy_csr(self):
+        return _CSRData.from_coo(self.indices, self.shape)
+
+    def _cache_scipy_csr(self, cache, key):
+        if key not in cache:
+            cache[key] = self._factorize_scipy_csr()
+        self._csr = cache[key]
 
     def toarray(self) -> ndarray:
         """Return a dense numpy array."""

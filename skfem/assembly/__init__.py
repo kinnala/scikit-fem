@@ -74,6 +74,8 @@ def asm(form: Form,
 
     A shorthand for :meth:`skfem.assembly.Form.assemble` which, in addition,
     supports assembling multiple bases at once and summing the result.
+    For bilinear forms, pass ``cache=True`` to reuse the COO to CSR conversion
+    for unchanged basis arguments, including ordered lists of bases.
 
     """
     if not isinstance(form, Form) and callable(form):
@@ -90,9 +92,29 @@ def asm(form: Form,
     assert form.form is not None
     logger.info("Assembling '{}'.".format(form.form.__name__))
     nargs = [[arg] if not isinstance(arg, list) else arg for arg in args]
-    retval = to(map(lambda a: form.coo_data(*a[1], idx=a[0], **kwargs),
-                    zip(product(*(range(len(x)) for x in nargs)),
-                        product(*nargs))))
+    cache_combined = (
+        isinstance(form, BilinearForm)
+        and kwargs.get('cache', False)
+        and to is _sum
+        and all(nargs)
+        and any(len(x) > 1 for x in nargs)
+    )
+    if cache_combined:
+        kwargs['cache'] = False
+    blocks = map(lambda a: form.coo_data(*a[1], idx=a[0], **kwargs),
+                 zip(product(*(range(len(x)) for x in nargs)),
+                     product(*nargs)))
+    if cache_combined:
+        out = sum(blocks)
+        assert not isinstance(out, int)
+        cache_owner = nargs[0][0]
+        if not hasattr(cache_owner, '_csr_cache'):
+            cache_owner._csr_cache = {}
+        cache_key = tuple(tuple(x) for x in nargs)
+        out._cache_scipy_csr(cache_owner._csr_cache, cache_key)
+        retval = out.todefault()
+    else:
+        retval = to(blocks)
     logger.info("Assembling finished.")
     return retval
 
