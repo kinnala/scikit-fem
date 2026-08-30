@@ -127,7 +127,36 @@ class BilinearForm(Form):
             (vbasis.Nbfun, ubasis.Nbfun),
         )
 
-    def assemble(self, *args, **kwargs):
+    def _assemble_coo_data(self,
+                           ubasis: Basis,
+                           vbasis: Optional[Basis] = None,
+                           cache: bool = False,
+                           **kwargs) -> COOData:
+        out = COOData(*self._assemble(ubasis, vbasis, **kwargs))
+        if cache:
+            resolved_vbasis = ubasis if vbasis is None else vbasis
+            if not hasattr(ubasis, '_csr_cache'):
+                ubasis._csr_cache = {}
+            out._cache_scipy_csr(ubasis._csr_cache, resolved_vbasis)
+        return out
+
+    def coo_data(self,
+                 ubasis: Basis,
+                 vbasis: Optional[Basis] = None,
+                 *,
+                 cache: bool = False,
+                 **kwargs) -> COOData:
+        return self._assemble_coo_data(ubasis,
+                                       vbasis,
+                                       cache=cache,
+                                       **kwargs)
+
+    def assemble(self,
+                 ubasis: Basis,
+                 vbasis: Optional[Basis] = None,
+                 *,
+                 cache: bool = False,
+                 **kwargs):
         """Assemble the bilinear form into a sparse matrix.
 
         Parameters
@@ -137,13 +166,21 @@ class BilinearForm(Form):
         vbasis
             Optionally, specify a different :class:`~skfem.assembly.Basis`
             for ``v``.
+        cache
+            If ``True``, cache the COO to CSR conversion for the trial and
+            test basis pair.  Cached matrices retain the full sparsity pattern
+            including explicit zero entries.  The bases must remain unchanged
+            while the cache is used.
         **kwargs
             Any additional keyword arguments are appended to ``w``.
 
         """
         assert self.form is not None
         logger.info("Assembling '{}'.".format(self.form.__name__))
-        mat = COOData._assemble_scipy_csr(*self._assemble(*args, **kwargs))
+        mat = self._assemble_coo_data(ubasis,
+                                      vbasis,
+                                      cache=cache,
+                                      **kwargs).tocsr()
         logger.info("Assembling finished.")
         return mat
 
