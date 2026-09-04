@@ -10,11 +10,8 @@ import scipy.sparse as sp
 import scipy.sparse.csgraph as spg
 import scipy.sparse.linalg as spl
 from numpy import ndarray
+from scipy.sparse import spmatrix
 
-if "pyodide" in sys.modules:
-    from scipy.sparse.base import spmatrix
-else:
-    from scipy.sparse import spmatrix
 
 from skfem.assembly import asm, BilinearForm, LinearForm, DofsView
 from skfem.assembly.basis import AbstractBasis

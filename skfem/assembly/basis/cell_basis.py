@@ -8,10 +8,7 @@ from skfem.element import DiscreteField, Element
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh
 
-if "pyodide" in sys.modules:
-    from scipy.sparse.coo import coo_matrix
-else:
-    from scipy.sparse import coo_matrix
+from scipy.sparse import coo_matrix
 
 from .abstract_basis import AbstractBasis
 from ..dofs import Dofs
