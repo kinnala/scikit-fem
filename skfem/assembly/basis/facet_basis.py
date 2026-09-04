@@ -8,7 +8,7 @@ from skfem.element import (BOUNDARY_ELEMENT_MAP, DiscreteField, Element,
                            ElementTriP0)
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
-from skfem.generic_utils import OrientedBoundary, deprecated
+from skfem.generic_utils import OrientedBoundary, Removed
 
 from .abstract_basis import AbstractBasis
 from .cell_basis import CellBasis
@@ -159,44 +159,10 @@ class FacetBasis(AbstractBasis):
                 raise ValueError
         return projection(x, fbasis, self, I=I)
 
-    @deprecated("Basis.interpolator + Basis.project")
-    def trace(self,
-              x: ndarray,
-              projection: Callable[[ndarray], ndarray],
-              target_elem: Optional[Element] = None) -> Tuple[CellBasis,
-                                                              ndarray]:
-
-        DEFAULT_TARGET = {
-            MeshTri: ElementTriP0,
-            MeshQuad: ElementQuad0,
-            MeshTet: ElementTetP0,
-            MeshHex: ElementHex0,
-        }
-
-        meshcls = type(self.mesh)
-        if meshcls not in DEFAULT_TARGET:
-            raise NotImplementedError("Mesh type not supported.")
-        if target_elem is None:
-            target_elem = DEFAULT_TARGET[meshcls]()
-
-        if type(target_elem) not in BOUNDARY_ELEMENT_MAP:
-            raise Exception("The specified element not supported.")
-        elemcls = BOUNDARY_ELEMENT_MAP[type(target_elem)]
-        target_meshcls = {
-            MeshTri: MeshLine,
-            MeshQuad: MeshLine,
-            MeshTet: MeshTri,
-            MeshHex: MeshQuad,
-        }[meshcls]
-
-        assert callable(target_meshcls)  # to satisfy mypy
-
-        p, t, _ = self.mesh._reix(self.mesh.facets[:, self.find])
-
-        return (
-            CellBasis(target_meshcls(projection(p), t), elemcls()),
-            self._trace_project(x, target_elem)
-        )
+    trace = Removed(
+        version="13.0.0",
+        message=("Use Basis.interpolator together with Basis.project "
+                 "for the same functionality."))
 
     def with_element(self, elem: Element) -> 'FacetBasis':
         """Return a similar basis using a different element."""

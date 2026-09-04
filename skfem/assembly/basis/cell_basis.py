@@ -1,5 +1,4 @@
 import logging
-import sys
 from typing import Callable, Optional, Tuple, Any
 
 import numpy as np
@@ -7,6 +6,7 @@ from numpy import ndarray
 from skfem.element import DiscreteField, Element
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh
+from skfem.generic_utils import Removed
 
 from scipy.sparse import coo_matrix
 
@@ -333,3 +333,10 @@ class CellBasis(AbstractBasis):
         elif self.tind is not None:
             return solve(*condense(M, f, I=self.get_dofs(elements=self.tind)))
         return solve(M, f)
+
+    find_dofs = Removed(
+        version="8.0.0", era="pre-4.0",
+        message=("Use Basis.get_dofs, which returns a DofsView directly "
+                 "rather than a dict:\n"
+                 "    D = basis.get_dofs('left')\n"
+                 "The tag is passed positionally, not as a dict of lambdas."))
