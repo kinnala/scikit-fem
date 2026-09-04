@@ -1,16 +1,11 @@
 import logging
-import sys
 
 from dataclasses import dataclass, replace
 from typing import Tuple, Any, Optional
 
 import numpy as np
 from numpy import ndarray
-
-if "pyodide" in sys.modules:
-    from scipy.sparse.coo import coo_matrix
-else:
-    from scipy.sparse import coo_matrix
+from scipy.sparse import coo_matrix
 
 
 logger = logging.getLogger(__name__)
