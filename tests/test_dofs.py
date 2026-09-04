@@ -64,9 +64,7 @@ class TestDofsMerge(TestCase):
         D2 = basis.get_dofs(lambda x: x[0] == 1)
         D3 = basis.get_dofs(lambda x: x[1] == 1)
         D4 = basis.get_dofs(lambda x: x[1] == 0)
-        assert_allclose(D1 | D2 | D3 | D4,
-                        basis.get_dofs())
-        assert_allclose(D1 + D2 + D3 + D4,
+        assert_allclose(np.unique((D1, D2, D3, D4,)),
                         basis.get_dofs())
 
 
