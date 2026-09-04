@@ -13,7 +13,6 @@ from skfem.mesh import (Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
 from skfem.assembly import Basis, LinearForm, Functional, FacetBasis
 from skfem.element import (ElementTetP1, ElementTriP0, ElementQuad0,
                            ElementHex0, ElementTriP1)
-from skfem.utils import projection
 from skfem.io.meshio import to_meshio, from_meshio
 from skfem.helpers import dot
 
@@ -262,7 +261,7 @@ def test_adaptive_splitting_3d_3():
         return w.h * v
 
     basis = Basis(m, ElementTetP1())
-    h = projection(hproj, basis)
+    h = basis.project(hproj)
 
     funh = basis.interpolator(h)
 
