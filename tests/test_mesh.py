@@ -723,6 +723,8 @@ def test_refine_subdomains_uniform():
 
     m1 = MeshTri().refined(3).with_subdomains(sdef).refined()
     m2 = MeshTri().refined(3).refined().with_subdomains(sdef)
+    print(m1.subdomains)
+    print(m2.subdomains)
     np.testing.assert_equal(m1.subdomains, m2.subdomains)
 
 
