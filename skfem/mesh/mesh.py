@@ -9,7 +9,7 @@ import numpy as np
 from numpy import ndarray
 
 from ..element import BOUNDARY_ELEMENT_MAP, Element
-from ..generic_utils import OrientedBoundary
+from ..generic_utils import OrientedBoundary, Removed
 
 
 logger = logging.getLogger(__name__)

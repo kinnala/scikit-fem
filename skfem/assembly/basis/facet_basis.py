@@ -6,6 +6,7 @@ from numpy import ndarray
 from skfem.element import DiscreteField, Element
 from skfem.mapping import Mapping
 from skfem.generic_utils import OrientedBoundary, Removed
+from skfem.mesh import Mesh
 
 from .abstract_basis import AbstractBasis
 from ..dofs import Dofs
