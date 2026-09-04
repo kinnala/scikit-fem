@@ -1401,7 +1401,7 @@ class Mesh:
             **subdomains,
         )
 
-     refine = Removed(
+    refine = Removed(
         version="3.0.0",
         era="pre-3.0",
         message=("Use Mesh.refined which returns "

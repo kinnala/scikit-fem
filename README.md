@@ -232,7 +232,10 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
-- Removed: `skfem.visuals.glvis`, deprecated in 9.0.0.
+- Removed: `skfem.visuals.glvis`
+- Removed: `skfem.utils.project`
+- Removed: `skfem.utils.projection`
+- Removed: `skfem.basis.FacetBasis.trace`
 
 ### [12.0.2] - 2026-06-05
 

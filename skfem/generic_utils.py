@@ -1,6 +1,3 @@
-import warnings
-import functools
-
 import numpy as np
 
 from numpy import ndarray

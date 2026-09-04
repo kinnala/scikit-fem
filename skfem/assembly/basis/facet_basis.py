@@ -18,7 +18,7 @@ class FacetBasis(AbstractBasis):
     """For integrating over facets of the mesh.  Usually over the boundary."""
 
     def __init__(self,
-                 mesh:g Mesh,
+                 mesh: Mesh,
                  elem: Element,
                  mapping: Optional[Mapping] = None,
                  intorder: Optional[int] = None,
@@ -133,27 +133,6 @@ class FacetBasis(AbstractBasis):
                  ** (1. / (self.mesh.dim() - 1.)))
                 if self.mesh.dim() != 1 else np.array([0.]))
         return self._mesh_parameters
-
-    def _trace_project(self,
-                       x: ndarray,
-                       elem: Element) -> ndarray:
-        from skfem.utils import projection
-
-        fbasis = FacetBasis(self.mesh,
-                            elem,
-                            facets=self.find,
-                            quadrature=(self.X, self.W))
-        I = fbasis.get_dofs(self.find).all()
-        if len(I) == 0:  # special case: no facet DOFs
-            if fbasis.dofs.interior_dofs is not None:
-                if fbasis.dofs.interior_dofs.shape[0] > 1:
-                    # no one-to-one restriction: requires interpolation
-                    raise NotImplementedError
-                # special case: piecewise constant elem
-                I = fbasis.dofs.interior_dofs[:, self.tind].flatten()
-            else:
-                raise ValueError
-        return projection(x, fbasis, self, I=I)
 
     trace = Removed(
         version="13.0.0",

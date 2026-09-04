@@ -11,7 +11,6 @@ from numpy import ndarray
 
 from skfem.element import Element
 from skfem.mesh import Mesh
-from skfem.generic_utils import deprecated
 
 
 @dataclass(repr=False)
