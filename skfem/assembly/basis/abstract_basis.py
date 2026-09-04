@@ -321,6 +321,37 @@ class AbstractBasis:
             return tuple(dfs)
         return dfs[0]
 
+    def interpolate_multiple(self, w: ndarray) -> Union[ndarray,
+                                                        Tuple[ndarray, ...]]:
+        """Interpolate multiple solution vectors to quadrature points.
+
+        Parameters
+        ----------
+        w
+            An array of shape ``(N, nfields)`` whose columns are solution
+            vectors.
+
+        Returns
+        -------
+        ndarray or tuple of ndarray
+            Values of a scalar element have shape ``(nelems, nqp, nfields)``.
+            Vector or tensor component axes precede these axes.  A tuple is
+            returned for a composite element.
+
+        """
+        if w.ndim != 2 or w.shape[0] != self.N:
+            raise ValueError("Input array must have shape (N, nfields).")
+
+        values = w[self.element_dofs]
+        out = [
+            np.einsum('ief,i...eq->...eqf',
+                      values,
+                      np.asarray([b[c].get(0) for b in self.basis]),
+                      optimize=True)
+            for c in range(len(self.basis[0]))
+        ]
+        return tuple(out) if len(out) > 1 else out[0]
+
     def split_indices(self) -> List[ndarray]:
         """Return indices for the solution components."""
         output: List[ndarray] = []
