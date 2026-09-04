@@ -1,17 +1,13 @@
 import logging
-from typing import Callable, Optional, Tuple, Any
+from typing import Optional, Tuple, Any
 
 import numpy as np
 from numpy import ndarray
-from skfem.element import (BOUNDARY_ELEMENT_MAP, DiscreteField, Element,
-                           ElementHex0, ElementQuad0, ElementTetP0,
-                           ElementTriP0)
+from skfem.element import DiscreteField, Element
 from skfem.mapping import Mapping
-from skfem.mesh import Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 from skfem.generic_utils import OrientedBoundary, Removed
 
 from .abstract_basis import AbstractBasis
-from .cell_basis import CellBasis
 from ..dofs import Dofs
 
 
@@ -22,7 +18,7 @@ class FacetBasis(AbstractBasis):
     """For integrating over facets of the mesh.  Usually over the boundary."""
 
     def __init__(self,
-                 mesh: Mesh,
+                 mesh:g Mesh,
                  elem: Element,
                  mapping: Optional[Mapping] = None,
                  intorder: Optional[int] = None,

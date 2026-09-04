@@ -1,7 +1,6 @@
 """This module contains utility functions such as convenient access to
 SciPy linear solvers."""
 
-import sys
 import logging
 from typing import Optional, Union, Tuple, Callable, Dict
 
@@ -13,9 +12,7 @@ from numpy import ndarray
 from scipy.sparse import spmatrix
 
 
-from skfem.assembly import asm, BilinearForm, LinearForm, DofsView
-from skfem.assembly.basis import AbstractBasis
-from skfem.element import ElementVector
+from skfem.assembly import DofsView
 from skfem.generic_utils import Removed
 
 
@@ -722,7 +719,8 @@ project = Removed(
     "skfem.utils.project", version="13.0.0", era="pre-4.0",
     message=("L2 projection is now a method on the basis:\n"
              "    x = basis.project(lambda x: x[0] ** 2)\n"
-             "Basis.project is bound — write basis.project(f), not "
-             "Basis.project(f, basis)."))
+             "Basis.project is bound — write basis.project(f), "
+             "not Basis.project(f, basis)."))
+
 projection = Removed("skfem.utils.projection", version="13.0.0",
                      era="pre-4.0", message=project._message)

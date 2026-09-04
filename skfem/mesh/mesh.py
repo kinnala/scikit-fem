@@ -1400,3 +1400,10 @@ class Mesh:
             **boundaries,
             **subdomains,
         )
+
+     refine = Removed(
+        version="3.0.0",
+        era="pre-3.0",
+        message=("Use Mesh.refined which returns "
+                 "a new mesh rather than mutates "
+                 "the original mesh."))
