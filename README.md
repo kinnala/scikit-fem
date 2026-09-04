@@ -232,6 +232,8 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+- Removed: `skfem.visuals.glvis`, deprecated in 9.0.0.
+
 ### [12.0.2] - 2026-06-05
 
 - Fixed: `skfem.utils.enforce` now works correctly with rows that have no nonzero entries
