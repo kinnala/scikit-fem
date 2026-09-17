@@ -28,8 +28,9 @@ import re
 release = re.sub('^v', '', os.popen('git describe --tags').read().strip())
 # The short X.Y version
 version = release
-# For links to source tree
-previous_release = version.split("-")[0]
+# For links to source tree; fall back to default branch when the tag is
+# unavailable (e.g. ReadTheDocs shallow-clone of "latest").
+previous_release = version.split("-")[0] or "master"
 
 
 # -- General configuration ---------------------------------------------------
