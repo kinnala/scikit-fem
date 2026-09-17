@@ -49,7 +49,7 @@ from skfem.element import (
     ElementWedge1,
 )
 from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
-from skfem.assembly import InteriorBasis, Functional
+from skfem.assembly import Basis, Functional
 from skfem.mapping import MappingAffine
 
 
@@ -211,7 +211,7 @@ class TestCompatibilityWarning(TestCase):
         for m in self.meshes:
 
             def init_incompatible():
-                return InteriorBasis(m(), self.elem())
+                return Basis(m(), self.elem())
 
             self.assertRaises(ValueError, init_incompatible)
 
@@ -370,8 +370,8 @@ def test_dg_element(m, e, edg):
     def square(w):
         return w['random'] ** 2
 
-    basis = InteriorBasis(m, e)
-    basisdg = InteriorBasis(m, edg)
+    basis = Basis(m, e)
+    basisdg = Basis(m, edg)
 
     assert_allclose(
         square.assemble(

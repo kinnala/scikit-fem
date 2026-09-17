@@ -7,7 +7,7 @@ from skfem.mesh import MeshQuad, MeshTri, MeshLine
 from skfem.element import (ElementQuadBFS, ElementTriArgyris,
                            ElementTriMorley, ElementLineHermite,
                            ElementTri15ParamPlate)
-from skfem.assembly import InteriorBasis
+from skfem.assembly import Basis
 
 
 class ConvergenceMorley(TestCase):
@@ -25,7 +25,7 @@ class ConvergenceMorley(TestCase):
 
         for itr in range(3):
             e = self.case[1]()
-            ib = InteriorBasis(m, e)
+            ib = Basis(m, e)
 
             t = 1.
             E = 1.
@@ -120,7 +120,7 @@ class ConvergenceHermite(TestCase):
 
         for itr in range(3):
             e = self.case[1]()
-            ib = InteriorBasis(m, e)
+            ib = Basis(m, e)
 
             @BilinearForm
             def bilinf(u, v, w):

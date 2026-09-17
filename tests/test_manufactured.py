@@ -9,8 +9,7 @@ import pytest
 import numpy as np
 from numpy.testing import assert_almost_equal
 
-from skfem import (LinearForm, Functional, asm, condense, solve, projection,
-                   enforce)
+from skfem import LinearForm, Functional, asm, condense, solve, enforce
 from skfem.assembly import FacetBasis, Basis
 from skfem.element import (ElementHex1, ElementHex2, ElementHexS2,
                            ElementLineMini, ElementLineP1, ElementLineP2,
@@ -318,9 +317,7 @@ def test_solving_inhomogeneous_laplace(mesh_elem, impose):
 
     u = basis.zeros()
     A = laplace.assemble(basis)
-    u[boundary_dofs] = projection(dirichlet,
-                                  boundary_basis,
-                                  I=boundary_dofs)
+    u = boundary_basis.project(dirichlet)
     u = solve(*impose(A, x=u, D=boundary_dofs))
 
 

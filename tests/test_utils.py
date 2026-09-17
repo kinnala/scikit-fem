@@ -7,7 +7,7 @@ from numpy.testing import assert_almost_equal
 from skfem.assembly import CellBasis, Basis, LinearForm, asm, BilinearForm
 from skfem.element import ElementTriP1, ElementQuad1, ElementTriP2
 from skfem.mesh import MeshTri, MeshQuad
-from skfem.utils import projection, enforce, condense, solve, mpc
+from skfem.utils import enforce, condense, solve, mpc
 from skfem.models import laplace, mass, unit_load
 
 
@@ -22,7 +22,7 @@ class InitializeScalarField(TestCase):
             x, y = X
             return x ** 2 + y ** 2
 
-        x = projection(fun, basis)
+        x = basis.project(fun)
         y = fun(mesh.p)
 
         normest = np.linalg.norm(x - y)

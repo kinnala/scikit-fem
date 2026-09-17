@@ -9,7 +9,8 @@ import numpy as np
 from numpy import ndarray
 
 from ..element import BOUNDARY_ELEMENT_MAP, Element
-from ..generic_utils import OrientedBoundary
+from ..generic_utils import OrientedBoundary, Removed
+from ._tags import Subdomains, Boundaries
 
 
 logger = logging.getLogger(__name__)
@@ -602,6 +603,12 @@ class Mesh:
         #         for k, v in self._subdomains.items()
         #     }
 
+        # wrap tags using TagDict
+        object.__setattr__(self, "_boundaries",
+                           Boundaries(self.boundaries or {}))
+        object.__setattr__(self, "_subdomains",
+                           Subdomains(self.subdomains or {}))
+
         # run validation
         if self.validate and logger.getEffectiveLevel() <= logging.DEBUG:
             self.is_valid()
@@ -713,14 +720,14 @@ class Mesh:
         rep += "  Number of elements: {}\n".format(self.nelements)
         rep += "  Number of vertices: {}\n".format(self.nvertices)
         rep += "  Number of nodes: {}".format(self.p.shape[1])
-        if self.subdomains is not None:
+        if self.subdomains is not None and len(self.subdomains) > 0:
             rep += "\n  Named subdomains [# elements]: {}".format(
                 ', '.join(
                     map(lambda k: '{} [{}]'.format(k, len(self.subdomains[k])),
                         list(self.subdomains.keys()))
                 )
             )
-        if self.boundaries is not None:
+        if self.boundaries is not None and len(self.boundaries) > 0:
             rep += "\n  Named boundaries [# facets]: {}".format(
                 ', '.join(
                     map(lambda k: '{} [{}]'.format(k, len(self.boundaries[k])),
@@ -887,7 +894,7 @@ class Mesh:
             for _ in range(times_or_ix):
                 mtmp = m._uniform()
                 # fix subdomains for remaining mesh types
-                if m._subdomains is not None and mtmp._subdomains is None:
+                if m._subdomains is not None and len(mtmp._subdomains) == 0:
                     N = int(mtmp.t.shape[1] / m.t.shape[1])
                     new_t = np.zeros((N, m.t.shape[1]), dtype=np.int32)
                     new_t[0] = np.arange(m.t.shape[1], dtype=np.int32)
@@ -1400,3 +1407,10 @@ class Mesh:
             **boundaries,
             **subdomains,
         )
+
+    refine = Removed(
+        version="3.0.0",
+        era="pre-3.0",
+        message=("Use Mesh.refined which returns "
+                 "a new mesh rather than mutates "
+                 "the original mesh."))

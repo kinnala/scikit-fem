@@ -1,7 +1,6 @@
 """This module contains utility functions such as convenient access to
 SciPy linear solvers."""
 
-import sys
 import logging
 from typing import Optional, Union, Tuple, Callable, Dict
 
@@ -10,16 +9,11 @@ import scipy.sparse as sp
 import scipy.sparse.csgraph as spg
 import scipy.sparse.linalg as spl
 from numpy import ndarray
+from scipy.sparse import spmatrix
 
-if "pyodide" in sys.modules:
-    from scipy.sparse.base import spmatrix
-else:
-    from scipy.sparse import spmatrix
 
-from skfem.assembly import asm, BilinearForm, LinearForm, DofsView
-from skfem.assembly.basis import AbstractBasis
-from skfem.element import ElementVector
-from skfem.generic_utils import deprecated
+from skfem.assembly import DofsView
+from skfem.generic_utils import Removed
 
 
 logger = logging.getLogger(__name__)
@@ -721,68 +715,12 @@ def adaptive_theta(est, theta=0.5, max=None):
         return np.nonzero(theta * max < est)[0].astype(np.int32)
 
 
-@deprecated("Basis.project")
-def projection(fun,
-               basis_to: Optional[AbstractBasis] = None,
-               basis_from: Optional[AbstractBasis] = None,
-               diff: Optional[int] = None,
-               I: Optional[ndarray] = None,
-               expand: bool = False) -> ndarray:
+project = Removed(
+    "skfem.utils.project", version="13.0.0", era="pre-4.0",
+    message=("L2 projection is now a method on the basis:\n"
+             "    x = basis.project(lambda x: x[0] ** 2)\n"
+             "Basis.project is bound — write basis.project(f), "
+             "not Basis.project(f, basis)."))
 
-    @BilinearForm
-    def mass(u, v, w):
-        from skfem.helpers import dot, ddot
-        p = 0
-        if len(u.shape) == 2:
-            p = u * v
-        elif len(u.shape) == 3:
-            p = dot(u, v)
-        elif len(u.shape) == 4:
-            p = ddot(u, v)
-        return p
-
-    if isinstance(fun, LinearForm):
-        funv = fun
-    else:
-        @LinearForm
-        def funv(v, w):
-            p = fun(w.x) * v
-            return sum(p) if isinstance(basis_to.elem, ElementVector) else p
-
-    @BilinearForm
-    def deriv(u, v, w):
-        from skfem.helpers import grad
-        du = grad(u)
-        return du[diff] * v
-
-    M = asm(mass, basis_to)
-
-    if not isinstance(fun, ndarray):
-        f = asm(funv, basis_to)
-    else:
-        if diff is not None:
-            f = asm(deriv, basis_from, basis_to) @ fun
-        else:
-            f = asm(mass, basis_from, basis_to) @ fun
-
-    if I is not None:
-        return solve_linear(*condense(M, f, I=I, expand=expand))
-
-    return solve_linear(M, f)
-
-
-@deprecated("Basis.project (will be removed in the next release)")
-def project(fun,
-            basis_from: Optional[AbstractBasis] = None,
-            basis_to: Optional[AbstractBasis] = None,
-            diff: Optional[int] = None,
-            I: Optional[ndarray] = None,
-            expand: bool = False) -> ndarray:
-    return projection(
-        fun,
-        basis_to=basis_to,
-        basis_from=basis_from,
-        diff=diff,
-        I=I,
-        expand=expand,
-    )
+projection = Removed("skfem.utils.projection", version="13.0.0",
+                     era="pre-4.0", message=project._message)

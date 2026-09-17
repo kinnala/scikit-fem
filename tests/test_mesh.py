@@ -13,7 +13,6 @@ from skfem.mesh import (Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
 from skfem.assembly import Basis, LinearForm, Functional, FacetBasis
 from skfem.element import (ElementTetP1, ElementTriP0, ElementQuad0,
                            ElementHex0, ElementTriP1)
-from skfem.utils import projection
 from skfem.io.meshio import to_meshio, from_meshio
 from skfem.helpers import dot
 
@@ -257,12 +256,9 @@ def test_adaptive_splitting_3d_3():
     for itr in range(15):
         m = m.refined(m.f2t[0, m.facets_satisfying(lambda x: x[0] == 0)])
 
-    @LinearForm
-    def hproj(v, w):
-        return w.h * v
 
     basis = Basis(m, ElementTetP1())
-    h = projection(hproj, basis)
+    h = basis.project(basis.mesh_parameters())
 
     funh = basis.interpolator(h)
 
@@ -727,6 +723,8 @@ def test_refine_subdomains_uniform():
 
     m1 = MeshTri().refined(3).with_subdomains(sdef).refined()
     m2 = MeshTri().refined(3).refined().with_subdomains(sdef)
+    print(m1.subdomains)
+    print(m2.subdomains)
     np.testing.assert_equal(m1.subdomains, m2.subdomains)
 
 

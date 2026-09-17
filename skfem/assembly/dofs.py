@@ -11,7 +11,6 @@ from numpy import ndarray
 
 from skfem.element import Element
 from skfem.mesh import Mesh
-from skfem.generic_utils import deprecated
 
 
 @dataclass(repr=False)
@@ -232,16 +231,6 @@ class DofsView:
 
     def __getattr__(self, attr):
         return getattr(self.obj, attr)
-
-    @deprecated("numpy.hstack")
-    def __or__(self, other):
-        return replace(
-            self,
-            nodal_ix=np.union1d(self.nodal_ix, other.nodal_ix),
-            facet_ix=np.union1d(self.facet_ix, other.facet_ix),
-            edge_ix=np.union1d(self.edge_ix, other.edge_ix),
-            interior_ix=np.union1d(self.interior_ix, other.interior_ix),
-        )
 
     def __add__(self, other):
         return self.__or__(other)

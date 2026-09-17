@@ -24,8 +24,8 @@ __all__ = all_mesh + all_assembly + all_element + [  # noqa
     'condense',
     'enforce',
     'penalize',
-    'project',  # TODO remove due to deprecation
-    'projection',  # TODO remove due to deprecation
+    'project',  # removed; prints migration info
+    'projection',  # removed; prints migration info
     'solve',
     'bmat',
     'mpc',

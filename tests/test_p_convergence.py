@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from skfem import (MeshLine, ElementLinePp, InteriorBasis, LinearForm, asm,
+from skfem import (MeshLine, ElementLinePp, Basis, LinearForm, asm,
                    solve, condense, MeshQuad, ElementQuadP)
 
 from skfem.models.poisson import laplace
@@ -16,7 +16,7 @@ class ConvergenceLinePp(unittest.TestCase):
 
     def create_basis(self, m, p):
         e = ElementLinePp(p)
-        return InteriorBasis(m, e)
+        return Basis(m, e)
 
     def runTest(self):
 
@@ -74,7 +74,7 @@ class ConvergenceQuadP(unittest.TestCase):
 
     def create_basis(self, m, p):
         e = ElementQuadP(p)
-        return InteriorBasis(m, e, intorder=p*p)
+        return Basis(m, e, intorder=p*p)
 
     def runTest(self):
 
