@@ -3,6 +3,7 @@ import importlib
 
 from dataclasses import dataclass, replace
 from os import PathLike
+from pathlib import Path
 from typing import Callable, Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
@@ -1406,6 +1407,44 @@ class Mesh:
             t=self.t,
             **boundaries,
             **subdomains,
+        )
+
+    def save_npy(self, path: Union[str, PathLike]):
+        """Save the mesh as a directory of ``.npy`` files.
+
+        Each array is stored in its own file (``doflocs.npy``, ``t.npy``,
+        ``b_<name>.npy`` for boundaries, ``s_<name>.npy`` for subdomains)
+        under ``path``, which is created if missing. Avoids the meshio
+        round-trip of :meth:`save` and the single-archive bundling of
+        :meth:`save_npz`; useful for meshes with millions of nodes.
+        """
+        path = Path(path)
+        path.mkdir(parents=True, exist_ok=True)
+        np.save(path / "doflocs.npy", self.doflocs, allow_pickle=False)
+        np.save(path / "t.npy", self.t, allow_pickle=False)
+        boundaries = {} if self.boundaries is None else self.boundaries
+        subdomains = {} if self.subdomains is None else self.subdomains
+        for key, value in boundaries.items():
+            np.save(path / ("b_" + key + ".npy"), value, allow_pickle=False)
+        for key, value in subdomains.items():
+            np.save(path / ("s_" + key + ".npy"), value, allow_pickle=False)
+
+    @classmethod
+    def load_npy(cls, path: Union[str, PathLike]):
+        """Load a mesh from a directory of ``.npy`` files written by
+        :meth:`save_npy`."""
+        path = Path(path)
+        return cls(
+            np.load(path / "doflocs.npy", allow_pickle=False),
+            np.load(path / "t.npy", allow_pickle=False),
+            _boundaries={
+                p.stem[2:]: np.load(p, allow_pickle=False)
+                for p in sorted(path.glob("b_*.npy"))
+            },
+            _subdomains={
+                p.stem[2:]: np.load(p, allow_pickle=False)
+                for p in sorted(path.glob("s_*.npy"))
+            },
         )
 
     refine = Removed(
