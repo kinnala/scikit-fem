@@ -945,3 +945,39 @@ def test_hole_orientation():
         fbasisext.normals,
         fbasisextig.normals,
     )
+
+
+@pytest.mark.parametrize(
+    "m",
+    [
+        MeshTri(),
+        MeshQuad(),
+        MeshTet(),
+        MeshHex(),
+        MeshLine(),
+    ]
+)
+def test_save_load_npy_cycle(m, tmp_path):
+    m.save_npy(tmp_path / "mesh")
+    M = type(m).load_npy(tmp_path / "mesh")
+    assert_array_equal(M.p, m.p)
+    assert_array_equal(M.t, m.t)
+
+
+def test_save_load_npy_cycle_with_tags(tmp_path):
+    m = (MeshTri()
+         .refined(2)
+         .with_boundaries({'test1': lambda x: x[0] == 0,
+                           'test2': lambda x: x[0] == 1})
+         .with_subdomains({'up': lambda x: x[1] > 0.5}))
+    m.save_npy(tmp_path / "mesh")
+    M = MeshTri.load_npy(tmp_path / "mesh")
+    assert_array_equal(M.p, m.p)
+    assert_array_equal(M.t, m.t)
+    np.testing.assert_equal(M.boundaries, m.boundaries)
+    np.testing.assert_equal(M.subdomains, m.subdomains)
+
+
+def test_load_npy_missing(tmp_path):
+    with pytest.raises(FileNotFoundError):
+        MeshTri.load_npy(tmp_path / "does_not_exist")
