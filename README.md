@@ -232,10 +232,13 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
-- Removed: `skfem.visuals.glvis`
-- Removed: `skfem.utils.project`
-- Removed: `skfem.utils.projection`
-- Removed: `skfem.basis.FacetBasis.trace`
+- Added: `Mesh.save_npy/load_npy` with better performance for larger meshes (in comparison to `Mesh.save/load`)
+- Added: `Basis.interpolate_multiple` for a simultaneous interpolation of multiple solution vectors
+- Changed: Accessing `Mesh.subdomains` or `Mesh.boundaries` with nonexisting key/tag will now raise `TagKeyError`
+- Removed: Obsolete projection functions `skfem.utils.project` and `skfem.utils.projection` that have been replaced by `Basis.project`
+- Removed: Dysfunctional visualization package `skfem.visuals.glvis`
+- Removed: The deprecated `FacetBasis.trace` method
+- Fixed: `ElementGlobal` subclasses such as `ElementLineHermite`, `ElementTriArgyris` and `ElementQuadBFS` now work with periodic meshes
 
 ### [12.0.2] - 2026-06-05
 
