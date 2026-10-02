@@ -9,7 +9,6 @@ assembly](https://en.wikipedia.org/wiki/Finite_element_method). Its main
 purpose is the transformation of bilinear forms into sparse matrices and linear
 forms into vectors.
 
-<a href="https://colab.research.google.com/github/kinnala/scikit-fem-notebooks/blob/master/ex1.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 <a href="https://scikit-fem.readthedocs.io/" alt="Documentation"><img src="https://readthedocs.org/projects/pip/badge/?version=stable" /></a>
 <a href="https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e" alt="status"><img src="https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e/status.svg" /></a>
 <a href="https://pypi.org/project/scikit-fem/" alt="PyPI"><img src="https://img.shields.io/pypi/v/scikit-fem" /></a>
@@ -45,7 +44,7 @@ Remove `[all]` to not install the optional dependencies `meshio` for mesh
 input/output, and `matplotlib` for creating simple visualizations.
 The minimal dependencies are `numpy` and `scipy`.
 Some submodules require other optional dependencies: `skfem.autodiff` requires `jax` and `jaxlib`, `skfem.supermeshing` requires `shapely`.
-You can also try the library in browser through [Google Colab](https://colab.research.google.com/github/kinnala/scikit-fem-notebooks/blob/master/ex1.ipynb).
+You can also try the library in browser through [Pyodide](https://kinnala.github.io/skfem-demo/).
 
 ## Examples
 
