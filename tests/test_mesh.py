@@ -83,6 +83,67 @@ class Loading(TestCase):
     """Check that Mesh.load works properly."""
 
     def runTest(self):
+        # Salome V9:14 sphere mesh with named physical groups
+        m = MeshTet.load(MESH_PATH / "salomeV914_sphere_names.med")
+        self.assertTrue(
+            (
+                m.subdomains["core"]
+                == m.elements_satisfying(lambda x: np.linalg.norm(x, axis=0) < 2)
+            ).all()
+        )
+        self.assertTrue(
+            (
+                m.subdomains["shell"]
+                == m.elements_satisfying(
+                    lambda x: (np.linalg.norm(x, axis=0) > 2)
+                    & (np.linalg.norm(x, axis=0) < 3)
+                )
+            ).all()
+        )
+        self.assertTrue(
+            (np.sort(m.boundaries["boundary"]) == m.boundary_facets()).all()
+        )
+
+        # Gmsh V4 sphere mesh with named physical groups
+        m = MeshTet.load(MESH_PATH / "gmshV4_sphere_names.msh")
+        self.assertTrue(
+            (
+                m.subdomains["core"]
+                == m.elements_satisfying(lambda x: np.linalg.norm(x, axis=0) < 2)
+            ).all()
+        )
+        self.assertTrue(
+            (
+                m.subdomains["shell"]
+                == m.elements_satisfying(
+                    lambda x: (np.linalg.norm(x, axis=0) > 2)
+                    & (np.linalg.norm(x, axis=0) < 3)
+                )
+            ).all()
+        )
+        self.assertTrue(
+            (np.sort(m.boundaries["boundary"]) == m.boundary_facets()).all()
+        )
+
+        # Gmsh V4 sphere mesh with integer physical groups
+        m = MeshTet.load(MESH_PATH / "gmshV4_sphere_integers.msh")
+        self.assertTrue(
+            (
+                m.subdomains[1]
+                == m.elements_satisfying(lambda x: np.linalg.norm(x, axis=0) < 2)
+            ).all()
+        )
+        self.assertTrue(
+            (
+                m.subdomains[2]
+                == m.elements_satisfying(
+                    lambda x: (np.linalg.norm(x, axis=0) > 2)
+                    & (np.linalg.norm(x, axis=0) < 3)
+                )
+            ).all()
+        )
+        self.assertTrue((np.sort(m.boundaries[3]) == m.boundary_facets()).all())
+
         # submeshes
         m = MeshTet.load(MESH_PATH / 'box.msh')
         self.assertTrue((m.boundaries['top']
