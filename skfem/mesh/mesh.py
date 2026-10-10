@@ -801,8 +801,10 @@ class Mesh:
             data['subdomains'] = {k: np.array(v)
                                   for k, v in data['subdomains'].items()}
         data['doflocs'] = data.pop('p')
-        data['_subdomains'] = data.pop('subdomains')
-        data['_boundaries'] = data.pop('boundaries')
+        if 'subdomains' in data:
+            data['_subdomains'] = data.pop('subdomains')
+        if 'boundaries' in data:
+            data['_boundaries'] = data.pop('boundaries')
         return cls(**data)
 
     def to_dict(self):
