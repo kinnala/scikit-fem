@@ -251,7 +251,7 @@ class CellBasis(AbstractBasis):
                 out = out.reshape(self._base_tensor_order + (x.shape[1],))
             # reshape output back to original shape
             if shape is not None:
-                return out.reshape(*shape[1:])
+                return out.reshape(self._base_tensor_order + shape[1:])
             return out
 
         return interpfun
