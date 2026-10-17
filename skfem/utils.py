@@ -203,9 +203,12 @@ def solve_eigen(A: spmatrix,
 
     if x is not None and I is not None:
         L, X = solver(A, M, **kwargs)
-        y = np.tile(x.copy()[:, None], (1, X.shape[1]))
         if isinstance(I, tuple):
-            np.add.at(y, I[0], np.array([I[1](x) for x in X.T]).T)
+            X = np.array([I[1](x) for x in X.T]).T
+        y = np.tile(x.astype(np.result_type(x.dtype, X.dtype))[:, None],
+                    (1, X.shape[1]))
+        if isinstance(I, tuple):
+            np.add.at(y, I[0], X)
         else:
             y[I] = X
         return L, y
@@ -223,11 +226,14 @@ def solve_linear(A: spmatrix,
         solver = solver_direct_scipy(**kwargs)
 
     if x is not None and I is not None:
-        y = x.copy()
+        solution = solver(A, b, **kwargs)
         if isinstance(I, tuple):
-            np.add.at(y, I[0], I[1](solver(A, b, **kwargs)))
+            solution = I[1](solution)
+        y = x.astype(np.result_type(x.dtype, solution.dtype))
+        if isinstance(I, tuple):
+            np.add.at(y, I[0], solution)
         else:
-            y[I] = solver(A, b, **kwargs)
+            y[I] = solution
         return y
     return solver(A, b, **kwargs)
 
