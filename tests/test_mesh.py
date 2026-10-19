@@ -981,3 +981,39 @@ def test_save_load_npy_cycle_with_tags(tmp_path):
 def test_load_npy_missing(tmp_path):
     with pytest.raises(FileNotFoundError):
         MeshTri.load_npy(tmp_path / "does_not_exist")
+
+
+def test_meshtri_adaptive_refine_boundaries():
+    m = MeshTri().refined(2).with_defaults()
+    tests = {
+        'left': lambda x: x[0] == 0,
+        'right': lambda x: x[0] == 1,
+        'bottom': lambda x: x[1] == 0,
+        'top': lambda x: x[1] == 1,
+    }
+    for _ in range(3):
+        # refine elements touching the left boundary only
+        m = m.refined(m.f2t[0, m.boundaries['left']])
+        for name, test in tests.items():
+            np.testing.assert_array_equal(m.boundaries[name],
+                                          m.facets_satisfying(test))
+
+
+def test_meshtri_adaptive_refine_partial_boundary():
+    m = MeshTri.init_circle(3).with_boundaries({
+        'upper': lambda x: x[1] > 0.3,
+    })
+    # refine elements next to the first three tagged facets
+    M = m.refined(m.f2t[0, m.boundaries['upper'][:3]])
+    assert np.isin(M.boundaries['upper'], M.boundary_facets()).all()
+    # length of the tagged boundary is preserved
+    length = lambda mesh, ix: np.sum(np.linalg.norm(
+        mesh.p[:, mesh.facets[1, ix]] - mesh.p[:, mesh.facets[0, ix]],
+        axis=0,
+    ))
+    assert abs(length(M, M.boundaries['upper'])
+               - length(m, m.boundaries['upper'])) < 1e-12
+    # at least the three facets are split, but not all of them
+    assert (len(m.boundaries['upper']) + 3
+            <= len(M.boundaries['upper'])
+            < 2 * len(m.boundaries['upper']))
