@@ -269,6 +269,40 @@ def test_interpolator_probes(mtype, e, nrefs, npoints):
 
 
 @pytest.mark.parametrize(
+    "element,components",
+    [
+        (ElementTriP1(), ()),
+        (ElementVectorH1(ElementTriP1()), (2,)),
+        (ElementVectorH1(ElementVectorH1(ElementTriP1())), (2, 2)),
+    ],
+)
+@pytest.mark.parametrize("dtype", [np.float64, np.complex128])
+@pytest.mark.parametrize("split_elements", [False, True])
+def test_interpolator_shaped_points(element, components, dtype, split_elements):
+    basis = CellBasis(MeshTri().refined(), element)
+
+    def field(x):
+        result = (1. + 2.j if dtype == np.complex128 else 1.) * (
+            1. + x[0] + 2. * x[1]
+        )
+        if components:
+            factors = np.arange(1, np.prod(components) + 1).reshape(
+                components + (1,) * (x.ndim - 1)
+            )
+            result = factors * result
+        return result
+
+    y = basis.project(field, dtype=dtype)
+    fun = basis.interpolator(y)
+    points = basis.global_coordinates()
+    if split_elements:
+        points = points.reshape(2, 2, basis.nelems // 2, -1)
+
+    assert_allclose(fun(points), field(points))
+    assert_allclose(basis.project(fun, dtype=dtype), y)
+
+
+@pytest.mark.parametrize(
     "mtype,e1",
     [
         (MeshTri, ElementTriP1()),
