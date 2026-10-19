@@ -237,7 +237,10 @@ with respect to documented and/or tested features.
 - Removed: Obsolete projection functions `skfem.utils.project` and `skfem.utils.projection` that have been replaced by `Basis.project`
 - Removed: Dysfunctional visualization package `skfem.visuals.glvis`
 - Removed: The deprecated `FacetBasis.trace` method
+- Fixed: `MeshTri` now preserves boundary tags when refining adaptively
+- Fixed: `MeshTet` now preserves boundary tags when refined uniformly
 - Fixed: `ElementGlobal` subclasses such as `ElementLineHermite`, `ElementTriArgyris` and `ElementQuadBFS` now work with periodic meshes
+- Fixed: `solve` preserves complex solutions and eigenvectors when expanding condensed or multipoint-constrained systems with real boundary-value arrays.
 - Fixed: `Basis.interpolator` preserves vector and tensor components when evaluating shaped point arrays, including during `Basis.project`.
 
 ### [12.0.2] - 2026-06-05

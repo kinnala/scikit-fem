@@ -157,13 +157,39 @@ class MeshTet1(MeshSimplex, Mesh3D):
         else:
             subdomains = None
 
-        return replace(
+        m = replace(
             self,
             doflocs=newp,
             t=newt,
             _boundaries=None,
             _subdomains=subdomains,
         )
+
+        if self._boundaries is not None:
+            # each facet splits into four; find their indices in the new mesh
+            f = self.facets
+            f2e = self.f2e + sz
+            subfacets = np.sort(np.hstack((
+                np.vstack((f[0], f2e[0], f2e[2])),
+                np.vstack((f[1], f2e[0], f2e[1])),
+                np.vstack((f[2], f2e[1], f2e[2])),
+                np.vstack((f2e[0], f2e[1], f2e[2])),
+            )), axis=0)
+            _, ix = np.unique(np.hstack((m.facets, subfacets)),
+                              axis=1,
+                              return_inverse=True)
+            new_facets = (ix.flatten()[m.nfacets:]
+                          .reshape(4, -1)
+                          .astype(np.int32))
+            m = replace(
+                m,
+                _boundaries={
+                    name: np.sort(new_facets[:, ixs].flatten())
+                    for name, ixs in self._boundaries.items()
+                },
+            )
+
+        return m
 
     def _adaptive_sort_mesh(self, p, t, marked):
         """Make (0, 1) the longest edge in t for marked."""

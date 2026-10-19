@@ -1,13 +1,14 @@
 from unittest import TestCase
 
 import numpy as np
+import pytest
 import scipy.sparse
 from numpy.testing import assert_almost_equal
 
 from skfem.assembly import CellBasis, Basis, LinearForm, asm, BilinearForm
 from skfem.element import ElementTriP1, ElementQuad1, ElementTriP2
 from skfem.mesh import MeshTri, MeshQuad
-from skfem.utils import enforce, condense, solve, mpc
+from skfem.utils import enforce, condense, solve, mpc, solver_eigen_scipy
 from skfem.models import laplace, mass, unit_load
 
 
@@ -224,3 +225,50 @@ def test_mpc_dirichlet():
     y2 = solve(*condense(A, b, D=D, x=m.p[0]))
     assert_almost_equal(y1, y2)
 
+
+@pytest.mark.parametrize("constraint", [condense, mpc])
+@pytest.mark.parametrize("dtype", [np.int32, np.float64, np.complex128])
+def test_solve_preserves_complex_solution(constraint, dtype):
+    basis = Basis(MeshTri().refined(2), ElementTriP1())
+    A = laplace.assemble(basis)
+    b = (1. + 2.j) * unit_load.assemble(basis)
+    D = basis.get_dofs().all()
+    free = np.setdiff1d(np.arange(basis.N), D)
+    expected = np.zeros(basis.N, dtype=np.complex128)
+    expected[free] = np.linalg.solve(A[free][:, free].toarray(), b[free])
+    system = constraint(A, b, **({'D': D} if constraint is condense else {'S': D}))
+    x = system[2].astype(dtype)
+    result = solve(system[0], system[1], x, system[3])
+
+    assert_almost_equal(result, expected)
+    assert_almost_equal(x, np.zeros_like(x))
+
+
+@pytest.mark.parametrize("constraint", [condense, mpc])
+@pytest.mark.parametrize("dtype", [np.float64, np.complex128])
+def test_solve_preserves_complex_eigenvectors(constraint, dtype):
+    from skfem.helpers import dot, grad
+
+    basis = Basis(MeshTri().refined(3), ElementTriP1())
+
+    @BilinearForm
+    def advection_diffusion(u, v, w):
+        velocity = 10. * np.array([.5 - w.x[1], w.x[0] - .5])
+        return dot(grad(u), grad(v)) + dot(velocity, grad(u)) * v
+
+    A = advection_diffusion.assemble(basis)
+    M = mass.assemble(basis)
+    D = basis.get_dofs().all()
+    free = np.setdiff1d(np.arange(basis.N), D)
+    system = constraint(A, np.zeros(basis.N),
+                        **({'D': D} if constraint is condense else {'S': D}))
+    Mc = M[free][:, free]
+    values, vectors = solve(
+        system[0], Mc, system[2].astype(dtype), system[3],
+        solver=solver_eigen_scipy(k=3, sigma=30.,
+                                 v0=np.linspace(1., 2., len(free))),
+    )
+
+    assert np.max(np.abs(values.imag)) > 1.
+    assert_almost_equal((A @ vectors)[free], ((M @ vectors) * values)[free])
+    assert_almost_equal(vectors[D], np.zeros_like(vectors[D]))

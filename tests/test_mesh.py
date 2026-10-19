@@ -983,6 +983,22 @@ def test_load_npy_missing(tmp_path):
         MeshTri.load_npy(tmp_path / "does_not_exist")
 
 
+def test_meshtri_adaptive_refine_boundaries():
+    m = MeshTri().refined(2).with_defaults()
+    tests = {
+        'left': lambda x: x[0] == 0,
+        'right': lambda x: x[0] == 1,
+        'bottom': lambda x: x[1] == 0,
+        'top': lambda x: x[1] == 1,
+    }
+    for _ in range(3):
+        # refine elements touching the left boundary only
+        m = m.refined(m.f2t[0, m.boundaries['left']])
+        for name, test in tests.items():
+            np.testing.assert_array_equal(m.boundaries[name],
+                                          m.facets_satisfying(test))
+
+
 def test_meshtet_adaptive_refine_boundaries():
     m = MeshTet().refined(2).with_defaults()
     tests = {
@@ -1014,22 +1030,56 @@ def test_meshtet_adaptive_refine_interface():
         )
 
 
-def test_meshtet_adaptive_refine_partial_boundary():
-    m = MeshTet.init_ball().with_boundaries({
-        'upper': lambda x: x[2] > 0.3,
+def test_meshtri_adaptive_refine_partial_boundary():
+    m = MeshTri.init_circle(3).with_boundaries({
+        'upper': lambda x: x[1] > 0.3,
     })
     # refine elements next to the first three tagged facets
     M = m.refined(m.f2t[0, m.boundaries['upper'][:3]])
     assert np.isin(M.boundaries['upper'], M.boundary_facets()).all()
-    assert len(M.boundaries['upper']) > len(m.boundaries['upper'])
+    # length of the tagged boundary is preserved
+    length = lambda mesh, ix: np.sum(np.linalg.norm(
+        mesh.p[:, mesh.facets[1, ix]] - mesh.p[:, mesh.facets[0, ix]],
+        axis=0,
+    ))
+    assert abs(length(M, M.boundaries['upper'])
+               - length(m, m.boundaries['upper'])) < 1e-12
+    # at least the three facets are split, but not all of them
+    assert (len(m.boundaries['upper']) + 3
+            <= len(M.boundaries['upper'])
+            < 2 * len(m.boundaries['upper']))
 
-    def area(mesh, ix):
-        return np.sum(np.linalg.norm(np.cross(
-            mesh.p[:, mesh.facets[1, ix]] - mesh.p[:, mesh.facets[0, ix]],
-            mesh.p[:, mesh.facets[2, ix]] - mesh.p[:, mesh.facets[0, ix]],
-            axis=0,
-        ), axis=0))
+    
+@pytest.mark.parametrize("nrefs", [1, 2])
+def test_meshtet_uniform_refine_boundaries(nrefs):
+    m = MeshTet().with_defaults().refined(nrefs)
+    tests = {
+        'left': lambda x: x[0] == 0,
+        'right': lambda x: x[0] == 1,
+        'bottom': lambda x: x[1] == 0,
+        'top': lambda x: x[1] == 1,
+        'front': lambda x: x[2] == 0,
+        'back': lambda x: x[2] == 1,
+    }
+    for name, test in tests.items():
+        np.testing.assert_array_equal(m.boundaries[name],
+                                      m.facets_satisfying(test))
 
+
+def test_meshtet_uniform_refine_partial_boundary():
+    m = MeshTet.init_ball().with_boundaries({
+        'upper': lambda x: x[2] > 0.3,
+    })
+    M = m.refined()
+    # each tagged facet splits into four boundary facets
+    assert len(M.boundaries['upper']) == 4 * len(m.boundaries['upper'])
+    assert np.isin(M.boundaries['upper'], M.boundary_facets()).all()
     # area of the tagged boundary is preserved
+    area = lambda mesh, ix: np.sum(np.linalg.norm(np.cross(
+        mesh.p[:, mesh.facets[1, ix]] - mesh.p[:, mesh.facets[0, ix]],
+        mesh.p[:, mesh.facets[2, ix]] - mesh.p[:, mesh.facets[0, ix]],
+        axis=0,
+    ), axis=0))
+
     assert abs(area(M, M.boundaries['upper'])
                - area(m, m.boundaries['upper'])) < 1e-12

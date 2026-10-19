@@ -382,13 +382,39 @@ class MeshTri1(MeshSimplex, Mesh2D):
             self._subdomains,
         )
 
-        return replace(
+        m = replace(
             self,
             doflocs=doflocs,
             t=t,
             _boundaries=None,
             _subdomains=subdomains,
         )
+
+        if self._boundaries is not None:
+            # split facets are halved at the new vertex, others are kept
+            f = self.facets
+            mid = f.copy()
+            mid[:, facets == 1] = (np.arange(np.count_nonzero(facets))
+                                   + self.p.shape[1])
+            subfacets = np.sort(np.hstack((
+                np.vstack((f[0], mid[1])),
+                np.vstack((mid[0], f[1])),
+            )), axis=0)
+            _, ix = np.unique(np.hstack((m.facets, subfacets)),
+                              axis=1,
+                              return_inverse=True)
+            new_facets = (ix.flatten()[m.nfacets:]
+                          .reshape(2, -1)
+                          .astype(np.int32))
+            m = replace(
+                m,
+                _boundaries={
+                    name: np.unique(new_facets[:, ixs])
+                    for name, ixs in self._boundaries.items()
+                },
+            )
+
+        return m
 
     def __mul__(self, other):
 
