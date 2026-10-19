@@ -986,7 +986,12 @@ def test_load_npy_missing(tmp_path):
 
 def test_meshtri_adaptive_refine_boundaries():
     m = MeshTri().refined(2).with_defaults()
-
+    tests = {
+        'left': lambda x: x[0] == 0,
+        'right': lambda x: x[0] == 1,
+        'bottom': lambda x: x[1] == 0,
+        'top': lambda x: x[1] == 1,
+    }
     for _ in range(3):
         # refine elements touching the left boundary only
         m = m.refined(m.f2t[0, m.boundaries['left']])
@@ -1018,7 +1023,6 @@ def test_meshtri_adaptive_refine_partial_boundary():
 @pytest.mark.parametrize("nrefs", [1, 2])
 def test_meshtet_uniform_refine_boundaries(nrefs):
     m = MeshTet().with_defaults().refined(nrefs)
-
     tests = {
         'left': lambda x: x[0] == 0,
         'right': lambda x: x[0] == 1,
