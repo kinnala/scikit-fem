@@ -348,7 +348,8 @@ def enforce(A: spmatrix,
     A
         The system matrix
     b
-        Optionally, the right hand side vector.
+        Optionally, the right hand side vector.  Unless ``overwrite`` is
+        enabled, its dtype is promoted to accommodate the values in ``x``.
     x
         The values of the enforced degrees-of-freedom. If not given, assumed
         to be zero.
@@ -361,7 +362,9 @@ def enforce(A: spmatrix,
     overwrite
         Optionally, the original system is both modified (for performance) and
         returned (for compatibility with :func:`skfem.utils.solve`).  By
-        default, ``False``.
+        default, ``False``.  Nonzero imaginary boundary values require a
+        complex right hand side when overwriting; otherwise, ``ValueError``
+        is raised before either input is modified.
 
     Returns
     -------
@@ -370,6 +373,13 @@ def enforce(A: spmatrix,
 
     """
     b, x, I, D = _init_bc(A, b, x, I, D)
+
+    if (overwrite and b is not None and not isinstance(b, spmatrix)
+            and np.iscomplexobj(x) and not np.iscomplexobj(b)):
+        if np.any(x[D].imag != 0):
+            raise ValueError("Complex boundary values require a complex "
+                             "right hand side when overwrite=True.")
+        x = x.real
 
     Aout = A if overwrite else A.copy()
 
@@ -404,7 +414,8 @@ def enforce(A: spmatrix,
             bout = enforce(b, D=D, diag=0., overwrite=overwrite)
         else:
             # set rhs to the given value
-            bout = b if overwrite else b.copy()
+            bout = b if overwrite else b.astype(
+                np.result_type(b.dtype, x.dtype))
             bout[D] = x[D]
         return Aout, bout
 

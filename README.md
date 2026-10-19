@@ -242,6 +242,7 @@ with respect to documented and/or tested features.
 - Fixed: `ElementGlobal` subclasses such as `ElementLineHermite`, `ElementTriArgyris` and `ElementQuadBFS` now work with periodic meshes
 - Fixed: `solve` preserves complex solutions and eigenvectors when expanding condensed or multipoint-constrained systems with real boundary-value arrays.
 - Fixed: `Basis.interpolator` preserves vector and tensor components when evaluating shaped point arrays, including during `Basis.project`.
+- Fixed: `enforce` preserves complex boundary values with a real right-hand side, and rejects incompatible in-place updates before modifying the system.
 
 ### [12.0.2] - 2026-06-05
 

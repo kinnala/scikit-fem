@@ -54,6 +54,79 @@ class TestEnforce(TestCase):
         assert_almost_equal(A.toarray(), np.eye(A.shape[0]))
 
 
+@pytest.mark.parametrize('matrix_dtype', [np.float64, np.complex128])
+@pytest.mark.parametrize('rhs_dtype', [np.float32, np.float64])
+@pytest.mark.parametrize('value_dtype', [np.complex64, np.complex128])
+def test_enforce_complex_values(matrix_dtype, rhs_dtype, value_dtype):
+    A = scipy.sparse.diags([-1., 2., -1.], [-1, 0, 1],
+                           shape=(3, 3), format='csr', dtype=matrix_dtype)
+    b = np.zeros(3, dtype=rhs_dtype)
+    x = np.array([1. + 2.j, 0., 3. + 4.j], dtype=value_dtype)
+    original_A, original_b, original_x = A.copy(), b.copy(), x.copy()
+
+    Aout, bout = enforce(A, b, x=x, D=np.array([0, 2]))
+
+    assert bout.dtype == np.result_type(rhs_dtype, value_dtype)
+    assert_almost_equal(solve(Aout, bout), [1. + 2.j, 2. + 3.j, 3. + 4.j])
+    assert_almost_equal(A.toarray(), original_A.toarray())
+    assert_almost_equal(b, original_b)
+    assert_almost_equal(x, original_x)
+
+
+@pytest.mark.parametrize('dtype', [np.complex64, np.complex128])
+@pytest.mark.parametrize('overwrite', [False, True])
+def test_enforce_complex_rhs_control(dtype, overwrite):
+    A = scipy.sparse.diags([-1., 2., -1.], [-1, 0, 1],
+                           shape=(3, 3), format='csr')
+    b = np.zeros(3, dtype=dtype)
+    x = np.array([1. + 2.j, 0., 3. + 4.j], dtype=dtype)
+    Aout, bout = enforce(
+        A, b, x=x, D=np.array([0, 2]), overwrite=overwrite)
+    assert_almost_equal(solve(Aout, bout), [1. + 2.j, 2. + 3.j, 3. + 4.j])
+    assert (Aout is A) == overwrite
+    assert (bout is b) == overwrite
+
+
+@pytest.mark.parametrize('matrix_dtype', [np.float64, np.complex128])
+@pytest.mark.parametrize('rhs_dtype', [np.float32, np.float64])
+def test_enforce_complex_overwrite_error(matrix_dtype, rhs_dtype):
+    A = scipy.sparse.diags([-1., 2., -1.], [-1, 0, 1],
+                           shape=(3, 3), format='csr', dtype=matrix_dtype)
+    b = np.zeros(3, dtype=rhs_dtype)
+    x = np.array([1. + 2.j, 0., 3. + 4.j])
+    original_A, original_b, original_x = A.copy(), b.copy(), x.copy()
+    with pytest.raises(ValueError, match='complex right hand side'):
+        enforce(A, b, x=x, D=np.array([0, 2]), overwrite=True)
+    assert_almost_equal(A.toarray(), original_A.toarray())
+    assert_almost_equal(b, original_b)
+    assert_almost_equal(x, original_x)
+
+
+@pytest.mark.parametrize('matrix_dtype', [np.float64, np.complex128])
+@pytest.mark.parametrize('rhs_dtype', [np.float32, np.float64])
+@pytest.mark.parametrize('values', ['zero', 'real_boundary', 'default'])
+def test_enforce_real_values_from_complex_array(
+        matrix_dtype, rhs_dtype, values):
+    A = scipy.sparse.diags([-1., 2., -1.], [-1, 0, 1],
+                           shape=(3, 3), format='csr', dtype=matrix_dtype)
+    b = np.array([0., 1., 0.], dtype=rhs_dtype)
+    if values == 'zero':
+        x, expected = np.zeros(3, dtype=complex), [0., .5, 0.]
+    elif values == 'real_boundary':
+        # Only prescribed entries matter; interior values can be complex.
+        x, expected = np.array([1., 3.j, 3.]), [1., 2.5, 3.]
+    else:
+        x, expected = None, [0., .5, 0.]
+    original_x = None if x is None else x.copy()
+    Aout, bout = enforce(A, b, x=x, D=np.array([0, 2]), overwrite=True)
+    assert_almost_equal(solve(Aout, bout), expected)
+    assert Aout is A
+    assert bout is b
+    assert bout.dtype == rhs_dtype
+    if x is not None:
+        assert_almost_equal(x, original_x)
+
+
 def test_enforce_handles_empty_rows():
     """Regression: ``enforce`` must work when some enforced rows have no
     nonzeros to begin with -- this happens whenever an assembled matrix has
