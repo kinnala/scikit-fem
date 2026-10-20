@@ -231,8 +231,6 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
-- Fixed: `skfem.utils.penalize` preserves complex boundary values in the right-hand side.
-
 - Added: `Mesh.save_npy/load_npy` with better performance for larger meshes (in comparison to `Mesh.save/load`)
 - Added: `Basis.interpolate_multiple` for a simultaneous interpolation of multiple solution vectors
 - Changed: Accessing `Mesh.subdomains` or `Mesh.boundaries` with nonexisting key/tag will now raise `TagKeyError`
@@ -246,6 +244,7 @@ with respect to documented and/or tested features.
 - Fixed: `Basis.interpolator` preserves vector and tensor components when evaluating shaped point arrays, including during `Basis.project`.
 - Fixed: `enforce` preserves complex boundary values with a real right-hand side, and rejects incompatible in-place updates before modifying the system.
 - Fixed: `enforce` preserves prescribed boundary values when using a nonunit diagonal.
+- Fixed: `skfem.utils.penalize` preserves complex boundary values in the right-hand side.
 
 ### [12.0.2] - 2026-06-05
 
