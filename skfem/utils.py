@@ -438,7 +438,8 @@ def penalize(A: spmatrix,
     A
         The system matrix
     b
-        Optionally, the right hand side vector.
+        Optionally, the right hand side vector or mass matrix.  A copied
+        vector is promoted to accommodate the penalized values.
     x
         The values of the penalized degrees-of-freedom. If not given, assumed
         to be zero.
@@ -454,7 +455,9 @@ def penalize(A: spmatrix,
     overwrite
         Optionally, the original system is both modified (for performance) and
         returned (for compatibility with :func:`skfem.utils.solve`).  By
-        default, ``False``.
+        default, ``False``.  Nonzero imaginary boundary values require a
+        complex right hand side when overwriting; otherwise, ``ValueError``
+        is raised before either input is modified.
 
     Returns
     -------
@@ -470,16 +473,27 @@ def penalize(A: spmatrix,
     d = Aout.diagonal()
     if epsilon is None:
         epsilon = 1e-10 / np.linalg.norm(d[D], np.inf).astype(float)
+    if b is not None and not isinstance(b, spmatrix):
+        values = x[D] / epsilon
+        if np.iscomplexobj(values) and not np.iscomplexobj(b):
+            if np.all(values.imag == 0):
+                values = values.real
+            elif overwrite:
+                raise ValueError("Complex boundary values require a complex "
+                                 "right hand side when overwrite=True.")
     d[D] = 1. / epsilon
     Aout.setdiag(d)
 
     if b is None:
         return Aout
 
-    bout = b if overwrite else b.copy()
     # Nothing needs doing for mass matrix, but RHS vector needs penalty factor
-    if not isinstance(b, spmatrix):
-        bout[D] = x[D] / epsilon
+    if isinstance(b, spmatrix):
+        bout = b if overwrite else b.copy()
+    else:
+        bout = b if overwrite else b.astype(
+            np.result_type(b.dtype, values.dtype))
+        bout[D] = values
     return Aout, bout
 
 
