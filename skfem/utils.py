@@ -334,8 +334,8 @@ def enforce(A: spmatrix,
     r"""Enforce degrees-of-freedom of a linear system.
 
     An alternative to :func:`~skfem.utils.condense` which sets the matrix
-    diagonals to one and right-hand side vector to the enforced
-    degree-of-freedom value.
+    diagonals to ``diag`` and right-hand side entries to ``diag`` times
+    the enforced degree-of-freedom value.
 
     .. note::
 
@@ -358,7 +358,9 @@ def enforce(A: spmatrix,
         solve for.
     D
         Specify either this or ``I``: The set of degree-of-freedom indices to
-        enforce (rows/diagonal set to zero/one).
+        enforce (rows set to zero and diagonal set to ``diag``).
+    diag
+        The diagonal value to use for enforced degrees-of-freedom.
     overwrite
         Optionally, the original system is both modified (for performance) and
         returned (for compatibility with :func:`skfem.utils.solve`).  By
@@ -416,7 +418,7 @@ def enforce(A: spmatrix,
             # set rhs to the given value
             bout = b if overwrite else b.astype(
                 np.result_type(b.dtype, x.dtype))
-            bout[D] = x[D]
+            bout[D] = x[D] * diag
         return Aout, bout
 
     return Aout

@@ -125,6 +125,30 @@ def test_enforce_real_values_from_complex_array(
     assert bout.dtype == rhs_dtype
     if x is not None:
         assert_almost_equal(x, original_x)
+@pytest.mark.parametrize('diag', [.25, 1., 4., -2.])
+@pytest.mark.parametrize('dtype', [np.float64, np.complex128])
+@pytest.mark.parametrize('overwrite', [False, True])
+def test_enforce_nonunit_diagonal(diag, dtype, overwrite):
+    A = scipy.sparse.diags([-1., 2., -1.], [-1, 0, 1],
+                           shape=(3, 3), format='csr')
+    b = np.zeros(3, dtype=dtype)
+    factor = 1. if dtype == np.float64 else 1. + .5j
+    x = np.array([1., 0., 3.]) * factor
+    A_original, b_original, x_original = A.copy(), b.copy(), x.copy()
+
+    Aout, bout = enforce(A, b, x=x, D=np.array([0, 2]),
+                        diag=diag, overwrite=overwrite)
+
+    # The middle equation is 2 * u[1] = u[0] + u[2], independently
+    # of the scaling of the two prescribed boundary equations.
+    assert_almost_equal(solve(Aout, bout),
+                        np.array([1., 2., 3.]) * factor)
+    assert (Aout is A) == overwrite
+    assert (bout is b) == overwrite
+    assert_almost_equal(x, x_original)
+    if not overwrite:
+        assert_almost_equal(A.toarray(), A_original.toarray())
+        assert_almost_equal(b, b_original)
 
 
 def test_enforce_handles_empty_rows():

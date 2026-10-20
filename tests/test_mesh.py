@@ -983,7 +983,6 @@ def test_load_npy_missing(tmp_path):
         MeshTri.load_npy(tmp_path / "does_not_exist")
 
 
-
 def test_meshtri_adaptive_refine_boundaries():
     m = MeshTri().refined(2).with_defaults()
     tests = {
@@ -998,6 +997,37 @@ def test_meshtri_adaptive_refine_boundaries():
         for name, test in tests.items():
             np.testing.assert_array_equal(m.boundaries[name],
                                           m.facets_satisfying(test))
+
+
+def test_meshtet_adaptive_refine_boundaries():
+    m = MeshTet().refined(2).with_defaults()
+    tests = {
+        'left': lambda x: x[0] == 0,
+        'right': lambda x: x[0] == 1,
+        'bottom': lambda x: x[1] == 0,
+        'top': lambda x: x[1] == 1,
+        'front': lambda x: x[2] == 0,
+        'back': lambda x: x[2] == 1,
+    }
+    for _ in range(3):
+        # refine elements touching the left boundary only
+        m = m.refined(m.f2t[0, m.boundaries['left']])
+        for name, test in tests.items():
+            np.testing.assert_array_equal(m.boundaries[name],
+                                          m.facets_satisfying(test))
+
+
+def test_meshtet_adaptive_refine_interface():
+    # interior facets on the plane x = 0.5 are also tracked
+    m = MeshTet().refined(2).with_boundaries({
+        'interface': lambda x: np.isclose(x[0], 0.5),
+    }, boundaries_only=False)
+    for _ in range(2):
+        m = m.refined(m.f2t[0, m.boundaries['interface'][:4]])
+        np.testing.assert_array_equal(
+            m.boundaries['interface'],
+            m.facets_satisfying(lambda x: np.isclose(x[0], 0.5)),
+        )
 
 
 def test_meshtri_adaptive_refine_partial_boundary():
@@ -1050,5 +1080,6 @@ def test_meshtet_uniform_refine_partial_boundary():
         mesh.p[:, mesh.facets[2, ix]] - mesh.p[:, mesh.facets[0, ix]],
         axis=0,
     ), axis=0))
+
     assert abs(area(M, M.boundaries['upper'])
                - area(m, m.boundaries['upper'])) < 1e-12

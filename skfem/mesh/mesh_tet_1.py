@@ -276,6 +276,12 @@ class MeshTet1(MeshSimplex, Mesh3D):
         split_edge = np.zeros((3, 8 * nv), dtype=np.int32)
         ns = 0
 
+        # original vertices of the smallest original simplex
+        # containing each vertex, padded with 'pad'
+        pad = np.iinfo(np.int32).max
+        supp = np.full((4, 9 * nv), pad, dtype=np.int32)
+        supp[0, :nv] = np.arange(nv, dtype=np.int32)
+
         while len(marked) > 0:
             nm = len(marked)
             tnew = np.zeros(nm, dtype=np.int32) - 1
@@ -310,6 +316,9 @@ class MeshTet1(MeshSimplex, Mesh3D):
 
                 # add new points
                 p[:, nv:(nv + nn)] = .5 * (p[:, i] + p[:, j])
+                supp[:, nv:(nv + nn)] = self._adaptive_union(
+                    np.vstack((supp[:, i], supp[:, j])), pad
+                )[:4]
 
                 nv += nn
                 assert len(np.unique(p[:, :nv].T, axis=0)) == nv
@@ -343,11 +352,42 @@ class MeshTet1(MeshSimplex, Mesh3D):
             nonconf[check[i]] = 1
             marked = np.unique(j)
 
-        return replace(
+        m = replace(
             self,
             doflocs=p[:, :nv],
             t=t[:, :nt],
+            _boundaries=None,
+            _subdomains=None,
         )
+
+        if self._boundaries is not None:
+            # new facets inside an original facet are supported
+            # by exactly its three vertices
+            fsupp = self._adaptive_union(
+                np.vstack(tuple(supp[:, m.facets[k]] for k in range(3))),
+                pad,
+            )
+            onfacet = np.nonzero((fsupp[2] < pad) & (fsupp[3] == pad))[0]
+            _, ix = np.unique(np.hstack((self.facets, fsupp[:3, onfacet])),
+                              axis=1,
+                              return_inverse=True)
+            parent = ix.flatten()[self.nfacets:]
+            m = replace(
+                m,
+                _boundaries={
+                    name: onfacet[np.isin(parent, ixs)].astype(np.int32)
+                    for name, ixs in self._boundaries.items()
+                },
+            )
+
+        return m
+
+    @staticmethod
+    def _adaptive_union(s, pad):
+        """Columnwise union of padded vertex sets, sorted, padding last."""
+        s = np.sort(s, axis=0)
+        s[1:][s[1:] == s[:-1]] = pad
+        return np.sort(s, axis=0)
 
     @classmethod
     def init_tensor(cls: Type,
