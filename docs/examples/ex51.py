@@ -1,9 +1,8 @@
 """Contact problem."""
 from skfem import *
-from skfem.autodiff import *
-from skfem.autodiff.helpers import *
+from skfem.ad import *
+from skfem.ad.helpers import *
 from skfem.supermeshing import intersect, elementwise_quadrature
-import jax.numpy as jnp
 import numpy as np
 
 
@@ -25,7 +24,7 @@ basis2 = Basis(m2, e2)
 @NonlinearForm(hessian=True)
 def g(u1, u2, w):
     eps = 1e-2
-    return 1 / eps * jnp.minimum(0.25 + u1[1] - u2[1], 0) ** 2
+    return 1 / eps * np.minimum(0.25 + u1[1] - u2[1], 0) ** 2
 
 
 @NonlinearForm(hessian=True)

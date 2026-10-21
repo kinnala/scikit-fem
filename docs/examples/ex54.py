@@ -5,8 +5,8 @@ solver.
 
 """
 from skfem import *
-from skfem.autodiff import *
-from skfem.autodiff.helpers import *
+from skfem.ad import *
+from skfem.ad.helpers import *
 import numpy as np
 import petsc4py.PETSc as petsc
 

@@ -5,6 +5,13 @@ import numpy as np
 from jax import jvp, linearize, config
 from jax.tree_util import register_pytree_node
 import jax.numpy as jnp
+import logging
+
+
+logger = logging.getLogger(__name__)
+logger.warning("Warning: skfem.autodiff is deprecated. "
+               "Prefer the similar skfem.ad module.")
+
 
 
 config.update("jax_enable_x64", True)
