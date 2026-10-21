@@ -13,7 +13,6 @@ logger.warning("Warning: skfem.autodiff is deprecated. "
                "Prefer the similar skfem.ad module.")
 
 
-
 config.update("jax_enable_x64", True)
 
 
