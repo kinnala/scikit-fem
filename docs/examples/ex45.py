@@ -5,8 +5,8 @@ differentation in order to derive the tangent system for Newton's method.
 
 """
 from skfem import *
-from skfem.ad import NonlinearForm
-from skfem.ad.helpers import grad, dot
+from skfem.autodiff import NonlinearForm
+from skfem.autodiff.helpers import grad, dot
 import numpy as np
 
 m = MeshTri().refined(5)

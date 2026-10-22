@@ -1,7 +1,7 @@
 """Contact problem."""
 from skfem import *
-from skfem.ad import *
-from skfem.ad.helpers import *
+from skfem.autodiff import *
+from skfem.autodiff.helpers import *
 from skfem.supermeshing import intersect, elementwise_quadrature
 import numpy as np
 
