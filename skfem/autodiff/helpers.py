@@ -1,7 +1,7 @@
 """Helper functions for defining nonlinear forms.
 
 The helpers work both for the dual numbers passed to
-:class:`~skfem.ad.NonlinearForm` and for plain arrays such as
+:class:`~skfem.autodiff.NonlinearForm` and for plain arrays such as
 :class:`~skfem.element.DiscreteField`.
 
 """

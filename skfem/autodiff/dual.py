@@ -1,5 +1,10 @@
 """Second-order forward-mode dual numbers for linearizing variational forms.
 
+The seed groups are the scalar entries of the trial (A) and test (B)
+fields at the quadrature points, e.g., the value and the gradient
+components, so that the result of a form evaluation contains the
+pointwise coefficients of the linearized form.
+
 A :class:`Dual` holds a value array ``val`` together with
 
 - ``ga``, the first derivatives with respect to the seed group A,
@@ -12,11 +17,6 @@ The derivative axes are leading, i.e. if ``val`` has the shape ``S`` then
 singleton axes that broadcast against ``S``, and ``None`` stands for an
 identically zero derivative.  If the two seed groups coincide (``gb is ga``)
 then ``hab`` is the full Hessian.
-
-The seed groups are the scalar entries of the trial (A) and test (B)
-fields at the quadrature points, e.g., the value and the gradient
-components, so that the result of a form evaluation contains the
-pointwise coefficients of the linearized form.
 
 """
 from string import ascii_lowercase
@@ -47,6 +47,7 @@ def _const(x):
 
 def _val(x):
     return x.val if isinstance(x, Dual) else _const(x)
+
 
 
 def _pad(d, nlead, ndim):
@@ -135,7 +136,7 @@ class Dual:
     def __array__(self, *args, **kwargs):
         raise TypeError("Cannot convert Dual to ndarray: the operation "
                         "would lose the derivatives.  Use NumPy functions "
-                        "or skfem.autodiffng.helpers instead.")
+                        "or skfem.autodiff.helpers instead.")
 
     def zeros(self):
         return np.zeros_like(self.val)

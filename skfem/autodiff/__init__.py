@@ -1,14 +1,14 @@
-"""Linearization of nonlinear forms using built-in autodifferentation.
+"""Linearization of nonlinear forms using automatic differentiation.
 
 The trial and test functions are represented using second-order
-forward-mode dual numbers (see :class:`~skfem.ad.dual.Dual`) which
-are seeded with respect to the scalar entries of the fields at the
-quadrature points, e.g., the value and the gradient components.
+forward-mode dual numbers (see :class:`~skfem.autodiff.dual.Dual`)
+which are seeded with respect to the scalar entries of the fields at
+the quadrature points, e.g., the value and the gradient components.
 
-A single evaluation of the form gives the pointwise coefficients of
-the linearized form which are then contracted with the basis
-functions, similarly to :class:`~skfem.assembly.BilinearForm`.  NumPy
-functions can be applied to the dual numbers directly.
+An evaluation of the form gives the pointwise coefficients of the
+linearized form which are then contracted with the basis functions,
+similarly to :class:`~skfem.assembly.BilinearForm`.  NumPy functions
+can be applied to the dual numbers directly.
 
 """
 import numpy as np
@@ -20,12 +20,12 @@ from .dual import Dual, FIELD_ATTRS
 
 
 class NonlinearForm(Form):
-    """A nonlinear form linearized using autodifferentiation.
+    """A nonlinear form linearized using automatic differentiation.
 
-    The form is either ``form(u, v, w)``, linear in the test function ``v``,
-    or ``form(u, w)`` with the keyword argument ``hessian=True``, an energy
-    functional whose first variation gives the residual and second variation
-    gives the Jacobian.
+    The form is either ``form(u, v, w)``, linear in the test function
+    ``v``, or ``form(u, w)`` with the keyword argument
+    ``hessian=True``, an energy functional whose first variation gives
+    the residual and second variation gives the Jacobian.
 
     """
 
