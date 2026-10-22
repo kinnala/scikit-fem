@@ -8,7 +8,5 @@ pyamg
 mypy
 flake8
 sphinx
-jax
-jaxlib
 pep517
 shapely
