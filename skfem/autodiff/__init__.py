@@ -1,108 +1,33 @@
+"""Linearization of nonlinear forms using automatic differentiation.
+
+The trial and test functions are represented using second-order
+forward-mode dual numbers (see :class:`~skfem.autodiff.dual.Dual`)
+which are seeded with respect to the scalar entries of the fields at
+the quadrature points, e.g., the value and the gradient components.
+
+An evaluation of the form gives the pointwise coefficients of the
+linearized form which are then contracted with the basis functions,
+similarly to :class:`~skfem.assembly.BilinearForm`.  NumPy functions
+can be applied to the dual numbers directly.
+
+"""
+import numpy as np
+from numpy import ndarray
+
 from skfem.assembly.form.form import Form, FormExtraParams
 from skfem.assembly.form.coo_data import COOData
-from numpy import ndarray
-import numpy as np
-from jax import jvp, linearize, config
-from jax.tree_util import register_pytree_node
-import jax.numpy as jnp
-
-
-config.update("jax_enable_x64", True)
-
-
-class JaxDiscreteField(object):
-
-    def __init__(self,
-                 value,
-                 grad=None,
-                 div=None,
-                 curl=None,
-                 hess=None,
-                 grad3=None,
-                 grad4=None,
-                 grad5=None,
-                 grad6=None):
-        self.value = value
-        self.grad = grad
-        self.div = div
-        self.curl = curl
-        self.hess = hess
-        self.grad3 = grad3
-        self.grad4 = grad4
-        self.grad5 = grad5
-        self.grad6 = grad6
-
-    def __add__(self, other):
-        if isinstance(other, JaxDiscreteField):
-            return self.value + other.value
-        return self.value + other
-
-    def __sub__(self, other):
-        if isinstance(other, JaxDiscreteField):
-            return self.value - other.value
-        return self.value - other
-
-    def __rsub__(self, other):
-        if isinstance(other, JaxDiscreteField):
-            return other.value - self.value
-        return other - self.value
-
-    def __mul__(self, other):
-        if isinstance(other, JaxDiscreteField):
-            return self.value * other.value
-        return self.value * other
-
-    def __rmul__(self, other):
-        if isinstance(other, JaxDiscreteField):
-            return self.value * other.value
-        return self.value * other
-
-    def __truediv__(self, other):
-        if isinstance(other, JaxDiscreteField):
-            return self.value / other.value
-        return self.value / other
-
-    def __rtruediv__(self, other):
-        if isinstance(other, JaxDiscreteField):
-            return other.value / self.value
-        return other / self.value
-
-    def __pow__(self, ix):
-        return self.value ** ix
-
-    def __array__(self):
-        return self.value
-
-    def __getitem__(self, index):
-        return self.value[index]
-
-    @property
-    def shape(self):
-        return self.value.shape
-
-    @property
-    def astuple(self):
-        return (
-            self.value,
-            self.grad,
-            self.div,
-            self.curl,
-            self.hess,
-            self.grad3,
-            self.grad4,
-            self.grad5,
-            self.grad6,
-        )
-
-
-register_pytree_node(
-    JaxDiscreteField,
-    lambda xs: (xs.astuple, None),
-    lambda _, xs: JaxDiscreteField(*xs),
-)
+from .dual import Dual, FIELD_ATTRS
 
 
 class NonlinearForm(Form):
+    """A nonlinear form linearized using automatic differentiation.
+
+    The form is either ``form(u, v, w)``, linear in the test function
+    ``v``, or ``form(u, w)`` with the keyword argument
+    ``hessian=True``, an energy functional whose first variation gives
+    the residual and second variation gives the Jacobian.
+
+    """
 
     def assemble(self, basis, x=None, **kwargs):
         """Assemble the Jacobian and the right-hand side.
@@ -121,97 +46,6 @@ class NonlinearForm(Form):
             COOData(*vec).todefault()
         )
 
-    def _assemble(self, basis, x=None, **kwargs):
-
-        # make x compatible with u in forms
-        if x is None:
-            x = basis.zeros()
-        if isinstance(x, ndarray):
-            x = basis.interpolate(x)
-            if isinstance(x, tuple):
-                x = tuple(JaxDiscreteField(*c.astuple) for c in x)
-            else:
-                x = (JaxDiscreteField(*x.astuple),)
-
-        nt = basis.nelems
-        dx = basis.dx
-
-        defaults = basis.default_parameters()
-        # turn defaults into JaxDiscreteField to avoid np.ndarray
-        # to jnp.ndarray promotion issues
-        w = FormExtraParams({
-            **{
-                k: JaxDiscreteField(*tuple(
-                    jnp.asarray(x)
-                    if x is not None else None
-                    for x in defaults[k].astuple
-                ))
-                for k in defaults
-            },
-            **self._normalize_asm_kwargs(kwargs, basis),
-        })
-
-        # initialize COO data structures
-        sz = basis.Nbfun * basis.Nbfun * nt
-        data = np.zeros((basis.Nbfun, basis.Nbfun, nt), dtype=self.dtype)
-        rows = np.zeros(sz, dtype=np.int32)
-        cols = np.zeros(sz, dtype=np.int32)
-
-        sz1 = basis.Nbfun * nt
-        data1 = np.zeros(sz1, dtype=self.dtype)
-        rows1 = np.zeros(sz1, dtype=np.int32)
-
-        # # autograd version
-        # def _make_jacobian(V):
-        #     if 'hessian' in self.params:
-        #         F = make_jvp(lambda U: self.form(*U, w))
-        #         return make_jvp(lambda W: F(W)(V)[1])(x)
-        #     return make_jvp(lambda U: self.form(*U, *V, w))(x)
-
-        # JAX version
-        def _make_jacobian(V):
-            if 'hessian' in self.params:
-                return linearize(
-                    lambda W: jvp(lambda U: self.form(*U, w), (W,), (V,))[1],
-                    x
-                )
-            return linearize(lambda U: self.form(*U, *V, w), x)
-
-        # loop over the indices of local stiffness matrix
-        for i in range(basis.Nbfun):
-            y, DF = _make_jacobian(tuple(JaxDiscreteField(*c.astuple)
-                                         for c in basis.basis[i]))
-            for j in range(basis.Nbfun):
-                DFU = DF(tuple(JaxDiscreteField(*c.astuple)
-                               for c in basis.basis[j]))
-                # Jacobian
-                ixs = slice(nt * (basis.Nbfun * j + i),
-                            nt * (basis.Nbfun * j + i + 1))
-                rows[ixs] = basis.element_dofs[i]
-                cols[ixs] = basis.element_dofs[j]
-                data[j, i, :] = np.sum(DFU * dx, axis=1)
-            # rhs
-            ixs1 = slice(nt * i, nt * (i + 1))
-            rows1[ixs1] = basis.element_dofs[i]
-            data1[ixs1] = np.sum(y * dx, axis=1)
-
-        data = data.flatten('C')
-
-        return (
-            (
-                np.array([rows, cols]),
-                data,
-                (basis.N, basis.N),
-                (basis.Nbfun, basis.Nbfun),
-            ),
-            (
-                np.array([rows1]),
-                -data1,
-                (basis.N,),
-                (basis.Nbfun,)
-            )
-        )
-
     def elemental(self, basis, x=None, **kwargs):
         """Return COOData for the Jacobian and the right-hand side.
 
@@ -225,3 +59,126 @@ class NonlinearForm(Form):
         """
         mat, vec = self._assemble(basis, x=x, **kwargs)
         return COOData(*mat), COOData(*vec)
+
+    def _assemble(self, basis, x=None, **kwargs):
+
+        if x is None:
+            x = basis.zeros()
+        if isinstance(x, ndarray):
+            x = basis.interpolate(x)
+        if not isinstance(x, tuple):
+            x = (x,)
+
+        nt = basis.nelems
+        dx = basis.dx
+        nq = dx.shape[-1]
+        Nbfun = basis.Nbfun
+
+        w = FormExtraParams({
+            **basis.default_parameters(),
+            **self._normalize_asm_kwargs(kwargs, basis),
+        })
+
+        # the scalar entries of all fields are the seeds; find their layout
+        slots = []
+        K = 0
+        for field in basis.basis[0]:
+            slots.append([])
+            for n, arr in enumerate(field.astuple):
+                if arr is None:
+                    continue
+                shape = arr.shape[:-2]
+                size = int(np.prod(shape))
+                slots[-1].append((n, shape, K, size))
+                K += size
+
+        def seed(shape, offset, size):
+            s = np.zeros((K, size))
+            s[offset:offset + size] = np.eye(size)
+            return s.reshape((K,) + shape + (1, 1))
+
+        def make_fields(values, group):
+            out = []
+            for k, field in enumerate(slots):
+                parts = {}
+                for n, shape, offset, size in field:
+                    if values is None:
+                        val = np.zeros(shape + (1, 1))
+                    else:
+                        val = np.asarray(values[k].get(n))
+                    s = seed(shape, offset, size)
+                    if group == 'a':
+                        parts[n] = Dual(val, ga=s)
+                    elif group == 'b':
+                        parts[n] = Dual(val, gb=s)
+                    else:
+                        parts[n] = Dual(val, ga=s, gb=s)
+                main = parts.pop(0, None)
+                if main is None:
+                    raise NotImplementedError("Fields without values are "
+                                              "not supported.")
+                for n in parts:
+                    setattr(main, FIELD_ATTRS[n - 1], parts[n])
+                out.append(main)
+            return out
+
+        if self.params.get('hessian', False):
+            # energy functional: both seed groups are the trial function
+            out = self.form(*make_fields(x, 'ab'), w)
+            res = out.ga if isinstance(out, Dual) else None
+        else:
+            # the form is linear in the test function, evaluate at zero
+            out = self.form(*make_fields(x, 'a'),
+                            *make_fields(None, 'b'),
+                            w)
+            res = out.gb if isinstance(out, Dual) else None
+        jac = out.hab if isinstance(out, Dual) else None
+
+        # basis functions sampled at the seeds: (Nbfun, K, nt, nq)
+        phi = np.zeros((Nbfun, K, nt, nq))
+        for i in range(Nbfun):
+            for k, field in enumerate(slots):
+                for n, shape, offset, size in field:
+                    phi[i, offset:offset + size] = np.broadcast_to(
+                        basis.basis[i][k].get(n),
+                        shape + (nt, nq)
+                    ).reshape(size, nt, nq)
+        phidx = phi * dx
+
+        dtype = self.dtype
+        if jac is None:
+            data = np.zeros((Nbfun, Nbfun, nt), dtype=dtype)
+        else:
+            jac = np.broadcast_to(jac, (K, K, nt, nq))
+            # data[j, i] corresponds to trial function j and test function i
+            data = np.einsum('jaeq,iaeq->jie',
+                             phi,
+                             np.einsum('abeq,ibeq->iaeq', jac, phidx),
+                             optimize=True).astype(dtype, copy=False)
+        if res is None:
+            data1 = np.zeros((Nbfun, nt), dtype=dtype)
+        else:
+            res = np.broadcast_to(res, (K, nt, nq))
+            data1 = np.einsum('beq,ibeq->ie',
+                              res,
+                              phidx,
+                              optimize=True).astype(dtype, copy=False)
+
+        dofs = basis.element_dofs
+        rows = np.broadcast_to(dofs[None, :, :], (Nbfun, Nbfun, nt))
+        cols = np.broadcast_to(dofs[:, None, :], (Nbfun, Nbfun, nt))
+
+        return (
+            (
+                np.array([rows.flatten(), cols.flatten()]),
+                data.flatten('C'),
+                (basis.N, basis.N),
+                (basis.Nbfun, basis.Nbfun),
+            ),
+            (
+                np.array([dofs.flatten()]),
+                -data1.flatten('C'),
+                (basis.N,),
+                (basis.Nbfun,)
+            )
+        )
