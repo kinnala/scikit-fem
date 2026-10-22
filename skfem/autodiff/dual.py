@@ -49,7 +49,6 @@ def _val(x):
     return x.val if isinstance(x, Dual) else _const(x)
 
 
-
 def _pad(d, nlead, ndim):
     """Insert singleton axes after the derivative axes of ``d``."""
     extra = ndim - (d.ndim - nlead)
