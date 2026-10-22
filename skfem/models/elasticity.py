@@ -59,10 +59,10 @@ def linear_stress(Lambda=1., Mu=1.):
 def linear_elasticity(Lambda=1., Mu=1.):
     """Weak form of the linear elasticity operator."""
 
-    C = linear_stress(Lambda, Mu)
-
     @BilinearForm
     def weakform(u, v, w):
-        return ddot(C(sym_grad(u)), sym_grad(v))
+        gu, gv = grad(u), grad(v)
+        return (Mu * (ddot(gu, gv) + ddot(gu, transpose(gv)))
+                + Lambda * div(u) * div(v))
 
     return weakform

@@ -235,6 +235,7 @@ with respect to documented and/or tested features.
 - Added: `Basis.interpolate_multiple` for a simultaneous interpolation of multiple solution vectors
 - Changed: `skfem.autodiff` now uses built-in forward-mode dual number automatic differentiation without the JAX dependency
 - Changed: Accessing `Mesh.subdomains` or `Mesh.boundaries` with nonexisting key/tag will now raise `TagKeyError`
+- Changed: Optimized `ElementVector` and `ElementComposite` by storing only nonzero values 
 - Removed: Obsolete projection functions `skfem.utils.project` and `skfem.utils.projection` that have been replaced by `Basis.project`
 - Removed: Dysfunctional visualization package `skfem.visuals.glvis`
 - Removed: The deprecated `FacetBasis.trace` method
