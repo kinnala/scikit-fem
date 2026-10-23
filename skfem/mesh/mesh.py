@@ -513,9 +513,16 @@ class Mesh:
         return vertices, edges
 
     def _mapping(self):
-        from skfem.mapping import MappingAffine, MappingIsoparametric
+        from skfem.mapping import (MappingAffine, MappingIsoparametric,
+                                   MappingManifold)
         if not hasattr(self, '_cached_mapping'):
-            if self.affine:
+            if self.doflocs.shape[0] > self.dim():
+                self._cached_mapping = MappingManifold(
+                    self,
+                    self.elem(),
+                    self.bndelem,
+                )
+            elif self.affine:
                 self._cached_mapping = MappingAffine(self)
             else:
                 self._cached_mapping = MappingIsoparametric(
