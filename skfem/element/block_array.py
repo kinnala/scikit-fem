@@ -1,16 +1,13 @@
-"""Arrays where most of the leading component axes are known to be zero.
+"""Arrays with most leading components equal to zero.
 
 :class:`~skfem.element.ElementVector` and
 :class:`~skfem.element.ElementComposite` produce basis functions whose
-quadrature point values are mostly zero, e.g., the vectorial basis function
-``phi * e_n`` is nonzero only in its ``n``'th component.  Storing such fields
-densely makes the forms spend most of their time multiplying zeros.
+quadrature point values are mostly zero. Storing such fields densely
+causes the forms spend most of their time multiplying zeros.
 
-:class:`BlockArray` stores only the nonzero components and implements the
-operations used in forms (arithmetic, indexing and ``np.einsum``, which
-covers most of :mod:`skfem.helpers`) without touching the zeros.  Any other
-operation converts the array to a dense ``ndarray`` first so that the result
-is always correct.
+:class:`BlockArray` stores only the nonzero components and implements
+the operations used in forms without touching the zeros.  Any other
+operation converts the array to a dense ``ndarray``.
 
 """
 import re
