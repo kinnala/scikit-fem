@@ -16,6 +16,7 @@ from numpy import ndarray
 
 from skfem.assembly.form.form import Form, FormExtraParams
 from skfem.assembly.form.coo_data import COOData
+from skfem.element.block_array import BlockArray
 from .dual import Dual, FIELD_ATTRS
 
 
@@ -81,6 +82,13 @@ class NonlinearForm(Form):
 
         # the scalar entries of all fields are the seeds; find their layout
         slots = []
+        # example 'slots' for 3D Taylor-Hood:
+        # | field | attr  | shape  | offset | size |
+        # |-------+-------+--------+--------+------|
+        # | u     | value | (3,)   |      0 |    3 |
+        # | u     | grad  | (3, 3) |      3 |    9 |
+        # | p     | value | ()     |     12 |    1 |
+        # | p     | grad  | (3,)   |     13 |    3 |
         K = 0
         for field in basis.basis[0]:
             slots.append([])
@@ -92,10 +100,14 @@ class NonlinearForm(Form):
                 slots[-1].append((n, shape, K, size))
                 K += size
 
+        one = np.ones((1, 1))
+
         def seed(shape, offset, size):
-            s = np.zeros((K, size))
-            s[offset:offset + size] = np.eye(size)
-            return s.reshape((K,) + shape + (1, 1))
+            # each seed is a single entry: store the nonzeros only
+            return BlockArray((K,) + shape + (1, 1),
+                              1 + len(shape),
+                              {(offset + j,) + ix: one
+                               for j, ix in enumerate(np.ndindex(*shape))})
 
         def make_fields(values, group):
             out = []
@@ -134,35 +146,75 @@ class NonlinearForm(Form):
             res = out.gb if isinstance(out, Dual) else None
         jac = out.hab if isinstance(out, Dual) else None
 
-        # basis functions sampled at the seeds: (Nbfun, K, nt, nq)
-        phi = np.zeros((Nbfun, K, nt, nq))
+        # basis functions sampled at the seeds; most entries are zero, e.g.,
+        # a component of ElementVector touches only its own seeds
+        samples = []
         for i in range(Nbfun):
+            sample = {}
             for k, field in enumerate(slots):
                 for n, shape, offset, size in field:
-                    phi[i, offset:offset + size] = np.broadcast_to(
-                        basis.basis[i][k].get(n),
-                        shape + (nt, nq)
-                    ).reshape(size, nt, nq)
-        phidx = phi * dx
+                    f = basis.basis[i][k].get(n)
+                    if isinstance(f, BlockArray):
+                        f = f.promote(len(shape))
+                        for key, b in f.blocks.items():
+                            ix = (np.ravel_multi_index(key, shape)
+                                  if len(key) > 0 else 0)
+                            sample[offset + int(ix)] = b
+                    else:
+                        f = np.broadcast_to(f, shape + (nt, nq))
+                        f = f.reshape(size, nt, nq)
+                        for j in range(size):
+                            sample[offset + j] = f[j]
+            samples.append(sample)
+
+        # group the basis functions by the seeds they touch
+        groups = {}
+        for i, sample in enumerate(samples):
+            groups.setdefault(tuple(sorted(sample)), []).append(i)
+        groups = [(np.array(ixs), list(seeds), np.array([
+            [np.broadcast_to(samples[i][a], (nt, nq)) for a in seeds]
+            for i in ixs
+        ])) for seeds, ixs in groups.items()]
+
+        def restrict(d, *seeds):
+            """Entries of the derivative ``d`` at the given seeds."""
+            if isinstance(d, BlockArray):
+                out = np.zeros(tuple(len(s) for s in seeds) + (nt, nq),
+                               dtype=d.dtype)
+                pos = [{a: j for j, a in enumerate(s)} for s in seeds]
+                for key, b in d.blocks.items():
+                    try:
+                        out[tuple(p[a] for p, a in zip(pos, key))] = b
+                    except KeyError:
+                        continue
+                return out
+            d = np.broadcast_to(d, (K,) * len(seeds) + (nt, nq))
+            return d[np.ix_(*seeds)]
 
         dtype = self.dtype
-        if jac is None:
-            data = np.zeros((Nbfun, Nbfun, nt), dtype=dtype)
-        else:
-            jac = np.broadcast_to(jac, (K, K, nt, nq))
-            # data[j, i] corresponds to trial function j and test function i
-            data = np.einsum('jaeq,iaeq->jie',
-                             phi,
-                             np.einsum('abeq,ibeq->iaeq', jac, phidx),
-                             optimize=True).astype(dtype, copy=False)
-        if res is None:
-            data1 = np.zeros((Nbfun, nt), dtype=dtype)
-        else:
-            res = np.broadcast_to(res, (K, nt, nq))
-            data1 = np.einsum('beq,ibeq->ie',
-                              res,
+        data = np.zeros((Nbfun, Nbfun, nt), dtype=dtype)
+        data1 = np.zeros((Nbfun, nt), dtype=dtype)
+        for ixs, seeds, phi in groups:
+            phidx = phi * dx
+            if res is not None:
+                data1[ixs] = np.einsum('beq,ibeq->ie',
+                                       restrict(res, seeds),
+                                       phidx,
+                                       optimize=True)
+            if jac is None:
+                continue
+            for jxs, aseeds, psi in groups:
+                # data[j, i] corresponds to trial function j and test
+                # function i
+                data[np.ix_(jxs, ixs)] = np.einsum(
+                    'jaeq,iaeq->jie',
+                    psi,
+                    np.einsum('abeq,ibeq->iaeq',
+                              restrict(jac, aseeds, seeds),
                               phidx,
-                              optimize=True).astype(dtype, copy=False)
+                              optimize=True),
+                    optimize=True
+                )
 
         dofs = basis.element_dofs
         rows = np.broadcast_to(dofs[None, :, :], (Nbfun, Nbfun, nt))
