@@ -1,3 +1,4 @@
+import weakref
 from typing import List, Any
 
 import numpy as np
@@ -92,13 +93,29 @@ class ElementComposite(Element):
 
         return ns[i], inds[i]
 
+    def _zeros(self, mapping, X: ndarray, tind=None):
+        """For caching zero fields of the components."""
+        args = (mapping, X, tind)
+        cached = getattr(self, '_zeros_cache', None)
+        # weak references: do not keep the arguments alive
+        if (cached is None
+                or any(arg is not (None if ref is None else ref())
+                       for arg, ref in zip(args, cached[0]))):
+            zeros = [e.gbasis(mapping, X, 0, tind)[0].zeros()
+                     for e in self.elems]
+            refs = tuple(None if arg is None else weakref.ref(arg)
+                         for arg in args)
+            self._zeros_cache = cached = (refs, zeros)
+        return cached[1]
+
     def gbasis(self, mapping, X: ndarray, i: int, tind=None):
         """Call correct :meth:`Element.gbasis` based on ``i``."""
         n, ind = self._deduce_bfun(i)
+        zeros = self._zeros(mapping, X, tind)
         output: List[DiscreteField] = []
         for k, e in enumerate(self.elems):
             if n == k:
                 output.append(e.gbasis(mapping, X, ind, tind)[0])
             else:
-                output.append(e.gbasis(mapping, X, 0, tind)[0].zeros())
+                output.append(zeros[k])
         return tuple(output)
