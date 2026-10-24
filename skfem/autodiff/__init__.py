@@ -82,6 +82,13 @@ class NonlinearForm(Form):
 
         # the scalar entries of all fields are the seeds; find their layout
         slots = []
+        # example 'slots' for 3D Taylor-Hood:
+        # | field | attr  | shape  | offset | size |
+        # |-------+-------+--------+--------+------|
+        # | u     | value | (3,)   |      0 |    3 |
+        # | u     | grad  | (3, 3) |      3 |    9 |
+        # | p     | value | ()     |     12 |    1 |
+        # | p     | grad  | (3,)   |     13 |    3 |
         K = 0
         for field in basis.basis[0]:
             slots.append([])
