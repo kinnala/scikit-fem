@@ -734,3 +734,72 @@ def test_disable_doflocs():
     assert hasattr(basis, 'doflocs')
     assert not hasattr(ifbasisd, 'doflocs')
     assert hasattr(ifbasis, 'doflocs')
+
+
+def test_composite_basis_different_elements():
+    """Basis * Basis with different elements agrees with ElementComposite."""
+    from skfem import Basis, ElementVector
+    from skfem.helpers import ddot, div
+    from skfem.autodiff import NonlinearForm
+    import skfem.autodiff.helpers as ad
+
+    m = MeshTri().refined(2)
+    ub = Basis(m, ElementVector(ElementTriP2()), intorder=4)
+    pb = Basis(m, ElementTriP1(), intorder=4)
+    cb = Basis(m, ElementVector(ElementTriP2()) * ElementTriP1(),
+               intorder=4)
+    perm = np.concatenate(cb.split_indices())
+
+    # zeros have the shape of the corresponding field
+    assert (ub * pb).basis[0][1].shape == pb.basis[0][0].shape
+    assert (ub * pb).basis[-1][0].shape == ub.basis[0][0].shape
+
+    @BilinearForm
+    def stokes(u, p, v, q, w):
+        return (ddot(grad(u), grad(v)) - div(u) * q - div(v) * p
+                - 1e-2 * p * q)
+
+    A = stokes.assemble(ub * pb)
+    B = stokes.assemble(cb)
+    assert_allclose(A.toarray(), B[perm][:, perm].toarray(), atol=1e-12)
+
+    @NonlinearForm
+    def navierstokes(u, p, v, q, w):
+        return (ad.ddot(ad.grad(u), ad.grad(v))
+                + ad.dot(ad.mul(ad.grad(u), u), v)
+                - ad.div(u) * q - ad.div(v) * p + p ** 2 * q)
+
+    x = np.random.RandomState(0).rand(cb.N)
+    J1, r1 = navierstokes.assemble(ub * pb, x=x[perm])
+    J2, r2 = navierstokes.assemble(cb, x=x)
+    assert_allclose(J1.toarray(), J2[perm][:, perm].toarray(), atol=1e-12)
+    assert_allclose(r1, r2[perm], atol=1e-12)
+
+
+def test_composite_basis_equal_dofnum():
+    """Bases combined with @ share the DOFs."""
+    from skfem import Basis
+    from skfem.autodiff import NonlinearForm
+    import skfem.autodiff.helpers as ad
+
+    m = MeshTri().refined(2)
+    b1, b2 = Basis(m, ElementTriP1()), Basis(m, ElementTriP1())
+    basis = b1 @ b2
+    x = np.random.RandomState(0).rand(basis.N)
+    u1, u2 = basis.interpolate(x)
+    assert_allclose(u1, u2)
+    assert all(y is x for y, _ in basis.split(x))
+
+    @NonlinearForm(hessian=True)
+    def energy(u1, u2, w):
+        return .5 * ad.dot(ad.grad(u1), ad.grad(u1)) * u2 ** 2
+
+    @NonlinearForm(hessian=True)
+    def single(u, w):
+        return .5 * ad.dot(ad.grad(u), ad.grad(u)) * u ** 2
+
+    # the variations w.r.t. the shared DOFs: u1 and u2 vary together
+    J1, r1 = energy.assemble(basis, x=x)
+    J2, r2 = single.assemble(b1, x=x)
+    assert_allclose(J1.toarray(), J2.toarray(), atol=1e-12)
+    assert_allclose(r1, r2, atol=1e-12)
