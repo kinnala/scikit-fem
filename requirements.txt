@@ -9,4 +9,3 @@ mypy
 flake8
 sphinx
 pep517
-shapely
