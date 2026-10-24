@@ -79,7 +79,10 @@ class DiscreteField(ndarray):
         return np.array(self)
 
     def zeros(self):
-        return DiscreteField(*tuple(None if c is None else np.zeros_like(c)
+        # zeros are not stored, see BlockArray
+        from .block_array import BlockArray, BlockDiscreteField
+        return BlockDiscreteField(*(None if c is None
+                                    else BlockArray.zeros(c.shape, c.dtype)
                                     for c in self.astuple))
 
     def __repr__(self):

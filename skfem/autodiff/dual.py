@@ -18,11 +18,23 @@ singleton axes that broadcast against ``S``, and ``None`` stands for an
 identically zero derivative.  If the two seed groups coincide (``gb is ga``)
 then ``hab`` is the full Hessian.
 
+The derivatives are usually sparse: a seed is a single scalar entry of a
+field and, e.g., the derivative of ``grad(u)[i, j]`` with respect to the
+other entries is zero.  Therefore the derivatives are stored, when possible,
+as :class:`~skfem.element.block_array.BlockArray` whose sparse axes are the
+derivative axes and the component axes of the value, i.e. all axes except the
+last two (the elements and the quadrature points).  The operations fall back
+to dense arrays if a sparse implementation is not available.
+
 """
+from collections import defaultdict
+from itertools import product
 from string import ascii_lowercase
 
 import numpy as np
 from numpy import ndarray
+
+from skfem.element.block_array import BlockArray
 
 
 FIELD_ATTRS = (
@@ -49,8 +61,72 @@ def _val(x):
     return x.val if isinstance(x, Dual) else _const(x)
 
 
+def _sparse(*ds):
+    """True if all derivatives are sparse."""
+    return all(isinstance(d, BlockArray) for d in ds if d is not None)
+
+
+def _dense(d):
+    return np.asarray(d) if isinstance(d, BlockArray) else d
+
+
+def _sp_new(lead, cshape, trailing, blocks, dtype=np.float64):
+    return BlockArray(tuple(lead) + tuple(cshape) + tuple(trailing),
+                      len(lead) + len(cshape),
+                      blocks,
+                      dtype)
+
+
+def _sp_parts(d, nlead):
+    """Split the shape into the derivative, component and trailing parts."""
+    return d.shape[:nlead], d.shape[nlead:d.r], d.shape[d.r:]
+
+
+def _sp_pad(d, nlead, ndim):
+    """Insert singleton component axes, cf. :func:`_pad`."""
+    extra = ndim - (d.ndim - nlead)
+    if extra <= 0:
+        return d
+    lead, cshape, trailing = _sp_parts(d, nlead)
+    zeros = (0,) * extra
+    return _sp_new(lead,
+                   (1,) * extra + cshape,
+                   trailing,
+                   {k[:nlead] + zeros + k[nlead:]: b
+                    for k, b in d.blocks.items()},
+                   d.dtype)
+
+
+def _sp_bcast(d, nlead, cshape, trailing=None):
+    """Broadcast the component axes to ``cshape`` by repeating blocks."""
+    lead, old, oldtrailing = _sp_parts(d, nlead)
+    trailing = (oldtrailing if trailing is None
+                else np.broadcast_shapes(oldtrailing, trailing))
+    if old == tuple(cshape):
+        if trailing == oldtrailing:
+            return d
+        return _sp_new(lead, cshape, trailing, d.blocks, d.dtype)
+    blocks = {}
+    for k, b in d.blocks.items():
+        for c in product(*(range(n) if o == 1 else (i,)
+                           for o, n, i in zip(old, cshape, k[nlead:]))):
+            blocks[k[:nlead] + c] = b
+    return _sp_new(lead, cshape, trailing, blocks, d.dtype)
+
+
+def _sp_normalize(d, nlead, ndim):
+    """Make all but the trailing two axes sparse, or else densify."""
+    if not isinstance(d, BlockArray):
+        return d
+    if ndim < 2 or d.ndim != nlead + ndim:
+        return np.asarray(d)
+    return d.promote(nlead + ndim - 2)
+
+
 def _pad(d, nlead, ndim):
     """Insert singleton axes after the derivative axes of ``d``."""
+    if isinstance(d, BlockArray):
+        return _sp_pad(d, nlead, ndim)
     extra = ndim - (d.ndim - nlead)
     if extra <= 0:
         return d
@@ -60,6 +136,12 @@ def _pad(d, nlead, ndim):
 def _full(d, nlead, shape):
     """Broadcast the value part of ``d`` to ``shape`` without copying."""
     d = _pad(d, nlead, len(shape))
+    if isinstance(d, BlockArray):
+        return _sp_bcast(d,
+                         nlead,
+                         np.broadcast_shapes(d.shape[nlead:d.r],
+                                             shape[:-2]),
+                         shape[-2:])
     return np.broadcast_to(d, d.shape[:nlead]
                            + np.broadcast_shapes(d.shape[nlead:], shape))
 
@@ -67,15 +149,51 @@ def _full(d, nlead, shape):
 def _scale(c, d, nlead, ndim):
     if d is None:
         return None
+    if isinstance(d, BlockArray):
+        c = np.asarray(c)
+        if c.ndim == 0:
+            return BlockArray(d.shape,
+                              d.r,
+                              {k: c * b for k, b in d.blocks.items()},
+                              np.result_type(c, d.dtype))
+        ndim = max(ndim, c.ndim)
+        if ndim < 2:
+            return c * np.asarray(_pad(d, nlead, ndim))
+        d = _sp_pad(d, nlead, ndim)
+        c = c.reshape((1,) * (ndim - c.ndim) + c.shape)
+        d = _sp_bcast(d,
+                      nlead,
+                      np.broadcast_shapes(d.shape[nlead:d.r], c.shape[:-2]),
+                      c.shape[-2:])
+        return BlockArray(d.shape,
+                          d.r,
+                          {k: b * c[tuple(i if c.shape[j] > 1 else 0
+                                          for j, i in enumerate(k[nlead:]))]
+                           for k, b in d.blocks.items()},
+                          np.result_type(c, d.dtype))
     return c * _pad(d, nlead, ndim)
 
 
 def _add(nlead, ndim, *ds):
+    ds = [d for d in ds if d is not None]
+    if len(ds) == 0:
+        return None
+    if _sparse(*ds) and ndim >= 2:
+        ds = [_sp_pad(d, nlead, ndim) for d in ds]
+        cshape = np.broadcast_shapes(*(d.shape[nlead:d.r] for d in ds))
+        trailing = np.broadcast_shapes(*(d.shape[d.r:] for d in ds))
+        blocks = {}
+        for d in ds:
+            for k, b in _sp_bcast(d, nlead, cshape).blocks.items():
+                blocks[k] = blocks[k] + b if k in blocks else b
+        return _sp_new(ds[0].shape[:nlead],
+                       cshape,
+                       trailing,
+                       blocks,
+                       np.result_type(*(d.dtype for d in ds)))
     out = None
     for d in ds:
-        if d is None:
-            continue
-        d = _pad(d, nlead, ndim)
+        d = _pad(_dense(d), nlead, ndim)
         out = d if out is None else out + d
     return out
 
@@ -83,8 +201,25 @@ def _add(nlead, ndim, *ds):
 def _outer(da, db, ndim):
     if da is None or db is None:
         return None
-    da = _pad(da, 1, ndim)
-    db = _pad(db, 1, ndim)
+    if _sparse(da, db) and ndim >= 2:
+        da, db = _sp_pad(da, 1, ndim), _sp_pad(db, 1, ndim)
+        cshape = np.broadcast_shapes(da.shape[1:da.r], db.shape[1:db.r])
+        da, db = _sp_bcast(da, 1, cshape), _sp_bcast(db, 1, cshape)
+        # only the derivatives of the same component are multiplied
+        bycomp = defaultdict(list)
+        for k, b in da.blocks.items():
+            bycomp[k[1:]].append((k[0], b))
+        blocks = {}
+        for k, b in db.blocks.items():
+            for a, ba in bycomp.get(k[1:], ()):
+                blocks[(a, k[0]) + k[1:]] = ba * b
+        return _sp_new((da.shape[0], db.shape[0]),
+                       cshape,
+                       np.broadcast_shapes(da.shape[da.r:], db.shape[db.r:]),
+                       blocks,
+                       np.result_type(da.dtype, db.dtype))
+    da = _pad(_dense(da), 1, ndim)
+    db = _pad(_dense(db), 1, ndim)
     return da[:, None] * db[None, :]
 
 
@@ -203,7 +338,26 @@ class Dual:
         def take(d, nlead):
             if d is None:
                 return None
-            return _full(d, nlead, shape)[(slice(None),) * nlead + idx]
+            d = _full(d, nlead, shape)
+            if isinstance(d, BlockArray):
+                ints = len(idx)
+                while (ints > 0 and (idx[ints - 1] is Ellipsis
+                                     or idx[ints - 1] == slice(None))):
+                    ints -= 1
+                head = idx[:ints]
+                if (len(head) <= len(shape) - 2
+                        and all(isinstance(i, (int, np.integer))
+                                for i in head)):
+                    head = tuple(int(i) % n for i, n in zip(head, shape))
+                    m = len(head)
+                    return BlockArray(d.shape[:nlead] + d.shape[nlead + m:],
+                                      d.r - m,
+                                      {k[:nlead] + k[nlead + m:]: b
+                                       for k, b in d.blocks.items()
+                                       if k[nlead:nlead + m] == head},
+                                      d.dtype)
+                d = np.asarray(d)
+            return d[(slice(None),) * nlead + idx]
 
         ga = take(self.ga, 1)
         return Dual(self.val[idx],
@@ -471,7 +625,10 @@ def einsum(subscripts, *operands, **kwargs):
     def deriv(prefixes, outprefix, ops):
         spec = (','.join(p + s for p, s in zip(prefixes, ins))
                 + '->' + outprefix + out)
-        return np.einsum(spec, *ops, **kwargs)
+        # sparse derivatives are contracted blockwise by BlockArray
+        return _sp_normalize(np.einsum(spec, *ops, **kwargs),
+                             len(outprefix),
+                             val.ndim)
 
     n = len(operands)
     duals = [k for k in range(n) if isinstance(operands[k], Dual)]
@@ -513,17 +670,41 @@ def einsum(subscripts, *operands, **kwargs):
     return Dual(val, ga, gb, hab)
 
 
-def _linear(x, fun, nlead_fun):
-    """Apply a linear map defined on the value part of ``x``."""
+def _linear(x, fun, nlead_fun, comp_fun=None):
+    """Apply a linear map defined on the value part of ``x``.
+
+    The optional ``comp_fun`` maps the component indices of a sparse
+    derivative to the component indices of the result, or returns ``None``
+    if the map cannot be applied blockwise.
+
+    """
     shape = x.val.shape
+    newval = fun(x.val)
+    ncomp = len(shape) - 2
+    newcshape = (None if comp_fun is None or ncomp < 0
+                 else comp_fun(shape[:ncomp]))
 
     def apply(d, nlead):
         if d is None:
             return None
-        return nlead_fun(_full(d, nlead, shape), nlead)
+        d = _full(d, nlead, shape)
+        if isinstance(d, BlockArray) and newcshape is not None:
+            blocks = {}
+            for k, b in d.blocks.items():
+                c = comp_fun(k[nlead:], key=True)
+                if c is None:
+                    continue
+                key = k[:nlead] + c
+                blocks[key] = blocks[key] + b if key in blocks else b
+            return _sp_new(d.shape[:nlead],
+                           newcshape,
+                           d.shape[d.r:],
+                           blocks,
+                           d.dtype)
+        return nlead_fun(_dense(d), nlead)
 
     ga = apply(x.ga, 1)
-    return Dual(fun(x.val),
+    return Dual(newval,
                 ga,
                 ga if x.gb is x.ga else apply(x.gb, 1),
                 apply(x.hab, 2))
@@ -538,25 +719,48 @@ def _sum(x, axis=None, **kwargs):
     elif not isinstance(axis, tuple):
         axis = (axis,)
     axis = tuple(ax % ndim for ax in axis)
+
+    def comp_fun(c, key=False):
+        # summing over the components only
+        return tuple(i for j, i in enumerate(c) if j not in axis)
+
     return _linear(x,
                    lambda v: np.sum(v, axis=axis),
-                   lambda d, n: np.sum(d, axis=tuple(ax + n for ax in axis)))
+                   lambda d, n: np.sum(d, axis=tuple(ax + n for ax in axis)),
+                   comp_fun if max(axis) < ndim - 2 else None)
 
 
 def transpose(x, axes=None):
     ndim = x.val.ndim
     if axes is None:
         axes = tuple(range(ndim))[::-1]
+
+    def comp_fun(c, key=False):
+        return tuple(c[ax] for ax in axes[:ndim - 2])
+
     return _linear(x,
                    lambda v: np.transpose(v, axes),
                    lambda d, n: np.transpose(
-                       d, tuple(range(n)) + tuple(ax + n for ax in axes)))
+                       d, tuple(range(n)) + tuple(ax + n for ax in axes)),
+                   comp_fun if tuple(axes[ndim - 2:]) == (ndim - 2, ndim - 1)
+                   else None)
 
 
 def trace(x, offset=0, axis1=0, axis2=1):
+    ndim = x.val.ndim
+    axis1, axis2 = axis1 % ndim, axis2 % ndim
+
+    def comp_fun(c, key=False):
+        if key and c[axis1] != c[axis2]:
+            return None  # off-diagonal
+        return tuple(i for j, i in enumerate(c) if j not in (axis1, axis2))
+
     return _linear(x,
                    lambda v: np.trace(v, offset, axis1, axis2),
-                   lambda d, n: np.trace(d, offset, axis1 + n, axis2 + n))
+                   lambda d, n: np.trace(d, offset, axis1 + n, axis2 + n),
+                   comp_fun if (offset == 0
+                                and axis1 != axis2
+                                and max(axis1, axis2) < ndim - 2) else None)
 
 
 def stack(arrays, axis=0):
@@ -575,10 +779,29 @@ def stack(arrays, axis=0):
         if all(d is None for d in ds):
             return None
         lead = next(d for d in ds if d is not None).shape[:nlead]
+        if _sparse(*ds) and axis <= len(shape) - 2:
+            # the new axis is a component axis
+            blocks = {}
+            trailing = shape[-2:]
+            for p, x in enumerate(arrays):
+                d = getattr(x, attr) if isinstance(x, Dual) else None
+                if d is None:
+                    continue
+                d = _full(d, nlead, shape)
+                trailing = np.broadcast_shapes(trailing, d.shape[d.r:])
+                for k, b in d.blocks.items():
+                    blocks[k[:nlead + axis] + (p,) + k[nlead + axis:]] = b
+            return _sp_new(lead,
+                           shape[:axis] + (len(arrays),) + shape[axis:-2],
+                           trailing,
+                           blocks,
+                           np.result_type(*(d.dtype for d in ds
+                                            if d is not None)))
+        ds = [_dense(d) for d in ds]
         zero = np.zeros(lead + shape)
         out = []
         for x in arrays:
-            d = getattr(x, attr) if isinstance(x, Dual) else None
+            d = _dense(getattr(x, attr)) if isinstance(x, Dual) else None
             out.append(zero if d is None else
                        np.broadcast_to(_pad(d, nlead, len(shape)),
                                        lead + shape))

@@ -6,12 +6,13 @@ from numpy.testing import (assert_array_almost_equal,
 
 from skfem import (Basis, FacetBasis, MeshTri, MeshQuad, MeshTet, MeshLine,
                    ElementTriP1, ElementTriP2, ElementQuad1, ElementTetP1,
-                   ElementVector, solve, condense, enforce, bmat)
+                   ElementTetP2, ElementVector, solve, condense, enforce,
+                   bmat)
 from skfem.autodiff import NonlinearForm
 import skfem.autodiff.helpers as ngh
 from skfem.autodiff.helpers import (grad, dot, ddot, mul, div, sym_grad,
                                     transpose, eye, trace, det, inv,
-                                    cross, prod, identity, inner)
+                                    cross, prod, identity, inner, stack)
 
 
 def test_linear_poisson():
@@ -190,4 +191,88 @@ def test_mixed_finite_difference():
                 - div(u) * q - div(v) * p ** 3)
 
     x = .1 * np.random.RandomState(0).rand(basis.N)
+    _fd_check(form, basis, x)
+
+
+def _sparse_dual(shape, K, offset, nq=(2, 3), hessian=True, seed=0):
+    """A field with sparse seed derivatives, and the same with dense."""
+    from skfem.autodiff.dual import Dual
+    from skfem.element.block_array import BlockArray
+    rng = np.random.RandomState(seed)
+    val = rng.rand(*(shape + nq))
+    ga = BlockArray((K,) + shape + (1, 1),
+                    1 + len(shape),
+                    {(offset + j,) + ix: np.ones((1, 1))
+                     for j, ix in enumerate(np.ndindex(*shape))})
+    sparse = Dual(val, ga=ga, gb=ga if hessian else None)
+    dense = Dual(val,
+                 ga=np.asarray(ga),
+                 gb=np.asarray(ga) if hessian else None)
+    return sparse, dense
+
+
+@pytest.mark.parametrize("expr", [
+    lambda u, G: ddot(G, G) * dot(u, u),
+    lambda u, G: trace(mul(transpose(G), G)) ** 2,
+    lambda u, G: det(G + identity(G)),
+    lambda u, G: np.sum(inv(G + 3. * identity(G)), axis=(0, 1)),
+    lambda u, G: np.sum(G * G, axis=0)[1] * u[2],
+    lambda u, G: dot(cross(u, G[:, 0]), u),
+    lambda u, G: dot(mul(G, u), u) / (1. + dot(u, u)),
+    lambda u, G: ddot(sym_grad_like(G), prod(u, u)),
+    lambda u, G: np.sum(stack([u[0] * G[1, 1], u[2], 2. * u[1]], axis=0)
+                        * u, axis=0),
+    lambda u, G: np.where(u[0] > .5, u[0] ** 3, np.exp(u[1])) * G[0, 2],
+    lambda u, G: np.maximum(trace(G), 1.) * np.sqrt(1. + dot(u, u)),
+    lambda u, G: np.trace(G, axis1=0, axis2=1) * u[0],
+    lambda u, G: ddot(G.T.T, eye(u[0], 3)) * u[1],  # full transpose
+    lambda u, G: np.sum(G[0:2, 1] * u[:2], axis=0),  # slicing
+    lambda u, G: np.einsum('i...,i...', u, u) * np.einsum('ii...', G),
+])
+def test_sparse_dual_matches_dense(expr):
+    """Sparse seed derivatives give the same result as dense ones."""
+    from skfem.element.block_array import BlockArray
+    K = 12
+    u, ud = _sparse_dual((3,), K, 0, seed=0)
+    G, Gd = _sparse_dual((3, 3), K, 3, seed=1)
+    out, ref = expr(u, G), expr(ud, Gd)
+    assert_allclose(out.val, ref.val)
+    for attr in ('ga', 'gb', 'hab'):
+        d, r = getattr(out, attr), getattr(ref, attr)
+        assert (d is None) == (r is None)
+        if d is not None:
+            assert_allclose(np.broadcast_to(np.asarray(d), r.shape), r,
+                            atol=1e-13)
+    assert isinstance(out.hab, (BlockArray, np.ndarray))
+
+
+def sym_grad_like(G):
+    return .5 * (G + transpose(G))
+
+
+def test_sparse_dual_stays_sparse():
+    from skfem.element.block_array import BlockArray
+    K = 12
+    u, _ = _sparse_dual((3,), K, 0)
+    G, _ = _sparse_dual((3, 3), K, 3)
+    F = G + identity(G)
+    E = .5 * (mul(transpose(F), F) - identity(G))
+    W = ddot(E, E) + trace(E) ** 2 + dot(u, u)
+    assert isinstance(E.hab, BlockArray)
+    assert isinstance(W.hab, BlockArray)
+    # the energy depends on u and grad(u) but has no mixed derivatives
+    assert len(W.hab.blocks) == 9 * 9 + 3
+
+
+def test_vector_p2_finite_difference():
+    basis = Basis(MeshTet(), ElementVector(ElementTetP2()))
+
+    def form(u, v, w):
+        G = grad(u)
+        return (ddot(G + G.T.T, grad(v)) * (1. + np.sum(G * G, axis=(0, 1)))
+                + dot(stack([u[1] * u[2], u[0], np.exp(u[2])]), v)
+                + np.where(u[0] > .03, u[0], 0.) * np.einsum('ii...', G)
+                * v[1])
+
+    x = .05 * np.random.RandomState(0).rand(basis.N)
     _fd_check(form, basis, x)

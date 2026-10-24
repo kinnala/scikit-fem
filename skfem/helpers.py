@@ -4,6 +4,7 @@ from typing import Union, Optional
 import numpy as np
 from numpy import ndarray, zeros_like
 from skfem.element import DiscreteField
+from skfem.element.block_array import BlockArray
 from skfem.assembly.form.form import FormExtraParams
 
 
@@ -146,8 +147,14 @@ def transpose(T):
 
 def eye(w, n):
     """Create diagonal matrix with w on diagonal."""
-    return np.array([[w if i == j else 0. * w for i in range(n)]
-                     for j in range(n)])
+    if isinstance(w, BlockArray) and len(w.blocks) == 0:
+        return BlockArray.zeros((n, n) + w.shape, w.dtype)
+    w = np.asarray(w)
+    # off-diagonal zeros are not stored
+    return BlockArray((n, n) + w.shape,
+                      2,
+                      {(i, i): w for i in range(n)},
+                      w.dtype)
 
 
 def identity(w, N=None):

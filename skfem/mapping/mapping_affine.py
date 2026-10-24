@@ -208,7 +208,9 @@ class MappingAffine(Mapping):
         else:
             detDF = self.detA[tind]
 
-        return np.tile(detDF, (X.shape[-1], 1)).T
+        # read-only views: the affine mapping is constant in each element
+        return np.broadcast_to(detDF[:, None],
+                               detDF.shape + (X.shape[-1],))
 
     def DF(self, X, tind=None):
         if tind is None or self.tind is not None:
@@ -216,10 +218,9 @@ class MappingAffine(Mapping):
         else:
             DF = self.A[:, :, tind]
 
-        if len(X.shape) == 2:
-            return np.einsum('ijk,l->ijkl', DF, 1 + np.zeros_like(X[0]))
-        elif len(X.shape) == 3:
-            return np.einsum('ijk,kl->ijkl', DF, 1 + np.zeros_like(X[0]))
+        if len(X.shape) in (2, 3):
+            return np.broadcast_to(DF[..., None],
+                                   DF.shape + (X.shape[-1],))
         raise NotImplementedError
 
     def invDF(self, X, tind=None):
@@ -228,8 +229,8 @@ class MappingAffine(Mapping):
         else:
             invDF = self.invA[:, :, tind]
 
-        ones = np.ones(X.shape[-1])
-        return np.einsum('ijk,l->ijkl', invDF, ones)
+        return np.broadcast_to(invDF[..., None],
+                               invDF.shape + (X.shape[-1],))
 
     def G(self, X, find=None):
         if find is None:
