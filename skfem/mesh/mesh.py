@@ -1286,6 +1286,8 @@ class Mesh:
             behavior based on the type of this parameter.
 
         """
+        if isinstance(nodes, int):
+            return np.array([nodes])
         if isinstance(nodes, tuple):
             return self.normalize_nodes(
                 lambda x: np.linalg.norm(x - np.array(list(nodes))[:, None],
