@@ -1,6 +1,6 @@
 numpy
 scipy
-meshio
+meshio[all]
 matplotlib
 ipython
 pytest
