@@ -1,6 +1,6 @@
 import numpy as np
 from .element import Element
-from .discrete_field import DiscreteField
+from .block_array import BlockArray, BlockDiscreteField
 
 
 class ElementVector(Element):
@@ -34,15 +34,27 @@ class ElementVector(Element):
         return self._dim
 
     def gbasis(self, mapping, X, i, tind=None):
-        """Set correct components to zero based on ``i``."""
-        ind = int(np.floor(float(i) / float(self.dim)))
-        n = i - self.dim * ind
+        """Place the scalar basis function to the correct component.
+
+        Only the nonzero component is stored, see
+        :class:`~skfem.element.block_array.BlockArray`.
+
+        """
+        ind, n = divmod(int(i), self.dim)
         fields = []
         for field in self.elem.gbasis(mapping, X, ind, tind)[0].astuple:
             if field is None:
                 fields.append(None)
+            elif isinstance(field, BlockArray):  # nested ElementVector
+                fields.append(BlockArray((self.dim,) + field.shape,
+                                         field.r + 1,
+                                         {(n,) + k: b
+                                          for k, b in field.blocks.items()},
+                                         field.dtype))
             else:
-                tmp = np.zeros((self.dim,) + field.shape)
-                tmp[n] = field
-                fields.append(tmp)
-        return (DiscreteField(*fields),)
+                field = np.asarray(field)
+                fields.append(BlockArray((self.dim,) + field.shape,
+                                         1,
+                                         {(n,): field},
+                                         field.dtype))
+        return (BlockDiscreteField(*fields),)

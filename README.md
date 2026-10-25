@@ -43,7 +43,6 @@ pip install scikit-fem[all]
 Remove `[all]` to not install the optional dependencies `meshio` for mesh
 input/output, and `matplotlib` for creating simple visualizations.
 The minimal dependencies are `numpy` and `scipy`.
-Some submodules require other optional dependencies: `skfem.autodiff` requires `jax` and `jaxlib`, `skfem.supermeshing` requires `shapely`.
 You can also try the library in browser through [Pyodide](https://kinnala.github.io/skfem-demo/).
 
 ## Examples
@@ -234,6 +233,7 @@ with respect to documented and/or tested features.
 - Added: `Mesh.save_npy/load_npy` with better performance for larger meshes (in comparison to `Mesh.save/load`)
 - Added: `Basis.interpolate_multiple` for a simultaneous interpolation of multiple solution vectors
 - Changed: `skfem.autodiff` now uses built-in forward-mode dual number automatic differentiation without the JAX dependency
+- Changed: `ElementVector` and `ElementComposite` have been optimized via the introduction of `BlockArray` and `BlockDiscreteField` that avoid storing explicitly the zeros associated with nonactive basis functions
 - Changed: Accessing `Mesh.subdomains` or `Mesh.boundaries` with nonexisting key/tag will now raise `TagKeyError`
 - Removed: Obsolete projection functions `skfem.utils.project` and `skfem.utils.projection` that have been replaced by `Basis.project`
 - Removed: Dysfunctional visualization package `skfem.visuals.glvis`
