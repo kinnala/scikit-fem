@@ -445,3 +445,11 @@ class TestEx56(TestCase):
         self.assertGreater(ex.lopsided, 3.)
         self.assertLess(ex.blocked, 0.1)
         self.assertGreater(ex.routed, 2.)
+
+
+class TestEx57(TestCase):
+
+    def runTest(self):
+        import docs.examples.ex57 as ex
+
+        self.assertAlmostEqual(0, np.sum((ex.forces - ex.ref) ** 2))

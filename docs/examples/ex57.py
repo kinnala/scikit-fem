@@ -1,15 +1,15 @@
-"""Statically indeterminate truss."""
+"""Truss elements."""
 
 import numpy as np
 from skfem import *
 from skfem.helpers import *
 
 
-m = MeshLine(np.array([[0, 0],
-                       [4, 0],
-                       [8, 0],
-                       [0, 4],
-                       [4, 4]]).T,
+m = MeshLine(np.array([[0., 0.],
+                       [.5, 0.],
+                       [1., 0.],
+                       [0., .5],
+                       [.5, .5]]).T,
              np.array([[0, 1],
                        [1, 2],
                        [0, 4],
@@ -28,8 +28,8 @@ def truss(u, v, w):
 K = truss.assemble(basis)
 F = basis.zeros()
 
-# apply downwards force -60 kN to node nr 2
-F[basis.get_dofs(nodes=[2]).all('u^2')] = -60
+# apply downwards force -6 kN to node nr 2
+F[basis.get_dofs(nodes=[2]).all('u^2')] = -6000
 
 # fix nodes 0 and 3
 D = basis.get_dofs(nodes=[0, 3]).all()
@@ -44,5 +44,11 @@ def axial(w):
     return dot(dot(grad(w.u), w.t), w.t)
 
 
-print(axial.elemental(basis, u=u) / basis.mesh_parameters()[:, 0])
+forces = np.round(axial.elemental(basis, u=u)
+                  / basis.mesh_parameters()[:, 0]
+                  / 1000, decimals=2)
+ref = np.array([-8.65, -6.00, -4.73, 3.75, 8.49, -2.65, 9.35])
+
+print("Calculated forces [kN]: {}".format(forces))
+print("Reference forces [kN]: {}".format(ref))
 
