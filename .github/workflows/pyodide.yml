@@ -1,0 +1,40 @@
+name: tests-pyodide
+
+on:
+  pull_request:
+  push:
+    branches: master
+
+env:
+  # The host Python version must match the Python bundled with Pyodide
+  # (Pyodide 0.29.x ships Python 3.13, Pyodide 314.x ships Python 3.14).
+  PYTHON_VERSION: '3.13'
+  PYODIDE_VERSION: '0.29.5'
+
+jobs:
+  build-pyodide:
+
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22
+    - name: Set up Pyodide virtual environment
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyodide-build
+        pyodide xbuildenv install ${{ env.PYODIDE_VERSION }}
+        pyodide venv .venv-pyodide
+    - name: Install dependencies
+      run: |
+        source .venv-pyodide/bin/activate
+        pip install . pytest matplotlib meshio
+    - name: Run pytest
+      run: |
+        source .venv-pyodide/bin/activate
+        python -c "import sys; assert sys.platform == 'emscripten', sys.platform"
+        pytest -k "not test_mamba"
