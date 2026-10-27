@@ -216,6 +216,16 @@ class MeshTri1(MeshSimplex, Mesh2D):
             Number of refinements, by default 3.
 
         """
+        from .mesh_tet_1 import MeshTet1 as MeshTet
+
+        m = MeshTet.init_tensor(*(3 * [np.linspace(-1, 1, 3)]))
+        f = m.facets[:, m.boundary_facets()]
+        ix, t = np.unique(f, return_inverse=True)
+        m = cls(m.p[:, ix], t.reshape(f.shape))
+        for _ in range(nrefs):
+            m = m.refined()
+            m = cls(m.p / np.linalg.norm(m.p, axis=0), m.t)
+        return m
 
     def _uniform(self):
 

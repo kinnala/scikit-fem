@@ -28,7 +28,7 @@ class MappingManifold(MappingIsoparametric):
     def __init__(self, mesh, elem, bndelem=None):
         super().__init__(mesh, elem, bndelem)
         self.dim = mesh.dim()  # topological dimension, d
-        self.gdim = mesh.doflocs.shape[0]  # geometric dimension, D
+        self.gdim = mesh.gdim()  # geometric dimension, D
 
     def _jacobian(self, X, tind=None):
         return np.array([[self.J(i, j, X, tind=tind)

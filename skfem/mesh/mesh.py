@@ -196,6 +196,9 @@ class Mesh:
     def dim(self):
         return self.elem.refdom.dim()
 
+    def gdim(self):
+        return self.doflocs.shape[0]
+
     def boundary_facets(self) -> ndarray:
         """Return an array of boundary facet indices."""
         return np.nonzero(self.f2t[1] == -1)[0].astype(np.int32)
@@ -742,6 +745,9 @@ class Mesh:
                         list(self.boundaries.keys()))
                 )
             )
+        if self.dim() != self.gdim():
+            rep += "\n  Topological dimension: {}".format(self.dim())
+            rep += "\n  Geometric dimension: {}".format(self.gdim())
         return rep
 
     def __str__(self):

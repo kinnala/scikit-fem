@@ -15,17 +15,6 @@ def area(w):
     return 1. + 0. * w.x[0]
 
 
-def init_sphere(nrefs):
-    m = MeshTet.init_tensor(*(3 * [np.linspace(-1, 1, 3)]))
-    f = m.facets[:, m.boundary_facets()]
-    ix, t = np.unique(f, return_inverse=True)
-    m = MeshTri(m.p[:, ix], t.reshape(f.shape))
-    for _ in range(nrefs):
-        m = m.refined()
-        m = MeshTri(m.p / np.linalg.norm(m.p, axis=0), m.t)
-    return m
-
-
 def test_default_mapping():
     m = MeshTri(np.array([[0., 1., 0.],
                           [0., 0., 1.],
@@ -77,7 +66,7 @@ def test_laplace_beltrami():
     """-Δu + u = 3x on unit sphere has the solution u = x."""
     errs = []
     for nrefs in [2, 3]:
-        m = MeshTri2.from_mesh(init_sphere(nrefs))
+        m = MeshTri2.from_mesh(MeshTri.init_sphere(nrefs))
         m = MeshTri2(m.doflocs / np.linalg.norm(m.doflocs, axis=0), m.t)
         b = Basis(m, ElementTriP2())
         A = BilinearForm(
@@ -94,7 +83,7 @@ def test_laplace_beltrami():
 
 
 def test_sphere_normals():
-    b = Basis(init_sphere(2), ElementTriP1())
+    b = Basis(MeshTri.init_sphere(2), ElementTriP1())
     n = np.asarray(b.default_parameters()['n'])
     assert_allclose(np.linalg.norm(n, axis=0), 1.)
     x = np.asarray(b.default_parameters()['x'])
