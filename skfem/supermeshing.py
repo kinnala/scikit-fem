@@ -368,9 +368,12 @@ def _tetrahedron_intersection(A, B):
 
 
 def _intersect3d(p1, t1, p2, t2, chunksize=2000):
-    """Three-dimensional supermesh of tetrahedral meshes using a vectorized
-    octree search and convex polyhedron
-    intersection."""
+    """Three-dimensional supermesh of tetrahedral meshes.
+
+    Uses a vectorized octree search and convex polyhedron
+    intersection.
+
+    """
     i1, i2 = _candidate_pairs(p1, t1, p2, t2)
     tets, ix = [], []
     for s in _chunks(len(i1), chunksize):
