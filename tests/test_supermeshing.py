@@ -7,7 +7,7 @@ from skfem.supermeshing import intersect
 
 def _volumes(m):
     dim = m.p.shape[0]
-    return (np.abs(m._mapping().detDF(np.zeros((dim, 1)))[:, 0])
+    return (np.abs(m.mapping().detDF(np.zeros((dim, 1)))[:, 0])
             / (2 if dim == 2 else 6))
 
 
