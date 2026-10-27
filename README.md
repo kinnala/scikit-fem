@@ -231,6 +231,8 @@ with respect to documented and/or tested features.
 
 - Added: `Mesh.save_npy/load_npy` with better performance for larger meshes (in comparison to `Mesh.save/load`)
 - Added: `Basis.interpolate_multiple` for a simultaneous interpolation of multiple solution vectors
+- Added: `MappingManifold` for assembling forms over embedded paths or surfaces (see new example ex57.py)
+- Changed: `Mesh` constructors now accept vertex arrays with higher geometric than topological dimension (these are compatible with `MappingManifold`)
 - Changed: `skfem.autodiff` now uses built-in forward-mode dual number automatic differentiation without the JAX dependency
 - Changed: `ElementVector` and `ElementComposite` have been optimized via the introduction of `BlockArray` and `BlockDiscreteField` that avoid storing explicitly the zeros associated with nonactive basis functions
 - Changed: Accessing `Mesh.subdomains` or `Mesh.boundaries` with nonexisting key/tag will now raise `TagKeyError`
