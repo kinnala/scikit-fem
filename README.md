@@ -9,7 +9,6 @@ assembly](https://en.wikipedia.org/wiki/Finite_element_method). Its main
 purpose is the transformation of bilinear forms into sparse matrices and linear
 forms into vectors.
 
-<a href="https://scikit-fem.readthedocs.io/" alt="Documentation"><img src="https://app.readthedocs.org/projects/scikit-fem/badge/?version=latest" /></a>
 <a href="https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e" alt="status"><img src="https://joss.theoj.org/papers/4120aba1525403e6d0972f4270d7b61e/status.svg" /></a>
 <a href="https://pypi.org/project/scikit-fem/" alt="PyPI"><img src="https://img.shields.io/pypi/v/scikit-fem" /></a>
 
