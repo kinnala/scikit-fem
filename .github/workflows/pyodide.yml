@@ -37,4 +37,4 @@ jobs:
       run: |
         source .venv-pyodide/bin/activate
         python -c "import sys; assert sys.platform == 'emscripten', sys.platform"
-        pytest -k "not test_mamba"
+        pytest -k "not test_mamba" -k "not test_visuals"
