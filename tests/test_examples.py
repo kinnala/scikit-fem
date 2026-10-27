@@ -407,7 +407,8 @@ class TestEx49(TestCase):
 
     def runTest(self):
         import docs.examples.ex49 as ex49
-        self.assertLess(np.abs(ex49.l2), 0.0012)
+        self.assertLess(np.abs(ex49.L2s[0]), 0.0006)
+        self.assertLess(np.abs(ex49.L2s[1]), 0.003)
 
 
 class TestEx50(TestCase):

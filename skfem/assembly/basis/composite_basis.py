@@ -76,7 +76,8 @@ class CompositeBasis(AbstractBasis):
                         if k == i:
                             tmp.append(self.bases[i].basis[j][0])
                         else:
-                            tmp.append(self.bases[i].basis[j][0].zeros())
+                            # zeros with the shape of the k'th field
+                            tmp.append(self.bases[k].basis[0][0].zeros())
                     bases.append(tuple(tmp))
 
             self._basis = bases
@@ -102,6 +103,8 @@ class CompositeBasis(AbstractBasis):
         return Nbfun
 
     def split(self, x):
+        if self.equal_dofnum:
+            return [(x, basis) for basis in self.bases]
         return list(zip(
             np.split(x, np.cumsum([basis.N
                                    for basis in self.bases])[:-1]),
@@ -116,14 +119,7 @@ class CompositeBasis(AbstractBasis):
         return rep
 
     def interpolate(self, x):
-
-        # find slice indices
-        ixs = [0]
-        for basis in self.bases:
-            ixs.append(basis.N + ixs[-1])
-
-        return tuple(basis.interpolate(x[ixs[itr]:ixs[itr + 1]])
-                     for itr, basis in enumerate(self.bases))
+        return tuple(basis.interpolate(y) for y, basis in self.split(x))
 
     def get_dofs(self, *args, **kwargs):
         raise NotImplementedError
