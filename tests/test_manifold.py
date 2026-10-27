@@ -66,8 +66,7 @@ def test_laplace_beltrami():
     """-Δu + u = 3x on unit sphere has the solution u = x."""
     errs = []
     for nrefs in [2, 3]:
-        m = MeshTri2.from_mesh(MeshTri.init_sphere(nrefs))
-        m = MeshTri2(m.doflocs / np.linalg.norm(m.doflocs, axis=0), m.t)
+        m = MeshTri2.init_sphere(nrefs)
         b = Basis(m, ElementTriP2())
         A = BilinearForm(
             lambda u, v, w: dot(grad(u), grad(v)) + u * v
