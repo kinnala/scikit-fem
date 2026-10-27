@@ -448,7 +448,7 @@ class Mesh:
             facets = np.intersect1d(facets, self.boundary_facets())
         if normal is not None:
             tind = self.f2t[0, facets]
-            mapping = self._mapping()
+            mapping = self.mapping()
             normals = mapping.normals(np.zeros((self.dim(), 1)),
                                       tind,
                                       facets,
@@ -844,7 +844,7 @@ class Mesh:
         """
         from skfem.assembly import Dofs
 
-        mapping = mesh._mapping()
+        mapping = mesh.mapping()
         nelem = cls.elem
         dofs = Dofs(mesh, nelem())
         locs = mapping.F(nelem.doflocs.T)
@@ -1057,7 +1057,7 @@ class Mesh:
         cls = type(self)
         m = cls.init_refdom().refined(nrefs)
         X = m.p
-        x = self._mapping().F(m.p)
+        x = self.mapping().F(m.p)
 
         # create connectivity for the new mesh
         nt = self.nelements

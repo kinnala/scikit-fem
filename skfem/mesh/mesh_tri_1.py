@@ -206,6 +206,17 @@ class MeshTri1(MeshSimplex, Mesh2D):
             m = replace(m, doflocs=tmp)
         return m
 
+    @classmethod
+    def init_sphere(cls: Type, nrefs: int = 3):
+        """Initialize a sphere triangle mesh embedded into 3D.
+
+        Parameters
+        ----------
+        nrefs
+            Number of refinements, by default 3.
+
+        """
+
     def _uniform(self):
 
         p = self.doflocs
@@ -447,7 +458,7 @@ class MeshTri1(MeshSimplex, Mesh2D):
     def element_finder(self, mapping=None):
 
         if mapping is None:
-            mapping = self._mapping()
+            mapping = self.mapping()
 
         if not hasattr(self, '_cached_tree'):
             from scipy.spatial import cKDTree
