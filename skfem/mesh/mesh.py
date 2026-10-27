@@ -196,6 +196,9 @@ class Mesh:
     def dim(self):
         return self.elem.refdom.dim()
 
+    def gdim(self):
+        return self.doflocs.shape[0]
+
     def boundary_facets(self) -> ndarray:
         """Return an array of boundary facet indices."""
         return np.nonzero(self.f2t[1] == -1)[0].astype(np.int32)
@@ -448,7 +451,7 @@ class Mesh:
             facets = np.intersect1d(facets, self.boundary_facets())
         if normal is not None:
             tind = self.f2t[0, facets]
-            mapping = self._mapping()
+            mapping = self.mapping()
             normals = mapping.normals(np.zeros((self.dim(), 1)),
                                       tind,
                                       facets,
@@ -513,9 +516,16 @@ class Mesh:
         return vertices, edges
 
     def _mapping(self):
-        from skfem.mapping import MappingAffine, MappingIsoparametric
+        from skfem.mapping import (MappingAffine, MappingIsoparametric,
+                                   MappingManifold)
         if not hasattr(self, '_cached_mapping'):
-            if self.affine:
+            if self.doflocs.shape[0] > self.dim():
+                self._cached_mapping = MappingManifold(
+                    self,
+                    self.elem(),
+                    self.bndelem,
+                )
+            elif self.affine:
                 self._cached_mapping = MappingAffine(self)
             else:
                 self._cached_mapping = MappingIsoparametric(
@@ -735,6 +745,9 @@ class Mesh:
                         list(self.boundaries.keys()))
                 )
             )
+        if self.dim() != self.gdim():
+            rep += "\n  Topological dimension: {}".format(self.dim())
+            rep += "\n  Geometric dimension: {}".format(self.gdim())
         return rep
 
     def __str__(self):
@@ -837,7 +850,7 @@ class Mesh:
         """
         from skfem.assembly import Dofs
 
-        mapping = mesh._mapping()
+        mapping = mesh.mapping()
         nelem = cls.elem
         dofs = Dofs(mesh, nelem())
         locs = mapping.F(nelem.doflocs.T)
@@ -1050,7 +1063,7 @@ class Mesh:
         cls = type(self)
         m = cls.init_refdom().refined(nrefs)
         X = m.p
-        x = self._mapping().F(m.p)
+        x = self.mapping().F(m.p)
 
         # create connectivity for the new mesh
         nt = self.nelements
@@ -1279,6 +1292,8 @@ class Mesh:
             behavior based on the type of this parameter.
 
         """
+        if isinstance(nodes, int):
+            return np.array([nodes])
         if isinstance(nodes, tuple):
             return self.normalize_nodes(
                 lambda x: np.linalg.norm(x - np.array(list(nodes))[:, None],

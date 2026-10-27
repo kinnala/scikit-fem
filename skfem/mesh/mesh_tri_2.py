@@ -38,6 +38,11 @@ class MeshTri2(Mesh2D2, MeshTri1):
         doflocs[:, D] /= np.linalg.norm(doflocs[:, D], axis=0)
         return replace(M, doflocs=doflocs)
 
+    @classmethod
+    def init_sphere(cls: Type, nrefs: int = 3):
+        m = cls.from_mesh(MeshTri1.init_sphere(nrefs=nrefs))
+        return cls(m.doflocs / np.linalg.norm(m.doflocs, axis=0), m.t)
+
     def _uniform(self):
         return MeshTri2.from_mesh(MeshTri1.from_mesh(self).refined())
 

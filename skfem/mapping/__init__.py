@@ -8,3 +8,4 @@ so normally the user is not required to initialize these classes.
 from .mapping import Mapping  # noqa
 from .mapping_affine import MappingAffine  # noqa
 from .mapping_isoparametric import MappingIsoparametric  # noqa
+from .mapping_manifold import MappingManifold  # noqa

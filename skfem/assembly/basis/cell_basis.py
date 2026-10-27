@@ -4,7 +4,7 @@ from typing import Callable, Optional, Tuple, Any
 import numpy as np
 from numpy import ndarray
 from skfem.element import DiscreteField, Element
-from skfem.mapping import Mapping
+from skfem.mapping import Mapping, MappingManifold
 from skfem.mesh import Mesh
 from skfem.generic_utils import Removed
 
@@ -120,8 +120,17 @@ class CellBasis(AbstractBasis):
 
     def default_parameters(self):
         """Return default parameters for `~skfem.assembly.asm`."""
-        return {'x': self.global_coordinates(),
-                'h': self.mesh_parameters()}
+        params = {'x': self.global_coordinates(),
+                  'h': self.mesh_parameters()}
+        if isinstance(self.mapping, MappingManifold):
+            # embedded curves and surfaces
+            if self.mesh.dim() == 1:
+                params['t'] = DiscreteField(
+                    self.mapping.tangents(self.X, tind=self.tind))
+            if self.mapping.gdim - self.mesh.dim() == 1:
+                params['n'] = DiscreteField(
+                    self.mapping.cell_normals(self.X, tind=self.tind))
+        return params
 
     def global_coordinates(self) -> DiscreteField:
         if self._global_coordinates is None:

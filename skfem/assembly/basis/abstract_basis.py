@@ -55,7 +55,7 @@ class AbstractBasis:
         if mesh.refdom != elem.refdom:
             raise ValueError("Incompatible Mesh and Element.")
 
-        self.mapping = mesh._mapping() if mapping is None else mapping
+        self.mapping = mesh.mapping() if mapping is None else mapping
         self.dofs = Dofs(mesh, elem) if dofs is None else dofs
 
         # global degree-of-freedom location

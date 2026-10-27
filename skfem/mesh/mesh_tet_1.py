@@ -46,7 +46,7 @@ class MeshTet1(MeshSimplex, Mesh3D):
     def element_finder(self, mapping=None):
 
         if mapping is None:
-            mapping = self._mapping()
+            mapping = self.mapping()
 
         if not hasattr(self, '_cached_tree'):
             from scipy.spatial import cKDTree

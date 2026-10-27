@@ -667,7 +667,7 @@ def test_periodic_failure():
 def test_init_refdom(mtype):
 
     m = mtype.init_refdom()
-    mapping = m._mapping()
+    mapping = m.mapping()
     x = mapping.F(m.p)[:, 0, :]
     assert_array_equal(x, m.p)
 

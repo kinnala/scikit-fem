@@ -8,7 +8,7 @@ class MeshSimplex:
 
     def orientation(self):
         """Return the sign of the Jacobian determinant for each element."""
-        mapping = self._mapping()
+        mapping = self.mapping()
         return (np.sign(mapping.detDF(np.zeros(self.p.shape[0])[:, None]))
                 .flatten()
                 .astype(np.int32))
