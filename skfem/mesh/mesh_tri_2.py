@@ -40,7 +40,7 @@ class MeshTri2(Mesh2D2, MeshTri1):
 
     @classmethod
     def init_sphere(cls: Type, nrefs: int = 3):
-        m = MeshTri1.init_sphere(nrefs=nrefs)
+        m = cls.from_mesh(MeshTri1.init_sphere(nrefs=nrefs))
         return cls(m.doflocs / np.linalg.norm(m.doflocs, axis=0), m.t)
 
     def _uniform(self):
