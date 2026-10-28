@@ -229,6 +229,7 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+- Added: The library is now tested against Pyodide (a port of CPython to WebAssembly)
 - Added: `Mesh.save_npy/load_npy` with better performance for larger meshes (in comparison to `Mesh.save/load`)
 - Added: `Basis.interpolate_multiple` for a simultaneous interpolation of multiple solution vectors
 - Added: `MappingManifold` for assembling forms over embedded paths or surfaces (see new example ex57.py)
