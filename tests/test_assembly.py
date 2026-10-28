@@ -1,3 +1,4 @@
+import sys
 from unittest import TestCase, main
 
 import pytest
@@ -47,11 +48,14 @@ class IntegrateOneOverBoundaryQ1(TestCase):
         B = asm(uv, self.fbasis)
 
         # assemble the same matrix using multiple threads
-        @BilinearForm(nthreads=2)
-        def uvt(u, v, w):
-            return u * v
+        if sys.platform != "emscripten":  # no threads in Pyodide
+            @BilinearForm(nthreads=2)
+            def uvt(u, v, w):
+                return u * v
 
-        Bt = asm(uvt, self.fbasis)
+            Bt = asm(uvt, self.fbasis)
+        else:
+            Bt = B
 
         @LinearForm
         def gv(v, w):
@@ -471,6 +475,8 @@ class TestComplexValuedAssembly(TestCase):
         self.assertAlmostEqual(np.dot(ones, f), 1j * self.interior_area)
 
 
+@pytest.mark.skipif(sys.platform == "emscripten",
+                    reason="threads are not available in Pyodide")
 class TestThreadedAssembly(TestCase):
 
     def runTest(self):
