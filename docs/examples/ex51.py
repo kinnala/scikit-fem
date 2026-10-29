@@ -72,7 +72,7 @@ for itr in range(40):
         basis1.get_dofs({'left', 'right'}).all(),
         basis2.get_dofs({'left', 'right'}).all() + basis1.N,
     ))))
-    x += 0.95 * dx  # regularization
+    x += dx
     print(np.linalg.norm(dx))
     if np.linalg.norm(dx) < 1e-8:
         break
