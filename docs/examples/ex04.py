@@ -8,7 +8,7 @@ They are useful also when solving variational inequalities such as
 
 import numpy as np
 from skfem import *
-from skfem.supermeshing import intersect, elementwise_quadrature
+from skfem.supermeshing import mortar_quadrature
 from skfem.models.elasticity import (linear_elasticity, lame_parameters,
                                      linear_stress)
 from skfem.helpers import dot, sym_grad, jump, mul
@@ -31,22 +31,14 @@ m2 = (
 e1 = ElementVector(ElementTriP2())
 e2 = ElementVector(ElementQuad2())
 
-# create trace meshes and project
-m1t, orig1 = m1.trace('contact', mtype=MeshLine, project=lambda p: p[1:])
-m2t, orig2 = m2.trace('contact', mtype=MeshLine, project=lambda p: p[1:])
+basis1, basis2 = Basis(m1, e1), Basis(m2, e2)
 
-# create a supermesh for integration
-m12, t1, t2 = intersect(m1t, m2t)
+# mortaring
+qw1, find1, qw2, find2 = mortar_quadrature(m1, 'contact',
+                                           m2, 'contact', 0.1, slave=2)
 
-basis1 = Basis(m1, e1)
-basis2 = Basis(m2, e2)
-
-fbasis1 = FacetBasis(m1, e1,
-                     quadrature=elementwise_quadrature(m1t, m12, t1),
-                     facets=orig1[t1])
-fbasis2 = FacetBasis(m2, e2,
-                     quadrature=elementwise_quadrature(m2t, m12, t2),
-                     facets=orig2[t2])
+fbasis1 = FacetBasis(m1, e1, quadrature=qw1, facets=find1)
+fbasis2 = FacetBasis(m2, e2, quadrature=qw2, facets=find2)
 fbasis = fbasis1 * fbasis2
 
 # problem definition
