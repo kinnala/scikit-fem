@@ -2,7 +2,7 @@
 from skfem import *
 from skfem.autodiff import *
 from skfem.autodiff.helpers import *
-from skfem.supermeshing import intersect, elementwise_quadrature
+from skfem.supermeshing import mortar_quadrature
 import numpy as np
 
 
@@ -49,20 +49,11 @@ m2defo = m2.copy()
 for itr in range(40):
 
     # use deformed mesh for mapping between domain 1 and 2
-    m1t, orig1 = m1defo.trace('bottom',
-                              mtype=MeshLine,
-                              project=lambda p: np.array(p[0]))
-    m2t, orig2 = m2defo.trace('top',
-                              mtype=MeshLine,
-                              project=lambda p: np.array(p[0]))
-    m12, t1, t2 = intersect(m1t, m2t)
+    qw1, find1, qw2, find2 = mortar_quadrature(m1defo, 'bottom',
+                                               m2defo, 'top', max_dist=0.2)
 
-    fbasis1 = FacetBasis(m1, e1,
-                         quadrature=elementwise_quadrature(m1t, m12, t1),
-                         facets=orig1[t1])
-    fbasis2 = FacetBasis(m2, e2,
-                         quadrature=elementwise_quadrature(m2t, m12, t2),
-                         facets=orig2[t2])
+    fbasis1 = FacetBasis(m1, e1, quadrature=qw1, facets=find1)
+    fbasis2 = FacetBasis(m2, e2, quadrature=qw2, facets=find2)
     fbasis = fbasis1 * fbasis2
 
     # assemble jacobians for 1 and 2 separately and create a block matrix
@@ -81,7 +72,7 @@ for itr in range(40):
         basis1.get_dofs({'left', 'right'}).all(),
         basis2.get_dofs({'left', 'right'}).all() + basis1.N,
     ))))
-    x += 0.95 * dx  # regularization
+    x += dx
     print(np.linalg.norm(dx))
     if np.linalg.norm(dx) < 1e-8:
         break
