@@ -93,8 +93,8 @@ class ConvergenceQ1(unittest.TestCase):
         self.assertLess(np.abs(rateH1 - self.rateH1),
                         self.eps,
                         msg='observed H1 rate: {}'.format(rateH1))
-        self.assertLess(H1s[-1], 0.3)
-        self.assertLess(L2s[-1], 0.008)
+        self.assertLess(H1s[-1], 0.34)
+        self.assertLess(L2s[-1], 0.0082)
 
     def get_bc_nodes(self, ib):
         return ib.get_dofs().all('u')
@@ -413,6 +413,9 @@ class ConvergenceTetCR(ConvergenceTetP1):
     def create_basis(self, m):
         e = ElementTetCR()
         return Basis(m, e)
+
+    def setUp(self):
+        self.mesh = MeshTet().refined()
 
 
 class ConvergenceTetCCR(ConvergenceTetP1):

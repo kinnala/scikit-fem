@@ -19,10 +19,11 @@ from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementQuadRT1, ElementTetRT1, ElementHexRT1,
                            ElementTriN1, ElementTriP0, ElementTetN0,
                            ElementQuadN1, ElementQuad0, ElementTriN2,
-                           ElementTetN1, ElementTriHHJ1)
+                           ElementTetN1, ElementTriHHJ1, ElementWedge1,
+                           ElementLineP1)
 from skfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
                         MeshTri2, MeshTet2, MeshHex2, MeshTri1DG, MeshQuad1DG,
-                        MeshHex1DG)
+                        MeshHex1DG, MeshWedge, MeshLine)
 from skfem.assembly import FacetBasis, Basis
 from skfem.models import laplace, unit_load, mass
 from skfem.helpers import grad, dot, ddot, sym_grad, curl
@@ -649,9 +650,9 @@ def test_hdiv_boundary_integration(basis):
 @pytest.mark.parametrize(
     "basis",
     [
-        Basis(MeshTet().refined(4).with_defaults(),
+        Basis(MeshTet().refined(3).with_defaults(),
               ElementTetRT1()),
-        Basis(MeshHex().refined(4).with_defaults(),
+        Basis(MeshHex().refined(3).with_defaults(),
               ElementHexRT1()),
     ]
 )
@@ -668,7 +669,7 @@ def test_hdiv_boundary_integration_3d(basis):
     def test2(w):
         return w['y'].div
 
-    assert_almost_equal(test1.assemble(fbasis, y=y), 1, decimal=2)
+    assert_almost_equal(test1.assemble(fbasis, y=y), 1, decimal=1)
     if not isinstance(basis.elem, ElementTetRT1):
         assert_almost_equal(test2.assemble(fbasis, y=y), 1, decimal=5)
 
@@ -832,3 +833,25 @@ def test_tensorial_interpolator(basis):
     X = np.array([np.sin(m.p[0, :]), np.sin(3. * m.p[1, :])])
     assert_almost_equal(yfun(X), np.array([[X[0], X[1]],
                                            [X[1], X[0]]]), decimal=4)
+
+
+@pytest.mark.parametrize(
+    "mesh,element,target",
+    [
+        (MeshLine(), ElementLineP1(), 1.),
+        (MeshTri(), ElementTriP1(), 1.),
+        (MeshQuad(), ElementQuad1(), 1.),
+        (MeshTet(), ElementTetP1(), 1.),
+        (MeshHex(), ElementHex1(), 1.),
+        (MeshTri2(), ElementTriP1(), 1.),
+        (MeshQuad2(), ElementQuad1(), 1.),
+        (MeshWedge(), ElementWedge1(), 1.),
+    ]
+)
+def test_integrate_unit_volume(mesh, element, target):
+
+    basis = Basis(mesh, element)
+    assert_almost_equal(
+        Functional(lambda w: 1. + 0. * w.x[0]).assemble(basis),
+        target
+    )

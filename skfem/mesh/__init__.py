@@ -48,6 +48,7 @@ MeshTri = MeshTri1
 MeshQuad = MeshQuad1
 MeshTet = MeshTet1
 MeshHex = MeshHex1
+MeshWedge = MeshWedge1
 
 
 class MeshLineConstructor:
@@ -100,5 +101,6 @@ __all__ = [
     "MeshHex1",
     "MeshHex2",
     "MeshHex1DG",
+    "MeshWedge",
     "MeshWedge1",
 ]

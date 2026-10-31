@@ -17,9 +17,9 @@ import numpy as np
 from skfem import *
 
 m = MeshTet.init_tensor(
-    np.linspace(-1, 1, 15),
-    np.linspace(-1, 1, 15),
-    np.linspace(-1, 1, 15)
+    np.linspace(-1, 1, 10),
+    np.linspace(-1, 1, 10),
+    np.linspace(-1, 1, 10)
 )
 e = ElementTetN0()
 basis = Basis(m, e)

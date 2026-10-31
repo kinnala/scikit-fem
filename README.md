@@ -1,5 +1,5 @@
 <div align="center">
-<img src="https://raw.githubusercontent.com/kinnala/scikit-fem/master/logo.png" width="250px" alt="logo"></img>
+<img src="https://raw.githubusercontent.com/kinnala/scikit-fem/master/logo.png" width="150px" alt="logo"></img>
 </div>
 
 # scikit-fem
@@ -106,7 +106,7 @@ mesh = MeshTet.init_tensor(*((np.linspace(0, 1, 60),) * 3))
 ```
 
 We support [many common finite
-elements](https://github.com/kinnala/scikit-fem/blob/master/skfem/element/__init__.py#L51).
+elements](https://github.com/kinnala/scikit-fem/blob/master/skfem/element/__init__.py#L75).
 Below the stiffness matrix is assembled using second-order tetrahedra:
 
 ```python
@@ -148,7 +148,7 @@ of `scipy.sparse.linalg.spsolve`.*
 | 512000 | 5.61395 | nan |
 | 1030301 | 12.58563 | nan |
 
-The conclusion is that in many cases the
+The conclusion is that often the
 time spent on linear solve will significantly dominate
 and a Python package such as `scikit-fem`
 can be fast enough for assembling
@@ -156,12 +156,8 @@ the finite element matrices.
 
 ## Documentation
 
-The project is documented using Sphinx under `docs/`.
+The project's Sphinx documentation is under `docs/`.
 Built version can be found from [Read the Docs](https://scikit-fem.readthedocs.io/en/latest/).
-Here are direct links to additional resources:
-
-- [Examples from our test suite](https://scikit-fem.readthedocs.io/en/latest/listofexamples.html)
-- [Examples from the FEniCS tutorial](https://github.com/gdmcbain/fenics-tuto-in-skfem)
 
 ## Getting help
 
@@ -182,15 +178,12 @@ many
 [examples](https://scikit-fem.readthedocs.io/en/latest/listofexamples.html) use
 [matplotlib](https://matplotlib.org/) for visualization and
 [meshio](https://github.com/nschloe/meshio) for loading/saving different mesh
-file formats.  Some examples demonstrate the use of other external packages;
+file formats.  Some examples may use other external packages;
 see `requirements.txt` for a list of test dependencies.
 
 ## Testing
 
-The tests are run by GitHub Actions.  The `Makefile` in the repository root has
-targets for running the testing container locally using `docker`.  For example,
-`make test_py38` runs the tests using `py38` branch from
-[kinnala/scikit-fem-docker-action](https://github.com/kinnala/scikit-fem-docker-action).
+The tests are run automatically by GitHub Actions via `pytest`.
 The releases are tested in
 [kinnala/scikit-fem-release-tests](https://github.com/kinnala/scikit-fem-release-tests).
 
@@ -211,20 +204,13 @@ M. Juntunen](https://au.mathworks.com/matlabcentral/fileexchange/36108-hjfem_lit
 
 ## Contributing
 
-We are happy to welcome any contributions to the library.  Reasonable projects
-for first timers include:
-
-- Reporting a [bug](https://github.com/kinnala/scikit-fem/issues)
-- Writing an [example](https://github.com/kinnala/scikit-fem/tree/master/docs/examples)
-- Improving the [tests](https://github.com/kinnala/scikit-fem/tree/master/tests)
-- Suggesting improvements in the [documentation](https://scikit-fem.readthedocs.io).
-
+We are happy to welcome any contributions to the library.
 *By contributing code to scikit-fem, you are agreeing to release it under BSD-3-Clause, see LICENSE.md.*
 
 ## Changelog
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
+and this project aims to adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 with respect to documented and/or tested features.
 
 ### Unreleased
@@ -235,19 +221,20 @@ with respect to documented and/or tested features.
 - Added: `MappingManifold` for assembling forms over embedded paths or surfaces (see new example ex57.py)
 - Changed: `Mesh` constructors now accept vertex arrays with higher geometric than topological dimension (these are compatible with `MappingManifold`)
 - Changed: `skfem.autodiff` now uses built-in forward-mode dual number automatic differentiation without the JAX dependency
-- Changed: `ElementVector` and `ElementComposite` have been optimized via the introduction of `BlockArray` and `BlockDiscreteField` that avoid storing explicitly the zeros associated with nonactive basis functions
+- Changed: `ElementVector` and `ElementComposite` are optimized via `BlockArray` and `BlockDiscreteField` that avoid storing explicit zeros
 - Changed: Accessing `Mesh.subdomains` or `Mesh.boundaries` with nonexisting key/tag will now raise `TagKeyError`
-- Removed: Obsolete projection functions `skfem.utils.project` and `skfem.utils.projection` that have been replaced by `Basis.project`
+- Removed: Obsolete projection functions `skfem.utils.project` and `skfem.utils.projection`, replaced by `Basis.project`
 - Removed: Dysfunctional visualization package `skfem.visuals.glvis`
 - Removed: The deprecated `FacetBasis.trace` method
 - Fixed: `MeshTri` now preserves boundary tags when refining adaptively
 - Fixed: `MeshTet` now preserves boundary tags when refined uniformly or adaptively
 - Fixed: `ElementGlobal` subclasses such as `ElementLineHermite`, `ElementTriArgyris` and `ElementQuadBFS` now work with periodic meshes
-- Fixed: `solve` preserves complex solutions and eigenvectors when expanding condensed or multipoint-constrained systems with real boundary-value arrays.
-- Fixed: `Basis.interpolator` preserves vector and tensor components when evaluating shaped point arrays, including during `Basis.project`.
-- Fixed: `enforce` preserves complex boundary values with a real right-hand side, and rejects incompatible in-place updates before modifying the system.
+- Fixed: `solve` preserves complex solutions and eigenvectors
+- Fixed: `Basis.interpolator` preserves vector and tensor components, including during `Basis.project`.
+- Fixed: `enforce` preserves complex boundary values with a real right-hand side
 - Fixed: `enforce` preserves prescribed boundary values when using a nonunit diagonal.
-- Fixed: `skfem.utils.penalize` preserves complex boundary values in the right-hand side.
+- Fixed: `skfem.utils.penalize` preserves complex boundary values in the right-hand side
+- Fixed: `MeshWedge` quadrature rules were incorrect
 
 ### [12.0.2] - 2026-06-05
 
