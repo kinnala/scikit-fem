@@ -235,19 +235,20 @@ with respect to documented and/or tested features.
 - Added: `MappingManifold` for assembling forms over embedded paths or surfaces (see new example ex57.py)
 - Changed: `Mesh` constructors now accept vertex arrays with higher geometric than topological dimension (these are compatible with `MappingManifold`)
 - Changed: `skfem.autodiff` now uses built-in forward-mode dual number automatic differentiation without the JAX dependency
-- Changed: `ElementVector` and `ElementComposite` have been optimized via the introduction of `BlockArray` and `BlockDiscreteField` that avoid storing explicitly the zeros associated with nonactive basis functions
+- Changed: `ElementVector` and `ElementComposite` are optimized via `BlockArray` and `BlockDiscreteField` that avoid storing explicit zeros
 - Changed: Accessing `Mesh.subdomains` or `Mesh.boundaries` with nonexisting key/tag will now raise `TagKeyError`
-- Removed: Obsolete projection functions `skfem.utils.project` and `skfem.utils.projection` that have been replaced by `Basis.project`
+- Removed: Obsolete projection functions `skfem.utils.project` and `skfem.utils.projection`, replaced by `Basis.project`
 - Removed: Dysfunctional visualization package `skfem.visuals.glvis`
 - Removed: The deprecated `FacetBasis.trace` method
 - Fixed: `MeshTri` now preserves boundary tags when refining adaptively
 - Fixed: `MeshTet` now preserves boundary tags when refined uniformly or adaptively
 - Fixed: `ElementGlobal` subclasses such as `ElementLineHermite`, `ElementTriArgyris` and `ElementQuadBFS` now work with periodic meshes
-- Fixed: `solve` preserves complex solutions and eigenvectors when expanding condensed or multipoint-constrained systems with real boundary-value arrays.
-- Fixed: `Basis.interpolator` preserves vector and tensor components when evaluating shaped point arrays, including during `Basis.project`.
-- Fixed: `enforce` preserves complex boundary values with a real right-hand side, and rejects incompatible in-place updates before modifying the system.
+- Fixed: `solve` preserves complex solutions and eigenvectors
+- Fixed: `Basis.interpolator` preserves vector and tensor components, including during `Basis.project`.
+- Fixed: `enforce` preserves complex boundary values with a real right-hand side
 - Fixed: `enforce` preserves prescribed boundary values when using a nonunit diagonal.
-- Fixed: `skfem.utils.penalize` preserves complex boundary values in the right-hand side.
+- Fixed: `skfem.utils.penalize` preserves complex boundary values in the right-hand side
+- Fixed: `MeshWedge` quadrature rules were incorrect
 
 ### [12.0.2] - 2026-06-05
 
