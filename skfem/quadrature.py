@@ -44,13 +44,11 @@ def get_quadrature(refdom_or_elem: Union[Type[Refdom], Type[Element], Element],
     elif refdom == RefWedge:
         X1, W1 = get_quadrature_line(norder)
         X2, W2 = get_quadrature_tri(norder)
-        A, B, C = np.meshgrid(X1, X2[:1], X2[1:])
-        Y = np.vstack((A.flatten(order="F"),
-                       B.flatten(order="F"),
-                       C.flatten(order="F")))
-        A, B, C = np.meshgrid(W1, W2, W2)
-        Z = A * B * C
-        W = Z.flatten(order="F")
+        X1 = np.asarray(X1).reshape(-1)
+        Y = np.vstack((np.tile(X2[0], len(W1)),
+                       np.tile(X2[1], len(W1)),
+                       np.repeat(X1, len(W2))))
+        W = np.outer(W1, W2).ravel()
         return Y, W
     elif refdom == RefQuad:
         X, W = get_quadrature_line(norder)
