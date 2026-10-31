@@ -235,6 +235,7 @@ with respect to documented and/or tested features.
 - Fixed: `enforce` preserves prescribed boundary values when using a nonunit diagonal.
 - Fixed: `skfem.utils.penalize` preserves complex boundary values in the right-hand side
 - Fixed: `MeshWedge` quadrature rules were incorrect
+- Fixed: `MeshTet` quadrature rules for `intorder>=5` were accurate only up to `intorder - 1`
 
 ### [12.0.2] - 2026-06-05
 
