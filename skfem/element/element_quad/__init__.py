@@ -7,3 +7,4 @@ from .element_quad_bfs import ElementQuadBFS  # noqa
 from .element_quad_rt1 import ElementQuadRT1  # noqa
 from .element_quad_n1 import ElementQuadN1  # noqa
 from .element_quad2g import ElementQuad2G  # noqa
+from .element_quad_dpc import ElementQuadDPC  # noqa

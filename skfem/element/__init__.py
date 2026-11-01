@@ -27,13 +27,13 @@ from .element_tri import (ElementTriP1, ElementTriP2, ElementTriP0,
 from .element_quad import (ElementQuad0, ElementQuad1, ElementQuad2,  # noqa
                            ElementQuadS2, ElementQuadP,
                            ElementQuadBFS, ElementQuadRT1, ElementQuad1DG,
-                           ElementQuadN1, ElementQuad2G)
+                           ElementQuadN1, ElementQuad2G, ElementQuadDPC)
 from .element_tet import (ElementTetP0, ElementTetP1, ElementTetP2,  # noqa
                           ElementTetRT1, ElementTetN1, ElementTetMini,
                           ElementTetCR, ElementTetCCR, ElementTetSkeletonP0)
 from .element_hex import (ElementHex0, ElementHex1, ElementHex2,  # noqa
                           ElementHexS2, ElementHex1DG, ElementHexRT1,
-                          ElementHexSkeleton0, ElementHexC1)
+                          ElementHexSkeleton0, ElementHexC1, ElementHexDPC)
 from .element_line import (ElementLineP0, ElementLineP1, ElementLineP2,  # noqa
                            ElementLinePp, ElementLineHermite,
                            ElementLineMini, ElementLineP1DG)
@@ -124,6 +124,7 @@ __all__ = [
     "ElementQuad1DG",
     "ElementQuadN1",
     "ElementQuad2G",
+    "ElementQuadDPC",
     "ElementTetP0",
     "ElementTetP1",
     "ElementTetP2",
@@ -144,6 +145,7 @@ __all__ = [
     "ElementHexDG",
     "ElementHexRT1",
     "ElementHexSkeleton0",
+    "ElementHexDPC",
     "ElementLineP0",
     "ElementLineP1",
     "ElementLineP1DG",

@@ -164,6 +164,7 @@ Module: skfem.element
     skfem.element.ElementQuadP
     skfem.element.ElementQuadBFS
     skfem.element.ElementQuadRT0
+    skfem.element.ElementQuadDPC
     skfem.element.ElementTetP0
     skfem.element.ElementTetP1
     skfem.element.ElementTetP2
@@ -176,6 +177,7 @@ Module: skfem.element
     skfem.element.ElementHex1
     skfem.element.ElementHex2
     skfem.element.ElementHexS2
+    skfem.element.ElementHexDPC
     skfem.element.ElementLineP0
     skfem.element.ElementLineP1
     skfem.element.ElementLineP2

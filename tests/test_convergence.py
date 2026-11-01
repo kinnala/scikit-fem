@@ -1,9 +1,11 @@
 import unittest
 
 import numpy as np
+import pytest
 
 from skfem import BilinearForm, LinearForm, asm, solve, condense
 from skfem.models.poisson import laplace
+from skfem.helpers import ddot, div, grad
 from skfem.element import (
     ElementHex1,
     ElementHex2,
@@ -31,6 +33,9 @@ from skfem.element import (
     ElementTriP1G,
     ElementTriP2G,
     ElementTriP2B,
+    ElementVector,
+    ElementQuadDPC,
+    ElementHexDPC,
 )
 from skfem.assembly import FacetBasis, Basis
 from skfem.mesh import (MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
@@ -602,3 +607,32 @@ class FacetConvergenceTetP1(FacetConvergenceTetP2):
     case = (MeshTet, ElementTetP1)
     limits = (0.9, 1.1)
     preref = 2
+
+
+@pytest.mark.parametrize(
+    "mesh,e,rate",
+    [
+        (MeshQuad().refined(1), ElementQuadDPC(1), 2.),
+        (MeshQuad().refined(1), ElementQuadDPC(2), 3.),
+        (MeshHex().refined(1), ElementHexDPC(1), 2.),
+    ]
+)
+def test_convergence_dpc_projection(mesh, e, rate):
+    """L2 projection of a smooth function to dPc."""
+
+    def fun(x):
+        return np.prod(np.sin(np.pi * x), axis=0)
+
+    hs, L2s = [], []
+    m = mesh
+    for itr in range(3):
+        if itr > 0:
+            m = m.refined()
+        basis = Basis(m, e)
+        y = basis.project(fun)
+        X = np.asarray(basis.global_coordinates())
+        L2s.append(np.sqrt(np.sum((np.asarray(basis.interpolate(y))
+                                   - fun(X)) ** 2 * basis.dx)))
+        hs.append(m.param())
+
+    assert abs(np.polyfit(np.log(hs), np.log(L2s), 1)[0] - rate) < .1
