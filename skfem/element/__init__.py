@@ -23,20 +23,23 @@ from .element_tri import (ElementTriP1, ElementTriP2, ElementTriP0,
                           ElementTri15ParamPlate, ElementTriBDM1,
                           ElementTriP1G, ElementTriP2G, ElementTriP2B,
                           ElementTriRT2, ElementTriN1, ElementTriN2,
-                          ElementTriN3, ElementTriHHJ0, ElementTriHHJ1)  # noqa
+                          ElementTriN3, ElementTriHHJ0, ElementTriHHJ1,
+                          ElementTriBubble)  # noqa
 from .element_quad import (ElementQuad0, ElementQuad1, ElementQuad2,  # noqa
                            ElementQuadS2, ElementQuadP,
                            ElementQuadBFS, ElementQuadRT1, ElementQuad1DG,
                            ElementQuadN1, ElementQuad2G)
 from .element_tet import (ElementTetP0, ElementTetP1, ElementTetP2,  # noqa
                           ElementTetRT1, ElementTetN1, ElementTetMini,
-                          ElementTetCR, ElementTetCCR, ElementTetSkeletonP0)
+                          ElementTetCR, ElementTetCCR, ElementTetSkeletonP0,
+                          ElementTetBubble)
 from .element_hex import (ElementHex0, ElementHex1, ElementHex2,  # noqa
                           ElementHexS2, ElementHex1DG, ElementHexRT1,
                           ElementHexSkeleton0, ElementHexC1)
 from .element_line import (ElementLineP0, ElementLineP1, ElementLineP2,  # noqa
                            ElementLinePp, ElementLineHermite,
-                           ElementLineMini, ElementLineP1DG)
+                           ElementLineMini, ElementLineP1DG,
+                           ElementLineBubble)
 from .element_wedge_1 import ElementWedge1
 from .element_composite import ElementComposite  # noqa
 from .element_dg import ElementDG
@@ -112,6 +115,7 @@ __all__ = [
     "ElementTriN3",
     "ElementTriHHJ0",
     "ElementTriHHJ1",
+    "ElementTriBubble",
     "ElementQuad0",
     "ElementQuad1",
     "ElementQuad2",
@@ -136,6 +140,7 @@ __all__ = [
     "ElementTetCCR",
     "ElementTetDG",
     "ElementTetSkeletonP0",
+    "ElementTetBubble",
     "ElementHex0",
     "ElementHex1",
     "ElementHex2",
@@ -151,6 +156,7 @@ __all__ = [
     "ElementLinePp",
     "ElementLineHermite",
     "ElementLineMini",
+    "ElementLineBubble",
     "ElementWedge1",
     "ElementHexC1",
 ]
