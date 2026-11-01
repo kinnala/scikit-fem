@@ -47,6 +47,8 @@ from skfem.element import (
     ElementQuadP,
     ElementHexDG,
     ElementWedge1,
+    ElementQuadDPC,
+    ElementHexDPC,
     ElementLineBubble,
     ElementTriBubble,
     ElementTetBubble,
@@ -256,6 +258,9 @@ class TestDerivatives(TestCase):
         ElementTetCR(),
         ElementTetCCR(),
         ElementWedge1(),
+        ElementQuadDPC(0),
+        ElementQuadDPC(3),
+        ElementHexDPC(2),
         ElementLineBubble(),
         ElementTriBubble(),
         ElementTetBubble(),
@@ -412,6 +417,58 @@ def test_dg_element(m, e, edg):
 def test_initialize_dg_composite_elements(e, edg):
     E = edg(e) * e
 
+
+@pytest.mark.parametrize(
+    "m,e,ndofs",
+    [
+        (MeshQuad(), ElementQuadDPC(0), 1),
+        (MeshQuad(), ElementQuadDPC(1), 3),
+        (MeshQuad(), ElementQuadDPC(3), 10),
+        (MeshHex(), ElementHexDPC(0), 1),
+        (MeshHex(), ElementHexDPC(1), 4),
+        (MeshHex(), ElementHexDPC(3), 20),
+    ]
+)
+def test_dpc_orthonormal(m, e, ndofs):
+    """The basis is orthonormal over the reference element."""
+    basis = Basis(m, e)
+    assert basis.N == ndofs
+
+    @BilinearForm
+    def mass(u, v, w):
+        return u * v
+
+    assert_allclose(mass.assemble(basis).toarray(), np.eye(ndofs),
+                    atol=1e-12)
+
+
+@pytest.mark.parametrize(
+    "m,e",
+    [
+        (MeshQuad().refined(1), ElementQuadDPC(1)),
+        (MeshQuad().refined(1), ElementQuadDPC(2)),
+        (MeshHex().refined(1), ElementHexDPC(1)),
+        (MeshHex().refined(1), ElementHexDPC(2)),
+    ]
+)
+def test_dpc_polynomial_reproduction(m, e):
+    """Total degree p is reproduced exactly while the degree p tensor
+    product monomial is not."""
+    basis = Basis(m, e)
+    dim = m.dim()
+    p = e.p
+
+    def error(exps):
+        def fun(x):
+            return np.prod([x[i] ** exps[i] for i in range(dim)], axis=0)
+        y = basis.project(fun)
+        X = np.asarray(basis.global_coordinates())
+        return np.max(np.abs(np.asarray(basis.interpolate(y)) - fun(X)))
+
+    for exps in np.ndindex(*(dim * (p + 1,))):
+        if sum(exps) <= p:
+            assert error(exps) < 1e-12, exps
+    assert error(dim * (p,)) > 1e-3
 
 @pytest.mark.parametrize(
     "m,e",

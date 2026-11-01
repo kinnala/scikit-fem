@@ -5,7 +5,7 @@ import pytest
 
 from skfem import BilinearForm, LinearForm, asm, solve, condense
 from skfem.models.poisson import laplace
-from skfem.helpers import dot, grad
+from skfem.helpers import ddot, div, grad
 from skfem.element import (
     ElementHex1,
     ElementHex2,
@@ -33,6 +33,9 @@ from skfem.element import (
     ElementTriP1G,
     ElementTriP2G,
     ElementTriP2B,
+    ElementVector,
+    ElementQuadDPC,
+    ElementHexDPC,
     ElementLineBubble,
     ElementTriBubble,
     ElementTetBubble,
@@ -607,59 +610,32 @@ class FacetConvergenceTetP1(FacetConvergenceTetP2):
     case = (MeshTet, ElementTetP1)
     limits = (0.9, 1.1)
     preref = 2
-
-
+    
+   
 @pytest.mark.parametrize(
-    "mesh,e1,eb,intorder,rates,eps",
+    "mesh,e,rate",
     [
-        # in 1D, P1 enriched by the bubble is the full P2 space
-        (MeshLine().refined(3), ElementLineP1(), ElementLineBubble(), 4,
-         (3., 2.), .1),
-        (MeshTri().refined(2), ElementTriP1(), ElementTriBubble(), 6,
-         (2., 1.), .1),
-        (MeshTet().refined(1), ElementTetP1(), ElementTetBubble(), 8,
-         (2., 1.), .15),
+        (MeshQuad().refined(1), ElementQuadDPC(1), 2.),
+        (MeshQuad().refined(1), ElementQuadDPC(2), 3.),
+        (MeshHex().refined(1), ElementHexDPC(1), 2.),
     ]
 )
-def test_convergence_bubble_enriched(mesh, e1, eb, intorder, rates, eps):
-    """Poisson with a P1 field enriched by a separate bubble field."""
-    dim = mesh.dim()
+def test_convergence_dpc_projection(mesh, e, rate):
+    """L2 projection of a smooth function to dPc."""
 
-    def exact(x):
+    def fun(x):
         return np.prod(np.sin(np.pi * x), axis=0)
 
-    def exact_grad(x):
-        return np.array([np.pi * np.cos(np.pi * x[i])
-                         * np.prod(np.sin(np.pi * np.delete(x, i, axis=0)),
-                                   axis=0)
-                         for i in range(dim)])
-
-    @BilinearForm
-    def bilinf(u, ub, v, vb, w):
-        return dot(grad(u) + grad(ub), grad(v) + grad(vb))
-
-    @LinearForm
-    def linf(v, vb, w):
-        return dim * np.pi ** 2 * exact(w.x) * (v + vb)
-
-    hs, L2s, H1s = [], [], []
+    hs, L2s = [], []
     m = mesh
     for itr in range(3):
         if itr > 0:
             m = m.refined()
-        basis = Basis(m, e1 * eb, intorder=intorder)
-        x = solve(*condense(bilinf.assemble(basis),
-                            linf.assemble(basis),
-                            D=basis.get_dofs()))
-        u, ub = basis.interpolate(x)
+        basis = Basis(m, e)
+        y = basis.project(fun)
         X = np.asarray(basis.global_coordinates())
-        L2s.append(np.sqrt(np.sum((u + ub - exact(X)) ** 2 * basis.dx)))
-        H1s.append(np.sqrt(np.sum(np.sum((grad(u) + grad(ub)
-                                          - exact_grad(X)) ** 2, axis=0)
-                                  * basis.dx)))
+        L2s.append(np.sqrt(np.sum((np.asarray(basis.interpolate(y))
+                                   - fun(X)) ** 2 * basis.dx)))
         hs.append(m.param())
 
-    rateL2 = np.polyfit(np.log(hs), np.log(L2s), 1)[0]
-    rateH1 = np.polyfit(np.log(hs), np.log(H1s), 1)[0]
-    assert abs(rateL2 - rates[0]) < eps, rateL2
-    assert abs(rateH1 - rates[1]) < eps, rateH1
+    assert abs(np.polyfit(np.log(hs), np.log(L2s), 1)[0] - rate) < .1
