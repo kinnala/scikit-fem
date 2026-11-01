@@ -4,3 +4,4 @@ from .element_line_p2 import ElementLineP2  # noqa
 from .element_line_pp import ElementLinePp  # noqa
 from .element_line_hermite import ElementLineHermite  # noqa
 from .element_line_mini import ElementLineMini  # noqa
+from .element_line_bubble import ElementLineBubble  # noqa
