@@ -32,7 +32,8 @@ from .element_quad import (ElementQuad0, ElementQuad1, ElementQuad2,  # noqa
 from .element_tet import (ElementTetP0, ElementTetP1, ElementTetP2,  # noqa
                           ElementTetRT1, ElementTetN1, ElementTetMini,
                           ElementTetCR, ElementTetCCR, ElementTetSkeletonP0,
-                          ElementTetBubble)
+                          ElementTetBubble, ElementTetMorley,
+                          ElementTetMWX3)
 from .element_hex import (ElementHex0, ElementHex1, ElementHex2,  # noqa
                           ElementHexS2, ElementHex1DG, ElementHexRT1,
                           ElementHexSkeleton0, ElementHexC1, ElementHexDPC)
@@ -142,6 +143,8 @@ __all__ = [
     "ElementTetDG",
     "ElementTetSkeletonP0",
     "ElementTetBubble",
+    "ElementTetMorley",
+    "ElementTetMWX3",
     "ElementHex0",
     "ElementHex1",
     "ElementHex2",

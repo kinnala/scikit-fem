@@ -8,3 +8,4 @@ from .element_tet_cr import ElementTetCR  # noqa
 from .element_tet_ccr import ElementTetCCR  # noqa
 from .element_tet_skeleton_p0 import ElementTetSkeletonP0  # noqa
 from .element_tet_bubble import ElementTetBubble  # noqa
+from .element_tet_morley import ElementTetMorley, ElementTetMWX3  # noqa

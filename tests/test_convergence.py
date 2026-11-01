@@ -1,3 +1,4 @@
+import itertools
 import unittest
 
 import numpy as np
@@ -5,7 +6,7 @@ import pytest
 
 from skfem import BilinearForm, LinearForm, asm, solve, condense
 from skfem.models.poisson import laplace
-from skfem.helpers import ddot, div, grad
+from skfem.helpers import ddot, dd, div, grad
 from skfem.element import (
     ElementHex1,
     ElementHex2,
@@ -39,6 +40,8 @@ from skfem.element import (
     ElementLineBubble,
     ElementTriBubble,
     ElementTetBubble,
+    ElementTetMorley,
+    ElementTetMWX3,
 )
 from skfem.assembly import FacetBasis, Basis
 from skfem.mesh import (MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
@@ -639,3 +642,74 @@ def test_convergence_dpc_projection(mesh, e, rate):
         hs.append(m.param())
 
     assert abs(np.polyfit(np.log(hs), np.log(L2s), 1)[0] - rate) < .1
+
+
+def _dsines(x, alpha):
+    """Derivative of the product of sin(pi x_i) with multi-index alpha."""
+    return np.prod([np.pi ** a * np.sin(np.pi * x[i] + a * np.pi / 2)
+                    for i, a in enumerate(alpha)], axis=0)
+
+
+def _seminorm_error(basis, field, order):
+    """Broken seminorm error against the product of sines."""
+    X = np.asarray(basis.global_coordinates())
+    err = 0.
+    for ix in itertools.product(range(X.shape[0]), repeat=order):
+        alpha = np.bincount(np.array(ix, dtype=int), minlength=X.shape[0])
+        err = err + (np.asarray(field)[ix] - _dsines(X, alpha)) ** 2
+    return np.sqrt(np.sum(err * basis.dx))
+
+
+def test_convergence_tet_morley():
+    """Simply supported biharmonic problem in the unit cube."""
+
+    @BilinearForm
+    def bilinf(u, v, w):
+        return ddot(dd(u), dd(v))
+
+    @LinearForm
+    def linf(v, w):
+        return 9. * np.pi ** 4 * _dsines(w.x, (0, 0, 0)) * v
+
+    hs, L2s, H2s = [], [], []
+    for n in [1, 2, 3]:
+        m = MeshTet().refined(n)
+        basis = Basis(m, ElementTetMorley())
+        x = solve(*condense(bilinf.assemble(basis),
+                            linf.assemble(basis),
+                            D=basis.get_dofs().all('u')))
+        u = basis.interpolate(x)
+        L2s.append(_seminorm_error(basis, u, 0))
+        H2s.append(_seminorm_error(basis, u.hess, 2))
+        hs.append(m.param())
+
+    # the meshes are coarse and the rates still slightly above asymptotic
+    assert abs(np.polyfit(np.log(hs), np.log(H2s), 1)[0] - 1.) < .15
+    assert abs(np.polyfit(np.log(hs), np.log(L2s), 1)[0] - 2.) < .15
+
+
+def test_convergence_tet_mwx3():
+    """Sixth order problem in the unit cube."""
+
+    @BilinearForm
+    def bilinf(u, v, w):
+        return np.einsum('ijk...,ijk...', u.grad3, v.grad3)
+
+    @LinearForm
+    def linf(v, w):
+        return 27. * np.pi ** 6 * _dsines(w.x, (0, 0, 0)) * v
+
+    hs, H3s = [], []
+    for n in [1, 2]:
+        m = MeshTet().refined(n)
+        basis = Basis(m, ElementTetMWX3())
+        # the exact solution and its second normal derivative vanish on the
+        # boundary
+        x = solve(*condense(bilinf.assemble(basis),
+                            linf.assemble(basis),
+                            D=basis.get_dofs().all(['u', 'u_nn'])))
+        H3s.append(_seminorm_error(basis, basis.interpolate(x).grad3, 3))
+        hs.append(m.param())
+
+    # only two meshes are used to keep the test fast
+    assert abs(np.log(H3s[1] / H3s[0]) / np.log(hs[1] / hs[0]) - 1.) < .3

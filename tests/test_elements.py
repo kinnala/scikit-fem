@@ -52,6 +52,8 @@ from skfem.element import (
     ElementLineBubble,
     ElementTriBubble,
     ElementTetBubble,
+    ElementTetMorley,
+    ElementTetMWX3,
 )
 from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 from skfem.assembly import (Basis, FacetBasis, Functional, BilinearForm,
@@ -60,6 +62,7 @@ from skfem.helpers import dot, grad
 from skfem.models.poisson import laplace, unit_load
 from skfem.utils import solve, condense
 from skfem.mapping import MappingAffine
+from skfem.refdom import RefTet
 
 
 class TestNodality(TestCase):
@@ -522,3 +525,182 @@ def test_bubble_enrichment_equals_mini(m, e1, eb, emini):
 
     assert_allclose(x1, y[mbasis.nodal_dofs[0]], atol=1e-12)
     assert_allclose(xb, y[mbasis.interior_dofs[0]], atol=1e-12)
+
+
+def _distorted_tet():
+    m = MeshTet().refined(1)
+    rng = np.random.default_rng(0)
+    p = m.p + .2 * m.param() * (rng.random(m.p.shape) - .5)
+    A = np.array([[1., .3, .2],
+                  [0., 1., .4],
+                  [0., 0., 1.]])
+    return MeshTet(A @ p, m.t)
+
+
+@pytest.mark.parametrize("e", [ElementTetMorley(), ElementTetMWX3()])
+def test_mwx_dofs(e):
+    """Evaluate the DOF functionals of a random function in each element and
+    compare to the global DOF values.  This verifies the DOF definitions and
+    the orientation of the normals."""
+    m = _distorted_tet()
+
+    # normals defined using the global vertex indices, sorted in mesh.edges
+    # and mesh.facets
+    a, b = m.p[:, m.edges[0]], m.p[:, m.edges[1]]
+    t = (b - a) / np.linalg.norm(b - a, axis=0)
+    ax = np.zeros_like(t)
+    ax[np.argmin(np.abs(t), axis=0), np.arange(t.shape[1])] = 1.
+    en1 = np.cross(t, ax, axis=0)
+    en1 /= np.linalg.norm(en1, axis=0)
+    en2 = np.cross(t, en1, axis=0)
+    a, b, c = (m.p[:, m.facets[i]] for i in range(3))
+    fn = np.cross(b - a, c - a, axis=0)
+    fn /= np.linalg.norm(fn, axis=0)
+
+    # evaluate at vertices, edge (start, midpoint, end), face centroids
+    P = RefTet.p
+    X = [P[:, i] for i in range(4)]
+    for i, j in RefTet.edges:
+        X += [P[:, i], .5 * (P[:, i] + P[:, j]), P[:, j]]
+    X += [P[:, f].mean(axis=1) for f in RefTet.facets]
+    X = np.array(X).T
+    basis = Basis(m, e, quadrature=(X, np.ones(X.shape[1])))
+    x = np.random.default_rng(1).random(basis.N)
+    u = basis.interpolate(x)
+    val, grad, hess = np.asarray(u), np.asarray(u.grad), np.asarray(u.hess)
+
+    def edge_mean(f, k):
+        j = 4 + 3 * k
+        return (f[..., j] + 4. * f[..., j + 1] + f[..., j + 2]) / 6.
+
+    dofs = []
+    if e.nodal_dofs > 0:
+        dofs += [val[:, i] for i in range(4)]
+    for k in range(6):
+        if e.edge_dofs == 1:
+            dofs += [edge_mean(val, k)]
+        else:
+            g = edge_mean(grad, k)
+            dofs += [np.einsum('ik,ik->k', g, en1[:, m.t2e[k]]),
+                     np.einsum('ik,ik->k', g, en2[:, m.t2e[k]])]
+    for k in range(4):
+        n = fn[:, m.t2f[k]]
+        if e.maxdeg == 2:
+            dofs += [np.einsum('ik,ik->k', grad[..., 22 + k], n)]
+        else:
+            dofs += [np.einsum('ijk,ik,jk->k', hess[..., 22 + k], n, n)]
+
+    assert_allclose(np.array(dofs), x[basis.element_dofs], atol=1e-11)
+
+
+@pytest.mark.parametrize(
+    "e,maxdeg",
+    [
+        (ElementTetMorley(), 2),
+        (ElementTetMWX3(), 3),
+    ]
+)
+def test_mwx_polynomial_reproduction(e, maxdeg):
+    """Polynomials of degree k are reproduced, degree k + 1 are not."""
+    basis = Basis(_distorted_tet(), e)
+    X = np.asarray(basis.global_coordinates())
+
+    @BilinearForm
+    def mass(u, v, w):
+        return u * v
+
+    @LinearForm
+    def load(v, w):
+        return w['f'] * v
+
+    M = mass.assemble(basis)
+
+    def error(exps):
+        f = np.prod([X[i] ** exps[i] for i in range(3)], axis=0)
+        y = solve(M, load.assemble(basis, f=f))
+        return np.max(np.abs(np.asarray(basis.interpolate(y)) - f))
+
+    for exps in np.ndindex(*(3 * (maxdeg + 1,))):
+        if sum(exps) <= maxdeg:
+            assert error(exps) < 1e-10, exps
+    assert error((maxdeg + 1, 0, 0)) > 1e-4
+
+
+def _gbasis_reference(e, mapping, X, i):
+    """Unoptimized evaluation of ElementGlobal basis function."""
+    import itertools
+    x = mapping.F(X)
+    h = e._h[:, None]
+    y = (x - e._c[:, :, None]) / h
+    V = e.V
+    U = [np.zeros((e.dim,) * k + x[0].shape)
+         for k in range(e.derivatives + 1)]
+    for k in range(e.derivatives + 1):
+        for diff in itertools.product(*((list(range(e.dim)),) * k)):
+            for itr, p in enumerate(e._pbasis[diff]):
+                U[k][diff] += V[:, itr, i][:, None] * p(*y) / h ** k
+    return U
+
+
+@pytest.mark.parametrize(
+    "m,e",
+    [
+        (MeshTri().refined(2), ElementTriArgyris()),
+        (MeshQuad().refined(2), ElementQuadBFS()),
+        (_distorted_tet(), ElementTetMorley()),
+        (_distorted_tet(), ElementTetMWX3()),
+    ]
+)
+def test_element_global_gbasis(m, e):
+    """Compare the vectorized and cached ElementGlobal.gbasis to the
+    unoptimized loop, also when the calls are interleaved."""
+    mapping = m.mapping()
+    X1 = Basis(m, e).X
+    X2 = X1[:, ::-1].copy()
+    N = len(e.doflocs)
+    for i in list(range(N - 1, -1, -2)) + list(range(0, N, 2)):
+        for X in [X1, X2]:
+            U = _gbasis_reference(e, mapping, X, i)
+            field = e.gbasis(mapping, X, i)[0]
+            fields = [np.asarray(field), field.grad, field.hess]
+            fields += [getattr(field, 'grad{}'.format(k + 3))
+                       for k in range(e.derivatives - 2)]
+            for u, v in zip(U, fields):
+                assert_allclose(v, u, rtol=1e-8,
+                                atol=1e-8 * np.abs(u).max())
+
+
+@pytest.mark.parametrize(
+    "m1,m2,e",
+    [
+        (MeshTri().refined(2), MeshTri().refined(2).scaled(2.),
+         ElementTriMorley),
+        (MeshTet().refined(1), _distorted_tet(), ElementTetMorley),
+    ]
+)
+def test_element_global_reuse(m1, m2, e):
+    """The same instance of ElementGlobal can be used with several
+    meshes."""
+    elem = e()
+    Basis(m1, elem)
+    basis = Basis(m2, elem)
+    basis_fresh = Basis(m2, e())
+    for f, g in zip(basis.basis, basis_fresh.basis):
+        assert_allclose(f[0].hess, g[0].hess)
+
+
+@pytest.mark.parametrize(
+    "m,e,fun",
+    [
+        (MeshTri().refined(5), ElementTriArgyris(),
+         lambda x: x[0] ** 5 - 3. * x[0] ** 2 * x[1] ** 3 + x[1]),
+        (MeshQuad().refined(5), ElementQuadBFS(),
+         lambda x: x[0] ** 3 * x[1] ** 3 - x[0] * x[1] ** 2),
+    ]
+)
+def test_element_global_conditioning(m, e, fun):
+    """Polynomials are reproduced accurately also on fine meshes."""
+    basis = Basis(m, e)
+    y = basis.project(fun)
+    X = np.asarray(basis.global_coordinates())
+    assert_allclose(np.asarray(basis.interpolate(y)), fun(X), atol=1e-11)
