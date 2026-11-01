@@ -175,6 +175,8 @@ Module: skfem.element
     skfem.element.ElementTetCR
     skfem.element.ElementTetCCR
     skfem.element.ElementTetBubble
+    skfem.element.ElementTetMorley
+    skfem.element.ElementTetMWX3
     skfem.element.ElementHex0
     skfem.element.ElementHex1
     skfem.element.ElementHex2

@@ -220,16 +220,19 @@ with respect to documented and/or tested features.
 - Added: `Basis.interpolate_multiple` for a simultaneous interpolation of multiple solution vectors
 - Added: `MappingManifold` for assembling forms over embedded paths or surfaces (see new example ex57.py)
 - Added: `ElementQuadDPC` and `ElementHexDPC`, discontinuous elements of total degree `p` with an orthonormal Legendre basis
-- Added: `ElementLineBubble`, `ElementTriBubble` and `ElementTetBubble`, standalone interior bubble elements, e.g., for bubble enrichment via `ElementComposite` or hierarchical a posteriori error estimators
-- Changed: `Mesh` constructors now accept vertex arrays with higher geometric than topological dimension (these are compatible with `MappingManifold`)
-- Changed: `skfem.autodiff` now uses built-in forward-mode dual number automatic differentiation without the JAX dependency
+- Added: `ElementTetMorley` and `ElementTetMWX3`, tetrahedral Morley-Wang-Xu elements of degree 2 and 3
+- Added: `ElementLineBubble`, `ElementTriBubble` and `ElementTetBubble`, standalone interior bubble elements
+- Changed: `ElementGlobal` evaluates all basis functions at once, which speeds up initialization
+- Changed: `Mesh` constructors accept vertex arrays with higher geometric than topological dimension (used with `MappingManifold`)
+- Changed: `skfem.autodiff` now uses faster built-in forward-mode dual number automatic differentiation without the JAX dependency
 - Changed: `ElementVector` and `ElementComposite` are optimized via `BlockArray` and `BlockDiscreteField` that avoid storing explicit zeros
 - Changed: Accessing `Mesh.subdomains` or `Mesh.boundaries` with nonexisting key/tag will now raise `TagKeyError`
 - Removed: Obsolete projection functions `skfem.utils.project` and `skfem.utils.projection`, replaced by `Basis.project`
 - Removed: Dysfunctional visualization package `skfem.visuals.glvis`
 - Removed: The deprecated `FacetBasis.trace` method
+- Fixed: The same instance of ``ElementGlobal` subclass, e.g., `ElementTriMorley`, gave a wrong basis when used with more than one mesh
 - Fixed: `MeshTri` now preserves boundary tags when refining adaptively
-- Fixed: `MeshTet` now preserves boundary tags when refined uniformly or adaptively
+- Fixed: `MeshTet` now preserves boundary tags when refined
 - Fixed: `ElementGlobal` subclasses such as `ElementLineHermite`, `ElementTriArgyris` and `ElementQuadBFS` now work with periodic meshes
 - Fixed: `solve` preserves complex solutions and eigenvectors
 - Fixed: `Basis.interpolator` preserves vector and tensor components, including during `Basis.project`.
@@ -238,6 +241,7 @@ with respect to documented and/or tested features.
 - Fixed: `skfem.utils.penalize` preserves complex boundary values in the right-hand side
 - Fixed: `MeshWedge` quadrature rules were incorrect
 - Fixed: `MeshTet` quadrature rules for `intorder>=5` were accurate only up to `intorder - 1`
+- Fixed: `ElementGlobal` power basis is now defined in scaled local coordinates to improve conditioning
 
 ### [12.0.2] - 2026-06-05
 

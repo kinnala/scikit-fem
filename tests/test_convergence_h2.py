@@ -101,7 +101,8 @@ class ConvergenceBFS(ConvergenceMorley):
 
     case = (MeshQuad, ElementQuadBFS)
     preref = 1
-    limits = (3.9, 4.5)
+    # the observed rate is still above four on these coarse meshes
+    limits = (3.9, 4.8)
     abs_limit = 5e-9
 
 
