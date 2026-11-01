@@ -157,6 +157,7 @@ Module: skfem.element
     skfem.element.ElementTriSkeletonP0
     skfem.element.ElementTriSkeletonP1
     skfem.element.ElementTriBDM1
+    skfem.element.ElementTriBubble
     skfem.element.ElementQuad0
     skfem.element.ElementQuad1
     skfem.element.ElementQuad2
@@ -173,6 +174,7 @@ Module: skfem.element
     skfem.element.ElementTetMini
     skfem.element.ElementTetCR
     skfem.element.ElementTetCCR
+    skfem.element.ElementTetBubble
     skfem.element.ElementHex0
     skfem.element.ElementHex1
     skfem.element.ElementHex2
@@ -184,6 +186,7 @@ Module: skfem.element
     skfem.element.ElementLinePp
     skfem.element.ElementLineHermite
     skfem.element.ElementLineMini
+    skfem.element.ElementLineBubble
    
 
 .. note::

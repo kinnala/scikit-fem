@@ -49,9 +49,16 @@ from skfem.element import (
     ElementWedge1,
     ElementQuadDPC,
     ElementHexDPC,
+    ElementLineBubble,
+    ElementTriBubble,
+    ElementTetBubble,
 )
 from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
-from skfem.assembly import Basis, BilinearForm, Functional
+from skfem.assembly import (Basis, FacetBasis, Functional, BilinearForm,
+                            LinearForm)
+from skfem.helpers import dot, grad
+from skfem.models.poisson import laplace, unit_load
+from skfem.utils import solve, condense
 from skfem.mapping import MappingAffine
 
 
@@ -89,6 +96,9 @@ class TestNodality(TestCase):
         ElementTriCR(),
         ElementTriCCR(),
         ElementWedge1(),
+        ElementLineBubble(),
+        ElementTriBubble(),
+        ElementTetBubble(),
     ]
 
     def runTest(self):
@@ -251,6 +261,9 @@ class TestDerivatives(TestCase):
         ElementQuadDPC(0),
         ElementQuadDPC(3),
         ElementHexDPC(2),
+        ElementLineBubble(),
+        ElementTriBubble(),
+        ElementTetBubble(),
     ]
 
     def runTest(self):
@@ -456,3 +469,56 @@ def test_dpc_polynomial_reproduction(m, e):
         if sum(exps) <= p:
             assert error(exps) < 1e-12, exps
     assert error(dim * (p,)) > 1e-3
+
+@pytest.mark.parametrize(
+    "m,e",
+    [
+        (MeshLine().refined(2), ElementLineBubble()),
+        (MeshTri().refined(2), ElementTriBubble()),
+        (MeshTet().refined(1), ElementTetBubble()),
+    ]
+)
+def test_bubble_vanishes_on_facets(m, e):
+    basis = Basis(m, e)
+    assert basis.N == m.nelements
+    assert len(basis.get_dofs()) == 0
+    fbasis = FacetBasis(m, e, facets=np.arange(m.nfacets))
+    for i in range(e.interior_dofs):
+        assert_allclose(fbasis.basis[i][0], 0., atol=1e-13)
+
+
+@pytest.mark.parametrize(
+    "m,e1,eb,emini",
+    [
+        (MeshLine().refined(3), ElementLineP1(), ElementLineBubble(),
+         ElementLineMini()),
+        (MeshTri().refined(3), ElementTriP1(), ElementTriBubble(),
+         ElementTriMini()),
+        (MeshTet().refined(2), ElementTetP1(), ElementTetBubble(),
+         ElementTetMini()),
+    ]
+)
+def test_bubble_enrichment_equals_mini(m, e1, eb, emini):
+    """Composite P1 * bubble spans the same space as the MINI element."""
+
+    @BilinearForm
+    def bilinf(u, ub, v, vb, w):
+        return dot(grad(u) + grad(ub), grad(v) + grad(vb))
+
+    @LinearForm
+    def linf(v, vb, w):
+        return v + vb
+
+    basis = Basis(m, e1 * eb, intorder=2 * emini.maxdeg)
+    x = solve(*condense(bilinf.assemble(basis),
+                        linf.assemble(basis),
+                        D=basis.get_dofs()))
+    (x1, _), (xb, _) = basis.split(x)
+
+    mbasis = Basis(m, emini)
+    y = solve(*condense(laplace.assemble(mbasis),
+                        unit_load.assemble(mbasis),
+                        D=mbasis.get_dofs()))
+
+    assert_allclose(x1, y[mbasis.nodal_dofs[0]], atol=1e-12)
+    assert_allclose(xb, y[mbasis.interior_dofs[0]], atol=1e-12)

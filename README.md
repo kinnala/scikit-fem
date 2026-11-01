@@ -220,6 +220,7 @@ with respect to documented and/or tested features.
 - Added: `Basis.interpolate_multiple` for a simultaneous interpolation of multiple solution vectors
 - Added: `MappingManifold` for assembling forms over embedded paths or surfaces (see new example ex57.py)
 - Added: `ElementQuadDPC` and `ElementHexDPC`, discontinuous elements of total degree `p` with an orthonormal Legendre basis
+- Added: `ElementLineBubble`, `ElementTriBubble` and `ElementTetBubble`, standalone interior bubble elements, e.g., for bubble enrichment via `ElementComposite` or hierarchical a posteriori error estimators
 - Changed: `Mesh` constructors now accept vertex arrays with higher geometric than topological dimension (these are compatible with `MappingManifold`)
 - Changed: `skfem.autodiff` now uses built-in forward-mode dual number automatic differentiation without the JAX dependency
 - Changed: `ElementVector` and `ElementComposite` are optimized via `BlockArray` and `BlockDiscreteField` that avoid storing explicit zeros

@@ -36,6 +36,9 @@ from skfem.element import (
     ElementVector,
     ElementQuadDPC,
     ElementHexDPC,
+    ElementLineBubble,
+    ElementTriBubble,
+    ElementTetBubble,
 )
 from skfem.assembly import FacetBasis, Basis
 from skfem.mesh import (MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
@@ -607,8 +610,8 @@ class FacetConvergenceTetP1(FacetConvergenceTetP2):
     case = (MeshTet, ElementTetP1)
     limits = (0.9, 1.1)
     preref = 2
-
-
+    
+   
 @pytest.mark.parametrize(
     "mesh,e,rate",
     [
