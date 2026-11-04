@@ -87,6 +87,18 @@ class Mapping():
         """
         raise NotImplementedError
 
+    def H(self,
+          X: ndarray,
+          eind: Optional[ndarray] = None) -> ndarray:
+        """Perform a mapping from the reference to global edge."""
+        raise NotImplementedError
+
+    def detDH(self,
+              X: ndarray,
+              eind: Optional[ndarray] = None) -> ndarray:
+        """The jacobian determinant of H."""
+        raise NotImplementedError
+
     def normals(self,
                 X: ndarray,
                 tind: ndarray,
