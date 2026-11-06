@@ -28,6 +28,7 @@ from skfem.element import (
     ElementTriP2,
     ElementTriP3,
     ElementTriP4,
+    ElementTriP,
     ElementTriRT0,
     ElementVectorH1,
     ElementHex2,
@@ -57,7 +58,7 @@ from skfem.element import (
 )
 from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 from skfem.assembly import (Basis, FacetBasis, Functional, BilinearForm,
-                            LinearForm)
+                            LinearForm, InteriorFacetBasis)
 from skfem.helpers import dot, grad
 from skfem.models.poisson import laplace, unit_load
 from skfem.utils import solve, condense
@@ -102,6 +103,8 @@ class TestNodality(TestCase):
         ElementLineBubble(),
         ElementTriBubble(),
         ElementTetBubble(),
+        ElementTriP(1),
+        ElementTriP(5),
     ]
 
     def runTest(self):
@@ -267,6 +270,8 @@ class TestDerivatives(TestCase):
         ElementLineBubble(),
         ElementTriBubble(),
         ElementTetBubble(),
+        ElementTriP(2),
+        ElementTriP(6),
     ]
 
     def runTest(self):
@@ -329,6 +334,7 @@ class TestPartitionofUnity(TestCase):
         ElementTriP1B(),
         ElementTriP2B(),
         ElementWedge1(),
+        ElementTriP(5),
     ]
 
     def runTest(self):
@@ -704,3 +710,110 @@ def test_element_global_conditioning(m, e, fun):
     y = basis.project(fun)
     X = np.asarray(basis.global_coordinates())
     assert_allclose(np.asarray(basis.interpolate(y)), fun(X), atol=1e-11)
+
+
+def _unsorted_tri():
+    """A triangle mesh where the element vertices are not sorted."""
+    m = MeshTri().refined(2)
+    rot = np.random.default_rng(1).integers(0, 3, m.t.shape[1])
+    t = np.array([np.roll(m.t[:, k], r) for k, r in enumerate(rot)]).T
+    return MeshTri(m.p, t, sort_t=False)
+
+
+@pytest.mark.parametrize(
+    "m",
+    [
+        MeshTri().refined(2),
+        _unsorted_tri(),
+    ]
+)
+@pytest.mark.parametrize(
+    "e",
+    [
+        ElementTriP3(),
+        ElementTriP4(),
+        ElementTriP(3),
+        ElementTriP(5),
+        ElementTriP(6),
+    ]
+)
+def test_tri_facet_dof_orientation(m, e):
+    """The basis is continuous also if the element vertices are not
+    sorted."""
+    fbasis = [InteriorFacetBasis(m, e, side=i) for i in range(2)]
+    x = np.random.default_rng(0).random(fbasis[0].N)
+    assert_allclose(np.asarray(fbasis[0].interpolate(x)),
+                    np.asarray(fbasis[1].interpolate(x)),
+                    atol=1e-12)
+
+
+@pytest.mark.parametrize("p", [1, 2, 3, 4, 7])
+def test_tri_p_hierarchical(p):
+    """The basis of degree p is contained in the basis of degree p + 1."""
+    e1, e2 = ElementTriP(p), ElementTriP(p + 1)
+    assert (e1.doflocs.shape[0]
+            == 3 + 3 * e1.facet_dofs + e1.interior_dofs
+            == (p + 1) * (p + 2) // 2)
+    X = np.random.default_rng(0).random((2, 10)) / 2.
+    for i in range(e1.doflocs.shape[0]):
+        if i < 3:
+            j = i
+        elif i < 3 + 3 * e1.facet_dofs:
+            facet, k = divmod(i - 3, e1.facet_dofs)
+            j = 3 + facet * e2.facet_dofs + k
+        else:
+            ix = e1._interior[i - 3 - 3 * e1.facet_dofs]
+            j = 3 + 3 * e2.facet_dofs + e2._interior.index(ix)
+        for f1, f2 in zip(e1.lbasis(X, i), e2.lbasis(X, j)):
+            assert_allclose(f1, f2, atol=1e-14)
+
+
+@pytest.mark.parametrize(
+    "p,elem",
+    [
+        (3, ElementTriP3),
+        (4, ElementTriP4),
+    ]
+)
+def test_tri_p_same_space(p, elem):
+    """The hierarchical and the nodal bases give the same solution."""
+    m = _unsorted_tri()
+
+    def solve_poisson(e):
+        basis = Basis(m, e)
+        x = solve(*condense(laplace.assemble(basis),
+                            unit_load.assemble(basis),
+                            D=basis.get_dofs()))
+        return np.asarray(basis.interpolate(x))
+
+    assert_allclose(solve_poisson(ElementTriP(p)), solve_poisson(elem()),
+                    atol=1e-13)
+
+
+def _rotated_quad():
+    """A quadrilateral mesh where the element vertices are rotated."""
+    m = MeshQuad().refined(2)
+    rot = np.random.default_rng(1).integers(0, 4, m.t.shape[1])
+    t = np.array([np.roll(m.t[:, k], r) for k, r in enumerate(rot)]).T
+    return MeshQuad(m.p, t)
+
+
+@pytest.mark.parametrize("p", [3, 4, 5])
+def test_quad_p_facet_dof_orientation(p):
+    """ElementQuadP is continuous and gives the same solution also if the
+    element vertices are rotated."""
+    pts = np.random.default_rng(3).random((2, 20))
+    sols = []
+    for m in [MeshQuad().refined(2), _rotated_quad()]:
+        e = ElementQuadP(p)
+        fbasis = [InteriorFacetBasis(m, e, side=i) for i in range(2)]
+        x = np.random.default_rng(0).random(fbasis[0].N)
+        assert_allclose(np.asarray(fbasis[0].interpolate(x)),
+                        np.asarray(fbasis[1].interpolate(x)),
+                        atol=1e-12)
+        basis = Basis(m, e)
+        x = solve(*condense(laplace.assemble(basis),
+                            unit_load.assemble(basis),
+                            D=basis.get_dofs()))
+        sols.append(basis.probes(pts) @ x)
+    assert_allclose(sols[0], sols[1], atol=1e-12)

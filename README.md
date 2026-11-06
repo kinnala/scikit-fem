@@ -222,6 +222,7 @@ with respect to documented and/or tested features.
 - Added: `ElementQuadDPC` and `ElementHexDPC`, discontinuous elements of total degree `p` with an orthonormal Legendre basis
 - Added: `ElementTetMorley` and `ElementTetMWX3`, tetrahedral Morley-Wang-Xu elements of degree 2 and 3
 - Added: `ElementLineBubble`, `ElementTriBubble` and `ElementTetBubble`, standalone interior bubble elements
+- Added: `ElementTriP` for high order triangle elements
 - Changed: `ElementGlobal` evaluates all basis functions at once, which speeds up initialization
 - Changed: `Mesh` constructors accept vertex arrays with higher geometric than topological dimension (used with `MappingManifold`)
 - Changed: `skfem.autodiff` now uses faster built-in forward-mode dual number automatic differentiation without the JAX dependency
@@ -230,6 +231,7 @@ with respect to documented and/or tested features.
 - Removed: Obsolete projection functions `skfem.utils.project` and `skfem.utils.projection`, replaced by `Basis.project`
 - Removed: Dysfunctional visualization package `skfem.visuals.glvis`
 - Removed: The deprecated `FacetBasis.trace` method
+- Fixed: `ElementQuadP` and `ElementTriP` now work with any mesh orientation
 - Fixed: The same instance of ``ElementGlobal` subclass, e.g., `ElementTriMorley`, gave a wrong basis when used with more than one mesh
 - Fixed: `MeshTri` now preserves boundary tags when refining adaptively
 - Fixed: `MeshTet` now preserves boundary tags when refined

@@ -34,6 +34,10 @@ class ElementTriP4(ElementH1):
 
     refdom = RefTri
 
+    def reversed_facet_dof(self, j):
+        # the facet DOFs are ordered along the facet
+        return self.facet_dofs - 1 - j, 1.
+
     def lbasis(self, X, i):
         x, y = X
 
