@@ -145,6 +145,7 @@ Module: skfem.element
     skfem.element.ElementTriP2
     skfem.element.ElementTriP3
     skfem.element.ElementTriP4
+    skfem.element.ElementTriP
     skfem.element.ElementTriP0
     skfem.element.ElementTriCR
     skfem.element.ElementTriCCR
