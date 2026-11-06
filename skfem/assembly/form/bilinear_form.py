@@ -77,19 +77,16 @@ class BilinearForm(Form):
         })
 
         # initialize COO data structures
-        sz = ubasis.Nbfun * vbasis.Nbfun * nt
         data = np.zeros((ubasis.Nbfun, vbasis.Nbfun, nt), dtype=self.dtype)
-        rows = np.zeros(sz, dtype=np.int32)
-        cols = np.zeros(sz, dtype=np.int32)
+        rowcol = np.empty((2, ubasis.Nbfun, vbasis.Nbfun, nt),
+                          dtype=np.int32)
+        rowcol[0] = vbasis.element_dofs[None, :, :]  # rows
+        rowcol[1] = ubasis.element_dofs[:, None, :]  # cols
 
         # loop over the indices of local stiffness matrix
-        for j in range(ubasis.Nbfun):
-            for i in range(vbasis.Nbfun):
-                ixs = slice(nt * (vbasis.Nbfun * j + i),
-                            nt * (vbasis.Nbfun * j + i + 1))
-                rows[ixs] = vbasis.element_dofs[i]
-                cols[ixs] = ubasis.element_dofs[j]
-                if self.nthreads <= 0:
+        if self.nthreads <= 0:
+            for j in range(ubasis.Nbfun):
+                for i in range(vbasis.Nbfun):
                     data[j, i, :] = self._kernel(
                         ubasis.basis[j],
                         vbasis.basis[i],
@@ -118,11 +115,9 @@ class BilinearForm(Form):
             for t in threads:
                 t.join()
 
-        data = data.flatten('C')
-
         return (
-            np.array([rows, cols]),
-            data,
+            rowcol.reshape(2, -1),
+            data.reshape(-1),
             (vbasis.N, ubasis.N),
             (vbasis.Nbfun, ubasis.Nbfun),
         )
@@ -148,7 +143,7 @@ class BilinearForm(Form):
         return mat
 
     def _kernel(self, u, v, w, dx):
-        return np.sum(self.form(*u, *v, w) * dx, axis=1)
+        return self._integrate(self.form(*u, *v, w), dx)
 
     def _threaded_kernel(self, data, ix, ubasis, vbasis, wdict, dx):
         for ij in ix:

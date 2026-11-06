@@ -46,4 +46,4 @@ class LinearForm(Form):
         return np.array([rows]), data, (vbasis.N,), (vbasis.Nbfun,)
 
     def _kernel(self, v, w, dx):
-        return np.sum(self.form(*v, w) * dx, axis=1)
+        return self._integrate(self.form(*v, w), dx)

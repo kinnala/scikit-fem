@@ -8,6 +8,7 @@ from numpy import ndarray
 from skfem.assembly.dofs import Dofs
 from skfem.element import (DiscreteField, Element, ElementComposite,
                            ElementVector)
+from skfem.element.block_array import BlockArray
 from skfem.mapping import Mapping
 from skfem.mesh import Mesh
 from skfem.quadrature import get_quadrature
@@ -284,27 +285,29 @@ class AbstractBasis:
         if w.shape[0] != self.N:
             raise ValueError("Input array has wrong size.")
 
-        if isinstance(self.elem, ElementVector):
-            # ElementVector shouldn't get split here: workaround
-            refs: List[Tuple[ndarray, 'AbstractBasis']] = [(np.array([]),
-                                                            self)]
-        else:
-            refs = self.split(w)
+        # gather the local DOF values only once
+        values = w[self.element_dofs][..., None]
         dfs: List[DiscreteField] = []
 
         # loop over solution components
-        for c in range(len(refs)):
-            ref = refs[c][1].basis[0][0].astuple
+        for c in range(len(self.basis[0])):
+            ref = self.basis[0][c].astuple
 
             def linear_combination(n):
                 """Global discrete function at quadrature points."""
-                out = 0. * np.einsum('...,...j->...j',
-                                     w[self.element_dofs[0]],
-                                     self.basis[0][c].get(n))
+                out = None
                 for i in range(self.Nbfun):
-                    values = w[self.element_dofs[i]]
-                    out += np.einsum('...,...j->...j', values,
-                                     self.basis[i][c].get(n))
+                    phi = self.basis[i][c].get(n)
+                    if out is None:
+                        out = np.zeros(phi.shape,
+                                       dtype=np.result_type(w.dtype,
+                                                            phi.dtype))
+                    if isinstance(phi, BlockArray):
+                        # skip the structurally zero components
+                        for k, block in phi.blocks.items():
+                            out[k] += values[i] * block
+                    else:
+                        out += values[i] * phi
                 return out
 
             # interpolate DiscreteField

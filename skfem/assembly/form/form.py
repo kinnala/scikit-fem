@@ -89,6 +89,16 @@ class Form:
         return COOData(*self._assemble(*args, **kwargs))
 
     @staticmethod
+    def _integrate(f, dx: ndarray, axis: int = 1) -> ndarray:
+        """Sum ``f * dx`` over the quadrature points of each element."""
+        if (isinstance(f, ndarray)
+                and f.shape == dx.shape
+                and f.dtype != object):
+            # avoids allocating the temporary array f * dx
+            return np.einsum('ij,ij->i', f, dx)
+        return np.sum(f * dx, axis=axis)
+
+    @staticmethod
     def _normalize_asm_kwargs(w, basis):
         """Support additional input formats for 'w'."""
         for k in w:
