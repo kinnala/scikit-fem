@@ -34,6 +34,10 @@ class ElementQuadP(ElementLinePp):
         self.p = p
         self._X = np.array([])
 
+    def reversed_facet_dof(self, j):
+        # L_k(1 - x) = (-1) ** k L_k(x) where k = j + 2
+        return j, (-1.) ** j
+
     def lbasis(self, X, i):
         x, y = X
 
@@ -57,8 +61,11 @@ class ElementQuadP(ElementLinePp):
                 Px, Py = self.Px[1], self.Py[ind]
                 dPx, dPy = self.dPx[1], self.dPy[ind]
             elif n == 2:
-                Px, Py = self.Px[ind], self.Py[1]
-                dPx, dPy = self.dPx[ind], self.dPy[1]
+                # parametrize from the vertex 2 to the vertex 3, i.e. use
+                # L_k(1 - x) = (-1) ** k L_k(x), as on the other facets
+                sign = (-1.) ** ind
+                Px, Py = sign * self.Px[ind], self.Py[1]
+                dPx, dPy = sign * self.dPx[ind], self.dPy[1]
             elif n == 3:
                 Px, Py = self.Px[0], self.Py[ind]
                 dPx, dPy = self.dPx[0], self.dPy[ind]
