@@ -109,30 +109,56 @@ class MappingIsoparametric(Mapping):
                 out += p[i, facets[itr, find]][:, None] * dphi[j]
             return out
 
-    def _J(self, i, j, X, tind=None):
-        p = self.mesh.doflocs
-        t = self.mesh.dofs.element_dofs
-        if tind is None:
-            out = np.zeros((t.shape[1], X.shape[1]))
-            for itr in range(t.shape[0]):
-                _, dphi = self.elem.lbasis(X, itr)
-                out += p[i, t[itr, :]][:, None] * dphi[j]
-            return out
-        else:
-            out = np.zeros((len(tind), X.shape[-1]))
-            for itr in range(t.shape[0]):
-                _, dphi = self.elem.lbasis(X, itr)
-                out += p[i, t[itr, tind]][:, None] * dphi[j]
-            return out
+    def _key(self, X, tind):
+        return (X.shape,) + hash_args(X, tind)
 
-    def J(self, i, j, X, tind=None):
-        # cache the jacobian
+    def _jacobians(self, X, tind=None):
+        """Return all entries of the Jacobian matrix as a single array."""
         if not hasattr(self, '_cache'):
             self._cache = {}
-        h = hash_args(i, j, X, tind)
-        if h not in self._cache:
-            self._cache[h] = self._J(i, j, X, tind)
-        return self._cache[h]
+        key = self._key(X, tind)
+        if key not in self._cache:
+            p = self.mesh.doflocs
+            t = self.mesh.dofs.element_dofs
+            if tind is not None:
+                t = t[:, tind]
+            dphi = np.array([self.elem.lbasis(X, itr)[1]
+                             for itr in range(t.shape[0])])
+            if dphi.ndim == 3:
+                # same reference points for all elements:
+                # J[i, j] = p[i, t].T @ dphi[:, j]
+                out = (p[:, t.T][:, None]
+                       @ np.moveaxis(dphi, 0, 1)[None])
+            else:
+                # different reference points for each element
+                out = np.zeros((p.shape[0], dphi.shape[1],
+                                t.shape[1], X.shape[-1]))
+                for i in range(out.shape[0]):
+                    for j in range(out.shape[1]):
+                        for itr in range(t.shape[0]):
+                            out[i, j] += (p[i, t[itr]][:, None]
+                                          * dphi[itr, j])
+            self._cache[key] = out
+        return self._cache[key]
+
+    def _cached(self, name, X, tind, compute):
+        """Remember the latest result for the given X and tind.
+
+        Elements call, e.g., :meth:`invDF` once per basis function with the
+        same arguments.
+
+        """
+        if not hasattr(self, '_latest'):
+            self._latest = {}
+        key = self._key(X, tind)
+        if name not in self._latest or self._latest[name][0] != key:
+            value = compute()
+            value.setflags(write=False)
+            self._latest[name] = (key, value)
+        return self._latest[name][1]
+
+    def J(self, i, j, X, tind=None):
+        return self._jacobians(X, tind)[i, j]
 
     def G(self, X: ndarray, find: Optional[ndarray] = None) -> ndarray:
         return np.array([self.bndmap(i, X, find=find)
@@ -143,13 +169,12 @@ class MappingIsoparametric(Mapping):
             return np.sqrt(self.bndJ(0, 0, X, find) ** 2 +
                            self.bndJ(1, 0, X, find) ** 2)
         elif self.dim == 3:
+            J = [[self.bndJ(i, j, X, find) for j in range(2)]
+                 for i in range(3)]
             return np.sqrt(
-                (self.bndJ(1, 0, X, find) * self.bndJ(2, 1, X, find) -
-                 self.bndJ(2, 0, X, find) * self.bndJ(1, 1, X, find)) ** 2 +
-                (-self.bndJ(0, 0, X, find) * self.bndJ(2, 1, X, find) +
-                 self.bndJ(2, 0, X, find) * self.bndJ(0, 1, X, find)) ** 2 +
-                (self.bndJ(0, 0, X, find) * self.bndJ(1, 1, X, find) -
-                 self.bndJ(1, 0, X, find) * self.bndJ(0, 1, X, find)) ** 2
+                (J[1][0] * J[2][1] - J[2][0] * J[1][1]) ** 2 +
+                (-J[0][0] * J[2][1] + J[2][0] * J[0][1]) ** 2 +
+                (J[0][0] * J[1][1] - J[1][0] * J[0][1]) ** 2
             )
         else:
             raise NotImplementedError
@@ -172,17 +197,18 @@ class MappingIsoparametric(Mapping):
 
     def DF(self, X, tind=None, J=None):
         if J is None:
-            J = [[self.J(i, j, X, tind=tind) for j in range(self.dim)]
-                 for i in range(self.dim)]
+            return self._jacobians(X, tind).copy()
         return np.array(J)
 
     def detDF(self, X, tind=None, J=None):
         if J is None:
-            J = [[self.J(i, j, X, tind=tind) for j in range(self.dim)]
-                 for i in range(self.dim)]
+            return self._cached('detDF', X, tind,
+                                lambda: self._detDF(self._jacobians(X, tind)))
+        return self._detDF(J)
 
+    def _detDF(self, J):
         if self.dim == 1:
-            detDF = J[0][0]
+            detDF = J[0][0].copy()
         elif self.dim == 2:
             detDF = J[0][0] * J[1][1] - J[0][1] * J[1][0]
         elif self.dim == 3:
@@ -198,9 +224,12 @@ class MappingIsoparametric(Mapping):
         return detDF
 
     def invDF(self, X, tind=None):
-        J = [[self.J(i, j, X, tind=tind) for j in range(self.dim)]
-             for i in range(self.dim)]
-        detDF = self.detDF(X, tind, J=J)
+        return self._cached('invDF', X, tind,
+                            lambda: self._invDF(X, tind))
+
+    def _invDF(self, X, tind=None):
+        J = self._jacobians(X, tind)
+        detDF = self.detDF(X, tind)
         invDF = np.empty((self.dim, self.dim) + J[0][0].shape)
 
         if self.dim == 1:
@@ -223,7 +252,8 @@ class MappingIsoparametric(Mapping):
         else:
             raise Exception("Not implemented for the given dimension.")
 
-        return invDF / detDF
+        invDF /= detDF
+        return invDF
 
     def normals(self, X, tind, find, t2f):
         Nref = self.mesh.elem.refdom.normals

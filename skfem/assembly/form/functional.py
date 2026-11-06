@@ -21,7 +21,7 @@ class Functional(Form):
                 dx: ndarray) -> ndarray:
         if self.form is None:
             raise Exception("Form function handle not defined.")
-        return (self.form(w) * dx).sum(-1)
+        return self._integrate(self.form(w), dx, axis=-1)
 
     def elemental(self,
                   v: AbstractBasis,

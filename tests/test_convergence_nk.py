@@ -77,8 +77,10 @@ class ConvergenceNedelecN2(ConvergenceNedelec):
 
 class ConvergenceNedelecN3(ConvergenceNedelec):
     case = (MeshTri, lambda: ElementTriN3() * ElementTriP3())
-    limits = (5.8, 6.2) # Higher order is much more sensitive. The slope is 5.907 for these values,
+    limits = (5.8, 6.6) # Higher order is much more sensitive. The slope is 5.907 for these values,
     # but it can move a bit further for different meshes/integration orders.
+    # The error on the finest mesh is ~1e-12, i.e. at the level of roundoff,
+    # so the slope also depends on the summation order used in assembly.
     intorder = 9
     N_start = 3
 

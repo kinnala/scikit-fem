@@ -64,4 +64,4 @@ class TrilinearForm(Form):
         )
 
     def _kernel(self, u, v, w, params, dx):
-        return np.sum(self.form(*u, *v, *w, params) * dx, axis=1)
+        return self._integrate(self.form(*u, *v, *w, params), dx)
