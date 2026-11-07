@@ -1,4 +1,8 @@
+"""Visualization using vedo (VTK)."""
+
 import tempfile
+
+from .data import sample
 
 
 def draw(m, backend=False, **kwargs):
@@ -20,6 +24,9 @@ def draw(m, backend=False, **kwargs):
 
 
 def plot(basis, z, **kwargs):
-    nrefs = kwargs["nrefs"] if 'nrefs' in kwargs else 1
-    m, Z = basis.refinterp(z, nrefs=nrefs)
-    return draw(m, point_data={'z': Z})
+    """Plot fields sampled by :func:`skfem.visuals.data.sample`."""
+    data = sample(basis, z, nrefs=kwargs.get("nrefs", 1))
+    point_data = {k: v for k, v in data.point_data.items()}
+    if set(point_data) == {'u'}:
+        point_data = {'z': point_data['u']}  # backwards compatibility
+    return draw(data.to_mesh(), point_data=point_data)

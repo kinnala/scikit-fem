@@ -12,6 +12,31 @@ from matplotlib.collections import PolyCollection
 
 from ..assembly import CellBasis
 from ..mesh import Mesh2D, MeshLine1, MeshQuad1, MeshTri1, Mesh3D
+from .data import VisData
+
+
+def _nrefs(kwargs, default=1):
+    if "nrefs" in kwargs:
+        return kwargs["nrefs"]
+    if "Nrefs" in kwargs:
+        return kwargs["Nrefs"]
+    return default
+
+
+def _no_3d(basis):
+    if basis.mesh.dim() == 3:
+        raise NotImplementedError("The matplotlib backend does not support "
+                                  "plotting fields on three-dimensional "
+                                  "meshes; use visuals='web' instead.")
+
+
+def _from_visdata(data: VisData, name):
+    """Linear mesh and component-major values for the mesh-based plots."""
+    m = data.to_mesh()
+    if name is None and not data.point_data:
+        return m, None
+    v = data.point_data[name if name is not None else data.fields[0]]
+    return m, np.ascontiguousarray(v.T).flatten()
 
 
 @singledispatch
@@ -22,14 +47,13 @@ def draw(m, **kwargs) -> Axes:
 
 @draw.register(CellBasis)
 def draw_basis(ib: CellBasis, **kwargs) -> Axes:
-    if "nrefs" in kwargs:
-        nrefs = kwargs["nrefs"]
-    elif "Nrefs" in kwargs:
-        nrefs = kwargs["Nrefs"]
-    else:
-        nrefs = 1
-    m, _ = ib.refinterp(ib.mesh.p[0], nrefs=nrefs)
+    m, _ = ib.refinterp(ib.mesh.p[0], nrefs=_nrefs(kwargs))
     return draw(m, boundaries_only=True, **kwargs)
+
+
+@draw.register(VisData)
+def draw_visdata(data: VisData, **kwargs) -> Axes:
+    return draw(data.to_mesh(), boundaries_only=True, **kwargs)
 
 
 @draw.register(Mesh3D)
@@ -322,13 +346,28 @@ def plot_meshquad(m: MeshQuad1, z, **kwargs):
 @plot.register(CellBasis)
 def plot_basis(basis: CellBasis, z: ndarray, **kwargs) -> Axes:
     """Plot on a refined mesh via :meth:`CellBasis.refinterp`."""
-    if "nrefs" in kwargs:
-        nrefs = kwargs["nrefs"]
-    elif "Nrefs" in kwargs:
-        nrefs = kwargs["Nrefs"]
-    else:
-        nrefs = 1
-    return plot(*basis.refinterp(z, nrefs=nrefs), **kwargs)
+    _no_3d(basis)
+    return plot(*basis.refinterp(z, nrefs=_nrefs(kwargs)), **kwargs)
+
+
+@plot.register(VisData)
+def plot_visdata(data: VisData, name=None, **kwargs) -> Axes:
+    """Plot a field of :class:`~skfem.visuals.data.VisData`."""
+    if data.dim == 3:
+        raise NotImplementedError("The matplotlib backend does not support "
+                                  "plotting fields on three-dimensional "
+                                  "meshes; use visuals='web' instead.")
+    if data.dim == 1 and data.gdim == 1 and data.point_data:
+        ax = kwargs["ax"] if "ax" in kwargs else plt.figure().add_subplot(111)
+        x = data.points[:, 0]
+        z = data.scalar(name, kwargs.get("component"))
+        cells = data.cells[np.argsort(x[data.cells].mean(axis=1))]
+        ix = cells.flatten()
+        ax.plot(x[ix], z[ix], kwargs.get("color", 'k-'),
+                **kwargs.get("plot_kwargs", {}))
+        ax.show = lambda: plt.show()
+        return ax
+    return plot(*_from_visdata(data, name), **kwargs)
 
 
 @singledispatch
@@ -392,13 +431,14 @@ def plot3_meshquad(m: MeshQuad1, z: ndarray, **kwargs) -> Axes:
 @plot3.register(CellBasis)
 def plot3_basis(basis: CellBasis, z: ndarray, **kwargs) -> Axes:
     """Plot on a refined mesh via :meth:`CellBasis.refinterp`."""
-    if "nrefs" in kwargs:
-        nrefs = kwargs["nrefs"]
-    elif "Nrefs" in kwargs:
-        nrefs = kwargs["Nrefs"]
-    else:
-        nrefs = 1
-    return plot3(*basis.refinterp(z, nrefs=nrefs), **kwargs)
+    _no_3d(basis)
+    return plot3(*basis.refinterp(z, nrefs=_nrefs(kwargs)), **kwargs)
+
+
+@plot3.register(VisData)
+def plot3_visdata(data: VisData, name=None, **kwargs) -> Axes:
+    """Plot a field of :class:`~skfem.visuals.data.VisData` (3D)."""
+    return plot3(*_from_visdata(data, name), **kwargs)
 
 
 def savefig(*args, **kwargs):

@@ -162,6 +162,5 @@ for step in range(nsteps):
 
 
 if __name__ == '__main__':
-    (mesh.translated(u[basis.nodal_dofs])
-         .draw('vedo', point_data={'uy': u[basis.nodal_dofs[1]]})
-         .show())
+    basis.plot({'uy': (u, lambda w: w[1]), 'u': u}, 'web',
+               deform='u', deform_scale=1., nrefs=3).show()

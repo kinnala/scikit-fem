@@ -1,5 +1,4 @@
 import logging
-import importlib
 from warnings import warn
 from typing import Any, List, Optional, Tuple, Type, Union
 
@@ -474,24 +473,48 @@ class AbstractBasis:
         """
         raise NotImplementedError
 
-    def plot(self, x, visuals='matplotlib', **kwargs):
-        """Convenience wrapper for skfem.visuals."""
-        mod = importlib.import_module('skfem.visuals.{}'.format(visuals))
-        return mod.plot(self, x, **kwargs)
+    def plot(self, x, visuals=None, **kwargs):
+        """Convenience wrapper for :mod:`skfem.visuals`.
 
-    def plot3(self, x, visuals='matplotlib', **kwargs):
-        """Convenience wrapper for skfem.visuals."""
-        if not isinstance(visuals, str):
-            logger.warning("Second argument, 'visuals', must be a string.")
-        mod = importlib.import_module('skfem.visuals.{}'.format(visuals))
-        return mod.plot3(self, x, **kwargs)
+        Parameters
+        ----------
+        x
+            The field(s) to plot; see :func:`skfem.visuals.data.sample`.
+        visuals
+            The backend, e.g. ``'matplotlib'``, ``'svg'`` or ``'web'``.
+            Defaults to :func:`skfem.visuals.get_default_backend`.
 
-    def draw(self, visuals='matplotlib', **kwargs):
-        """Convenience wrapper for skfem.visuals."""
-        if not isinstance(visuals, str):
-            logger.warning("First argument, 'visuals', must be a string.")
-        mod = importlib.import_module('skfem.visuals.{}'.format(visuals))
-        return mod.draw(self, **kwargs)
+        """
+        from skfem.visuals import get_backend
+        return get_backend(visuals).plot(self, x, **kwargs)
+
+    def plot3(self, x, visuals=None, **kwargs):
+        """Convenience wrapper for :mod:`skfem.visuals`.
+
+        Parameters
+        ----------
+        x
+            The field(s) to plot; see :func:`skfem.visuals.data.sample`.
+        visuals
+            The backend, e.g. ``'matplotlib'``, ``'svg'`` or ``'web'``.
+            Defaults to :func:`skfem.visuals.get_default_backend`.
+
+        """
+        from skfem.visuals import get_backend
+        return get_backend(visuals).plot3(self, x, **kwargs)
+
+    def draw(self, visuals=None, **kwargs):
+        """Convenience wrapper for :mod:`skfem.visuals`.
+
+        Parameters
+        ----------
+        visuals
+            The backend, e.g. ``'matplotlib'``, ``'svg'`` or ``'web'``.
+            Defaults to :func:`skfem.visuals.get_default_backend`.
+
+        """
+        from skfem.visuals import get_backend
+        return get_backend(visuals).draw(self, **kwargs)
 
     def __matmul__(self, other):
         from .composite_basis import CompositeBasis
