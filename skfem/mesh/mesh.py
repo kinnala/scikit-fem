@@ -910,7 +910,7 @@ class Mesh:
             for _ in range(times_or_ix):
                 mtmp = m._uniform()
                 # fix subdomains for remaining mesh types
-                if m._subdomains is not None and len(mtmp._subdomains) == 0:
+                if m._subdomains and len(mtmp._subdomains) == 0:
                     N = int(mtmp.t.shape[1] / m.t.shape[1])
                     new_t = np.zeros((N, m.t.shape[1]), dtype=np.int32)
                     new_t[0] = np.arange(m.t.shape[1], dtype=np.int32)

@@ -247,7 +247,7 @@ class MeshTri1(MeshSimplex, Mesh2D):
             _subdomains=None,
         )
 
-        if self._boundaries is not None:
+        if self._boundaries:
             # mapping of indices between old and new facets
             new_facets = np.zeros((2, self.facets.shape[1]), dtype=np.int32)
             ix0 = np.arange(t.shape[1], dtype=np.int32)
@@ -411,7 +411,7 @@ class MeshTri1(MeshSimplex, Mesh2D):
             _subdomains=subdomains,
         )
 
-        if self._boundaries is not None:
+        if self._boundaries:
             # split facets are halved at the new vertex, others are kept
             f = self.facets
             mid = f.copy()

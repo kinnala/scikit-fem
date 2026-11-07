@@ -58,7 +58,7 @@ class MeshQuad1(Mesh2D):
             _subdomains=None,
         )
 
-        if self._boundaries is not None:
+        if self._boundaries:
             # mapping of indices between old and new facets
             new_facets = np.zeros((2, self.facets.shape[1]), dtype=np.int32)
             ix0 = np.arange(t.shape[1], dtype=np.int32)

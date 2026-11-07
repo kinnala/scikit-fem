@@ -125,7 +125,7 @@ class MeshTet1(MeshSimplex, Mesh3D):
             np.vstack((t2e[0, c3], t2e[5, c3], t2e[2, c3], t2e[1, c3])),
         ))
 
-        if self._subdomains is not None:
+        if self._subdomains:
             nt = t.shape[1]
             new_t = np.zeros((8, nt), dtype=np.int32)
             new_t[0] = np.arange(nt, dtype=np.int32)
@@ -165,7 +165,7 @@ class MeshTet1(MeshSimplex, Mesh3D):
             _subdomains=subdomains,
         )
 
-        if self._boundaries is not None:
+        if self._boundaries:
             # each facet splits into four; find their indices in the new mesh
             f = self.facets
             f2e = self.f2e + sz
@@ -175,12 +175,21 @@ class MeshTet1(MeshSimplex, Mesh3D):
                 np.vstack((f[2], f2e[1], f2e[2])),
                 np.vstack((f2e[0], f2e[1], f2e[2])),
             )), axis=0)
-            _, ix = np.unique(np.hstack((m.facets, subfacets)),
-                              axis=1,
-                              return_inverse=True)
-            new_facets = (ix.flatten()[m.nfacets:]
-                          .reshape(4, -1)
-                          .astype(np.int32))
+            nv = m.nvertices
+            if nv < 2 ** 21:
+                # m.facets is sorted lexicographically; encode each facet
+                # as a single int64 key and look up via binary search
+                mf = m.facets.astype(np.int64)
+                sf = subfacets.astype(np.int64)
+                ix = np.searchsorted((mf[0] * nv + mf[1]) * nv + mf[2],
+                                     (sf[0] * nv + sf[1]) * nv + sf[2])
+            else:
+                _, ix = np.unique(np.hstack((m.facets, subfacets)),
+                                  axis=1,
+                                  return_inverse=True)
+                ix = ix.flatten()[m.nfacets:]
+            new_facets = ix.reshape(4, -1).astype(np.int32)
+            facets, t2f = m._facets, m._t2f
             m = replace(
                 m,
                 _boundaries={
@@ -188,6 +197,8 @@ class MeshTet1(MeshSimplex, Mesh3D):
                     for name, ixs in self._boundaries.items()
                 },
             )
+            # keep the facets already built for the refined mesh
+            m._facets, m._t2f = facets, t2f
 
         return m
 
@@ -360,7 +371,7 @@ class MeshTet1(MeshSimplex, Mesh3D):
             _subdomains=None,
         )
 
-        if self._boundaries is not None:
+        if self._boundaries:
             # new facets inside an original facet are supported
             # by exactly its three vertices
             fsupp = self._adaptive_union(
