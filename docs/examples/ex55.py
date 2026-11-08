@@ -83,11 +83,19 @@ However, the deformation gradient is always computed w.r.t. the reference config
 and interpolate these gradients by the total deformation :math:`u` w.r.t. the initial mesh and basis in every iteration.
 
 """
+import sys
 import numpy as np
 from skfem import *
 from skfem.helpers import grad, identity, ddot, det, transpose, inv, trace, mul
-from skfem.experimental.cforms import CBilinearForm, CLinearForm
 from datetime import datetime
+
+
+if sys.platform != 'emscripten':
+    # cforms do not work in Pyodide
+    from skfem.experimental.cforms import CBilinearForm, CLinearForm
+    BilinearForm = CBilinearForm(cache_sparsity=True)
+    LinearForm = CLinearForm
+
 
 start = datetime.now()
 # note: rough mesh to make tests fast
@@ -105,7 +113,7 @@ gradbasis = Basis(mesh, element, intorder=1)
 
 mu, lmbda = 1., 2.
 
-@CLinearForm
+@LinearForm
 def L(v, w):
     dudX  = w['orig_gradu'] 
     F     = dudX + identity(dudX)
@@ -116,7 +124,7 @@ def L(v, w):
     tau   = mu * (b - I) + lmbda * lnJ * I
     return 1/J*ddot(tau,grad(v))
 
-@CBilinearForm(cache_sparsity=True)
+@BilinearForm
 def a(u, v, w):
     dudX  = w['orig_gradu'] 
     F     = dudX + identity(dudX)
