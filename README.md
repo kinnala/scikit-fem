@@ -223,6 +223,7 @@ with respect to documented and/or tested features.
 - Added: `ElementTetMorley` and `ElementTetMWX3`, tetrahedral Morley-Wang-Xu elements of degree 2 and 3
 - Added: `ElementLineBubble`, `ElementTriBubble` and `ElementTetBubble`, standalone interior bubble elements
 - Added: `ElementTriP` for high order triangle elements
+- Added: `ElementTriRT` for high order Raviart-Thomas elements
 - Added: `skfem.visuals.web`, an interactive WebGL2 viewer (with a canvas fallback); try `basis.plot(u, 'web').show()`
 - Changed: `skfem.autodiff` was rewritten to use faster built-in forward-mode dual number AD without the JAX dependency
 - Changed: `ElementVector` and `ElementComposite` are optimized via `BlockArray` and `BlockDiscreteField` that avoid storing explicit zeros
