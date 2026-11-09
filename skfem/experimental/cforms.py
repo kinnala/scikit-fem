@@ -20,12 +20,18 @@ How it works:
    ``eye``, ...) are based on ``np.einsum``, indexing and arithmetic, which
    all work on NumPy object arrays, so the same helpers build the C
    expression of the integrand.  Nothing in :mod:`skfem.helpers` is changed.
+   The expression is a graph where identical subexpressions are shared, and
+   every operation is evaluated at the outermost loop it can be hoisted to:
+   once per quadrature point (depends only on ``w``), once per test or
+   trial function, or in the innermost loop.
 
 2. *Code generation.*  The reference basis functions are tabulated at the
    quadrature points in Python (via ``Element.lbasis``) and embedded into the
    C source as constant arrays.  The element loop transforms them using
    ``invDF`` and ``dx`` that are taken from the Basis object, so any mapping
-   (affine, isoparametric) is supported without writing C for it.
+   (affine, isoparametric) is supported without writing C for it.  DOF
+   vectors given to ``assemble`` and the global coordinates ``w.x`` are
+   interpolated inside the kernel.
 
 3. *Compilation.*  The source is compiled with the system C compiler (``CC``
    environment variable, defaults to ``cc``) with POSIX threads, and loaded
@@ -46,14 +52,17 @@ How it works:
    :func:`_partition`.
 
 Unsupported cases (e.g. facet bases, H(div)/H(curl) elements, complex
-dtype) fall back to the Python implementation with a warning.
+dtype, no C compiler as in Pyodide) fall back to the Python implementation
+with a warning.
 
 """
 import ctypes
 import hashlib
 import numbers
 import os
+import shutil
 import subprocess
+import sys
 import tempfile
 import warnings
 import weakref
@@ -63,6 +72,7 @@ import numpy as np
 from numpy import ndarray
 
 from skfem.assembly.basis import CellBasis
+from skfem.mapping import MappingAffine, MappingIsoparametric
 from skfem.assembly.form import BilinearForm, LinearForm
 from skfem.assembly.form.form import FormExtraParams
 from skfem.element import (DiscreteField, ElementDG, ElementH1,
@@ -73,28 +83,83 @@ from skfem.element import (DiscreteField, ElementDG, ElementH1,
 # Symbolic scalars
 # ---------------------------------------------------------------------------
 
-def _c(x) -> str:
-    """Convert a CExpr or a number into C source."""
-    if isinstance(x, CExpr):
-        return x.src
-    if isinstance(x, numbers.Number):
-        if isinstance(x, complex):
-            raise NotImplementedError("Complex numbers are not supported.")
-        return repr(float(x))
-    raise TypeError("Cannot convert '{}' to C.".format(type(x)))
+def _const(x) -> float:
+    if isinstance(x, complex):
+        raise NotImplementedError("Complex numbers are not supported.")
+    return float(x)
 
 
 def _is(x, value) -> bool:
     return isinstance(x, numbers.Number) and x == value
 
 
+class _Graph:
+    """Expression graph of one trace; identical subexpressions are shared."""
+
+    def __init__(self):
+        self.table = {}
+
+    def intern(self, key, make):
+        node = self.table.get(key)
+        if node is None:
+            node = make()
+            node.id = len(self.table)
+            self.table[key] = node
+        return node
+
+
+_graph = _Graph()  # replaced by a fresh graph for every trace
+
+
+def _key(x):
+    return ('n', x.id) if isinstance(x, CExpr) else ('c', _const(x))
+
+
+def _deps(name: str) -> frozenset:
+    """Loop indices a symbol depends on: trial 'j', test 'i' or none."""
+    if name.startswith(('U[', 'DU[')):
+        return frozenset('j')
+    if name.startswith(('V[', 'DV[')):
+        return frozenset('i')
+    return frozenset()
+
+
 class CExpr:
-    """A scalar C expression; supports the arithmetic used in forms."""
+    """A scalar C expression; supports the arithmetic used in forms.
 
-    __slots__ = ('src',)
+    Expressions are nodes of a graph: a symbol (a C variable), or an
+    operation ``op`` applied to ``args`` (CExprs or numbers).  Identical
+    subexpressions are the same node, which is used for hoisting.
 
-    def __init__(self, src: str):
-        self.src = src
+    """
+
+    __slots__ = ('op', 'args', 'deps', 'id')
+
+    @staticmethod
+    def symbol(name: str) -> 'CExpr':
+        def make():
+            node = CExpr()
+            node.op, node.args, node.deps = 'sym', (name,), _deps(name)
+            return node
+        return _graph.intern(('sym', name), make)
+
+    @staticmethod
+    def apply(op: str, *args) -> 'CExpr':
+        if op in ('+', '*'):  # commutative: canonical order of operands
+            args = tuple(sorted(args, key=_key))
+
+        def make():
+            node = CExpr()
+            node.op, node.args = op, args
+            node.deps = frozenset().union(
+                *(a.deps for a in args if isinstance(a, CExpr)))
+            return node
+        return _graph.intern((op,) + tuple(_key(a) for a in args), make)
+
+    @property
+    def src(self) -> str:
+        """Inline C source of the expression (for inspection)."""
+        return _render(self, lambda node: node.src)
 
     def __repr__(self):
         return self.src
@@ -106,28 +171,24 @@ class CExpr:
             return NotImplemented
         if _is(other, 0):
             return self
-        return CExpr("({} + {})".format(self.src, _c(other)))
+        return CExpr.apply('+', self, other)
 
     def __radd__(self, other):
-        if not isinstance(other, (CExpr, numbers.Number)):
-            return NotImplemented
-        if _is(other, 0):
-            return self
-        return CExpr("({} + {})".format(_c(other), self.src))
+        return self.__add__(other)
 
     def __sub__(self, other):
         if not isinstance(other, (CExpr, numbers.Number)):
             return NotImplemented
         if _is(other, 0):
             return self
-        return CExpr("({} - {})".format(self.src, _c(other)))
+        return CExpr.apply('-', self, other)
 
     def __rsub__(self, other):
         if not isinstance(other, (CExpr, numbers.Number)):
             return NotImplemented
         if _is(other, 0):
             return -self
-        return CExpr("({} - {})".format(_c(other), self.src))
+        return CExpr.apply('-', other, self)
 
     def __mul__(self, other):
         if not isinstance(other, (CExpr, numbers.Number)):
@@ -136,49 +197,48 @@ class CExpr:
             return 0.
         if _is(other, 1):
             return self
-        return CExpr("({} * {})".format(self.src, _c(other)))
+        return CExpr.apply('*', self, other)
 
     def __rmul__(self, other):
-        if not isinstance(other, (CExpr, numbers.Number)):
-            return NotImplemented
-        if _is(other, 0):
-            return 0.
-        if _is(other, 1):
-            return self
-        return CExpr("({} * {})".format(_c(other), self.src))
+        return self.__mul__(other)
 
     def __truediv__(self, other):
         if not isinstance(other, (CExpr, numbers.Number)):
             return NotImplemented
-        return CExpr("({} / {})".format(self.src, _c(other)))
+        if _is(other, 1):
+            return self
+        return CExpr.apply('/', self, other)
 
     def __rtruediv__(self, other):
         if not isinstance(other, (CExpr, numbers.Number)):
             return NotImplemented
         if _is(other, 0):
             return 0.
-        return CExpr("({} / {})".format(_c(other), self.src))
+        return CExpr.apply('/', other, self)
 
     def __pow__(self, other):
         if not isinstance(other, (CExpr, numbers.Number)):
             return NotImplemented
         if isinstance(other, numbers.Integral) and 0 < other <= 4:
-            return CExpr("(" + " * ".join([self.src] * int(other)) + ")")
-        return CExpr("pow({}, {})".format(self.src, _c(other)))
+            out = self
+            for _ in range(int(other) - 1):
+                out = out * self
+            return out
+        return CExpr.apply('pow', self, other)
 
     def __rpow__(self, other):
         if not isinstance(other, (CExpr, numbers.Number)):
             return NotImplemented
-        return CExpr("pow({}, {})".format(_c(other), self.src))
+        return CExpr.apply('pow', other, self)
 
     def __neg__(self):
-        return CExpr("(-{})".format(self.src))
+        return CExpr.apply('neg', self)
 
     def __pos__(self):
         return self
 
     def __abs__(self):
-        return CExpr("fabs({})".format(self.src))
+        return CExpr.apply('fabs', self)
 
     def __bool__(self):
         raise TypeError("Symbolic expressions have no truth value; "
@@ -187,7 +247,7 @@ class CExpr:
     # NumPy calls these methods for ufuncs on object arrays, e.g. np.sqrt
     def _fun(name):
         def f(self):
-            return CExpr("{}({})".format(name, self.src))
+            return CExpr.apply(name, self)
         return f
 
     sqrt = _fun('sqrt')
@@ -206,6 +266,90 @@ class CExpr:
     del _fun
 
 
+def _render(node: CExpr, ref) -> str:
+    """C source of one operation; ``ref`` gives the source of operands."""
+    if node.op == 'sym':
+        return node.args[0]
+    args = [ref(a) if isinstance(a, CExpr) else repr(_const(a))
+            for a in node.args]
+    if node.op in ('+', '-', '*', '/'):
+        return "({} {} {})".format(args[0], node.op, args[1])
+    if node.op == 'neg':
+        return "(-{})".format(args[0])
+    return "{}({})".format(node.op, ", ".join(args))
+
+
+def _emit(root, bilinear: bool):
+    """Generate the loops over basis functions with hoisted temporaries.
+
+    Every operation is computed once at the outermost loop level allowed by
+    its dependencies: per quadrature point (only 'w'), per test function
+    'i', per trial function 'j' (precomputed to arrays over 'j' before the
+    loops), or in the innermost loop (both 'i' and 'j').
+
+    """
+    if not isinstance(root, CExpr):
+        expr = repr(_const(root))
+        nodes = []
+    else:
+        # operations reachable from the root, in post-order
+        nodes, seen, stack = [], set(), [(root, False)]
+        while stack:
+            node, done = stack.pop()
+            if done:
+                nodes.append(node)
+                continue
+            if node.id in seen or node.op == 'sym':
+                continue
+            seen.add(node.id)
+            stack.append((node, True))
+            for a in reversed(node.args):
+                if isinstance(a, CExpr) and a.op != 'sym':
+                    stack.append((a, False))
+
+    names = {}
+    code = {'q': [], 'i': [], 'j': [], 'ij': []}
+    jdecl = []
+
+    def ref(node):
+        return names[node.id] if node.op != 'sym' else node.args[0]
+
+    for n, node in enumerate(nodes):
+        level = ''.join(sorted(node.deps)) or 'q'
+        src = _render(node, ref)
+        if level == 'j':
+            names[node.id] = "tj{}[j]".format(n)
+            jdecl.append("tj{}[NU]".format(n))
+            code['j'].append("      tj{}[j] = {};".format(n, src))
+        else:
+            names[node.id] = "t{}{}".format(level, n)
+            indent = {'q': 4, 'i': 6, 'ij': 8}[level]
+            code[level].append("{}const double t{}{} = {};"
+                               .format(' ' * indent, level, n, src))
+    if isinstance(root, CExpr):
+        expr = ref(root)
+
+    if bilinear:
+        jcode = ""
+        if code['j']:
+            jcode = ("    double " + ", ".join(jdecl) + ";\n"
+                     "    for (int64_t j = 0; j < NU; j++) {\n"
+                     + "\n".join(code['j']) + "\n    }")
+        return _BILINEAR_LOOPS.format(
+            qcode="\n".join(code['q']),
+            jcode=jcode,
+            icode="\n".join(code['i']),
+            ijcode="\n".join(code['ij']),
+            expr=expr,
+        )
+    assert not code['j'] and not code['ij']
+    return _LINEAR_LOOPS.format(
+        qcode="\n".join(code['q']),
+        icode="\n".join(code['i']),
+        expr=expr,
+    )
+
+
 def _symbols(fmt: str, shape: Tuple[int, ...], offset: int = 0) -> ndarray:
     """Object array of CExpr's named by ``fmt.format(offset + flat_index)``.
 
@@ -216,7 +360,7 @@ def _symbols(fmt: str, shape: Tuple[int, ...], offset: int = 0) -> ndarray:
     """
     out = np.empty(shape, dtype=object)
     for n, ix in enumerate(np.ndindex(*shape)):
-        out[ix] = CExpr(fmt.format(offset + n))
+        out[ix] = CExpr.symbol(fmt.format(offset + n))
     return out.reshape(shape + (1, 1))
 
 
@@ -239,12 +383,15 @@ def _symbolic_field(name: str, index: str, ncomp: int,
 
 
 def _simplify_result(out):
-    """Turn the traced integrand into a C expression string."""
+    """The traced integrand: a CExpr or a number."""
     out = np.asarray(out, dtype=object)
     if out.size != 1:
         raise ValueError("The form must return a scalar, got an array of "
                          "shape {}.".format(out.shape[:-2]))
-    return _c(out.reshape(-1)[0])
+    out = out.reshape(-1)[0]
+    if not isinstance(out, (CExpr, numbers.Number)):
+        raise TypeError("Cannot convert '{}' to C.".format(type(out)))
+    return out
 
 
 class _TracingParams(FormExtraParams):
@@ -381,6 +528,9 @@ struct input {{
   const double *coef;    /* DOF vectors of 'w', (ncoef, coef_n) */
   int64_t coef_n;
   const int64_t *idofs;  /* element DOFs of the interpolation basis */
+  const double *gp;      /* geometry nodes (GDIM, gnp) for 'x' ... */
+  int64_t gnp;
+  const int64_t *gconn;  /* ... and their element connectivity (NG, nt) */
   const idx_t *indptr;   /* CSR sparsity pattern (direct assembly) */
   const idx_t *indices;
   const int64_t *udofs;  /* (NU, nt) element DOFs of trial functions */
@@ -532,12 +682,16 @@ void assemble_coo(int64_t nt,
                   const double *coef,
                   int64_t coef_n,
                   const int64_t *idofs,
+                  const double *gp,
+                  int64_t gnp,
+                  const int64_t *gconn,
                   double *data,
                   int64_t nthreads)
 {{
   struct input in = {{.nt = nt, .invDF = invDF, .js = js, .dx = dx,
                       .dxs = dxs, .qd = qd, .P = P, .coef = coef,
-                      .coef_n = coef_n, .idofs = idofs}};
+                      .coef_n = coef_n, .idofs = idofs, .gp = gp,
+                      .gnp = gnp, .gconn = gconn}};
   if (nthreads > nt) nthreads = nt;
   if (nthreads < 1) nthreads = 1;
   struct task tasks[nthreads];
@@ -563,6 +717,9 @@ void assemble_csr(int64_t nt,
                   const double *coef,
                   int64_t coef_n,
                   const int64_t *idofs,
+                  const double *gp,
+                  int64_t gnp,
+                  const int64_t *gconn,
                   const idx_t *indptr,
                   const idx_t *indices,
                   const int64_t *udofs,
@@ -575,7 +732,8 @@ void assemble_csr(int64_t nt,
 {{
   struct input in = {{.nt = nt, .invDF = invDF, .js = js, .dx = dx,
                       .dxs = dxs, .qd = qd, .P = P, .coef = coef,
-                      .coef_n = coef_n, .idofs = idofs, .indptr = indptr,
+                      .coef_n = coef_n, .idofs = idofs, .gp = gp,
+                      .gnp = gnp, .gconn = gconn, .indptr = indptr,
                       .indices = indices, .udofs = udofs, .vdofs = vdofs,
                       .perm = perm}};
   int64_t nthreads = 1;
@@ -647,17 +805,34 @@ _INTERP_TEMPLATE = """
     }}"""
 
 
+_GEOMETRY_TEMPLATE = """
+    /* global coordinates 'x' at quadrature point q */
+    double XQ[GDIM];
+    for (int g = 0; g < GDIM; g++) XQ[g] = 0.;
+    for (int64_t n = 0; n < NG; n++) {{
+      const int64_t node = in->gconn[n * in->nt + k];
+      for (int g = 0; g < GDIM; g++)
+        XQ[g] += in->gp[g * in->gnp + node] * GPHI[n][q];
+    }}"""
+
+
 _BILINEAR_LOOPS = """
+{qcode}
+{jcode}
     for (int64_t i = 0; i < NV; i++) {{
+{icode}
       for (int64_t j = 0; j < NU; j++) {{
-        A[j * NV + i] += ({expr}) * w_dx;
+{ijcode}
+        A[j * NV + i] += {expr} * w_dx;
       }}
     }}"""
 
 
 _LINEAR_LOOPS = """
+{qcode}
     for (int64_t i = 0; i < NV; i++) {{
-      A[i] += ({expr}) * w_dx;
+{icode}
+      A[i] += {expr} * w_dx;
     }}"""
 
 
@@ -671,6 +846,13 @@ def _cache_dir() -> str:
 
 
 _libraries: Dict[str, ctypes.CDLL] = {}
+
+
+def _compiler_available() -> bool:
+    """Whether forms can be compiled, e.g., not in Pyodide."""
+    if sys.platform == 'emscripten':
+        return False
+    return shutil.which(os.environ.get('CC', 'cc')) is not None
 
 
 # -fno-math-errno: lets the compiler hoist exp(), sqrt(), ... of 'w' out of
@@ -718,11 +900,13 @@ def _kernel_lib(source: str) -> ctypes.CDLL:
     i64 = ctypes.c_int64
     vptr = ctypes.c_void_p  # strided arrays
     lib.assemble_coo.argtypes = (i64, vptr, iptr, vptr, iptr, dptr, dptr,
-                                 dptr, i64, iptr, dptr, i64)
+                                 dptr, i64, iptr, dptr, i64, iptr, dptr,
+                                 i64)
     lib.assemble_coo.restype = None
     lib.assemble_csr.argtypes = (i64, vptr, iptr, vptr, iptr, dptr, dptr,
-                                 dptr, i64, iptr, xptr, xptr, iptr, iptr,
-                                 iptr, iptr, iptr, i64, dptr)
+                                 dptr, i64, iptr, dptr, i64, iptr, xptr,
+                                 xptr, iptr, iptr, iptr, iptr, iptr, i64,
+                                 dptr)
     lib.assemble_csr.restype = None
     return lib
 
@@ -900,21 +1084,67 @@ def _strided(arr) -> ndarray:
     return arr
 
 
-_dofs64_cache = weakref.WeakKeyDictionary()
+_basis_cache = weakref.WeakKeyDictionary()
+
+
+def _cached(basis, name, make):
+    """Data derived from a Basis object, remembered while it is alive."""
+    try:
+        entry = _basis_cache[basis]
+    except KeyError:
+        entry = _basis_cache[basis] = {}
+    except TypeError:  # not weak referenceable
+        return make()
+    if name not in entry:
+        entry[name] = make()
+    return entry[name]
 
 
 def _dofs64(basis) -> ndarray:
-    """``basis.element_dofs`` as contiguous int64; remembered per Basis."""
-    try:
-        return _dofs64_cache[basis]
-    except (KeyError, TypeError):
-        pass
-    dofs = np.ascontiguousarray(basis.element_dofs, dtype=np.int64)
-    try:
-        _dofs64_cache[basis] = dofs
-    except TypeError:
-        pass
-    return dofs
+    """``basis.element_dofs`` as contiguous int64."""
+    return _cached(basis, 'dofs64', lambda: np.ascontiguousarray(
+        basis.element_dofs, dtype=np.int64))
+
+
+def _geometry(basis):
+    """Data for computing the global coordinates 'x' in C.
+
+    The mapping is written as ``x = sum_n nodes[:, conn[n, k]] phi_n(X)``;
+    returns ``(phi, nodes, conn)`` with ``phi`` tabulated at the quadrature
+    points, or None if the mapping is not of this form.
+
+    """
+    mapping, mesh, X = basis.mapping, basis.mesh, basis.X
+    if (type(mapping) is MappingAffine
+            and mesh.t.shape[0] == X.shape[0] + 1):  # simplices
+        phi = np.vstack((1. - X.sum(axis=0), X))
+        nodes, conn = mesh.p, mesh.t
+    elif type(mapping) is MappingIsoparametric:
+        conn = mesh.dofs.element_dofs
+        nodes = mesh.doflocs
+        phi = np.array([np.broadcast_to(mapping.elem.lbasis(X, n)[0],
+                                        X.shape[-1:])
+                        for n in range(conn.shape[0])])
+    else:
+        return None
+    if nodes.shape[0] != X.shape[0]:
+        return None
+    if basis.tind is not None:
+        conn = conn[:, basis.tind]
+    return (phi,
+            np.ascontiguousarray(nodes, dtype=np.float64),
+            np.ascontiguousarray(conn, dtype=np.int64))
+
+
+class _Lazy:
+    """Entry of 'w' which is evaluated only if the form uses it."""
+
+    def __init__(self, fn, shape=()):
+        self.fn = fn
+        self.shape = shape
+
+
+_GEOM_X = object()  # 'x' computed inside the kernel
 
 
 def _strides(arr) -> ndarray:
@@ -926,6 +1156,8 @@ class _CFormMixin:
     """Shared logic of CBilinearForm and CLinearForm."""
 
     def _check_support(self, *bases):
+        if not _compiler_available():
+            raise _Unsupported("no C compiler found (set CC)")
         if np.dtype(self.dtype) != np.float64:
             raise _Unsupported("dtype {}".format(self.dtype))
         for basis in bases:
@@ -968,10 +1200,24 @@ class _CFormMixin:
                 value=_symbols("F{}[{{}}]".format(f), vshape),
                 grad=_symbols("DF{}[{{}}]".format(f), vshape + (gdim,)),
             ))
+        uses_x = False
         for key, val in wdict.items():
-            if isinstance(val, numbers.Number):
+            if isinstance(val, _Lazy):
+                if used is None:  # placeholder while finding used keys
+                    dict.__setitem__(w, key, DiscreteField(
+                        value=_symbols("Q[{}]", val.shape)))
+                    continue
+                if key not in used:
+                    continue
+                val = val.fn()
+            if val is _GEOM_X:
+                dict.__setitem__(w, key, DiscreteField(
+                    value=_symbols("XQ[{}]", (gdim,))))
+                uses_x = uses_x or (used is not None and key in used)
+            elif isinstance(val, numbers.Number):
                 # runtime parameter: changing the value needs no recompile
-                dict.__setitem__(w, key, CExpr("P[{}]".format(len(params))))
+                dict.__setitem__(w, key,
+                                 CExpr.symbol("P[{}]".format(len(params))))
                 params.append(float(val))
             elif isinstance(val, DiscreteField):
                 if used is not None and key not in used:
@@ -998,7 +1244,7 @@ class _CFormMixin:
             else:
                 # e.g. 'idx' of asm(); keep as is
                 dict.__setitem__(w, key, val)
-        return w, params, qdata, offset, interpolated
+        return w, params, qdata, offset, interpolated, uses_x
 
     def _trace(self, args, wdict, coefs=(), cshape=(1, 1)):
         """Call the form with symbolic arguments.
@@ -1010,19 +1256,22 @@ class _CFormMixin:
         try:
             w = self._build_w(wdict, coefs, cshape)[0]
             self.form(*args, w)
-            w, params, qdata, nqd, interp = self._build_w(
+            w, params, qdata, nqd, interp, uses_x = self._build_w(
                 wdict, coefs, cshape, used=w.accessed)
             expr = _simplify_result(self.form(*args, w))
         except (TypeError, NotImplementedError) as err:
             # e.g. branching on values or NumPy functions without C version
             raise _Unsupported("Tracing the form failed: {}".format(err))
-        return expr, params, qdata, nqd, interp
+        return expr, params, qdata, nqd, interp, uses_x
 
     def _generate(self, basis, vbasis, wdict, idx_dtype=np.int32,
-                  coefs=()):
+                  coefs=(), geom=None):
+        global _graph
+        _graph = _Graph()  # fresh expression graph for this trace
         ttab, ncv = self._tables('V', vbasis)
-        gdim = basis.mapping.invDF(basis.X[:, :1],
-                                   tind=np.array([0])).shape[1]
+        # not probed from invDF: isoparametric mappings cache only the
+        # latest invDF, i.e., the one of the basis that is reused below
+        gdim = basis.mesh.p.shape[0]
         # trial function is indexed by 'j' and test function by 'i' in C
         if self._bilinear:
             utab, ncu = self._tables('U', basis)
@@ -1035,22 +1284,27 @@ class _CFormMixin:
         # DOF vectors are interpolated using the trial basis (as in
         # scikit-fem), which is the test basis for linear forms
         B, ncb = ('U', ncu) if self._bilinear else ('V', ncv)
-        expr, params, qdata, nqd, interp = self._trace(args, wdict, coefs,
-                                                       (ncb, gdim))
+        expr, params, qdata, nqd, interp, uses_x = self._trace(
+            args, wdict, coefs, (ncb, gdim))
         gather = "".join(_GATHER_TEMPLATE.format(name=name, f=f, B=B)
                          for f, name in enumerate(interp))
         interp_src = "".join(_INTERP_TEMPLATE.format(name=name, f=f, B=B)
                              for f, name in enumerate(interp))
+        gtab = ""
+        if uses_x:
+            gtab = ("\n#define NG {}\nstatic const double GPHI[NG][NQ] = {};\n"
+                    .format(geom[0].shape[0], _carray(geom[0])))
+            interp_src = _GEOMETRY_TEMPLATE.format() + interp_src
 
         if self._bilinear:
             udecl = "  double U[NU][NCU], DU[NU][NCU * GDIM];"
             evals = (_EVAL_TEMPLATE.format(N='U')
                      + _EVAL_TEMPLATE.format(N='V'))
-            loops = _BILINEAR_LOOPS.format(expr=expr)
+            loops = _emit(expr, bilinear=True)
         else:
             udecl = ""
             evals = _EVAL_TEMPLATE.format(N='V')
-            loops = _LINEAR_LOOPS.format(expr=expr)
+            loops = _emit(expr, bilinear=False)
 
         source = _KERNEL_TEMPLATE.format(
             nqp=basis.X.shape[-1],
@@ -1063,25 +1317,36 @@ class _CFormMixin:
             nqd=max(nqd, 1),
             idx_t={np.int32: 'int32_t',
                    np.int64: 'int64_t'}[np.dtype(idx_dtype).type],
-            tables=utab + ttab,
+            tables=utab + ttab + gtab,
             udecl=udecl,
             gather=gather,
             eval=evals,
             interp=interp_src,
             loops=loops,
         )
-        return source, params, qdata, interp
+        return source, params, qdata, interp, uses_x
+
+    def _wdict(self, ubasis, kwargs):
+        """Split DOF vectors from kwargs and build the numerical 'w'."""
+        kwargs = dict(kwargs)
+        coefs = self._split_coefs(ubasis, kwargs)
+        geom = _cached(ubasis, 'geometry', lambda: _geometry(ubasis))
+        if geom is None:
+            defaults = ubasis.default_parameters()
+        else:  # 'x' is computed in C, 'h' only if used
+            defaults = {'x': _GEOM_X, 'h': _Lazy(ubasis.mesh_parameters)}
+        wdict = FormExtraParams({
+            **defaults,
+            **self._normalize_asm_kwargs(kwargs, ubasis),
+        })
+        return coefs, wdict, geom
 
     def source(self, ubasis, vbasis=None, **kwargs) -> str:
         """Return the generated C source (for inspection)."""
         vbasis = ubasis if vbasis is None else vbasis
-        kwargs = dict(kwargs)
-        coefs = self._split_coefs(ubasis, kwargs)
-        wdict = FormExtraParams({
-            **ubasis.default_parameters(),
-            **self._normalize_asm_kwargs(kwargs, ubasis),
-        })
-        return self._generate(ubasis, vbasis, wdict, coefs=coefs)[0]
+        coefs, wdict, geom = self._wdict(ubasis, kwargs)
+        return self._generate(ubasis, vbasis, wdict, coefs=list(coefs),
+                              geom=geom)[0]
 
     @property
     def _nthreads(self) -> int:
@@ -1114,14 +1379,9 @@ class _CFormMixin:
         if ubasis.X.shape[-1] != vbasis.X.shape[-1]:
             raise ValueError("Quadrature mismatch: trial and test functions "
                              "should have same number of integration points.")
-        kwargs = dict(kwargs)
-        coefs = self._split_coefs(ubasis, kwargs)
-        wdict = FormExtraParams({
-            **ubasis.default_parameters(),
-            **self._normalize_asm_kwargs(kwargs, ubasis),
-        })
-        source, params, qdata, interp = self._generate(
-            ubasis, vbasis, wdict, idx_dtype, coefs=list(coefs))
+        coefs, wdict, geom = self._wdict(ubasis, kwargs)
+        source, params, qdata, interp, uses_x = self._generate(
+            ubasis, vbasis, wdict, idx_dtype, coefs=list(coefs), geom=geom)
         lib = _kernel_lib(source)
         if interp:
             coef = np.ascontiguousarray(np.stack([coefs[k] for k in interp]),
@@ -1129,6 +1389,10 @@ class _CFormMixin:
             idofs = _dofs64(ubasis)
         else:
             coef, idofs = np.zeros(1), np.zeros(1, dtype=np.int64)
+        if uses_x:
+            _, gp, gconn = geom
+        else:
+            gp, gconn = np.zeros((1, 1)), np.zeros(1, dtype=np.int64)
         # passed with strides; e.g. affine invDF is a broadcast view
         invDF = _strided(ubasis.mapping.invDF(ubasis.X, tind=ubasis.tind))
         dx = _strided(ubasis.dx)
@@ -1139,7 +1403,7 @@ class _CFormMixin:
         vp = ctypes.c_void_p
         return lib, (ubasis.nelems, invDF.ctypes.data_as(vp), _strides(invDF),
                      dx.ctypes.data_as(vp), _strides(dx), qd, P,
-                     coef, ubasis.N, idofs)
+                     coef, ubasis.N, idofs, gp, gp.shape[1], gconn)
 
     def _c_assemble(self, ubasis, vbasis, kwargs):
         """Fill the COO data array of scikit-fem."""
@@ -1154,52 +1418,224 @@ class _CFormMixin:
                       .format(type(self).__name__, err))
 
 
-def _bisect(mid, idx, nparts):
-    """Recursive coordinate bisection of the elements ``idx``."""
-    if nparts == 1:
-        return [idx]
-    axis = np.argmax(np.ptp(mid[:, idx], axis=1))
-    idx = idx[np.argsort(mid[axis, idx], kind='stable')]
-    half = nparts // 2
-    cut = len(idx) * half // nparts
-    return (_bisect(mid, idx[:cut], half)
-            + _bisect(mid, idx[cut:], nparts - half))
+_PARTITION_SOURCE = """
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+
+/* Group elements so that concurrently running threads write to disjoint
+   rows.  Phase 0: compact blocks by recursive coordinate bisection, minus
+   the interface elements sharing rows with other blocks.  Phases 1..: the
+   interface elements colored greedily (no two elements of a color share a
+   row), each color split between the threads. */
+
+static void select_nth(int64_t *idx, int64_t n, int64_t k, const double *c)
+{
+  /* reorder idx so that c[idx[0..k-1]] <= c[idx[k]] <= c[idx[k+1..]] */
+  int64_t lo = 0, hi = n - 1;
+  while (lo < hi) {
+    const int64_t m = lo + (hi - lo) / 2;
+    /* median of three as the pivot; deterministic */
+    double a = c[idx[lo]], b = c[idx[m]], d = c[idx[hi]];
+    double pivot = a < b ? (b < d ? b : (a < d ? d : a))
+                         : (a < d ? a : (b < d ? d : b));
+    int64_t i = lo, j = hi;
+    while (i <= j) {
+      while (c[idx[i]] < pivot) i++;
+      while (c[idx[j]] > pivot) j--;
+      if (i <= j) {
+        const int64_t t = idx[i]; idx[i] = idx[j]; idx[j] = t;
+        i++; j--;
+      }
+    }
+    if (k <= j) hi = j;
+    else if (k >= i) lo = i;
+    else return;
+  }
+}
+
+static void bisect(int64_t *idx, int64_t n, int64_t nparts, int64_t first,
+                   const double *mid, int64_t gdim, int64_t nt,
+                   int64_t *block)
+{
+  if (nparts == 1) {
+    for (int64_t e = 0; e < n; e++) block[idx[e]] = first;
+    return;
+  }
+  /* cut along the longest extent */
+  int64_t axis = 0;
+  double best = -1.;
+  for (int64_t d = 0; d < gdim; d++) {
+    double lo = mid[d * nt + idx[0]], hi = lo;
+    for (int64_t e = 1; e < n; e++) {
+      const double x = mid[d * nt + idx[e]];
+      if (x < lo) lo = x;
+      if (x > hi) hi = x;
+    }
+    if (hi - lo > best) { best = hi - lo; axis = d; }
+  }
+  const int64_t half = nparts / 2;
+  const int64_t cut = n * half / nparts;
+  if (cut > 0 && cut < n) select_nth(idx, n, cut, mid + axis * nt);
+  bisect(idx, cut, half, first, mid, gdim, nt, block);
+  bisect(idx + cut, n - cut, nparts - half, first + half, mid, gdim, nt,
+         block);
+}
+
+/* returns the number of groups, or -1 if 'maxgroups' is too small or
+   memory runs out */
+int64_t partition(int64_t nt, int64_t nbv, const int64_t *vdofs, int64_t N,
+                  int64_t gdim, int64_t nverts, int64_t npts,
+                  const double *p,
+                  const int64_t *t, int64_t nthreads, int64_t minchunk,
+                  int64_t *perm, int64_t *parts, int64_t *phases,
+                  int64_t maxgroups, int64_t *nphases)
+{
+  int64_t ret = -1;
+  double *mid = malloc(sizeof(double) * gdim * nt);
+  int64_t *idx = malloc(sizeof(int64_t) * nt);
+  int64_t *block = malloc(sizeof(int64_t) * nt);
+  int64_t *color = malloc(sizeof(int64_t) * nt);
+  int64_t *lmin = malloc(sizeof(int64_t) * N);
+  int64_t *lmax = malloc(sizeof(int64_t) * N);
+  int64_t *r2e_ptr = calloc(N + 1, sizeof(int64_t));
+  int64_t *r2e = NULL, *mark = NULL, *count = NULL;
+  if (!mid || !idx || !block || !color || !lmin || !lmax || !r2e_ptr)
+    goto done;
+
+  /* element midpoints */
+  for (int64_t e = 0; e < nt; e++)
+    for (int64_t d = 0; d < gdim; d++) {
+      double sum = 0.;
+      for (int64_t n = 0; n < nverts; n++)
+        sum += p[d * npts + t[n * nt + e]];
+      mid[d * nt + e] = sum / nverts;
+    }
+
+  /* phase 0: blocks by recursive coordinate bisection */
+  for (int64_t e = 0; e < nt; e++) idx[e] = e;
+  bisect(idx, nt, nthreads, 0, mid, gdim, nt, block);
+
+  /* interface elements have a row shared with another block */
+  for (int64_t r = 0; r < N; r++) { lmin[r] = nthreads; lmax[r] = -1; }
+  for (int64_t e = 0; e < nt; e++)
+    for (int64_t i = 0; i < nbv; i++) {
+      const int64_t r = vdofs[i * nt + e];
+      if (block[e] < lmin[r]) lmin[r] = block[e];
+      if (block[e] > lmax[r]) lmax[r] = block[e];
+    }
+  int64_t ninterface = 0;
+  for (int64_t e = 0; e < nt; e++) {
+    color[e] = -1;
+    for (int64_t i = 0; i < nbv; i++) {
+      const int64_t r = vdofs[i * nt + e];
+      if (lmin[r] != lmax[r]) { color[e] = 0; ninterface++; break; }
+    }
+  }
+
+  /* row -> interface element map */
+  for (int64_t e = 0; e < nt; e++)
+    if (color[e] >= 0)
+      for (int64_t i = 0; i < nbv; i++) r2e_ptr[vdofs[i * nt + e] + 1]++;
+  for (int64_t r = 0; r < N; r++) r2e_ptr[r + 1] += r2e_ptr[r];
+  r2e = malloc(sizeof(int64_t) * (r2e_ptr[N] > 0 ? r2e_ptr[N] : 1));
+  if (!r2e) goto done;
+  memcpy(lmin, r2e_ptr, sizeof(int64_t) * N);  /* reuse as positions */
+  for (int64_t e = 0; e < nt; e++)
+    if (color[e] >= 0)
+      for (int64_t i = 0; i < nbv; i++) r2e[lmin[vdofs[i * nt + e]]++] = e;
+
+  /* greedy coloring of interface elements in element order */
+  int64_t ncolors = 0, cap = 64;
+  mark = malloc(sizeof(int64_t) * cap);
+  if (!mark) goto done;
+  for (int64_t c = 0; c < cap; c++) mark[c] = -1;
+  for (int64_t e = 0; e < nt; e++) color[e] = color[e] >= 0 ? -2 : -1;
+  for (int64_t e = 0; e < nt; e++) {
+    if (color[e] != -2) continue;
+    for (int64_t i = 0; i < nbv; i++) {
+      const int64_t r = vdofs[i * nt + e];
+      for (int64_t q = r2e_ptr[r]; q < r2e_ptr[r + 1]; q++)
+        if (color[r2e[q]] >= 0) mark[color[r2e[q]]] = e;
+    }
+    int64_t c = 0;
+    while (c < cap && mark[c] == e) c++;
+    if (c == cap) {
+      int64_t *grown = realloc(mark, sizeof(int64_t) * 2 * cap);
+      if (!grown) goto done;
+      mark = grown;
+      for (int64_t k = cap; k < 2 * cap; k++) mark[k] = -1;
+      cap *= 2;
+    }
+    color[e] = c;
+    if (c + 1 > ncolors) ncolors = c + 1;
+  }
+
+  /* groups: phase 0 has one group per block, phase 1 + c the elements of
+     color c split in chunks; elements keep their order within groups */
+  const int64_t nkeys = nthreads + ncolors;
+  count = calloc(2 * nkeys + 1, sizeof(int64_t));
+  if (!count) goto done;
+  int64_t *start = count + nkeys;
+  for (int64_t e = 0; e < nt; e++)
+    count[color[e] < 0 ? block[e] : nthreads + color[e]]++;
+  start[0] = 0;
+  for (int64_t key = 0; key < nkeys; key++)
+    start[key + 1] = start[key] + count[key];
+  for (int64_t e = 0; e < nt; e++)
+    perm[start[color[e] < 0 ? block[e] : nthreads + color[e]]++] = e;
+  /* start[key] now points to the end of key; shift back */
+  for (int64_t key = nkeys; key > 0; key--) start[key] = start[key - 1];
+  start[0] = 0;
+
+  int64_t ngroups = 0, nph = 0;
+  phases[nph++] = 0;
+  for (int64_t key = 0; key < nkeys; key++) {
+    int64_t nchunks = 1;
+    if (key >= nthreads) {
+      nchunks = count[key] / minchunk;
+      if (nchunks > nthreads) nchunks = nthreads;
+      if (nchunks < 1) nchunks = 1;
+    }
+    if (ngroups + nchunks > maxgroups) goto done;
+    for (int64_t g = 0; g < nchunks; g++)
+      parts[ngroups++] = start[key] + count[key] * g / nchunks;
+    if (key >= nthreads - 1) phases[nph++] = ngroups;
+  }
+  parts[ngroups] = nt;
+  *nphases = nph - 1;
+  ret = ngroups;
+
+done:
+  free(mid); free(idx); free(block); free(color); free(lmin); free(lmax);
+  free(r2e_ptr); free(r2e); free(mark); free(count);
+  return ret;
+}
+"""
 
 
-def _independent_sets(vdofs, idx, N):
-    """Split elements ``idx`` to sets of elements with no common rows.
-
-    Jones-Plassmann: in each round, the elements whose random priority is
-    the largest among the remaining elements sharing any of its rows form
-    an independent set.
-
-    """
-    prio = np.random.default_rng(0).permutation(len(idx)) + 1
-    sets = []
-    rem = np.arange(len(idx))
-    while len(rem) > 0:
-        dofs = vdofs[:, idx[rem]]
-        rmax = np.zeros(N, dtype=np.int64)
-        np.maximum.at(rmax, dofs.ravel(),
-                      np.broadcast_to(prio[rem], dofs.shape).ravel())
-        sel = (rmax[dofs] == prio[rem]).all(axis=0)
-        sets.append(idx[rem[sel]])
-        rem = rem[~sel]
-    return sets
+def _partition_lib() -> ctypes.CDLL:
+    lib = compile_source(_PARTITION_SOURCE)
+    iptr = np.ctypeslib.ndpointer(np.int64, flags='C_CONTIGUOUS')
+    dptr = np.ctypeslib.ndpointer(np.float64, flags='C_CONTIGUOUS')
+    i64 = ctypes.c_int64
+    lib.partition.argtypes = (i64, i64, iptr, i64, i64, i64, i64, dptr,
+                              iptr, i64, i64, iptr, iptr, iptr, i64,
+                              ctypes.POINTER(i64))
+    lib.partition.restype = i64
+    return lib
 
 
-def _partition(basis, nthreads):
+def _partition(basis, nthreads, minchunk=64):
     """Group elements so that concurrent threads write to disjoint rows.
 
     First phase: the elements are split into ``nthreads`` compact blocks by
     recursive coordinate bisection, and each thread assembles the elements
     of its block that do not share rows (test function DOFs) with other
-    blocks.  Following phases: the remaining interface elements are split
-    into independent sets (no two elements share a row), and each set is
-    divided between the threads.  Phases run one after another.
-
-    This is the idea of femgen without the METIS dependency, and without
-    the extra output buffer for the interface elements.
+    blocks.  Following phases: the remaining interface elements are colored
+    greedily so that no two elements of a color share a row, and each color
+    is divided between the threads.  Phases run one after another.  See
+    ``_PARTITION_SOURCE``.
 
     Returns
     -------
@@ -1212,39 +1648,33 @@ def _partition(basis, nthreads):
         are assembled in parallel.
 
     """
-    vdofs = basis.element_dofs
-    nt = vdofs.shape[1]
+    vdofs = _dofs64(basis)
+    nbv, nt = vdofs.shape
     if nthreads <= 1 or nt < 8 * nthreads:
         return (np.arange(nt, dtype=np.int64),
                 np.array([0, nt], dtype=np.int64),
                 np.array([0, 1], dtype=np.int64))
     mesh = basis.mesh
     t = mesh.t if basis.tind is None else mesh.t[:, basis.tind]
-    mid = mesh.p[:, t].mean(axis=1)
-
-    # first phase: interiors of compact blocks
-    blocks = _bisect(mid, np.arange(nt), nthreads)
-    label = np.empty(nt, dtype=np.int64)
-    for n, block in enumerate(blocks):
-        label[block] = n
-    labels = np.broadcast_to(label, vdofs.shape).ravel()
-    lmin = np.full(basis.N, nthreads, dtype=np.int64)
-    lmax = np.full(basis.N, -1, dtype=np.int64)
-    np.minimum.at(lmin, vdofs.ravel(), labels)
-    np.maximum.at(lmax, vdofs.ravel(), labels)
-    interface = (lmin != lmax)[vdofs].any(axis=0)
-    groups = [block[~interface[block]] for block in blocks]
-    phases = [0, len(groups)]
-
-    # following phases: independent sets of interface elements
-    for iset in _independent_sets(vdofs, np.nonzero(interface)[0], basis.N):
-        nchunks = int(min(nthreads, max(1, len(iset) // 64)))
-        groups += np.array_split(iset, nchunks)
-        phases.append(len(groups))
-
-    perm = np.concatenate(groups).astype(np.int64)
-    parts = np.concatenate(([0], np.cumsum([len(g) for g in groups])))
-    return perm, parts.astype(np.int64), np.array(phases, dtype=np.int64)
+    t = np.ascontiguousarray(t, dtype=np.int64)
+    p = np.ascontiguousarray(mesh.p, dtype=np.float64)
+    lib = _partition_lib()
+    maxgroups = 256 * nthreads
+    while True:
+        perm = np.empty(nt, dtype=np.int64)
+        parts = np.empty(maxgroups + 1, dtype=np.int64)
+        phases = np.empty(maxgroups + 1, dtype=np.int64)
+        nphases = ctypes.c_int64()
+        ngroups = lib.partition(nt, nbv, vdofs, basis.N, p.shape[0],
+                                t.shape[0], p.shape[1], p, t, nthreads,
+                                minchunk, perm, parts, phases, maxgroups,
+                                ctypes.byref(nphases))
+        if ngroups >= 0:
+            return (perm, parts[:ngroups + 1].copy(),
+                    phases[:nphases.value + 1].copy())
+        if maxgroups > nthreads * (nt + 1):
+            raise MemoryError("Partitioning the elements failed.")
+        maxgroups *= 8
 
 
 class _Sparsity:
@@ -1326,6 +1756,7 @@ class CBilinearForm(_CFormMixin, BilinearForm):
         from scipy.sparse import csr_matrix
         vbasis = ubasis if vbasis is None else vbasis
         try:
+            self._check_support(ubasis, vbasis)
             # pattern first; its index dtype is used in the generated code
             S = self.sparsity(ubasis, vbasis)
             lib, args = self._prepare(ubasis, vbasis, dict(kwargs),
