@@ -83,9 +83,21 @@ However, the deformation gradient is always computed w.r.t. the reference config
 and interpolate these gradients by the total deformation :math:`u` w.r.t. the initial mesh and basis in every iteration.
 
 """
+import sys
 import numpy as np
 from skfem import *
 from skfem.helpers import grad, identity, ddot, det, transpose, inv, trace, mul
+from datetime import datetime
+
+
+if sys.platform != 'emscripten':
+    # cforms do not work in Pyodide
+    from skfem.experimental.cforms import CBilinearForm, CLinearForm
+    BilinearForm = CBilinearForm(cache_sparsity=True)
+    LinearForm = CLinearForm
+
+
+start = datetime.now()
 # note: rough mesh to make tests fast
 mesh = MeshHex.init_tensor(
     np.linspace(0, 1, 10),
@@ -111,6 +123,7 @@ def L(v, w):
     b     = mul(F,transpose(F))
     tau   = mu * (b - I) + lmbda * lnJ * I
     return 1/J*ddot(tau,grad(v))
+
 @BilinearForm
 def a(u, v, w):
     dudX  = w['orig_gradu'] 
@@ -124,6 +137,7 @@ def a(u, v, w):
     stiff = 1/J*( mu*ddot( grad(v), mul(grad(u),b) + mul(b,transpose(grad(u))) ) + lmbda*trace(grad(v))*trace(grad(u)) )
     geo   = -1/J*ddot(grad(v), mul(tau, transpose(grad(u))))
     return stiff+geo
+
 # Dirichlet boundary conditions
 dofs = basis.get_dofs('right')
 dirichlet = basis.get_dofs({'right', 'left'})
@@ -161,6 +175,7 @@ for step in range(nsteps):
         if norm_du < tol: break
 
 if __name__ == '__main__':
+    print("Time elapsed: {}".format(datetime.now() - start))
     import vedo
     p = (mesh.translated(u[basis.nodal_dofs])
              .draw('vedo', point_data={'uy': u[basis.nodal_dofs[1]]}))
