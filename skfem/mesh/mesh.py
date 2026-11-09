@@ -1,5 +1,4 @@
 import logging
-import importlib
 
 from dataclasses import dataclass, replace
 from os import PathLike
@@ -1268,19 +1267,33 @@ class Mesh:
         """
         raise NotImplementedError
 
-    def draw(self, visuals='matplotlib', **kwargs):
-        """Convenience wrapper for skfem.visuals."""
-        if not isinstance(visuals, str):
-            logger.warning("First argument, 'visuals', must be a string.")
-        mod = importlib.import_module('skfem.visuals.{}'.format(visuals))
-        return mod.draw(self, **kwargs)
+    def draw(self, visuals=None, **kwargs):
+        """Convenience wrapper for :mod:`skfem.visuals`.
 
-    def plot(self, x, visuals='matplotlib', **kwargs):
-        """Convenience wrapper for skfem.visuals."""
-        if not isinstance(visuals, str):
-            logger.warning("Second argument, 'visuals', must be a string.")
-        mod = importlib.import_module('skfem.visuals.{}'.format(visuals))
-        return mod.plot(self, x, **kwargs)
+        Parameters
+        ----------
+        visuals
+            The backend, e.g. ``'matplotlib'``, ``'svg'`` or ``'web'``.
+            Defaults to :func:`skfem.visuals.get_default_backend`.
+
+        """
+        from skfem.visuals import get_backend
+        return get_backend(visuals).draw(self, **kwargs)
+
+    def plot(self, x, visuals=None, **kwargs):
+        """Convenience wrapper for :mod:`skfem.visuals`.
+
+        Parameters
+        ----------
+        x
+            The field(s) to plot; see :func:`skfem.visuals.data.sample`.
+        visuals
+            The backend, e.g. ``'matplotlib'``, ``'svg'`` or ``'web'``.
+            Defaults to :func:`skfem.visuals.get_default_backend`.
+
+        """
+        from skfem.visuals import get_backend
+        return get_backend(visuals).plot(self, x, **kwargs)
 
     def normalize_nodes(self, nodes) -> ndarray:
         """Generate an array of node indices.

@@ -150,55 +150,23 @@ class CellBasis(AbstractBasis):
                   y: ndarray,
                   nrefs: int = 1,
                   Nrefs: Optional[int] = None) -> Tuple[Mesh, ndarray]:
-        """Refine and interpolate (for plotting)."""
+        """Refine and interpolate (for plotting).
+
+        Thin wrapper around :func:`skfem.visuals.data.sample` which returns
+        a discontinuous linear mesh of the subdivided elements and the values
+        of ``y`` at its vertices.  Vector- and tensor-valued fields are
+        returned component by component, i.e. the length of the output is a
+        multiple of the number of vertices.
+
+        """
+        from ...visuals.data import sample
         if Nrefs is not None:
             nrefs = Nrefs  # for backwards compatibility
-        # mesh reference domain, refine and take the vertices
-        meshclass = type(self.mesh)
-        m = meshclass.init_refdom().refined(nrefs)
-
-        if self.mesh.dim() == 1:
-            # this workaround makes sorting preserve correct order of duplicate
-            # nodes in skfem.visuals.matplotlib.plot_meshline
-            X = (1. - 1e-10) * m.p + 5e-11
-        else:
-            X = m.p
-
-        # map vertices to global elements
-        x = self.mapping.F(X)
-
-        # interpolate some previous discrete function at the vertices
-        # of the refined mesh
-        test = self.elem.gbasis(self.mapping, X, 0)[0]
-        if len(test.shape) == 3:
-            w = np.zeros_like(x, dtype=y.dtype)
-        elif len(test.shape) == 2:
-            w = np.zeros_like(x[0], dtype=y.dtype)
-        else:
-            raise NotImplementedError
-        for j in range(self.Nbfun):
-            basis = self.elem.gbasis(self.mapping, X, j)
-            w += y[self.element_dofs[j]][:, None] * basis[0]
-
-        # create connectivity for the new mesh
-        nt = self.nelems
-        t = np.tile(m.t, (1, nt))
-        dt = np.max(t)
-        t += (dt + 1) *\
-            (np.tile(np.arange(nt), (m.t.shape[0] * m.t.shape[1], 1))
-             .flatten('F')
-             .reshape((-1, m.t.shape[0])).T)
-
-        if X.shape[0] == 1:
-            p = np.array([x.flatten()])
-        else:
-            p = x[0].flatten()
-            for itr in range(len(x) - 1):
-                p = np.vstack((p, x[itr + 1].flatten()))
-
-        M = meshclass(p, t)
-
-        return M, w.flatten()
+        # in 1D, shrinking the reference points makes sorting preserve
+        # correct order of duplicate nodes in skfem.visuals.matplotlib
+        data = sample(self, y, nrefs=nrefs, _shrink=self.mesh.dim() == 1)
+        w = data.point_data['u']
+        return data.to_mesh(), np.ascontiguousarray(w.T).flatten()
 
     def probes(self, x: ndarray):
         """Return matrix which acts on a solution vector to find its values

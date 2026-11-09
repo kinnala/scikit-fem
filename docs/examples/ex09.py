@@ -89,7 +89,7 @@ if __name__ == "__main__":
     from os.path import splitext
     from sys import argv
 
-    # use vedo: press 5 to visualize potential, X for cutter tool
-    basis.plot(x, 'vedo').show()
+    # interactive plot in the browser; use the clip tool to see inside
+    basis.plot(x, 'web', clip='x').show()
     # preferred: save to vtk for visualization in Paraview
     #m.save(splitext(argv[0])[0] + ".vtk", point_data{'potential': x})
