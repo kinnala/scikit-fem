@@ -2,7 +2,6 @@ import numpy as np
 
 from ..element_hcurl import ElementHcurl
 from ...refdom import RefTri
-from ..discrete_field import DiscreteField
 
 
 class ElementTriN3(ElementHcurl):
@@ -19,9 +18,9 @@ class ElementTriN3(ElementHcurl):
             [0.75, 0.25],
             [0.50, 0.50],
             [0.25, 0.75],
-            [0.0, 0.75],
-            [0.0, 0.50],
             [0.0, 0.25],
+            [0.0, 0.50],
+            [0.0, 0.75],
             [0.25, 0.25],
             [0.25, 0.25],
             [0.50, 0.25],
@@ -32,70 +31,21 @@ class ElementTriN3(ElementHcurl):
 
     refdom = RefTri
 
-    def gbasis(self, mapping, X, i, tind=None):
-        """Covariant Piola transformation.
-        Overridden to allow for higher order"""
-        orient = self.orient(mapping, i, tind)
-        target_swap = i
-        if i < 9:
-            edge_idx = i // 3
-            local_idx = i % 3
-            if edge_idx in [0, 1]:
-                if local_idx == 0:
-                    target_swap = i + 2
-                elif local_idx == 2:
-                    target_swap = i - 2
-                swap_condition = -1  # Swap if orient < 0
-            elif edge_idx == 2:
-                if local_idx == 0:
-                    target_swap = i + 2
-                elif local_idx == 2:
-                    target_swap = i - 2
-                swap_condition = 1  # Swap if orient > 0
-
-        def get_lbasis_fixed(idx):
-            p, dp = self.lbasis(X, idx)
-            if 6 <= idx <= 8:
-                # Edge 2 vectors point down in definition,
-                # but reference points Up.
-                return -p, -dp
-            return p, dp
-
-        if target_swap == i:
-            phi, dphi = get_lbasis_fixed(i)
-
-            invDF = mapping.invDF(X, tind)
-            detDF = mapping.detDF(X, tind)
-
-            val_final = np.einsum('ijkl,il,k->jkl', invDF, phi, orient)
-            curl_final = dphi / detDF * orient[:, None]
-
-        else:
-            phi_A, dphi_A = get_lbasis_fixed(i)
-            phi_B, dphi_B = get_lbasis_fixed(target_swap)
-
-            invDF = mapping.invDF(X, tind)
-            detDF = mapping.detDF(X, tind)
-
-            val_A = np.einsum('ijkl,il,k->jkl', invDF, phi_A, orient)
-            curl_A = dphi_A / detDF * orient[:, None]
-
-            val_B = np.einsum('ijkl,il,k->jkl', invDF, phi_B, orient)
-            curl_B = dphi_B / detDF * orient[:, None]
-
-            if swap_condition == -1:
-                mask = (orient > 0).astype(np.float64)
-            else:
-                mask = (orient < 0).astype(np.float64)
-
-            mask_val = mask[None, :, None]
-            mask_curl = mask[:, None]
-
-            val_final = val_A * mask_val + val_B * (1.0 - mask_val)
-            curl_final = curl_A * mask_curl + curl_B * (1.0 - mask_curl)
-        return (DiscreteField(value=val_final, curl=curl_final),)
+    def reversed_facet_dof(self, j):
+        # the facet DOFs are symmetric with respect to the facet midpoint
+        return self.facet_dofs - 1 - j, 1.
 
     def lbasis(self, X, i):
+        if 6 <= i <= 8:
+            # the facet DOFs of the third facet are defined from the vertex 2
+            # towards the vertex 0 in _lbasis; reorder and change the
+            # direction so that all facets are traversed from facets[k][0]
+            # to facets[k][1]
+            phi, dphi = self._lbasis(X, 14 - i)
+            return -phi, -dphi
+        return self._lbasis(X, i)
+
+    def _lbasis(self, X, i):
         x, y = X
 
         x2 = x**2

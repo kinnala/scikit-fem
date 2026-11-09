@@ -29,11 +29,13 @@ class ElementHcurl(Element):
 
     def gbasis(self, mapping, X, i, tind=None):
         """Covariant Piola transformation."""
-        phi, dphi = self.lbasis(X, i)
+        phi, dphi, sign = self._oriented_lbasis(mapping, X, i, tind)
         DF = mapping.DF(X, tind)
         invDF = mapping.invDF(X, tind)
         detDF = mapping.detDF(X, tind)
         orient = self.orient(mapping, i, tind)
+        if sign is not None:
+            orient = orient * sign
         if mapping.mesh.dim() == 3:
             if len(X.shape) == 2:
                 return (DiscreteField(
@@ -48,12 +50,12 @@ class ElementHcurl(Element):
                                    1. / detDF * orient[:, None]),
                 ),)
         else:
-            if len(X.shape) == 2:
+            if len(X.shape) == 2 and phi.ndim == 2:
                 return (DiscreteField(
                     value=np.einsum('ijkl,il,k->jkl', invDF, phi, orient),
                     curl=dphi / detDF * orient[:, None],
                 ),)
-            elif len(X.shape) == 3:
+            elif len(X.shape) == 3 or phi.ndim == 3:
                 return (DiscreteField(
                     value=np.einsum('ijkl,ikl,k->jkl', invDF, phi, orient),
                     curl=dphi / detDF * orient[:, None],

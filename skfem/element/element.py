@@ -64,6 +64,58 @@ class Element:
     def __call__(self):
         return self
 
+    def reversed_facet_dof(self, j):
+        """Return the facet DOF replacing the j'th one on a reversed facet.
+
+        Elements with several DOFs per facet, which depend on the direction
+        of the facet, override this.  The facet of an element is reversed if
+        its local direction is opposite to the direction of increasing global
+        vertex indices.  Returns a tuple ``(j', sign)`` meaning that the basis
+        function corresponding to the local facet DOF ``j'``, multiplied by
+        ``sign``, is used.  The default ``None`` means no reordering.
+
+        """
+        return None
+
+    def _oriented_lbasis(self, mapping, X, i, tind=None):
+        """Evaluate lbasis and reorder the DOFs of the reversed facets.
+
+        Returns the basis function, its derivative and an optional array of
+        signs for each element which must be applied after the mapping.
+
+        """
+        phi, dphi = self.lbasis(X, i)
+        offset = self.refdom.nnodes * self.nodal_dofs
+        if (self.dim != 2
+                or self.facet_dofs < 2
+                or not offset <= i < offset + self.refdom.nfacets
+                * self.facet_dofs):
+            return phi, dphi, None
+        facet, j = divmod(i - offset, self.facet_dofs)
+        rev = self.reversed_facet_dof(j)
+        if rev is None:
+            return phi, dphi, None
+        t = mapping.mesh.t if tind is None else mapping.mesh.t[:, tind]
+        a, b = self.refdom.facets[facet]
+        reverse = t[a] > t[b]
+        if not reverse.any():
+            return phi, dphi, None
+        if rev[0] == j:
+            # only the sign changes
+            return phi, dphi, np.where(reverse, rev[1], 1.)
+        phi_r, dphi_r = self.lbasis(X, offset + facet * self.facet_dofs
+                                    + rev[0])
+
+        def select(f, f_r):
+            if f is None:
+                return None
+            if X.ndim == 2:
+                # evaluate per element
+                f, f_r = np.expand_dims(f, -2), np.expand_dims(f_r, -2)
+            return np.where(reverse[:, None], rev[1] * f_r, f)
+
+        return select(phi, phi_r), select(dphi, dphi_r), None
+
     def gbasis(self,
                mapping,
                X: ndarray,
