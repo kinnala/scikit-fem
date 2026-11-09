@@ -87,14 +87,8 @@ import sys
 import numpy as np
 from skfem import *
 from skfem.helpers import grad, identity, ddot, det, transpose, inv, trace, mul
+from skfem.experimental.cforms import CBilinearForm, CLinearForm
 from datetime import datetime
-
-
-if sys.platform != 'emscripten':
-    # cforms do not work in Pyodide
-    from skfem.experimental.cforms import CBilinearForm, CLinearForm
-    BilinearForm = CBilinearForm(cache_sparsity=True)
-    LinearForm = CLinearForm
 
 
 start = datetime.now()
@@ -113,9 +107,9 @@ gradbasis = Basis(mesh, element, intorder=1)
 
 mu, lmbda = 1., 2.
 
-@LinearForm
+@CLinearForm
 def L(v, w):
-    dudX  = w['orig_gradu'] 
+    dudX  = w['orig_gradu']
     F     = dudX + identity(dudX)
     J     = det(F)
     lnJ   = np.log(J)
@@ -124,9 +118,9 @@ def L(v, w):
     tau   = mu * (b - I) + lmbda * lnJ * I
     return 1/J*ddot(tau,grad(v))
 
-@BilinearForm
+@CBilinearForm(cache_sparsity=True)
 def a(u, v, w):
-    dudX  = w['orig_gradu'] 
+    dudX  = w['orig_gradu']
     F     = dudX + identity(dudX)
     J     = det(F)
     lnJ   = np.log(J)

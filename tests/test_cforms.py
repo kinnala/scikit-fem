@@ -8,12 +8,15 @@ from skfem import (BilinearForm, LinearForm, Basis, FacetBasis, MeshTri,
                    MeshTet, MeshQuad, MeshHex, MeshLine, ElementTriP2,
                    ElementTetP1, ElementQuad2, ElementTriMini, ElementDG,
                    ElementTetP2, ElementLineP2, ElementVector, ElementTriP1,
-                   ElementHex1)
+                   ElementHex1, MeshTri2, MeshQuad2, ElementLineP1)
 from skfem.helpers import dot, grad, inner, ddot, sym_grad, div
 from skfem.models.elasticity import linear_stress
 
-pytestmark = pytest.mark.skipif(shutil.which('cc') is None,
-                                reason="No C compiler")
+pytestmark = [
+    pytest.mark.skipif(shutil.which('cc') is None, reason="No C compiler"),
+    # an unexpected fallback to Python would hide errors in the C path
+    pytest.mark.filterwarnings("error:.*falls back to Python"),
+]
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -162,21 +165,31 @@ def test_cache_sparsity_decorator_vector_subset():
                - b.assemble(ub, vb)).max() < 1e-12
 
 
-@pytest.mark.parametrize("nthreads", [2, 4, 8])
-def test_partition_disjoint_rows(nthreads):
+@pytest.mark.parametrize("nthreads", [2, 3, 4, 8, 16])
+@pytest.mark.parametrize("make", [
+    lambda: Basis(MeshTet().refined(3), ElementTetP2()),
+    lambda: Basis(MeshTri().refined(5), ElementVector(ElementTriP1()),
+                  elements=lambda x: x[0] < .7),
+    lambda: Basis(MeshQuad().refined(5), ElementDG(ElementQuad2())),
+    lambda: Basis(MeshHex().refined(3), ElementVector(ElementHex1())),
+])
+def test_partition_disjoint_rows(nthreads, make):
     from skfem.experimental.cforms import _partition
-    basis = Basis(MeshTet().refined(3), ElementTetP2())
+    basis = make()
     perm, parts, phases = _partition(basis, nthreads)
     assert np.array_equal(np.sort(perm), np.arange(basis.nelems))
+    assert parts[0] == 0 and parts[-1] == basis.nelems
+    assert np.all(np.diff(parts) >= 0)
+    assert phases[0] == 0 and phases[-1] == len(parts) - 1
     for f in range(len(phases) - 1):
         groups = range(phases[f], phases[f + 1])
+        assert len(groups) <= nthreads
         rows = [np.unique(basis.element_dofs[:, perm[parts[g]:parts[g + 1]]])
                 for g in groups]
-        for p in range(len(rows)):
-            for q in range(p + 1, len(rows)):
-                assert len(np.intersect1d(rows[p], rows[q])) == 0
-    # most elements are in the first phase
-    assert parts[phases[1]] > .3 * basis.nelems
+        allrows = np.concatenate(rows)
+        assert len(allrows) == len(np.unique(allrows))  # disjoint
+    if nthreads <= 8:  # with tiny blocks most elements are on interfaces
+        assert parts[phases[1]] > .3 * basis.nelems
 
 
 @pytest.mark.parametrize("nthreads", [1, 4])
@@ -251,3 +264,55 @@ def test_coefficient_interpolation(interpolate_in_c, cache_sparsity):
     assert abs(A - B).max() < 1e-12
     a = LinearForm(lin).assemble(ub, z=z)
     assert np.abs(a - make(CLinearForm, lin).assemble(ub, z=z)).max() < 1e-12
+
+
+@pytest.mark.parametrize("m,e,in_c", [
+    (MeshTri().refined(3), ElementTriP2(), True),            # affine
+    (MeshTet().refined(2), ElementTetP1(), True),
+    (MeshHex().refined(2), ElementHex1(), True),             # isoparametric
+    (MeshTri2.init_circle(2), ElementTriP2(), True),         # curved
+    (MeshQuad2().refined(2).translated((0., 1.)), ElementQuad2(), True),
+    (MeshLine().refined(3), ElementLineP1(), True),
+])
+@pytest.mark.parametrize("subset", [False, True])
+def test_global_coordinates(m, e, in_c, subset):
+    basis = Basis(m, e, elements=(lambda x: x[0] < .5) if subset else None)
+
+    def bilin(u, v, w):
+        return (np.exp(w.x[0]) + w.x[-1] ** 2 * w.h) * u * v
+
+    def lin(v, w):
+        return np.sin(w.x[0]) * v
+
+    form = CBilinearForm(bilin)
+    A = BilinearForm(bilin).assemble(basis)
+    assert abs(A - form.assemble(basis)).max() < 1e-12
+    a = LinearForm(lin).assemble(basis)
+    assert np.abs(a - CLinearForm(lin).assemble(basis)).max() < 1e-12
+    # 'x' is computed inside the kernel instead of passed
+    assert ("XQ[g] +=" in form.source(basis)) == in_c
+
+    # user-given 'x' overrides the default
+    x = basis.interpolate(basis.zeros() + 1.)
+    A = BilinearForm(bilin).assemble(basis, x=x)
+    assert abs(A - form.assemble(basis, x=x)).max() < 1e-12
+
+
+@pytest.mark.parametrize("cache_sparsity", [False, True])
+def test_no_compiler(monkeypatch, cache_sparsity):
+    import skfem.experimental.cforms as cforms
+    # e.g. Pyodide, where sys.platform == 'emscripten'
+    monkeypatch.setattr(cforms.sys, 'platform', 'emscripten')
+    basis = Basis(MeshTri().refined(2), ElementTriP1())
+    form = CBilinearForm(laplace, cache_sparsity=cache_sparsity)
+    with pytest.warns(UserWarning, match="no C compiler"):
+        B = form.assemble(basis)
+    assert abs(BilinearForm(laplace).assemble(basis) - B).max() < 1e-12
+    with pytest.warns(UserWarning, match="no C compiler"):
+        b = CLinearForm(load).assemble(basis, u0=basis.zeros(), k=1.)
+    assert np.abs(LinearForm(load).assemble(basis, u0=basis.zeros(), k=1.)
+                  - b).max() < 1e-12
+    monkeypatch.setattr(cforms.sys, 'platform', 'linux')
+    monkeypatch.setenv('CC', 'no-such-compiler')
+    with pytest.warns(UserWarning, match="no C compiler"):
+        form.assemble(basis)
