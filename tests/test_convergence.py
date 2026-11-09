@@ -6,7 +6,7 @@ import pytest
 
 from skfem import BilinearForm, LinearForm, asm, solve, condense
 from skfem.models.poisson import laplace
-from skfem.helpers import ddot, dd, div, grad
+from skfem.helpers import ddot, dd, div, dot, grad
 from skfem.element import (
     ElementHex1,
     ElementHex2,
@@ -42,6 +42,9 @@ from skfem.element import (
     ElementTetBubble,
     ElementTetMorley,
     ElementTetMWX3,
+    ElementTriP,
+    ElementTriRT,
+    ElementDG,
 )
 from skfem.assembly import FacetBasis, Basis
 from skfem.mesh import (MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
@@ -713,3 +716,48 @@ def test_convergence_tet_mwx3():
 
     # only two meshes are used to keep the test fast
     assert abs(np.log(H3s[1] / H3s[0]) / np.log(hs[1] / hs[0]) - 1.) < .3
+
+
+@pytest.mark.parametrize(
+    "p,nrefs",
+    [
+        (3, [1, 2, 3]),
+        (4, [0, 1, 2]),
+    ]
+)
+def test_convergence_tri_rt(p, nrefs):
+    """Mixed Poisson with the Raviart-Thomas element of degree p."""
+
+    def exact(x):
+        return np.sin(np.pi * x[0]) * np.sin(np.pi * x[1])
+
+    @BilinearForm
+    def mixed(sig, u, tau, v, w):
+        return dot(sig, tau) - div(tau) * u - div(sig) * v
+
+    @LinearForm
+    def load(tau, v, w):
+        return -2. * np.pi ** 2 * exact(w.x) * v
+
+    hs, errs = [], []
+    for n in nrefs:
+        m = MeshTri().refined(n)
+        basis = Basis(m, ElementTriRT(p) * ElementDG(ElementTriP(p - 1)),
+                      intorder=2 * p + 2)
+        x = solve(mixed.assemble(basis), load.assemble(basis))
+        sig, u = basis.interpolate(x)
+        X = np.asarray(basis.global_coordinates())
+        # sigma = -grad u and div sigma = 2 pi^2 u
+        gradu = np.pi * np.array([np.cos(np.pi * X[0]) * np.sin(np.pi * X[1]),
+                                  np.sin(np.pi * X[0]) * np.cos(np.pi * X[1])])
+        errs.append([
+            np.sqrt(np.sum(np.sum((np.asarray(sig) + gradu) ** 2, axis=0)
+                           * basis.dx)),
+            np.sqrt(np.sum((np.asarray(u) - exact(X)) ** 2 * basis.dx)),
+            np.sqrt(np.sum((np.asarray(sig.div)
+                            - 2. * np.pi ** 2 * exact(X)) ** 2 * basis.dx)),
+        ])
+        hs.append(m.param())
+
+    for err in np.array(errs).T:
+        assert abs(np.polyfit(np.log(hs), np.log(err), 1)[0] - p) < .15

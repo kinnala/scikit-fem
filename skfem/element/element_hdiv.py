@@ -23,17 +23,19 @@ class ElementHdiv(Element):
 
     def gbasis(self, mapping, X, i, tind=None):
         """Contravariant Piola transformation."""
-        phi, dphi = self.lbasis(X, i)
+        phi, dphi, sign = self._oriented_lbasis(mapping, X, i, tind)
         DF = mapping.DF(X, tind)
         detDF = mapping.detDF(X, tind)
         orient = self.orient(mapping, i, tind)
-        if len(X.shape) == 2:
+        if sign is not None:
+            orient = orient * sign
+        if len(X.shape) == 2 and phi.ndim == 2:
             return (DiscreteField(
                 value=np.einsum('ijkl,jl,kl->ikl', DF, phi,
                                 1. / np.abs(detDF) * orient[:, None]),
                 div=dphi / (np.abs(detDF) * orient[:, None])
             ),)
-        elif len(X.shape) == 3:
+        elif len(X.shape) == 3 or phi.ndim == 3:
             return (DiscreteField(
                 value=np.einsum('ijkl,jkl,kl->ikl', DF, phi,
                                 1. / np.abs(detDF) * orient[:, None]),

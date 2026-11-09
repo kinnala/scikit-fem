@@ -23,3 +23,4 @@ from .element_tri_n3 import ElementTriN3  # noqa
 from .element_tri_hhj import ElementTriHHJ0, ElementTriHHJ1  # noqa
 from .element_tri_bubble import ElementTriBubble  # noqa
 from .element_tri_p import ElementTriP  # noqa
+from .element_tri_rt import ElementTriRT  # noqa

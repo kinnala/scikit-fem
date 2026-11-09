@@ -150,6 +150,7 @@ Module: skfem.element
     skfem.element.ElementTriCR
     skfem.element.ElementTriCCR
     skfem.element.ElementTriRT0
+    skfem.element.ElementTriRT
     skfem.element.ElementTriMorley
     skfem.element.ElementTri15ParamPlate
     skfem.element.ElementTriArgyris

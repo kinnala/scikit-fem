@@ -29,6 +29,14 @@ from skfem.element import (
     ElementTriP3,
     ElementTriP4,
     ElementTriP,
+    ElementTriRT,
+    ElementTriRT1,
+    ElementTriRT2,
+    ElementTriBDM1,
+    ElementTriN1,
+    ElementTriN2,
+    ElementTriN3,
+    ElementTriHHJ1,
     ElementTriRT0,
     ElementVectorH1,
     ElementHex2,
@@ -59,7 +67,7 @@ from skfem.element import (
 from skfem.mesh import MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri
 from skfem.assembly import (Basis, FacetBasis, Functional, BilinearForm,
                             LinearForm, InteriorFacetBasis)
-from skfem.helpers import dot, grad
+from skfem.helpers import dot, grad, div
 from skfem.models.poisson import laplace, unit_load
 from skfem.utils import solve, condense
 from skfem.mapping import MappingAffine
@@ -817,3 +825,126 @@ def test_quad_p_facet_dof_orientation(p):
                             D=basis.get_dofs()))
         sols.append(basis.probes(pts) @ x)
     assert_allclose(sols[0], sols[1], atol=1e-12)
+
+
+def _facet_jumps(m, e, x):
+    """Jumps across the interior facets in the conserved component."""
+    fbasis = [InteriorFacetBasis(m, e, side=i) for i in range(2)]
+    u = [np.asarray(fb.interpolate(x)) for fb in fbasis]
+    n = fbasis[0].normals
+    if isinstance(e, ElementTriHHJ1):
+        return np.einsum('i...,ij...,j...', n, u[0] - u[1], n)
+    if isinstance(e, (ElementTriN1, ElementTriN2, ElementTriN3)):
+        return np.einsum('i...,i...', u[0] - u[1], np.array([-n[1], n[0]]))
+    return np.einsum('i...,i...', u[0] - u[1], n)
+
+
+@pytest.mark.parametrize(
+    "m",
+    [
+        MeshTri().refined(2),
+        _unsorted_tri(),
+    ]
+)
+@pytest.mark.parametrize(
+    "e",
+    [
+        ElementTriRT1(),
+        ElementTriRT2(),
+        ElementTriBDM1(),
+        ElementTriN1(),
+        ElementTriN2(),
+        ElementTriN3(),
+        ElementTriHHJ1(),
+        ElementTriRT(3),
+        ElementTriRT(5),
+    ]
+)
+def test_tri_piola_facet_dof_orientation(m, e):
+    """The normal, tangential or normal-normal component is continuous also
+    if the element vertices are not sorted."""
+    x = np.random.default_rng(0).random(Basis(m, e).N)
+    assert_allclose(_facet_jumps(m, e, x), 0., atol=1e-10)
+
+
+def test_tri_n3_facet_basis():
+    """ElementTriN3 can be used with FacetBasis."""
+    m = MeshTri().refined(1)
+    fbasis = FacetBasis(m, ElementTriN3())
+    x = np.random.default_rng(0).random(fbasis.N)
+    assert np.asarray(fbasis.interpolate(x)).shape[1] == len(fbasis.find)
+
+
+@pytest.mark.parametrize("p", [1, 2, 3, 4, 6])
+def test_tri_rt_facet_moments(p):
+    """The facet DOFs are the moments of the normal component against the
+    Legendre polynomials, defined using the global facet normal and the
+    direction of increasing global vertex indices."""
+    m = _unsorted_tri()
+    m = MeshTri(m.p + .05 * np.sin(5. * m.p[::-1]), m.t, sort_t=False)
+    e = ElementTriRT(p)
+    basis = Basis(m, e)
+    x = np.random.default_rng(0).random(basis.N)
+    fbasis = [InteriorFacetBasis(m, e, side=i, intorder=2 * p)
+              for i in range(2)]
+    find = fbasis[0].find
+    X = np.asarray(fbasis[0].global_coordinates())
+    p0, p1 = m.p[:, m.facets[0, find]], m.p[:, m.facets[1, find]]
+    s = (np.einsum('i...,i...', X - p0[:, :, None], (p1 - p0)[:, :, None])
+         / np.sum((p1 - p0) ** 2, axis=0)[:, None])
+    for fb in fbasis:
+        un = np.einsum('i...,i...', np.asarray(fb.interpolate(x)),
+                       fbasis[0].normals)
+        for j in range(p):
+            c = np.zeros(j + 1)
+            c[j] = 1.
+            moment = np.sum(un * np.polynomial.legendre.legval(2. * s - 1.,
+                                                               c)
+                            * fbasis[0].dx, axis=1)
+            assert_allclose(moment, x[basis.facet_dofs[j, find]],
+                            atol=1e-10)
+
+
+@pytest.mark.parametrize("p", [1, 2, 3, 4, 5])
+def test_tri_rt_divergence(p):
+    """The divergence matches central finite differences."""
+    e = ElementTriRT(p)
+    X = np.array([[.2, .3, .1, .6],
+                  [.1, .25, .7, .2]])
+    eps = 1e-6
+    for i in range(3 * e.facet_dofs + e.interior_dofs):
+        _, d = e.lbasis(X, i)
+        fd = sum((e.lbasis(X + eps * np.eye(2)[:, [c]], i)[0][c]
+                  - e.lbasis(X - eps * np.eye(2)[:, [c]], i)[0][c])
+                 / (2. * eps) for c in range(2))
+        assert_allclose(fd, d, atol=1e-6 * max(1., np.abs(d).max()))
+
+
+@pytest.mark.parametrize(
+    "p,elem",
+    [
+        (1, ElementTriRT1),
+        (2, ElementTriRT2),
+    ]
+)
+def test_tri_rt_same_space(p, elem):
+    """ElementTriRT gives the same mixed Poisson solution as the existing
+    elements of the same degree."""
+    m = _unsorted_tri()
+
+    @BilinearForm
+    def mixed(sig, u, tau, v, w):
+        return dot(sig, tau) - div(tau) * u - div(sig) * v
+
+    @LinearForm
+    def load(tau, v, w):
+        return -np.sin(np.pi * w.x[0]) * v
+
+    sols = []
+    for e in [ElementTriRT(p), elem()]:
+        basis = Basis(m, e * ElementTriDG(ElementTriP(p - 1) if p > 1
+                                       else ElementTriP0()))
+        x = solve(mixed.assemble(basis), load.assemble(basis))
+        sols.append([np.asarray(f) for f in basis.interpolate(x)])
+    for f, g in zip(*sols):
+        assert_allclose(f, g, atol=1e-12)

@@ -23,6 +23,10 @@ class ElementTriBDM1(ElementHdiv):
                         [.0, s_2]])
     refdom = RefTri
 
+    def reversed_facet_dof(self, j):
+        # the facet DOFs are symmetric with respect to the facet midpoint
+        return self.facet_dofs - 1 - j, 1.
+
     def lbasis(self, X, i):
         x, y = X
 
