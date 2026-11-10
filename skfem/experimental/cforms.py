@@ -25,13 +25,27 @@ How it works:
    once per quadrature point (depends only on ``w``), once per test or
    trial function, or in the innermost loop.
 
+   The basis functions are split into groups sharing the field of
+   :class:`~skfem.element.ElementComposite`, the reference element and the
+   nonzero component of :class:`~skfem.element.ElementVector`.  The form is
+   traced for each pair of a test and a trial group with the other fields
+   and components set to zero, so the zero blocks are simplified away and
+   pairs which do not interact are skipped altogether.  The traces are
+   cached by the structure of the bases and ``w``.
+
 2. *Code generation.*  The reference basis functions are tabulated at the
    quadrature points in Python (via ``Element.lbasis``) and embedded into the
    C source as constant arrays.  The element loop transforms them using
-   ``invDF`` and ``dx`` that are taken from the Basis object, so any mapping
-   (affine, isoparametric) is supported without writing C for it.  DOF
-   vectors given to ``assemble`` and the global coordinates ``w.x`` are
-   interpolated inside the kernel.
+   ``invDF``, ``DF`` and ``dx`` that are taken from the Basis object, so any
+   mapping (affine, isoparametric) is supported without writing C for it:
+   identity for :math:`H^1`, the contravariant Piola transformation for
+   :math:`H(div)` and the covariant one for :math:`H(curl)` elements.  Where
+   the basis depends on the orientation of the element (DOFs of reversed
+   facets as in ``ElementTriP3``, or the orientation signs of
+   :math:`H(div)` and :math:`H(curl)` elements), each element has a code
+   selecting the reference functions and their signs from small tables.
+   DOF vectors given to ``assemble`` and the global coordinates ``w.x``
+   are interpolated inside the kernel.
 
 3. *Compilation.*  The source is compiled with the system C compiler (``CC``
    environment variable, defaults to ``cc``) with POSIX threads, and loaded
@@ -51,9 +65,13 @@ How it works:
    then independent sets of the remaining interface elements, see
    :func:`_partition`.
 
-Unsupported cases (e.g. facet bases, H(div)/H(curl) elements, complex
-dtype, no C compiler as in Pyodide) fall back to the Python implementation
-with a warning.
+Supported are :math:`H^1`, :math:`H(div)` and :math:`H(curl)` elements
+using the default transformations, and ``ElementVector``, ``ElementDG`` and
+``ElementComposite`` of them.  Unsupported cases fall back to the Python
+implementation with a warning, e.g., facet bases, ``ElementGlobal`` and
+other elements with a custom ``gbasis``, nested ``ElementVector`` or
+``ElementComposite``, complex dtype, forms branching on values (``np.where``,
+``np.maximum``), or no C compiler as in Pyodide.
 
 """
 import ctypes
@@ -75,7 +93,8 @@ from skfem.assembly.basis import CellBasis
 from skfem.mapping import MappingAffine, MappingIsoparametric
 from skfem.assembly.form import BilinearForm, LinearForm
 from skfem.assembly.form.form import FormExtraParams
-from skfem.element import (DiscreteField, ElementDG, ElementH1,
+from skfem.element import (DiscreteField, ElementComposite, ElementDG,
+                           ElementH1, ElementHcurl, ElementHdiv,
                            ElementVector)
 
 
@@ -115,15 +134,6 @@ def _key(x):
     return ('n', x.id) if isinstance(x, CExpr) else ('c', _const(x))
 
 
-def _deps(name: str) -> frozenset:
-    """Loop indices a symbol depends on: trial 'j', test 'i' or none."""
-    if name.startswith(('U[', 'DU[')):
-        return frozenset('j')
-    if name.startswith(('V[', 'DV[')):
-        return frozenset('i')
-    return frozenset()
-
-
 class CExpr:
     """A scalar C expression; supports the arithmetic used in forms.
 
@@ -136,10 +146,11 @@ class CExpr:
     __slots__ = ('op', 'args', 'deps', 'id')
 
     @staticmethod
-    def symbol(name: str) -> 'CExpr':
+    def symbol(name: str, deps: frozenset = frozenset()) -> 'CExpr':
+        """A C variable; ``deps`` are the loop indices it depends on."""
         def make():
             node = CExpr()
-            node.op, node.args, node.deps = 'sym', (name,), _deps(name)
+            node.op, node.args, node.deps = 'sym', (name,), deps
             return node
         return _graph.intern(('sym', name), make)
 
@@ -263,7 +274,27 @@ class CExpr:
     cosh = _fun('cosh')
     tanh = _fun('tanh')
     absolute = _fun('fabs')
+    arcsinh = _fun('asinh')
+    arccosh = _fun('acosh')
+    arctanh = _fun('atanh')
+    log1p = _fun('log1p')
+    expm1 = _fun('expm1')
+    log2 = _fun('log2')
+    log10 = _fun('log10')
+    exp2 = _fun('exp2')
+    cbrt = _fun('cbrt')
     del _fun
+
+    def _fun2(name):
+        def f(self, other):
+            if not isinstance(other, (CExpr, numbers.Number)):
+                return NotImplemented
+            return CExpr.apply(name, self, other)
+        return f
+
+    arctan2 = _fun2('atan2')
+    hypot = _fun2('hypot')
+    del _fun2
 
 
 def _render(node: CExpr, ref) -> str:
@@ -279,21 +310,27 @@ def _render(node: CExpr, ref) -> str:
     return "{}({})".format(node.op, ", ".join(args))
 
 
-def _emit(root, bilinear: bool):
+def _emit(roots, bilinear: bool, uside=None, vside=None):
     """Generate the loops over basis functions with hoisted temporaries.
 
-    Every operation is computed once at the outermost loop level allowed by
-    its dependencies: per quadrature point (only 'w'), per test function
-    'i', per trial function 'j' (precomputed to arrays over 'j' before the
-    loops), or in the innermost loop (both 'i' and 'j').
+    ``roots`` maps (test group, trial group) -- or the test group for
+    linear forms -- to the traced integrand.  Every operation is computed
+    once at the outermost loop level allowed by its dependencies: per
+    quadrature point (only 'w'), per trial function of a group (precomputed
+    to arrays before the loops), per test function of a group, or in the
+    innermost loop of a pair of groups.  Pairs whose integrand is zero,
+    e.g. different components of vectorial fields, are skipped.
 
     """
-    if not isinstance(root, CExpr):
-        expr = repr(_const(root))
-        nodes = []
-    else:
-        # operations reachable from the root, in post-order
-        nodes, seen, stack = [], set(), [(root, False)]
+    roots = {key: root for key, root in roots.items()
+             if isinstance(root, CExpr) or _const(root) != 0.}
+
+    # operations reachable from the roots, in post-order
+    nodes, seen = [], set()
+    for root in roots.values():
+        if not isinstance(root, CExpr):
+            continue
+        stack = [(root, False)]
         while stack:
             node, done = stack.pop()
             if done:
@@ -308,78 +345,90 @@ def _emit(root, bilinear: bool):
                     stack.append((a, False))
 
     names = {}
-    code = {'q': [], 'i': [], 'j': [], 'ij': []}
-    jdecl = []
+    qcode, jcode, icode, ijcode = [], {}, {}, {}
+    jdecl = {}
 
     def ref(node):
+        if not isinstance(node, CExpr):
+            return repr(_const(node))
         return names[node.id] if node.op != 'sym' else node.args[0]
 
     for n, node in enumerate(nodes):
-        level = ''.join(sorted(node.deps)) or 'q'
         src = _render(node, ref)
-        if level == 'j':
+        idx = dict(node.deps)  # e.g. {'i': 'V0', 'j': 'U2'}
+        if len(idx) != len(node.deps):
+            raise _Unsupported("Expression mixes basis function groups.")
+        if not idx:
+            names[node.id] = "tq{}".format(n)
+            qcode.append("    const double tq{} = {};".format(n, src))
+        elif set(idx) == {'j'}:
+            g = idx['j']
             names[node.id] = "tj{}[j]".format(n)
-            jdecl.append("tj{}[NU]".format(n))
-            code['j'].append("      tj{}[j] = {};".format(n, src))
+            jdecl.setdefault(g, []).append("tj{}[M_{}]".format(n, g))
+            jcode.setdefault(g, []).append("      tj{}[j] = {};"
+                                           .format(n, src))
+        elif set(idx) == {'i'}:
+            names[node.id] = "ti{}".format(n)
+            icode.setdefault(idx['i'], []).append(
+                "      const double ti{} = {};".format(n, src))
         else:
-            names[node.id] = "t{}{}".format(level, n)
-            indent = {'q': 4, 'i': 6, 'ij': 8}[level]
-            code[level].append("{}const double t{}{} = {};"
-                               .format(' ' * indent, level, n, src))
-    if isinstance(root, CExpr):
-        expr = ref(root)
+            names[node.id] = "tk{}".format(n)
+            ijcode.setdefault((idx['i'], idx['j']), []).append(
+                "          const double tk{} = {};".format(n, src))
 
+    out = ["\n".join(qcode)]
+    for g in jdecl:
+        out.append("    double {};\n"
+                   "    for (int64_t j = 0; j < M_{}; j++) {{\n{}\n    }}"
+                   .format(", ".join(jdecl[g]), g, "\n".join(jcode[g])))
     if bilinear:
-        jcode = ""
-        if code['j']:
-            jcode = ("    double " + ", ".join(jdecl) + ";\n"
-                     "    for (int64_t j = 0; j < NU; j++) {\n"
-                     + "\n".join(code['j']) + "\n    }")
-        return _BILINEAR_LOOPS.format(
-            qcode="\n".join(code['q']),
-            jcode=jcode,
-            icode="\n".join(code['i']),
-            ijcode="\n".join(code['ij']),
-            expr=expr,
-        )
-    assert not code['j'] and not code['ij']
-    return _LINEAR_LOOPS.format(
-        qcode="\n".join(code['q']),
-        icode="\n".join(code['i']),
-        expr=expr,
-    )
+        for gv in vside:
+            pairs = [gu for gu in uside if (gv, gu) in roots]
+            if not pairs:
+                continue
+            out.append("    for (int64_t i = 0; i < M_{gv}; i++) {{\n"
+                       "      const int64_t iv = IDX_{gv}[i];\n{icode}"
+                       .format(gv=gv, icode="\n".join(icode.get(gv, []))))
+            for gu in pairs:
+                out.append(
+                    "      for (int64_t j = 0; j < M_{gu}; j++) {{\n{ij}\n"
+                    "        A[IDX_{gu}[j] * NV + iv] += {expr} * w_dx;\n"
+                    "      }}".format(gu=gu,
+                                      ij="\n".join(ijcode.get((gv, gu), [])),
+                                      expr=ref(roots[(gv, gu)])))
+            out.append("    }")
+    else:
+        for gv in vside:
+            if gv not in roots:
+                continue
+            out.append("    for (int64_t i = 0; i < M_{gv}; i++) {{\n{icode}\n"
+                       "      A[IDX_{gv}[i]] += {expr} * w_dx;\n    }}"
+                       .format(gv=gv, icode="\n".join(icode.get(gv, [])),
+                               expr=ref(roots[gv])))
+    return "\n".join(out)
 
 
-def _symbols(fmt: str, shape: Tuple[int, ...], offset: int = 0) -> ndarray:
+def _symbols(fmt: str, shape: Tuple[int, ...], offset: int = 0,
+             deps: frozenset = frozenset()) -> ndarray:
     """Object array of CExpr's named by ``fmt.format(offset + flat_index)``.
 
     Two trailing axes of length one are appended so that the arrays have the
     same rank as the numerical arrays (..., nelems, nqp) seen by forms;
     shape-based helpers such as ``inner`` or ``identity`` then work as is.
+    ``deps`` are the loop indices the symbols depend on.
 
     """
     out = np.empty(shape, dtype=object)
     for n, ix in enumerate(np.ndindex(*shape)):
-        out[ix] = CExpr.symbol(fmt.format(offset + n))
+        out[ix] = CExpr.symbol(fmt.format(offset + n), deps)
     return out.reshape(shape + (1, 1))
 
 
-def _symbolic_field(name: str, index: str, ncomp: int,
-                    gdim: int) -> DiscreteField:
-    """Symbolic basis function: C arrays ``name[j][c]``, ``Dname[j][n]``.
-
-    Here ``j`` is the local basis function index (a loop variable in C
-    called ``index``), ``c`` the component and ``g`` the direction of the
-    derivative; ``n = c * GDIM + g``.
-
-    """
-    vshape = () if ncomp == 1 else (ncomp,)
-    pre = "{}[{}]".format(name, index)
-    dpre = "D{}[{}]".format(name, index)
-    return DiscreteField(
-        value=_symbols(pre + "[{}]", vshape),
-        grad=_symbols(dpre + "[{}]", vshape + (gdim,)),
-    )
+def _zeros(shape: Tuple[int, ...]) -> ndarray:
+    """Object array of zeros with the trailing axes, see :func:`_symbols`."""
+    out = np.empty(shape, dtype=object)
+    out.fill(0.)
+    return out.reshape(shape + (1, 1))
 
 
 def _simplify_result(out):
@@ -412,56 +461,295 @@ class _TracingParams(FormExtraParams):
 
 
 # ---------------------------------------------------------------------------
-# Element tabulation
+# Elements
 # ---------------------------------------------------------------------------
 
 class _Unsupported(Exception):
     pass
 
 
-def _tabulate(elem, X: ndarray, nbfun: int):
-    """Tabulate reference basis functions at quadrature points.
+#: derivative attribute of DiscreteField for each transformation
+_DERIVATIVE = {'h1': 'grad', 'hdiv': 'div', 'hcurl': 'curl'}
 
-    Returns
-    -------
-    phi
-        Values of the scalar reference functions, shape (nscalar, nqp).
-    dphi
-        Reference gradients, shape (nscalar, ldim, nqp).
-    base, comp
-        For each local basis function, the index of the scalar reference
-        function and the component it is placed to.
-    ncomp
-        Number of components.
+
+class _Field:
+    """A field of the form arguments.
+
+    ``kind`` is the transformation of the reference basis: 'h1' (identity,
+    scalar or ``vdim`` components), 'hdiv' (contravariant Piola) or 'hcurl'
+    (covariant Piola).  An :class:`~skfem.element.ElementComposite` has a
+    field for each of its elements.
 
     """
+
+    def __init__(self, kind: str, vdim=None):
+        self.kind, self.vdim = kind, vdim
+
+    def shapes(self, gdim: int):
+        """Shapes of the value and the derivative."""
+        if self.kind == 'h1':
+            v = () if self.vdim is None else (self.vdim,)
+            return v, v + (gdim,)
+        if self.kind == 'hdiv':
+            return (gdim,), ()
+        return (gdim,), (() if gdim == 2 else (gdim,))
+
+    def make(self, value, deriv) -> DiscreteField:
+        return DiscreteField(**{'value': value,
+                                _DERIVATIVE[self.kind]: deriv})
+
+    def zeros(self, gdim: int) -> DiscreteField:
+        vshape, dshape = self.shapes(gdim)
+        return self.make(_zeros(vshape), _zeros(dshape))
+
+    def symbols(self, vfmt: str, dfmt: str, gdim: int, deps=frozenset(),
+                comp=None) -> DiscreteField:
+        """Field where the values are the C variables ``vfmt.format(n)`` and
+        the derivatives ``dfmt.format(n)``; for a component ``comp`` of a
+        vectorial field, the other components are zero."""
+        vshape, dshape = self.shapes(gdim)
+        if comp is None:
+            return self.make(_symbols(vfmt, vshape, deps=deps),
+                             _symbols(dfmt, dshape, deps=deps))
+        value, deriv = _zeros(vshape), _zeros(dshape)
+        value[comp] = _symbols(vfmt, (), deps=deps)
+        deriv[comp] = _symbols(dfmt, (gdim,), deps=deps)
+        return self.make(value, deriv)
+
+
+class _Group:
+    """Basis functions sharing the field, the reference element (``leaf``)
+    and the nonzero component of a vectorial field (``comp``).
+
+    ``members`` lists ``(i, s)``: the index ``i`` of the basis function in
+    the element and the index ``s`` of the reference function in ``leaf``.
+
+    """
+
+    def __init__(self, leaf, kind, field, comp, members):
+        self.leaf, self.kind = leaf, kind
+        self.field, self.comp = field, comp
+        self.members = members
+
+    def sizes(self, ldim: int, gdim: int):
+        """Number of reference values and derivatives, and the same for the
+        global basis functions."""
+        if self.kind == 'h1':
+            return 1, ldim, 1, gdim
+        if self.kind == 'hdiv':
+            return ldim, 1, gdim, 1
+        return ldim, 1 if ldim == 2 else ldim, gdim, 1 if gdim == 2 else gdim
+
+
+def _describe(elem, nbfun: int):
+    """Split the basis functions of ``elem`` into fields and groups."""
+    if isinstance(elem, ElementComposite):
+        where = [tuple(int(a) for a in elem._deduce_bfun(i))
+                 for i in range(nbfun)]
+        fields, groups = [], []
+        for n, sub in enumerate(elem.elems):
+            if isinstance(sub, ElementComposite):
+                raise _Unsupported("Nested ElementComposite")
+            local = {ind: i for i, (m, ind) in enumerate(where) if m == n}
+            subfields, subgroups = _describe(sub, len(local))
+            for g in subgroups:
+                g.field += len(fields)
+                g.members = [(local[i], s) for i, s in g.members]
+            fields += subfields
+            groups += subgroups
+        return fields, groups
     if isinstance(elem, ElementVector):
-        phi, dphi, base, comp, ncomp = _tabulate(elem.elem, X,
-                                                 nbfun // elem.dim)
-        if ncomp != 1:
-            raise _Unsupported("Nested ElementVector")
-        n = np.arange(nbfun)
-        return phi, dphi, base[n // elem.dim], n % elem.dim, elem.dim
+        subfields, subgroups = _describe(elem.elem, nbfun // elem.dim)
+        if (len(subfields) != 1
+                or subfields[0].kind != 'h1'
+                or subfields[0].vdim is not None):
+            raise _Unsupported("ElementVector of " + type(elem.elem).__name__)
+        d = elem.dim
+        return [_Field('h1', d)], [
+            _Group(g.leaf, 'h1', 0, c, [(i * d + c, s) for i, s in g.members])
+            for c in range(d) for g in subgroups
+        ]
     if isinstance(elem, ElementDG):
-        return _tabulate(elem.elem, X, nbfun)
-    if not isinstance(elem, ElementH1):
-        raise _Unsupported(type(elem).__name__)
-    if type(elem).gbasis is not ElementH1.gbasis:
-        raise _Unsupported("Custom gbasis in " + type(elem).__name__)
-    if (elem.dim == 2
-            and elem.facet_dofs >= 2
-            and elem.reversed_facet_dof(0) is not None):
-        # basis depends on facet orientation, i.e. differs per element
-        raise _Unsupported("Orientation-dependent " + type(elem).__name__)
-    nqp = X.shape[-1]
-    phi = np.empty((nbfun, nqp))
-    dphi = np.empty((nbfun, X.shape[0], nqp))
-    for i in range(nbfun):
-        p, dp = elem.lbasis(X, i)
-        phi[i] = np.broadcast_to(p, (nqp,))
-        dphi[i] = np.broadcast_to(dp, (X.shape[0], nqp))
-    n = np.arange(nbfun)
-    return phi, dphi, n, np.zeros_like(n), 1
+        return _describe(elem.elem, nbfun)
+    for kind, base in (('h1', ElementH1),
+                       ('hdiv', ElementHdiv),
+                       ('hcurl', ElementHcurl)):
+        if isinstance(elem, base):
+            if type(elem).gbasis is not base.gbasis:
+                raise _Unsupported("Custom gbasis in " + type(elem).__name__)
+            return [_Field(kind)], [
+                _Group(elem, kind, 0, None, [(i, i) for i in range(nbfun)])
+            ]
+    raise _Unsupported(type(elem).__name__)
+
+
+def _orientation(group, mapping, tind, s: int):
+    """Reference function and multiplier of the function ``s`` per element.
+
+    Mirrors :meth:`~skfem.element.Element._oriented_lbasis`, which swaps the
+    DOFs of reversed facets, and ``orient`` of H(div) and H(curl) elements.
+
+    """
+    leaf = group.leaf
+    t = mapping.mesh.t if tind is None else mapping.mesh.t[:, tind]
+    src = np.full(t.shape[1], s, dtype=np.int64)
+    mult = np.ones(t.shape[1])
+    offset = leaf.refdom.nnodes * leaf.nodal_dofs
+    if (leaf.dim == 2
+            and leaf.facet_dofs >= 2
+            and offset <= s < offset + leaf.refdom.nfacets * leaf.facet_dofs):
+        facet, j = divmod(s - offset, leaf.facet_dofs)
+        rev = leaf.reversed_facet_dof(j)
+        if rev is not None:
+            a, b = leaf.refdom.facets[facet]
+            reverse = t[a] > t[b]
+            mult = np.where(reverse, rev[1], 1.)
+            if rev[0] != j:
+                src = np.where(reverse,
+                               offset + facet * leaf.facet_dofs + rev[0], s)
+    if group.kind != 'h1':
+        mult = mult * leaf.orient(mapping, s, tind)
+        if group.kind == 'hdiv' and np.any(np.abs(mult) != 1.):
+            raise _Unsupported("Non-unit orientation in H(div)")
+    return src, mult
+
+
+def _compress(S: ndarray, M: ndarray):
+    """Number the distinct columns of (S, M); returns the number of each
+    column and a representative column for each number."""
+    nt = S.shape[1]
+    if nt == 0:
+        return np.zeros(0, dtype=np.int64), np.zeros(1, dtype=np.int64)
+    varying = np.nonzero((S != S[:, :1]).any(axis=1)
+                         | (M != M[:, :1]).any(axis=1))[0]
+    code = np.zeros(nt, dtype=np.int64)
+    radix = 1
+    for r in varying:
+        _, inv = np.unique(np.vstack((S[r], M[r])), axis=1,
+                           return_inverse=True)
+        n = int(inv.max()) + 1
+        if radix * n >= 2 ** 62:  # too many combinations for an integer
+            _, rep, codes = np.unique(np.vstack((S[varying], M[varying])).T,
+                                      axis=0, return_index=True,
+                                      return_inverse=True)
+            return codes.reshape(-1).astype(np.int64), rep
+        code += inv.reshape(-1) * radix
+        radix *= n
+    _, rep, codes = np.unique(code, return_index=True, return_inverse=True)
+    return codes.reshape(-1).astype(np.int64), rep
+
+
+class _Side:
+    """The basis functions of a Basis, for code generation."""
+
+    def __init__(self, basis):
+        X = basis.X
+        self.ldim, self.gdim = X.shape[0], basis.mesh.p.shape[0]
+        self.fields, self.groups = _describe(basis.elem, basis.Nbfun)
+        if (any(g.kind != 'h1' for g in self.groups)
+                and self.ldim != self.gdim):
+            raise _Unsupported("H(div) or H(curl) on a manifold")
+        srcs, mults = [], []
+        for g in self.groups:
+            for _, s in g.members:
+                src, mult = _orientation(g, basis.mapping, basis.tind, s)
+                srcs.append(src)
+                mults.append(mult)
+        S, M = np.array(srcs), np.array(mults)
+        self.codes, rep = _compress(S, M)
+        self.ncodes = len(rep)
+        pos = 0
+        for g in self.groups:
+            n = len(g.members)
+            src, g.mult = S[pos:pos + n, rep].T, M[pos:pos + n, rep].T
+            pos += n
+            g.rows = sorted(set(src.ravel().tolist())
+                            | {s for _, s in g.members})
+            row = {s: r for r, s in enumerate(g.rows)}
+            g.src = np.vectorize(row.get, otypes=[np.int64])(src)
+            nvr, ndr, _, _ = g.sizes(self.ldim, self.gdim)
+            nq = X.shape[-1]
+            g.phi = np.empty((len(g.rows), nvr, nq))
+            g.dphi = np.empty((len(g.rows), ndr, nq))
+            for r, s in enumerate(g.rows):
+                phi, dphi = g.leaf.lbasis(X, s)
+                g.phi[r] = np.broadcast_to(phi, (nvr, nq))
+                g.dphi[r] = np.broadcast_to(dphi, (ndr, nq))
+
+    @property
+    def structure(self):
+        """What the traced form sees of this basis."""
+        return (tuple((f.kind, f.vdim) for f in self.fields),
+                tuple((g.kind, g.field, g.comp, len(g.members))
+                      for g in self.groups),
+                self.ldim, self.gdim)
+
+    @property
+    def needs_DF(self) -> bool:
+        return any(g.kind != 'h1' for g in self.groups)
+
+    def arguments(self, name: str, gdim: int):
+        """Symbolic form arguments for each group: the fields of the group's
+        basis functions are C variables, the other fields are zero."""
+        index = 'j' if name == 'U' else 'i'
+        out = {}
+        for n, g in enumerate(self.groups):
+            G = name + str(n)
+            deps = frozenset([(index, G)])
+            out[G] = [
+                f.symbols("{}v[{}][{{}}]".format(G, index),
+                          "{}d[{}][{{}}]".format(G, index),
+                          gdim, deps, g.comp) if m == g.field
+                else f.zeros(gdim)
+                for m, f in enumerate(self.fields)
+            ]
+        return out
+
+    def tables(self, name: str) -> str:
+        """Constant tables of the groups for the C source."""
+        memo = self.__dict__.setdefault('_tables', {})
+        if name not in memo:
+            memo[name] = self._make_tables(name)
+        return memo[name]
+
+    def _make_tables(self, name: str) -> str:
+        src = "\n#define NCODE_{} {}\n".format(name, self.ncodes)
+        for n, g in enumerate(self.groups):
+            G = name + str(n)
+            src += ("#define M_{G} {m}\n"
+                    "static const int64_t IDX_{G}[M_{G}] = {idx};\n"
+                    "static const int64_t SRC_{G}[NCODE_{S}][M_{G}] = {src};\n"
+                    "static const double MUL_{G}[NCODE_{S}][M_{G}] = {mul};\n"
+                    "static const double PHI_{G}[{r}][{nv}][NQ] = {phi};\n"
+                    "static const double DPHI_{G}[{r}][{nd}][NQ] = {dphi};\n"
+                    .format(G=G, S=name, m=len(g.members),
+                            idx=_carray(np.array([i for i, _ in g.members])),
+                            src=_carray(g.src), mul=_carray(g.mult),
+                            r=len(g.rows), nv=g.phi.shape[1],
+                            nd=g.dphi.shape[1], phi=_carray(g.phi),
+                            dphi=_carray(g.dphi)))
+        return src
+
+    def declarations(self, name: str) -> str:
+        out = ["  const int64_t code{} = in->code{}[k];".format(name, name)]
+        for n, g in enumerate(self.groups):
+            _, _, nvp, ndp = g.sizes(self.ldim, self.gdim)
+            out.append("  double {G}v[M_{G}][{nv}], {G}d[M_{G}][{nd}];"
+                       .format(G=name + str(n), nv=nvp, nd=ndp))
+        return "\n".join(out)
+
+    def evaluation(self, name: str) -> str:
+        """C code evaluating the global basis functions at point q."""
+        out = []
+        for n, g in enumerate(self.groups):
+            G = name + str(n)
+            body = _EVAL[g.kind]
+            if g.kind == 'hcurl':
+                body = body.format(curl=_CURL2D if self.gdim == 2
+                                   else _CURL3D)
+            out.append(_EVAL_LOOP.format(G=G, S=name, kind=g.kind,
+                                         body=body.format(G=G)))
+        return "\n".join(out)
 
 
 # ---------------------------------------------------------------------------
@@ -475,27 +763,89 @@ def _carray(a: ndarray) -> str:
     return "{" + ", ".join(_carray(x) for x in a) + "}"
 
 
-_BASIS_TEMPLATE = """
-static const double PHI_{N}[{nscalar}][NQ] = {phi};
-static const double DPHI_{N}[{nscalar}][LDIM][NQ] = {dphi};
-static const int64_t BASE_{N}[N{N}] = {base};
-static const int64_t COMP_{N}[N{N}] = {comp};
-"""
+_EVAL_LOOP = """
+    /* basis functions of group {G} ({kind}) at quadrature point q */
+    for (int64_t m = 0; m < M_{G}; m++) {{
+      const int64_t r = SRC_{G}[code{S}][m];
+      const double c = MUL_{G}[code{S}][m];
+{body}
+    }}"""
 
 
-_EVAL_TEMPLATE = """
-    /* global basis functions {N} at quadrature point q */
-    memset({N}, 0, sizeof({N}));
-    memset(D{N}, 0, sizeof(D{N}));
-    for (int64_t j = 0; j < N{N}; j++) {{
-      const int64_t b = BASE_{N}[j], c = COMP_{N}[j];
-      {N}[j][c] = PHI_{N}[b][q];
+# global basis functions from the reference ones; J is invDF, DFq is DF
+_EVAL = {
+    'h1': """      {G}v[m][0] = c * PHI_{G}[r][0][q];
       for (int g = 0; g < GDIM; g++) {{
         double s = 0.;
         for (int a = 0; a < LDIM; a++)
-          s += J[a * GDIM + g] * DPHI_{N}[b][a][q];
-        D{N}[j][c * GDIM + g] = s;
+          s += J[a * GDIM + g] * DPHI_{G}[r][a][q];
+        {G}d[m][g] = c * s;
+      }}""",
+    'hdiv': """      for (int g = 0; g < GDIM; g++) {{
+        double s = 0.;
+        for (int a = 0; a < LDIM; a++)
+          s += DFq[g * LDIM + a] * PHI_{G}[r][a][q];
+        {G}v[m][g] = c * s / fabs(detq);
       }}
+      {G}d[m][0] = c * DPHI_{G}[r][0][q] / fabs(detq);""",
+    'hcurl': """      for (int g = 0; g < GDIM; g++) {{{{
+        double s = 0.;
+        for (int a = 0; a < LDIM; a++)
+          s += J[a * GDIM + g] * PHI_{{G}}[r][a][q];
+        {{G}}v[m][g] = c * s;
+      }}}}
+{curl}""",
+}
+
+_CURL2D = """      {G}d[m][0] = c * DPHI_{G}[r][0][q] / detq;"""
+
+_CURL3D = """      for (int g = 0; g < GDIM; g++) {{
+        double s = 0.;
+        for (int a = 0; a < LDIM; a++)
+          s += DFq[g * LDIM + a] * DPHI_{G}[r][a][q];
+        {G}d[m][g] = c * s / detq;
+      }}"""
+
+
+_DF_TEMPLATE = """
+    /* DF (strided) and its determinant at quadrature point q */
+    double DFq[GDIM * LDIM];
+    for (int a = 0; a < GDIM; a++)
+      for (int b = 0; b < LDIM; b++)
+        DFq[a * LDIM + b] = in->DF[a * in->dfs[0] + b * in->dfs[1]
+                                   + k * in->dfs[2] + q * in->dfs[3]];
+    const double detq = {det};
+    (void)detq;"""
+
+_DET = {
+    1: "DFq[0]",
+    2: "DFq[0] * DFq[3] - DFq[1] * DFq[2]",
+    3: ("DFq[0] * (DFq[4] * DFq[8] - DFq[5] * DFq[7])"
+        " - DFq[1] * (DFq[3] * DFq[8] - DFq[5] * DFq[6])"
+        " + DFq[2] * (DFq[3] * DFq[7] - DFq[4] * DFq[6])"),
+}
+
+
+_GATHER_TEMPLATE = """
+  /* local coefficients of the DOF vector '{name}' of 'w' */
+  double C{f}[N{B}];
+  for (int64_t j = 0; j < N{B}; j++)
+    C{f}[j] = in->coef[{f} * in->coef_n + in->idofs[j * in->nt + k]];"""
+
+
+_INTERP_DECL = """
+    /* '{name}' of 'w', field {n}, interpolated at quadrature point q */
+    double F{f}x{n}v[{nv}], F{f}x{n}d[{nd}];
+    memset(F{f}x{n}v, 0, sizeof(F{f}x{n}v));
+    memset(F{f}x{n}d, 0, sizeof(F{f}x{n}d));"""
+
+_INTERP_GROUP = """
+    for (int64_t m = 0; m < M_{G}; m++) {{
+      const double cc = C{f}[IDX_{G}[m]];
+      for (int n = 0; n < {nv}; n++)
+        F{f}x{fld}v[{voff} + n] += cc * {G}v[m][n];
+      for (int n = 0; n < {nd}; n++)
+        F{f}x{fld}d[{doff} + n] += cc * {G}d[m][n];
     }}"""
 
 
@@ -509,9 +859,7 @@ _KERNEL_TEMPLATE = """
 #define LDIM {ldim}
 #define GDIM {gdim}
 #define NV {nv}
-#define NCV {ncv}
 #define NU {nu}
-#define NCU {ncu}
 #define NQD {nqd}
 typedef {idx_t} idx_t;
 {tables}
@@ -531,6 +879,11 @@ struct input {{
   const double *gp;      /* geometry nodes (GDIM, gnp) for 'x' ... */
   int64_t gnp;
   const int64_t *gconn;  /* ... and their element connectivity (NG, nt) */
+  const double *DF;      /* Jacobians (GDIM, LDIM, nt, NQ) for H(div) and
+                            H(curl) ... */
+  const int64_t *dfs;    /* ... with strides dfs[0..3] (in doubles) */
+  const int64_t *codeU;  /* orientation code of each element, selects the */
+  const int64_t *codeV;  /* reference functions and signs of the tables */
   const idx_t *indptr;   /* CSR sparsity pattern (direct assembly) */
   const idx_t *indices;
   const int64_t *udofs;  /* (NU, nt) element DOFs of trial functions */
@@ -549,8 +902,7 @@ struct task {{
 static void local(const struct input *restrict in, int64_t k,
                   double *restrict A)
 {{
-  double V[NV][NCV], DV[NV][NCV * GDIM];
-{udecl}
+{decls}
   const double *restrict P = in->P;
   (void)P;
 {gather}
@@ -685,13 +1037,18 @@ void assemble_coo(int64_t nt,
                   const double *gp,
                   int64_t gnp,
                   const int64_t *gconn,
+                  const double *DF,
+                  const int64_t *dfs,
+                  const int64_t *codeU,
+                  const int64_t *codeV,
                   double *data,
                   int64_t nthreads)
 {{
   struct input in = {{.nt = nt, .invDF = invDF, .js = js, .dx = dx,
                       .dxs = dxs, .qd = qd, .P = P, .coef = coef,
                       .coef_n = coef_n, .idofs = idofs, .gp = gp,
-                      .gnp = gnp, .gconn = gconn}};
+                      .gnp = gnp, .gconn = gconn, .DF = DF, .dfs = dfs,
+                      .codeU = codeU, .codeV = codeV}};
   if (nthreads > nt) nthreads = nt;
   if (nthreads < 1) nthreads = 1;
   struct task tasks[nthreads];
@@ -720,6 +1077,10 @@ void assemble_csr(int64_t nt,
                   const double *gp,
                   int64_t gnp,
                   const int64_t *gconn,
+                  const double *DF,
+                  const int64_t *dfs,
+                  const int64_t *codeU,
+                  const int64_t *codeV,
                   const idx_t *indptr,
                   const idx_t *indices,
                   const int64_t *udofs,
@@ -733,7 +1094,8 @@ void assemble_csr(int64_t nt,
   struct input in = {{.nt = nt, .invDF = invDF, .js = js, .dx = dx,
                       .dxs = dxs, .qd = qd, .P = P, .coef = coef,
                       .coef_n = coef_n, .idofs = idofs, .gp = gp,
-                      .gnp = gnp, .gconn = gconn, .indptr = indptr,
+                      .gnp = gnp, .gconn = gconn, .DF = DF, .dfs = dfs,
+                      .codeU = codeU, .codeV = codeV, .indptr = indptr,
                       .indices = indices, .udofs = udofs, .vdofs = vdofs,
                       .perm = perm}};
   int64_t nthreads = 1;
@@ -785,26 +1147,6 @@ void assemble_csr(int64_t nt,
 """
 
 
-_GATHER_TEMPLATE = """
-  /* local coefficients of the DOF vector '{name}' of 'w' */
-  double C{f}[N{B}];
-  for (int64_t j = 0; j < N{B}; j++)
-    C{f}[j] = in->coef[{f} * in->coef_n + in->idofs[j * in->nt + k]];"""
-
-
-_INTERP_TEMPLATE = """
-    /* '{name}' of 'w' interpolated at quadrature point q */
-    double F{f}[NC{B}], DF{f}[NC{B} * GDIM];
-    memset(F{f}, 0, sizeof(F{f}));
-    memset(DF{f}, 0, sizeof(DF{f}));
-    for (int64_t j = 0; j < N{B}; j++) {{
-      for (int n = 0; n < NC{B}; n++)
-        F{f}[n] += C{f}[j] * {B}[j][n];
-      for (int n = 0; n < NC{B} * GDIM; n++)
-        DF{f}[n] += C{f}[j] * D{B}[j][n];
-    }}"""
-
-
 _GEOMETRY_TEMPLATE = """
     /* global coordinates 'x' at quadrature point q */
     double XQ[GDIM];
@@ -813,26 +1155,6 @@ _GEOMETRY_TEMPLATE = """
       const int64_t node = in->gconn[n * in->nt + k];
       for (int g = 0; g < GDIM; g++)
         XQ[g] += in->gp[g * in->gnp + node] * GPHI[n][q];
-    }}"""
-
-
-_BILINEAR_LOOPS = """
-{qcode}
-{jcode}
-    for (int64_t i = 0; i < NV; i++) {{
-{icode}
-      for (int64_t j = 0; j < NU; j++) {{
-{ijcode}
-        A[j * NV + i] += {expr} * w_dx;
-      }}
-    }}"""
-
-
-_LINEAR_LOOPS = """
-{qcode}
-    for (int64_t i = 0; i < NV; i++) {{
-{icode}
-      A[i] += {expr} * w_dx;
     }}"""
 
 
@@ -900,13 +1222,13 @@ def _kernel_lib(source: str) -> ctypes.CDLL:
     i64 = ctypes.c_int64
     vptr = ctypes.c_void_p  # strided arrays
     lib.assemble_coo.argtypes = (i64, vptr, iptr, vptr, iptr, dptr, dptr,
-                                 dptr, i64, iptr, dptr, i64, iptr, dptr,
-                                 i64)
+                                 dptr, i64, iptr, dptr, i64, iptr, vptr,
+                                 iptr, iptr, iptr, dptr, i64)
     lib.assemble_coo.restype = None
     lib.assemble_csr.argtypes = (i64, vptr, iptr, vptr, iptr, dptr, dptr,
-                                 dptr, i64, iptr, dptr, i64, iptr, xptr,
-                                 xptr, iptr, iptr, iptr, iptr, iptr, i64,
-                                 dptr)
+                                 dptr, i64, iptr, dptr, i64, iptr, vptr,
+                                 iptr, iptr, iptr, xptr, xptr, iptr, iptr,
+                                 iptr, iptr, iptr, i64, dptr)
     lib.assemble_csr.restype = None
     return lib
 
@@ -1152,6 +1474,27 @@ def _strides(arr) -> ndarray:
     return np.array(arr.strides, dtype=np.int64) // 8
 
 
+def _signature(val):
+    """Structure of an entry of 'w' as seen by the traced form, or None if
+    it cannot be summarized (then the trace is not cached)."""
+    if val is _GEOM_X:
+        return ('x',)
+    if isinstance(val, numbers.Number):
+        return ('P',)
+    if isinstance(val, _Lazy):
+        return ('L', val.shape)
+    if isinstance(val, DiscreteField):
+        return ('F',) + tuple(
+            (attr, np.shape(val if attr == 'value' else getattr(val, attr))
+             [:-2])
+            for attr in ('value',) + DiscreteField._extra_attrs
+            if attr == 'value' or getattr(val, attr) is not None)
+    if isinstance(val, tuple):
+        sigs = tuple(_signature(v) for v in val)
+        return None if None in sigs else ('T',) + sigs
+    return None
+
+
 class _CFormMixin:
     """Shared logic of CBilinearForm and CLinearForm."""
 
@@ -1164,42 +1507,58 @@ class _CFormMixin:
             if type(basis) is not CellBasis:
                 raise _Unsupported(type(basis).__name__)
 
-    def _tables(self, name, basis):
-        phi, dphi, base, comp, ncomp = _tabulate(basis.elem, basis.X,
-                                                 basis.Nbfun)
-        src = _BASIS_TEMPLATE.format(
-            N=name,
-            nscalar=phi.shape[0],
-            phi=_carray(phi),
-            dphi=_carray(dphi),
-            base=_carray(base),
-            comp=_carray(comp),
-        )
-        return src, ncomp
+    @staticmethod
+    def _side(basis) -> _Side:
+        return _cached(basis, 'side', lambda: _Side(basis))
 
     @staticmethod
-    def _build_w(wdict, coefs=(), cshape=(1, 1), used=None):
+    def _pack(val, offset: int, pack: bool):
+        """Symbolic version of a DiscreteField (or a tuple of them) whose
+        values at quadrature points are passed in ``Q``."""
+        if isinstance(val, tuple):
+            out, qdata = [], []
+            for v in val:
+                f, q, offset = _CFormMixin._pack(v, offset, pack)
+                out.append(f)
+                qdata += q
+            return tuple(out), qdata, offset
+        syms, qdata = {}, []
+        for attr in ('value',) + DiscreteField._extra_attrs:
+            arr = np.asarray(val) if attr == 'value' else getattr(val, attr)
+            if arr is None:
+                continue
+            shape = np.shape(arr)[:-2]
+            syms[attr] = _symbols("Q[{}]", shape, offset)
+            offset += int(np.prod(shape))
+            if pack:
+                arr = np.asarray(arr, dtype=np.float64)
+                nt, nq = arr.shape[-2:]
+                qdata.append(np.moveaxis(arr.reshape(-1, nt, nq), 0, -1))
+        return DiscreteField(**syms), qdata, offset
+
+    @classmethod
+    def _build_w(cls, wdict, coefs=(), cfields=(), gdim=1, used=None):
         """Symbolic 'w'.
 
-        DiscreteFields in ``used`` are packed into ``Q``; DOF vectors with
-        names in ``coefs`` are interpolated in C to ``F<n>`` and ``DF<n>``,
-        where ``cshape`` is (number of components, gdim).
+        Scalars become runtime parameters ``P``; DiscreteFields in ``used``
+        are packed into ``Q``; DOF vectors with names in ``coefs`` are
+        interpolated in C, where ``cfields`` are the fields of the
+        interpolation basis.
 
         """
         w = _TracingParams()
         params, qdata, offset = [], [], 0
-        ncomp, gdim = cshape
-        vshape = () if ncomp == 1 else (ncomp,)
         interpolated = []
         for key in coefs:
             if used is not None and key not in used:
                 continue
             f = len(interpolated)
             interpolated.append(key)
-            dict.__setitem__(w, key, DiscreteField(
-                value=_symbols("F{}[{{}}]".format(f), vshape),
-                grad=_symbols("DF{}[{{}}]".format(f), vshape + (gdim,)),
-            ))
+            fields = [field.symbols("F{}x{}v[{{}}]".format(f, n),
+                                    "F{}x{}d[{{}}]".format(f, n), gdim)
+                      for n, field in enumerate(cfields)]
+            dict.__setitem__(w, key,
+                             fields[0] if len(fields) == 1 else tuple(fields))
         uses_x = False
         for key, val in wdict.items():
             if isinstance(val, _Lazy):
@@ -1219,112 +1578,129 @@ class _CFormMixin:
                 dict.__setitem__(w, key,
                                  CExpr.symbol("P[{}]".format(len(params))))
                 params.append(float(val))
-            elif isinstance(val, DiscreteField):
+            elif (isinstance(val, DiscreteField)
+                  or (isinstance(val, tuple) and len(val) > 0
+                      and all(isinstance(v, DiscreteField) for v in val))):
                 if used is not None and key not in used:
                     continue
                 # fields are passed as values at the quadrature points
-                syms = {}
-                for attr in ('value', 'grad'):
-                    arr = np.asarray(val) if attr == 'value' else val.grad
-                    if arr is None:
-                        syms[attr] = None
-                        continue
-                    shape = np.shape(arr)[:-2]
-                    syms[attr] = _symbols("Q[{}]", shape, offset)
-                    offset += int(np.prod(shape))
-                    if used is not None:
-                        arr = np.asarray(arr, dtype=np.float64)
-                        nt, nq = arr.shape[-2:]
-                        qdata.append(np.moveaxis(arr.reshape(-1, nt, nq),
-                                                 0, -1))
-                dict.__setitem__(w, key, DiscreteField(
-                    value=syms['value'],
-                    grad=syms['grad'],
-                ))
+                sym, q, offset = cls._pack(val, offset, used is not None)
+                qdata += q
+                dict.__setitem__(w, key, sym)
             else:
                 # e.g. 'idx' of asm(); keep as is
                 dict.__setitem__(w, key, val)
         return w, params, qdata, offset, interpolated, uses_x
 
-    def _trace(self, args, wdict, coefs=(), cshape=(1, 1)):
-        """Call the form with symbolic arguments.
+    def _trace(self, argsets, wdict, coefs=(), cfields=(), gdim=1):
+        """Call the form with symbolic arguments for each pair of groups.
 
-        The first call finds out which entries of 'w' are used, the second
-        builds the final expression; only the used fields are packed.
+        The first round finds out which entries of 'w' are used, the second
+        builds the final expressions; only the used fields are packed.
 
         """
         try:
-            w = self._build_w(wdict, coefs, cshape)[0]
-            self.form(*args, w)
+            w = self._build_w(wdict, coefs, cfields, gdim)[0]
+            for args in argsets.values():
+                self.form(*args, w)
+            used = set(w.accessed)
             w, params, qdata, nqd, interp, uses_x = self._build_w(
-                wdict, coefs, cshape, used=w.accessed)
-            expr = _simplify_result(self.form(*args, w))
-        except (TypeError, NotImplementedError) as err:
-            # e.g. branching on values or NumPy functions without C version
+                wdict, coefs, cfields, gdim, used=used)
+            roots = {key: _simplify_result(self.form(*args, w))
+                     for key, args in argsets.items()}
+        except (TypeError, NotImplementedError, AttributeError, ValueError,
+                IndexError) as err:
+            # e.g. branching on values or NumPy functions without C version;
+            # genuine errors in the form are raised by the Python fallback
             raise _Unsupported("Tracing the form failed: {}".format(err))
-        return expr, params, qdata, nqd, interp, uses_x
+        return roots, params, qdata, nqd, interp, uses_x, used
 
     def _generate(self, basis, vbasis, wdict, idx_dtype=np.int32,
                   coefs=(), geom=None):
         global _graph
         _graph = _Graph()  # fresh expression graph for this trace
-        ttab, ncv = self._tables('V', vbasis)
         # not probed from invDF: isoparametric mappings cache only the
         # latest invDF, i.e., the one of the basis that is reused below
         gdim = basis.mesh.p.shape[0]
-        # trial function is indexed by 'j' and test function by 'i' in C
+        ldim = basis.X.shape[0]
+        vside = self._side(vbasis)
+        vargs = vside.arguments('V', gdim)
         if self._bilinear:
-            utab, ncu = self._tables('U', basis)
-            args = (_symbolic_field('U', 'j', ncu, gdim),
-                    _symbolic_field('V', 'i', ncv, gdim))
+            uside = self._side(basis)
+            uargs = uside.arguments('U', gdim)
+            # one trace per (test group, trial group)
+            argsets = {(gv, gu): tuple(uargs[gu]) + tuple(vargs[gv])
+                       for gv in vargs for gu in uargs}
         else:
-            utab, ncu = "", 1
-            args = (_symbolic_field('V', 'i', ncv, gdim),)
+            uside, uargs = None, {}
+            argsets = {gv: tuple(vargs[gv]) for gv in vargs}
 
         # DOF vectors are interpolated using the trial basis (as in
         # scikit-fem), which is the test basis for linear forms
-        B, ncb = ('U', ncu) if self._bilinear else ('V', ncv)
-        expr, params, qdata, nqd, interp, uses_x = self._trace(
-            args, wdict, coefs, (ncb, gdim))
+        B, bside = ('U', uside) if self._bilinear else ('V', vside)
+
+        # the trace depends only on the structure of the bases and 'w'
+        sigs = [_signature(val) for val in wdict.values()]
+        key = None if None in sigs else (
+            tuple(zip(wdict, sigs)), tuple(coefs), gdim, ldim,
+            tuple(side.structure for side in (uside, vside) if side))
+        cache = self.__dict__.setdefault('_trace_cache', {})
+        if key in cache:
+            loops, used = cache[key]
+            _, params, qdata, nqd, interp, uses_x = self._build_w(
+                wdict, coefs, bside.fields, gdim, used=used)
+        else:
+            roots, params, qdata, nqd, interp, uses_x, used = self._trace(
+                argsets, wdict, coefs, bside.fields, gdim)
+            loops = _emit(roots, self._bilinear, list(uargs), list(vargs))
+            if key is not None:
+                cache[key] = (loops, used)
+
         gather = "".join(_GATHER_TEMPLATE.format(name=name, f=f, B=B)
                          for f, name in enumerate(interp))
-        interp_src = "".join(_INTERP_TEMPLATE.format(name=name, f=f, B=B)
-                             for f, name in enumerate(interp))
+        interp_src = ""
+        for f, name in enumerate(interp):
+            for n, field in enumerate(bside.fields):
+                vshape, dshape = field.shapes(gdim)
+                interp_src += _INTERP_DECL.format(
+                    name=name, f=f, n=n, nv=max(int(np.prod(vshape)), 1),
+                    nd=max(int(np.prod(dshape)), 1))
+            for n, g in enumerate(bside.groups):
+                _, _, nvp, ndp = g.sizes(ldim, gdim)
+                comp = 0 if g.comp is None else g.comp
+                interp_src += _INTERP_GROUP.format(
+                    G=B + str(n), f=f, fld=g.field, nv=nvp, nd=ndp,
+                    voff=comp * nvp, doff=comp * ndp)
         gtab = ""
         if uses_x:
             gtab = ("\n#define NG {}\nstatic const double GPHI[NG][NQ] = {};\n"
                     .format(geom[0].shape[0], _carray(geom[0])))
             interp_src = _GEOMETRY_TEMPLATE.format() + interp_src
 
-        if self._bilinear:
-            udecl = "  double U[NU][NCU], DU[NU][NCU * GDIM];"
-            evals = (_EVAL_TEMPLATE.format(N='U')
-                     + _EVAL_TEMPLATE.format(N='V'))
-            loops = _emit(expr, bilinear=True)
-        else:
-            udecl = ""
-            evals = _EVAL_TEMPLATE.format(N='V')
-            loops = _emit(expr, bilinear=False)
+        sides = [('V', vside)] + ([('U', uside)] if self._bilinear else [])
+        needs_DF = any(side.needs_DF for _, side in sides)
+        evals = (_DF_TEMPLATE.format(det=_DET[ldim]) if needs_DF else "")
+        evals += "".join(side.evaluation(name) for name, side in sides)
+        decls = "\n".join(side.declarations(name) for name, side in sides)
+        tables = "".join(side.tables(name) for name, side in sides)
 
         source = _KERNEL_TEMPLATE.format(
             nqp=basis.X.shape[-1],
-            ldim=basis.X.shape[0],
+            ldim=ldim,
             gdim=gdim,
             nv=vbasis.Nbfun,
-            ncv=ncv,
             nu=basis.Nbfun if self._bilinear else 1,
-            ncu=ncu,
             nqd=max(nqd, 1),
             idx_t={np.int32: 'int32_t',
                    np.int64: 'int64_t'}[np.dtype(idx_dtype).type],
-            tables=utab + ttab + gtab,
-            udecl=udecl,
+            tables=tables + gtab,
+            decls=decls,
             gather=gather,
             eval=evals,
             interp=interp_src,
             loops=loops,
         )
-        return source, params, qdata, interp, uses_x
+        return source, params, qdata, interp, uses_x, needs_DF
 
     def _wdict(self, ubasis, kwargs):
         """Split DOF vectors from kwargs and build the numerical 'w'."""
@@ -1380,7 +1756,7 @@ class _CFormMixin:
             raise ValueError("Quadrature mismatch: trial and test functions "
                              "should have same number of integration points.")
         coefs, wdict, geom = self._wdict(ubasis, kwargs)
-        source, params, qdata, interp, uses_x = self._generate(
+        source, params, qdata, interp, uses_x, needs_DF = self._generate(
             ubasis, vbasis, wdict, idx_dtype, coefs=list(coefs), geom=geom)
         lib = _kernel_lib(source)
         if interp:
@@ -1396,6 +1772,11 @@ class _CFormMixin:
         # passed with strides; e.g. affine invDF is a broadcast view
         invDF = _strided(ubasis.mapping.invDF(ubasis.X, tind=ubasis.tind))
         dx = _strided(ubasis.dx)
+        DF = (_strided(ubasis.mapping.DF(ubasis.X, tind=ubasis.tind))
+              if needs_DF else np.zeros((1, 1, 1, 1)))
+        dummy = np.zeros(1, dtype=np.int64)
+        codeV = self._side(vbasis).codes
+        codeU = self._side(ubasis).codes if self._bilinear else dummy
         qd = (np.ascontiguousarray(np.concatenate(qdata, axis=-1))
               if qdata else np.zeros(1))
         P = np.array(params if params else [0.], dtype=np.float64)
@@ -1403,7 +1784,8 @@ class _CFormMixin:
         vp = ctypes.c_void_p
         return lib, (ubasis.nelems, invDF.ctypes.data_as(vp), _strides(invDF),
                      dx.ctypes.data_as(vp), _strides(dx), qd, P,
-                     coef, ubasis.N, idofs, gp, gp.shape[1], gconn)
+                     coef, ubasis.N, idofs, gp, gp.shape[1], gconn,
+                     DF.ctypes.data_as(vp), _strides(DF), codeU, codeV)
 
     def _c_assemble(self, ubasis, vbasis, kwargs):
         """Fill the COO data array of scikit-fem."""
