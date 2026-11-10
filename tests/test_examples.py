@@ -454,3 +454,11 @@ class TestEx57(TestCase):
         import docs.examples.ex57 as ex
 
         self.assertAlmostEqual(0, np.sum((ex.forces - ex.ref) ** 2))
+
+
+class TestEx58(TestCase):
+
+    def runTest(self):
+        import docs.examples.ex58 as ex
+
+        self.assertAlmostEqual(ex.x.max(), 6.198333345828766)

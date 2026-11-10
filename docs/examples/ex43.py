@@ -77,7 +77,6 @@ import numpy as np
 
 from skfem import *
 from skfem.helpers import grad, identity, ddot, det, transpose, inv, trace, mul
-from skfem.experimental.cforms import CBilinearForm, CLinearForm
 
 # note: rough mesh to make tests fast
 mesh = MeshHex.init_tensor(
@@ -98,14 +97,14 @@ def deformation_gradient(w):
     F = dudX + identity(dudX)
     return F, inv(F)
 
-@CLinearForm
+@LinearForm
 def L(v, w):
     F, iF = deformation_gradient(w)
     dF = grad(v)
     lnJ = np.log(det(F))
     return mu * ddot(F, dF) + (lmbda * lnJ - mu) * ddot(transpose(iF), dF)
 
-@CBilinearForm(cache_sparsity=True)
+@BilinearForm
 def a(u, v, w):
     F, iF = deformation_gradient(w)
     DF = grad(u)
