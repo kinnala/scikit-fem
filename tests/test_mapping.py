@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 
-from skfem.mesh import MeshHex, MeshQuad, MeshTri, MeshTet
+from skfem.mesh import MeshHex, MeshQuad, MeshTet
 from skfem.element import ElementHex1, ElementQuad1, ElementHex2
 from skfem.assembly import FacetBasis
 from skfem.mapping import MappingAffine
@@ -17,12 +17,12 @@ class TestIsoparamNormals(unittest.TestCase):
         m = self.mesh().refined()
         e = self.elem()
         fb = FacetBasis(m, e)
-        x = fb.global_coordinates().value
+        x = np.asarray(fb.global_coordinates())
         eps = 1e-6
         for itr in range(m.p.shape[0]):
             case = (x[itr] < eps) * (x[itr] > -eps)
             for jtr in range(m.p.shape[0]):
-                normals = fb.normals.value[jtr][case]
+                normals = np.asarray(fb.normals)[jtr][case]
                 if itr == jtr:
                     self.assertTrue((normals == -1).all())
                 else:

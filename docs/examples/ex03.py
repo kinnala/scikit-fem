@@ -52,7 +52,7 @@ def visualize():
     return plot(M,
                 sigma[sbasis.nodal_dofs[0]],
                 ax=ax,
-                colorbar='$\sigma_{xx}$',
+                colorbar=r'$\sigma_{xx}$',
                 shading='gouraud')
 
 if __name__ == "__main__":

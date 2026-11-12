@@ -6,7 +6,7 @@ import pytest
 
 from skfem import BilinearForm, LinearForm, asm, solve, condense
 from skfem.models.poisson import laplace
-from skfem.helpers import ddot, dd, div, dot, grad
+from skfem.helpers import ddot, dd, div, dot
 from skfem.element import (
     ElementHex1,
     ElementHex2,
@@ -34,12 +34,8 @@ from skfem.element import (
     ElementTriP1G,
     ElementTriP2G,
     ElementTriP2B,
-    ElementVector,
     ElementQuadDPC,
     ElementHexDPC,
-    ElementLineBubble,
-    ElementTriBubble,
-    ElementTetBubble,
     ElementTetMorley,
     ElementTetMWX3,
     ElementTriP,
@@ -48,7 +44,7 @@ from skfem.element import (
 )
 from skfem.assembly import FacetBasis, Basis
 from skfem.mesh import (MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
-                        MeshWedge1, MeshQuad2, MeshTri2, MeshTet2, MeshHex2)
+                        MeshQuad2, MeshTri2, MeshHex2)
 
 
 class ConvergenceQ1(unittest.TestCase):
@@ -131,7 +127,7 @@ class ConvergenceQ1(unittest.TestCase):
             else:
                 raise Exception("The dimension not supported")
 
-        L2 = np.sqrt(np.sum(np.sum((uh - u(x.value)) ** 2 * dx, axis=1)))
+        L2 = np.sqrt(np.sum(np.sum((uh - u(x)) ** 2 * dx, axis=1)))
 
         def ux(y):
             if y.shape[0] == 1:
@@ -165,16 +161,16 @@ class ConvergenceQ1(unittest.TestCase):
                                 np.cos(np.pi * y[2]))
 
         if m.dim() == 3:
-            H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x.value)) ** 2 +
-                                        (duh[1] - uy(x.value)) ** 2 +
-                                        (duh[2] - uz(x.value)) ** 2) * dx,
+            H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x)) ** 2 +
+                                        (duh[1] - uy(x)) ** 2 +
+                                        (duh[2] - uz(x)) ** 2) * dx,
                                 axis=1)))
         elif m.dim() == 2:
-            H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x.value)) ** 2 +
-                                        (duh[1] - uy(x.value)) ** 2) * dx,
+            H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x)) ** 2 +
+                                        (duh[1] - uy(x)) ** 2) * dx,
                                 axis=1)))
         else:
-            H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x.value)) ** 2) * dx,
+            H1 = np.sqrt(np.sum(np.sum(((duh[0] - ux(x)) ** 2) * dx,
                                 axis=1)))
 
         return L2, H1
@@ -568,7 +564,7 @@ class FacetConvergenceTetP2(unittest.TestCase):
     def compute_error(self, m, basis, U):
         uh, duh, *_ = basis.interpolate(U).astuple
         dx = basis.dx
-        x = basis.global_coordinates().value
+        x = np.asarray(basis.global_coordinates())
 
         def u(x):
             return 1 + x[0] - x[0] ** 2 * x[1] ** 2 + x[0] * x[1] * x[2] ** 3

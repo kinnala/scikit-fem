@@ -233,9 +233,6 @@ class DofsView:
     def __getattr__(self, attr):
         return getattr(self.obj, attr)
 
-    def __add__(self, other):
-        return self.__or__(other)
-
 
 class Dofs:
     """An object containing a set of degree-of-freedom indices."""

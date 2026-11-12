@@ -568,7 +568,7 @@ basis object on a function projected into finite element space.
    global_points = basis_p1.mapping.F(points).reshape(2, -1)
    fig, ax = plt.subplots(1, 2, figsize=(12,6))
    skfem.visuals.matplotlib.draw(mesh, ax=ax[0])
-   for value, p in zip(interpolation.value.reshape(-1), global_points.T):
+   for value, p in zip(np.asarray(interpolation).reshape(-1), global_points.T):
        ax[0].plot(p[0], p[1], 'or')
        ax[0].annotate(f'{value:.2f}', [p[0], p[1]])
    skfem.visuals.matplotlib.plot(basis_p1, fe_approximation, vmin=0, vmax=2, ax=ax[1], shading='gouraud', colorbar=True)
@@ -596,7 +596,7 @@ basis object on a function projected into finite element space.
    global_points = basis_p1.mapping.F(points).reshape(2, -1)
    fig, ax = plt.subplots(1, 2, figsize=(12,6))
    skfem.visuals.matplotlib.draw(mesh, ax=ax[0])
-   for value, p in zip(interpolation.value.reshape(-1), global_points.T):
+   for value, p in zip(np.asarray(interpolation).reshape(-1), global_points.T):
        ax[0].plot(p[0], p[1], 'or')
        ax[0].annotate(f'{value:.2f}', [p[0], p[1]])
    skfem.visuals.matplotlib.plot(basis_p1, fe_approximation, vmin=0, vmax=2, ax=ax[1], shading='gouraud', colorbar=True)

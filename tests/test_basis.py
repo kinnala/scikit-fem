@@ -10,17 +10,15 @@ from numpy.testing import (assert_allclose, assert_almost_equal,
 from skfem import BilinearForm, LinearForm, asm, solve, condense
 from skfem.mesh import (Mesh, MeshTri, MeshTet, MeshHex,
                         MeshQuad, MeshLine1, MeshWedge1)
-from skfem.assembly import (CellBasis, FacetBasis, Dofs, Functional,
+from skfem.assembly import (CellBasis, FacetBasis, Functional,
                             InteriorFacetBasis)
 from skfem.mapping import MappingIsoparametric
 from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
                            ElementTetP2, ElementHexS2, ElementHex2,
                            ElementQuad2, ElementLineP2, ElementTriP0,
-                           ElementLineP0, ElementQuad1, ElementQuad0,
-                           ElementTetP1, ElementTetP0, ElementHex1,
-                           ElementHex0, ElementLineP1, ElementLineMini,
-                           ElementWedge1, ElementTriRT0, ElementQuadRT0,
-                           ElementTriP1)
+                           ElementQuad1, ElementTetP1, ElementHex1,
+                           ElementLineP1, ElementLineMini, ElementWedge1,
+                           ElementTriRT0, ElementQuadRT0)
 from skfem.helpers import dot, grad
 from skfem.utils import enforce
 from skfem.io.meshio import to_meshio, from_meshio
@@ -68,8 +66,8 @@ class TestCompositeSplitting(TestCase):
         self.assertTrue(np.sum(p - x[basis.nodal_dofs[2]]) < 1e-8)
 
         U, P = basis.interpolate(x)
-        self.assertTrue(isinstance(U.value, np.ndarray))
-        self.assertTrue(isinstance(P.value, np.ndarray))
+        self.assertTrue(isinstance(U, np.ndarray))
+        self.assertTrue(isinstance(P, np.ndarray))
         self.assertTrue(P.shape[0] == m.nelements)
 
         self.assertTrue((basis.doflocs[:, Dup.all()][1] == 1.).all())
@@ -98,7 +96,7 @@ class TestCompositeFacetAssembly(TestCase):
                              facets=m.facets_satisfying(lambda x: x[0] == 0))
         fbasis2 = FacetBasis(m, ElementTriP1(),
                              facets=lambda x: x[0] == 0)
-        fbasis3 = FacetBasis(m, ElementTriP1(), facets='left')
+        FacetBasis(m, ElementTriP1(), facets='left')
 
         @BilinearForm
         def uv1(u, p, v, q, w):
@@ -143,9 +141,7 @@ class TestFacetExpansion(TestCase):
                     lambda x: x[1] == 1,
                     lambda x: x[2] == 0,
                     lambda x: x[2] == 1]:
-            arr1 = basis.get_dofs({
-                'kek': m.facets_satisfying(fun)
-            })['kek'].edge['u']
+            arr1 = basis.get_dofs(m.facets_satisfying(fun)).edge['u']
             arr2 = basis.edge_dofs[:, m.edges_satisfying(fun)]
 
             assert_allclose(arr1, arr2.flatten())
@@ -232,7 +228,7 @@ class TestIncompatibleMeshElement(TestCase):
         with self.assertRaises(ValueError):
             m = MeshTri()
             e = ElementTetP2()
-            basis = CellBasis(m, e)
+            CellBasis(m, e)
 
 
 @pytest.mark.parametrize(

@@ -71,9 +71,8 @@ def solver_eigen_scipy(**kwargs) -> EigenSolver:
     params.update(kwargs)
 
     def solver(K, M, **solve_time_kwargs):
-        params.update(solve_time_kwargs)
         from scipy.sparse.linalg import eigs
-        return eigs(K, M=M, **params)
+        return eigs(K, M=M, **{**params, **solve_time_kwargs})
 
     return solver
 
@@ -95,9 +94,8 @@ def solver_eigen_scipy_sym(**kwargs) -> EigenSolver:
     params.update(kwargs)
 
     def solver(K, M, **solve_time_kwargs):
-        params.update(solve_time_kwargs)
         from scipy.sparse.linalg import eigsh
-        return eigsh(K, M=M, **params)
+        return eigsh(K, M=M, **{**params, **solve_time_kwargs})
 
     return solver
 
@@ -106,8 +104,7 @@ def solver_direct_scipy(**kwargs) -> LinearSolver:
     """The default linear solver of SciPy."""
 
     def solver(A, b, **solve_time_kwargs):
-        kwargs.update(solve_time_kwargs)
-        return spl.spsolve(A, b, **kwargs)
+        return spl.spsolve(A, b, **{**kwargs, **solve_time_kwargs})
 
     return solver
 
@@ -126,7 +123,7 @@ def solver_iter_krylov(krylov: Optional[LinearSolver] = spl.cg,
         If True, print the norm of the iterate.
 
     Any remaining keyword arguments are passed on to the solver, in particular
-    tol and atol, the tolerances, maxiter, and M, the preconditioner.  If the
+    rtol and atol, the tolerances, maxiter, and M, the preconditioner.  If the
     last is omitted, a diagonal preconditioner is supplied using
     :func:`skfem.utils.build_pc_diag`.
 
@@ -141,16 +138,16 @@ def solver_iter_krylov(krylov: Optional[LinearSolver] = spl.cg,
             print(np.linalg.norm(x))
 
     def solver(A, b, **solve_time_kwargs):
-        kwargs.update(solve_time_kwargs)
-        if 'M' not in kwargs:
-            kwargs['M'] = build_pc_diag(A)
-        sol, info = krylov(A, b, **{'callback': callback, **kwargs})
+        params = {**kwargs, **solve_time_kwargs}
+        if 'M' not in params:
+            params['M'] = build_pc_diag(A)
+        sol, info = krylov(A, b, **{'callback': callback, **params})
         if info > 0:
             logger.warning("Iterative solver did not converge.")
         elif info == 0 and verbose:
             print(f"{krylov.__name__} converged to "
-                  + f"tol={kwargs.get('tol', 'default')} and "
-                  + f"atol={kwargs.get('atol', 'default')}")
+                  + f"rtol={params.get('rtol', 'default')} and "
+                  + f"atol={params.get('atol', 'default')}")
         return sol
 
     return solver
@@ -165,9 +162,9 @@ def solver_iter_cg(**kwargs):
     """Pure Python conjugate gradient solver (for old scipy versions)."""
 
     def solver(A, b, **solve_time_kwargs):
-        kwargs.update(solve_time_kwargs)
-        maxiters = kwargs['maxiters'] if 'maxiters' in kwargs else 500
-        tol = kwargs['tol'] if 'tol' in kwargs else 1e-10
+        params = {**kwargs, **solve_time_kwargs}
+        maxiters = params.get('maxiters', 500)
+        tol = params.get('tol', 1e-10)
         x = b
         r = b - A.dot(x)
         p = r
@@ -182,7 +179,7 @@ def solver_iter_cg(**kwargs):
                 break
             p = r + (rsnew / rsold) * p
             rsold = rsnew
-        if k == maxiters:
+        else:
             logger.warning("Iterative solver did not converge.")
         return x
 
@@ -326,6 +323,10 @@ def solve(A: spmatrix,
 
     The remaining keyword arguments are passed to the solver.
 
+    For PETSc matrices assembled on a distributed mesh, see
+    :func:`skfem.distributed.distribute`, the local part of the solution
+    is returned as a NumPy array.
+
     Parameters
     ----------
     A
@@ -335,16 +336,12 @@ def solve(A: spmatrix,
         eigenvalue problem.
     solver
         Choose one of the following solvers:
-        :func:`skfem.utils.solver_direct_scipy` (default),
-        :func:`skfem.utils.solver_eigen_scipy` (default),
+        :func:`skfem.utils.solver_direct_scipy` (default, linear),
+        :func:`skfem.utils.solver_eigen_scipy` (default, eigen),
         :func:`skfem.utils.solver_iter_pcg`,
         :func:`skfem.utils.solver_iter_krylov`,
         :func:`skfem.utils.solver_petsc` (default for PETSc matrices,
         with ``rtol=1e-10``).
-
-    For PETSc matrices assembled on a distributed mesh, see
-    :func:`skfem.distributed.distribute`, the local part of the solution
-    is returned as a NumPy array.
 
     """
     logger.info("Solving linear system, shape={}.".format(
@@ -869,7 +866,7 @@ def bmat(blocks, *args, **kwargs):
                     sizes.append(blocks[i][j].shape[0] + diff)
                 else:
                     sizes.append(blocks[i][j].shape[1] + diff)
-                diff += sizes[-1]
+                diff = sizes[-1]
                 break
 
     mat = sp.bmat(blocks, *args, **kwargs)

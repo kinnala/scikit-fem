@@ -10,6 +10,9 @@ from skfem.mapping import *  # noqa
 from skfem.element import *  # noqa
 from skfem.utils import *  # noqa
 from skfem.distributed import distribute, allreduce  # noqa
+# removed names, kept importable for their migration messages
+from skfem.assembly import (InteriorBasis, ExteriorFacetBasis,  # noqa
+                            BoundaryFacetBasis)
 
 from skfem.assembly import __all__ as all_assembly
 from skfem.mesh import __all__ as all_mesh
@@ -25,8 +28,6 @@ __all__ = all_mesh + all_assembly + all_element + [  # noqa
     'condense',
     'enforce',
     'penalize',
-    'project',  # removed; prints migration info
-    'projection',  # removed; prints migration info
     'solve',
     'bmat',
     'mpc',

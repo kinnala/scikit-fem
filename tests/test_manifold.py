@@ -2,10 +2,10 @@ import numpy as np
 import pytest
 from numpy.testing import assert_allclose
 
-from skfem import (MeshTri, MeshTri2, MeshTet, MeshLine1, MeshQuad,
-                   ElementTriP1, ElementTriP2, ElementQuad1, ElementLineP1,
-                   ElementVector, Basis, FacetBasis, BilinearForm, LinearForm,
-                   Functional, solve, condense)
+from skfem import (MeshTri, MeshTri2, MeshLine1, MeshQuad, ElementTriP1,
+                   ElementTriP2, ElementQuad1, ElementLineP1, ElementVector,
+                   Basis, FacetBasis, BilinearForm, LinearForm, Functional,
+                   solve, condense)
 from skfem.mapping import MappingManifold
 from skfem.helpers import dot, grad
 

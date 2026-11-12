@@ -5,7 +5,7 @@ import tempfile
 from .data import sample
 
 
-def draw(m, backend=False, **kwargs):
+def draw(m, **kwargs):
     """Visualize meshes."""
     from vedo import Plotter, UnstructuredGrid
     vp = Plotter()

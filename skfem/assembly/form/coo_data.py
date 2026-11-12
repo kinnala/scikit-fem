@@ -34,9 +34,12 @@ class COOData:
     def __radd__(self, other):
         return self.__add__(other)
 
-    def __array__(self):
+    def __array__(self, dtype=None, copy=None):
         # allow passing a list of COOData objects to, e.g., np.concatenate
-        return self.toarray()
+        out = self.toarray()
+        if dtype is not None:
+            out = out.astype(dtype, copy=False)
+        return out
 
     def tolocal(self, basis=None):
         """Return an array of local finite element matrices.
@@ -260,6 +263,6 @@ class COOData:
                 break
             p = r + (rsnew / rsold) * p
             rsold = rsnew
-        if k == maxiters:
+        else:
             logger.warning("Iterative solver did not converge.")
         return x

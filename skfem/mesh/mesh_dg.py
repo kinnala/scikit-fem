@@ -46,7 +46,7 @@ class MeshDG:
             The mesh to periodify.
         ix
             An array of nodes to eliminate.  They are replaced by the nodes in
-            the array ``ix``.
+            the array ``ix0``.
         ix0
             An array of nodes left unchanged.
 
