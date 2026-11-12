@@ -72,7 +72,7 @@ class FacetBasis(AbstractBasis):
 
         # by default use boundary facets
         if facets is None:
-            self.find = np.nonzero(self.mesh.f2t[1] == -1)[0].astype(np.int32)
+            self.find = self.mesh.boundary_facets()
         else:
             self.find = mesh.normalize_facets(facets)
 

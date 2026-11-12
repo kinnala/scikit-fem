@@ -3,7 +3,7 @@ import logging
 from dataclasses import dataclass, replace
 from os import PathLike
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
 from numpy import ndarray
@@ -39,6 +39,8 @@ class Mesh:
     # off this behaviour and, hence, this flag exists.
     sort_t: bool = False
     validate: bool = True  # run validation check if log_level<=DEBUG
+    # set by skfem.distributed.distribute for the local part of a mesh
+    _dist: Optional[Any] = None
 
     @property
     def p(self):
@@ -199,7 +201,14 @@ class Mesh:
         return self.doflocs.shape[0]
 
     def boundary_facets(self) -> ndarray:
-        """Return an array of boundary facet indices."""
+        """Return an array of boundary facet indices.
+
+        For a distributed mesh, the facets on the interfaces between
+        the processes are excluded.
+
+        """
+        if self._dist is not None:
+            return self._dist.boundary_facets
         return np.nonzero(self.f2t[1] == -1)[0].astype(np.int32)
 
     def boundary_edges(self) -> ndarray:
@@ -1223,6 +1232,25 @@ class Mesh:
         if return_mapping:
             return out, ix
         return out
+
+    def distributed(self, comm=None):
+        """Split the mesh between MPI processes and return the local part.
+
+        Requires ``petsc4py``, ``mpi4py`` and ``pymetis``.  The forms
+        assembled using a basis on the local part become distributed
+        PETSc matrices and vectors, see
+        :func:`skfem.distributed.distribute` for details.  For large
+        meshes, consider ``distribute(lambda: ...)`` which builds the
+        global mesh only on the first process.
+
+        Parameters
+        ----------
+        comm
+            The communicator, by default ``petsc4py.PETSc.COMM_WORLD``.
+
+        """
+        from skfem.distributed import distribute
+        return distribute(self, comm=comm)
 
     def remove_elements(self, elements):
         """Construct a new mesh by removing elements.

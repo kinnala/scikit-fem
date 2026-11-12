@@ -9,6 +9,7 @@ from skfem.assembly import *  # noqa
 from skfem.mapping import *  # noqa
 from skfem.element import *  # noqa
 from skfem.utils import *  # noqa
+from skfem.distributed import distribute, allreduce  # noqa
 
 from skfem.assembly import __all__ as all_assembly
 from skfem.mesh import __all__ as all_mesh
@@ -35,5 +36,8 @@ __all__ = all_mesh + all_assembly + all_element + [  # noqa
     'solver_iter_pcg',
     'solver_iter_krylov',
     'solver_iter_cg',
+    'solver_petsc',
+    'distribute',
+    'allreduce',
     '__version__',
 ]

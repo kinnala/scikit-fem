@@ -225,6 +225,10 @@ with respect to documented and/or tested features.
 - Added: `ElementTriP` for high order triangle elements
 - Added: `ElementTriRT` for high order Raviart-Thomas elements
 - Added: `skfem.visuals.web`, an interactive WebGL2 viewer (with a canvas fallback); try `basis.plot(u, 'web').show()`
+- Added: `Mesh.distributed` (and `skfem.distributed.distribute`) for distributed assembly and solve using petsc4py (see ex53 and ex54)
+- Added: `solver_petsc` for solving SciPy or PETSc systems using PETSc linear solvers, see ex52
+- Changed: `Mesh.boundary_facets` excludes the interfaces between processes for distributed meshes
+- Deprecated: `Dofs.decompose`, `Dofs.l2g`, `Dofs.loc` and the `dofs` argument of `COOData.topetsc`, superseded by `Mesh.distributed`, due for removal in 14.0.0
 - Changed: `skfem.autodiff` was rewritten to use faster built-in forward-mode dual number AD without the JAX dependency
 - Changed: `ElementVector` and `ElementComposite` are optimized via `BlockArray` and `BlockDiscreteField` that avoid storing explicit zeros
 - Changed: Accessing `Mesh.subdomains` or `Mesh.boundaries` with nonexisting key/tag will now raise `TagKeyError`

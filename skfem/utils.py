@@ -191,6 +191,82 @@ def solver_iter_cg(**kwargs):
 
 # solve and condense
 
+def solver_petsc(ksp_type: Optional[str] = None,
+                 pc_type: Optional[str] = None,
+                 rtol: Optional[float] = None,
+                 atol: Optional[float] = None,
+                 maxiter: Optional[int] = None) -> LinearSolver:
+    """Linear solver from PETSc, requires petsc4py.
+
+    Accepts both SciPy matrices and PETSc matrices, e.g., from the
+    assembly on a distributed mesh, see
+    :func:`skfem.distributed.distribute`.  The settings can be
+    overridden from the command line using the PETSc options, e.g.,
+    ``python script.py -ksp_type cg -pc_type gamg -ksp_monitor``.
+
+    Parameters
+    ----------
+    ksp_type
+        The Krylov method, e.g., 'cg', 'gmres' or 'preonly'.  Default is
+        the PETSc default.
+    pc_type
+        The preconditioner, e.g., 'gamg', 'hypre', 'ilu' or 'lu'.
+        Default is the PETSc default.
+    rtol
+        Relative tolerance.
+    atol
+        Absolute tolerance.
+    maxiter
+        Maximum number of iterations.
+
+    Returns
+    -------
+    LinearSolver
+        A solver function that can be passed to :func:`solve`.
+
+    """
+    def solver(A, b, **solve_time_kwargs):
+        import petsc4py.PETSc as petsc
+        from skfem.distributed import is_petsc, to_local
+
+        temporary = []
+        if is_petsc(A):
+            Ap, bp = A, b
+        else:
+            A = A.tocsr()
+            Ap = petsc.Mat().createAIJ(size=A.shape,
+                                       csr=(A.indptr, A.indices, A.data),
+                                       comm=petsc.COMM_SELF)
+            bp = petsc.Vec().createWithArray(np.asarray(b, dtype=A.dtype),
+                                             comm=petsc.COMM_SELF)
+            temporary += [Ap, bp]
+
+        ksp = petsc.KSP().create(comm=Ap.getComm())
+        ksp.setOperators(Ap)
+        if ksp_type is not None:
+            ksp.setType(ksp_type)
+        if pc_type is not None:
+            ksp.getPC().setType(pc_type)
+        ksp.setTolerances(
+            rtol=petsc.DEFAULT if rtol is None else rtol,
+            atol=petsc.DEFAULT if atol is None else atol,
+            max_it=petsc.DEFAULT if maxiter is None else maxiter,
+        )
+        ksp.setFromOptions()
+        x = Ap.createVecRight()
+        ksp.solve(bp, x)
+        if ksp.getConvergedReason() < 0:
+            logger.warning("PETSc solver did not converge, reason={}."
+                           .format(ksp.getConvergedReason()))
+
+        out = to_local(A, x) if is_petsc(A) else x.getArray().copy()
+        for obj in [ksp, x] + temporary:
+            obj.destroy()
+        return out
+
+    return solver
+
+
 def solve_eigen(A: spmatrix,
                 M: spmatrix,
                 x: Optional[ndarray] = None,
@@ -223,7 +299,9 @@ def solve_linear(A: spmatrix,
                  **kwargs) -> ndarray:
 
     if solver is None:
-        solver = solver_direct_scipy(**kwargs)
+        # tight tolerance because the serial default is a direct solver
+        solver = (solver_petsc(rtol=1e-10) if _is_petsc(A)
+                  else solver_direct_scipy(**kwargs))
 
     if x is not None and I is not None:
         solution = solver(A, b, **kwargs)
@@ -260,11 +338,24 @@ def solve(A: spmatrix,
         :func:`skfem.utils.solver_direct_scipy` (default),
         :func:`skfem.utils.solver_eigen_scipy` (default),
         :func:`skfem.utils.solver_iter_pcg`,
-        :func:`skfem.utils.solver_iter_krylov`.
+        :func:`skfem.utils.solver_iter_krylov`,
+        :func:`skfem.utils.solver_petsc` (default for PETSc matrices,
+        with ``rtol=1e-10``).
+
+    For PETSc matrices assembled on a distributed mesh, see
+    :func:`skfem.distributed.distribute`, the local part of the solution
+    is returned as a NumPy array.
 
     """
-    logger.info("Solving linear system, shape={}.".format(A.shape))
-    if isinstance(b, spmatrix):
+    logger.info("Solving linear system, shape={}.".format(
+        A.getSize() if _is_petsc(A) else A.shape))
+    if _is_petsc(A):
+        # distributed system from skfem.distributed, solution is local
+        if not _is_petsc(b):
+            raise NotImplementedError("Eigenvalue problems are not "
+                                      "supported for PETSc matrices.")
+        out = solve_linear(A, b, None, None, solver, **kwargs)
+    elif isinstance(b, spmatrix):
         out = solve_eigen(A, b, x, I, solver, **kwargs)  # type: ignore
     elif isinstance(b, ndarray):
         out = solve_linear(A, b, x, I, solver, **kwargs)  # type: ignore
@@ -272,6 +363,42 @@ def solve(A: spmatrix,
         raise NotImplementedError("Provided argument types not supported")
     logger.info("Solving done.")
     return out
+
+
+def _is_petsc(A) -> bool:
+    return type(A).__module__.startswith('petsc4py')
+
+
+def _enforce_petsc(A, b, x, I, D, diag, overwrite):
+    """Enforce DOFs of a distributed PETSc system, see :func:`enforce`.
+
+    The DOF indices and the values ``x`` are local, i.e. relative to the
+    basis on the local part of the distributed mesh.
+
+    """
+    from skfem.distributed import global_indices, to_petsc_vec
+
+    if b is not None and not _is_petsc(b):
+        raise NotImplementedError("Eigenvalue problems are not supported "
+                                  "for PETSc matrices.")
+    glob = global_indices(A)
+    D = _flatten_dofs(D)
+    I = _flatten_dofs(I)
+    if (I is None) == (D is None):
+        raise Exception("Give either I or D!")
+    if D is None:
+        D = np.setdiff1d(np.arange(len(glob), dtype=np.int32), I)
+
+    Aout = A if overwrite else A.copy()
+    # only the values of the enforced DOFs are used; other values in the
+    # local array are possibly inconsistent between the processes
+    xvec = to_petsc_vec(A, None if x is None else x[D], ix=D)
+    bout = None
+    if b is not None:
+        bout = b if overwrite else b.copy()
+    Aout.zeroRowsColumns(glob[D], diag=diag, x=xvec, b=bout)
+    xvec.destroy()
+    return Aout if bout is None else (Aout, bout)
 
 
 def _flatten_dofs(S: Optional[DofsCollection]) -> Optional[ndarray]:
@@ -374,6 +501,10 @@ def enforce(A: spmatrix,
         A linear system with the enforced rows/diagonals set to zero/one.
 
     """
+    if _is_petsc(A):
+        # the columns are also zeroed to preserve symmetry
+        return _enforce_petsc(A, b, x, I, D, diag, overwrite)
+
     b, x, I, D = _init_bc(A, b, x, I, D)
 
     if (overwrite and b is not None and not isinstance(b, spmatrix)
@@ -466,6 +597,9 @@ def penalize(A: spmatrix,
         very large values, 1/epsilon and x/epsilon, respectively.
 
     """
+    if _is_petsc(A):
+        raise NotImplementedError("penalize() is not supported for PETSc "
+                                  "matrices; use enforce() or condense().")
     b, x, I, D = _init_bc(A, b, x, I, D)
 
     Aout = A if overwrite else A.copy()
@@ -617,6 +751,14 @@ def condense(A: spmatrix,
         the boundary values.
 
     """
+    if _is_petsc(A):
+        # distributed matrices are not condensed; the DOFs are enforced
+        # instead which leads to the same solution
+        if b is None:
+            raise NotImplementedError("Condensing a PETSc matrix without "
+                                      "the right hand side.")
+        return _enforce_petsc(A, b, x, I, D, 1., False)
+
     b, x, I, D = _init_bc(A, b, x, I, D)
 
     ret_value: CondensedSystem = (None,)
@@ -661,6 +803,9 @@ def mpc(A: spmatrix,
         The constraint is of the form `x[S] = T @ x[M] + g`.
 
     """
+    if _is_petsc(A):
+        raise NotImplementedError("mpc() is not supported for PETSc "
+                                  "matrices; use enforce() or condense().")
     if M is None:
         M = np.array([], dtype=np.int32)
     if S is None:

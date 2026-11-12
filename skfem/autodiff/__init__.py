@@ -42,6 +42,12 @@ class NonlinearForm(Form):
 
         """
         mat, vec = self._assemble(basis, x=x, **kwargs)
+        dofs = self._distributed_dofs(basis)
+        if dofs is not None:
+            return (
+                COOData(*mat)._todistributed(dofs),
+                COOData(*vec)._todistributed(dofs),
+            )
         return (
             COOData._assemble_scipy_csr(*mat),
             COOData(*vec).todefault()

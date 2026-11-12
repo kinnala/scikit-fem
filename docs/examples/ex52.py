@@ -1,16 +1,18 @@
 """Using PETSc linear solvers.
 
-While before a conversion was possible, there is now basic built-in
-support for the creation of PETSc matrices.  This allows using the
-variety of linear solvers and preconditiors from PETSc.
+The assembled SciPy matrices can be passed to the linear solvers and
+preconditioners of PETSc using :func:`~skfem.utils.solver_petsc`.  The
+solver can be changed also from the command line, e.g.,
+``python ex52.py -ksp_type gmres -pc_type ilu -ksp_monitor``.
+
+See ex53 for running the same script in parallel using MPI: the only
+change is to call :meth:`~skfem.mesh.Mesh.distributed`.
 
 This example requires petsc4py.
 
 """
 from skfem import *
 from skfem.helpers import *
-import petsc4py.PETSc as petsc
-import time
 
 
 # this mesh has 230 945 vertices
@@ -30,34 +32,14 @@ def linf(v, w):
                              * np.sin(np.pi * w.x[2])) * v
 
 
-# build elemental matrices/vectors and convert to PETSc Mat/Vec
-start = time.time()
-A = bilinf.elemental(basis).topetsc()
-b = linf.elemental(basis).topetsc()
-print("--- %s seconds ---" % (time.time() - start))
+A = bilinf.assemble(basis)
+b = linf.assemble(basis)
 
-x = A.createVecRight()
-
-# apply dirichlet BC
-A.zeroRowsColumns(
-    basis.get_dofs(),
-    diag=1.,
-    x=x,
-    b=b,
+x = solve(
+    *condense(A, b, D=basis.get_dofs()),
+    solver=solver_petsc(ksp_type='cg', pc_type='gamg', rtol=1e-6),
 )
 
-# create solver instance
-ksp = petsc.KSP().create()
-ksp.setOperators(A)
-ksp.setType('cg')
-ksp.getPC().setType('gamg')
-ksp.setTolerances(rtol=1e-6, atol=0, divtol=1e16, max_it=400)
-
-# solve
-start = time.time()
-ksp.solve(b, x)
-print("--- %s seconds ---" % (time.time() - start))
-
-# print maximum value
-xmax = x.array.max()
+# allreduce is a no-op in serial; see ex53
+xmax = allreduce(x.max(), op='max')
 print(xmax)

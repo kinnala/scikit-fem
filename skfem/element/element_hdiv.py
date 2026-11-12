@@ -17,8 +17,16 @@ class ElementHdiv(Element):
             # TODO can you just skip np.arange here? len(tind)?
             return np.ones(len(np.arange(mapping.mesh.t.shape[1])[tind]),
                            dtype=np.int32)
-        ori = -1 + 2 * (mapping.mesh.f2t[0, mapping.mesh.t2f[ix]]
-                        == np.arange(mapping.mesh.t.shape[1]))
+        mesh = mapping.mesh
+        dist = getattr(mesh, '_dist', None)
+        if dist is None:
+            ori = -1 + 2 * (mesh.f2t[0, mesh.t2f[ix]]
+                            == np.arange(mesh.t.shape[1]))
+        else:
+            # use the global element indices so that both sides of an
+            # interface between processes agree on the orientation
+            ori = -1 + 2 * (dist.facet_first[mesh.t2f[ix]]
+                            == dist.elements)
         return ori[tind]
 
     def gbasis(self, mapping, X, i, tind=None):

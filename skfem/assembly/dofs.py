@@ -1,6 +1,7 @@
 import functools
 import os.path
 import pickle
+import warnings
 
 from datetime import datetime
 from dataclasses import dataclass, replace, field
@@ -254,6 +255,7 @@ class Dofs:
 
         self.topo = topo
         self.element = element
+        offset_given = offset
 
         self.nodal_dofs = np.reshape(
             np.arange(element.nodal_dofs * topo.nvertices, dtype=np.int32),
@@ -322,6 +324,48 @@ class Dofs:
         # total dofs
         self.N = np.max(self.element_dofs) + 1
 
+        if getattr(topo, '_dist', None) is not None:
+            self._init_distributed(topo._dist, offset_given=offset_given)
+
+    def _init_distributed(self, dist, offset_given=0):
+        """Global DOF numbering for the local part of a distributed mesh.
+
+        The DOFs of the global mesh are numbered entity by entity exactly
+        as above; the local DOFs are mapped using the global indices of
+        the local vertices, edges, facets and elements.
+
+        """
+        if offset_given != 0:
+            raise NotImplementedError("Offset is not supported for "
+                                      "distributed meshes.")
+        dist.check(self.topo)
+        element = self.element
+        globnums = np.zeros(self.N, dtype=np.int32)
+        offset = 0
+
+        def number(local, nlocdofs, entities, nentities):
+            nonlocal offset
+            if nlocdofs > 0:
+                globnums[local] = (nlocdofs * entities[None, :]
+                                   + np.arange(nlocdofs)[:, None]
+                                   + offset)
+            offset += nlocdofs * nentities
+
+        number(self.nodal_dofs, element.nodal_dofs,
+               dist.vertices, dist.nvertices)
+        if element.dim == 3 and element.edge_dofs > 0:
+            number(self.edge_dofs, element.edge_dofs,
+                   dist.edges, dist.nedges)
+        if element.facet_dofs > 0:
+            number(self.facet_dofs, element.facet_dofs,
+                   dist.facets, dist.nfacets)
+        number(self.interior_dofs, element.interior_dofs,
+               dist.elements, dist.nelements)
+
+        self._globnums = globnums
+        self._nglob = offset
+        self._comm = dist.comm
+
     @property
     def _iset(self):
 
@@ -374,7 +418,19 @@ class Dofs:
             terminated.  This is used, e.g., for running METIS in a
             separate high-memory SLURM task.
 
+        .. deprecated:: 13.0.0
+
+            Due for removal in 14.0.0.  Use
+            :meth:`skfem.mesh.Mesh.distributed` or
+            :func:`skfem.distributed.distribute` instead: the global DOF
+            numbering is computed from the local mesh and the assembly,
+            boundary conditions and solve use the same calls as in serial.
+
         """
+        warnings.warn("Dofs.decompose is deprecated and will be removed in "
+                      "14.0.0. Use Mesh.distributed() or "
+                      "skfem.distributed.distribute instead.",
+                      DeprecationWarning, stacklevel=2)
 
         use_cache = False
         load_cache = False
@@ -386,6 +442,17 @@ class Dofs:
             if os.path.isfile(cache.format(0) + '.m'):
                 if nparts is None:
                     load_cache = True
+                    # a cache for a different number of processes would
+                    # make some processes fail and the others hang
+                    if (not os.path.isfile(cache.format(comm.size - 1)
+                                           + '.m')
+                            or os.path.isfile(cache.format(comm.size)
+                                              + '.m')):
+                        raise ValueError(
+                            "The cache '{}' was created for a different "
+                            "number of processes than {}; remove the "
+                            "files to recompute the decomposition."
+                            .format(cache, comm.size))
 
         def _recv(comm):
 
@@ -510,7 +577,17 @@ class Dofs:
         ix
             Array of local indices.
 
+        .. deprecated:: 13.0.0
+
+            Due for removal in 14.0.0.  Use
+            :meth:`skfem.mesh.Mesh.distributed`; then
+            :func:`skfem.utils.enforce` accepts the local indices.
+
         """
+        warnings.warn("Dofs.l2g is deprecated and will be removed in "
+                      "14.0.0. Use Mesh.distributed(); then enforce accepts "
+                      "local DOF indices.",
+                      DeprecationWarning, stacklevel=2)
         ix = np.array(ix, dtype=np.int32)
         return self._lgmap.apply(ix)
 
@@ -522,7 +599,17 @@ class Dofs:
         x
             Distributed PETSc vector.
 
+        .. deprecated:: 13.0.0
+
+            Due for removal in 14.0.0.  Use
+            :meth:`skfem.mesh.Mesh.distributed`; then
+            :func:`skfem.utils.solve` returns the local array.
+
         """
+        warnings.warn("Dofs.loc is deprecated and will be removed in "
+                      "14.0.0. Use Mesh.distributed(); then solve returns the "
+                      "local array.",
+                      DeprecationWarning, stacklevel=2)
         return x.getSubVector(self._iset).getArray()
 
     def get_vertex_dofs(

@@ -1,3 +1,4 @@
+import warnings
 import logging
 
 from dataclasses import dataclass, replace
@@ -111,15 +112,26 @@ class COOData:
         return out
 
     def topetsc(self, dofs=None):
-        """Convert to PETSc matrix.
+        """Convert to PETSc matrix or vector.
 
         Parameters
         ----------
         dofs
-            If given, then the matrix will be distributed ("mpiaij" in
-            PETSc jargon).  Otherwise, a local matrix is returned.
+            Deprecated and due for removal in 14.0.0.  If given, then the
+            matrix will be distributed ("mpiaij" in PETSc jargon).
+            Otherwise, a local matrix is returned.  Use
+            :meth:`skfem.mesh.Mesh.distributed` instead: then the forms
+            assemble directly into distributed PETSc matrices.
 
         """
+        if dofs is not None:
+            warnings.warn("COOData.topetsc(dofs) is deprecated and will be "
+                          "removed in 14.0.0. Use Mesh.distributed() and "
+                          "Form.assemble instead.", DeprecationWarning,
+                          stacklevel=2)
+        return self._topetsc(dofs)
+
+    def _topetsc(self, dofs=None):
         import petsc4py.PETSc as petsc
 
         if len(self.shape) == 1:
@@ -161,10 +173,26 @@ class COOData:
             mat.setISLocalMat(locmat)
             mat.assemble()
             mat.convert("mpiaij")
+            # the mapping is lost in the conversion; it is used, e.g.,
+            # in skfem.utils.enforce to map the local DOF indices
+            mat.setLGMap(dofs._lgmap)
 
             return mat
 
         raise NotImplementedError
+
+    def _todistributed(self, dofs) -> Any:
+        """Assemble over all processes of a distributed mesh.
+
+        Scalar for 0-tensor (summed over the processes), PETSc vector for
+        1-tensor and PETSc matrix for 2-tensor.
+
+        """
+        if len(self.shape) == 0:
+            if dofs._comm.size == 1:
+                return self.todefault()
+            return dofs._comm.tompi4py().allreduce(self.todefault())
+        return self._topetsc(dofs)
 
     def astuple(self):
         return self.indices, self.data, self.shape
