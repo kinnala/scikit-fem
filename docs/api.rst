@@ -224,6 +224,26 @@ Function: enforce
 
 .. autofunction:: skfem.utils.enforce
 
+Function: solver_petsc
+----------------------
+
+.. autofunction:: skfem.utils.solver_petsc
+
+Module: skfem.distributed
+=========================
+
+.. automodule:: skfem.distributed
+
+Function: distribute
+--------------------
+
+.. autofunction:: skfem.distributed.distribute
+
+Function: allreduce
+-------------------
+
+.. autofunction:: skfem.distributed.allreduce
+
 Module: skfem.helpers
 =====================
 

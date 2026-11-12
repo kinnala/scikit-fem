@@ -125,6 +125,9 @@ class BilinearForm(Form):
     def assemble(self, *args, **kwargs):
         """Assemble the bilinear form into a sparse matrix.
 
+        If the basis is defined on a distributed mesh, see
+        :func:`skfem.distributed.distribute`, returns a PETSc matrix.
+
         Parameters
         ----------
         ubasis
@@ -138,7 +141,13 @@ class BilinearForm(Form):
         """
         assert self.form is not None
         logger.info("Assembling '{}'.".format(self.form.__name__))
-        mat = COOData._assemble_scipy_csr(*self._assemble(*args, **kwargs))
+        dofs = self._distributed_dofs(*args)
+        if dofs is not None:
+            mat = (COOData(*self._assemble(*args, **kwargs))
+                   ._todistributed(dofs))
+        else:
+            mat = COOData._assemble_scipy_csr(*self._assemble(*args,
+                                                              **kwargs))
         logger.info("Assembling finished.")
         return mat
 

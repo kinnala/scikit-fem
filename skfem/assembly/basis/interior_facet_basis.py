@@ -29,6 +29,15 @@ class InteriorFacetBasis(FacetBasis):
                  disable_doflocs: bool = False):
         """Precomputed global basis on interior facets."""
 
+        if (getattr(mesh, '_dist', None) is not None
+                and (np.sum(mesh.f2t[1] == -1)
+                     > len(mesh.boundary_facets()))):
+            raise NotImplementedError(
+                "InteriorFacetBasis is not supported for distributed "
+                "meshes: the facets on the interfaces between the processes "
+                "would be missing because the neighboring elements are on "
+                "another process.")
+
         if facets is None:
             facets = np.nonzero(mesh.f2t[1] != -1)[0].astype(np.int32)
 

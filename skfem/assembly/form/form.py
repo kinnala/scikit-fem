@@ -71,13 +71,34 @@ class Form:
         return self.assemble(self.kernel(*args))
 
     def assemble(self, *args, **kwargs) -> Any:
-        """Assemble system matrix as SciPy CSR sparse matrix."""
+        """Assemble system matrix as SciPy CSR sparse matrix.
+
+        If the basis is defined on a distributed mesh, see
+        :func:`skfem.distributed.distribute`, returns a PETSc matrix,
+        PETSc vector or a scalar summed over all processes.
+
+        """
         assert self.form is not None
         logger.info("Assembling '{}'.".format(self.form.__name__))
-        out = (COOData(*self._assemble(*args, **kwargs))  # type: ignore
-               .todefault())
+        data = COOData(*self._assemble(*args, **kwargs))  # type: ignore
+        dofs = self._distributed_dofs(*args)
+        out = data.todefault() if dofs is None else data._todistributed(dofs)
         logger.info("Assembling finished.")
         return out
+
+    @staticmethod
+    def _distributed_dofs(*bases):
+        """Dofs of the bases if they are defined on a distributed mesh."""
+        dofs = [basis.dofs for basis in bases
+                if getattr(getattr(basis, 'dofs', None), '_comm', None)
+                is not None]
+        if len(dofs) == 0:
+            return None
+        if any(not np.array_equal(d._globnums, dofs[0]._globnums)
+               for d in dofs):
+            raise NotImplementedError("Distributed assembly supports only "
+                                      "forms with a single basis.")
+        return dofs[0]
 
     def elemental(self, *args, **kwargs) -> COOData:
         """Build elemental matrices without full assembly."""

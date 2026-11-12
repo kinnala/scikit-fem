@@ -90,9 +90,16 @@ def asm(form: Form,
     assert form.form is not None
     logger.info("Assembling '{}'.".format(form.form.__name__))
     nargs = [[arg] if not isinstance(arg, list) else arg for arg in args]
-    retval = to(map(lambda a: form.coo_data(*a[1], idx=a[0], **kwargs),
-                    zip(product(*(range(len(x)) for x in nargs)),
-                        product(*nargs))))
+    blocks = map(lambda a: form.coo_data(*a[1], idx=a[0], **kwargs),
+                 zip(product(*(range(len(x)) for x in nargs)),
+                     product(*nargs)))
+    dofs = (form._distributed_dofs(*[b for arg in nargs for b in arg])
+            if to is _sum else None)
+    if dofs is not None:
+        # basis on a distributed mesh, see skfem.distributed
+        retval = sum(blocks)._todistributed(dofs)
+    else:
+        retval = to(blocks)
     logger.info("Assembling finished.")
     return retval
 

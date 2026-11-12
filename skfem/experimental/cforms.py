@@ -2133,7 +2133,8 @@ class CBilinearForm(_CFormMixin, BilinearForm):
         return self._sparsity[key]
 
     def assemble(self, ubasis, vbasis=None, **kwargs):
-        if not self.cache_sparsity:
+        if (not self.cache_sparsity
+                or self._distributed_dofs(ubasis, vbasis) is not None):
             return super().assemble(ubasis, vbasis, **kwargs)
         from scipy.sparse import csr_matrix
         vbasis = ubasis if vbasis is None else vbasis
