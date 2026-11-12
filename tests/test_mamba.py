@@ -14,13 +14,19 @@ class TestEx52(TestCase):
         self.assertAlmostEqual(ex52.xmax, 0.999610970807614, places=5)
 
 
-
 @pytest.mark.mpi
 def test_ex_53():
 
     import docs.examples.ex53 as ex53
     # the solver tolerance is rtol=1e-6
     assert_almost_equal(ex53.xmax, 0.9996111271291415, decimal=5)
+
+
+@pytest.mark.mpi
+def test_ex_54():
+
+    import docs.examples.ex54 as ex54
+    assert_almost_equal(ex54.xmax, 1.692582561905199, decimal=5)
 
 
 def _poisson_serial_vs_distributed(mesh, elem, facet=False, use_condense=False):
