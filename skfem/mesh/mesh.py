@@ -912,9 +912,10 @@ class Mesh:
 
         """
         m = self
-        has_boundaries = self.boundaries is not None
-        has_subdomains = self.subdomains is not None
-        if isinstance(times_or_ix, int):
+        has_boundaries = bool(self.boundaries)
+        has_subdomains = bool(self.subdomains)
+        if (isinstance(times_or_ix, (int, np.integer))
+                and not isinstance(times_or_ix, (bool, np.bool_))):
             for _ in range(times_or_ix):
                 mtmp = m._uniform()
                 # fix subdomains for remaining mesh types
@@ -934,10 +935,10 @@ class Mesh:
                 m = mtmp
         else:
             m = m._adaptive(times_or_ix)
-        if has_boundaries and m.boundaries is None:
+        if has_boundaries and not m.boundaries:
             logger.warning("Named boundaries invalidated by a call to "
                            "Mesh.refined()")
-        if has_subdomains and self.subdomains is None:
+        if has_subdomains and not m.subdomains:
             logger.warning("Named subdomains invalidated by a call to "
                            "Mesh.refined()")
         return m
@@ -948,17 +949,24 @@ class Mesh:
         Parameters
         ----------
         factors
-            Scale each dimension by a factor.
+            Scale each dimension by a factor.  A scalar scales all
+            dimensions by the same factor.
 
         """
-        if isinstance(factors, float):
-            # for backwards compatibility
+        if np.ndim(factors) == 0:
             factors = self.doflocs.shape[0] * [factors]
+        self._check_dim(factors, 'factors')
         return replace(
             self,
             doflocs=np.array([self.doflocs[itr] * factors[itr]
                               for itr in range(len(factors))]),
         )
+
+    def _check_dim(self, arr, name):
+        if len(arr) != self.doflocs.shape[0]:
+            raise ValueError("The length of '{}' ({}) must match the mesh "
+                             "dimension ({})."
+                             .format(name, len(arr), self.doflocs.shape[0]))
 
     def translated(self, diffs):
         """Return a new translated mesh.
@@ -970,6 +978,7 @@ class Mesh:
             dimension.
 
         """
+        self._check_dim(diffs, 'diffs')
         return replace(
             self,
             doflocs=np.array([self.doflocs[itr] + diffs[itr]
@@ -1268,21 +1277,59 @@ class Mesh:
                                           elements))
 
     def remove_unused_nodes(self):
-        p, t, _ = self._reix(self.t)
-        return replace(
+        p, t, ix = self._reix(self.t)
+        node_map = np.full(self.nvertices, -1, dtype=np.int32)
+        node_map[ix] = np.arange(len(ix), dtype=np.int32)
+        out = replace(
             self,
             doflocs=p,
             t=t,
         )
+        return out._with_remapped_boundaries(self, node_map)
 
     def remove_duplicate_nodes(self):
-        p, t = self._remove_duplicate_nodes(self.doflocs,
-                                            self.t)
-        return replace(
+        tmp = np.ascontiguousarray(self.doflocs.T)
+        _, ixa, ixb = np.unique(tmp.view([('', tmp.dtype)] * tmp.shape[1]),
+                                return_index=True, return_inverse=True)
+        node_map = ixb.flatten().astype(np.int32)
+        out = replace(
             self,
-            doflocs=p,
-            t=t,
+            doflocs=self.doflocs[:, ixa],
+            t=node_map[self.t],
         )
+        return out._with_remapped_boundaries(self, node_map)
+
+    def _with_remapped_boundaries(self, old, node_map):
+        """Translate the boundary facets of ``old`` to ``self``.
+
+        Parameters
+        ----------
+        old
+            The mesh before renumbering the nodes.
+        node_map
+            Maps the vertex indices of ``old`` to the vertex indices of
+            ``self``.
+
+        """
+        if not old.boundaries:
+            return self
+        new_facets = np.sort(self.facets, axis=0)
+        nf = new_facets.shape[1]
+        names = list(old.boundaries)
+        old_ix = [np.asarray(old.boundaries[k]) for k in names]
+        queries = np.sort(node_map[old.facets[:, np.concatenate(old_ix)]],
+                          axis=0)
+        _, inv = np.unique(np.hstack((new_facets, queries)),
+                           axis=1, return_inverse=True)
+        inv = inv.flatten()
+        lookup = np.full(inv.max() + 1, -1, dtype=np.int32)
+        lookup[inv[:nf]] = np.arange(nf, dtype=np.int32)
+        found = lookup[inv[nf:]]
+        splits = np.cumsum([len(ix) for ix in old_ix])[:-1]
+        boundaries = {}
+        for k, f in zip(names, np.split(found, splits)):
+            boundaries[k] = np.unique(f[f >= 0]).astype(np.int32)
+        return replace(self, _boundaries=boundaries)
 
     def element_finder(self, mapping=None):
         """Return a function handle from location to element index.
@@ -1333,7 +1380,8 @@ class Mesh:
             behavior based on the type of this parameter.
 
         """
-        if isinstance(nodes, int):
+        if (isinstance(nodes, (int, np.integer))
+                and not isinstance(nodes, (bool, np.bool_))):
             return np.array([nodes])
         if isinstance(nodes, tuple):
             return self.normalize_nodes(
@@ -1364,7 +1412,8 @@ class Mesh:
             behavior based on the type of this parameter.
 
         """
-        if isinstance(facets, int):
+        if (isinstance(facets, (int, np.integer))
+                and not isinstance(facets, (bool, np.bool_))):
             # Make  normalize_facets([1,2,3]) have the same behavior as
             # normalize_facets(np.array([1,2,3]))
             return np.array([facets])
@@ -1404,9 +1453,11 @@ class Mesh:
             behavior based on the type of this parameter.
 
         """
-        if isinstance(elements, bool) and elements:
-            return np.arange(self.nelements, dtype=np.int32)
-        if isinstance(elements, int):
+        if isinstance(elements, (bool, np.bool_)):
+            if elements:
+                return np.arange(self.nelements, dtype=np.int32)
+            return np.array([], dtype=np.int32)
+        if isinstance(elements, (int, np.integer)):
             # Make  normalize_elements([1,2,3]) have the same behavior as
             # normalize_elements(np.array([1,2,3]))
             return np.array([elements])

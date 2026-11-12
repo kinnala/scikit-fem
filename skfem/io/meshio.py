@@ -55,11 +55,7 @@ def from_meshio(m,
                 out=None,
                 int_data_to_sets=False,
                 force_meshio_type=None,
-                ignore_orientation=False,
-                ignore_interior_facets=False):
-
-    if ignore_interior_facets:
-        logger.warning("kwarg ignore_interior_facets is unused.")
+                ignore_orientation=False):
 
     cells = m.cells_dict
     meshio_type = None
@@ -255,14 +251,10 @@ def to_meshio(mesh,
     cells = {mtype: t.T}
 
     if encode_cell_data:
-        if cell_data is None:
-            cell_data = {}
-        cell_data.update(mesh._encode_cell_data())
+        cell_data = {**(cell_data or {}), **mesh._encode_cell_data()}
 
     if encode_point_data:
-        if point_data is None:
-            point_data = {}
-        point_data.update(mesh._encode_point_data())
+        point_data = {**(point_data or {}), **mesh._encode_point_data()}
 
     mio = meshio.Mesh(
         mesh.p.T,

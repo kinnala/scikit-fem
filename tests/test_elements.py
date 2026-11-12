@@ -1,4 +1,4 @@
-from unittest import TestCase, main
+from unittest import TestCase
 
 import numpy as np
 from numpy.testing import assert_allclose, assert_array_equal
@@ -53,7 +53,6 @@ from skfem.element import (
     ElementTriDG,
     ElementTetDG,
     ElementQuadDG,
-    ElementQuadP,
     ElementHexDG,
     ElementWedge1,
     ElementQuadDPC,
@@ -202,8 +201,8 @@ class TestComposite(TestCase):
             for i in [0, 1]:
                 # accessing i'th component looks slightly different
                 assert_array_equal(
-                    ev.gbasis(mapping, X, k)[0].value[i],
-                    ec.gbasis(mapping, X, k)[i].value
+                    np.asarray(ev.gbasis(mapping, X, k)[0])[i],
+                    np.asarray(ec.gbasis(mapping, X, k)[i])
                 )
                 for j in [0, 1]:
                     assert_array_equal(
@@ -432,7 +431,7 @@ def test_dg_element(m, e, edg):
     ]
 )
 def test_initialize_dg_composite_elements(e, edg):
-    E = edg(e) * e
+    edg(e) * e
 
 
 @pytest.mark.parametrize(

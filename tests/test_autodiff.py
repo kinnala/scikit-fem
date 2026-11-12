@@ -4,12 +4,10 @@ from numpy.testing import (assert_array_almost_equal,
                            assert_almost_equal,
                            assert_allclose)
 
-from skfem import (Basis, FacetBasis, MeshTri, MeshQuad, MeshTet, MeshLine,
-                   ElementTriP1, ElementTriP2, ElementQuad1, ElementTetP1,
-                   ElementTetP2, ElementVector, solve, condense, enforce,
-                   bmat)
+from skfem import (Basis, MeshTri, MeshQuad, MeshTet, ElementTriP1, ElementTriP2,
+                   ElementTetP1, ElementTetP2, ElementVector, solve,
+                   condense)
 from skfem.autodiff import NonlinearForm
-import skfem.autodiff.helpers as ngh
 from skfem.autodiff.helpers import (grad, dot, ddot, mul, div, sym_grad,
                                     transpose, eye, trace, det, inv,
                                     cross, prod, identity, inner, stack)

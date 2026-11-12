@@ -5,12 +5,12 @@ from pathlib import Path
 import numpy as np
 import pytest
 from scipy.spatial import Delaunay
-from numpy.testing import assert_array_equal, assert_almost_equal
+from numpy.testing import assert_array_equal
 
 from skfem.mesh import (Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
                         MeshTet1, MeshHex1, MeshLine1DG, MeshQuad1DG, 
-                        MeshTri1DG, MeshTri2, MeshQuad2, MeshTet2, MeshHex2)
-from skfem.assembly import Basis, LinearForm, Functional, FacetBasis
+                        MeshTri2, MeshQuad2, MeshTet2, MeshHex2)
+from skfem.assembly import Basis, Functional, FacetBasis
 from skfem.element import (ElementTetP1, ElementTriP0, ElementQuad0,
                            ElementHex0, ElementTriP1)
 from skfem.io.meshio import to_meshio, from_meshio
@@ -598,14 +598,7 @@ def test_saveload_cycle_vtk(m):
         False,
     ]
 )
-@pytest.mark.parametrize(
-    "ignore_interior_facets",
-    [
-        True,
-        False,
-    ]
-)
-def test_saveload_cycle_tags(fmt, kwargs, m, ignore_orientation, ignore_interior_facets):
+def test_saveload_cycle_tags(fmt, kwargs, m, ignore_orientation):
 
     m = (m
          .refined(2)
@@ -623,8 +616,7 @@ def test_saveload_cycle_tags(fmt, kwargs, m, ignore_orientation, ignore_interior
         out = ['point_data', 'cells_dict']
         m2 = Mesh.load(tmpname,
                        out=out,
-                       ignore_orientation=ignore_orientation,
-                       ignore_interior_facets=ignore_interior_facets)
+                       ignore_orientation=ignore_orientation)
 
 
         assert_array_equal(m.p, m2.p)
@@ -645,13 +637,13 @@ def test_periodic_failure():
     # these meshes cannot be made periodic due to insufficient number of
     # elements
     with pytest.raises(ValueError):
-        mp = MeshLine1DG.periodic(MeshLine(), [0], [1])
+        MeshLine1DG.periodic(MeshLine(), [0], [1])
 
     with pytest.raises(ValueError):
-        mp = MeshQuad1DG.periodic(MeshQuad(), [0], [1])
+        MeshQuad1DG.periodic(MeshQuad(), [0], [1])
 
     with pytest.raises(ValueError):
-        mp = MeshQuad1DG.periodic(MeshQuad().refined(2), [0], [1, 2])
+        MeshQuad1DG.periodic(MeshQuad().refined(2), [0], [1, 2])
 
 
 @pytest.mark.parametrize(
@@ -1083,3 +1075,38 @@ def test_meshtet_uniform_refine_partial_boundary():
 
     assert abs(area(M, M.boundaries['upper'])
                - area(m, m.boundaries['upper'])) < 1e-12
+
+
+@pytest.mark.parametrize(
+    "method",
+    ["remove_duplicate_nodes", "remove_unused_nodes"],
+)
+def test_remove_nodes_keeps_boundaries(method):
+    m = MeshTri.init_tensor(np.linspace(0, 2, 5), np.linspace(0, 1, 3))
+    # shuffle the nodes and prepend an unused duplicate of one of them
+    perm = np.random.default_rng(0).permutation(m.nvertices)
+    inv = np.argsort(perm)
+    p = m.p[:, perm]
+    m = MeshTri(np.hstack((p[:, [3]], p)), inv[m.t] + 1).with_boundaries(
+        {'right': lambda x: x[0] == 2}
+    )
+    M = getattr(m, method)()
+    assert len(M.boundaries['right']) == 2
+    assert_array_equal(M.p[0, M.facets[:, M.boundaries['right']]], 2.)
+
+
+def test_mesh_input_types():
+    m = MeshTri()
+    assert m.refined(np.int64(1)).nelements == 4 * m.nelements
+    assert_array_equal(m.scaled(2).p, 2 * m.p)
+    with pytest.raises(ValueError):
+        m.translated((1.,))
+    assert len(m.normalize_elements(False)) == 0
+    assert_array_equal(m.normalize_elements(np.int64(1)), [1])
+    assert_array_equal(m.normalize_nodes(np.int32(2)), [2])
+    assert_array_equal(m.normalize_facets(np.int64(1)), [1])
+
+
+def test_meshline_with_defaults():
+    m = MeshLine().refined(2).with_defaults()
+    assert set(m.boundaries) == {'left', 'right'}

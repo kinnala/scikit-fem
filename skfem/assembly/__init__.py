@@ -50,9 +50,10 @@ import logging
 from typing import Any
 from itertools import product
 
-from .basis import (Basis, CellBasis, FacetBasis, BoundaryFacetBasis,
-                    InteriorFacetBasis)
-from .basis import InteriorBasis, ExteriorFacetBasis  # backwards compatibility
+from .basis import Basis, CellBasis, FacetBasis, InteriorFacetBasis
+# removed names, kept importable for their migration messages
+from .basis import (InteriorBasis, ExteriorFacetBasis,  # noqa: F401
+                    BoundaryFacetBasis)
 from .dofs import Dofs, DofsView
 from .form import Form, TrilinearForm, BilinearForm, LinearForm, Functional
 
@@ -109,7 +110,6 @@ __all__ = [
     "Basis",
     "CellBasis",
     "FacetBasis",
-    "BoundaryFacetBasis",
     "InteriorFacetBasis",
     "Dofs",
     "DofsView",
@@ -117,6 +117,4 @@ __all__ = [
     "BilinearForm",
     "LinearForm",
     "Functional",
-    "InteriorBasis",  # backwards compatibility
-    "ExteriorFacetBasis",  # backwards compatibility
 ]

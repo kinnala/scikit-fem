@@ -1,5 +1,4 @@
 import logging
-import warnings
 import numbers
 from copy import deepcopy
 from functools import partial
@@ -139,12 +138,6 @@ class Form:
                 w[k] = basis.interpolate(w[k])
             elif isinstance(w[k], ndarray) and len(w[k].shape) > 1:
                 w[k] = DiscreteField(w[k])
-            elif isinstance(w[k], list):
-                warnings.warn("Use Basis.interpolate instead of passing lists "
-                              "to assemble", DeprecationWarning)
-                # for backwards-compatibility
-                w[k] = DiscreteField(np.array([z.value for z in w[k]]),
-                                     np.array([z.grad for z in w[k]]))
             else:
                 raise ValueError("The given type '{}' for the list of extra "
                                  "form parameters w cannot be converted to "

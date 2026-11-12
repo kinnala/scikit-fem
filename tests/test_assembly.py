@@ -1,5 +1,5 @@
 import sys
-from unittest import TestCase, main
+from unittest import TestCase
 
 import pytest
 import numpy as np
@@ -22,10 +22,9 @@ from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementTetN1, ElementTriHHJ1, ElementWedge1,
                            ElementLineP1)
 from skfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
-                        MeshTri2, MeshTet2, MeshHex2, MeshTri1DG, MeshQuad1DG,
-                        MeshHex1DG, MeshWedge, MeshLine)
+                        MeshTri2, MeshTet2, MeshHex2, MeshWedge, MeshLine)
 from skfem.assembly import FacetBasis, Basis
-from skfem.models import laplace, unit_load, mass
+from skfem.models import unit_load, mass
 from skfem.helpers import grad, dot, ddot, sym_grad, curl
 from skfem.models import linear_stress
 
@@ -612,7 +611,7 @@ def test_matrix_element_projection(m, e):
 
     x = basis0.interpolate(np.random.random(basis0.N))
 
-    y = basis1.project(C(sym_grad(x)))
+    basis1.project(C(sym_grad(x)))
 
 
 @pytest.mark.parametrize(
@@ -710,7 +709,7 @@ def test_hcurl_boundary_integration(basis):
               ElementTetN1()),
     ]
 )
-def test_hcurl_boundary_integration(basis):
+def test_hcurl_boundary_integration_3d(basis):
 
     y = basis.project(lambda x: np.array([x[1], -x[0], 0*x[0]]))
     fbasis = basis.boundary('right')

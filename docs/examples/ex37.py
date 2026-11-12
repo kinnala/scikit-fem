@@ -31,7 +31,7 @@ b = asm(linf, fbasis)
 x = solve(A, b)
 
 (sigma, rtbasis), (u, ubasis) = basis.split(x)
-M, X = ubasis.refinterp(u, Nrefs=0)
+M, X = ubasis.refinterp(u, nrefs=0)
 
 if __name__ == "__main__":
     M.save('ex37.vtk', {'sol': X})

@@ -369,3 +369,22 @@ def test_solve_preserves_complex_eigenvectors(constraint, dtype):
     assert np.max(np.abs(values.imag)) > 1.
     assert_almost_equal((A @ vectors)[free], ((M @ vectors) * values)[free])
     assert_almost_equal(vectors[D], np.zeros_like(vectors[D]))
+
+
+def test_bmat_blocks():
+    from skfem.utils import bmat
+    A = bmat([[scipy.sparse.eye(2, k) for k in (2, 3, 4, 5)]])
+    assert A.blocks == [2, 5, 9]
+
+
+def test_solver_iter_krylov_reuse():
+    from skfem.utils import solver_iter_krylov
+    solver = solver_iter_krylov()
+    for n in (2, 3):
+        m = MeshTri().refined(n)
+        basis = CellBasis(m, ElementTriP1())
+        A = laplace.assemble(basis)
+        b = unit_load.assemble(basis)
+        x = solve(*condense(A, b, D=m.boundary_nodes()), solver=solver)
+        y = solve(*condense(A, b, D=m.boundary_nodes()))
+        assert_almost_equal(x, y, decimal=5)

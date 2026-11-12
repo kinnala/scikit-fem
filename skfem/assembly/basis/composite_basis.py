@@ -15,7 +15,7 @@ class CompositeBasis(AbstractBasis):
             if len(basis.W) != nqp:
                 raise ValueError("Each Basis must have the same "
                                  "number of quadrature points.")
-            if bases[0].element_dofs.shape[1] != nelem:
+            if basis.element_dofs.shape[1] != nelem:
                 raise ValueError("Each Basis must have the same "
                                  "number of elements.")
             if isinstance(basis.elem, ElementComposite):

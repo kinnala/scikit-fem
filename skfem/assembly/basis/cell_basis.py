@@ -148,8 +148,7 @@ class CellBasis(AbstractBasis):
 
     def refinterp(self,
                   y: ndarray,
-                  nrefs: int = 1,
-                  Nrefs: Optional[int] = None) -> Tuple[Mesh, ndarray]:
+                  nrefs: int = 1) -> Tuple[Mesh, ndarray]:
         """Refine and interpolate (for plotting).
 
         Thin wrapper around :func:`skfem.visuals.data.sample` which returns
@@ -160,8 +159,6 @@ class CellBasis(AbstractBasis):
 
         """
         from ...visuals.data import sample
-        if Nrefs is not None:
-            nrefs = Nrefs  # for backwards compatibility
         # in 1D, shrinking the reference points makes sorting preserve
         # correct order of duplicate nodes in skfem.visuals.matplotlib
         data = sample(self, y, nrefs=nrefs, _shrink=self.mesh.dim() == 1)

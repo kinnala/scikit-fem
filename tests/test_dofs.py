@@ -6,7 +6,7 @@ import pytest
 
 from skfem.mesh import MeshTri
 from skfem.element import ElementTriArgyris, ElementTriP2
-from skfem.assembly import Dofs, CellBasis
+from skfem.assembly import CellBasis
 
 
 class TestDofsKeepSkipOperations(TestCase):

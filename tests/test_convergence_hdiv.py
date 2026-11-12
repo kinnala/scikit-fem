@@ -100,7 +100,7 @@ class ConvergenceRaviartThomas(unittest.TestCase):
                     np.sin(np.pi * y[1]) *
                     np.sin(np.pi * y[2]))
 
-        return np.sqrt(np.sum(np.sum((uh - u(x.value)) ** 2 * dx, axis=1)))
+        return np.sqrt(np.sum(np.sum((uh - u(x)) ** 2 * dx, axis=1)))
 
     def compute_Hdiv(self, m, basis, U):
         uh, duh, *_ = basis.interpolate(U).astuple
@@ -125,7 +125,7 @@ class ConvergenceRaviartThomas(unittest.TestCase):
 
         divuh = sum(uh)
 
-        return np.sqrt(np.sum(np.sum(((divuh - divu(x.value)) ** 2) * dx, axis=1)))
+        return np.sqrt(np.sum(np.sum(((divuh - divu(x)) ** 2) * dx, axis=1)))
 
     def create_basis(self, m):
         e = ElementTriRT0()

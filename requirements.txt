@@ -8,4 +8,3 @@ pyamg
 mypy
 flake8
 sphinx
-pep517

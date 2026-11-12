@@ -32,3 +32,9 @@ Code = "https://github.com/kinnala/scikit-fem"
 
 [tool.flit.module]
 name = "skfem"
+
+[tool.pytest.ini_options]
+markers = [
+    "mpi: test is run under MPI (pytest-mpi)",
+    "mpi_skip: test is skipped under MPI (pytest-mpi)",
+]

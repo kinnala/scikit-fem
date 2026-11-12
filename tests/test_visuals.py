@@ -107,8 +107,7 @@ from skfem import (Basis, ElementTriP1, ElementTriP2, ElementTriP0,  # noqa
                    ElementQuad2, ElementTetP2, ElementHex2, ElementVector,
                    ElementLineP2, ElementTriRT0, ElementTriMorley,
                    ElementHex1, ElementTriP1DG)
-from skfem.mesh import (MeshHex, MeshTri1DG, MeshWedge1,  # noqa: E402
-                        MeshHex2)
+from skfem.mesh import MeshHex, MeshTri1DG, MeshWedge1  # noqa: E402
 from skfem.visuals.data import sample, VisData  # noqa: E402
 
 

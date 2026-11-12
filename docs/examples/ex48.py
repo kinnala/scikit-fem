@@ -1,4 +1,4 @@
-"""Solve :math:`\Delta^2 u = 1` using HHJ element."""
+r"""Solve :math:`\Delta^2 u = 1` using HHJ element."""
 from skfem import *
 from skfem.helpers import *
 import numpy as np

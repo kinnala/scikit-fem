@@ -69,10 +69,14 @@ class MeshLine1(MeshSimplex, Mesh):
             self,
             doflocs=newp,
             t=newt,
+            _subdomains=None,
         )
 
-    def param(self):
-        return np.max(np.abs(self.p[0, self.t[1]] - self.p[0, self.t[0]]))
+    def params(self) -> ndarray:
+        return np.abs(self.p[0, self.t[1]] - self.p[0, self.t[0]])
+
+    def param(self) -> float:
+        return np.max(self.params())
 
     def element_finder(self, mapping=None):
 

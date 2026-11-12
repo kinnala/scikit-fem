@@ -194,7 +194,7 @@ However, this is so common that we have a shortcut command
    basis = fem.FacetBasis(m, fem.ElementQuad1())
    u0 = lambda x: x[0] ** 3 * x[1] ** 3
    u0t = basis.project(u0)
-   ibasis = fem.InteriorBasis(m, fem.ElementQuad1())
+   ibasis = fem.Basis(m, fem.ElementQuad1())
    from skfem.visuals.matplotlib import plot, draw
    ax = draw(ibasis)
    plot(ibasis, u0t, nrefs=3, ax=ax, colorbar=True, shading='gouraud')
