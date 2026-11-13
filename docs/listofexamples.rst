@@ -17,8 +17,9 @@ This example solves the Poisson problem :math:`-\Delta u = 1` with the Dirichlet
 boundary condition :math:`u = 0` in the unit square using piecewise-linear
 triangular elements.
 
-.. plot::
-   :caption: The solution of Example 1.
+.. skfem-web::
+   :height: 400
+   :caption: The solution of Example 1
 
    from docs.examples.ex01 import visualize
    visualize()
@@ -218,7 +219,8 @@ This example solves the biharmonic Kirchhoff plate bending problem :math:`D
 stiffness :math:`D` and a combination of clamped, simply supported and free
 boundary conditions.
 
-.. plot::
+.. skfem-web::
+   :height: 400
    :caption: The solution of Example 2.
 
    from docs.examples.ex02 import visualize
@@ -233,8 +235,9 @@ This example solves the linear elastic eigenvalue problem
 :math:`\mathrm{div}\,\sigma(u)= \lambda u` with
 the displacement fixed on the left boundary.
 
-.. plot::
-   :caption: The fifth eigenmode of Example 3.
+.. skfem-web::
+   :height: 400
+   :caption: The fifth eigenmode of Example 3, colored by the stress component :math:`\sigma_{xx}`.
 
    from docs.examples.ex03 import visualize
    visualize()

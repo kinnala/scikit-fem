@@ -37,8 +37,8 @@ A, b = enforce(A, b, D=m.boundary_nodes())
 x = solve(A, b)
 
 def visualize():
-    from skfem.visuals.matplotlib import plot
-    return plot(m, x, shading='gouraud', colorbar=True)
+    from skfem.visuals.web import plot
+    return plot(basis, x, warp=True, edges=False)
 
 if __name__ == "__main__":
     visualize().show()
