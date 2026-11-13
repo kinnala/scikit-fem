@@ -39,6 +39,10 @@ class Element:
         rules.
     dofnames
         A list of strings indicating the DOF types. See :ref:`finddofs`.
+        Contains the names of the DOFs of a single node, edge, facet and
+        the interior, in this order, i.e. the same order as the local basis
+        functions.  Its length is ``nodal_dofs + edge_dofs + facet_dofs +
+        interior_dofs``.
 
     """
     nodal_dofs: int = 0
@@ -165,6 +169,10 @@ class Element:
                 eo.elems[i].interior_dofs = 0
 
         ei = deepcopy(self)
+        # keep only the names of the interior DOFs
+        ei.dofnames = list(self.dofnames[(self.nodal_dofs
+                                          + self.edge_dofs
+                                          + self.facet_dofs):])
         ei.nodal_dofs = 0
         ei.facet_dofs = 0
         ei.edge_dofs = 0

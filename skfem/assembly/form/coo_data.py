@@ -14,6 +14,17 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class COOData:
+    """Assembled finite element data in coordinate format.
+
+    ``local_shape`` lists the number of local basis functions in the same
+    order as the global ``shape``, e.g., ``(Nbfun_v, Nbfun_u)`` for a
+    bilinear form whose rows correspond to the test function ``v`` and
+    columns to the trial function ``u``.  The entries of ``data`` are stored
+    with the element index running fastest and the local indices in reverse
+    order, i.e. ``data`` is a flattened array of shape
+    ``local_shape[::-1] + (nelems,)``.
+
+    """
 
     indices: ndarray
     data: ndarray
@@ -44,6 +55,11 @@ class COOData:
     def tolocal(self, basis=None):
         """Return an array of local finite element matrices.
 
+        The result has the shape ``(nelems,) + local_shape`` and is indexed
+        like the global matrix, e.g., ``out[e, i, j]`` is the entry related
+        to the ``i``'th test function and the ``j``'th trial function in
+        element ``e``.
+
         Parameters
         ----------
         basis
@@ -55,8 +71,8 @@ class COOData:
             raise NotImplementedError("Cannot build local matrices if "
                                       "local_shape is not specified.")
 
-        local = np.moveaxis(self.data.reshape(self.local_shape + (-1,),
-                                              order='C'), -1, 0)
+        # data is laid out as local_shape[::-1] + (nelems,); reverse all axes
+        local = self.data.reshape(self.local_shape[::-1] + (-1,)).T
         if basis is not None:
             out = np.zeros((basis.mesh.nfacets,) + local.shape[1:])
             out[basis.find] = local
@@ -68,7 +84,7 @@ class COOData:
         """Reverse of :meth:`COOData.tolocal`."""
         return replace(
             self,
-            data=np.moveaxis(local, 0, -1).flatten('C'),
+            data=np.asarray(local).T.flatten('C'),
         )
 
     def inverse(self):

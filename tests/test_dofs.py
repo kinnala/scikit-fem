@@ -4,8 +4,10 @@ import numpy as np
 from numpy.testing import assert_allclose
 import pytest
 
-from skfem.mesh import MeshTri
-from skfem.element import ElementTriArgyris, ElementTriP2
+from skfem.mesh import MeshTri, MeshTet
+from skfem.element import (ElementTriArgyris, ElementTriP2, ElementTriP1B,
+                           ElementTetMorley, ElementTetMWX3,
+                           ElementComposite, ElementDG)
 from skfem.assembly import CellBasis
 
 
@@ -113,3 +115,53 @@ def test_nonexisting_keys():
 
     with pytest.raises(ValueError):
         basis.get_dofs(elements="does not exist")
+
+
+@pytest.mark.parametrize(
+    "elem,expected",
+    [
+        # (component, entity type) of each DOF name
+        (ElementTetMorley(), {'u': (0, 'edge'), 'u_n': (0, 'facet')}),
+        (ElementTetMWX3(), {'u': (0, 'nodal'),
+                            'u_n': (0, 'edge'),
+                            'u_nn': (0, 'facet')}),
+        (ElementComposite(ElementTetMWX3(), ElementTetMorley()),
+         {'u^1': (0, 'nodal'),
+          'u_n^1': (0, 'edge'),
+          'u_nn^1': (0, 'facet'),
+          'u^2': (1, 'edge'),
+          'u_n^2': (1, 'facet')}),
+        (ElementComposite(ElementTetMorley(), ElementTetMWX3()),
+         {'u^1': (0, 'edge'),
+          'u_n^1': (0, 'facet'),
+          'u^2': (1, 'nodal'),
+          'u_n^2': (1, 'edge'),
+          'u_nn^2': (1, 'facet')}),
+    ]
+)
+def test_dofnames_edge_facet_order(elem, expected):
+    # names of edge and facet DOFs differ and are mixed by ElementComposite
+    basis = CellBasis(MeshTet(), elem, intorder=2)
+    comps = basis.split_indices()
+    dofs = basis.get_dofs(elements=True)
+    for name, (comp, entity) in expected.items():
+        assert_allclose(
+            np.sort(dofs.keep(name).flatten()),
+            np.intersect1d(comps[comp],
+                           getattr(basis.dofs, entity + '_dofs')),
+        )
+        assert name in getattr(dofs, entity)
+
+
+def test_dofnames_dg():
+    assert ElementDG(ElementTetMorley()).dofnames == 6 * ['u'] + 4 * ['u_n']
+    assert (ElementDG(ElementTetMWX3()).dofnames
+            == 4 * ['u'] + 12 * ['u_n'] + 4 * ['u_nn'])
+
+
+def test_dofnames_condensed():
+    ei, eo = ElementTriP1B().condensed()
+    assert ei.dofnames == ['NA']
+    assert_allclose(CellBasis(MeshTri(), ei).get_dofs(elements=True)
+                    .keep('NA').flatten(),
+                    np.arange(MeshTri().nelements))
