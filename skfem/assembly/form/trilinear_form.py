@@ -60,7 +60,7 @@ class TrilinearForm(Form):
             ]),
             data.flatten(),
             (wbasis.N, vbasis.N, ubasis.N),
-            (ubasis.Nbfun, vbasis.Nbfun, wbasis.Nbfun),
+            (wbasis.Nbfun, vbasis.Nbfun, ubasis.Nbfun),
         )
 
     def _kernel(self, u, v, w, params, dx):

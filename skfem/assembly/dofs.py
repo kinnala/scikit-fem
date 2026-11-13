@@ -61,23 +61,24 @@ class DofsView:
                 nnodal,
                 dofnames[self.nodal_rows]
             )
-        if nfacet > 0:
-            rep += "\n  Number of facet DOFs: {} {}".format(
-                nfacet,
-                dofnames[self.obj.nodal_dofs.shape[0]:][self.facet_rows],
-            )
         if nedge > 0:
             rep += "\n  Number of edge DOFs: {} {}".format(
                 nedge,
+                dofnames[self.obj.nodal_dofs.shape[0]:][self.edge_rows],
+            )
+        if nfacet > 0:
+            rep += "\n  Number of facet DOFs: {} {}".format(
+                nfacet,
                 dofnames[(self.obj.nodal_dofs.shape[0]
-                          + self.obj.facet_dofs.shape[0]):][self.edge_rows],
+                          + self.obj.edge_dofs.shape[0]):][self.facet_rows],
             )
         if ninterior > 0:
             rep += "\n  Number of interior DOFs: {} {}".format(
                 ninterior,
                 dofnames[(self.obj.nodal_dofs.shape[0]
-                          + self.obj.facet_dofs.shape[0]
-                          + self.obj.edge_dofs.shape[0]):][self.interior_rows],
+                          + self.obj.edge_dofs.shape[0]
+                          + self.obj.facet_dofs.shape[0]):]
+                [self.interior_rows],
             )
         return rep
 
@@ -209,15 +210,15 @@ class DofsView:
     @property
     def facet(self):
         return self._by_name(self.facet_dofs[self.facet_rows],
-                             off=self.nodal_dofs.shape[0],
+                             off=(self.nodal_dofs.shape[0]
+                                  + self.edge_dofs.shape[0]),
                              ix=self.facet_ix,
                              rows=self.facet_rows)
 
     @property
     def edge(self):
         return self._by_name(self.edge_dofs[self.edge_rows],
-                             off=(self.nodal_dofs.shape[0]
-                                  + self.facet_dofs.shape[0]),
+                             off=self.nodal_dofs.shape[0],
                              ix=self.edge_ix,
                              rows=self.edge_rows)
 
@@ -782,19 +783,21 @@ class Dofs:
             if check(self.element.dofnames[i], dofnames):
                 nodal_rows.append(i)
 
-        facet_rows = []
-        for i in range(n_facet):
-            if check(self.element.dofnames[i + n_nodal], dofnames):
-                facet_rows.append(i)
-
+        # dofnames follow the order of the local basis functions: nodal,
+        # edge, facet, interior
         edge_rows = []
         for i in range(n_edge):
-            if check(self.element.dofnames[i + n_nodal + n_facet], dofnames):
+            if check(self.element.dofnames[i + n_nodal], dofnames):
                 edge_rows.append(i)
+
+        facet_rows = []
+        for i in range(n_facet):
+            if check(self.element.dofnames[i + n_nodal + n_edge], dofnames):
+                facet_rows.append(i)
 
         interior_rows = []
         for i in range(n_interior):
-            if check(self.element.dofnames[i + n_nodal + n_facet + n_edge],
+            if check(self.element.dofnames[i + n_nodal + n_edge + n_facet],
                      dofnames):
                 interior_rows.append(i)
 

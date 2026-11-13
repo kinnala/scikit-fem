@@ -17,7 +17,7 @@ from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementTetDG, ElementTriHermite, ElementVector,
                            ElementTriRT1, ElementTriRT2, ElementTriBDM1,
                            ElementQuadRT1, ElementTetRT1, ElementHexRT1,
-                           ElementTriN1, ElementTriP0, ElementTetN0,
+                           ElementTriN1, ElementTriP0, ElementDG, ElementTetN0,
                            ElementQuadN1, ElementQuad0, ElementTriN2,
                            ElementTetN1, ElementTriHHJ1, ElementWedge1,
                            ElementLineP1)
@@ -524,6 +524,58 @@ def test_coodata_inverse(m, e, edg):
     assert_array_almost_equal(
         np.linalg.inv(M1.toarray()),
         M2.inverse().tocsr().toarray(),
+    )
+
+
+def test_coodata_tolocal_bilinear():
+    # nonsymmetric form with different trial and test spaces; DG spaces so
+    # that the local matrices are the diagonal blocks of the global matrix
+    m = MeshTri().refined()
+    ubasis = Basis(m, ElementDG(ElementTriP2()), intorder=4)
+    vbasis = Basis(m, ElementDG(ElementTriP1()), intorder=4)
+    A = (BilinearForm(lambda u, v, w: grad(u)[0] * v)
+         .coo_data(ubasis, vbasis))
+    K = A.toarray()
+    local = A.tolocal()
+    assert local.shape == (m.nelements, vbasis.Nbfun, ubasis.Nbfun)
+    for e in range(m.nelements):
+        assert_array_almost_equal(
+            local[e],
+            K[np.ix_(vbasis.element_dofs[:, e], ubasis.element_dofs[:, e])],
+        )
+    assert_array_almost_equal(A.fromlocal(local).toarray(), K)
+
+
+def test_coodata_tolocal_trilinear():
+    m = MeshTri()
+    ubasis = Basis(m, ElementDG(ElementTriP2()), intorder=4)
+    vbasis = Basis(m, ElementDG(ElementTriP1()), intorder=4)
+    wbasis = Basis(m, ElementDG(ElementTriP0()), intorder=4)
+    A = (TrilinearForm(lambda u, v, w, p: w * grad(u)[0] * v)
+         .coo_data(ubasis, vbasis, wbasis))
+    K = A.toarray()
+    local = A.tolocal()
+    assert local.shape == (m.nelements,
+                           wbasis.Nbfun,
+                           vbasis.Nbfun,
+                           ubasis.Nbfun)
+    for e in range(m.nelements):
+        assert_array_almost_equal(
+            local[e],
+            K[np.ix_(wbasis.element_dofs[:, e],
+                     vbasis.element_dofs[:, e],
+                     ubasis.element_dofs[:, e])],
+        )
+    assert_array_almost_equal(A.fromlocal(local).toarray(), K)
+
+
+def test_coodata_inverse_nonsymmetric():
+    m = MeshTri().refined()
+    basis = Basis(m, ElementDG(ElementTriP1()))
+    A = BilinearForm(lambda u, v, w: u * v + grad(u)[0] * v).coo_data(basis)
+    assert_array_almost_equal(
+        np.linalg.inv(A.toarray()),
+        A.inverse().toarray(),
     )
 
 

@@ -248,6 +248,8 @@ with respect to documented and/or tested features.
 - Fixed: `MeshWedge` quadrature rules were incorrect
 - Fixed: `MeshTet` quadrature rules for `intorder>=5` were accurate only up to `intorder - 1`
 - Fixed: `ElementGlobal` power basis is now defined in scaled local coordinates to improve conditioning
+- Fixed: `COOData.tolocal` returned incorrect local matrices for unsymmetric forms
+- Fixed: `dofnames` of `ElementComposite` and `ElementDG` were mislabeled in some cases
 
 ### [12.0.2] - 2026-06-05
 

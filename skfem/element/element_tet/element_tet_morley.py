@@ -71,7 +71,7 @@ class ElementTetMorley(ElementGlobal):
     edge_dofs = 1
     facet_dofs = 1
     maxdeg = 2
-    dofnames = ['u_n', 'u']
+    dofnames = ['u', 'u_n']
     doflocs = np.array([[.5, 0., 0.],
                         [.5, .5, 0.],
                         [0., .5, 0.],
@@ -109,7 +109,7 @@ class ElementTetMWX3(ElementGlobal):
     facet_dofs = 1
     maxdeg = 3
     derivatives = 3
-    dofnames = ['u', 'u_nn', 'u_n', 'u_n']
+    dofnames = ['u', 'u_n', 'u_n', 'u_nn']
     doflocs = np.array([[0., 0., 0.],
                         [1., 0., 0.],
                         [0., 1., 0.],
