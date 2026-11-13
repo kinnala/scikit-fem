@@ -1,10 +1,6 @@
 from skfem import *
 from skfem.helpers import dot, grad
 
-# # enable additional mesh validity checks, sacrificing performance
-# import logging
-# logging.basicConfig(format='%(levelname)s %(asctime)s %(name)s %(message)s')
-# logging.getLogger('skfem').setLevel(logging.DEBUG)
 
 # create the mesh
 m = MeshTri().refined(6)
@@ -38,7 +34,7 @@ x = solve(A, b)
 
 def visualize():
     from skfem.visuals.web import plot
-    return plot(basis, x, warp=True, edges=False)
+    return plot(basis, x, warp=True, edges=False, cmap='jet')
 
 if __name__ == "__main__":
     visualize().show()

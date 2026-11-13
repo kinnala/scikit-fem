@@ -53,7 +53,8 @@ def visualize():
                 {'sigma': (sbasis, sigma), 'u': y},
                 component=0,
                 deform='u',
-                deform_scale=.5)
+                deform_scale=.5,
+                cmap='jet')
 
 if __name__ == "__main__":
     visualize().show()

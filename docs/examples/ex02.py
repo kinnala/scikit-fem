@@ -88,7 +88,7 @@ x = solve(*condense(K, f, D=D))
 
 def visualize():
     from skfem.visuals.web import plot
-    return plot(basis, x, nrefs=2)
+    return plot(basis, x, nrefs=2, cmap='jet')
 
 if __name__ == "__main__":
     visualize().show()

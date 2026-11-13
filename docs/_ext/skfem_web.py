@@ -22,6 +22,7 @@ other than HTML skip the plot.
 import ast
 import hashlib
 import os
+import sys
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -121,6 +122,23 @@ def script_safe(s):
     return s.replace('\u2028', '\\u2028').replace('\u2029', '\\u2029')
 
 
+def datafile(app, key):
+    return os.path.join(app.outdir, '_static', DATADIR, key + '.js')
+
+
+def imported_files(code):
+    """The source files of the modules imported by the code."""
+    names = set()
+    for node in ast.walk(ast.parse(code)):
+        if isinstance(node, ast.Import):
+            names.update(alias.name for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            names.add(node.module)
+    files = [getattr(sys.modules.get(name), '__file__', None)
+             for name in names]
+    return [f for f in files if f]
+
+
 def run_code(code, filename):
     """Execute the code and return the value of the last expression."""
     tree = ast.parse(code, filename)
@@ -142,9 +160,9 @@ class SkfemWeb(SphinxDirective):
 
     def run(self):
         source, line = self.get_source_info()
+        code = '\n'.join(self.content)
         try:
-            plot = run_code('\n'.join(self.content),
-                            '{}:{}'.format(source, line))
+            plot = run_code(code, '{}:{}'.format(source, line))
             if not isinstance(plot, WebPlot):
                 raise TypeError("the last line must evaluate to WebPlot, "
                                 "got {}".format(type(plot).__name__))
@@ -155,15 +173,18 @@ class SkfemWeb(SphinxDirective):
             plot.height = self.options['height']
         # the documentation does not have a dark theme
         plot.options.setdefault('theme', 'light')
+        # rebuild the page when the example changes
+        for filename in imported_files(code):
+            self.env.note_dependency(filename)
         if self.env.app.builder.format != 'html':
             return []
         # the file is named after its content: unchanged plots are not
         # rewritten and browsers can cache them
         payload = script_safe(plot.to_json())
         key = hashlib.sha256(payload.encode('utf-8')).hexdigest()[:16]
-        datadir = os.path.join(self.env.app.outdir, '_static', DATADIR)
-        os.makedirs(datadir, exist_ok=True)
-        filename = os.path.join(datadir, key + '.js')
+        filename = datafile(self.env.app, key)
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        keys(self.env).setdefault(self.env.docname, set()).add(key)
         if not os.path.exists(filename):
             with open(filename, 'w', encoding='utf-8') as f:
                 f.write('SkfemWeb.register("{}",{});\n'.format(key, payload))
@@ -179,6 +200,32 @@ class SkfemWeb(SphinxDirective):
                                                 self.lineno)
         figure += nodes.caption('', '', *text)
         return [figure] + messages
+
+
+def keys(env):
+    """Document name to the keys of its plots."""
+    if not hasattr(env, 'skfem_web_keys'):
+        env.skfem_web_keys = {}
+    return env.skfem_web_keys
+
+
+def purge_keys(app, env, docname):
+    keys(env).pop(docname, None)
+
+
+def merge_keys(app, env, docnames, other):
+    for docname in docnames:
+        if docname in keys(other):
+            keys(env)[docname] = keys(other)[docname]
+
+
+def missing_data(app, env, added, changed, removed):
+    # Sphinx does not rerun the directive on unchanged pages: read again
+    # the pages whose data files were deleted from the output directory
+    if app.builder.format != 'html':
+        return []
+    return [docname for docname, ks in keys(env).items()
+            if not all(os.path.exists(datafile(app, k)) for k in ks)]
 
 
 def copy_scripts(app):
@@ -202,5 +249,8 @@ def add_viewer(app, pagename, templatename, context, doctree):
 def setup(app):
     app.add_directive('skfem-web', SkfemWeb)
     app.connect('builder-inited', copy_scripts)
+    app.connect('env-purge-doc', purge_keys)
+    app.connect('env-merge-info', merge_keys)
+    app.connect('env-get-outdated', missing_data)
     app.connect('html-page-context', add_viewer)
     return {'parallel_read_safe': True, 'parallel_write_safe': True}

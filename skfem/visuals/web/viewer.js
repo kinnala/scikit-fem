@@ -873,7 +873,9 @@ void main() {
         const sp = this.doc.createElement('span'); sp.style.top = (i * 25) + '%'; sp.textContent = fmt(v); ticks.appendChild(sp);
       }
     }
-    isFlat() { const s = this.scene; return s.mode === '2d' && !this.st.warp && this.st.deform < 0 && Math.abs(this.view.R[8] - 1) < 1e-9; }
+    // a planar mesh viewed from above: drag pans.  Deformation keeps the mesh in the plane
+    // because the displacement has as many components as the mesh has dimensions.
+    isFlat() { const s = this.scene; return s.mode === '2d' && !this.st.warp && Math.abs(this.view.R[8] - 1) < 1e-9; }
 
     /* ----- export ----- */
     png(opts) {
