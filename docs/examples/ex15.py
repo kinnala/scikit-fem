@@ -14,7 +14,9 @@ b = asm(unit_load, basis)
 
 x = solve(*condense(A, b, D=basis.get_dofs()))
 
+def visualize():
+    from skfem.visuals.web import plot
+    return plot(basis, x)
+
 if __name__ == "__main__":
-    from skfem.visuals.matplotlib import plot, show
-    plot(m, x)
-    show()
+    visualize().show()

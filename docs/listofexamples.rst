@@ -97,11 +97,14 @@ Example 15: One-dimensional Poisson equation
 This example solves :math:`-u'' = 1` in :math:`(0,1)` with the boundary
 condition :math:`u(0)=u(1)=0`.
 
-.. figure:: https://user-images.githubusercontent.com/973268/87775166-52b70b80-c82e-11ea-9009-c9fa0a9e28e8.png
+.. skfem-web::
+   :height: 400
+   :caption: The solution of Example 15
 
-   The solution of Example 15.
+   from docs.examples.ex15 import visualize
+   visualize()
 
-See the source code of :exlink:`15` for more information.
+Run :wblink:`15` interactively in the browser for more information.
 
 
 Example 9: Three-dimensional Poisson equation
