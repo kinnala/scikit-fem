@@ -59,10 +59,10 @@ extlinks = {
         "https://github.com/kinnala/scikit-fem/blob/{}/docs/examples/ex%s.py".format(previous_release),
         "example %s"
     ),
-    'wblink': {
+    'wblink': (
         "https://kinnala.github.io/skfem-demo/?src=kinnala/scikit-fem/docs/examples/ex%s.py",
         "example %s"
-    },
+    ),
 }
 
 autosummary_generate = True
