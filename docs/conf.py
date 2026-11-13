@@ -15,6 +15,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('_ext'))
 
 # -- Project information -----------------------------------------------------
 
@@ -50,6 +51,7 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.extlinks',
     'matplotlib.sphinxext.plot_directive',
+    'skfem_web',
 ]
 
 extlinks = {
@@ -57,6 +59,10 @@ extlinks = {
         "https://github.com/kinnala/scikit-fem/blob/{}/docs/examples/ex%s.py".format(previous_release),
         "example %s"
     ),
+    'wblink': {
+        "https://kinnala.github.io/skfem-demo/?src=kinnala/scikit-fem/docs/examples/ex%s.py",
+        "example %s"
+    },
 }
 
 autosummary_generate = True
@@ -93,7 +99,7 @@ pygments_style = 'sphinx'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'classic'
+html_theme = 'alabaster'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -121,35 +127,6 @@ html_static_path = []
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'scikit-femdoc'
-
-
-# -- Options for LaTeX output ------------------------------------------------
-
-latex_elements = {
-    # The paper size ('letterpaper' or 'a4paper').
-    #
-    # 'papersize': 'letterpaper',
-
-    # The font size ('10pt', '11pt' or '12pt').
-    #
-    # 'pointsize': '10pt',
-
-    # Additional stuff for the LaTeX preamble.
-    #
-    # 'preamble': '',
-
-    # Latex figure (float) alignment
-    #
-    # 'figure_align': 'htbp',
-}
-
-# Grouping the document tree into LaTeX files. List of tuples
-# (source start file, target name, title,
-#  author, documentclass [howto, manual, or own class]).
-latex_documents = [
-    (master_doc, 'scikit-fem.tex', 'scikit-fem Documentation',
-     author, 'manual'),
-]
 
 
 # -- Options for manual page output ------------------------------------------

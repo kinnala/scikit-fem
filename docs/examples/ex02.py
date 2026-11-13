@@ -87,14 +87,8 @@ D = np.hstack((
 x = solve(*condense(K, f, D=D))
 
 def visualize():
-    from skfem.visuals.matplotlib import draw, plot
-    ax = draw(m)
-    return plot(basis,
-                x,
-                ax=ax,
-                shading='gouraud',
-                colorbar=True,
-                nrefs=2)
+    from skfem.visuals.web import plot
+    return plot(basis, x, nrefs=2, cmap='jet')
 
 if __name__ == "__main__":
     visualize().show()

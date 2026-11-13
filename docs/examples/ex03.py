@@ -46,14 +46,15 @@ yi = basis.interpolate(y)
 sigma = sbasis.project(C(sym_grad(yi)))
 
 def visualize():
-    from skfem.visuals.matplotlib import plot, draw
-    M = MeshQuad(np.array(m.p + .5 * y[basis.nodal_dofs]), m.t)
-    ax = draw(M)
-    return plot(M,
-                sigma[sbasis.nodal_dofs[0]],
-                ax=ax,
-                colorbar=r'$\sigma_{xx}$',
-                shading='gouraud')
+    from skfem.visuals.web import plot
+    # sigma_xx on the deformed mesh; the viewer has a menu for the other
+    # components
+    return plot(basis,
+                {'sigma': (sbasis, sigma), 'u': y},
+                component=0,
+                deform='u',
+                deform_scale=.5,
+                cmap='jet')
 
 if __name__ == "__main__":
     visualize().show()
