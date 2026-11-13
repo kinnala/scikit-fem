@@ -24,7 +24,7 @@ triangular elements.
    from docs.examples.ex01 import visualize
    visualize()
 
-See the source code of :exlink:`01` for more information.
+Run :wblink:`01` interactively in the browser for more information.
 
 .. _ex07:
 
@@ -35,13 +35,14 @@ This example solves the Poisson problem :math:`-\Delta u = 1` with :math:`u=0`
 on the boundary using discontinuous Galerkin method.  The finite element basis
 is piecewise-quartic but discontinuous over the element edges.
 
-.. plot::
-   :caption: The solution of Example 7.
+.. skfem-web::
+   :height: 400
+   :caption: The solution of Example 7
 
    from docs.examples.ex07 import visualize
    visualize()
 
-See the source code of :exlink:`07` for more information.
+Run :wblink:`07` interactively in the browser for more information.
 
 Example 12: Postprocessing
 --------------------------
@@ -226,7 +227,7 @@ boundary conditions.
    from docs.examples.ex02 import visualize
    visualize()
 
-See the source code of :exlink:`02` for more information.
+Run :wblink:`02` interactively in the browser for more information.
 
 Example 3: Linear elastic eigenvalue problem
 --------------------------------------------
@@ -242,7 +243,7 @@ the displacement fixed on the left boundary.
    from docs.examples.ex03 import visualize
    visualize()
 
-See the source code of :exlink:`03` for more information.
+Run :wblink:`03` interactively in the browser for more information.
 
 Example 4: Linearized contact problem
 -------------------------------------
