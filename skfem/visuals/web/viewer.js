@@ -444,9 +444,8 @@ void main() {
       this.scene = s;
       this.sameKind = prevKind === s.mode + '|' + s.meta.mesh;
       // field / deformation menus
-      const fs = this.c('field'); fs.innerHTML = '';
+      const fs = this.c('field'); fs.innerHTML = ''; fs.add(new Option('off', '-1'));
       s.fields.forEach((f, i) => fs.add(new Option(f.name, String(i))));
-      if (!s.fields.length) fs.add(new Option('(none)', '-1'));
       const ds = this.c('deform'); ds.innerHTML = ''; ds.add(new Option('off', '-1'));
       s.fields.forEach((f, i) => { if (f.ncomp === g && g > 1) ds.add(new Option(f.name, String(i))); });
       this.setupRenderer();
@@ -485,7 +484,8 @@ void main() {
         st.clipFlip = !!o.clip_flip;
         st.defAmt = 0.5; st.defScaleUser = o.deform_scale;
         let fi = 0;
-        if (o.field !== undefined && o.field !== null) {
+        if (o.field === false) fi = -1;  // mesh only
+        else if (o.field !== undefined && o.field !== null) {
           const k = s.fields.findIndex((f) => f.name === o.field);
           if (k >= 0) fi = k;
         }
@@ -511,15 +511,6 @@ void main() {
       this.c('clipFlip').checked = st.clipFlip;
       this.c('field').value = String(st.field);
       this.c('deform').value = String(st.deform);
-      const show = (g2, on) => { this.q('[data-g="' + g2 + '"]').hidden = !on; };
-      const hasF = st.field >= 0;
-      show('field', s.fields.length > 1);
-      show('cmap', hasF && s.mode !== '1d');
-      show('edges', s.mode !== '1d' && s.mode !== 'curve');
-      show('warp', s.mode === '2d' && hasF);
-      show('deform', this.c('deform').options.length > 1 && s.mode !== '1d');
-      show('clip', s.mode === '3d' && !s.meta.no_clip);
-      show('view', s.mode !== '1d');
       this.bar.hidden = o.toolbar === false;
       if (o.theme === 'light' || o.theme === 'dark') this.root.dataset.theme = o.theme; else delete this.root.dataset.theme;
       this.fillComponents();
@@ -528,9 +519,10 @@ void main() {
       if (this.sw) this.sw.setLut(this.lut);
       this.computeValues();
       this.computeDisp();
+      this.showControls();
       if (!this.sameKind || fresh && o.view) {
         const v = this.view;
-        v.R = o.view && VIEWS[o.view] ? VIEWS[o.view]() : (s.mode === '3d' || s.mode === 'surf') ? VIEWS.iso() : (st.warp ? mul(rotX(-0.95), rotZ(-0.5)) : VIEWS.xy());
+        v.R = o.view && VIEWS[o.view] ? VIEWS[o.view]() : this.homeView();
         v.zoom = 1; v.panX = 0; v.panY = 0; v.x0 = s.lo[0]; v.x1 = s.hi[0];
         if (!(v.x1 > v.x0)) { v.x0 -= 0.5; v.x1 += 0.5; }
       }
@@ -541,6 +533,25 @@ void main() {
       this.drawColorbar();
       this.resize(true);
       this.requestRender();
+    }
+
+    showControls() {
+      const s = this.scene, hasF = this.st.field >= 0;
+      const show = (g2, on) => { this.q('[data-g="' + g2 + '"]').hidden = !on; };
+      // the field menu has 'off' to show the mesh only
+      show('field', s.fields.length > 0);
+      show('cmap', hasF && s.mode !== '1d');
+      show('edges', s.mode !== '1d' && s.mode !== 'curve');
+      show('warp', s.mode === '2d' && hasF);
+      show('deform', this.c('deform').options.length > 1 && s.mode !== '1d');
+      show('clip', s.mode === '3d' && !s.meta.no_clip);
+      // view directions only for geometry in 3D, including a warped 2D field
+      show('view', s.mode === '3d' || s.mode === 'surf' || (s.mode === 'curve' && s.gdim === 3) || this.warpHeight() > 0);
+    }
+    homeView() {
+      const s = this.scene;
+      if (s.mode === '3d' || s.mode === 'surf') return VIEWS.iso();
+      return this.warpHeight() ? mul(rotX(-0.95), rotZ(-0.5)) : VIEWS.xy();
     }
 
     fillComponents() {
@@ -1011,7 +1022,7 @@ void main() {
     // a planar mesh, or a curve in the plane, viewed from above: drag pans.  Deformation keeps
     // it in the plane because the displacement has as many components as the points.
     isFlat() {
-      const s = this.scene, planar = (s.mode === '2d' && !this.st.warp) || (s.mode === 'curve' && s.gdim === 2);
+      const s = this.scene, planar = (s.mode === '2d' && !this.warpHeight()) || (s.mode === 'curve' && s.gdim === 2);
       return planar && Math.abs(this.view.R[8] - 1) < 1e-9;
     }
 
@@ -1074,15 +1085,22 @@ void main() {
     wire() {
       const on = (name, ev, fn) => this.c(name).addEventListener(ev, fn);
       const regeo = () => { this.prepareGeometry(); this.requestRender(); };
-      on('field', 'change', (e) => { this.st.field = +e.target.value; this.st.vminUser = this.st.vmaxUser = undefined; this.fillComponents(); this.computeValues(); this.updateInfo(); this.drawColorbar(); this.fitView(false); this.requestRender(); });
+      on('field', 'change', (e) => {
+        const wh = this.warpHeight();
+        this.st.field = +e.target.value; this.st.vminUser = this.st.vmaxUser = undefined;
+        this.fillComponents(); this.computeValues(); this.showControls();
+        // the warp appears or disappears with the field
+        if (!wh !== !this.warpHeight()) { this.view.R = this.homeView(); this.fitView(true); } else this.fitView(false);
+        this.updateInfo(); this.drawColorbar(); this.requestRender();
+      });
       on('comp', 'change', (e) => { this.st.comp = e.target.value; this.st.vminUser = this.st.vmaxUser = undefined; this.computeValues(); this.updateInfo(); this.drawColorbar(); this.requestRender(); });
       on('cmap', 'change', (e) => { this.st.cmap = e.target.value; this.lut = buildLut(this.st.cmap); if (this.gl) this.gl.setLut(this.lut); if (this.sw) this.sw.setLut(this.lut); this.drawColorbar(); this.requestRender(); });
       on('bands', 'change', (e) => { this.st.bands = +e.target.value; this.drawColorbar(); this.requestRender(); });
       on('edges', 'change', (e) => { this.st.edges = e.target.checked; this.requestRender(); });
       on('warp', 'change', (e) => {
         this.st.warp = e.target.checked;
-        this.view.R = this.st.warp ? mul(rotX(-0.95), rotZ(-0.5)) : VIEWS.xy();
-        this.fitView(true); this.updateInfo(); this.requestRender();
+        this.view.R = this.homeView();
+        this.showControls(); this.fitView(true); this.updateInfo(); this.requestRender();
       });
       on('warpAmt', 'input', (e) => { this.st.warpAmt = e.target.value / 100; this.requestRender(); });
       on('deform', 'change', (e) => { this.st.deform = +e.target.value; this.computeDisp(); this.updateInfo(); this.requestRender(); });
@@ -1174,7 +1192,7 @@ void main() {
         cv.addEventListener('dblclick', () => {
           const s = this.scene, v = this.view;
           if (s.mode === '1d') { v.x0 = s.lo[0]; v.x1 = s.hi[0]; }
-          else { v.R = (s.mode === '3d' || s.mode === 'surf') ? VIEWS.iso() : this.st.warp ? mul(rotX(-0.95), rotZ(-0.5)) : VIEWS.xy(); this.fitView(true); }
+          else { v.R = this.homeView(); this.fitView(true); }
           this.updateInfo(); this.requestRender();
         });
       }

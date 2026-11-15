@@ -252,7 +252,8 @@ def plot(obj, x: Any = None, **kwargs) -> WebPlot:
         Height in pixels for Jupyter and :meth:`WebPlot.fragment`.
     field, component (optional)
         Initially visible field and its component (an integer index or
-        ``'magnitude'``).
+        ``'magnitude'``).  ``field=False`` shows the mesh only; the field
+        can be turned on and off in the toolbar.
     cmap (optional)
         One of ``'viridis'`` (default), ``'turbo'``, ``'jet'``,
         ``'coolwarm'``, ``'magma'``, ``'plasma'``, ``'grey'``.
