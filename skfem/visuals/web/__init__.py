@@ -270,7 +270,9 @@ def plot(obj, x: Any = None, **kwargs) -> WebPlot:
         vector field or a field name.  ``deform_scale`` sets the factor.
     clip, clip_position, clip_flip (optional)
         Three-dimensional meshes: initial clip plane normal (``'x'``,
-        ``'y'`` or ``'z'``) and relative position in ``[0, 1]``.
+        ``'y'`` or ``'z'``) and relative position in ``[0, 1]``.  The
+        mesh is cut exactly at the plane and the section is shown with
+        the field values interpolated onto it.
     view (optional)
         Initial view: ``'xy'``, ``'xz'``, ``'yz'`` or ``'iso'``.
     title (optional)

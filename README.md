@@ -225,6 +225,7 @@ with respect to documented and/or tested features.
 - Added: `ElementTriP` for high order triangle elements
 - Added: `ElementTriRT` for high order Raviart-Thomas elements
 - Added: `skfem.visuals.web`, an interactive WebGL2 viewer (with a canvas fallback); try `basis.plot(u, 'web').show()`
+- Added: `Mesh.boundary_tags` and `Mesh.subdomain_tags` for visualizing named boundaries and subdomains, e.g. `plot(*mesh.boundary_tags())`
 - Added: `Mesh.distributed` (and `skfem.distributed.distribute`) for distributed assembly and solve using petsc4py (see ex53 and ex54)
 - Added: `solver_petsc` for solving SciPy or PETSc systems using PETSc linear solvers, see ex52
 - Changed: `Mesh.boundary_facets` excludes the interfaces between processes for distributed meshes

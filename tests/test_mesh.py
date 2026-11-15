@@ -1110,3 +1110,70 @@ def test_mesh_input_types():
 def test_meshline_with_defaults():
     m = MeshLine().refined(2).with_defaults()
     assert set(m.boundaries) == {'left', 'right'}
+
+
+@pytest.mark.parametrize(
+    "m,ntrace,mtype",
+    [
+        (MeshTri().refined(2), 2, MeshLine),
+        (MeshQuad().refined(2), 2, MeshLine),
+        (MeshTet().refined(1), 3, MeshTri),
+        (MeshHex().refined(1), 4, MeshQuad),
+    ]
+)
+def test_boundary_tags(m, ntrace, mtype):
+    m = m.with_defaults()
+    names = list(m.boundaries)
+    basis, y = m.boundary_tags()
+    assert isinstance(basis.mesh, mtype)
+    assert basis.mesh.t.shape[0] == ntrace
+    assert len(y) == basis.N == len(m.boundary_facets())
+    # each trace element has the value of its boundary
+    mid = basis.mesh.p[:, basis.mesh.t].mean(axis=1)
+    for i, k in enumerate(names):
+        fmid = m.p[:, m.facets[:, m.boundaries[k]]].mean(axis=1)
+        sel = np.nonzero(y == i + 1)[0]
+        assert len(sel) == len(m.boundaries[k])
+        assert_array_equal(np.sort(mid[:, sel].round(8), axis=1),
+                           np.sort(fmid.round(8), axis=1))
+    # only the given boundaries
+    basis, y = m.boundary_tags(names[1:2])
+    assert len(y) == len(m.boundaries[names[1]])
+    assert (y == 1).all()
+
+
+def test_boundary_tags_untagged_interior():
+    m = MeshTri().refined(3).with_boundaries({'left': lambda x: x[0] == 0})
+    inner = m.facets_satisfying(lambda x: x[0] == .5, boundaries_only=False)
+    m = m.with_boundaries({'inner': inner}, boundaries_only=False)
+    basis, y = m.boundary_tags()
+    nb = len(m.boundary_facets())
+    assert len(y) == nb + len(inner)
+    assert (y == 0).sum() == nb - len(m.boundaries['left'])
+    assert (y == 2).sum() == len(inner)
+
+
+def test_subdomain_tags():
+    m = MeshTet().refined(2).with_subdomains({
+        'a': lambda x: x[0] < .5,
+        'b': lambda x: x[1] < .5,
+    })
+    basis, y = m.subdomain_tags()
+    assert basis.N == m.nelements
+    # 'b' overrides 'a'
+    assert_array_equal(np.nonzero(y == 2)[0], m.subdomains['b'])
+    assert_array_equal(np.nonzero(y == 1)[0],
+                       np.setdiff1d(m.subdomains['a'], m.subdomains['b']))
+    assert (y[np.setdiff1d(np.arange(m.nelements),
+                           np.union1d(m.subdomains['a'],
+                                      m.subdomains['b']))] == 0).all()
+    basis, y = m.subdomain_tags(['a'])
+    assert_array_equal(np.nonzero(y)[0], m.subdomains['a'])
+
+
+def test_tags_plot():
+    from skfem.visuals.web import plot
+    m = MeshTri().refined(2).with_defaults()
+    assert plot(*m.boundary_tags()).payload['dim'] == 1
+    assert plot(*m.with_subdomains(
+        {'a': lambda x: x[0] < .5}).subdomain_tags()).html()

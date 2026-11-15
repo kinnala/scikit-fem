@@ -438,6 +438,8 @@ void main() {
       }
       s.sx = new Float32Array(n); s.sy = new Float32Array(n); s.sz = new Float32Array(n);
       s.V = new Float32Array(n); s.D = new Float32Array(n * 3);
+      // vertices n0.. are created by the clipping plane on the edges (cutA, cutB) at parameter cutT
+      s.n0 = n; s.cutA = new Int32Array(0); s.cutB = new Int32Array(0); s.cutT = new Float32Array(0);
       const prevKind = this.scene ? this.scene.mode + '|' + this.scene.meta.mesh : null;
       this.scene = s;
       this.sameKind = prevKind === s.mode + '|' + s.meta.mesh;
@@ -564,7 +566,7 @@ void main() {
     }
 
     computeValues() {
-      const s = this.scene, st = this.st, V = s.V, n = s.n;
+      const s = this.scene, st = this.st, V = s.V, n = s.n0;
       const f = st.field >= 0 ? s.fields[st.field] : null;
       s.hasField = !!f;
       if (!f) { V.fill(0); st.vmin = 0; st.vmax = 1; }
@@ -584,13 +586,14 @@ void main() {
         st.dmin = r[0]; st.dmax = r[1];
         if (!(vmax > vmin)) { const c = vmin, h = 0.5 * (Math.abs(c) || 1); vmin = c - h; vmax = c + h; }
         st.vmin = vmin; st.vmax = vmax;
+        this.interpCut(V, 1);
       }
       if (this.gl) this.gl.setValues(V);
       this.projDirty = true;
     }
 
     computeDisp() {
-      const s = this.scene, st = this.st, Dd = s.D, g = s.gdim, n = s.n;
+      const s = this.scene, st = this.st, Dd = s.D, g = s.gdim, n = s.n0;
       Dd.fill(0); st.dispMax = 0;
       if (st.deform >= 0) {
         const f = s.fields[st.deform].data;
@@ -601,6 +604,7 @@ void main() {
           if (a > m) m = a;
         }
         st.dispMax = Math.sqrt(m);
+        this.interpCut(Dd, 3);
       }
       if (this.gl) this.gl.setDisp(Dd);
       this.projDirty = true;
@@ -616,27 +620,101 @@ void main() {
     warpHeight() { const s = this.scene; return s.mode === '2d' && this.st.warp && s.hasField ? this.st.warpAmt * 2 * s.radius : 0; }
 
     /* ----- geometry: visible triangles and wireframe ----- */
+    // values at the vertices created by the clipping plane: linear interpolation along sub-cell edges
+    interpCut(A, k) {
+      const s = this.scene, ca = s.cutA, cb = s.cutB, ct = s.cutT, n0 = s.n0;
+      for (let m = 0; m < ca.length; m++) {
+        const a = ca[m] * k, b = cb[m] * k, t = ct[m], o = (n0 + m) * k;
+        for (let j = 0; j < k; j++) A[o + j] = A[a + j] + t * (A[b + j] - A[a + j]);
+      }
+    }
+    setCut(ca, cb, ct) {
+      const s = this.scene, n = s.n0 + ca.length;
+      s.cutA = Int32Array.from(ca); s.cutB = Int32Array.from(cb); s.cutT = Float32Array.from(ct);
+      if (s.n !== n) {
+        const grow = (A, k) => { const B = new Float32Array(n * k); B.set(A.subarray(0, s.n0 * k)); return B; };
+        s.P3 = grow(s.P3, 3); s.V = grow(s.V, 1); s.D = grow(s.D, 3);
+        s.sx = new Float32Array(n); s.sy = new Float32Array(n); s.sz = new Float32Array(n);
+        s.n = n;
+      }
+      this.interpCut(s.P3, 3); this.interpCut(s.V, 1); this.interpCut(s.D, 3);
+      if (this.gl) { this.gl.setPositions(s.P3); this.gl.setValues(s.V); this.gl.setDisp(s.D); }
+      this.projDirty = true;
+    }
+    // per sub-cell face: does it lie on the boundary of its element (not shared by two sub-cells)
+    elementFaces() {
+      const s = this.scene;
+      if (s.ebf) return s.ebf;
+      const faces = s.meta.faces, nf = faces.length, nvc = s.nvc, nsub = s.nsub, nloc = s.nloc, C = s.C;
+      const ebf = new Uint8Array(s.nel * nsub * nf), cnt = new Map(), key = (c, f) => {
+        const fl = faces[f], o = ((c / nsub) | 0) * nloc, so = fl.map((j) => C[c * nvc + j] - o).sort((x, y) => x - y);
+        return so[0] + nloc * (so[1] + nloc * so[2]);
+      };
+      for (let e = 0; e < s.nel; e++) {
+        cnt.clear();
+        for (let c = e * nsub; c < (e + 1) * nsub; c++) for (let f = 0; f < nf; f++) { const k = key(c, f); cnt.set(k, (cnt.get(k) || 0) + 1); }
+        for (let c = e * nsub; c < (e + 1) * nsub; c++) for (let f = 0; f < nf; f++) ebf[c * nf + f] = cnt.get(key(c, f)) === 1 ? 1 : 0;
+      }
+      return (s.ebf = ebf);
+    }
     prepareGeometry() {
       const s = this.scene, st = this.st;
       if (s.mode === '1d') return;
-      const nvc = s.nvc, nsub = s.nsub, C = s.C, ncells = C.length / nvc;
-      const keep = new Uint8Array(s.nel).fill(1);
-      if (s.mode === '3d' && st.clipAxis >= 0) {
-        const a = st.clipAxis, lo = s.lo[a], span = (s.hi[a] - lo) || 1;
-        for (let e = 0; e < s.nel; e++) {
-          const t = (s.cent[e * 3 + a] - lo) / span;
-          keep[e] = st.clipFlip ? (t >= st.clipPos ? 1 : 0) : (t <= st.clipPos ? 1 : 0);
+      const nvc = s.nvc, nsub = s.nsub, C = s.C, ncells = C.length / nvc, n0 = s.n0, Wd = s.Wd, P = s.P3;
+      const clip = s.mode === '3d' && st.clipAxis >= 0;
+      // signed distance to the clipping plane (undeformed configuration, in units of the bounding box);
+      // the part d <= 0 is shown
+      let dist = null;
+      const cls = new Uint8Array(ncells);  // 0 inside, 1 cut by the plane, 2 outside
+      let maxW = 0; for (let i = 0; i < Wd.length; i++) if (Wd[i] > maxW) maxW = Wd[i];
+      const cutA = [], cutB = [], cutT = [], cutW = [], cutMap = new Map(), weldMap = new Map();
+      const W = (i) => i < n0 ? Wd[i] : cutW[i - n0];
+      // vertex at the intersection of the edge (i, j) and the plane, dist[i] and dist[j] of opposite sign
+      const cross = (i, j) => {
+        if (i > j) { const k = i; i = j; j = k; }
+        const key = i * n0 + j;
+        let v = cutMap.get(key);
+        if (v === undefined) {
+          v = n0 + cutA.length; cutMap.set(key, v);
+          cutA.push(i); cutB.push(j); cutT.push(dist[i] / (dist[i] - dist[j]));
+          // welded id: coincident cut vertices of neighbouring elements share it
+          const wi = Wd[i], wj = Wd[j], wk = wi < wj ? wi + (maxW + 1) * wj : wj + (maxW + 1) * wi;
+          let w = weldMap.get(wk);
+          if (w === undefined) { w = maxW + 1 + weldMap.size; weldMap.set(wk, w); }
+          cutW.push(w);
+        }
+        return v;
+      };
+      const pos = (i, k) => i < n0 ? P[3 * i + k] : P[3 * cutA[i - n0] + k] + cutT[i - n0] * (P[3 * cutB[i - n0] + k] - P[3 * cutA[i - n0] + k]);
+      if (clip) {
+        const a = st.clipAxis, lo = s.lo[a], span = (s.hi[a] - lo) || 1, sg = st.clipFlip ? -1 : 1;
+        dist = new Float64Array(n0);
+        for (let i = 0; i < n0; i++) dist[i] = sg * ((P[3 * i + a] - lo) / span - st.clipPos);
+        for (let c = 0; c < ncells; c++) {
+          let mn = Infinity, mx = -Infinity;
+          for (let j = 0; j < nvc; j++) { const d = dist[C[c * nvc + j]]; if (d < mn) mn = d; if (d > mx) mx = d; }
+          cls[c] = mx <= 0 ? 0 : mn >= 0 ? 2 : 1;
         }
       }
-      const tris = [];
+      // Sutherland-Hodgman: the part d <= 0 of a polygon
+      const clipPoly = (poly) => {
+        const out = [], m = poly.length;
+        for (let k = 0; k < m; k++) {
+          const p = poly[k], q = poly[(k + 1) % m], dp = dist[p], dq = dist[q];
+          if (dp <= 0) out.push(p);
+          if ((dp < 0 && dq > 0) || (dp > 0 && dq < 0)) out.push(cross(p, q));
+        }
+        return out;
+      };
+      const tris = [], capEdges = [];
+      const fan = (poly) => { for (let j = 1; j + 1 < poly.length; j++) tris.push(poly[0], poly[j], poly[j + 1]); };
       if (s.mode === '3d') {
-        const Wd = s.Wd, faces = s.meta.faces;
-        let maxW = 0; for (let i = 0; i < Wd.length; i++) if (Wd[i] > maxW) maxW = Wd[i];
+        const faces = s.meta.faces, nf = faces.length;
         const N = maxW + 1, big = N > 200000;
         const cnt = new Map(), ids = [0, 0, 0, 0];
         for (let c = 0; c < ncells; c++) {
-          if (!keep[(c / nsub) | 0]) continue;
-          for (let f = 0; f < faces.length; f++) {
+          if (cls[c] === 2) continue;
+          for (let f = 0; f < nf; f++) {
             const fl = faces[f];
             for (let j = 0; j < fl.length; j++) ids[j] = Wd[C[c * nvc + fl[j]]];
             const so = ids.slice(0, fl.length).sort((x, y) => x - y);
@@ -647,36 +725,93 @@ void main() {
         }
         for (const v of cnt.values()) {
           if (v < 0) continue;
-          const c = Math.floor(v / 8), fl = faces[v % 8], p0 = C[c * nvc + fl[0]];
-          for (let j = 1; j + 1 < fl.length; j++) tris.push(p0, C[c * nvc + fl[j]], C[c * nvc + fl[j + 1]]);
+          const c = Math.floor(v / 8), poly = faces[v % 8].map((j) => C[c * nvc + j]);
+          fan(cls[c] === 1 ? clipPoly(poly) : poly);
+        }
+        if (clip) {
+          // the cap: intersection of each cut sub-cell with the plane, a convex polygon
+          if (!s.cellEdges) {
+            const seen = new Set(); s.cellEdges = [];
+            for (const fl of faces) for (let j = 0; j < fl.length; j++) {
+              const p = fl[j], q = fl[(j + 1) % fl.length], k = Math.min(p, q) * 64 + Math.max(p, q);
+              if (!seen.has(k)) { seen.add(k); s.cellEdges.push([p, q]); }
+            }
+          }
+          const ebf = this.elementFaces(), a = st.clipAxis, u = (a + 1) % 3, w = (a + 2) % 3;
+          const section = (cyc) => {
+            // vertices on the plane and crossings of the edges (cyc[k], cyc[k + 1]), unique
+            const pts = [];
+            const add = (i) => { if (pts.indexOf(i) < 0) pts.push(i); };
+            for (let k = 0; k < cyc.length; k++) {
+              const e = cyc[k], p = e[0], q = e[1];
+              if (dist[p] === 0) add(p);
+              if (dist[q] === 0) add(q);
+              if ((dist[p] < 0 && dist[q] > 0) || (dist[p] > 0 && dist[q] < 0)) add(cross(p, q));
+            }
+            return pts;
+          };
+          for (let c = 0; c < ncells; c++) {
+            if (cls[c] !== 1) continue;
+            const o = c * nvc;
+            const pts = section(s.cellEdges.map((e) => [C[o + e[0]], C[o + e[1]]]));
+            if (pts.length >= 3) {
+              let cu = 0, cw = 0;
+              for (const i of pts) { cu += pos(i, u); cw += pos(i, w); }
+              cu /= pts.length; cw /= pts.length;
+              const ang = new Map(pts.map((i) => [i, Math.atan2(pos(i, w) - cw, pos(i, u) - cu)]));
+              pts.sort((x, y) => ang.get(x) - ang.get(y));
+              fan(pts);
+            }
+            // element edges on the cap: element faces intersected with the plane
+            for (let f = 0; f < nf; f++) {
+              if (!ebf[c * nf + f]) continue;
+              const fl = faces[f], seg = section(fl.map((j, k) => [C[o + j], C[o + fl[(k + 1) % fl.length]]]));
+              if (seg.length < 2) continue;
+              let bi = 0, bj = 1, bd = -1;
+              for (let i = 0; i < seg.length; i++) for (let j = i + 1; j < seg.length; j++) {
+                let dd = 0; for (let k = 0; k < 3; k++) { const t = pos(seg[i], k) - pos(seg[j], k); dd += t * t; }
+                if (dd > bd) { bd = dd; bi = i; bj = j; }
+              }
+              if (bd > 0) capEdges.push(seg[bi], seg[bj]);
+            }
+          }
         }
       } else if (s.dim === 2) {
         const poly = s.meta.poly;
-        for (let c = 0; c < ncells; c++) {
-          const p0 = C[c * nvc + poly[0]];
-          for (let j = 1; j + 1 < poly.length; j++) tris.push(p0, C[c * nvc + poly[j]], C[c * nvc + poly[j + 1]]);
-        }
+        for (let c = 0; c < ncells; c++) fan(poly.map((j) => C[c * nvc + j]));
       }
       s.tris = new Uint32Array(tris);
       let edges = [];
       if (s.mode === 'curve') edges = Array.from(C);
       else {
-        const E = s.E, epe = (E.length / 2) / s.nel, Wd = s.Wd, seen = new Set();
-        let N = 0; for (let i = 0; i < Wd.length; i++) if (Wd[i] >= N) N = Wd[i] + 1;
-        // in 3D only draw edges of visible faces: endpoints on the visible surface
-        let onSurf = null;
-        if (s.mode === '3d') { onSurf = new Uint8Array(N); for (let i = 0; i < tris.length; i++) onSurf[Wd[tris[i]]] = 1; }
-        for (let k = 0; k < E.length / 2; k++) {
-          if (!keep[(k / epe) | 0]) continue;
-          const a = E[2 * k], b = E[2 * k + 1], wa = Wd[a], wb = Wd[b];
-          if (onSurf && !(onSurf[wa] && onSurf[wb])) continue;
-          const key = wa < wb ? wa * N + wb : wb * N + wa;
-          if (seen.has(key)) continue;
+        const E = s.E, seen = new Set();
+        const N = maxW + 2 + weldMap.size;
+        const push = (a, b) => {
+          const wa = W(a), wb = W(b), key = wa < wb ? wa * N + wb : wb * N + wa;
+          if (wa === wb || seen.has(key)) return;
           seen.add(key);
           edges.push(a, b);
+        };
+        // in 3D only draw edges of visible faces: endpoints on the visible surface
+        let onSurf = null;
+        if (s.mode === '3d') { onSurf = new Uint8Array(N); for (let i = 0; i < tris.length; i++) onSurf[W(tris[i])] = 1; }
+        for (let k = 0; k < E.length / 2; k++) {
+          let a = E[2 * k], b = E[2 * k + 1];
+          if (clip) {
+            if (dist[a] > 0 && dist[b] > 0) continue;
+            if (dist[a] > 0 || dist[b] > 0) {
+              if (dist[a] > 0) { const t = a; a = b; b = t; }
+              if (dist[a] === 0 || !onSurf[W(a)]) continue;
+              b = cross(a, b);
+            }
+          }
+          if (onSurf && !(onSurf[W(a)] && onSurf[W(b)])) continue;
+          push(a, b);
         }
+        for (let k = 0; k < capEdges.length; k += 2) push(capEdges[k], capEdges[k + 1]);
       }
       s.edgesIdx = new Uint32Array(edges);
+      if (s.mode === '3d' && (cutA.length || s.n !== n0)) this.setCut(cutA, cutB, cutT);
       if (this.useGL) { this.gl.setTris(s.tris); this.gl.setEdges(s.edgesIdx); }
     }
 
@@ -873,9 +1008,12 @@ void main() {
         const sp = this.doc.createElement('span'); sp.style.top = (i * 25) + '%'; sp.textContent = fmt(v); ticks.appendChild(sp);
       }
     }
-    // a planar mesh viewed from above: drag pans.  Deformation keeps the mesh in the plane
-    // because the displacement has as many components as the mesh has dimensions.
-    isFlat() { const s = this.scene; return s.mode === '2d' && !this.st.warp && Math.abs(this.view.R[8] - 1) < 1e-9; }
+    // a planar mesh, or a curve in the plane, viewed from above: drag pans.  Deformation keeps
+    // it in the plane because the displacement has as many components as the points.
+    isFlat() {
+      const s = this.scene, planar = (s.mode === '2d' && !this.st.warp) || (s.mode === 'curve' && s.gdim === 2);
+      return planar && Math.abs(this.view.R[8] - 1) < 1e-9;
+    }
 
     /* ----- export ----- */
     png(opts) {
