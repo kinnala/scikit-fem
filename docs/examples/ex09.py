@@ -85,11 +85,11 @@ for pc in preconditioners:
     x[I] = solve(Aint, bint, solver=solver_iter_pcg(verbose=True, M=pc))
 
 
-if __name__ == "__main__":
-    from os.path import splitext
-    from sys import argv
+def visualize():
+    return basis.plot(x, 'web', clip='x', cmap='magma', edges=False)
 
-    # interactive plot in the browser; use the clip tool to see inside
-    basis.plot(x, 'web', clip='x').show()
+if __name__ == "__main__":
+    visualize().show()
+
     # preferred: save to vtk for visualization in Paraview
     #m.save(splitext(argv[0])[0] + ".vtk", point_data{'potential': x})

@@ -1183,6 +1183,105 @@ class Mesh:
             t
         ), facets
 
+    @staticmethod
+    def _p0(refdom):
+        from ..element import (ElementLineP0, ElementTriP0, ElementQuad0,
+                               ElementTetP0, ElementHex0)
+        from ..refdom import RefLine, RefTri, RefQuad, RefTet, RefHex
+        from .mesh_line_1 import MeshLine1
+        from .mesh_tri_1 import MeshTri1
+        from .mesh_quad_1 import MeshQuad1
+        from .mesh_tet_1 import MeshTet1
+        from .mesh_hex_1 import MeshHex1
+        types = {
+            RefLine: (MeshLine1, ElementLineP0),
+            RefTri: (MeshTri1, ElementTriP0),
+            RefQuad: (MeshQuad1, ElementQuad0),
+            RefTet: (MeshTet1, ElementTetP0),
+            RefHex: (MeshHex1, ElementHex0),
+        }
+        if refdom not in types:
+            raise NotImplementedError("Reference domain {} not supported."
+                                      .format(refdom))
+        return types[refdom]
+
+    @staticmethod
+    def _label(n, tags, names):
+        y = np.zeros(n)
+        for i, name in enumerate(names):
+            y[tags[name]] = i + 1
+        return y
+
+    def boundary_tags(self, names=None):
+        """Visualize named boundaries as a piecewise constant field.
+
+        The facets form a mesh of one dimension lower, e.g. ``MeshLine1`` for
+        ``MeshTri1`` or ``MeshTri1`` for ``MeshTet1``.  Each of its elements
+        gets the value ``i + 1`` if it belongs to the boundary ``names[i]``
+        and ``0`` if it has no name.
+        A facet in several boundaries gets the value of the last one.
+        For example, ``plot(*m.boundary_tags())``.
+
+        Parameters
+        ----------
+        names
+            Optional list of boundary names.  By default all of
+            ``self.boundaries`` and the facets on the boundary of the domain
+            without a name; otherwise only the facets of the given
+            boundaries.
+
+        Returns
+        -------
+        CellBasis
+            A piecewise constant basis on the facets.
+        ndarray
+            The values.
+
+        """
+        from ..assembly import Basis
+        tags = self.boundaries if self.boundaries is not None else {}
+        facets = [self.boundary_facets()] if names is None else []
+        names = list(tags) if names is None else list(names)
+        facets = np.unique(np.concatenate(facets
+                                          + [tags[k] for k in names]))
+        mtype, elem = self._p0(self.brefdom)
+        mesh, facets = self.trace(facets, mtype=mtype)
+        ix = np.zeros(self.facets.shape[1], dtype=np.int64) - 1
+        ix[facets] = np.arange(len(facets))
+        return (Basis(mesh, elem()),
+                self._label(len(facets),
+                            {k: ix[tags[k]] for k in names},
+                            names))
+
+    def subdomain_tags(self, names=None):
+        """Visualize named subdomains as a piecewise constant field.
+
+        Each element gets the value ``i + 1`` if it belongs to the subdomain
+        ``names[i]`` and ``0`` if it has no name.  An element in several
+        subdomains gets the value of the last one.  For example,
+        ``plot(*m.subdomain_tags())``.
+
+        Parameters
+        ----------
+        names
+            Optional list of subdomain names; by default all of
+            ``self.subdomains``.
+
+        Returns
+        -------
+        CellBasis
+            A piecewise constant basis on the mesh.
+        ndarray
+            The values.
+
+        """
+        from ..assembly import Basis
+        tags = self.subdomains if self.subdomains is not None else {}
+        names = list(tags) if names is None else list(names)
+        _, elem = self._p0(self.refdom)
+        return (Basis(self, elem()),
+                self._label(self.nelements, tags, names))
+
     def restrict(self,
                  elements,
                  return_mapping=False,

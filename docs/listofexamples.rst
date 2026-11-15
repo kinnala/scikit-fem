@@ -24,7 +24,8 @@ triangular elements.
    from docs.examples.ex01 import visualize
    visualize()
 
-Run :wblink:`01` interactively in the browser for more information.
+See the source code of :exlink:`01` for more information.
+You can also run :wblink:`01` interactively in your browser.
 
 .. _ex07:
 
@@ -42,7 +43,8 @@ is piecewise-quartic but discontinuous over the element edges.
    from docs.examples.ex07 import visualize
    visualize()
 
-Run :wblink:`07` interactively in the browser for more information.
+See the source code of :exlink:`07` for more information.
+You can also run :wblink:`07` interactively in your browser.
 
 Example 12: Postprocessing
 --------------------------
@@ -104,7 +106,8 @@ condition :math:`u(0)=u(1)=0`.
    from docs.examples.ex15 import visualize
    visualize()
 
-Run :wblink:`15` interactively in the browser for more information.
+See the source code of :exlink:`15` for more information.
+You can also run :wblink:`15` interactively in your browser.
 
 
 Example 9: Three-dimensional Poisson equation
@@ -114,18 +117,20 @@ This example solves :math:`-\Delta u = 1` with :math:`u=0` on the boundary
 using linear tetrahedral elements and a preconditioned conjugate gradient
 method.
 
+.. skfem-web::
+   :height: 400
+   :caption: The solution of Example 9
+
+   from docs.examples.ex09 import visualize
+   visualize()
+
 .. note::
 
-   This example will make use of the external packages `PyAMG
-   <https://pypi.org/project/pyamg/>`__ or `pyamgcl
-   <https://pypi.org/project/pyamgcl/>`__, if installed.
-
-.. figure:: https://user-images.githubusercontent.com/973268/93183072-33abfb80-f743-11ea-9076-1324cbf28531.png
-
-   The solution of Example 9 on a cross-section of the tetrahedral mesh.  The
-   figure was created using `ParaView <https://www.paraview.org/>`__.
+   This example will make use of the external package `PyAMG
+   <https://pypi.org/project/pyamg/>`__ if installed.
 
 See the source code of :exlink:`09` for more information.
+You can also run :wblink:`09` interactively in your browser.
 
 Example 22: Adaptive Poisson equation
 -------------------------------------
@@ -230,7 +235,8 @@ boundary conditions.
    from docs.examples.ex02 import visualize
    visualize()
 
-Run :wblink:`02` interactively in the browser for more information.
+See the source code of :exlink:`02` for more information.
+You can also run :wblink:`02` interactively in your browser.
 
 Example 3: Linear elastic eigenvalue problem
 --------------------------------------------
