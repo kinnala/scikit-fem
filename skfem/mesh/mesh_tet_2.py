@@ -58,7 +58,7 @@ class MeshTet2(MeshTet1):
         return replace(M, doflocs=doflocs)
 
     def _uniform(self):
-        return MeshTet2.from_mesh(MeshTet1.from_mesh(self).refined())
+        return self._refined_via(MeshTet1)
 
     def _adaptive(self, marked):
-        return MeshTet2.from_mesh(MeshTet1.from_mesh(self).refined(marked))
+        return self._refined_via(MeshTet1, marked)

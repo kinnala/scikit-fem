@@ -1177,3 +1177,164 @@ def test_tags_plot():
     assert plot(*m.boundary_tags()).payload['dim'] == 1
     assert plot(*m.with_subdomains(
         {'a': lambda x: x[0] < .5}).subdomain_tags()).html()
+
+
+def _tag_mesh(m):
+    """Tag a boundary, an oriented interior boundary and a subdomain."""
+    return (m.with_boundaries({'left': lambda x: np.isclose(x[0], 0)})
+             .with_boundaries({
+                 'mid': m.facets_satisfying(lambda x: np.isclose(x[0], .5),
+                                            normal=np.eye(m.dim())[0]),
+             }, boundaries_only=False)
+             .with_subdomains({'a': lambda x: x[1] < .5}))
+
+
+def _check_tags(m):
+    from skfem.generic_utils import OrientedBoundary
+    assert_array_equal(np.sort(np.asarray(m.boundaries['left'])),
+                       m.facets_satisfying(lambda x: np.isclose(x[0], 0),
+                                           boundaries_only=True))
+    assert_array_equal(np.sort(np.asarray(m.boundaries['mid'])),
+                       m.facets_satisfying(lambda x: np.isclose(x[0], .5)))
+    assert_array_equal(np.sort(m.subdomains['a']),
+                       m.elements_satisfying(lambda x: x[1] < .5))
+    assert isinstance(m.boundaries['mid'], OrientedBoundary)
+    # the traces are taken from the left, i.e. the normals point to +x
+    n = FacetBasis(m, type(m).elem(), facets='mid').normals
+    np.testing.assert_allclose(np.asarray(n)[0], 1.)
+
+
+TAGGED_MESHES = [
+    MeshTri().refined(1),
+    MeshQuad().refined(1),
+    MeshTet().refined(1),
+    MeshHex().refined(1),
+    MeshTri2.from_mesh(MeshTri().refined(1)),
+    MeshQuad2.from_mesh(MeshQuad().refined(1)),
+    MeshTet2.from_mesh(MeshTet().refined(1)),
+    MeshHex2.from_mesh(MeshHex().refined(1)),
+]
+
+
+@pytest.mark.parametrize("m", TAGGED_MESHES)
+def test_refined_keeps_tags_and_orientation(m):
+    m = _tag_mesh(m)
+    _check_tags(m)
+    _check_tags(m.refined())
+    _check_tags(m.refined(2))
+    if isinstance(m, (MeshTri, MeshTet, MeshTri2, MeshTet2)):
+        _check_tags(m.refined(np.arange(0, m.nelements, 3)))
+        _check_tags(m.refined(np.arange(0, m.nelements, 3))
+                    .refined(np.arange(0, m.nelements, 2)))
+
+
+@pytest.mark.parametrize("m", TAGGED_MESHES[:4])
+def test_restrict_and_remove_nodes_keep_orientation(m):
+    m = _tag_mesh(m)
+    _check_tags(m.refined().restrict(lambda x: x[1] < .75))
+    _check_tags(m.remove_unused_nodes())
+    _check_tags(m.remove_duplicate_nodes())
+
+
+@pytest.mark.parametrize("m", TAGGED_MESHES[:4])
+def test_save_load_keeps_orientation(m, tmp_path):
+    from skfem.io.json import to_file, from_file
+    m = _tag_mesh(m)
+    m.save_npz(tmp_path / "mesh.npz")
+    _check_tags(type(m).load_npz(tmp_path / "mesh.npz"))
+    m.save_npy(tmp_path / "npy")
+    _check_tags(type(m).load_npy(tmp_path / "npy"))
+    to_file(m, tmp_path / "mesh.json")
+    _check_tags(from_file(tmp_path / "mesh.json"))
+    _check_tags(type(m).from_dict(m.to_dict()))
+
+
+def test_replace_keeps_topology_cache():
+    m = MeshTet().refined(2)
+    m.facets, m.edges, m.f2t
+    m2 = (m.with_boundaries({'left': lambda x: x[0] == 0})
+           .with_subdomains({'a': lambda x: x[0] < .5})
+           .with_paths({'a': lambda x: (x[0] == 0) & (x[1] == 0)})
+           .translated((1., 0., 0.)))
+    for attr in ('_facets', '_t2f', '_f2t', '_edges', '_t2e'):
+        assert getattr(m2, attr) is getattr(m, attr)
+
+
+def test_restrict_without_tags_skips_facets():
+    m = MeshTet().refined(2)
+    m.restrict(lambda x: x[0] < .5)
+    # the facets of the original mesh were not needed
+    assert '_facets' not in m.__dict__
+
+
+def test_adaptive_tet_keeps_subdomains():
+    from skfem import ElementTetP0
+
+    def moments(m, name):
+        basis = Basis(m, ElementTetP0(), elements=name)
+        return np.array([Functional(lambda w: 1. + 0. * w.x[0])
+                         .assemble(basis)]
+                        + [Functional(lambda w, i=i: w.x[i])
+                           .assemble(basis) for i in range(3)])
+
+    # note: the plane z = .5 is not conforming in this mesh
+    m = MeshTet().refined(2).with_subdomains({
+        'a': lambda x: x[0] < .5,
+        'b': lambda x: x[2] > .5,
+    })
+    expected = {k: moments(m, k) for k in m.subdomains}
+    for _ in range(3):
+        m = m.refined(m.elements_satisfying(
+            lambda x: np.linalg.norm(x, axis=0) < .6))
+        # bisection keeps the volume and the centroid of each subdomain
+        for k in m.subdomains:
+            np.testing.assert_allclose(moments(m, k), expected[k])
+        assert_array_equal(m.subdomains['a'],
+                           m.elements_satisfying(lambda x: x[0] < .5))
+
+
+@pytest.mark.parametrize(
+    "m,marked",
+    [
+        (MeshTet().refined(1), None),
+        (MeshTet().refined(1), np.arange(3)),
+        (MeshTri().refined(1), np.arange(3)),
+        (MeshHex().refined(1), None),
+        (MeshQuad().refined(1), None),
+        (MeshTet2.from_mesh(MeshTet().refined(1)), None),
+    ]
+)
+def test_refined_skip_tags(m, marked, caplog):
+    m = m.with_defaults().with_subdomains({'a': lambda x: x[0] < .5})
+    if m.dim() == 3:
+        m = m.with_paths({'p': lambda x: (x[0] == 0) & (x[1] == 0)})
+    args = (1,) if marked is None else (marked,)
+    full = m.refined(*args)
+    assert full.boundaries and full.subdomains
+    for kw in ('skip_boundaries', 'skip_subdomains', 'skip_paths'):
+        caplog.clear()
+        r = m.refined(*args, **{kw: True})
+        # the requested tags are dropped without warning
+        assert "invalidated" not in caplog.text
+        assert bool(r.boundaries) == (kw != 'skip_boundaries')
+        assert bool(r.subdomains) == (kw != 'skip_subdomains')
+        if m.dim() == 3:
+            assert bool(r.paths) == (kw != 'skip_paths')
+        # the others are as without skipping
+        for name in ('boundaries', 'subdomains', 'paths'):
+            if getattr(r, name):
+                for k in getattr(r, name):
+                    assert_array_equal(getattr(r, name)[k],
+                                       getattr(full, name)[k])
+        # the original mesh is untouched
+        assert m.boundaries and m.subdomains
+
+
+def test_meshline_uniform_refine_keeps_subdomains():
+    m = (MeshLine(np.linspace(0, 1, 5))
+         .with_subdomains({'a': lambda x: x[0] < .5}))
+    for r in (m.refined(), m.refined(3)):
+        assert_array_equal(r.subdomains['a'],
+                           r.elements_satisfying(lambda x: x[0] < .5))
+        # element orientation is kept
+        assert (r.p[0, r.t[1]] > r.p[0, r.t[0]]).all()

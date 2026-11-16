@@ -10,7 +10,7 @@ from numpy import ndarray
 
 from ..element import BOUNDARY_ELEMENT_MAP, Element
 from ..generic_utils import OrientedBoundary, Removed
-from ._tags import Subdomains, Boundaries
+from ._tags import Subdomains, Boundaries, Paths
 
 
 logger = logging.getLogger(__name__)
@@ -41,6 +41,7 @@ class Mesh:
     validate: bool = True  # run validation check if log_level<=DEBUG
     # set by skfem.distributed.distribute for the local part of a mesh
     _dist: Optional[Any] = None
+    _paths: Optional[Dict[str, ndarray]] = None
 
     @property
     def p(self):
@@ -96,6 +97,11 @@ class Mesh:
     @property
     def boundaries(self):
         return self._boundaries
+
+    @property
+    def paths(self):
+        """Named paths, i.e. subsets of edges, of a 3D mesh."""
+        return self._paths
 
     @property
     def facets(self):
@@ -251,8 +257,7 @@ class Mesh:
             If ``True``, consider only facets on the boundary of the domain.
 
         """
-        return replace(
-            self,
+        return self._replace(
             _boundaries={
                 **({} if self._boundaries is None else self._boundaries),
                 **{name: self.facets_satisfying(test_or_set, boundaries_only)
@@ -276,8 +281,7 @@ class Mesh:
             subdomain.
 
         """
-        return replace(
-            self,
+        return self._replace(
             _subdomains={
                 **({} if self._subdomains is None else self._subdomains),
                 **{name: (self.elements_satisfying(test)
@@ -285,6 +289,54 @@ class Mesh:
                    for name, test in subdomains.items()},
             },
         )
+
+    def with_paths(self,
+                   paths: Dict[str, Union[Callable[[ndarray], ndarray],
+                                          ndarray]],
+                   boundaries_only: bool = False):
+        """Return a copy of the mesh with named paths.
+
+        A path is a set of edges of a 3D mesh, e.g., a curve along which
+        :class:`~skfem.assembly.EdgeBasis` integrates, or along which
+        :meth:`~skfem.assembly.CellBasis.get_dofs` finds DOFs.
+
+        Parameters
+        ----------
+        paths
+            A dictionary of index arrays or lambda functions with the names of
+            the paths as keys.  The midpoint of the edge should return
+            ``True`` for the corresponding lambda function if the edge belongs
+            to the path.  An index array can be oriented, see
+            :meth:`~skfem.mesh.Mesh.edges_satisfying`.
+        boundaries_only
+            If ``True``, consider only edges on the boundary of the domain.
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> from skfem import MeshTet
+        >>> m = MeshTet().refined(2).with_paths({
+        ...     'axis': lambda x: np.isclose(x[0], 0) & np.isclose(x[1], 0),
+        ... })
+        >>> m.paths['axis']
+        array([ 0,  3, 36, 37], dtype=int32)
+
+        """
+        self._check_paths_supported()
+        return self._replace(
+            _paths={
+                **({} if self._paths is None else self._paths),
+                **{name: (self.edges_satisfying(test_or_set, boundaries_only)
+                          if callable(test_or_set) else test_or_set)
+                   for name, test_or_set in paths.items()},
+            },
+        )
+
+    def _check_paths_supported(self):
+        if self.dim() != 3:
+            raise ValueError("Paths are supported only for meshes with "
+                             "three-dimensional elements; use boundaries "
+                             "for the edges of a two-dimensional mesh.")
 
     def _build_default_tags(self):
 
@@ -331,6 +383,11 @@ class Mesh:
                                                        .flatten()))
                 for name, boundary in boundaries.items()
             },
+            **{
+                f"skfem:p:{name}": indicator(np.unique(self.edges[:, path]
+                                                       .flatten()))
+                for name, path in (self._paths or {}).items()
+            },
         }
 
     def _encode_cell_data(self) -> Dict[str, List[ndarray]]:
@@ -369,6 +426,16 @@ class Mesh:
             t2f_mask[(r, columns[c])] = 1
             return (1 << np.arange(self.refdom.nfacets)) @ t2f_mask
 
+        def encode_path(path: ndarray) -> ndarray:
+            """Return an int per cell with bit-flags for its local edges.
+
+            Similar to ``encode_boundary``, the bit ``i`` is set if the local
+            edge ``i`` of the cell belongs to the path.  Each edge is flagged
+            in all the cells sharing it.  The orientation is not stored.
+            """
+            return ((1 << np.arange(self.t2e.shape[0]))
+                    @ np.isin(self.t2e, path).astype(np.int64))
+
         return {
             **{
                 f"skfem:s:{name}": [
@@ -381,12 +448,17 @@ class Mesh:
                 f"skfem:b:{name}": [encode_boundary(boundary)]
                 for name, boundary in boundaries.items()
             },
+            **{
+                f"skfem:p:{name}": [encode_path(path)]
+                for name, path in (self._paths or {}).items()
+            },
         }
 
     def _decode_cell_data(self, cell_data: Dict[str, List[ndarray]]):
 
         subdomains = {}
         boundaries = {}
+        paths = {}
 
         for name, data in cell_data.items():
             subnames = name.split(":")
@@ -405,8 +477,14 @@ class Mesh:
                 boundaries[subnames[2]] = (
                     OrientedBoundary(facets, ori) if ori.any() else facets
                 )
+            elif subnames[1] == "p" and self.dim() == 3:
+                mask = (
+                    (1 << np.arange(self.t2e.shape[0]))[:, None]
+                    & data[0].astype(np.int64)
+                ).astype(bool)
+                paths[subnames[2]] = np.unique(self.t2e[mask]).astype(np.int32)
 
-        return boundaries, subdomains
+        return boundaries, subdomains, paths
 
     def boundary_nodes(self) -> ndarray:
         """Return an array of boundary node indices."""
@@ -467,6 +545,296 @@ class Mesh:
             ori = 1 * (np.dot(normal, normals) < 0)
             return OrientedBoundary(facets, ori)
         return facets
+
+    def edges_satisfying(self,
+                         test: Callable[[ndarray], ndarray],
+                         boundaries_only: bool = False,
+                         tangent: Optional[Any] = None) -> ndarray:
+        """Return edges whose midpoints satisfy some condition.
+
+        Parameters
+        ----------
+        test
+            A function which returns ``True`` for the edge midpoints that are
+            to be included in the return set.
+        boundaries_only
+            If ``True``, include only boundary edges.
+        tangent
+            If given, used to orient the set of edges: an array of shape
+            ``(3,)`` or a function returning the direction at the edge
+            midpoints.  The result is then an
+            :class:`~skfem.generic_utils.OrientedBoundary` where ``ori == 1``
+            means that the edge is traversed from ``edges[1]`` to
+            ``edges[0]``.
+
+        """
+        midp = self.p[:, self.edges].mean(axis=1)
+        edges = np.nonzero(test(midp))[0].astype(np.int32)
+        if boundaries_only:
+            edges = np.intersect1d(edges, self.boundary_edges())
+        if tangent is not None:
+            if callable(tangent):
+                tangent = tangent(midp[:, edges])
+            tangent = np.asarray(tangent, dtype=np.float64)
+            if tangent.ndim == 1:
+                tangent = tangent[:, None]
+            direction = (self.p[:, self.edges[1, edges]]
+                         - self.p[:, self.edges[0, edges]])
+            ori = 1 * (np.sum(tangent * direction, axis=0) < 0)
+            return OrientedBoundary(edges, ori)
+        return edges
+
+    def _find_edges(self, pairs: ndarray) -> ndarray:
+        """Return the indices of the edges with the given vertices.
+
+        Parameters
+        ----------
+        pairs
+            An array of shape ``(2, n)``, the vertex indices of the edges in
+            any order.
+
+        Returns
+        -------
+        ndarray
+            The edge indices, ``-1`` if there is no such edge.
+
+        """
+        pairs = np.sort(np.asarray(pairs, dtype=np.int64).reshape(2, -1),
+                        axis=0)
+        out = np.full(pairs.shape[1], -1, dtype=np.int32)
+        valid = (pairs >= 0).all(axis=0)
+        if not valid.any():
+            return out
+        e = self.edges.astype(np.int64)
+        nv = max(int(e.max()), int(pairs.max())) + 1
+        keys = e[0] * nv + e[1]  # sorted since edges are lexicographic
+        queries = pairs[0, valid] * nv + pairs[1, valid]
+        ix = np.clip(np.searchsorted(keys, queries), 0, len(keys) - 1)
+        found = keys[ix] == queries
+        out[np.nonzero(valid)[0][found]] = ix[found]
+        return out
+
+    def _path_pairs(self, path: ndarray) -> ndarray:
+        """Return the vertex pairs of a path in the traversal order."""
+        pairs = self.edges[:, path]
+        if isinstance(path, OrientedBoundary):
+            pairs = np.where(path.ori == 1, pairs[::-1], pairs)
+        return pairs
+
+    def _path_from_pairs(self, pairs: ndarray, oriented: bool) -> ndarray:
+        """Inverse of ``_path_pairs``; drops the pairs which are not edges.
+
+        """
+        edges = self._find_edges(pairs)
+        keep = edges >= 0
+        edges, pairs = edges[keep], pairs[:, keep]
+        if oriented:
+            ori = 1 * (pairs[0] > pairs[1])
+            ix = np.argsort(edges, kind='stable')
+            edges, ori = edges[ix], ori[ix]
+            edges, first = np.unique(edges, return_index=True)
+            return OrientedBoundary(edges.astype(np.int32), ori[first])
+        return np.unique(edges).astype(np.int32)
+
+    def _with_remapped_paths(self, old, node_map):
+        """Translate the paths of ``old`` to ``self``.
+
+        Parameters
+        ----------
+        old
+            The mesh before renumbering or removing the nodes.
+        node_map
+            Maps the vertex indices of ``old`` to the vertex indices of
+            ``self``; ``-1`` for the removed vertices.
+
+        """
+        if not old.paths:
+            return self._replace(_paths=None) if self.paths else self
+        paths = {}
+        for name, path in old.paths.items():
+            pairs = node_map[old._path_pairs(path)]
+            paths[name] = self._path_from_pairs(
+                pairs,
+                isinstance(path, OrientedBoundary),
+            )
+        return self._replace(_paths=paths)
+
+    def _with_refined_paths(self, old):
+        """Translate the paths of ``old`` to the refined mesh ``self``.
+
+        Assumes that the vertices of ``old`` keep their indices and that
+        the split edges are split from the middle.
+
+        """
+        if not old.paths:
+            return self._replace(_paths=None)
+        from scipy.spatial import cKDTree
+
+        nv = self.nvertices
+        tree = cKDTree(self.p[:, :nv].T)
+        tol = 1e-8 * np.max(np.linalg.norm(
+            np.diff(old.p[:, old.edges], axis=1)[:, 0],
+            axis=0,
+        ))
+        mapping = old.mapping()
+
+        paths = {}
+        for name, path in old.paths.items():
+            pairs = old._path_pairs(path)
+            # the midpoints of the original edges in the old geometry
+            # (curved for high order meshes)
+            midp = mapping.H(np.array([[.5]]),
+                             eind=np.asarray(path))[:, :, 0]
+            # refinement may also place the new vertex at the straight
+            # midpoint, e.g., MeshTet2.refined
+            linp = .5 * (old.p[:, pairs[0]] + old.p[:, pairs[1]])
+            dist, ix = tree.query(midp.T)
+            dist2, ix2 = tree.query(linp.T)
+            use = dist2 < dist
+            midp[:, use] = linp[:, use]
+            for _ in range(32):
+                dist, ix = tree.query(midp.T)
+                split = (dist <= tol) & (ix != pairs[0]) & (ix != pairs[1])
+                if not split.any():
+                    break
+                m = ix[split]
+                pairs = np.hstack((
+                    pairs[:, ~split],
+                    np.vstack((pairs[0, split], m)),
+                    np.vstack((m, pairs[1, split])),
+                ))
+                midp = .5 * (self.p[:, pairs[0]] + self.p[:, pairs[1]])
+            new_path = self._path_from_pairs(
+                pairs,
+                isinstance(path, OrientedBoundary),
+            )
+            if len(new_path) < pairs.shape[1]:
+                logger.warning("Some edges of the path '{}' were lost "
+                               "in refinement.".format(name))
+            paths[name] = new_path
+        return self._replace(_paths=paths)
+
+    _TOPOLOGY_CACHE = ('_facets', '_t2f', '_f2t', '_edges', '_t2e', '_f2e')
+
+    def _replace(self, **changes):
+        """Like ``dataclasses.replace`` but keep the cached topology.
+
+        The facets, edges and their incidence arrays depend only on ``t``.
+        They are copied to the new mesh unless ``t`` changes.
+
+        """
+        return replace(self, **changes)._copy_topology(self)
+
+    def _copy_topology(self, src):
+        """Copy the cached topology of ``src`` if the connectivity matches."""
+        if self.t is src.t or (self.t.shape == src.t.shape
+                               and np.array_equal(self.t, src.t)):
+            for attr in self._TOPOLOGY_CACHE:
+                if attr in src.__dict__ and attr not in self.__dict__:
+                    self.__dict__[attr] = src.__dict__[attr]
+        return self
+
+    def _refined_via(self, linear_type, marked=None):
+        """Refine a high order mesh using the corresponding linear mesh.
+
+        The tags are kept since the vertices, the facets and the elements
+        of both meshes are numbered identically.
+
+        """
+        tags = {'_boundaries': self._boundaries,
+                '_subdomains': self._subdomains}
+        m1 = replace(linear_type.from_mesh(self), **tags)._copy_topology(self)
+        m1 = m1.refined() if marked is None else m1.refined(marked)
+        out = type(self).from_mesh(m1)
+        return replace(out,
+                       _boundaries=m1._boundaries,
+                       _subdomains=m1._subdomains)._copy_topology(m1)
+
+    def _facet_sides(self, facets: ndarray, points: ndarray) -> ndarray:
+        """Return the signed side of the points w.r.t. the facets.
+
+        The sign is positive if the point is on the side of the normal
+        defined by the vertex order of ``self.facets``.
+
+        """
+        f = self.facets[:, facets]
+        p = self.p
+        x0 = p[:, f[0]]
+        if self.dim() == 1:
+            n = np.ones((1, len(facets)))
+        elif self.dim() == 2:
+            d = p[:, f[1]] - x0
+            n = np.array([d[1], -d[0]])
+        elif self.dim() == 3:
+            n = np.cross(p[:, f[1]] - x0, p[:, f[2]] - x0, axis=0)
+        else:
+            raise NotImplementedError
+        return np.sum(n * (points - x0), axis=0)
+
+    def _transfer_boundaries(self, old, child, parent):
+        """Translate the boundaries of ``old`` to ``self``.
+
+        Parameters
+        ----------
+        old
+            The original mesh.
+        child
+            An array of facet indices of ``self``.
+        parent
+            For each facet in ``child``, the facet of ``old`` that contains
+            it, e.g., the facet before refinement.
+
+        Returns
+        -------
+        dict
+            The new boundaries.  The orientation of
+            :class:`~skfem.generic_utils.OrientedBoundary` is preserved,
+            i.e. the traces are taken from the same side of the facets.
+
+        """
+        child = np.asarray(child, dtype=np.int32).ravel()
+        parent = np.asarray(parent, dtype=np.int32).ravel()
+        boundaries = {}
+        for name, b in (old.boundaries or {}).items():
+            sel = np.isin(parent, b)
+            c, par = child[sel], parent[sel]
+            c, first = np.unique(c, return_index=True)
+            par = par[first]
+            if not isinstance(b, OrientedBoundary):
+                boundaries[name] = c
+                continue
+            ori_old = np.zeros(old.nfacets, dtype=np.int64)
+            ori_old[np.asarray(b)] = b.ori
+            # the element of 'old' on the side of the traces
+            tel = old.f2t[ori_old[par], par]
+            nv = old.refdom.nnodes
+            side_old = self._facet_sides(
+                c, old.p[:, old.t[:nv, tel]].mean(axis=1))
+            side_new = self._facet_sides(
+                c, self.p[:, self.t[:nv, self.f2t[0, c]]].mean(axis=1))
+            ori = 1 * ((side_old > 0) != (side_new > 0))
+            # only one element available: no choice
+            ori[self.f2t[1, c] == -1] = 0
+            boundaries[name] = OrientedBoundary(c, ori)
+        return boundaries
+
+    @staticmethod
+    def _tags_from_arrays(tags, oris):
+        """Inverse of ``_tags_to_arrays``."""
+        return {
+            k: OrientedBoundary(v, oris[k]) if k in oris else v
+            for k, v in tags.items()
+        }
+
+    @staticmethod
+    def _tags_to_arrays(tags):
+        """Split possibly oriented tags into indices and orientations."""
+        tags = {} if tags is None else tags
+        return (
+            {k: np.asarray(v) for k, v in tags.items()},
+            {k: v.ori for k, v in tags.items()
+             if isinstance(v, OrientedBoundary)},
+        )
 
     def facets_around(self, elements, flip=False) -> OrientedBoundary:
         """Return the oriented set of facets around a set of elements.
@@ -627,6 +995,8 @@ class Mesh:
                            Boundaries(self.boundaries or {}))
         object.__setattr__(self, "_subdomains",
                            Subdomains(self.subdomains or {}))
+        object.__setattr__(self, "_paths",
+                           Paths(self.paths or {}))
 
         # run validation
         if self.validate and logger.getEffectiveLevel() <= logging.DEBUG:
@@ -753,6 +1123,13 @@ class Mesh:
                         list(self.boundaries.keys()))
                 )
             )
+        if self.paths is not None and len(self.paths) > 0:
+            rep += "\n  Named paths [# edges]: {}".format(
+                ', '.join(
+                    map(lambda k: '{} [{}]'.format(k, len(self.paths[k])),
+                        list(self.paths.keys()))
+                )
+            )
         if self.dim() != self.gdim():
             rep += "\n  Topological dimension: {}".format(self.dim())
             rep += "\n  Geometric dimension: {}".format(self.gdim())
@@ -812,36 +1189,52 @@ class Mesh:
 
         if 'p' not in data or 't' not in data:
             raise ValueError("Dictionary must contain keys 'p' and 't'.")
-        else:
-            data['p'] = np.ascontiguousarray(np.array(data['p']).T)
-            data['t'] = np.ascontiguousarray(np.array(data['t']).T)
-        if 'boundaries' in data and data['boundaries'] is not None:
-            data['boundaries'] = {k: np.array(v)
-                                  for k, v in data['boundaries'].items()}
-        if 'subdomains' in data and data['subdomains'] is not None:
-            data['subdomains'] = {k: np.array(v)
-                                  for k, v in data['subdomains'].items()}
-        data['doflocs'] = data.pop('p')
-        if 'subdomains' in data:
-            data['_subdomains'] = data.pop('subdomains')
-        if 'boundaries' in data:
-            data['_boundaries'] = data.pop('boundaries')
-        return cls(**data)
+        data = dict(data)
+        doflocs = np.ascontiguousarray(np.array(data.pop('p')).T)
+        t = np.ascontiguousarray(np.array(data.pop('t')).T)
+
+        def tags(name, oriname=None):
+            values = data.pop(name, None)
+            oris = (data.pop(oriname, None) if oriname else None) or {}
+            if values is None:
+                return None
+            return cls._tags_from_arrays(
+                {k: np.array(v, dtype=np.int32) for k, v in values.items()},
+                {k: np.array(v, dtype=np.int32) for k, v in oris.items()},
+            )
+
+        return cls(
+            doflocs=doflocs,
+            t=t,
+            _boundaries=tags('boundaries', 'boundary_orientations'),
+            _subdomains=tags('subdomains'),
+            _paths=tags('paths', 'path_orientations'),
+            **data,
+        )
 
     def to_dict(self):
+        """Return a JSON-serializable dictionary, see :meth:`from_dict`."""
 
-        boundaries = None
-        subdomains = None
-        if self.boundaries is not None:
-            boundaries = {k: v.tolist() for k, v in self.boundaries.items()}
-        if self.subdomains is not None:
-            subdomains = {k: v.tolist() for k, v in self.subdomains.items()}
-        return {
+        def tags(values):
+            arrays, oris = self._tags_to_arrays(values)
+            return ({k: v.tolist() for k, v in arrays.items()},
+                    {k: v.tolist() for k, v in oris.items()})
+
+        boundaries, boundary_oris = tags(self.boundaries)
+        subdomains, _ = tags(self.subdomains)
+        out = {
             'p': self.p.T.tolist(),
             't': self.t.T.tolist(),
             'boundaries': boundaries,
             'subdomains': subdomains,
         }
+        if boundary_oris:
+            out['boundary_orientations'] = boundary_oris
+        if self.paths:
+            out['paths'], path_oris = tags(self.paths)
+            if path_oris:
+                out['path_orientations'] = path_oris
+        return out
 
     @classmethod
     def from_mesh(cls, mesh, t: Optional[ndarray] = None):
@@ -899,25 +1292,48 @@ class Mesh:
             if arg is None:
                 continue
             p[i] = arg(self.p)
-        return replace(self, doflocs=p)
+        return self._replace(doflocs=p)
 
-    def refined(self, times_or_ix: Union[int, ndarray] = 1):
+    def refined(self,
+                times_or_ix: Union[int, ndarray] = 1,
+                skip_boundaries: bool = False,
+                skip_subdomains: bool = False,
+                skip_paths: bool = False):
         """Return a refined mesh.
+
+        The named boundaries, subdomains and paths are translated to the
+        refined mesh.  This requires, e.g., finding the facets or the edges
+        of the refined mesh which can be skipped if the tags are not needed.
 
         Parameters
         ----------
         times_or_ix
             Either an integer giving the number of uniform refinements or an
             array of element indices for adaptive refinement.
+        skip_boundaries
+            Optionally, drop the named boundaries instead of retagging.
+        skip_subdomains
+            Optionally, drop the named subdomains instead of retagging.
+        skip_paths
+            Optionally, drop the named paths instead of retagging.
 
         """
-        m = self
-        has_boundaries = bool(self.boundaries)
-        has_subdomains = bool(self.subdomains)
+        skip: Dict[str, Any] = {}
+        if skip_boundaries and self.boundaries:
+            skip['_boundaries'] = None
+        if skip_subdomains and self.subdomains:
+            skip['_subdomains'] = None
+        if skip_paths and self.paths:
+            skip['_paths'] = None
+        m = self._replace(**skip) if skip else self
+        has_boundaries = bool(m.boundaries)
+        has_subdomains = bool(m.subdomains)
         if (isinstance(times_or_ix, (int, np.integer))
                 and not isinstance(times_or_ix, (bool, np.bool_))):
             for _ in range(times_or_ix):
                 mtmp = m._uniform()
+                if m._paths or mtmp._paths:
+                    mtmp = mtmp._with_refined_paths(m)
                 # fix subdomains for remaining mesh types
                 if m._subdomains and len(mtmp._subdomains) == 0:
                     N = int(mtmp.t.shape[1] / m.t.shape[1])
@@ -925,8 +1341,7 @@ class Mesh:
                     new_t[0] = np.arange(m.t.shape[1], dtype=np.int32)
                     for itr in range(N - 1):
                         new_t[itr + 1] = new_t[itr] + m.t.shape[1]
-                    mtmp = replace(
-                        mtmp,
+                    mtmp = mtmp._replace(
                         _subdomains={
                             name: np.sort(new_t[:, ixs].flatten())
                             for name, ixs in m._subdomains.items()
@@ -934,7 +1349,10 @@ class Mesh:
                     )
                 m = mtmp
         else:
-            m = m._adaptive(times_or_ix)
+            mtmp = m._adaptive(times_or_ix)
+            if m._paths or mtmp._paths:
+                mtmp = mtmp._with_refined_paths(m)
+            m = mtmp
         if has_boundaries and not m.boundaries:
             logger.warning("Named boundaries invalidated by a call to "
                            "Mesh.refined()")
@@ -956,8 +1374,7 @@ class Mesh:
         if np.ndim(factors) == 0:
             factors = self.doflocs.shape[0] * [factors]
         self._check_dim(factors, 'factors')
-        return replace(
-            self,
+        return self._replace(
             doflocs=np.array([self.doflocs[itr] * factors[itr]
                               for itr in range(len(factors))]),
         )
@@ -979,8 +1396,7 @@ class Mesh:
 
         """
         self._check_dim(diffs, 'diffs')
-        return replace(
-            self,
+        return self._replace(
             doflocs=np.array([self.doflocs[itr] + diffs[itr]
                               for itr in range(len(diffs))]),
         )
@@ -1282,11 +1698,51 @@ class Mesh:
         return (Basis(self, elem()),
                 self._label(self.nelements, tags, names))
 
+    def path_tags(self, names=None):
+        """Visualize named paths as a piecewise constant field.
+
+        The edges of the paths form a :class:`~skfem.mesh.MeshLine1` embedded
+        in 3D.  Each of its elements gets the value ``i + 1`` if it belongs
+        to the path ``names[i]``.  An edge in several paths gets the value of
+        the last one.  For example, ``plot(*m.path_tags())``.
+
+        Parameters
+        ----------
+        names
+            Optional list of path names; by default all of ``self.paths``.
+
+        Returns
+        -------
+        CellBasis
+            A piecewise constant basis on the edges.
+        ndarray
+            The values.
+
+        """
+        from ..assembly import Basis
+        from ..element import ElementLineP0
+        from .mesh_line_1 import MeshLine1
+        tags = self.paths if self.paths is not None else {}
+        names = list(tags) if names is None else list(names)
+        if len(names) == 0:
+            raise ValueError("No paths to visualize; use Mesh.with_paths.")
+        edges = np.unique(np.concatenate([np.asarray(tags[k], dtype=np.int64)
+                                          for k in names]))
+        p, t, _ = self._reix(self.edges[:, edges])
+        mesh = MeshLine1(p, t)
+        ix = np.zeros(self.nedges, dtype=np.int64) - 1
+        ix[edges] = np.arange(len(edges))
+        return (Basis(mesh, ElementLineP0()),
+                self._label(len(edges),
+                            {k: ix[np.asarray(tags[k])] for k in names},
+                            names))
+
     def restrict(self,
                  elements,
                  return_mapping=False,
                  skip_boundaries=False,
-                 skip_subdomains=False):
+                 skip_subdomains=False,
+                 skip_paths=False):
         """Restrict the mesh to a subset of elements.
 
         Parameters
@@ -1300,13 +1756,15 @@ class Mesh:
             Optionally, skip retagging boundaries.
         skip_subdomains
             Optionally, skip retagging subdomains.
+        skip_paths
+            Optionally, skip retagging paths.
 
         """
         elements = self.normalize_elements(elements)
         p, t, ix = self._reix(self.t[:, elements])
 
         new_subdomains = None
-        if not skip_subdomains and self.subdomains is not None:
+        if not skip_subdomains and self.subdomains:
             # map from old to new element index
             newt = np.zeros(self.t.shape[1], dtype=np.int32) - 1
             newt[elements] = np.arange(len(elements), dtype=np.int32)
@@ -1317,25 +1775,29 @@ class Mesh:
                 for k in self.subdomains
             }
 
-        new_boundaries = None
-        if not skip_boundaries and self.boundaries is not None:
-            # map from old to new facet index
-            newf = np.zeros(self.facets.shape[1], dtype=np.int32) - 1
-            facets = np.unique(self.t2f[:, elements])
-            newf[facets] = np.arange(len(facets), dtype=np.int32)
-            new_boundaries = {k: newf[self.boundaries[k]]
-                              for k in self.boundaries}
-            # filter facets not existing in the new mesh, value is -1
-            new_boundaries = {k: v[v >= 0]
-                              for k, v in new_boundaries.items()}
-
         out = replace(
             self,
             doflocs=p,
             t=t,
-            _boundaries=new_boundaries,
+            _boundaries=None,
             _subdomains=new_subdomains,
+            _paths=None,
         )
+
+        if not skip_boundaries and self.boundaries:
+            # the facets of the new mesh are the facets of 'elements' in
+            # the same order since the vertex renumbering is monotonic
+            facets = np.unique(self.t2f[:, elements])
+            out = out._replace(_boundaries=out._transfer_boundaries(
+                self,
+                np.arange(len(facets), dtype=np.int32),
+                facets,
+            ))
+
+        if not skip_paths and self.paths:
+            node_map = np.full(self.nvertices, -1, dtype=np.int32)
+            node_map[ix] = np.arange(len(ix), dtype=np.int32)
+            out = out._with_remapped_paths(self, node_map)
 
         if return_mapping:
             return out, ix
@@ -1384,7 +1846,8 @@ class Mesh:
             doflocs=p,
             t=t,
         )
-        return out._with_remapped_boundaries(self, node_map)
+        return (out._with_remapped_boundaries(self, node_map)
+                ._with_remapped_paths(self, node_map))
 
     def remove_duplicate_nodes(self):
         tmp = np.ascontiguousarray(self.doflocs.T)
@@ -1396,7 +1859,8 @@ class Mesh:
             doflocs=self.doflocs[:, ixa],
             t=node_map[self.t],
         )
-        return out._with_remapped_boundaries(self, node_map)
+        return (out._with_remapped_boundaries(self, node_map)
+                ._with_remapped_paths(self, node_map))
 
     def _with_remapped_boundaries(self, old, node_map):
         """Translate the boundary facets of ``old`` to ``self``.
@@ -1414,21 +1878,21 @@ class Mesh:
             return self
         new_facets = np.sort(self.facets, axis=0)
         nf = new_facets.shape[1]
-        names = list(old.boundaries)
-        old_ix = [np.asarray(old.boundaries[k]) for k in names]
-        queries = np.sort(node_map[old.facets[:, np.concatenate(old_ix)]],
-                          axis=0)
+        parent = np.unique(np.concatenate([np.asarray(b)
+                                           for b in old.boundaries.values()]))
+        queries = np.sort(node_map[old.facets[:, parent]], axis=0)
         _, inv = np.unique(np.hstack((new_facets, queries)),
                            axis=1, return_inverse=True)
         inv = inv.flatten()
         lookup = np.full(inv.max() + 1, -1, dtype=np.int32)
         lookup[inv[:nf]] = np.arange(nf, dtype=np.int32)
-        found = lookup[inv[nf:]]
-        splits = np.cumsum([len(ix) for ix in old_ix])[:-1]
-        boundaries = {}
-        for k, f in zip(names, np.split(found, splits)):
-            boundaries[k] = np.unique(f[f >= 0]).astype(np.int32)
-        return replace(self, _boundaries=boundaries)
+        child = lookup[inv[nf:]]
+        found = child >= 0
+        return self._replace(_boundaries=self._transfer_boundaries(
+            old,
+            child[found],
+            parent[found],
+        ))
 
     def element_finder(self, mapping=None):
         """Return a function handle from location to element index.
@@ -1542,6 +2006,43 @@ class Mesh:
                 raise ValueError("Boundary '{}' not found.".format(facets))
         raise NotImplementedError
 
+    def normalize_edges(self, edges) -> ndarray:
+        """Generate an array of edge indices.
+
+        Parameters
+        ----------
+        edges
+            Criteria of which edges to include.  An array of edge indices, a
+            function of the edge midpoints (see
+            :meth:`~skfem.mesh.Mesh.edges_satisfying`), the name of a path
+            in ``self.paths`` or a list/tuple/set of these.  If ``None``,
+            use all the edges of all the paths.
+
+        """
+        if (isinstance(edges, (int, np.integer))
+                and not isinstance(edges, (bool, np.bool_))):
+            return np.array([edges], dtype=np.int32)
+        if isinstance(edges, ndarray):
+            # assume the edges have already been normalized
+            return edges
+        if edges is None:
+            if not self.paths:
+                raise ValueError("No paths defined; use Mesh.with_paths "
+                                 "or give the edges explicitly.")
+            return self.normalize_edges(list(self.paths))
+        if isinstance(edges, (tuple, list, set)):
+            return np.unique(
+                np.concatenate(
+                    [np.asarray(self.normalize_edges(e)) for e in edges]
+                )
+            ).astype(np.int32)
+        if callable(edges):
+            return self.edges_satisfying(edges)
+        if isinstance(edges, str):
+            # assume string is the label of a path in the mesh
+            return self.paths[edges]
+        raise NotImplementedError
+
     def normalize_elements(self, elements) -> ndarray:
         """Generate an array of element indices.
 
@@ -1588,71 +2089,89 @@ class Mesh:
 
         data = np.load(filename)
 
+        def tags(prefix):
+            n = len(prefix)
+            return cls._tags_from_arrays(
+                {key[n + 1:]: data[key] for key in data.files
+                 if key[:n + 1] == prefix + '_'},
+                {key[n + 2:]: data[key] for key in data.files
+                 if key[:n + 2] == prefix + 'o_'},
+            )
+
         return cls(
             data['doflocs'],
             data['t'],
-            _boundaries={
-                key[2:]: data[key]
-                for key in data.files
-                if key[:2] == 'b_'
-            },
-            _subdomains={
-                key[2:]: data[key]
-                for key in data.files
-                if key[:2] == 's_'
-            },
+            _boundaries=tags('b'),
+            _subdomains=tags('s'),
+            _paths=tags('p'),
         )
+
+    def _tagged_arrays(self) -> Dict[str, ndarray]:
+        """All tags as arrays; the orientations are stored separately.
+
+        The keys are ``b_<name>`` for boundaries, ``s_<name>`` for
+        subdomains, ``p_<name>`` for paths, and ``bo_<name>``/``po_<name>``
+        for the orientations of oriented boundaries/paths.
+
+        """
+        out = {}
+        for prefix, tags in (('b', self.boundaries),
+                             ('s', self.subdomains),
+                             ('p', self.paths)):
+            arrays, oris = self._tags_to_arrays(tags)
+            out.update({prefix + '_' + k: v for k, v in arrays.items()})
+            out.update({prefix + 'o_' + k: v for k, v in oris.items()})
+        return out
 
     def save_npz(self, filename: str):
 
-        boundaries = {} if self.boundaries is None else self.boundaries
-        subdomains = {} if self.subdomains is None else self.subdomains
-        boundaries = {'b_' + key: value for key, value in boundaries.items()}
-        subdomains = {'s_' + key: value for key, value in subdomains.items()}
         np.savez(
             filename,
             doflocs=self.doflocs,
             t=self.t,
-            **boundaries,
-            **subdomains,
+            **self._tagged_arrays(),
         )
 
     def save_npy(self, path: Union[str, PathLike]):
         """Save the mesh as a directory of ``.npy`` files.
 
         Each array is stored in its own file (``doflocs.npy``, ``t.npy``,
-        ``b_<name>.npy`` for boundaries, ``s_<name>.npy`` for subdomains)
-        under ``path``, which is created if missing. Avoids the meshio
-        round-trip of :meth:`save` and the single-archive bundling of
-        :meth:`save_npz`; useful for meshes with millions of nodes.
+        ``b_<name>.npy`` for boundaries, ``s_<name>.npy`` for subdomains,
+        ``p_<name>.npy`` for paths, ``bo_<name>.npy`` and ``po_<name>.npy``
+        for the orientations of boundaries and paths) under ``path``, which
+        is created if missing. Avoids the meshio round-trip of :meth:`save`
+        and the single-archive bundling of :meth:`save_npz`; useful for
+        meshes with millions of nodes.
         """
         path = Path(path)
         path.mkdir(parents=True, exist_ok=True)
         np.save(path / "doflocs.npy", self.doflocs, allow_pickle=False)
         np.save(path / "t.npy", self.t, allow_pickle=False)
-        boundaries = {} if self.boundaries is None else self.boundaries
-        subdomains = {} if self.subdomains is None else self.subdomains
-        for key, value in boundaries.items():
-            np.save(path / ("b_" + key + ".npy"), value, allow_pickle=False)
-        for key, value in subdomains.items():
-            np.save(path / ("s_" + key + ".npy"), value, allow_pickle=False)
+        for key, value in self._tagged_arrays().items():
+            np.save(path / (key + ".npy"), np.asarray(value),
+                    allow_pickle=False)
 
     @classmethod
     def load_npy(cls, path: Union[str, PathLike]):
         """Load a mesh from a directory of ``.npy`` files written by
         :meth:`save_npy`."""
         path = Path(path)
+
+        def tags(prefix):
+            n = len(prefix)
+            return cls._tags_from_arrays(
+                {p.stem[n + 1:]: np.load(p, allow_pickle=False)
+                 for p in sorted(path.glob(prefix + "_*.npy"))},
+                {p.stem[n + 2:]: np.load(p, allow_pickle=False)
+                 for p in sorted(path.glob(prefix + "o_*.npy"))},
+            )
+
         return cls(
             np.load(path / "doflocs.npy", allow_pickle=False),
             np.load(path / "t.npy", allow_pickle=False),
-            _boundaries={
-                p.stem[2:]: np.load(p, allow_pickle=False)
-                for p in sorted(path.glob("b_*.npy"))
-            },
-            _subdomains={
-                p.stem[2:]: np.load(p, allow_pickle=False)
-                for p in sorted(path.glob("s_*.npy"))
-            },
+            _boundaries=tags('b'),
+            _subdomains=tags('s'),
+            _paths=tags('p'),
         )
 
     refine = Removed(

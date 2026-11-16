@@ -26,6 +26,8 @@ class AbstractBasis:
     - :class:`~skfem.assembly.FacetBasis`, basis functions on boundary
     - :class:`~skfem.assembly.InteriorFacetBasis`, basis functions on facets
       inside the domain
+    - :class:`~skfem.assembly.EdgeBasis`, basis functions on edges of a 3D
+      mesh
 
     """
 
@@ -126,7 +128,8 @@ class AbstractBasis:
                  facets: Optional[Any] = None,
                  elements: Optional[Any] = None,
                  nodes: Optional[Any] = None,
-                 skip: Optional[List[str]] = None) -> Any:
+                 skip: Optional[List[str]] = None,
+                 edges: Optional[Any] = None) -> Any:
         """Find global DOF numbers.
 
         Accepts an array of facet/element indices.  However, various argument
@@ -192,6 +195,17 @@ class AbstractBasis:
         ...                skip=['u_x', 'u_y']).nodal.keys()
         dict_keys(['u', 'u_xx', 'u_xy', 'u_yy'])
 
+        Get DOFs via named paths of a 3D mesh:
+
+        >>> import numpy as np
+        >>> from skfem import MeshTet, Basis, ElementTetP2
+        >>> m = (MeshTet()
+        ...      .with_paths({'axis': lambda x: (np.isclose(x[0], 0)
+        ...                                      & np.isclose(x[1], 0))}))
+        >>> basis = Basis(m, ElementTetP2())
+        >>> basis.get_dofs(edges='axis').flatten()
+        array([0, 1, 8], dtype=int32)
+
         Combine several boundaries into one call:
 
         >>> import numpy as np
@@ -217,6 +231,11 @@ class AbstractBasis:
             An array of node indices.
         skip
             List of dofnames to skip.
+        edges
+            An array of edge indices of a 3D mesh, or anything accepted by
+            :meth:`~skfem.mesh.Mesh.normalize_edges`, e.g., the name of a
+            path in ``self.mesh.paths``.  The DOFs of the edges and their
+            vertices are returned.
 
         """
         if isinstance(facets, dict):
@@ -241,6 +260,11 @@ class AbstractBasis:
             return self.dofs.get_vertex_dofs(nodes,
                                              skip_dofnames=skip,
                                              doflocs=self.doflocs)
+        elif edges is not None:
+            edges = self.mesh.normalize_edges(edges)
+            return self.dofs.get_edge_dofs(edges,
+                                           skip_dofnames=skip,
+                                           doflocs=self.doflocs)
 
         facets = self.mesh.normalize_facets(facets)
         return self.dofs.get_facet_dofs(facets,

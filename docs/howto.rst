@@ -601,3 +601,29 @@ In addition, DOFs can be now found based on the tags:
    >>> basis = Basis(mesh, ElementTriP1())
    >>> basis.get_dofs('left').all()
    array([0, 2, 5], dtype=int32)
+
+For 3D meshes, a subset of edges (a path) can be tagged using
+:meth:`skfem.mesh.Mesh.with_paths`.  Then
+:class:`~skfem.assembly.EdgeBasis` integrates over the path
+and :meth:`~skfem.assembly.basis.AbstractBasis.get_dofs` finds the DOFs
+on the path:
+
+.. doctest::
+
+   >>> mesh3 = MeshTet().refined(2).with_paths({
+   ...     'axis': lambda x: (x[0] == 0.) & (x[1] == 0.),
+   ... })
+   >>> EdgeBasis(mesh3, ElementTetP1(), edges='axis')
+   <skfem EdgeBasis(MeshTet1, ElementTetP1) object>
+     Number of elements: 4
+     Number of DOFs: 115
+     Size: 1024 B
+   >>> Basis(mesh3, ElementTetP1()).get_dofs(edges='axis').all()
+   array([ 0,  1,  8, 26, 29], dtype=int32)
+
+The unit tangent of the path is available in the forms as ``w.t``.  Its
+direction can be fixed by passing ``tangent`` to
+:meth:`skfem.mesh.Mesh.edges_satisfying`.  The tags can be visualized using
+:meth:`~skfem.mesh.Mesh.boundary_tags`,
+:meth:`~skfem.mesh.Mesh.subdomain_tags` and
+:meth:`~skfem.mesh.Mesh.path_tags`, e.g., ``plot(*mesh3.path_tags())``.

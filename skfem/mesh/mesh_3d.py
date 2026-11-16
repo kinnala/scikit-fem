@@ -1,6 +1,4 @@
 from dataclasses import dataclass
-from typing import Callable
-
 import numpy as np
 from numpy import ndarray
 
@@ -18,19 +16,6 @@ class Mesh3D(Mesh):
 
     def param(self) -> float:
         return np.max(self.params())
-
-    def edges_satisfying(self, test: Callable[[ndarray], bool]) -> ndarray:
-        """Return edges whose midpoints satisfy some condition.
-
-        Parameters
-        ----------
-        test
-            Evaluates to 1 or ``True`` for edge midpoints of the edges
-            belonging to the output set.
-
-        """
-        return (np.nonzero(test(self.p[:, self.edges].mean(1)))[0]
-                .astype(np.int32))
 
     def interior_edges(self) -> ndarray:
         """Return an array of interior edge indices."""

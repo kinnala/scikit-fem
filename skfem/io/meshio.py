@@ -111,6 +111,7 @@ def from_meshio(m,
 
     subdomains = {}
     boundaries = {}
+    paths = {}
 
     # parse any subdomains from cell_sets
     if m.cell_sets:
@@ -214,9 +215,11 @@ def from_meshio(m,
 
     # attempt parsing skfem tags
     if m.cell_data:
-        _boundaries, _subdomains = mtmp._decode_cell_data(m.cell_data)
+        _boundaries, _subdomains, _paths = mtmp._decode_cell_data(
+            m.cell_data)
         boundaries.update(_boundaries)
         subdomains.update(_subdomains)
+        paths.update(_paths)
 
     # export mesh data
     if out is not None and isinstance(out, list):
@@ -228,6 +231,7 @@ def from_meshio(m,
         t,
         None if len(boundaries) == 0 else boundaries,
         None if len(subdomains) == 0 else subdomains,
+        _paths=None if len(paths) == 0 else paths,
     )
 
 

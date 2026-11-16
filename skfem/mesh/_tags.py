@@ -45,3 +45,7 @@ class Boundaries(TagDict):
 
 class Subdomains(TagDict):
     _kind, _ctor = "subdomain", "Mesh.with_subdomains"
+
+
+class Paths(TagDict):
+    _kind, _ctor = "path", "Mesh.with_paths"

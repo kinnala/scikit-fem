@@ -14,7 +14,7 @@ Abstract class: Mesh
 --------------------
 
 .. autoclass:: skfem.mesh.Mesh
-   :members: load, save, refined, facets_satisfying, nodes_satisfying, elements_satisfying, with_subdomains, with_boundaries
+   :members: load, save, refined, facets_satisfying, nodes_satisfying, elements_satisfying, edges_satisfying, with_subdomains, with_boundaries, with_paths, boundary_tags, subdomain_tags, path_tags
 
 Class: MeshTri
 **************
@@ -100,6 +100,12 @@ Class: InteriorFacetBasis
 *************************
 
 .. autoclass:: skfem.assembly.InteriorFacetBasis
+   :members: __init__
+
+Class: EdgeBasis
+****************
+
+.. autoclass:: skfem.assembly.EdgeBasis
    :members: __init__
 
 

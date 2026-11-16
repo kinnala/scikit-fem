@@ -262,13 +262,12 @@ class MeshTri1(MeshSimplex, Mesh2D):
             new_facets[1, t2f[1]] = m.t2f[2, ix2]
             new_facets[1, t2f[0]] = m.t2f[0, ix1]
 
-            m = replace(
-                m,
-                _boundaries={
-                    name: np.sort(new_facets[:, ixs].flatten())
-                    for name, ixs in self._boundaries.items()
-                },
-            )
+            m = m._replace(_boundaries=m._transfer_boundaries(
+                self,
+                new_facets,
+                np.broadcast_to(np.arange(self.nfacets, dtype=np.int32),
+                                new_facets.shape),
+            ))
 
         return m
 
@@ -427,13 +426,12 @@ class MeshTri1(MeshSimplex, Mesh2D):
             new_facets = (ix.flatten()[m.nfacets:]
                           .reshape(2, -1)
                           .astype(np.int32))
-            m = replace(
-                m,
-                _boundaries={
-                    name: np.unique(new_facets[:, ixs])
-                    for name, ixs in self._boundaries.items()
-                },
-            )
+            m = m._replace(_boundaries=m._transfer_boundaries(
+                self,
+                new_facets,
+                np.broadcast_to(np.arange(self.nfacets, dtype=np.int32),
+                                new_facets.shape),
+            ))
 
         return m
 

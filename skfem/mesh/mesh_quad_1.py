@@ -76,13 +76,12 @@ class MeshQuad1(Mesh2D):
             new_facets[0, t2f[3]] = m.t2f[3, ix3]
             new_facets[1, t2f[3]] = m.t2f[3, ix0]
 
-            m = replace(
-                m,
-                _boundaries={
-                    name: np.sort(new_facets[:, ixs].flatten())
-                    for name, ixs in self._boundaries.items()
-                },
-            )
+            m = m._replace(_boundaries=m._transfer_boundaries(
+                self,
+                new_facets,
+                np.broadcast_to(np.arange(self.nfacets, dtype=np.int32),
+                                new_facets.shape),
+            ))
 
         return m
 

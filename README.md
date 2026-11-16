@@ -219,36 +219,32 @@ with respect to documented and/or tested features.
 - Added: `Mesh.save_npy/load_npy` with better performance for larger meshes (in comparison to `Mesh.save/load`)
 - Added: `Basis.interpolate_multiple` for a simultaneous interpolation of multiple solution vectors
 - Added: `MappingManifold` for assembling forms over embedded paths or surfaces (see new example ex57.py)
-- Added: `ElementQuadDPC` and `ElementHexDPC`, discontinuous elements of total degree `p` with an orthonormal Legendre basis
-- Added: `ElementTetMorley` and `ElementTetMWX3`, tetrahedral Morley-Wang-Xu elements of degree 2 and 3
-- Added: `ElementLineBubble`, `ElementTriBubble` and `ElementTetBubble`, standalone interior bubble elements
-- Added: `ElementTriP` for high order triangle elements
-- Added: `ElementTriRT` for high order Raviart-Thomas elements
-- Added: `skfem.visuals.web`, an interactive WebGL2 viewer (with a canvas fallback); try `basis.plot(u, 'web').show()`
-- Added: `Mesh.boundary_tags` and `Mesh.subdomain_tags` for visualizing named boundaries and subdomains, e.g. `plot(*mesh.boundary_tags())`
+- Added: New elements: `ElementQuadDPC` and `ElementHexDPC` (discontinuous degree `p` elements with orthonormal Legendre basis), `ElementTetMorley` and `ElementTetMWX3` (tetrahedral Morley-Wang-Xu elements), `ElementLineBubble`, `ElementTriBubble` and `ElementTetBubble` (standalone interior bubble elements), `ElementTriP` (high order triangle elements), `ElementTriRT` (high order Raviart-Thomas elements)
+- Added: `skfem.visuals.web`, an interactive WebGL viewer (with Canvas fallback); try `basis.plot(u, 'web').show()`
+- Added: `Mesh.with_paths` and `Mesh.paths` for tagging sets of edges (paths) of 3D meshes
+- Added: `EdgeBasis` for integrating over the edges of 3D meshes
+- Added: `Basis.get_dofs(edges=...)` for finding the DOFs on edges or named paths, e.g. `basis.get_dofs(edges='mypath')`
 - Added: `Mesh.distributed` (and `skfem.distributed.distribute`) for distributed assembly and solve using petsc4py (see ex53 and ex54)
 - Added: `solver_petsc` for solving SciPy or PETSc systems using PETSc linear solvers, see ex52
-- Changed: `Mesh.boundary_facets` excludes the interfaces between processes for distributed meshes
 - Deprecated: `Dofs.decompose`, `Dofs.l2g`, `Dofs.loc` and the `dofs` argument of `COOData.topetsc`, superseded by `Mesh.distributed`, due for removal in 14.0.0
-- Changed: `skfem.autodiff` was rewritten to use faster built-in forward-mode dual number AD without the JAX dependency
+- Changed: `skfem.autodiff` was rewritten using built-in forward-mode dual number AD without the JAX dependency
 - Changed: `ElementVector` and `ElementComposite` are optimized via `BlockArray` and `BlockDiscreteField` that avoid storing explicit zeros
-- Changed: Accessing `Mesh.subdomains` or `Mesh.boundaries` with nonexisting key/tag will now raise `TagKeyError`
+- Changed: Accessing `Mesh.subdomains` or `Mesh.boundaries` with nonexisting tag will now raise `TagKeyError`
 - Removed: Obsolete projection functions `skfem.utils.project` and `skfem.utils.projection`, replaced by `Basis.project`
 - Removed: Dysfunctional visualization package `skfem.visuals.glvis`
 - Removed: The deprecated `FacetBasis.trace` method
+- Fixed: The uniform (and adaptive) refinement of all mesh types now keep the tags
+- Fixed: The orientation of `OrientedBoundary` is now preserved in `Mesh.refined` etc.
 - Fixed: `ElementQuadP` and `ElementTriP` now work with any mesh orientation
 - Fixed: `ElementGlobal` subclasses, e.g., `ElementTriMorley`, gave a wrong basis when used with more than one mesh
-- Fixed: `MeshTri` now preserves boundary tags when refining adaptively
-- Fixed: `MeshTet` now preserves boundary tags when refined
 - Fixed: `ElementGlobal` subclasses such as `ElementLineHermite`, `ElementTriArgyris` and `ElementQuadBFS` now work with periodic meshes
 - Fixed: `solve` preserves complex solutions and eigenvectors
-- Fixed: `Basis.interpolator` preserves vector and tensor components, including during `Basis.project`.
-- Fixed: `enforce` preserves complex boundary values with a real right-hand side
-- Fixed: `enforce` preserves prescribed boundary values when using a nonunit diagonal.
+- Fixed: `Basis.interpolator` preserves vector and tensor components, including during `Basis.project`
+- Fixed: `enforce` preserves complex boundary values with a real right-hand side, and prescribed boundary values with nonunit diagonal
 - Fixed: `skfem.utils.penalize` preserves complex boundary values in the right-hand side
 - Fixed: `MeshWedge` quadrature rules were incorrect
 - Fixed: `MeshTet` quadrature rules for `intorder>=5` were accurate only up to `intorder - 1`
-- Fixed: `ElementGlobal` power basis is now defined in scaled local coordinates to improve conditioning
+- Fixed: `ElementGlobal` power basis is now defined in scaled coordinates to improve conditioning
 - Fixed: `COOData.tolocal` returned incorrect local matrices for unsymmetric forms
 - Fixed: `dofnames` of `ElementComposite` and `ElementDG` were mislabeled in some cases
 

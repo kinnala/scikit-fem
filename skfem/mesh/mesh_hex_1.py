@@ -86,13 +86,33 @@ class MeshHex1(Mesh3D):
             np.vstack((mid, t2f[4], t2f[3], t2f[5],
                        t2e[9], t2e[10], t2e[11], t[7]))
         ))
-        return replace(
+        m = replace(
             self,
             doflocs=doflocs,
             t=t,
             _boundaries=None,
             _subdomains=None,
         )
+
+        if self._boundaries:
+            # each facet splits into four; the new facets on the old facets
+            # have one facet midpoint and no element midpoints as vertices
+            fmin = sz + self.nedges  # the first facet midpoint
+            fmax = fmin + self.nfacets  # the first element midpoint
+            nf = m.facets
+            isfmid = (nf >= fmin) & (nf < fmax)
+            child = np.nonzero((isfmid.sum(axis=0) == 1)
+                               & (nf.max(axis=0) < fmax))[0]
+            # the only facet midpoint identifies the parent facet
+            parent = (np.sum(np.where(isfmid[:, child], nf[:, child], 0),
+                             axis=0) - fmin)
+            m = m._replace(_boundaries=m._transfer_boundaries(
+                self,
+                child,
+                parent,
+            ))
+
+        return m
 
     @classmethod
     def init_tensor(cls: Type,

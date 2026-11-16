@@ -180,6 +180,58 @@ class MappingAffine(Mapping):
         else:
             raise Exception("Not implemented for the given dimension.")
 
+    @property
+    def C(self):
+        """Edge affine mapping matrix."""
+        if not hasattr(self, '_C'):
+            self._init_edge_mapping()
+        return self._C
+
+    @property
+    def d(self):
+        """Edge affine mapping constant."""
+        if not hasattr(self, '_d'):
+            self._init_edge_mapping()
+        return self._d
+
+    @property
+    def detC(self):
+        """Edge affine mapping length scaling."""
+        if not hasattr(self, '_detC'):
+            self._init_edge_mapping()
+        return self._detC
+
+    def _init_edge_mapping(self):
+        """For lazy evaluation of edge mapping."""
+        if self.dim != 3:
+            raise NotImplementedError("Edge mapping is supported only for "
+                                      "three-dimensional elements.")
+        edges = self.mesh.edges
+        self._d = self.mesh.p[:, edges[0]]
+        self._C = (self.mesh.p[:, edges[1]] - self._d)[:, None, :]
+        self._detC = np.linalg.norm(self._C[:, 0], axis=0)
+
+    def H(self, X, eind=None):
+        if eind is None:
+            C, d = self.C, self.d
+        else:
+            C, d = self.C[:, :, eind], self.d[:, eind]
+
+        if len(X.shape) == 2:
+            return (np.einsum('ijk,jl', C, X).T + d.T).T
+        elif len(X.shape) == 3:
+            return (np.einsum('ijk,jkl->ikl', C, X).T + d.T).T
+
+        raise Exception("Wrong dimension of input.")
+
+    def DH(self, X, eind=None):
+        C = self.C[:, 0] if eind is None else self.C[:, 0, eind]
+        return np.broadcast_to(C[..., None], C.shape + (X.shape[-1],))
+
+    def detDH(self, X, eind=None):
+        detC = self.detC if eind is None else self.detC[eind]
+        return np.broadcast_to(detC[:, None], detC.shape + (X.shape[-1],))
+
     def F(self, X, tind=None):
         if tind is None or self.tind is not None:
             A, b = self.A, self.b
