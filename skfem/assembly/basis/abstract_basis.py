@@ -28,6 +28,8 @@ class AbstractBasis:
       inside the domain
     - :class:`~skfem.assembly.EdgeBasis`, basis functions on edges of a 3D
       mesh
+    - :class:`~skfem.assembly.SkeletonBasis`, pairs of element traces and
+      functions on the facets for hybridized methods
 
     """
 

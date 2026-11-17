@@ -63,8 +63,13 @@ class COOData:
         Parameters
         ----------
         basis
-            Optionally, sum local facet matrices to form elemental matrices if
-            the corresponding :class:`skfem.assembly.FacetBasis` is provided.
+            Optionally, the basis used in the assembly, e.g.,
+            :class:`~skfem.assembly.FacetBasis`.  The local matrices are then
+            summed to the elements of the mesh they are related to, i.e.
+            ``basis.tind``, which makes sense if the local basis functions
+            are those of the element, e.g., the traces of the basis
+            functions from one side of the facets.  The result has the shape
+            ``(basis.mesh.nelements,) + local_shape``.
 
         """
         if self.local_shape is None:
@@ -74,9 +79,16 @@ class COOData:
         # data is laid out as local_shape[::-1] + (nelems,); reverse all axes
         local = self.data.reshape(self.local_shape[::-1] + (-1,)).T
         if basis is not None:
-            out = np.zeros((basis.mesh.nfacets,) + local.shape[1:])
-            out[basis.find] = local
-            local = np.sum(out[basis.mesh.t2f], axis=0)
+            tind = basis.tind
+            if tind is None:
+                tind = np.arange(basis.mesh.nelements)
+            if len(tind) != local.shape[0]:
+                raise ValueError("The basis does not correspond to the "
+                                 "local matrices.")
+            out = np.zeros((basis.mesh.nelements,) + local.shape[1:],
+                           dtype=local.dtype)
+            np.add.at(out, tind, local)
+            local = out
 
         return local
 

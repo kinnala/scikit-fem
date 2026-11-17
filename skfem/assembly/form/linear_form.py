@@ -45,5 +45,28 @@ class LinearForm(Form):
 
         return np.array([rows]), data, (vbasis.N,), (vbasis.Nbfun,)
 
+    def assemble_blocks(self, vbasis, **kwargs):
+        """Assemble the linear form and split it into blocks.
+
+        See :meth:`~skfem.assembly.BilinearForm.assemble_blocks`.
+
+        Parameters
+        ----------
+        vbasis
+            The :class:`~skfem.assembly.Basis` for ``v``.
+        **kwargs
+            Any additional keyword arguments are appended to ``w``.
+
+        Returns
+        -------
+        list
+            The vectors of the solution components.
+
+        """
+        if self._distributed_dofs(vbasis) is not None:
+            raise NotImplementedError("Distributed meshes not supported.")
+        vec = self.assemble(vbasis, **kwargs)
+        return [vec[ix] for ix in self._components(vbasis)]
+
     def _kernel(self, v, w, dx):
         return self._integrate(self.form(*v, w), dx)

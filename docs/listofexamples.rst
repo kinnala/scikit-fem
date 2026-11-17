@@ -183,14 +183,15 @@ for more information.
 Example 40: Hybridizable discontinuous Galerkin method
 ------------------------------------------------------
 
-This examples solves the Poisson equation with unit load using a technique
-where the finite element basis is first discontinous across element edges and
+This example solves the Poisson equation with unit load using a technique
+where the finite element basis is first discontinuous across element edges and
 then the continuity is recovered with the help of Lagrange multipliers defined
 on the mesh skeleton (i.e. a "skeleton mesh" consisting only of the edges of
-the original mesh).
+the original mesh).  The discontinuous unknowns are eliminated
+element-by-element so that the linear system is solved on the skeleton only.
 
 .. plot::
-   :caption: The solution of Example 40 on the skeleton mesh.
+   :caption: The discontinuous solution of Example 40.
 
    from docs.examples.ex40 import visualize
    visualize()

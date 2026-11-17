@@ -4,7 +4,7 @@ from unittest import TestCase
 import pytest
 import numpy as np
 from numpy.testing import (assert_equal, assert_almost_equal,
-                           assert_array_almost_equal)
+                           assert_array_almost_equal, assert_array_equal)
 
 from skfem import (TrilinearForm, BilinearForm, LinearForm, Functional, asm,
                    solve, condense)
@@ -20,12 +20,12 @@ from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementTriN1, ElementTriP0, ElementDG, ElementTetN0,
                            ElementQuadN1, ElementQuad0, ElementTriN2,
                            ElementTetN1, ElementTriHHJ1, ElementWedge1,
-                           ElementLineP1)
+                           ElementLineP1, ElementLineP1DG)
 from skfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
                         MeshTri2, MeshTet2, MeshHex2, MeshWedge, MeshLine)
-from skfem.assembly import FacetBasis, Basis
+from skfem.assembly import FacetBasis, Basis, InteriorFacetBasis
 from skfem.models import unit_load, mass
-from skfem.helpers import grad, dot, ddot, sym_grad, curl
+from skfem.helpers import grad, dot, ddot, sym_grad, curl, div
 from skfem.models import linear_stress
 
 
@@ -906,3 +906,130 @@ def test_integrate_unit_volume(mesh, element, target):
         Functional(lambda w: 1. + 0. * w.x[0]).assemble(basis),
         target
     )
+
+
+@pytest.mark.parametrize(
+    "facet_basis",
+    [
+        lambda m, e: FacetBasis(m, e),
+        lambda m, e: InteriorFacetBasis(m, e, side=0),
+        lambda m, e: InteriorFacetBasis(m, e, side=1),
+        lambda m, e: Basis(m, e).skeleton(ElementLineP1DG()).bases[0],
+    ]
+)
+def test_coodata_tolocal_facets(facet_basis):
+    # summing the local facet matrices to elements must give the global
+    # matrix; with a DG space the element matrices are the diagonal blocks
+    m = MeshTri().refined(2)
+    e = ElementDG(ElementTriP1())
+    fb = facet_basis(m, e)
+    form = BilinearForm(lambda u, v, w: u * v + dot(w.n, grad(u)) * v)
+    local = form.elemental(fb).tolocal(fb)
+    assert local.shape == (m.nelements, fb.Nbfun, fb.Nbfun)
+    lap = BilinearForm(lambda u, v, w: 0. * u * v).elemental(Basis(m, e))
+    assert_array_almost_equal(lap.fromlocal(local).toarray(),
+                              form.assemble(fb).toarray())
+
+
+def test_coodata_tolocal_basis_mismatch():
+    m = MeshTri().refined(2)  # different number of boundary/interior facets
+    e = ElementDG(ElementTriP1())
+    A = BilinearForm(lambda u, v, w: u * v).elemental(FacetBasis(m, e))
+    with pytest.raises(ValueError):
+        A.tolocal(InteriorFacetBasis(m, e))
+
+
+def _stokes_basis(m):
+    return Basis(m, ElementVector(ElementTriP2()) * ElementTriP1())
+
+
+@BilinearForm
+def _stokes(u, p, v, q, w):
+    return ddot(grad(u), grad(v)) - div(u) * q - div(v) * p
+
+
+@pytest.mark.parametrize(
+    "form,basis,ncomp",
+    [
+        (_stokes, _stokes_basis(MeshTri().refined()), 2),
+        (BilinearForm(lambda u, v, w: ddot(sym_grad(u), sym_grad(v))),
+         Basis(MeshTri().refined(), ElementVector(ElementTriP1())), 2),
+        (BilinearForm(lambda u, v, w: ddot(sym_grad(u), sym_grad(v))),
+         Basis(MeshTet(), ElementVector(ElementTetP1())), 3),
+        (BilinearForm(lambda u, p, q, v, r, s, w: (dot(grad(u), grad(v))
+                                                   + p * r + q * s
+                                                   + u * s + q * v)),
+         Basis(MeshTri().refined(), ElementTriP2() * ElementTriP1()
+               * ElementTriP0()), 3),
+    ]
+)
+def test_assemble_blocks(form, basis, ncomp):
+    blocks = form.assemble_blocks(basis)
+    eblocks = form.elemental_blocks(basis)
+    assert len(blocks) == ncomp and all(len(b) == ncomp for b in blocks)
+    K = form.assemble(basis)
+    ix = basis.split_indices()
+    for i in range(ncomp):
+        for j in range(ncomp):
+            ref = K[ix[i]][:, ix[j]]
+            assert blocks[i][j].shape == (len(ix[i]), len(ix[j]))
+            assert abs(blocks[i][j] - ref).max() < 1e-12
+            assert abs(eblocks[i][j].tocsr() - ref).max() < 1e-12
+            assert eblocks[i][j].tolocal().shape[0] == basis.nelems
+    # the blocks are numbered as the components given by split
+    x = np.arange(basis.N, dtype=np.float64)
+    parts = [y for y, _ in basis.split(x)]
+    for i in range(ncomp):
+        assert_array_almost_equal(sum(blocks[i][j] @ parts[j]
+                                      for j in range(ncomp)),
+                                  (K @ x)[ix[i]])
+
+
+def test_assemble_blocks_rectangular():
+    m = MeshTri().refined()
+    ubasis = Basis(m, ElementTriP1(), intorder=4)
+    vbasis = Basis(m, ElementVector(ElementTriP2()) * ElementTriP1(),
+                   intorder=4)
+    form = BilinearForm(lambda p, v, q, w: div(v) * p + q * p)
+    (B,), (M,) = form.assemble_blocks(ubasis, vbasis)
+    assert B.shape == (vbasis.split_indices()[0].shape[0], ubasis.N)
+    assert M.shape == (vbasis.split_indices()[1].shape[0], ubasis.N)
+    (Be,), (Me,) = form.elemental_blocks(ubasis, vbasis)
+    assert abs(Be.tocsr() - B).max() < 1e-12
+    assert abs(Me.tocsr() - M).max() < 1e-12
+
+
+def test_linear_assemble_blocks():
+    basis = _stokes_basis(MeshTri().refined())
+    form = LinearForm(lambda v, q, w: v[1] + q)
+    fu, fp = form.assemble_blocks(basis)
+    f = form.assemble(basis)
+    ix = basis.split_indices()
+    assert_array_almost_equal(fu, f[ix[0]])
+    assert_array_almost_equal(fp, f[ix[1]])
+
+
+def test_elemental_blocks_inverse():
+    # inverse of a block of the elemental matrices of a DG space
+    m = MeshTri().refined()
+    basis = Basis(m, ElementDG(ElementTriP1()) * ElementDG(ElementTriP0()))
+    form = BilinearForm(lambda u, p, v, q, w: u * v + p * q + u * q)
+    (A, _), _ = form.elemental_blocks(basis)
+    Ainv = A.inverse().tocsr()
+    assert_array_almost_equal((Ainv @ A.tocsr()).toarray(),
+                              np.eye(A.shape[0]))
+
+
+def test_composite_basis_split_indices():
+    m = MeshTri().refined()
+    b1 = Basis(m, ElementTriP1(), intorder=4)
+    b2 = Basis(m, ElementTriP2(), intorder=4)
+    cb = b1 * b2
+    ix = cb.split_indices()
+    x = np.arange(cb.N)
+    for (y, _), i in zip(cb.split(x), ix):
+        assert_array_equal(y, x[i])
+    # the components share the DOFs
+    form = BilinearForm(lambda u, ut, v, vt, w: u * v)
+    with pytest.raises(ValueError):
+        form.assemble_blocks(b1 @ Basis(m, ElementTriP1()))
