@@ -225,10 +225,11 @@ with respect to documented and/or tested features.
 - Added: `EdgeBasis` for integrating over the edges of 3D meshes
 - Added: `Basis.get_dofs(edges=...)` for finding the DOFs on edges or named paths, e.g. `basis.get_dofs(edges='mypath')`
 - Added: `Mesh.distributed` (and `skfem.distributed.distribute`) for distributed assembly and solve using petsc4py (see ex53 and ex54)
-- Added: `solver_petsc` for solving SciPy or PETSc systems using PETSc linear solvers, see ex52
+- Added: `solver_petsc` for using PETSc linear solvers, see ex52
+- Added: `BilinearForm.assemble_blocks` and `elemental_blocks` to create the blocks of `ElementComposite`, e.g., mixed systems
 - Deprecated: `Dofs.decompose`, `Dofs.l2g`, `Dofs.loc` and the `dofs` argument of `COOData.topetsc`, superseded by `Mesh.distributed`, due for removal in 14.0.0
-- Deprecated: `Element.condensed`, due for removal in 14.0.0
-- Deprecated: `Form.block`, due for removal in 14.0.0
+- Deprecated: `Element.condensed`, instead build separate `Element` class for interior DOFs
+- Deprecated: `Form.block`, superseded by `assemble_blocks`
 - Changed: `skfem.autodiff` was rewritten using built-in forward-mode dual number AD without the JAX dependency
 - Changed: `ElementVector` and `ElementComposite` are optimized via `BlockArray` and `BlockDiscreteField` that avoid storing explicit zeros
 - Changed: Accessing `Mesh.subdomains` or `Mesh.boundaries` with nonexisting tag will now raise `TagKeyError`
