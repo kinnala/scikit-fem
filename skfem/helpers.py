@@ -185,6 +185,7 @@ def det(A):
 
 def inv(A):
     """Inverse of an array `A` over trailing axis (if any)."""
+    A = A.astype(np.result_type(A.dtype, 1.), copy=False)
     invA = zeros_like(A)
     detA = det(A)
     if A.shape[0] == 3:

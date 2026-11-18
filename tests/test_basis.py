@@ -9,7 +9,7 @@ from numpy.testing import (assert_allclose, assert_almost_equal,
 
 from skfem import BilinearForm, LinearForm, asm, solve, condense
 from skfem.mesh import (Mesh, MeshTri, MeshTet, MeshHex,
-                        MeshQuad, MeshLine1, MeshWedge1)
+                        MeshQuad, MeshLine, MeshLine1, MeshWedge1)
 from skfem.assembly import (CellBasis, FacetBasis, Functional,
                             InteriorFacetBasis)
 from skfem.mapping import MappingIsoparametric
@@ -340,6 +340,35 @@ def test_point_source(etype):
     u = solve(*condense(asm(laplace, basis), basis.point_source(source), D=basis.get_dofs()))
     exact = np.stack([(1 - source) * mesh.p, (1 - mesh.p) * source]).min(0)
     assert_almost_equal(u[basis.nodal_dofs], exact)
+
+
+@pytest.mark.parametrize('kind', ['nonuniform', 'negative', 'refined'])
+@pytest.mark.parametrize('dtype', [np.int32, np.int64, np.uint64,
+                                  np.float32, np.float64])
+@pytest.mark.parametrize('renumbered', [False, True])
+def test_line_endpoint_evaluation(kind, dtype, renumbered):
+    if kind == 'refined':
+        mesh = MeshLine().refined(2)
+    else:
+        vertices = [0., .75, 1.] if kind == 'nonuniform' else [-1., -.25, 0.]
+        mesh = MeshLine(np.array(vertices))
+    if renumbered:
+        permutation = np.arange(mesh.nvertices)[::-1]
+        mesh = MeshLine(mesh.p[:, permutation], np.argsort(permutation)[mesh.t])
+    basis = CellBasis(mesh, ElementLineP1())
+    endpoint = mesh.p[0].max()
+    query = np.array([endpoint], dtype=dtype)
+    original_query = query.copy()
+    right_node = np.argmax(mesh.p[0])
+    expected_cell = np.flatnonzero(np.any(mesh.t == right_node, axis=0))[0]
+
+    assert_array_equal(mesh.element_finder()(query), [expected_cell])
+    values = basis.interpolator(basis.doflocs[0] ** 2)(query[None, :])
+    np.testing.assert_allclose(values, [endpoint ** 2])
+    expected_load = np.zeros(basis.N)
+    expected_load[np.argmax(basis.doflocs[0])] = 1.
+    np.testing.assert_allclose(basis.point_source(query), expected_load, atol=1e-14)
+    assert_array_equal(query, original_query)
 
 
 def test_pickling():
