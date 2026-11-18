@@ -243,7 +243,7 @@ class COOData:
 
         """
         y = self.data * x[self.indices[1]]
-        z = np.zeros_like(x)
+        z = np.zeros_like(x, dtype=y.dtype)
         np.add.at(z, self.indices[0], y)
         if D is not None:
             z[D] = x[D]

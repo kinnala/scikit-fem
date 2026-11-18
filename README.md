@@ -251,6 +251,7 @@ with respect to documented and/or tested features.
 - Fixed: `ElementGlobal` power basis is now defined in scaled local coordinates to improve conditioning
 - Fixed: `COOData.tolocal` returned incorrect local matrices for unsymmetric forms
 - Fixed: `dofnames` of `ElementComposite` and `ElementDG` were mislabeled in some cases
+- Fixed: `COOData.dot` preserves floating-point and complex products with mixed input dtypes
 
 ### [12.0.2] - 2026-06-05
 

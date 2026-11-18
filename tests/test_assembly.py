@@ -527,6 +527,30 @@ def test_coodata_inverse(m, e, edg):
     )
 
 
+@pytest.mark.parametrize('matrix_dtype', [np.float64, np.complex128])
+@pytest.mark.parametrize('vector_dtype', [np.int32, np.float64, np.complex128])
+@pytest.mark.parametrize('with_dirichlet', [False, True])
+def test_coodata_dot_mixed_dtypes(matrix_dtype, vector_dtype, with_dirichlet):
+    basis = Basis(MeshTri().refined(2), ElementTriP1())
+    factor = 1. + 2.j if np.issubdtype(matrix_dtype, np.complexfloating) else 1.
+    form = BilinearForm(lambda u, v, w: factor * u * v, dtype=matrix_dtype)
+    A = form.coo_data(basis)
+    x = np.arange(1, basis.N + 1, dtype=vector_dtype)
+    if np.issubdtype(vector_dtype, np.complexfloating):
+        x *= 1. + .5j
+    original_x = x.copy()
+    D = basis.get_dofs().all() if with_dirichlet else None
+    expected = A.tocsr() @ x
+    if D is not None:
+        expected[D] = x[D]
+
+    result = A.dot(x, D=D)
+
+    assert_array_almost_equal(result, expected)
+    assert_equal(result.dtype, expected.dtype)
+    assert_equal(x, original_x)
+
+
 def test_coodata_tolocal_bilinear():
     # nonsymmetric form with different trial and test spaces; DG spaces so
     # that the local matrices are the diagonal blocks of the global matrix
