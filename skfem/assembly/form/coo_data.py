@@ -269,6 +269,8 @@ class COOData:
         r = b - self.dot(x, D=D)
         p = r
         rsold = np.dot(r, r)
+        if np.sqrt(rsold) < tol:
+            return x
         for k in range(maxiters):
             Ap = self.dot(p, D=D)
             alpha = rsold / np.dot(p, Ap)

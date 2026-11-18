@@ -3,12 +3,14 @@ from unittest import TestCase
 import numpy as np
 import pytest
 import scipy.sparse
-from numpy.testing import assert_almost_equal
+from numpy.testing import assert_almost_equal, assert_array_equal
 
 from skfem.assembly import CellBasis, Basis, LinearForm, asm, BilinearForm
+from skfem.assembly.form.coo_data import COOData
 from skfem.element import ElementTriP1, ElementQuad1, ElementTriP2
 from skfem.mesh import MeshTri, MeshQuad
-from skfem.utils import enforce, condense, solve, mpc, solver_eigen_scipy
+from skfem.utils import (enforce, condense, solve, mpc, solver_eigen_scipy,
+                         solver_iter_cg)
 from skfem.models import laplace, mass, unit_load
 
 
@@ -218,6 +220,55 @@ def test_simple_cg_solver():
     x0 = A0.solve(f, D=D)
 
     assert_almost_equal(x0, x1)
+
+
+@pytest.mark.parametrize('method', ['coo', 'scipy'])
+@pytest.mark.parametrize('operator', ['identity', 'mass'])
+@pytest.mark.parametrize('nonzero_load', [False, True])
+def test_cg_initial_residual(method, operator, nonzero_load):
+    basis = Basis(MeshTri().refined(2), ElementTriP1())
+    if operator == 'identity':
+        indices = np.arange(basis.N)
+        A = COOData(np.array([indices, indices]), np.ones(basis.N),
+                    (basis.N, basis.N), None)
+        b = np.arange(1., basis.N + 1) if nonzero_load else np.zeros(basis.N)
+        expected = b.copy()
+    else:
+        A = mass.coo_data(basis)
+        b = unit_load.assemble(basis) if nonzero_load else np.zeros(basis.N)
+        expected = np.ones(basis.N) if nonzero_load else np.zeros(basis.N)
+    original_b = b.copy()
+
+    with np.errstate(divide='raise', invalid='raise'):
+        result = (A.solve(b) if method == 'coo'
+                  else solver_iter_cg()(A.tocsr(), b))
+
+    assert_almost_equal(result, expected)
+    assert_array_equal(b, original_b)
+
+
+@pytest.mark.parametrize('method', ['coo', 'scipy'])
+@pytest.mark.parametrize('nonzero_load', [False, True])
+def test_cg_zero_dirichlet_values(method, nonzero_load):
+    basis = Basis(MeshTri().refined(2), ElementTriP1())
+    A = laplace.coo_data(basis)
+    D = basis.get_dofs().all()
+    I = np.setdiff1d(np.arange(basis.N), D)
+    b = unit_load.assemble(basis) if nonzero_load else np.zeros(basis.N)
+    b[D] = 0.
+    original_b = b.copy()
+    expected = np.zeros(basis.N)
+    expected[I] = np.linalg.solve(A.toarray()[np.ix_(I, I)], b[I])
+
+    with np.errstate(divide='raise', invalid='raise'):
+        if method == 'coo':
+            result = A.solve(b, D=D)
+        else:
+            result = solve(*condense(A.tocsr(), b, D=D),
+                           solver=solver_iter_cg())
+
+    assert_almost_equal(result, expected)
+    assert_array_equal(b, original_b)
 
 
 def test_mpc_periodic():

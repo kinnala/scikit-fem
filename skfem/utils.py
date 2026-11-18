@@ -169,6 +169,8 @@ def solver_iter_cg(**kwargs):
         r = b - A.dot(x)
         p = r
         rsold = np.dot(r, r)
+        if np.sqrt(rsold) < tol:
+            return x
         for k in range(maxiters):
             Ap = A.dot(p)
             alpha = rsold / np.dot(p, Ap)
