@@ -4,7 +4,8 @@ from unittest import TestCase
 import pytest
 import numpy as np
 from numpy.testing import (assert_equal, assert_almost_equal,
-                           assert_array_almost_equal, assert_array_equal)
+                           assert_array_almost_equal, assert_array_equal,
+                           assert_allclose)
 
 from skfem import (TrilinearForm, BilinearForm, LinearForm, Functional, asm,
                    solve, condense)
@@ -25,7 +26,7 @@ from skfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
                         MeshTri2, MeshTet2, MeshHex2, MeshWedge, MeshLine)
 from skfem.assembly import FacetBasis, Basis, InteriorFacetBasis
 from skfem.models import unit_load, mass
-from skfem.helpers import grad, dot, ddot, sym_grad, curl, div
+from skfem.helpers import grad, dot, ddot, sym_grad, curl, div, inv, mul
 from skfem.models import linear_stress
 
 
@@ -527,6 +528,48 @@ def test_coodata_inverse(m, e, edg):
     )
 
 
+@pytest.mark.parametrize('matrix_dtype', [np.float64, np.complex128])
+@pytest.mark.parametrize('vector_dtype', [np.int32, np.float64, np.complex128])
+@pytest.mark.parametrize('with_dirichlet', [False, True])
+def test_coodata_dot_mixed_dtypes(matrix_dtype, vector_dtype, with_dirichlet):
+    basis = Basis(MeshTri().refined(2), ElementTriP1())
+    factor = 1. + 2.j if np.issubdtype(matrix_dtype, np.complexfloating) else 1.
+    form = BilinearForm(lambda u, v, w: factor * u * v, dtype=matrix_dtype)
+    A = form.coo_data(basis)
+    x = np.arange(1, basis.N + 1, dtype=vector_dtype)
+    if np.issubdtype(vector_dtype, np.complexfloating):
+        x *= 1. + .5j
+    original_x = x.copy()
+    D = basis.get_dofs().all() if with_dirichlet else None
+    expected = A.tocsr() @ x
+    if D is not None:
+        expected[D] = x[D]
+
+    result = A.dot(x, D=D)
+
+    assert_array_almost_equal(result, expected)
+    assert_equal(result.dtype, expected.dtype)
+    assert_equal(x, original_x)
+
+
+@pytest.mark.parametrize('dtype', [np.int64, np.uint64, np.float64])
+def test_inverse_in_diffusion_assembly(dtype):
+    basis = Basis(MeshTri().refined(2), ElementTriP1())
+    A = np.array([[2, 1], [1, 2]], dtype=dtype)
+    with np.errstate(over='raise', invalid='raise', divide='raise'):
+        coefficient = inv(A)
+
+    def assemble(tensor):
+        return BilinearForm(lambda u, v, w: dot(mul(tensor, grad(u)),
+                                                grad(v))).assemble(basis)
+
+    actual = assemble(coefficient)
+    expected = assemble(np.array([[2., -1.], [-1., 2.]]) / 3.)
+    assert_allclose(actual.toarray(), expected.toarray(), atol=1e-14)
+    field = basis.mesh.p[0]
+    assert_allclose(field @ actual @ field, 2. / 3.)
+
+
 def test_coodata_tolocal_bilinear():
     # nonsymmetric form with different trial and test spaces; DG spaces so
     # that the local matrices are the diagonal blocks of the global matrix
@@ -643,6 +686,34 @@ def test_trilinear_form(m, e):
                 .assemble(basis, kp=kp[i]))
         assert abs((opt1[i] - opt2).min()) < 1e-10
         assert abs((opt1[i] - opt2).max()) < 1e-10
+
+
+@pytest.mark.parametrize(
+    "m,e",
+    [
+        (MeshLine().refined(2), ElementLineP1()),
+        (MeshTri().refined(), ElementTriP1()),
+        (MeshTet(), ElementTetP1()),
+    ]
+)
+@pytest.mark.parametrize("dtype", [np.float32, np.float64,
+                                   np.complex64, np.complex128])
+def test_trilinear_toarray_dtype(m, e, dtype):
+    basis = Basis(m, e, intorder=4)
+    coefficient = 1. + 2.j if np.issubdtype(dtype, np.complexfloating) else 1.
+    data = TrilinearForm(lambda u, v, w, p: coefficient * u * v * w,
+                         dtype=dtype).assemble(basis)
+    tensor = data.toarray()
+    np.testing.assert_allclose(tensor.sum(), coefficient, rtol=1e-6)
+    # Contract the nodal affine field and compare with an independent
+    # weighted mass assembly, including shared-node contributions.
+    contracted = np.einsum('ijk,k->ij', tensor, 1. + basis.doflocs[0])
+    reference = BilinearForm(
+        lambda u, v, w: coefficient * (1. + w.x[0]) * u * v,
+        dtype=dtype,
+    ).assemble(basis).toarray()
+    np.testing.assert_allclose(contracted, reference, rtol=1e-6, atol=1e-8)
+    assert tensor.dtype == data.data.dtype
 
 
 @pytest.mark.parametrize(
