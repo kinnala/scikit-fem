@@ -648,6 +648,34 @@ def test_trilinear_form(m, e):
 @pytest.mark.parametrize(
     "m,e",
     [
+        (MeshLine().refined(2), ElementLineP1()),
+        (MeshTri().refined(), ElementTriP1()),
+        (MeshTet(), ElementTetP1()),
+    ]
+)
+@pytest.mark.parametrize("dtype", [np.float32, np.float64,
+                                   np.complex64, np.complex128])
+def test_trilinear_toarray_dtype(m, e, dtype):
+    basis = Basis(m, e, intorder=4)
+    coefficient = 1. + 2.j if np.issubdtype(dtype, np.complexfloating) else 1.
+    data = TrilinearForm(lambda u, v, w, p: coefficient * u * v * w,
+                         dtype=dtype).assemble(basis)
+    tensor = data.toarray()
+    np.testing.assert_allclose(tensor.sum(), coefficient, rtol=1e-6)
+    # Contract the nodal affine field and compare with an independent
+    # weighted mass assembly, including shared-node contributions.
+    contracted = np.einsum('ijk,k->ij', tensor, 1. + basis.doflocs[0])
+    reference = BilinearForm(
+        lambda u, v, w: coefficient * (1. + w.x[0]) * u * v,
+        dtype=dtype,
+    ).assemble(basis).toarray()
+    np.testing.assert_allclose(contracted, reference, rtol=1e-6, atol=1e-8)
+    assert tensor.dtype == data.data.dtype
+
+
+@pytest.mark.parametrize(
+    "m,e",
+    [
         (MeshTri(), ElementTriP1()),
         (MeshTri(), ElementTriP2()),
         (MeshTet(), ElementTetP1()),

@@ -125,7 +125,7 @@ class COOData:
             return self.tocsr().toarray()
 
         # slow implementation for testing N-tensors
-        out = np.zeros(self.shape)
+        out = np.zeros(self.shape, dtype=self.data.dtype)
         for itr in range(self.indices.shape[1]):
             out[tuple(self.indices[:, itr])] += self.data[itr]
         return out
