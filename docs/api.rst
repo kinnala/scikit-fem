@@ -112,7 +112,7 @@ Class: SkeletonBasis
 ********************
 
 .. autoclass:: skfem.assembly.SkeletonBasis
-   :members: __init__, split, get_dofs
+   :members: __init__, split_bases, split, get_dofs
 
 
 Abstract class: Form

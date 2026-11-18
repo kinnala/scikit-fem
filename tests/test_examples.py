@@ -458,3 +458,17 @@ class TestEx58(TestCase):
         import docs.examples.ex58 as ex
 
         self.assertAlmostEqual(ex.x.max(), 6.198333345828766)
+
+
+class TestEx59(TestCase):
+
+    def runTest(self):
+        import docs.examples.ex59 as ex
+
+        # the bars stiffen the beam
+        self.assertAlmostEqual(ex.deflection0, -0.51168, delta=1e-4)
+        self.assertAlmostEqual(ex.deflection, -0.46733, delta=1e-4)
+        # axial force of the bars versus beam theory away from the ends
+        mid = (ex.x > 1.) & (ex.x < ex.L - 1.)
+        self.assertLess(np.max(np.abs(ex.N[mid] - ex.N_beam(ex.x[mid]))
+                               / ex.N_beam(ex.x[mid])), .03)

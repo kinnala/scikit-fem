@@ -110,6 +110,10 @@ class CompositeBasis(AbstractBasis):
         return [np.arange(offsets[i], offsets[i + 1], dtype=np.int32)
                 for i in range(len(self.bases))]
 
+    def split_bases(self):
+        """Return the bases."""
+        return list(self.bases)
+
     def split(self, x):
         if self.equal_dofnum:
             return [(x, basis) for basis in self.bases]

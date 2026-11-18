@@ -58,7 +58,8 @@ u = Ainv @ (f - B @ ut)
 
 def visualize():
     from skfem.visuals.web import plot
-    return plot(sbasis.facets, ut)
+    ubasis, utbasis = sbasis.split_bases()
+    return plot(utbasis, ut)
 
 
 if __name__ == '__main__':

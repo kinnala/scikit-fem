@@ -5,6 +5,7 @@ from numpy import ndarray
 from skfem.element import Element
 from skfem.generic_utils import OrientedBoundary
 
+from .abstract_basis import AbstractBasis
 from .composite_basis import CompositeBasis
 from .cell_basis import CellBasis
 from .facet_basis import FacetBasis
@@ -37,13 +38,14 @@ class SkeletonBasis(CompositeBasis):
     ...     return (dot(w.n, grad(u)) * (vt - v) + dot(w.n, grad(v)) * (ut - u)
     ...             + 10. / w.h * (ut - u) * (vt - v))
     >>> laplace = BilinearForm(lambda u, v, w: dot(grad(u), grad(v)))
-    >>> nt = sbasis.facets.N
+    >>> ubasis, tbasis = sbasis.split_bases()
+    >>> nt = tbasis.N
     >>> K = bmat([[laplace.assemble(basis), None],
     ...           [None, csr_matrix((nt, nt))]]) + hdg.assemble(sbasis)
     >>> f = np.concatenate((LinearForm(lambda v, w: v).assemble(basis),
     ...                     np.zeros(nt)))
     >>> x = solve(*condense(K, f, D=basis.N + sbasis.get_dofs()))
-    >>> (u, ubasis), (ut, utbasis) = sbasis.split(x)
+    >>> (u, _), (ut, _) = sbasis.split(x)
     >>> print(round(float(u.max()), 4))
     0.0749
 
@@ -133,25 +135,32 @@ class SkeletonBasis(CompositeBasis):
                            elements=np.asarray(pairs))
         super().__init__(fbasis, tbasis)
 
-        #: The basis for the function defined in the elements.
-        self.volume = basis
+        self._volume = basis
+        self._skeleton = CellBasis(skeleton, elem)
         #: The mesh of the function defined in the elements.
         self.mesh = mesh
         #: The element of each element-facet pair, e.g., for
         #: :meth:`~skfem.assembly.form.COOData.tolocal`.
         self.tind = fbasis.tind
-        #: The basis for the function defined on the skeleton with one
-        #: element per facet.
-        self.facets = CellBasis(skeleton, elem)
+
+    def split_bases(self) -> List[AbstractBasis]:
+        """Return the bases of the element and the skeleton unknowns.
+
+        The bases are defined on the mesh and on the mesh skeleton,
+        respectively, e.g., for postprocessing.
+
+        """
+        return [self._volume, self._skeleton]
 
     def split(self, x: ndarray) -> List[Tuple[ndarray, Any]]:
         """Split a solution vector into the element and skeleton parts.
 
-        Returns ``[(u, self.volume), (ut, self.facets)]``.
+        Returns ``[(u, ubasis), (ut, tbasis)]`` with the bases given by
+        :meth:`split_bases`.
 
         """
-        n = self.volume.N
-        return [(x[:n], self.volume), (x[n:], self.facets)]
+        n = self._volume.N
+        return list(zip((x[:n], x[n:]), self.split_bases()))
 
     def get_dofs(self,
                  facets: Optional[Any] = None,
@@ -168,26 +177,26 @@ class SkeletonBasis(CompositeBasis):
             :meth:`~skfem.mesh.Mesh.normalize_facets`, e.g., the name of a
             boundary.  By default, the boundary facets.  The other
             parameters of :meth:`~skfem.assembly.CellBasis.get_dofs` are not
-            supported; use ``self.volume`` or ``self.facets``.
+            supported; use the bases given by :meth:`split_bases`.
 
         Returns
         -------
         ndarray
-            The DOFs in the numbering of the skeleton unknown, i.e. as in
-            ``self.facets``.  Add ``self.volume.N`` to obtain the DOFs in the
-            numbering of the pair.
+            The DOFs in the numbering of the skeleton unknown, i.e. of the
+            second basis given by :meth:`split_bases`.  Add the number of
+            element DOFs to obtain the DOFs in the numbering of the pair.
 
         """
         if any(arg is not None for arg in (elements, nodes, skip, edges)):
             raise NotImplementedError("Only facets are supported.")
-        facets = np.asarray(self.volume.mesh.normalize_facets(facets))
-        return self.facets.get_dofs(elements=facets).flatten()
+        facets = np.asarray(self.mesh.normalize_facets(facets))
+        return self._skeleton.get_dofs(elements=facets).flatten()
 
     def __repr__(self):
         return ("<skfem SkeletonBasis({}, {}) object>\n"
                 "  Number of element DOFs: {}\n"
                 "  Number of skeleton DOFs: {}"
-                .format(type(self.volume.elem).__name__,
-                        type(self.facets.elem).__name__,
-                        self.volume.N,
-                        self.facets.N))
+                .format(type(self._volume.elem).__name__,
+                        type(self._skeleton.elem).__name__,
+                        self._volume.N,
+                        self._skeleton.N))

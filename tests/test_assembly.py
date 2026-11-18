@@ -1029,6 +1029,8 @@ def test_composite_basis_split_indices():
     x = np.arange(cb.N)
     for (y, _), i in zip(cb.split(x), ix):
         assert_array_equal(y, x[i])
+    assert cb.split_bases() == [b1, b2]
+    assert [b for _, b in cb.split(x)] == cb.split_bases()
     # the components share the DOFs
     form = BilinearForm(lambda u, ut, v, vt, w: u * v)
     with pytest.raises(ValueError):
