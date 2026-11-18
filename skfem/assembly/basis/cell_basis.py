@@ -1,4 +1,5 @@
 import logging
+from warnings import warn
 from typing import Callable, Optional, Tuple, Any
 
 import numpy as np
@@ -241,7 +242,17 @@ class CellBasis(AbstractBasis):
         )
 
     def with_elements(self, elements: Optional[Any] = None) -> 'CellBasis':
-        """Return a similar basis on a subset of element indices."""
+        """Return a similar basis on a subset of element indices.
+
+        .. deprecated:: 13.0.0
+           Initialize a new basis instead, e.g.,
+           ``Basis(basis.mesh, basis.elem, elements=elements)``.
+
+        """
+        warn("CellBasis.with_elements is deprecated. Initialize a new "
+             "basis instead, e.g., "
+             "Basis(basis.mesh, basis.elem, elements=elements).",
+             DeprecationWarning, stacklevel=2)
         return type(self)(
             self.mesh,
             self.elem,

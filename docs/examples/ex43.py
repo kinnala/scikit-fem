@@ -83,10 +83,7 @@ mesh = MeshHex.init_tensor(
     np.linspace(0, 1, 10),
     np.linspace(-.1, .1, 3),
     np.linspace(-.1, .1, 3),
-).with_boundaries({
-    'left': lambda x: x[0] == 0.,
-    'right': lambda x: x[0] == 1.,
-})
+).with_defaults()
 element = ElementVector(ElementHex1())
 basis = Basis(mesh, element, intorder=1)
 
@@ -117,7 +114,6 @@ def a(u, v, w):
             + lmbda * trace(dFiF) * trace(DFiF))
 
 u  = basis.zeros()
-du = basis.zeros()
 uv = basis.interpolate(u)
 
 dofs = basis.get_dofs('right')

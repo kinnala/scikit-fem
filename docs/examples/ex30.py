@@ -58,7 +58,6 @@ from skfem.models.poisson import vector_laplace, laplace, mass
 from skfem.models.general import divergence, rot
 
 import numpy as np
-from scipy.sparse import csr_matrix
 from scipy.sparse.linalg import LinearOperator, minres
 
 mesh = MeshQuad.init_tensor(*(np.linspace(-.5, .5, 2**6),)*2)
@@ -86,10 +85,7 @@ I = basis['u'].complement_dofs(D)
 def flow(pressure: np.ndarray) -> np.ndarray:
     """compute the velocity corresponding to a guessed pressure"""
     velocity = basis['u'].zeros()
-    velocity[I] = solve(Aint,
-                        condense(csr_matrix(A.shape),
-                                 f - B.T @ pressure, I=I)[1],
-                        solver=solver)
+    velocity[I] = solve(Aint, (f - B.T @ pressure)[I], solver=solver)
     return velocity
 
 

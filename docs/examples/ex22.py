@@ -14,7 +14,7 @@ for each edge :math:`E`.
 """
 from skfem import *
 from skfem.models.poisson import laplace
-from skfem.helpers import grad
+from skfem.helpers import dot, grad
 import numpy as np
 
 m = MeshTri.init_lshaped().refined(2)
@@ -50,8 +50,7 @@ def eval_estimator(m, u):
         n = w.n
         dw1 = grad(w['u1'])
         dw2 = grad(w['u2'])
-        return h * ((dw1[0] - dw2[0]) * n[0] +
-                    (dw1[1] - dw2[1]) * n[1]) ** 2
+        return h * dot(dw1 - dw2, n) ** 2
 
     eta_E = edge_jump.elemental(fbasis[0], **w)
     
@@ -71,8 +70,7 @@ for itr in reversed(range(6)):
     K = asm(laplace, basis)
     f = asm(load, basis)
 
-    I = m.interior_nodes()
-    u = solve(*condense(K, f, I=I))
+    u = solve(*condense(K, f, D=basis.get_dofs()))
 
     if itr > 0:
         m = m.refined(adaptive_theta(eval_estimator(m, u))).smoothed()

@@ -84,7 +84,7 @@ def _poisson_serial_vs_distributed(mesh, elem, facet=False, use_condense=False):
     [
         ('MeshTri', 'ElementTriP1', {}),
         ('MeshTri', 'ElementTriP2', {'use_condense': True}),
-        ('MeshTri', 'ElementTriMini', {'facet': True}),
+        ('MeshTri', 'ElementTriP1B', {'facet': True}),
         ('MeshQuad', 'ElementQuad2', {'facet': True}),
         ('MeshTet', 'ElementTetP2', {}),
         ('MeshTet', 'ElementTetP2', {'facet': True, 'use_condense': True}),
@@ -156,11 +156,11 @@ def test_deprecated_decompose():
 @pytest.mark.parametrize(
     "mtype,elem",
     [
-        ('MeshTri', lambda s: s.ElementTriRT0()),
+        ('MeshTri', lambda s: s.ElementTriRT1()),
         ('MeshTri', lambda s: s.ElementTriRT(1)),
-        ('MeshQuad', lambda s: s.ElementQuadRT0()),
-        ('MeshTet', lambda s: s.ElementTetRT0()),
-        ('MeshTet', lambda s: s.ElementTetN0()),
+        ('MeshQuad', lambda s: s.ElementQuadRT1()),
+        ('MeshTet', lambda s: s.ElementTetRT1()),
+        ('MeshTet', lambda s: s.ElementTetN1()),
         ('MeshTri', lambda s: s.ElementTriMorley()),
         ('MeshTri', lambda s: s.ElementTriArgyris()),
         ('MeshTri', lambda s: s.ElementTriP(4)),

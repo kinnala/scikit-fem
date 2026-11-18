@@ -230,12 +230,17 @@ with respect to documented and/or tested features.
 - Deprecated: `Dofs.decompose`, `Dofs.l2g`, `Dofs.loc` and the `dofs` argument of `COOData.topetsc`, superseded by `Mesh.distributed`, due for removal in 14.0.0
 - Deprecated: `Element.condensed`, instead build separate `Element` class for interior DOFs
 - Deprecated: `Form.block`, superseded by `assemble_blocks`
+- Deprecated: `COOData.solve`, instead use `solve` with `solver_iter_cg`, e.g., `solve(*condense(A, b, D=D), solver=solver_iter_cg())`
+- Deprecated: `Form.coo_data`, superseded by `Form.elemental`
+- Deprecated: `CellBasis.with_elements`, instead initialize a new basis, e.g., `Basis(basis.mesh, basis.elem, elements=elements)`
 - Changed: `skfem.autodiff` was rewritten using built-in forward-mode dual number AD without the JAX dependency
 - Changed: `ElementVector` and `ElementComposite` are optimized via `BlockArray` and `BlockDiscreteField` that avoid storing explicit zeros
 - Changed: Accessing `Mesh.subdomains` or `Mesh.boundaries` with nonexisting tag will now raise `TagKeyError`
 - Removed: Obsolete projection functions `skfem.utils.project` and `skfem.utils.projection`, replaced by `Basis.project`
 - Removed: Dysfunctional visualization package `skfem.visuals.glvis`
 - Removed: The deprecated `FacetBasis.trace` method
+- Removed: Passing `dict` to `Basis.get_dofs` (and `dict` input to `Basis.complement_dofs`), deprecated since 5.0.0; call `get_dofs` separately for each boundary instead
+- Removed: Element aliases kept for backwards compatibility: `ElementVectorH1` (use `ElementVector`), `ElementTriDG`, `ElementQuadDG`, `ElementTetDG` and `ElementHexDG` (use `ElementDG`), `ElementTriMini` (use `ElementTriP1B`), `ElementTriCCR` (use `ElementTriP2B`), `ElementTriRT0` (use `ElementTriRT1`), `ElementQuadRT0` (use `ElementQuadRT1`), `ElementTetRT0` (use `ElementTetRT1`) and `ElementTetN0` (use `ElementTetN1`)
 - Fixed: The uniform (and adaptive) refinement of all mesh types now keep the tags
 - Fixed: The orientation of `OrientedBoundary` is now preserved in `Mesh.refined` etc.
 - Fixed: `ElementQuadP` and `ElementTriP` now work with any mesh orientation

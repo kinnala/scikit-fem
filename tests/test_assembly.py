@@ -11,15 +11,14 @@ from skfem import (TrilinearForm, BilinearForm, LinearForm, Functional, asm,
 from skfem.element import (ElementQuad1, ElementQuadS2, ElementHex1,
                            ElementHexS2, ElementTetP0, ElementTetP1,
                            ElementTetP2, ElementTriP1, ElementQuad2,
-                           ElementTriMorley, ElementVectorH1, ElementQuadP,
+                           ElementTriMorley, ElementVector, ElementQuadP,
                            ElementHex2, ElementTriArgyris, ElementTriP2,
-                           ElementTriDG, ElementQuadDG, ElementHexDG,
-                           ElementTetDG, ElementTriHermite, ElementVector,
-                           ElementTriRT1, ElementTriRT2, ElementTriBDM1,
+                           ElementDG, ElementTriHermite, ElementTriRT1,
+                           ElementTriRT2, ElementTriBDM1,
                            ElementQuadRT1, ElementTetRT1, ElementHexRT1,
-                           ElementTriN1, ElementTriP0, ElementDG, ElementTetN0,
+                           ElementTriN1, ElementTriP0, ElementTetN1,
                            ElementQuadN1, ElementQuad0, ElementTriN2,
-                           ElementTetN1, ElementTriHHJ1, ElementWedge1,
+                           ElementTriHHJ1, ElementWedge1,
                            ElementLineP1, ElementLineP1DG)
 from skfem.mesh import (MeshQuad, MeshHex, MeshTet, MeshTri, MeshQuad2,
                         MeshTri2, MeshTet2, MeshHex2, MeshWedge, MeshLine)
@@ -377,7 +376,7 @@ class TestCompositeAssembly(TestCase):
         m = MeshHex()
         # check that these assemble to the same matrix
         ec = ElementHex1() * ElementHex1() * ElementHex1()
-        ev = ElementVectorH1(ElementHex1())
+        ev = ElementVector(ElementHex1())
         basisc = Basis(m, ec)
         basisv = Basis(m, ev)
 
@@ -502,16 +501,16 @@ class TestThreadedAssembly(TestCase):
 @pytest.mark.parametrize(
     "m,e,edg",
     [
-        (MeshTri().refined(), ElementTriP1(), ElementTriDG),
-        (MeshTri().refined(), ElementTriP2(), ElementTriDG),
-        (MeshTet().refined(), ElementTetP1(), ElementTetDG),
-        (MeshTet().refined(), ElementTetP2(), ElementTetDG),
-        (MeshTri().refined(), ElementTriMorley(), ElementTriDG),
-        (MeshTri().refined(), ElementTriHermite(), ElementTriDG),
-        (MeshQuad().refined(), ElementQuad1(), ElementQuadDG),
-        (MeshQuad().refined(), ElementQuad2(), ElementQuadDG),
-        (MeshQuad().refined(), ElementQuadP(4), ElementQuadDG),
-        (MeshHex().refined(), ElementHex2(), ElementHexDG),
+        (MeshTri().refined(), ElementTriP1(), ElementDG),
+        (MeshTri().refined(), ElementTriP2(), ElementDG),
+        (MeshTet().refined(), ElementTetP1(), ElementDG),
+        (MeshTet().refined(), ElementTetP2(), ElementDG),
+        (MeshTri().refined(), ElementTriMorley(), ElementDG),
+        (MeshTri().refined(), ElementTriHermite(), ElementDG),
+        (MeshQuad().refined(), ElementQuad1(), ElementDG),
+        (MeshQuad().refined(), ElementQuad2(), ElementDG),
+        (MeshQuad().refined(), ElementQuadP(4), ElementDG),
+        (MeshHex().refined(), ElementHex2(), ElementDG),
     ]
 )
 def test_coodata_inverse(m, e, edg):
@@ -520,7 +519,7 @@ def test_coodata_inverse(m, e, edg):
     basis = Basis(m, E)
     basisdg = Basis(m, E)
     M1 = mass.assemble(basis)
-    M2 = mass.coo_data(basisdg)
+    M2 = mass.elemental(basisdg)
     assert_array_almost_equal(
         np.linalg.inv(M1.toarray()),
         M2.inverse().tocsr().toarray(),
@@ -534,7 +533,7 @@ def test_coodata_tolocal_bilinear():
     ubasis = Basis(m, ElementDG(ElementTriP2()), intorder=4)
     vbasis = Basis(m, ElementDG(ElementTriP1()), intorder=4)
     A = (BilinearForm(lambda u, v, w: grad(u)[0] * v)
-         .coo_data(ubasis, vbasis))
+         .elemental(ubasis, vbasis))
     K = A.toarray()
     local = A.tolocal()
     assert local.shape == (m.nelements, vbasis.Nbfun, ubasis.Nbfun)
@@ -552,7 +551,7 @@ def test_coodata_tolocal_trilinear():
     vbasis = Basis(m, ElementDG(ElementTriP1()), intorder=4)
     wbasis = Basis(m, ElementDG(ElementTriP0()), intorder=4)
     A = (TrilinearForm(lambda u, v, w, p: w * grad(u)[0] * v)
-         .coo_data(ubasis, vbasis, wbasis))
+         .elemental(ubasis, vbasis, wbasis))
     K = A.toarray()
     local = A.tolocal()
     assert local.shape == (m.nelements,
@@ -572,7 +571,7 @@ def test_coodata_tolocal_trilinear():
 def test_coodata_inverse_nonsymmetric():
     m = MeshTri().refined()
     basis = Basis(m, ElementDG(ElementTriP1()))
-    A = BilinearForm(lambda u, v, w: u * v + grad(u)[0] * v).coo_data(basis)
+    A = BilinearForm(lambda u, v, w: u * v + grad(u)[0] * v).elemental(basis)
     assert_array_almost_equal(
         np.linalg.inv(A.toarray()),
         A.inverse().toarray(),
@@ -814,7 +813,7 @@ def test_hcurl_projections_3d():
                             np.linspace(-1, 1, 10))
     basis0 = Basis(m, ElementVector(ElementTetP1()))
     y = basis0.project(lambda x: np.array([x[1], -x[0], 0*x[0]]))
-    basis = basis0.with_element(ElementTetN0())
+    basis = basis0.with_element(ElementTetN1())
     x = basis.project(lambda x: np.array([x[1], -x[0], 0*x[0]]))
     dbasis = basis0.with_element(ElementVector(ElementTetP0()))
     curla = dbasis.project(lambda x: np.array([0*x[0], 0*x[0], x[0] * 0 - 2.]))

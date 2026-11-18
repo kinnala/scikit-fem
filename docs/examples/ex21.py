@@ -63,7 +63,6 @@ included in the source code distribution.
 from skfem import *
 from skfem.models.elasticity import linear_elasticity,\
                                     lame_parameters
-import numpy as np
 
 from pathlib import Path
 
@@ -90,6 +89,5 @@ L, x = solve(
 )
 
 if __name__ == "__main__":
-    from skfem.visuals.matplotlib import draw, show
     sf = 10.0
     m.translated(sf * x[ib.nodal_dofs, 0]).draw().show()

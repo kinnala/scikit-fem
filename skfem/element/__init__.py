@@ -8,6 +8,7 @@ elements.
 
 """
 from typing import Type, Dict
+from skfem.generic_utils import Removed
 from .discrete_field import DiscreteField
 from .element import Element
 from .element_h1 import ElementH1
@@ -63,18 +64,40 @@ BOUNDARY_ELEMENT_MAP: Dict[Type[Element], Type[Element]] = {
     ElementHex1DG: ElementQuad1,
 }
 
-# for backwards compatibility
-ElementVectorH1 = ElementVector
-ElementTriDG = ElementDG
-ElementQuadDG = ElementDG
-ElementHexDG = ElementDG
-ElementTetDG = ElementDG
-ElementTriMini = ElementTriP1B
-ElementTriCCR = ElementTriP2B
-ElementTriRT0 = ElementTriRT1
-ElementTetRT0 = ElementTetRT1
-ElementQuadRT0 = ElementQuadRT1
-ElementTetN0 = ElementTetN1
+# removed aliases, kept importable for their migration messages
+ElementVectorH1 = Removed(
+    "skfem.ElementVectorH1", version="13.0.0",
+    message="Use ElementVector instead of ElementVectorH1.")
+ElementTriDG = Removed(
+    "skfem.ElementTriDG", version="13.0.0",
+    message="Use ElementDG instead of ElementTriDG.")
+ElementQuadDG = Removed(
+    "skfem.ElementQuadDG", version="13.0.0",
+    message="Use ElementDG instead of ElementQuadDG.")
+ElementHexDG = Removed(
+    "skfem.ElementHexDG", version="13.0.0",
+    message="Use ElementDG instead of ElementHexDG.")
+ElementTetDG = Removed(
+    "skfem.ElementTetDG", version="13.0.0",
+    message="Use ElementDG instead of ElementTetDG.")
+ElementTriMini = Removed(
+    "skfem.ElementTriMini", version="13.0.0",
+    message="Use ElementTriP1B instead of ElementTriMini.")
+ElementTriCCR = Removed(
+    "skfem.ElementTriCCR", version="13.0.0",
+    message="Use ElementTriP2B instead of ElementTriCCR.")
+ElementTriRT0 = Removed(
+    "skfem.ElementTriRT0", version="13.0.0",
+    message="Use ElementTriRT1 instead of ElementTriRT0.")
+ElementTetRT0 = Removed(
+    "skfem.ElementTetRT0", version="13.0.0",
+    message="Use ElementTetRT1 instead of ElementTetRT0.")
+ElementQuadRT0 = Removed(
+    "skfem.ElementQuadRT0", version="13.0.0",
+    message="Use ElementQuadRT1 instead of ElementQuadRT0.")
+ElementTetN0 = Removed(
+    "skfem.ElementTetN0", version="13.0.0",
+    message="Use ElementTetN1 instead of ElementTetN0.")
 
 
 __all__ = [
@@ -82,7 +105,6 @@ __all__ = [
     "Element",
     "ElementH1",
     "ElementVector",
-    "ElementVectorH1",
     "ElementHdiv",
     "ElementHcurl",
     "ElementGlobal",
@@ -92,17 +114,13 @@ __all__ = [
     "ElementTriP2",
     "ElementTriP3",
     "ElementTriP4",
-    "ElementTriDG",
     "ElementTriP0",
     "ElementTriCR",
-    "ElementTriCCR",
-    "ElementTriRT0",
     "ElementTriRT1",
     "ElementTriRT2",
     "ElementTriMorley",
     "ElementTri15ParamPlate",
     "ElementTriArgyris",
-    "ElementTriMini",
     "ElementTriHermite",
     "ElementTriP1DG",
     "ElementTriSkeletonP0",
@@ -124,10 +142,8 @@ __all__ = [
     "ElementQuad1",
     "ElementQuad2",
     "ElementQuadS2",
-    "ElementQuadDG",
     "ElementQuadP",
     "ElementQuadBFS",
-    "ElementQuadRT0",
     "ElementQuadRT1",
     "ElementQuad1DG",
     "ElementQuadN1",
@@ -136,14 +152,11 @@ __all__ = [
     "ElementTetP0",
     "ElementTetP1",
     "ElementTetP2",
-    "ElementTetRT0",
     "ElementTetRT1",
-    "ElementTetN0",
     "ElementTetN1",
     "ElementTetMini",
     "ElementTetCR",
     "ElementTetCCR",
-    "ElementTetDG",
     "ElementTetSkeletonP0",
     "ElementTetBubble",
     "ElementTetMorley",
@@ -153,7 +166,6 @@ __all__ = [
     "ElementHex2",
     "ElementHexS2",
     "ElementHex1DG",
-    "ElementHexDG",
     "ElementHexRT1",
     "ElementHexSkeleton0",
     "ElementHexDPC",

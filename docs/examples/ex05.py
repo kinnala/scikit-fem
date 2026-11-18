@@ -22,34 +22,27 @@ import numpy as np
 import scipy.sparse
 
 
-m = MeshTri().refined(5).with_boundaries({"plate": lambda x: x[1] == 0.0})
+m = MeshTri().refined(5).with_defaults()
 
 e = ElementTriP1()
 
 basis = Basis(m, e)
-fbasis = FacetBasis(m, e)
+fbasis = FacetBasis(m, e, facets="right")
 
 
 @BilinearForm
 def facetbilinf(u, v, w):
-    n = w.n
-    x = w.x
-    return -dot(grad(u), n) * v * (x[0] == 1.0)
+    return -dot(grad(u), w.n) * v
 
 
 @LinearForm
 def facetlinf(v, w):
-    n = w.n
-    x = w.x
-    return -dot(grad(v), n) * (x[0] == 1.0)
+    return -dot(grad(v), w.n)
 
 
 A = laplace.assemble(basis)
 B = facetbilinf.assemble(fbasis)
 b = facetlinf.assemble(fbasis)
-
-I = basis.complement_dofs(basis.get_dofs("plate"))
-
 
 b = scipy.sparse.csr_matrix(b)
 
@@ -57,9 +50,7 @@ b = scipy.sparse.csr_matrix(b)
 K = scipy.sparse.bmat([[A + B, b.T], [b, None]], 'csr')
 f = np.concatenate((basis.zeros(), -1.0 * np.ones(1)))
 
-I = np.append(I, K.shape[0] - 1)
-
-x = solve(*condense(K, f, I=I))
+x = solve(*condense(K, f, D=basis.get_dofs("bottom")))
 
 if __name__ == "__main__":
     from os.path import splitext

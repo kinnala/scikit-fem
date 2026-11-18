@@ -68,7 +68,7 @@ for itr in range(40):
     jac = jac + jacg
     rhs = rhs + rhsg
     
-    dx = solve(*enforce(jac, np.array(rhs), D=np.concatenate((
+    dx = solve(*enforce(jac, rhs, D=np.concatenate((
         basis1.get_dofs({'left', 'right'}).all(),
         basis2.get_dofs({'left', 'right'}).all() + basis1.N,
     ))))
@@ -106,12 +106,12 @@ if __name__ == "__main__":
     ax = m1defo.draw()
     m2defo.draw(ax=ax)
     ax.set_xlim(0.5, 4.5)
-    pbasis1defo.plot(pbasis1.project(np.array(sig1[1, 1])),
+    pbasis1defo.plot(sigyy1,
                      vmax=0.0,
                      vmin=-0.01,
                      ax=ax,
                      cmap='viridis')
-    pbasis2defo.plot(pbasis2.project(np.array(sig2[1, 1])),
+    pbasis2defo.plot(sigyy2,
                      vmax=0.0,
                      vmin=-0.01,
                      ax=ax,

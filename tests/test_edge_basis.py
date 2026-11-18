@@ -4,7 +4,7 @@ from numpy.testing import assert_allclose, assert_array_equal
 
 from skfem import (MeshTet, MeshTet2, MeshHex, MeshHex2, MeshWedge1, MeshTri,
                    Mesh, Basis, EdgeBasis, Functional, LinearForm,
-                   ElementTetP1, ElementTetP2, ElementTetN0, ElementHex1,
+                   ElementTetP1, ElementTetP2, ElementTetN1, ElementHex1,
                    ElementHex2, ElementWedge1, ElementVector)
 from skfem.generic_utils import OrientedBoundary
 from skfem.helpers import dot
@@ -145,9 +145,9 @@ def test_orientation_and_circulation():
                     .assemble(ebasis, u=u), 2.)
 
     # tangential component of a Nedelec field
-    u = Basis(m, ElementTetN0()).project(
+    u = Basis(m, ElementTetN1()).project(
         lambda x: np.array([0. * x[0], 0. * x[0], 1. + 0. * x[0]]))
-    ebasis = EdgeBasis(m, ElementTetN0(), edges='up')
+    ebasis = EdgeBasis(m, ElementTetN1(), edges='up')
     assert_allclose(Functional(lambda w: dot(w['u'], w.t))
                     .assemble(ebasis, u=u), 1.)
 
@@ -198,7 +198,7 @@ def test_with_element_and_project():
     [
         (ElementTetP1(), 5, 0),
         (ElementTetP2(), 5, 4),
-        (ElementTetN0(), 0, 4),
+        (ElementTetN1(), 0, 4),
     ]
 )
 def test_get_dofs(e, nverts, nedges):

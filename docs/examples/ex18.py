@@ -41,11 +41,9 @@ where :math:`\boldsymbol{rot}` is the adjoint of :math:`\mathrm{rot}`:
 
 """
 from skfem import *
-from skfem.io.json import from_file
 from skfem.models.poisson import vector_laplace, mass, laplace
 from skfem.models.general import divergence, rot
 
-from pathlib import Path
 
 import numpy as np
 

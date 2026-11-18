@@ -6,11 +6,11 @@ from skfem.helpers import dot, div
 
 
 p = np.linspace(0, 1, 10)
-m = MeshTet.init_tensor(*(p,) * 3)
+m = MeshTet.init_tensor(*(p,) * 3).with_defaults()
 
 e = ElementTetRT1() * ElementTetP0()
 basis = Basis(m, e)
-fbasis = basis.boundary()
+fbasis = basis.boundary('right')
 
 
 @BilinearForm
@@ -22,8 +22,7 @@ def bilinf(sigma, u, tau, v, w):
 def linf(tau, v, w):
     return (dot(tau, w.n)
             * np.sin(np.pi * w.x[1])
-            * np.sin(np.pi * w.x[2])
-            * np.isclose(w.x[0], 1))
+            * np.sin(np.pi * w.x[2]))
 
 
 A = asm(bilinf, basis)

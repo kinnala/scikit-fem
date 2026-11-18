@@ -47,8 +47,8 @@ from skfem.models.poisson import laplace, mass
 # refined towards the centre, where the correlations are evaluated
 mesh = MeshTri().refined(2)
 for _ in range(3):
-    cx, cy = mesh.p[:, mesh.t].mean(1)
-    mesh = mesh.refined(np.nonzero(np.hypot(cx - .5, cy - .5) < .45)[0])
+    mesh = mesh.refined(mesh.elements_satisfying(
+        lambda x: np.hypot(x[0] - .5, x[1] - .5) < .45))
 
 basis = Basis(mesh, ElementTriP1())
 x, y = basis.doflocs

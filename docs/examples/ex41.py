@@ -32,9 +32,9 @@ y = solve(*condense(A, f, D=out[0]['boundary']['line'].astype(np.int32)))
 
 def visualize():
     from skfem.visuals.matplotlib import plot, draw
-    ax = plot(basis_tri, y, Nrefs=4, colorbar=True)
+    ax = plot(basis_tri, y, nrefs=4, colorbar=True)
     draw(basis_tri, ax=ax)
-    plot(basis_quad, y, ax=ax, Nrefs=4)
+    plot(basis_quad, y, ax=ax, nrefs=4)
     draw(basis_quad, ax=ax)
     return ax
 

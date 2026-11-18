@@ -136,8 +136,18 @@ class Form:
         return COOData(*self._assemble(*args, **kwargs))  # type: ignore
 
     def coo_data(self, *args, **kwargs):
-        # for backwards compatibility
-        # use Form.elemental instead
+        """Build elemental matrices without full assembly.
+
+        .. deprecated:: 13.0.0
+           Use :meth:`~skfem.assembly.form.Form.elemental` instead.
+
+        """
+        warn("Form.coo_data is deprecated. Use Form.elemental instead.",
+             DeprecationWarning, stacklevel=2)
+        return self._coo_data(*args, **kwargs)
+
+    def _coo_data(self, *args, **kwargs) -> COOData:
+        # used by asm; unlike Form.elemental, never overridden in subclasses
         return COOData(*self._assemble(*args, **kwargs))
 
     @staticmethod

@@ -25,9 +25,6 @@ class OrientedBoundary(ndarray):
         self.ori = getattr(obj, 'ori', None)
 
 
-_REMOVAL_REGISTRY = []
-
-
 class Removed:
 
     __slots__ = ("_version", "_message", "_era", "_qualname", "__doc__")
@@ -38,7 +35,6 @@ class Removed:
         self._message = message
         self._era = era
         self.__doc__ = f"Removed in {version}. {message}"
-        _REMOVAL_REGISTRY.append(self)
 
     def __set_name__(self, owner, name):
         # fires only for assignment inside a class body
@@ -63,7 +59,3 @@ class Removed:
 
     def __repr__(self):
         return f"<removed in {self._version}: {self._qualname}>"
-
-    def as_dict(self):
-        return {"name": self._qualname, "version": self._version,
-                "message": self._message, "era": self._era}

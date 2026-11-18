@@ -13,6 +13,10 @@ from skfem.distributed import distribute, allreduce  # noqa
 # removed names, kept importable for their migration messages
 from skfem.assembly import (InteriorBasis, ExteriorFacetBasis,  # noqa
                             BoundaryFacetBasis)
+from skfem.element import (ElementVectorH1, ElementTriDG,  # noqa
+                           ElementQuadDG, ElementHexDG, ElementTetDG,
+                           ElementTriMini, ElementTriCCR, ElementTriRT0,
+                           ElementTetRT0, ElementQuadRT0, ElementTetN0)
 
 from skfem.assembly import __all__ as all_assembly
 from skfem.mesh import __all__ as all_mesh

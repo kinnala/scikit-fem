@@ -3,9 +3,9 @@ import unittest
 import numpy as np
 
 from skfem import BilinearForm, CellBasis, LinearForm, asm, solve
-from skfem.element import (ElementTetP0, ElementTetRT0, ElementTriP0,
-                           ElementTriRT0, ElementTriBDM1, ElementDG,
-                           ElementQuadRT0, ElementQuad0, ElementTriRT2,
+from skfem.element import (ElementTetP0, ElementTetRT1, ElementTriP0,
+                           ElementTriRT1, ElementTriBDM1, ElementDG,
+                           ElementQuadRT1, ElementQuad0, ElementTriRT2,
                            ElementTriP1, ElementHexRT1, ElementHex0)
 from skfem.mesh import MeshTet, MeshTri, MeshQuad, MeshHex
 
@@ -128,7 +128,7 @@ class ConvergenceRaviartThomas(unittest.TestCase):
         return np.sqrt(np.sum(np.sum(((divuh - divu(x)) ** 2) * dx, axis=1)))
 
     def create_basis(self, m):
-        e = ElementTriRT0()
+        e = ElementTriRT1()
         e0 = ElementTriP0()
         return (CellBasis(m, e, intorder=2),
                 CellBasis(m, e0, intorder=2))
@@ -176,7 +176,7 @@ class ConvergenceQuadRT0(ConvergenceRaviartThomas):
     L2bound = 0.03
 
     def create_basis(self, m):
-        b = CellBasis(m, ElementQuadRT0())
+        b = CellBasis(m, ElementQuadRT1())
         return (b, b.with_element(ElementQuad0()))
 
     def setUp(self):
@@ -191,7 +191,7 @@ class ConvergenceRaviartThomas3D(ConvergenceRaviartThomas):
     L2bound = 0.05
 
     def create_basis(self, m):
-        e = ElementTetRT0()
+        e = ElementTetRT1()
         e0 = ElementTetP0()
         return (CellBasis(m, e, intorder=2),
                 CellBasis(m, e0, intorder=2))

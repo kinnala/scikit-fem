@@ -8,7 +8,8 @@ from numpy.testing import assert_almost_equal
 from skfem.assembly import CellBasis, Basis, LinearForm, asm, BilinearForm
 from skfem.element import ElementTriP1, ElementQuad1, ElementTriP2
 from skfem.mesh import MeshTri, MeshQuad
-from skfem.utils import enforce, condense, solve, mpc, solver_eigen_scipy
+from skfem.utils import (enforce, condense, solve, mpc, solver_eigen_scipy,
+                         solver_iter_cg)
 from skfem.models import laplace, mass, unit_load
 
 
@@ -204,7 +205,7 @@ def test_simple_cg_solver():
     m = MeshTri().refined(3)
     basis = CellBasis(m, ElementTriP1())
 
-    A0 = laplace.coo_data(basis)
+    A0 = laplace.elemental(basis)
     A1 = laplace.assemble(basis)
 
     f = unit_load.assemble(basis)
@@ -212,12 +213,23 @@ def test_simple_cg_solver():
     D = m.boundary_nodes()
 
     x1 = solve(*condense(A1, f, D=D))
+    x2 = solve(*condense(A1, f, D=D), solver=solver_iter_cg())
 
     f[D] = 0
 
-    x0 = A0.solve(f, D=D)
+    with pytest.warns(DeprecationWarning):
+        x0 = A0.solve(f, D=D)
 
     assert_almost_equal(x0, x1)
+    assert_almost_equal(x2, x1)
+
+
+def test_coo_data_deprecated():
+
+    basis = CellBasis(MeshTri().refined(), ElementTriP1())
+    with pytest.warns(DeprecationWarning):
+        A0 = laplace.coo_data(basis)
+    assert_almost_equal(A0.toarray(), laplace.elemental(basis).toarray())
 
 
 def test_mpc_periodic():

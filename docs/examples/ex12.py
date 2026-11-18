@@ -17,11 +17,9 @@ problem, the maximum of the solution (normalized by the area) is the
 evaluated by interpolation.
 
 """
-from pathlib import Path
 
 from skfem import *
 from skfem.models.poisson import laplace, unit_load
-from skfem.io.json import from_file
 
 import numpy as np
 

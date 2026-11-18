@@ -276,7 +276,16 @@ class COOData:
         maxiters
             The maximum number of iterations before forced termination.
 
+        .. deprecated:: 13.0.0
+           Use :func:`~skfem.utils.solve` together with
+           :func:`~skfem.utils.solver_iter_cg` instead, e.g.,
+           ``solve(*condense(A, b, D=D), solver=solver_iter_cg())``.
+
         """
+        warnings.warn("COOData.solve is deprecated. Use skfem.utils.solve "
+                      "with solver_iter_cg instead, e.g., "
+                      "solve(*condense(A, b, D=D), solver=solver_iter_cg()).",
+                      DeprecationWarning, stacklevel=2)
         x = b
         r = b - self.dot(x, D=D)
         p = r

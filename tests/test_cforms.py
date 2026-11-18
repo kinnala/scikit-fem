@@ -6,12 +6,12 @@ import pytest
 
 from skfem import (BilinearForm, LinearForm, Basis, FacetBasis, MeshTri,
                    MeshTet, MeshQuad, MeshHex, MeshLine, ElementTriP2,
-                   ElementTetP1, ElementQuad2, ElementTriMini, ElementDG,
+                   ElementTetP1, ElementQuad2, ElementTriP1B, ElementDG,
                    ElementTetP2, ElementLineP2, ElementVector, ElementTriP1,
                    ElementHex1, MeshTri2, MeshQuad2, ElementLineP1,
-                   ElementTriRT0, ElementTriRT1, ElementTriRT2, ElementTriBDM1,
+                   ElementTriRT1, ElementTriRT2, ElementTriBDM1,
                    ElementTetRT1, ElementHexRT1, ElementTriN3, ElementQuadN1,
-                   ElementTetN0, ElementTetN1, ElementTriP3, ElementTriP4,
+                   ElementTetN1, ElementTriP3, ElementTriP4,
                    ElementTriP1DG, ElementQuad1)
 from skfem.helpers import (dot, grad, inner, ddot, sym_grad, div, curl,
                            mul)
@@ -50,7 +50,7 @@ SCALAR = [
     (MeshTri().refined(3), ElementTriP2()),
     (MeshTet().refined(2), ElementTetP1()),
     (MeshQuad().refined(3), ElementQuad2()),
-    (MeshTri().refined(2), ElementTriMini()),
+    (MeshTri().refined(2), ElementTriP1B()),
     (MeshTet().refined(1), ElementDG(ElementTetP2())),
     (MeshLine().refined(3), ElementLineP2()),
 ]
@@ -353,7 +353,7 @@ def _distorted(m, seed=0):
 
 
 @pytest.mark.parametrize("make,form", [
-    (lambda: Basis(_shuffled(MeshTri().refined(2)), ElementTriRT0()), _hdiv),
+    (lambda: Basis(_shuffled(MeshTri().refined(2)), ElementTriRT1()), _hdiv),
     (lambda: Basis(_shuffled(MeshTri().refined(2)), ElementTriRT2()), _hdiv),
     (lambda: Basis(_shuffled(MeshTri().refined(2)), ElementTriBDM1()),
      _hdiv),
@@ -398,7 +398,7 @@ def _maxwell(E, p, F, q, w):
     (lambda: Basis(_shuffled(MeshTri().refined(2)),
                    ElementTriRT1() * ElementDG(ElementTriP1())), _mixed),
     (lambda: Basis(_shuffled(MeshTet().refined(1)),
-                   ElementTetN0() * ElementTetP1()), _maxwell),
+                   ElementTetN1() * ElementTetP1()), _maxwell),
     (lambda: Basis(_distorted(MeshQuad().refined(3)),
                    ElementVector(ElementQuad2()) * ElementQuad1(),
                    elements=lambda x: x[0] < .6), _stokes),

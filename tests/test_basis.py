@@ -13,12 +13,12 @@ from skfem.mesh import (Mesh, MeshTri, MeshTet, MeshHex,
 from skfem.assembly import (CellBasis, FacetBasis, Functional,
                             InteriorFacetBasis)
 from skfem.mapping import MappingIsoparametric
-from skfem.element import (ElementVectorH1, ElementTriP2, ElementTriP1,
+from skfem.element import (ElementVector, ElementTriP2, ElementTriP1,
                            ElementTetP2, ElementHexS2, ElementHex2,
                            ElementQuad2, ElementLineP2, ElementTriP0,
                            ElementQuad1, ElementTetP1, ElementHex1,
                            ElementLineP1, ElementLineMini, ElementWedge1,
-                           ElementTriRT0, ElementQuadRT0)
+                           ElementTriRT1, ElementQuadRT1)
 from skfem.helpers import dot, grad
 from skfem.utils import enforce
 from skfem.io.meshio import to_meshio, from_meshio
@@ -39,7 +39,7 @@ class TestCompositeSplitting(TestCase):
             'rest': lambda x: x[1] != 1.,
         })
 
-        e = ElementVectorH1(ElementTriP2()) * ElementTriP1()
+        e = ElementVector(ElementTriP2()) * ElementTriP1()
 
         basis = CellBasis(m, e)
 
@@ -268,8 +268,8 @@ def test_interpolator_probes(mtype, e, nrefs, npoints):
     "element,components",
     [
         (ElementTriP1(), ()),
-        (ElementVectorH1(ElementTriP1()), (2,)),
-        (ElementVectorH1(ElementVectorH1(ElementTriP1())), (2, 2)),
+        (ElementVector(ElementTriP1()), (2,)),
+        (ElementVector(ElementVector(ElementTriP1())), (2, 2)),
     ],
 )
 @pytest.mark.parametrize("dtype", [np.float64, np.complex128])
@@ -381,8 +381,8 @@ def test_pickling():
     "m, e, fun",
     [
         (MeshTri(), ElementTriP1(), lambda x: x[0]),
-        (MeshTri(), ElementTriRT0(), lambda x: x),
-        (MeshQuad(), ElementQuadRT0(), lambda x: x),
+        (MeshTri(), ElementTriRT1(), lambda x: x),
+        (MeshQuad(), ElementQuadRT1(), lambda x: x),
     ]
 )
 def test_basis_project(m, e, fun):
@@ -463,8 +463,8 @@ def test_basis_project_grad():
     "m, e",
     [
         (MeshTri(), ElementTriP1()),
-        (MeshTri(), ElementTriRT0()),
-        (MeshQuad(), ElementQuadRT0()),
+        (MeshTri(), ElementTriRT1()),
+        (MeshQuad(), ElementQuadRT1()),
         (MeshTri(), ElementTriP2() * ElementTriP1()),
     ]
 )
@@ -482,7 +482,7 @@ def test_basis_interpolate_project(m, e):
     "e",
     [
         ElementTriP2(),
-        ElementVectorH1(ElementTriP1()),
+        ElementVector(ElementTriP1()),
         ElementTriP2() * ElementTriP1(),
     ],
 )
@@ -706,7 +706,8 @@ class TestZerosOnes(TestCase):
 def test_with_elements():
     mesh = MeshTri().refined(3).with_subdomains({'a': lambda x: x[0] < .5})
     basis = CellBasis(mesh, ElementTriP0())
-    basis_half = basis.with_elements('a')
+    with pytest.warns(DeprecationWarning):
+        basis_half = basis.with_elements('a')
 
     assert basis.mesh == basis_half.mesh
     assert basis.elem == basis_half.elem

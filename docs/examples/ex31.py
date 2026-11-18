@@ -50,5 +50,5 @@ if __name__ == '__main__':
 
     from skfem.visuals.matplotlib import *
     ax = draw(m)
-    plot(basis, x[:, 6], Nrefs=6, ax=ax)
+    plot(basis, x[:, 6], nrefs=6, ax=ax)
     savefig(f'{name}_eigenmode.png')

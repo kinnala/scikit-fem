@@ -95,7 +95,7 @@ if __name__ == '__main__':
     psi = solve(*condense(A, b, D=psibasis.get_dofs()))
 
     # plot the streamfunction
-    ax = plot(psibasis, psi, Nrefs=2, shading='gouraud', colorbar=True,
+    ax = plot(psibasis, psi, nrefs=2, shading='gouraud', colorbar=True,
               levels=[-0.1, -0.05, -0.01, -0.001, -0.0001, -0.00001, 0.00001, 0.0001])
     ax.set_title("Streamfunction, Re = {}".format(Re))
     plt.savefig('ex58.png')
