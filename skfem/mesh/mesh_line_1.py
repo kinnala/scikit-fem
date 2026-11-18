@@ -85,7 +85,8 @@ class MeshLine1(MeshSimplex, Mesh):
                       np.arange(self.t.shape[1])]
 
         def finder(x):
-            xin = x.copy()  # bring endpoint inside for np.digitize
+            # bring endpoint inside for np.digitize
+            xin = x.astype(np.result_type(x.dtype, self.p.dtype))
             xin[x == self.p[0, ix[-1]]] = self.p[0, ix[-2:]].mean()
             elems = np.nonzero(ix[np.digitize(xin, self.p[0, ix])][:, None]
                                == maxt)[1].astype(np.int32)

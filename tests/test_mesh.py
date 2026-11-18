@@ -12,7 +12,7 @@ from skfem.mesh import (Mesh, MeshHex, MeshLine, MeshQuad, MeshTet, MeshTri,
                         MeshTri2, MeshQuad2, MeshTet2, MeshHex2)
 from skfem.assembly import Basis, Functional, FacetBasis
 from skfem.element import (ElementTetP1, ElementTriP0, ElementQuad0,
-                           ElementHex0, ElementTriP1)
+                           ElementHex0, ElementTriP1, ElementLineP1)
 from skfem.io.meshio import to_meshio, from_meshio
 from skfem.helpers import dot
 
@@ -365,6 +365,35 @@ class TestMirrored(TestCase):
 
         self.assertEqual(len(m.boundary_facets()), 6)
         self.assertEqual(m.nvertices, 6)
+
+
+@pytest.mark.parametrize('kind', ['nonuniform', 'negative', 'refined'])
+@pytest.mark.parametrize('dtype', [np.int32, np.int64, np.uint64,
+                                  np.float32, np.float64])
+@pytest.mark.parametrize('renumbered', [False, True])
+def test_line_endpoint_evaluation(kind, dtype, renumbered):
+    if kind == 'refined':
+        mesh = MeshLine().refined(2)
+    else:
+        vertices = [0., .75, 1.] if kind == 'nonuniform' else [-1., -.25, 0.]
+        mesh = MeshLine(np.array(vertices))
+    if renumbered:
+        permutation = np.arange(mesh.nvertices)[::-1]
+        mesh = MeshLine(mesh.p[:, permutation], np.argsort(permutation)[mesh.t])
+    basis = Basis(mesh, ElementLineP1())
+    endpoint = mesh.p[0].max()
+    query = np.array([endpoint], dtype=dtype)
+    original_query = query.copy()
+    right_node = np.argmax(mesh.p[0])
+    expected_cell = np.flatnonzero(np.any(mesh.t == right_node, axis=0))[0]
+
+    assert_array_equal(mesh.element_finder()(query), [expected_cell])
+    values = basis.interpolator(basis.doflocs[0] ** 2)(query[None, :])
+    np.testing.assert_allclose(values, [endpoint ** 2])
+    expected_load = np.zeros(basis.N)
+    expected_load[np.argmax(basis.doflocs[0])] = 1.
+    np.testing.assert_allclose(basis.point_source(query), expected_load, atol=1e-14)
+    assert_array_equal(query, original_query)
 
 
 class TestFinder1DRefined(TestCase):
