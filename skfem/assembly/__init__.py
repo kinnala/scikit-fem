@@ -50,7 +50,8 @@ import logging
 from typing import Any
 from itertools import product
 
-from .basis import Basis, CellBasis, FacetBasis, InteriorFacetBasis
+from .basis import (Basis, CellBasis, FacetBasis, InteriorFacetBasis,
+                    EdgeBasis, SkeletonBasis)
 # removed names, kept importable for their migration messages
 from .basis import (InteriorBasis, ExteriorFacetBasis,  # noqa: F401
                     BoundaryFacetBasis)
@@ -111,6 +112,8 @@ __all__ = [
     "CellBasis",
     "FacetBasis",
     "InteriorFacetBasis",
+    "EdgeBasis",
+    "SkeletonBasis",
     "Dofs",
     "DofsView",
     "TrilinearForm",

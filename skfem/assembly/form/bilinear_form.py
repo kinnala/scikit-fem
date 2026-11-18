@@ -151,6 +151,100 @@ class BilinearForm(Form):
         logger.info("Assembling finished.")
         return mat
 
+    def assemble_blocks(self, ubasis, vbasis=None, **kwargs):
+        """Assemble the bilinear form and split it into blocks.
+
+        The blocks correspond to the solution components, e.g., the
+        elements of :class:`~skfem.element.ElementComposite`, the
+        components of :class:`~skfem.element.ElementVector`, or the bases of
+        :class:`~skfem.assembly.basis.CompositeBasis`.  The DOFs of each
+        component are numbered as in
+        :meth:`~skfem.assembly.CellBasis.split`.
+
+        >>> from skfem import (BilinearForm, Basis, MeshTri, ElementTriP2,
+        ...                    ElementTriP1, ElementVector)
+        >>> from skfem.helpers import ddot, grad, div
+        >>> @BilinearForm
+        ... def stokes(u, p, v, q, w):
+        ...     return ddot(grad(u), grad(v)) - div(u) * q - div(v) * p
+        >>> basis = Basis(MeshTri(), ElementVector(ElementTriP2())
+        ...               * ElementTriP1())
+        >>> (A, B), (C, D) = stokes.assemble_blocks(basis)
+        >>> A.shape, B.shape, C.shape, D.shape
+        ((18, 18), (18, 4), (4, 18), (4, 4))
+
+        Parameters
+        ----------
+        ubasis
+            The :class:`~skfem.assembly.Basis` for ``u``.
+        vbasis
+            Optionally, specify a different :class:`~skfem.assembly.Basis`
+            for ``v``.
+        **kwargs
+            Any additional keyword arguments are appended to ``w``.
+
+        Returns
+        -------
+        list
+            The sparse matrices ``blocks[i][j]`` of the ``i``'th component
+            of ``v`` and the ``j``'th component of ``u``.
+
+        """
+        vbasis = ubasis if vbasis is None else vbasis
+        if self._distributed_dofs(ubasis, vbasis) is not None:
+            raise NotImplementedError("Distributed meshes not supported.")
+        rows = self._components(vbasis)
+        cols = self._components(ubasis)
+        mat = self.assemble(ubasis, vbasis, **kwargs).tocsr()
+        return [[mat[r][:, c] for c in cols] for r in rows]
+
+    def elemental_blocks(self, ubasis, vbasis=None, **kwargs):
+        """Like :meth:`assemble_blocks` but return the elemental matrices.
+
+        The blocks are :class:`~skfem.assembly.form.COOData` objects
+        supporting, e.g., :meth:`~skfem.assembly.form.COOData.tolocal`
+        and :meth:`~skfem.assembly.form.COOData.inverse`.  Use
+        ``tocsr()`` to obtain the sparse matrices of
+        :meth:`assemble_blocks`.
+
+        Parameters
+        ----------
+        ubasis
+            The :class:`~skfem.assembly.Basis` for ``u``.
+        vbasis
+            Optionally, specify a different :class:`~skfem.assembly.Basis`
+            for ``v``.
+        **kwargs
+            Any additional keyword arguments are appended to ``w``.
+
+        Returns
+        -------
+        list
+            The blocks ``blocks[i][j]`` of the ``i``'th component of ``v``
+            and the ``j``'th component of ``u``.
+
+        """
+        vbasis = ubasis if vbasis is None else vbasis
+        local = self.elemental(ubasis, vbasis, **kwargs).tolocal()
+        vdofs, udofs = vbasis.element_dofs, ubasis.element_dofs
+        blocks = []
+        for vloc, vrenum, vn in self._local_components(vbasis):
+            row = []
+            for uloc, urenum, un in self._local_components(ubasis):
+                block = local[:, vloc][:, :, uloc]
+                rix = np.broadcast_to(vrenum[vdofs[vloc]].T[:, :, None],
+                                      block.shape)
+                cix = np.broadcast_to(urenum[udofs[uloc]].T[:, None, :],
+                                      block.shape)
+                row.append(COOData(
+                    np.array([rix.T.flatten('C'), cix.T.flatten('C')]),
+                    block.T.flatten('C'),
+                    (vn, un),
+                    (len(vloc), len(uloc)),
+                ))
+            blocks.append(row)
+        return blocks
+
     def _kernel(self, u, v, w, dx):
         return self._integrate(self.form(*u, *v, w), dx)
 

@@ -278,6 +278,28 @@ class CellBasis(AbstractBasis):
             quadrature=quadrature,
         )
 
+    def skeleton(self,
+                 elem: Element,
+                 intorder: Optional[int] = None,
+                 quadrature: Optional[Tuple[ndarray, ndarray]] = None):
+        """Return :class:`~skfem.assembly.SkeletonBasis` for hybridization.
+
+        Parameters
+        ----------
+        elem
+            The element for the function defined on the facets of the mesh,
+            e.g., :class:`~skfem.element.ElementLineP1DG` for triangular
+            meshes.
+        intorder
+            Optionally, specify integration order.
+        quadrature
+            Optionally, specify quadrature.
+
+        """
+        from skfem.assembly.basis.skeleton_basis import SkeletonBasis
+        return SkeletonBasis(self, elem, intorder=intorder,
+                             quadrature=quadrature)
+
     def project(self, interp, elements=None, dtype=None):
         """Perform :math:`L^2` projection onto the basis.
 

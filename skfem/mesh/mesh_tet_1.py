@@ -189,16 +189,12 @@ class MeshTet1(MeshSimplex, Mesh3D):
                                   return_inverse=True)
                 ix = ix.flatten()[m.nfacets:]
             new_facets = ix.reshape(4, -1).astype(np.int32)
-            facets, t2f = m._facets, m._t2f
-            m = replace(
-                m,
-                _boundaries={
-                    name: np.sort(new_facets[:, ixs].flatten())
-                    for name, ixs in self._boundaries.items()
-                },
-            )
-            # keep the facets already built for the refined mesh
-            m._facets, m._t2f = facets, t2f
+            m = m._replace(_boundaries=m._transfer_boundaries(
+                self,
+                new_facets,
+                np.broadcast_to(np.arange(self.nfacets, dtype=np.int32),
+                                new_facets.shape),
+            ))
 
         return m
 
@@ -282,6 +278,9 @@ class MeshTet1(MeshSimplex, Mesh3D):
         t = np.zeros((4, 8 * nt), dtype=np.int32)
         p[:, :nv] = self.p.copy()
         t[:, :nt] = self.t.copy()
+        # the original element containing each element
+        parent_t = np.zeros(8 * nt, dtype=np.int32)
+        parent_t[:nt] = np.arange(nt, dtype=np.int32)
 
         nonconf = np.ones(8 * nv, dtype=np.int8)
         split_edge = np.zeros((3, 8 * nv), dtype=np.int32)
@@ -345,6 +344,7 @@ class MeshTet1(MeshSimplex, Mesh3D):
             # add new elements
             t[:, marked] = np.vstack((t3, t0, t2, tnew))
             t[:, nt:(nt + nm)] = np.vstack((t2, t1, t3, tnew))
+            parent_t[nt:(nt + nm)] = parent_t[marked]
             nt += nm
 
             check = np.nonzero(nonconf[:ns])[0].astype(np.int32)
@@ -363,12 +363,16 @@ class MeshTet1(MeshSimplex, Mesh3D):
             nonconf[check[i]] = 1
             marked = np.unique(j)
 
+        parent_t = parent_t[:nt]
         m = replace(
             self,
             doflocs=p[:, :nv],
             t=t[:, :nt],
             _boundaries=None,
-            _subdomains=None,
+            _subdomains={
+                name: np.nonzero(np.isin(parent_t, ixs))[0].astype(np.int32)
+                for name, ixs in self._subdomains.items()
+            } if self._subdomains else None,
         )
 
         if self._boundaries:
@@ -383,13 +387,11 @@ class MeshTet1(MeshSimplex, Mesh3D):
                               axis=1,
                               return_inverse=True)
             parent = ix.flatten()[self.nfacets:]
-            m = replace(
-                m,
-                _boundaries={
-                    name: onfacet[np.isin(parent, ixs)].astype(np.int32)
-                    for name, ixs in self._boundaries.items()
-                },
-            )
+            m = m._replace(_boundaries=m._transfer_boundaries(
+                self,
+                onfacet,
+                parent,
+            ))
 
         return m
 

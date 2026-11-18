@@ -32,4 +32,4 @@ class MeshQuad2(Mesh2D2, MeshQuad1):
     elem: Type[Element] = ElementQuad2
 
     def _uniform(self):
-        return MeshQuad2.from_mesh(MeshQuad1.from_mesh(self).refined())
+        return self._refined_via(MeshQuad1)

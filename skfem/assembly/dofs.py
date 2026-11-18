@@ -689,6 +689,50 @@ class Dofs:
             doflocs
         )
 
+    def get_edge_dofs(
+            self,
+            edges: ndarray,
+            skip_dofnames: Optional[List[str]] = None,
+            doflocs: Optional[ndarray] = None
+    ) -> DofsView:
+        """Return a subset of DOFs corresponding to the given edges.
+
+        The DOFs of the vertices and the edges are included; for
+        three-dimensional meshes only.
+
+        Parameters
+        ----------
+        edges
+            An array of edge indices.
+        skip_dofnames
+            An array of dofnames to skip.
+
+        """
+        nodal_ix = (np.empty((0,), dtype=np.int32)
+                    if self.element.nodal_dofs == 0
+                    else np.unique(self.topo.edges[:, edges]))
+        edge_ix = (np.empty((0,), dtype=np.int32)
+                   if self.element.edge_dofs == 0
+                   else np.unique(edges).astype(np.int32))
+
+        if skip_dofnames is None:
+            skip_dofnames = []
+
+        r1, r2, r3, r4 = self._dofnames_to_rows(skip_dofnames, skip=True)
+
+        return DofsView(
+            self,
+            nodal_ix,
+            np.empty((0,), dtype=np.int32),
+            edge_ix,
+            np.empty((0,), dtype=np.int32),
+            r1,
+            r2,
+            r3,
+            r4,
+            doflocs
+        )
+
     def get_facet_dofs(
             self,
             facets: ndarray,

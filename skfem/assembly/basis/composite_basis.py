@@ -102,6 +102,18 @@ class CompositeBasis(AbstractBasis):
             Nbfun += basis.Nbfun
         return Nbfun
 
+    def split_indices(self):
+        """Return indices for the components, i.e. the bases."""
+        if self.equal_dofnum:
+            return [np.arange(self.N, dtype=np.int32) for _ in self.bases]
+        offsets = np.cumsum([0] + [basis.N for basis in self.bases])
+        return [np.arange(offsets[i], offsets[i + 1], dtype=np.int32)
+                for i in range(len(self.bases))]
+
+    def split_bases(self):
+        """Return the bases."""
+        return list(self.bases)
+
     def split(self, x):
         if self.equal_dofnum:
             return [(x, basis) for basis in self.bases]

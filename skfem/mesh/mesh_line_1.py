@@ -40,12 +40,13 @@ class MeshLine1(MeshSimplex, Mesh):
         p, t = self.doflocs, self.t
 
         newp = np.hstack((p, p[:, t].mean(axis=1)))
-        newt = np.empty((t.shape[0], 2 * t.shape[1]),
-                        dtype=t.dtype)
-        newt[0, ::2] = t[0]
-        newt[0, 1::2] = p.shape[1] + np.arange(t.shape[1])
-        newt[1, ::2] = newt[0, 1::2]
-        newt[1, 1::2] = t[1]
+        mid = p.shape[1] + np.arange(t.shape[1], dtype=t.dtype)
+        # the children of element i are i and i + nt, like for the other
+        # mesh types, so that Mesh.refined can remap the subdomains
+        newt = np.hstack((
+            np.vstack((t[0], mid)),
+            np.vstack((mid, t[1])),
+        ))
 
         return replace(
             self,

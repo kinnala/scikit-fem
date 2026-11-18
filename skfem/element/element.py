@@ -1,3 +1,4 @@
+from warnings import warn
 from typing import Optional, List, Type, Tuple
 from types import MethodType
 from copy import deepcopy
@@ -160,7 +161,9 @@ class Element:
 
     def condensed(self):
         """Return two elements: one for interior and one for other DOFs."""
-
+        warn("Element.condensed is deprecated. "
+             "Use instead Form.elemental_blocks and "
+             "separate Element classes.", DeprecationWarning)
         eo = deepcopy(self)
         eo.interior_dofs = 0
 

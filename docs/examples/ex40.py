@@ -1,61 +1,66 @@
 """Hybridizable discontinuous Galerkin method.
 
-This examples solves the Poisson equation with unit load using a technique
-where the finite element basis is first discontinous across element edges and
+This example solves the Poisson equation with unit load using a technique
+where the finite element basis is first discontinuous across element edges and
 then the continuity is recovered with the help of Lagrange multipliers defined
-on the mesh skeleton (i.e. a "skeleton mesh" consisting only of the edges of
-the original mesh).
+on the mesh skeleton, i.e. a mesh consisting only of the edges of the original
+mesh.  The pair of bases, the traces of the discontinuous basis functions and
+the basis on the mesh skeleton, is given by
+:class:`~skfem.assembly.SkeletonBasis` which evaluates them over the edges of
+each element.
 
-As usual for these so-called "hybridizable" methods, the resulting system can
-be condensed to the skeleton mesh only using Schur's complement.  However, this
-is not done here as the example is meant to simply demonstrate the use of
-finite elements defined on the mesh skeleton.
+As usual for these so-called "hybridizable" methods, the discontinuous unknowns
+are eliminated element-by-element (static condensation) so that the resulting
+linear system is defined on the mesh skeleton only.
 
 """
 
 from skfem import *
-from skfem.helpers import grad, dot, jump
-import numpy as np
+from skfem.helpers import grad, dot
 
 m = MeshTri().refined(3)
-e = ElementTriP1DG() * ElementTriSkeletonP1()
-ibasis = Basis(m, e)
-tbasis1 = InteriorFacetBasis(m, e, side=0)
-tbasis2 = InteriorFacetBasis(m, e, side=1)
-fbasis = FacetBasis(m, e)
+basis = Basis(m, ElementTriP1DG())
+sbasis = basis.skeleton(ElementLineP1DG())
 
 
 @BilinearForm
-def laplace(u, ut, v, vt, w):
+def laplace(u, v, w):
     return dot(grad(u), grad(v))
+
 
 @BilinearForm
 def hdg(u, ut, v, vt, w):
-    # outwards normal
-    n = jump(w, w.n)
-    return dot(n, grad(u)) * (vt - v) + dot(n, grad(v)) * (ut - u)\
-        + 1e1 / w.h * (ut - u) * (vt - v)
+    # w.n is the outward normal of each element
+    return (dot(w.n, grad(u)) * (vt - v) + dot(w.n, grad(v)) * (ut - u)
+            + 1e1 / w.h * (ut - u) * (vt - v))
+
 
 @LinearForm
-def load(v, vt, w):
+def load(v, w):
     return 1. * v
 
 
-A = asm(laplace, ibasis)
-B = asm(hdg, [tbasis1, tbasis2, fbasis])
-f = asm(load, ibasis)
+# blocks of the discontinuous (u) and the skeleton (ut) unknowns
+(Ah, B), (C, D) = hdg.elemental_blocks(sbasis)
+lap = laplace.elemental(basis)
 
-y = solve(*condense(A + B, f, D=ibasis.get_dofs()))
+# the block of u is block diagonal: invert element-by-element
+Ainv = lap.fromlocal(lap.tolocal() + Ah.tolocal(sbasis)).inverse().tocsr()
+B, C, D = B.tocsr(), C.tocsr(), D.tocsr()
+f = load.assemble(basis)
 
-(u1, _), (ut, skelebasis) = ibasis.split(y)
+# solve for ut on the mesh skeleton; then recover u element-by-element
+ut = solve(*condense(D - C @ Ainv @ B,
+                     -C @ (Ainv @ f),
+                     D=sbasis.get_dofs()))
+u = Ainv @ (f - B @ ut)
+
 
 def visualize():
-    from skfem.visuals.matplotlib import plot
-    return plot(skelebasis,
-                ut,
-                Nrefs=4,
-                colorbar=True,
-                shading='gouraud')
+    from skfem.visuals.web import plot
+    ubasis, utbasis = sbasis.split_bases()
+    return plot(utbasis, ut)
+
 
 if __name__ == '__main__':
     visualize().show()

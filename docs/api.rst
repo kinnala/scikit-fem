@@ -14,7 +14,7 @@ Abstract class: Mesh
 --------------------
 
 .. autoclass:: skfem.mesh.Mesh
-   :members: load, save, refined, facets_satisfying, nodes_satisfying, elements_satisfying, with_subdomains, with_boundaries
+   :members: load, save, refined, facets_satisfying, nodes_satisfying, elements_satisfying, edges_satisfying, with_subdomains, with_boundaries, with_paths, boundary_tags, subdomain_tags, path_tags
 
 Class: MeshTri
 **************
@@ -87,7 +87,7 @@ Class: CellBasis
 .. autoclass:: skfem.assembly.Basis
 
 .. autoclass:: skfem.assembly.CellBasis
-   :members: __init__, interpolate, interpolate_multiple, project
+   :members: __init__, interpolate, interpolate_multiple, project, boundary, skeleton
 
 
 Class: FacetBasis
@@ -102,6 +102,18 @@ Class: InteriorFacetBasis
 .. autoclass:: skfem.assembly.InteriorFacetBasis
    :members: __init__
 
+Class: EdgeBasis
+****************
+
+.. autoclass:: skfem.assembly.EdgeBasis
+   :members: __init__
+
+Class: SkeletonBasis
+********************
+
+.. autoclass:: skfem.assembly.SkeletonBasis
+   :members: __init__, split_bases, split, get_dofs
+
 
 Abstract class: Form
 --------------------
@@ -110,13 +122,13 @@ Class: BilinearForm
 *******************
 
 .. autoclass:: skfem.assembly.BilinearForm
-   :members: assemble
+   :members: assemble, assemble_blocks, elemental_blocks
 
 Class: LinearForm
 *****************
 
 .. autoclass:: skfem.assembly.LinearForm
-   :members: assemble
+   :members: assemble, assemble_blocks
 
 Class: Functional
 *****************

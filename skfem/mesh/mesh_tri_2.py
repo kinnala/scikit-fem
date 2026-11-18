@@ -44,7 +44,7 @@ class MeshTri2(Mesh2D2, MeshTri1):
         return cls(m.doflocs / np.linalg.norm(m.doflocs, axis=0), m.t)
 
     def _uniform(self):
-        return MeshTri2.from_mesh(MeshTri1.from_mesh(self).refined())
+        return self._refined_via(MeshTri1)
 
     def _adaptive(self, marked):
-        return MeshTri2.from_mesh(MeshTri1.from_mesh(self).refined(marked))
+        return self._refined_via(MeshTri1, marked)

@@ -4,6 +4,7 @@ from copy import deepcopy
 from functools import partial
 from typing import Any, Callable, Optional, Union, Type
 from inspect import signature
+from warnings import warn
 
 import numpy as np
 from numpy import ndarray
@@ -50,6 +51,8 @@ class Form:
         return form
 
     def block(self, *args):
+        warn("Form.block is deprecated. "
+             "Use instead Form.assemble_blocks.", DeprecationWarning)
         form = deepcopy(self)
         name = form.form.__name__
         form.form = lambda *arg: self.form(
@@ -98,6 +101,35 @@ class Form:
             raise NotImplementedError("Distributed assembly supports only "
                                       "forms with a single basis.")
         return dofs[0]
+
+    @staticmethod
+    def _components(basis):
+        """Global DOFs of each solution component of the basis."""
+        out = basis.split_indices()
+        if sum(len(ix) for ix in out) != basis.N or (
+                len(np.unique(np.concatenate(out))) != basis.N):
+            raise ValueError("The solution components do not partition "
+                             "the DOFs.")
+        return out
+
+    @staticmethod
+    def _local_components(basis):
+        """Local basis functions of each solution component of the basis,
+        and the numbering of the global DOFs within the component."""
+        comp = np.empty(basis.N, dtype=np.int64)
+        renum = np.empty(basis.N, dtype=np.int64)
+        components = Form._components(basis)
+        for c, ix in enumerate(components):
+            comp[ix] = c
+            renum[ix] = np.arange(len(ix))
+        edofs = basis.element_dofs
+        lcomp = comp[edofs]
+        if edofs.shape[1] > 0 and not (lcomp == lcomp[:, :1]).all():
+            raise ValueError("The solution component of a local basis "
+                             "function varies between elements.")
+        lcomp = lcomp[:, 0] if edofs.shape[1] > 0 else np.zeros(0)
+        return [(np.nonzero(lcomp == c)[0], renum, len(ix))
+                for c, ix in enumerate(components)]
 
     def elemental(self, *args, **kwargs) -> COOData:
         """Build elemental matrices without full assembly."""

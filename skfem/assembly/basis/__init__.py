@@ -2,6 +2,8 @@ from .abstract_basis import AbstractBasis  # noqa
 from .cell_basis import CellBasis  # noqa
 from .facet_basis import FacetBasis  # noqa
 from .interior_facet_basis import InteriorFacetBasis  # noqa
+from .edge_basis import EdgeBasis  # noqa
+from .skeleton_basis import SkeletonBasis  # noqa
 from skfem.generic_utils import Removed
 
 # aliases

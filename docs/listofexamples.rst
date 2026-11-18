@@ -183,14 +183,15 @@ for more information.
 Example 40: Hybridizable discontinuous Galerkin method
 ------------------------------------------------------
 
-This examples solves the Poisson equation with unit load using a technique
-where the finite element basis is first discontinous across element edges and
+This example solves the Poisson equation with unit load using a technique
+where the finite element basis is first discontinuous across element edges and
 then the continuity is recovered with the help of Lagrange multipliers defined
 on the mesh skeleton (i.e. a "skeleton mesh" consisting only of the edges of
-the original mesh).
+the original mesh).  The discontinuous unknowns are eliminated
+element-by-element so that the linear system is solved on the skeleton only.
 
 .. plot::
-   :caption: The solution of Example 40 on the skeleton mesh.
+   :caption: The discontinuous solution of Example 40.
 
    from docs.examples.ex40 import visualize
    visualize()
@@ -388,6 +389,23 @@ two nonlinear elastic solids.
    The deformed mesh and stress of Example 51.
 
 See the source code of :exlink:`51` for more information.
+
+Example 59: Elastic beam with embedded rebars
+---------------------------------------------
+
+This example models reinforcement bars embedded in a three-dimensional
+elastic beam.  The bars are one-dimensional bars along tagged mesh edges,
+see :meth:`~skfem.mesh.Mesh.with_paths`, and their axial stiffness is
+assembled using :class:`~skfem.assembly.EdgeBasis`.
+
+.. plot::
+   :caption: The axial force of the bars in Example 59 compared with the beam
+             theory for the transformed cross section.
+
+   from docs.examples.ex59 import visualize
+   visualize()
+
+See the source code of :exlink:`59` for more information.
 
 Fluid mechanics
 ===============
