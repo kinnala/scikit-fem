@@ -100,6 +100,57 @@ def test_index_error():
     assert len(list(a)) == 2
 
 
+@pytest.mark.parametrize('dim', [2, 3])
+@pytest.mark.parametrize('dtype', [np.int64, np.uint64, np.float32, np.float64,
+                                  np.complex64, np.complex128])
+@pytest.mark.parametrize('batched', [False, True])
+def test_inverse_input_dtypes(dim, dtype, batched):
+    A = (3 * np.eye(dim) + np.ones((dim, dim))).astype(dtype)
+    if np.issubdtype(dtype, np.complexfloating):
+        A *= 1. + .25j
+    if batched:
+        scales = np.arange(1, 7, dtype=dtype).reshape(2, 3)
+        A = A[:, :, None, None] * scales
+    original = A.copy()
+    expected = np.moveaxis(np.linalg.inv(np.moveaxis(A, (0, 1), (-2, -1))),
+                           (-2, -1), (0, 1))
+
+    with np.errstate(over='raise', invalid='raise', divide='raise'):
+        result = inv(A)
+
+    assert result.dtype == expected.dtype
+    assert_allclose(result, expected, rtol=2e-5, atol=2e-7)
+    np.testing.assert_array_equal(A, original)
+
+
+@pytest.mark.parametrize('dim', [2, 3])
+def test_inverse_promotes_before_integer_arithmetic(dim):
+    A = (1000 * (3 * np.eye(dim) + np.ones((dim, dim)))).astype(np.int16)
+    original = A.copy()
+    with np.errstate(over='raise', invalid='raise', divide='raise'):
+        result = inv(A)
+    assert_allclose(result, np.linalg.inv(A))
+    np.testing.assert_array_equal(A, original)
+
+
+@pytest.mark.parametrize('dtype', [np.int64, np.uint64, np.float64])
+def test_inverse_in_diffusion_assembly(dtype):
+    basis = Basis(MeshTri().refined(2), ElementTriP1())
+    A = np.array([[2, 1], [1, 2]], dtype=dtype)
+    with np.errstate(over='raise', invalid='raise', divide='raise'):
+        coefficient = inv(A)
+
+    def assemble(tensor):
+        return BilinearForm(lambda u, v, w: dot(mul(tensor, grad(u)),
+                                                grad(v))).assemble(basis)
+
+    actual = assemble(coefficient)
+    expected = assemble(np.array([[2., -1.], [-1., 2.]]) / 3.)
+    assert_allclose(actual.toarray(), expected.toarray(), atol=1e-14)
+    field = basis.mesh.p[0]
+    assert_allclose(field @ actual @ field, 2. / 3.)
+
+
 def densify(f):
     if isinstance(f, tuple):
         return tuple(densify(c) for c in f)
