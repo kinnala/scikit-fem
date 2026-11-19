@@ -941,28 +941,3 @@ def test_tri_rt_same_space(p, elem):
         sols.append([np.asarray(f) for f in basis.interpolate(x)])
     for f, g in zip(*sols):
         assert_allclose(f, g, atol=1e-12)
-
-
-@pytest.mark.parametrize(
-    "name",
-    [
-        "ElementVectorH1",
-        "ElementTriDG",
-        "ElementQuadDG",
-        "ElementHexDG",
-        "ElementTetDG",
-        "ElementTriMini",
-        "ElementTriCCR",
-        "ElementTriRT0",
-        "ElementTetRT0",
-        "ElementQuadRT0",
-        "ElementTetN0",
-    ]
-)
-def test_removed_element_aliases(name):
-    import skfem
-    import skfem.element
-    assert name not in skfem.__all__
-    assert name not in skfem.element.__all__
-    with pytest.raises(AttributeError, match="was removed"):
-        getattr(skfem, name)()

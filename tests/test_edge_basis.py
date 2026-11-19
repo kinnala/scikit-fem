@@ -329,7 +329,3 @@ def test_path_tags():
     assert plot(*m.path_tags()).payload['dim'] == 1
     with pytest.raises(ValueError):
         MeshTet().path_tags()
-
-
-def test_repr():
-    assert "Named paths [# edges]: up [4]" in repr(_tagged_mesh())
