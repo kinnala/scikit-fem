@@ -68,29 +68,29 @@ basis = Basis(mesh, ElementTriP1())
 
 
 @BilinearForm
-def advection(k, l, m):
+def advection(u, v, p):
     """Advection bilinear form."""
 
     # Coordinate fields
-    r, z = m.x
+    r, z = p.x
 
-    u = 1  # velocity scale
+    us = 1  # velocity scale
     a = 1  # ball size
 
     # Stokes flow around a sphere of size `a`
     w = r ** 2 + z ** 2
-    v_r = ((3 * a * r * z * u) / (4 * w**0.5)) * ((a / w) ** 2 - (1 / w))
-    v_z = u + ((3 * a * u) / (4 * w**0.5)) * (
-        (2 * a**2 + 3 * r**2) / (3 * w) - ((a * r) / w) ** 2 - 2
+    v_r = ((3 * a * r * z * us) / (4 * w ** 0.5)) * ((a / w) ** 2 - (1 / w))
+    v_z = us + ((3 * a * us) / (4 * w ** 0.5)) * (
+        (2 * a ** 2 + 3 * r ** 2) / (3 * w) - ((a * r) / w) ** 2 - 2
     )
 
-    return (l * v_r * grad(k)[0] + l * v_z * grad(k)[1]) * 2 * np.pi * r
+    return (v_r * grad(u)[0] * v + v_z * grad(u)[1] * v) * 2 * np.pi * r
 
 
 @BilinearForm
-def claplace(u, v, w):
+def claplace(u, v, p):
     """Laplace operator in cylindrical coordinates."""
-    r = abs(w.x[1])
+    r = abs(p.x[0])
     return dot(grad(u), grad(v)) * 2 * np.pi * r
 
 
@@ -104,7 +104,10 @@ u[basis.get_dofs("ball")] = 0.0
 
 u = solve(*condense(A, x=u, D=basis.get_dofs({"bottom", "ball"})))
 
-if __name__ == "__main__":
 
-    mesh.draw(boundaries=True).show()
-    basis.plot(u, shading='gouraud', cmap='viridis').show()
+def visualize():
+    return basis.plot(u, 'web', cmap='jet')
+
+
+if __name__ == "__main__":
+    visualize().show()

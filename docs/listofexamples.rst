@@ -531,11 +531,15 @@ advection ratio is controlled by the Peclet number.
 The problem is solved in a cylindrical coordinate
 system (hence a different definition of the Laplacian).
 
-.. figure:: https://github.com/turczyneq/fem_advection_diffusion/assets/51670923/271b5b86-71f1-49fb-b32e-3c9d012a29ee
+.. skfem-web::
+   :height: 400
+   :caption: Temperature distribution of Example 50.  Liquid behind the sphere is colder than the incoming one.
 
-   Temperature distribution of Example 50. Liquid behind the sphere is colder than the incoming one.
+   from docs.examples.ex50 import visualize
+   visualize()
 
 See the source code of :exlink:`50` for more information.
+You can also run :wblink:`50` interactively in your browser.
 
 
 Heat transfer
