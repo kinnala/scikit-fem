@@ -21,8 +21,8 @@ from skfem.element import (
     ElementTetMini,
     ElementTetP1,
     ElementTetP2,
-    ElementTriMini,
-    ElementTriCCR,
+    ElementTriP1B,
+    ElementTriP2B,
     ElementTriP1,
     ElementTriP2,
     ElementTriCR,
@@ -33,7 +33,6 @@ from skfem.element import (
     ElementTriP4,
     ElementTriP1G,
     ElementTriP2G,
-    ElementTriP2B,
     ElementQuadDPC,
     ElementHexDPC,
     ElementTetMorley,
@@ -315,7 +314,7 @@ class ConvergenceTriCCR(ConvergenceTriP1):
     rateH1 = 2.0
 
     def create_basis(self, m):
-        e = ElementTriCCR()
+        e = ElementTriP2B()
         return Basis(m, e)
 
 
@@ -339,7 +338,7 @@ class ConvergenceWedge1(ConvergenceTriP1):
 class ConvergenceTriMini(ConvergenceTriP1):
 
     def create_basis(self, m):
-        e = ElementTriMini()
+        e = ElementTriP1B()
         return Basis(m, e)
 
 

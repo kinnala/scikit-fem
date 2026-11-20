@@ -218,11 +218,10 @@ potential difference across the capacitor. Thus
    C = \\frac{2 E}{V^2}.
 
 """
-from packaging import version
 from pathlib import Path
 
-from skfem import (MeshTri, Basis, FacetBasis,
-                   solve, asm, condense, projection,
+from skfem import (MeshTri, Basis,
+                   solve, asm, condense,
                    ElementTriP1)
 from skfem.models.poisson import laplace, unit_load, mass
 from skfem.io.json import from_file
@@ -247,26 +246,19 @@ eps_fep = 2.1
 
 global_basis = Basis(mesh, element)
 inner_conductor_basis = Basis(
-    mesh, element, elements=mesh.subdomains['inner_conductor'])
+    mesh, element, elements='inner_conductor')
 outer_conductor_basis = Basis(
-    mesh, element, elements=mesh.subdomains['outer_conductor'])
+    mesh, element, elements='outer_conductor')
 inner_insulator_basis = Basis(
-    mesh, element, elements=mesh.subdomains['inner_insulator'])
+    mesh, element, elements='inner_insulator')
 outer_insulator_basis = Basis(
-    mesh, element, elements=mesh.subdomains['outer_insulator'])
-
-inner_conductor_outer_surface_basis = FacetBasis(
-    mesh, element, facets=mesh.boundaries['inner_conductor_outer_surface'])
-outer_conductor_inner_surface_basis = FacetBasis(
-    mesh, element, facets=mesh.boundaries['outer_conductor_inner_surface'])
+    mesh, element, elements='outer_insulator')
 
 dofs = {
-    'boundary':
-    global_basis.get_dofs(mesh.boundaries['boundary']),
-    'inner_conductor_outer_surface':
-    global_basis.get_dofs(mesh.boundaries['inner_conductor_outer_surface']),
-    'outer_conductor_inner_surface':
-    global_basis.get_dofs(mesh.boundaries['outer_conductor_inner_surface'])
+    label: global_basis.get_dofs(label)
+    for label in ['boundary',
+                  'inner_conductor_outer_surface',
+                  'outer_conductor_inner_surface']
 }
 
 # functional to compute the integral of a load vector over the domain
@@ -316,8 +308,9 @@ K_elec = (
 voltage = 1
 
 # initialize the non-homogeneous Dirichlet conditions on the conductor surfaces
-U = inner_conductor_outer_surface_basis.project(voltage / 2.)
-U += outer_conductor_inner_surface_basis.project(-voltage / 2.)
+U = global_basis.zeros()
+U[dofs['inner_conductor_outer_surface']] = voltage / 2.
+U[dofs['outer_conductor_inner_surface']] = -voltage / 2.
 D = np.hstack((
     dofs['inner_conductor_outer_surface'],
     dofs['outer_conductor_inner_surface'],

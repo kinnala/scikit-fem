@@ -105,7 +105,7 @@ import numpy as np  # noqa: E402
 
 from skfem import (Basis, ElementTriP1, ElementTriP2, ElementTriP0,  # noqa
                    ElementQuad2, ElementTetP2, ElementHex2, ElementVector,
-                   ElementLineP2, ElementTriRT0, ElementTriMorley,
+                   ElementLineP2, ElementTriRT1, ElementTriMorley,
                    ElementHex1, ElementTriP1DG)
 from skfem.mesh import MeshHex, MeshTri1DG, MeshWedge1  # noqa: E402
 from skfem.visuals.data import sample, VisData  # noqa: E402
@@ -188,7 +188,7 @@ def test_sample_vector_composite():
     assert d.fields == ['u0', 'u1']
     d = sample(b1, {'v': b1.zeros(), 'p': (b2, b2.ones())})
     np.testing.assert_allclose(d.point_data['p'], 1.)
-    d = sample(Basis(m, ElementTriRT0()), Basis(m, ElementTriRT0()).zeros())
+    d = sample(Basis(m, ElementTriRT1()), Basis(m, ElementTriRT1()).zeros())
     assert d.field_shapes['u'] == (2,)
     d = sample(Basis(m, ElementTriMorley()),
                Basis(m, ElementTriMorley()).zeros())

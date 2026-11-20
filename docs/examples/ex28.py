@@ -51,7 +51,6 @@ restricted to the elements belonging to a particular subdomain.
   Thermodynamics, Wicklow, Ireland.
 
 """
-from packaging import version
 from pathlib import Path
 
 from skfem import *
@@ -73,8 +72,8 @@ mesh = Mesh.load(Path(__file__).parent / 'meshes' / 'ex28.msh')
 element = ElementTriP1()
 basis = {
     'heat': Basis(mesh, element),
-    'fluid': Basis(mesh, element, elements=mesh.subdomains['fluid']),
-    **{label: FacetBasis(mesh, element, facets=mesh.boundaries[label])
+    'fluid': Basis(mesh, element, elements='fluid'),
+    **{label: FacetBasis(mesh, element, facets=label)
        for label in ['heated', 'fluid-outlet', 'solid-outlet']}}
 
 
@@ -104,8 +103,7 @@ b = (asm(unit_load, basis['heated'])
      * (asm(unit_load, basis['fluid-outlet'])
         + kratio * asm(unit_load, basis['solid-outlet'])))
 
-D = basis["heat"].get_dofs([b for b in mesh.boundaries if b.endswith("-inlet")])
-I = basis['heat'].complement_dofs(D)
+D = basis['heat'].get_dofs({'fluid-inlet', 'solid-inlet'}).flatten()
 
 
 def exact(x: np.ndarray, y: np.ndarray) -> np.ndarray:
@@ -116,10 +114,9 @@ def exact(x: np.ndarray, y: np.ndarray) -> np.ndarray:
 
 
 temperature = basis['heat'].zeros()
-inlet_dofs = basis['heat'].complement_dofs(I)
-temperature[inlet_dofs] = exact(*mesh.p[:, inlet_dofs])
+temperature[D] = exact(*basis['heat'].doflocs[:, D])
 
-temperature = solve(*condense(A, b, temperature, I=I))
+temperature = solve(*condense(A, b, temperature, D=D))
 
 exit_interface_temperature = {
     "skfem": temperature[
@@ -135,7 +132,6 @@ exit_interface_temperature = {
 }
 
 if __name__ == '__main__':
-    from pathlib import Path
     from skfem.visuals.matplotlib import plot, savefig
     from matplotlib.pyplot import subplots
 
@@ -146,7 +142,9 @@ if __name__ == '__main__':
     fig, ax = subplots()
     ax.set_title('transverse temperature profiles')
 
-    dofs = basis['heat'].get_dofs(mesh.boundaries)
+    dofs = {label: basis['heat'].get_dofs(label)
+            for label in ['fluid-inlet', 'solid-inlet',
+                          'fluid-outlet', 'solid-outlet']}
     y = {label: mesh.p[1, d.nodal['u']] for label, d in dofs.items()}
     ii = {label: np.argsort(yy) for label, yy in y.items()}
 

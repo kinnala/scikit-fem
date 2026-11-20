@@ -5,7 +5,7 @@ from skfem.helpers import grad, dot, jump
 from skfem.models.poisson import laplace, unit_load
 
 m = MeshTri.init_sqsymmetric().refined()
-e = ElementTriDG(ElementTriP4())
+e = ElementDG(ElementTriP4())
 alpha = 1e-3
 
 ib = Basis(m, e)

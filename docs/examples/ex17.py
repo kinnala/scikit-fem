@@ -61,10 +61,10 @@ for s in mesh.subdomains:
 
 L = asm(conduction, basis, conductivity=basis0.interpolate(conductivity))
 
-facet_basis = FacetBasis(mesh, element, facets=mesh.boundaries['perimeter'])
+facet_basis = basis.boundary('perimeter')
 H = heat_transfer_coefficient * asm(convection, facet_basis)
 
-core_basis = Basis(mesh, basis.elem, elements=mesh.subdomains['core'])
+core_basis = Basis(mesh, basis.elem, elements='core')
 f = joule_heating * asm(unit_load, core_basis)
 
 temperature = solve(L + H, f)

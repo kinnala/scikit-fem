@@ -103,7 +103,6 @@ mesh = MeshHex.init_tensor(
 })
 element = ElementVector(ElementHex1())
 basis = Basis(mesh, element, intorder=1)
-gradbasis = Basis(mesh, element, intorder=1)
 
 mu, lmbda = 1., 2.
 
@@ -140,15 +139,12 @@ tol    = 1e-10
 nsteps = 7
 # Initialization
 u = basis.zeros()
-x = mesh.p.copy()
-X0= mesh.p.copy()
-current_mesh = MeshHex(x,mesh.t).with_boundaries(mesh.boundaries)
 for step in range(nsteps):
     lam   = (step + 1.) / nsteps # load factor
     theat = lam*np.pi
     for iteration in range(10):
         # update mesh and basis for current configuration
-        current_mesh = MeshHex(X0+u[basis.nodal_dofs],current_mesh.t).with_boundaries(mesh.boundaries)
+        current_mesh = mesh.translated(u[basis.nodal_dofs])
         current_basis= Basis(current_mesh, element, intorder=1)
         # SET DIRICHLET_BC w.r.t. the displacemnts of the reference basis
         du_D = u.copy()
@@ -157,7 +153,7 @@ for step in range(nsteps):
         du_D[dofs.nodal['u^2']] = (y * np.cos(theat) - z * np.sin(theat) - y- du_D[dofs.nodal['u^2']])
         du_D[dofs.nodal['u^3']] = (y * np.sin(theat) + z * np.cos(theat) - z- du_D[dofs.nodal['u^3']])
         # compute residual and stiffness matrix with current basis but with displacment gradient to reference configuration
-        grad_u = gradbasis.interpolate(u).grad
+        grad_u = basis.interpolate(u).grad
         f = L.assemble(current_basis, orig_gradu=grad_u)
         K = a.assemble(current_basis, orig_gradu=grad_u)
         # solve for newton direction

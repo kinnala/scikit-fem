@@ -92,7 +92,7 @@ def asm(form: Form,
     assert form.form is not None
     logger.info("Assembling '{}'.".format(form.form.__name__))
     nargs = [[arg] if not isinstance(arg, list) else arg for arg in args]
-    blocks = map(lambda a: form.coo_data(*a[1], idx=a[0], **kwargs),
+    blocks = map(lambda a: form._coo_data(*a[1], idx=a[0], **kwargs),
                  zip(product(*(range(len(x)) for x in nargs)),
                      product(*nargs)))
     dofs = (form._distributed_dofs(*[b for arg in nargs for b in arg])

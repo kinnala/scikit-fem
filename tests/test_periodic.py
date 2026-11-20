@@ -3,7 +3,9 @@ import pytest
 from numpy.testing import assert_allclose
 
 from skfem import (Basis, BilinearForm, ElementQuadBFS, ElementTriArgyris,
-                   MeshQuad, MeshQuad1DG, MeshTri, MeshTri1DG)
+                   MeshQuad, MeshQuad1DG, MeshTri, MeshTri1DG,
+                   ElementLineHermite, MeshLine, MeshLine1DG,
+                   ElementTriHermite, MeshTri1DG)
 from skfem.helpers import dd, ddot
 from skfem.models.poisson import laplace, mass
 
@@ -169,3 +171,129 @@ def test_periodic_local_polynomial(element, periodic):
     assert_allclose(value, evaluate(x, y), rtol=1e-7, atol=1e-8)
     assert_allclose(gradient, [evaluate(x, y, 1, 0), evaluate(x, y, 0, 1)],
                     rtol=1e-7, atol=1e-8)
+
+
+
+@pytest.mark.parametrize('offset', [0., 1.5])
+@pytest.mark.parametrize('points', [
+    np.linspace(0., 1., 10),
+    np.array([0., .1, .3, .55, .8, 1.]),
+])
+def test_periodic_hermite_assembly(points, offset):
+    mesh = MeshLine(points + offset)
+    periodic = MeshLine1DG.periodic(mesh, [len(points) - 1], [0])
+    ordinary = Basis(mesh, ElementLineHermite())
+    basis = Basis(periodic, ElementLineHermite())
+
+    # Identify both value and derivative DOFs at the ordinary mesh endpoints.
+    restriction = np.zeros((ordinary.N, basis.N))
+    for node in range(len(points)):
+        restriction[ordinary.nodal_dofs[:, node],
+                    basis.nodal_dofs[:, node % (len(points) - 1)]] = 1.
+    for form in (mass, laplace):
+        expected = restriction.T @ form.assemble(ordinary) @ restriction
+        assert_allclose(form.assemble(basis).toarray(), expected,
+                        rtol=1e-8, atol=1e-9)
+
+    # Arbitrary coefficients must give a C1-periodic function, including
+    # across the seam where physical coordinates differ by the period.
+    endpoints = Basis(periodic, ElementLineHermite(),
+                      quadrature=(np.array([[0., 1.]]), np.ones(2)))
+    field = endpoints.interpolate(np.random.default_rng(902).normal(size=basis.N))
+    for values in (field, field.grad[0]):
+        assert_allclose(values[:, 1], np.roll(values[:, 0], -1),
+                        rtol=1e-8, atol=1e-8)
+
+
+def test_periodic_hermite_convergence():
+    errors = []
+    for n in (8, 16, 32):
+        mesh = MeshLine(np.linspace(0., 1., n + 1))
+        periodic = MeshLine1DG.periodic(mesh, [n], [0])
+        basis = Basis(periodic, ElementLineHermite(), intorder=8)
+        coefficients = np.zeros(basis.N)
+        nodes = np.linspace(0., 1., n + 1)[:-1]
+        coefficients[basis.nodal_dofs[0]] = np.sin(2. * np.pi * nodes)
+        coefficients[basis.nodal_dofs[1]] = 2. * np.pi * np.cos(2. * np.pi * nodes)
+        field = basis.interpolate(coefficients)
+        x = basis.global_coordinates()[0]
+        errors.append([
+            np.sqrt(np.sum((field - np.sin(2. * np.pi * x)) ** 2 * basis.dx)),
+            np.sqrt(np.sum((field.grad[0] - 2. * np.pi * np.cos(2. * np.pi * x)) ** 2
+                           * basis.dx)),
+        ])
+    rates = np.log2(np.array(errors[:-1]) / np.array(errors[1:]))
+    assert_allclose(rates, np.tile([4., 3.], (2, 1)), atol=.15)
+
+
+def _periodic_mesh(periodic, irregular):
+    if irregular:
+        x = np.array([0., .1, .35, .7, 1.])
+        y = np.array([0., .2, .4, .65, 1.])
+    else:
+        x = np.linspace(0., 1., 5)
+        y = np.linspace(0., 1., 5)
+    return MeshTri1DG.init_tensor(x + (1.5 if irregular else 0.),
+                                  y - (.75 if irregular else 0.),
+                                  periodic=periodic)
+
+
+@pytest.mark.parametrize('periodic', [[0], [1], [0, 1]])
+@pytest.mark.parametrize('irregular', [False, True])
+def test_periodic_tri_hermite_assembly(periodic, irregular):
+    mesh = _periodic_mesh(periodic, irregular)
+    ordinary = Basis(mesh._orig, ElementTriHermite(), intorder=6)
+    basis = Basis(mesh, ElementTriHermite(), intorder=6)
+    restriction = np.zeros((ordinary.N, basis.N))
+    for vertex, identified in enumerate(mesh._ix):
+        restriction[ordinary.nodal_dofs[:, vertex],
+                    basis.nodal_dofs[:, identified]] = 1.
+    restriction[ordinary.interior_dofs.ravel(),
+                basis.interior_dofs.ravel()] = 1.
+    for form in (mass, laplace):
+        expected = restriction.T @ form.assemble(ordinary) @ restriction
+        assert_allclose(form.assemble(basis).toarray(), expected,
+                        rtol=1e-8, atol=1e-9)
+
+    # The three nodal DOFs agree at identified vertices.  This is not a
+    # claim of C1 continuity at every point along a triangle edge.
+    vertices = Basis(mesh, ElementTriHermite(),
+                     quadrature=(ElementTriHermite.refdom.p, np.ones(3)))
+    coefficients = np.random.default_rng(902).normal(size=basis.N)
+    field = vertices.interpolate(coefficients)
+    for index, values in enumerate((field, field.grad[0], field.grad[1])):
+        expected = coefficients[basis.nodal_dofs[index, mesh.t]].T
+        assert_allclose(values, expected, rtol=1e-8, atol=1e-8)
+
+
+def cubic(x, y):
+    return 1. + 2.*x - 3.*y + x*y + .2*x**3 + .4*y**3 - .7*x*x*y + .6*x*y*y
+
+
+def cubic_gradient(x, y):
+    return np.array([2. + y + .6*x*x - 1.4*x*y + .6*y*y,
+                     -3. + x + 1.2*y*y - .7*x*x + 1.2*x*y])
+
+
+@pytest.mark.parametrize('periodic', [[0], [1], [0, 1]])
+@pytest.mark.parametrize('irregular', [False, True])
+def test_periodic_tri_hermite_local_polynomial(periodic, irregular):
+    mesh = _periodic_mesh(periodic, irregular)
+    basis = Basis(mesh, ElementTriHermite(), intorder=6)
+    vertices = mesh.mapping().F(ElementTriHermite.refdom.p)
+    coefficients = []
+    for vertex in range(3):
+        x, y = vertices[:, :, vertex]
+        coefficients.extend([cubic(x, y), *cubic_gradient(x, y)])
+    x, y = vertices.mean(axis=2)
+    coefficients.append(cubic(x, y))
+    # Element-local coefficients avoid imposing a nonperiodic polynomial
+    # on globally identified nodal DOFs.
+    value = np.zeros_like(basis.dx)
+    gradient = np.zeros((2, *basis.dx.shape))
+    for coefficient, (shape,) in zip(coefficients, basis.basis):
+        value += coefficient[:, None] * shape
+        gradient += coefficient[None, :, None] * shape.grad
+    x, y = basis.global_coordinates()
+    assert_allclose(value, cubic(x, y), rtol=1e-8, atol=1e-9)
+    assert_allclose(gradient, cubic_gradient(x, y), rtol=1e-8, atol=1e-8)

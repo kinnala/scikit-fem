@@ -31,7 +31,6 @@ from skfem.models.poisson import laplace, unit_load
 
 m = MeshQuad().refined(2)
 
-e1 = ElementQuad1()
 e = ElementQuad2()
 basis = Basis(m, e, intorder=4)
 

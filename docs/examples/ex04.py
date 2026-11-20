@@ -11,7 +11,7 @@ from skfem import *
 from skfem.supermeshing import mortar_quadrature
 from skfem.models.elasticity import (linear_elasticity, lame_parameters,
                                      linear_stress)
-from skfem.helpers import dot, sym_grad, jump, mul
+from skfem.helpers import dot, sym_grad, mul
 from skfem.io.json import from_file
 from pathlib import Path
 
@@ -109,8 +109,8 @@ mdefo2 = m2.translated(sf * y2[basis2.nodal_dofs])
 
 # calculate von Mises stress
 s1, s2 = {}, {}
-dg1 = basis1.with_element(ElementTriDG(ElementTriP1()))
-dg2 = basis2.with_element(ElementQuadDG(ElementQuad1()))
+dg1 = basis1.with_element(ElementDG(ElementTriP1()))
+dg2 = basis2.with_element(ElementDG(ElementQuad1()))
 u1 = basis1.interpolate(y1)
 u2 = basis2.interpolate(y2)
 

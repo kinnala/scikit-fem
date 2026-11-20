@@ -1,5 +1,4 @@
 import logging
-from warnings import warn
 from typing import Any, List, Optional, Tuple, Type, Union
 
 import numpy as np
@@ -121,9 +120,6 @@ class AbstractBasis:
         return self._element_dofs
 
     def complement_dofs(self, *D):
-        if type(D[0]) is dict:
-            # if a dict of Dofs objects are given, flatten all
-            D = tuple(D[0][key].all() for key in D[0])
         return np.setdiff1d(np.arange(self.N), np.concatenate(D))
 
     def get_dofs(self,
@@ -240,18 +236,6 @@ class AbstractBasis:
             vertices are returned.
 
         """
-        if isinstance(facets, dict):
-            warn("Passing dict to get_dofs is deprecated.", DeprecationWarning)
-
-            def to_indices(f):
-                if callable(f):
-                    return self.mesh.facets_satisfying(f)
-                return f
-
-            return {k: self.dofs.get_facet_dofs(to_indices(facets[k]),
-                                                skip_dofnames=skip)
-                    for k in facets}
-
         if elements is not None:
             elements = self.mesh.normalize_elements(elements)
             return self.dofs.get_element_dofs(elements,

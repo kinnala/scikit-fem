@@ -11,7 +11,7 @@ The analytical solution gives :math:`u(1)=1/8`.
 """
 from skfem import *
 
-m = MeshLine().refined(3).with_boundaries({"left": lambda x: x[0] == 0})
+m = MeshLine().refined(3).with_defaults()
 e = ElementLineHermite()
 basis = Basis(m, e)
 
@@ -42,5 +42,5 @@ if __name__ == '__main__':
     name = splitext(argv[0])[0]
 
     from skfem.visuals.matplotlib import *
-    plot(basis, x, Nrefs=3)
+    plot(basis, x, nrefs=3)
     savefig(f'{name}_solution.png')

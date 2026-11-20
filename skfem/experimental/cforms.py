@@ -53,8 +53,8 @@ How it works:
    source, so the compiler runs once per (form, element, quadrature).
 
 4. *Assembly.*  By default, the C kernel fills exactly the same COO arrays
-   as the Python implementation, so ``assemble``, ``elemental``,
-   ``coo_data`` and :class:`~skfem.assembly.form.COOData` work unchanged.
+   as the Python implementation, so ``assemble``, ``elemental`` and
+   :class:`~skfem.assembly.form.COOData` work unchanged.
    Each element writes to its own slots, so threads never race.
 
    With ``cache_sparsity=True``, the CSR sparsity pattern is computed once

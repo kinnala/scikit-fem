@@ -16,13 +16,13 @@ from skfem.element import (
     ElementQuad1,
     ElementQuad2,
     ElementQuadP,
-    ElementQuadRT0,
+    ElementQuadRT1,
     ElementQuadS2,
     ElementTetMini,
     ElementTetP0,
     ElementTetP1,
     ElementTetP2,
-    ElementTriMini,
+    ElementTriP1B,
     ElementTriP0,
     ElementTriP1,
     ElementTriP2,
@@ -37,23 +37,17 @@ from skfem.element import (
     ElementTriN2,
     ElementTriN3,
     ElementTriHHJ1,
-    ElementTriRT0,
-    ElementVectorH1,
+    ElementVector,
     ElementHex2,
     ElementQuadBFS,
     ElementTriCR,
-    ElementTriCCR,
-    ElementTriP1B,
     ElementTriP2B,
     ElementTetCR,
     ElementTetCCR,
     ElementTriHermite,
     ElementTriMorley,
     ElementTriArgyris,
-    ElementTriDG,
-    ElementTetDG,
-    ElementQuadDG,
-    ElementHexDG,
+    ElementDG,
     ElementWedge1,
     ElementQuadDPC,
     ElementHexDPC,
@@ -88,7 +82,7 @@ class TestNodality(TestCase):
         ElementTriP2(),
         ElementTriP3(),
         ElementTriP4(),
-        ElementTriMini(),
+        ElementTriP1B(),
         ElementQuad0(),
         ElementQuad1(),
         ElementQuad2(),
@@ -105,7 +99,7 @@ class TestNodality(TestCase):
         ElementTetCR(),
         ElementTetCCR(),
         ElementTriCR(),
-        ElementTriCCR(),
+        ElementTriP2B(),
         ElementWedge1(),
         ElementLineBubble(),
         ElementTriBubble(),
@@ -123,7 +117,7 @@ class TestNodality(TestCase):
 
             # Remove nan-rows: test nodality only on non-nan doflocs.
             #
-            # Some elements, such as ElementTriMini might have a combination
+            # Some elements, such as ElementTriP1B might have a combination
             # of nodal dofs and non-nodal dofs.
             #
             # Nodal dof is defined so that there exists a point where the
@@ -140,7 +134,7 @@ class TestNodality(TestCase):
 
 class TestNodalityTriRT0(TestCase):
 
-    elem = ElementTriRT0()
+    elem = ElementTriRT1()
 
     def runTest(self):
         e = self.elem
@@ -161,7 +155,7 @@ class TestNodalityTriRT0(TestCase):
 
 class TestNodalityQuadRT0(TestCase):
 
-    elem = ElementQuadRT0()
+    elem = ElementQuadRT1()
 
     def runTest(self):
         e = self.elem
@@ -189,7 +183,7 @@ class TestComposite(TestCase):
         self.check_equivalence(
             ElementComposite(ElementTriP1(),
                              ElementTriP1()),
-            ElementVectorH1(ElementTriP1())
+            ElementVector(ElementTriP1())
         )
 
     def check_equivalence(self, ec, ev):
@@ -217,7 +211,7 @@ class TestCompositeMul(TestComposite):
 
         self.check_equivalence(
             ElementTriP1() * ElementTriP1(),
-            ElementVectorH1(ElementTriP1())
+            ElementVector(ElementTriP1())
         )
 
 
@@ -254,7 +248,7 @@ class TestDerivatives(TestCase):
         ElementTriP2(),
         ElementTriP3(),
         ElementTriP4(),
-        ElementTriMini(),
+        ElementTriP1B(),
         ElementQuad0(),
         ElementQuad1(),
         ElementQuad2(),
@@ -267,7 +261,7 @@ class TestDerivatives(TestCase):
         ElementHexS2(),
         ElementHex2(),
         ElementTriCR(),
-        ElementTriCCR(),
+        ElementTriP2B(),
         ElementTetCR(),
         ElementTetCCR(),
         ElementWedge1(),
@@ -385,15 +379,15 @@ class TestElementQuadBFS(TestCase):
 @pytest.mark.parametrize(
     "m,e,edg",
     [
-        (MeshTri().refined(), ElementTriP1(), ElementTriDG),
-        (MeshTri().refined(), ElementTriP2(), ElementTriDG),
-        (MeshTet().refined(), ElementTetP1(), ElementTetDG),
-        (MeshTet().refined(), ElementTetP2(), ElementTetDG),
-        (MeshTri().refined(), ElementTriArgyris(), ElementTriDG),
-        (MeshTri().refined(), ElementTriMorley(), ElementTriDG),
-        (MeshTri().refined(), ElementTriHermite(), ElementTriDG),
-        (MeshHex().refined(), ElementHex1(), ElementHexDG),
-        (MeshQuad().refined(), ElementQuad1(), ElementQuadDG),
+        (MeshTri().refined(), ElementTriP1(), ElementDG),
+        (MeshTri().refined(), ElementTriP2(), ElementDG),
+        (MeshTet().refined(), ElementTetP1(), ElementDG),
+        (MeshTet().refined(), ElementTetP2(), ElementDG),
+        (MeshTri().refined(), ElementTriArgyris(), ElementDG),
+        (MeshTri().refined(), ElementTriMorley(), ElementDG),
+        (MeshTri().refined(), ElementTriHermite(), ElementDG),
+        (MeshHex().refined(), ElementHex1(), ElementDG),
+        (MeshQuad().refined(), ElementQuad1(), ElementDG),
     ]
 )
 def test_dg_element(m, e, edg):
@@ -422,12 +416,12 @@ def test_dg_element(m, e, edg):
 @pytest.mark.parametrize(
     "e,edg",
     [
-        (ElementTriP1(), ElementTriDG),
-        (ElementTetP2(), ElementTetDG),
-        (ElementTriArgyris(), ElementTriDG),
-        (ElementQuad1(), ElementQuadDG),
-        (ElementQuadP(4), ElementQuadDG),
-        (ElementHex2(), ElementHexDG),
+        (ElementTriP1(), ElementDG),
+        (ElementTetP2(), ElementDG),
+        (ElementTriArgyris(), ElementDG),
+        (ElementQuad1(), ElementDG),
+        (ElementQuadP(4), ElementDG),
+        (ElementHex2(), ElementDG),
     ]
 )
 def test_initialize_dg_composite_elements(e, edg):
@@ -509,7 +503,7 @@ def test_bubble_vanishes_on_facets(m, e):
         (MeshLine().refined(3), ElementLineP1(), ElementLineBubble(),
          ElementLineMini()),
         (MeshTri().refined(3), ElementTriP1(), ElementTriBubble(),
-         ElementTriMini()),
+         ElementTriP1B()),
         (MeshTet().refined(2), ElementTetP1(), ElementTetBubble(),
          ElementTetMini()),
     ]
@@ -941,7 +935,7 @@ def test_tri_rt_same_space(p, elem):
 
     sols = []
     for e in [ElementTriRT(p), elem()]:
-        basis = Basis(m, e * ElementTriDG(ElementTriP(p - 1) if p > 1
+        basis = Basis(m, e * ElementDG(ElementTriP(p - 1) if p > 1
                                        else ElementTriP0()))
         x = solve(mixed.assemble(basis), load.assemble(basis))
         sols.append([np.asarray(f) for f in basis.interpolate(x)])

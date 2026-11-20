@@ -77,7 +77,7 @@ for a nearly incompressible solid, should be close to the initial undeformed vol
 """
 import numpy as np
 from scipy.sparse import bmat
-from skfem.helpers import grad, transpose, det, inv, identity
+from skfem.helpers import grad, transpose, det, inv, identity, ddot
 from skfem import *
 
 
@@ -144,18 +144,7 @@ def volume(w):
     return J
 
 
-mesh = (
-    MeshTet()
-    .refined(2)
-    .with_boundaries(
-        {
-            "left": lambda x: x[0] == 0,
-            "bottom": lambda x: x[1] == 0,
-            "back": lambda x: x[2] == 0,
-            "front": lambda x: x[2] == 1,
-        }
-    )
-)
+mesh = MeshTet().refined(2).with_defaults()
 uelem = ElementVector(ElementTetP2())
 pelem = ElementTetP1()
 elems = {
@@ -172,10 +161,10 @@ dp = basis["p"].zeros()
 stretch_ = 1.
 
 D = [
-    basis["u"].get_dofs("front").all("u^3"),
+    basis["u"].get_dofs("back").all("u^3"),
     basis["u"].get_dofs("left").all("u^1"),
     basis["u"].get_dofs("bottom").all("u^2"),
-    basis["u"].get_dofs("back").all("u^3"),
+    basis["u"].get_dofs("front").all("u^3"),
 ]
 
 du[D[0]] = stretch_
@@ -188,7 +177,7 @@ I = np.hstack((
 
 @LinearForm
 def a1(v, w):
-    return np.einsum("ij...,ij...", F1(w), grad(v))
+    return ddot(F1(w), grad(v))
 
 
 @LinearForm
@@ -198,12 +187,12 @@ def a2(v, w):
 
 @BilinearForm
 def b11(u, v, w):
-    return np.einsum("ijkl...,ij...,kl...", A11(w), grad(u), grad(v))
+    return ddot(ddot(A11(w), grad(u)), grad(v))
 
 
 @BilinearForm
 def b12(u, v, w):
-    return np.einsum("ij...,ij...", A12(w), grad(v)) * u
+    return ddot(A12(w), grad(v)) * u
 
 
 @BilinearForm

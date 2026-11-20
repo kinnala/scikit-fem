@@ -19,7 +19,6 @@ so the conductance (for unit potential difference and conductivity) is
 
 from skfem import *
 from skfem.models.poisson import laplace, mass
-from skfem.io import from_meshio
 
 import numpy as np
 
@@ -33,8 +32,8 @@ mesh = (MeshTri
             'ground': lambda xi: xi[1] == 0.,
             'positive': lambda xi: xi[1] == np.pi/2,
         }))
-mesh = mesh.translated(mesh.p[0] * np.stack([np.cos(mesh.p[1]),
-                                             np.sin(mesh.p[1])]) - mesh.p)
+mesh = mesh.morphed(lambda p: p[0] * np.cos(p[1]),
+                    lambda p: p[0] * np.sin(p[1]))
 
 elements = ElementTriP2()
 basis = Basis(mesh, elements)
@@ -60,11 +59,10 @@ def port_flux(w):
 
 current = {}
 for port, boundary in mesh.boundaries.items():
-    fbasis = FacetBasis(mesh, elements, facets=boundary)
-    current[port] = asm(port_flux, fbasis, u=u)
+    current[port] = asm(port_flux, basis.boundary(boundary), u=u)
 
 def visualize():
-    from skfem.visuals.matplotlib import plot, show
+    from skfem.visuals.matplotlib import plot
     return plot(basis, u, shading='gouraud', colorbar=True)
 
 if __name__ == '__main__':

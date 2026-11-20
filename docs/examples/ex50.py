@@ -94,9 +94,6 @@ def claplace(u, v, w):
     return dot(grad(u), grad(v)) * 2 * np.pi * r
 
 
-# Identify the interior degrees of freedom
-interior = basis.complement_dofs(basis.get_dofs({"bottom", "ball"}))
-
 # Assemble the system matrix
 A = asm(claplace, basis) + peclet * asm(advection, basis)
 
@@ -105,7 +102,7 @@ u = basis.zeros()
 u[basis.get_dofs("bottom")] = 1.0
 u[basis.get_dofs("ball")] = 0.0
 
-u = solve(*condense(A, x=u, I=interior))
+u = solve(*condense(A, x=u, D=basis.get_dofs({"bottom", "ball"})))
 
 if __name__ == "__main__":
 

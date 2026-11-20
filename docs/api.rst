@@ -158,13 +158,13 @@ Module: skfem.element
     ElementTriP
     ElementTriP0
     ElementTriCR
-    ElementTriCCR
-    ElementTriRT0
+    ElementTriP2B
+    ElementTriRT1
     ElementTriRT
     ElementTriMorley
     ElementTri15ParamPlate
     ElementTriArgyris
-    ElementTriMini
+    ElementTriP1B
     ElementTriHermite
     ElementTriSkeletonP0
     ElementTriSkeletonP1
@@ -176,13 +176,13 @@ Module: skfem.element
     ElementQuadS2
     ElementQuadP
     ElementQuadBFS
-    ElementQuadRT0
+    ElementQuadRT1
     ElementQuadDPC
     ElementTetP0
     ElementTetP1
     ElementTetP2
-    ElementTetRT0
-    ElementTetN0
+    ElementTetRT1
+    ElementTetN1
     ElementTetMini
     ElementTetCR
     ElementTetCCR

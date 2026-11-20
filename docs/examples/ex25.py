@@ -16,7 +16,7 @@ Because the problem is symmetric about :math:`y = \frac{1}{2}`, only half is sol
 
 """
 from skfem import *
-from skfem.models.poisson import laplace, mass
+from skfem.models.poisson import laplace
 
 from math import ceil
 
@@ -42,16 +42,13 @@ def advection(u, v, w):
     return v * velocity_0 * grad(u)[0]
 
 
-interior = basis.complement_dofs(basis.get_dofs({"inlet", "floor"}))
-
 A = asm(laplace, basis) + peclet * asm(advection, basis)
 t = basis.zeros()
 t[basis.get_dofs("floor")] = 1.0
-t = solve(*condense(A, x=t, I=interior))
+t = solve(*condense(A, x=t, D=basis.get_dofs({"inlet", "floor"})))
 
 basis0 = basis.with_element(ElementQuad0())
-t0 = solve(asm(mass, basis0),
-           asm(mass, basis, basis0) @ t)
+t0 = basis0.project(basis.interpolate(t))
 
 
 if __name__ == '__main__':
