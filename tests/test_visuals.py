@@ -31,6 +31,20 @@ class CallDrawTet(CallDraw):
     mesh_type = MeshTet
 
 
+@pytest.mark.parametrize('mesh_type', [MeshTri, MeshQuad])
+@pytest.mark.parametrize('boundaries_only', [None, False, True])
+def test_draw_boundaries_only_flag(mesh_type, boundaries_only):
+    m = mesh_type().refined(1)
+    kwargs = ({} if boundaries_only is None else
+              {'boundaries_only': boundaries_only})
+    result = m.draw(visuals='matplotlib', **kwargs)
+    finite = np.isfinite(result.lines[0].get_xydata()).all(axis=1)
+    count = np.count_nonzero(finite[:-1] & finite[1:])
+    plt.close(result.figure)
+    expected = len(m.boundary_facets()) if boundaries_only else m.nfacets
+    assert count == expected
+
+
 class CallPlot(TestCase):
     mesh_type = MeshTri
 
