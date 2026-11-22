@@ -156,10 +156,11 @@ def plot_mesh2d(m: Mesh2D, x: ndarray, **kwargs) -> SvgPlot:
     p, width, height, stroke = points_to_figure(m.p.copy(), kwargs)
     template = ("""<polygon points=""" +
                 '"' + ("{},{} " * t.shape[0]) + '"' +
-                """style="fill:rgb({}, {}, {});" />""")
+                """ style="fill:rgb({}, {}, {});" />""")
     elems = ""
     for ix, e in enumerate(t.T):
-        scalar = (x[e].mean() - minval) / (maxval - minval) * (len(COLORS) - 1)
+        scalar = ((x[e].mean() - minval) / (maxval - minval)
+                  * (len(COLORS) - 1) if maxval != minval else 0.)
         ix1 = int(np.floor(scalar))
         ix2 = int(np.ceil(scalar))
         color = (COLORS[ix2] - COLORS[ix1]) * (scalar - ix1) + COLORS[ix1]

@@ -1,4 +1,5 @@
 from unittest import TestCase
+from xml.etree.ElementTree import fromstring
 import pytest
 
 import matplotlib.pyplot as plt
@@ -107,6 +108,20 @@ def test_call_svg_plot(mtype):
     svg = drawsvg(m, nrefs=2)
     basis = CellBasis(m, mtype.elem())
     svg_plot = plotsvg(basis, m.p[0], nrefs=2)
+    assert fromstring(svg_plot.svg).tag == '{http://www.w3.org/2000/svg}svg'
+
+
+@pytest.mark.parametrize('mtype', [MeshTri, MeshQuad])
+@pytest.mark.parametrize('value', [0., 1.])
+def test_svg_plot_constant(mtype, value):
+    m = mtype().refined(1)
+    basis = CellBasis(m, mtype.elem())
+    with np.errstate(divide='raise', invalid='raise'):
+        result = basis.plot(np.full(basis.N, value), visuals='svg')
+    polygons = fromstring(result.svg).findall(
+        '{http://www.w3.org/2000/svg}polygon')
+    assert len(polygons) == m.nelements
+    assert len({p.attrib['style'] for p in polygons}) == 1
 
 
 # ---------------------------------------------------------------------------
