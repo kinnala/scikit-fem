@@ -114,7 +114,7 @@ def draw_mesh2d(m: Mesh2D, **kwargs) -> Axes:
         ax.set_axis_off()
     else:
         ax = kwargs["ax"]
-    if "boundaries_only" in kwargs:
+    if kwargs.get("boundaries_only", False):
         facets = m.facets[:, m.boundary_facets()]
     else:
         facets = m.facets
