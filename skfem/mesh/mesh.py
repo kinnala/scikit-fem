@@ -1098,10 +1098,9 @@ class Mesh:
         cls = type(self)
         if not isinstance(other, cls):
             raise TypeError("Can only join meshes with same type.")
-        p = np.hstack((self.p.round(decimals=8),
-                       other.p.round(decimals=8)))
+        p = np.hstack((self.p, other.p))
         t = np.hstack((self.t, other.t + self.p.shape[1]))
-        return cls(*self._remove_duplicate_nodes(p, t))
+        return cls(p, t)
 
     def __repr__(self):
         rep = ""
