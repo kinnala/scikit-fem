@@ -236,6 +236,7 @@ with respect to documented and/or tested features.
 - Changed: `skfem.autodiff` was rewritten using built-in forward-mode dual number AD without the JAX dependency
 - Changed: `ElementVector` and `ElementComposite` are optimized via `BlockArray` and `BlockDiscreteField` that avoid storing explicit zeros
 - Changed: Accessing `Mesh.subdomains` or `Mesh.boundaries` with nonexisting tag will now raise `TagKeyError`
+- Changed: `Mesh.__add__` no more removes duplicate nodes (use explicit `Mesh.remove_duplicate_nodes()`)
 - Removed: Obsolete projection functions `skfem.utils.project` and `skfem.utils.projection`, replaced by `Basis.project`
 - Removed: Dysfunctional visualization package `skfem.visuals.glvis`
 - Removed: The deprecated `FacetBasis.trace` method

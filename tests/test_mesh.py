@@ -154,7 +154,7 @@ class TestMeshAddition(TestCase):
     def runTest(self):
         m = MeshTri()
         M = MeshTri().translated((1.0, 0.0))
-        mesh = m + M
+        mesh = (m + M).remove_duplicate_nodes()
         self.assertTrue(mesh.p.shape[1] == 6)
         self.assertTrue(mesh.t.shape[1] == 4)
 
@@ -352,7 +352,7 @@ class TestMirrored(TestCase):
         m2 = m1.mirrored((1, 0, 0))
         m3 = m1.mirrored((0, 1, 0))
         m4 = m1.mirrored((0, 0, 1))
-        m = m1 + m2 + m3 + m4
+        m = (m1 + m2 + m3 + m4).remove_duplicate_nodes()
 
         self.assertEqual(m.nvertices, 20)
         self.assertEqual(m.nelements, 20)
@@ -362,6 +362,7 @@ class TestMirrored(TestCase):
             np.linspace(1,2,2),
         )
         m = m + m.mirrored((0, 1), (2, 1))
+        m = m.remove_duplicate_nodes()
 
         self.assertEqual(len(m.boundary_facets()), 6)
         self.assertEqual(m.nvertices, 6)

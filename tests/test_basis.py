@@ -629,6 +629,7 @@ def test_oriented_interface_integral(m, e, facets, fun):
 )
 def test_oriented_interface_integral2(m, e, facets, normal):
 
+    m = m.remove_duplicate_nodes()
     fb = FacetBasis(m, e, facets=m.facets_satisfying(facets, normal=normal))
     assert_almost_equal(
         Functional(lambda w: dot(w.fun.grad, w.n)).assemble(fb, fun=m.p[0]),
