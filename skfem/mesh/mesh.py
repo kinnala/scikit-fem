@@ -1390,8 +1390,9 @@ class Mesh:
         Parameters
         ----------
         diffs
-            Translate the mesh by a vector. Must have same size as the mesh
-            dimension.
+            Translate the mesh by a vector.  Must have same size as the mesh
+            dimension.  If a callable, then doflocs are passed to it for
+            the creation of the bector.
 
         """
         if callable(diffs):

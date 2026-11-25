@@ -253,23 +253,26 @@ the displacement fixed on the left boundary.
    from docs.examples.ex03 import visualize
    visualize()
 
-Run :wblink:`03` interactively in the browser for more information.
+See the source code of :exlink:`03` for more information.
+You can also run :wblink:`03` interactively in your browser.
 
-Example 4: Linearized contact problem
--------------------------------------
+Example 4: Nitsche's method for Hertz contact
+---------------------------------------------
 
-This example solves a single interation of the contact problem
+This example solves the Hertz contact problem
 between two elastic bodies using the Nitsche's method.
-Triangular and quadrilateral second-order elements are used
-in the discretization of the two elastic bodies.
+Quadrilateral second-order elements are used
+in the discretization of the cylinder and a block.
 
-.. plot::
+.. skfem-web::
+   :height: 400
    :caption: The displaced meshes and the von Mises stress of Example 4.
 
    from docs.examples.ex04 import visualize
    visualize()
 
 See the source code of :exlink:`04` for more information.
+You can also run :wblink:`04` interactively in your browser.
 
 
 Example 8: Argyris basis functions

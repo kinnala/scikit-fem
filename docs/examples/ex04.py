@@ -26,7 +26,7 @@ nrefs = 0
 # mesh generation
 
 def graded(L, n, beta=3.5):
-    """n graded nodes on [0, L]"""
+    """n + 1 graded nodes on [0, L]"""
     s = np.linspace(0, 1, n + 1)
     return L * np.sinh(beta * s) / np.sinh(beta)
 
@@ -52,8 +52,8 @@ xs = np.concatenate((
     graded(1.0, 13, 4.0)
 ))
 ys = -graded(1.0, 25, 4.0)[::-1]
-m2 = (MeshQuad2
-      .from_mesh(MeshQuad.init_tensor(xs, ys).refined(nrefs))
+m2 = (MeshQuad.init_tensor(xs, ys)
+      .refined(nrefs)
       .with_defaults())
 
 # define elements, bases and forms
@@ -91,7 +91,7 @@ def nitsche(u1, u2, w):
 
 # contact pairing
 q1, f1, q2, f2 = mortar_quadrature(m1, 'bottom',
-                                   m2, 'top', max_dist=0.3, nsub=1)
+                                   m2, 'top', max_dist=0.2, nsub=1)
 fb1 = FacetBasis(m1, e, quadrature=q1, facets=f1)
 fb2 = FacetBasis(m2, e, quadrature=q2, facets=f2)
 fbasis = fb1 * fb2
