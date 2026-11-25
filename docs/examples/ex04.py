@@ -1,151 +1,165 @@
-r"""Contact problem.
+"""Hertz contact with Nitsche's method
 
-Mortar methods allow setting interface conditions on non-matching meshes.
-They are useful also when solving variational inequalities such as
-`elastic contact problems <https://arxiv.org/abs/1902.09312>`_.
+A cylinder (m1) is pressed against an elastic block (m2):
+
+- linear elasticity, small deformations
+- contact pairing in the reference configuration
+- quadratic mesh for accurate contact surface
+- one-sided Nitsche method
 
 """
-
-import numpy as np
 from skfem import *
+from skfem.autodiff import *
+from skfem.autodiff.helpers import *
 from skfem.supermeshing import mortar_quadrature
-from skfem.models.elasticity import (linear_elasticity, lame_parameters,
-                                     linear_stress)
-from skfem.helpers import dot, sym_grad, mul
-from skfem.io.json import from_file
-from pathlib import Path
+from skfem.models.elasticity import lame_parameters
+import numpy as np
 
 
-# create meshes
-mesh_file = Path(__file__).parent / 'meshes' / 'ex04_mesh.json'
-m1 = from_file(mesh_file)
-m2 = (
-    (MeshLine(np.linspace(1, 2, 6)) * MeshLine(np.linspace(-1, 1, 10)))
-    .refined()
-    .with_boundaries({
-        'contact': lambda x: x[0] == 1.0,
-        'dirichlet': lambda x: x[0] == 2.0,
-    })
-)
+R = 1.0  # cylinder radius
+E, nu = 1000.0, 0.3
+lam, mu = lame_parameters(E, nu)
+alpha = 1e-2  # Nitsche parameter
+delta = 3e-3  # prescribed displacement of the top
+nrefs = 0
 
-e1 = ElementVector(ElementTriP2())
-e2 = ElementVector(ElementQuad2())
+# mesh generation
 
-basis1, basis2 = Basis(m1, e1), Basis(m2, e2)
+def graded(L, n, beta=3.5):
+    """n graded nodes on [0, L]"""
+    s = np.linspace(0, 1, n + 1)
+    return L * np.sinh(beta * s) / np.sinh(beta)
 
-# mortaring
-qw1, find1, qw2, find2 = mortar_quadrature(m1, 'contact',
-                                           m2, 'contact', 0.1, slave=2)
 
-fbasis1 = FacetBasis(m1, e1, quadrature=qw1, facets=find1)
-fbasis2 = FacetBasis(m2, e2, quadrature=qw2, facets=find2)
-fbasis = fbasis1 * fbasis2
+# cylinder: bottom follows the circle y = R - sqrt(R^2 - x^2), top at y = 0.5
+trans = lambda x: np.array([
+    0 * x[0],
+    (R - np.sqrt(R ** 2 - x[0] ** 2)) * (1 - x[1] / 0.5)
+])
+xs = np.concatenate((
+    -graded(0.5, 10)[:0:-1],  # symmetric wrt x = 0
+    graded(0.5, 10)
+))
+ys = graded(0.5, 8)
+m1 = (MeshQuad2
+      .from_mesh(MeshQuad.init_tensor(xs, ys).refined(nrefs))
+      .with_defaults()
+      .translated(trans))
 
-# problem definition
-youngs_modulus = 1000.0
-poisson_ratio = 0.3
+# block [-1, 1] x [-1, 0]
+xs = np.concatenate((
+    -graded(1.0, 13, 4.0)[:0:-1],
+    graded(1.0, 13, 4.0)
+))
+ys = -graded(1.0, 25, 4.0)[::-1]
+m2 = (MeshQuad2
+      .from_mesh(MeshQuad.init_tensor(xs, ys).refined(nrefs))
+      .with_defaults())
 
-weakform = linear_elasticity(*lame_parameters(youngs_modulus, poisson_ratio))
-C = linear_stress(*lame_parameters(youngs_modulus, poisson_ratio))
+# define elements, bases and forms
 
-alpha = 1000
-limit = 0.3
+e = ElementVector(ElementQuad2())
+basis1, basis2 = Basis(m1, e), Basis(m2, e)
+N1 = basis1.N
 
-# mortar forms
-@BilinearForm
-def bilin_mortar(u1, u2, v1, v2, w):
-    ju = dot(u1 - u2, w.n)
-    jv = dot(v1 - v2, w.n)
-    mu = .5 * (dot(w.n, mul(C(sym_grad(u1)), w.n))
-               + dot(w.n, mul(C(sym_grad(u2)), w.n)))
-    mv = .5 * (dot(w.n, mul(C(sym_grad(v1)), w.n))
-               + dot(w.n, mul(C(sym_grad(v2)), w.n)))
-    return ((1. / (alpha * w.h) * ju * jv - mu * jv - mv * ju)
-            * (np.abs(w.x[1]) <= limit))
 
-def gap(x):
-    return (1. - np.sqrt(1. - x[1] ** 2))
+def sigma(u):
+    eps = sym_grad(u)
+    return 2 * mu * eps + lam * eye(trace(eps), 2)
 
-@LinearForm
-def lin_mortar(v1, v2, w):
-    jv = dot(v1 - v2, w.n)
-    mv = .5 * (dot(w.n, mul(C(sym_grad(v1)), w.n))
-               + dot(w.n, mul(C(sym_grad(v2)), w.n)))
-    return ((1. / (alpha * w.h) * gap(w.x) * jv - gap(w.x) * mv)
-            * (np.abs(w.x[1]) <= limit))
 
-# fix mesh parameter and normals from m2
-params = {
-    'h': fbasis2.mesh_parameters(),
-    'n': -fbasis2.normals,
-}
+@NonlinearForm(hessian=True)
+def elastic_energy(u, w):
+    return 1 / 2 * ddot(sigma(u), sym_grad(u))
 
-# assemble the block system
-A1 = asm(weakform, basis1)
-A2 = asm(weakform, basis2)
-B = asm(bilin_mortar, fbasis, **params)
-f = asm(lin_mortar, fbasis, **params)
 
-K = bmat([[A1, None],
-          [None, A2]], 'csr') + B
+def contact_pressure(u1, w):
+    return -dot(mul(sigma(u1), w.n), w.n)
 
-D1 = basis1.get_dofs('dirichlet').all()
-D2 = basis2.get_dofs('dirichlet').all() + basis1.N
 
-# initialize boundary conditions
-y1 = basis1.zeros()
-y2 = basis2.zeros()
-y1[basis1.get_dofs('dirichlet').all('u^1')] = .1
-y = np.concatenate((y1, y2))
+def gap(u1, u2, w):
+    return dot(w.x2 + u2 - w.x - u1, w.n)
 
-# linear solve
-y = solve(*condense(K, f, D=np.concatenate((D1, D2)), x=y))
 
-# create a displaced mesh for visualization
-sf = 1
-(y1, _), (y2, _) = fbasis.split(y)
-mdefo1 = m1.translated(sf * y1[basis1.nodal_dofs])
-mdefo2 = m2.translated(sf * y2[basis2.nodal_dofs])
+@NonlinearForm(hessian=True)
+def nitsche(u1, u2, w):
+    gamma = alpha * w.h / mu
+    lam_u = contact_pressure(u1, w)
+    return (gamma / 2 * np.maximum(lam_u - gap(u1, u2, w) / gamma, 0) ** 2
+            - gamma / 2 * lam_u ** 2)
 
-# calculate von Mises stress
-s1, s2 = {}, {}
-dg1 = basis1.with_element(ElementDG(ElementTriP1()))
-dg2 = basis2.with_element(ElementDG(ElementQuad1()))
-u1 = basis1.interpolate(y1)
-u2 = basis2.interpolate(y2)
 
-for i in [0, 1]:
-    for j in [0, 1]:
-        s1[i, j] = dg1.project(C(sym_grad(u1))[i, j])
-        s2[i, j] = dg2.project(C(sym_grad(u2))[i, j])
+# contact pairing
+q1, f1, q2, f2 = mortar_quadrature(m1, 'bottom',
+                                   m2, 'top', max_dist=0.3, nsub=1)
+fb1 = FacetBasis(m1, e, quadrature=q1, facets=f1)
+fb2 = FacetBasis(m2, e, quadrature=q2, facets=f2)
+fbasis = fb1 * fb2
+X2 = fb2.global_coordinates()  # master points paired with slave points
 
-s1[2, 2] = poisson_ratio * (s1[0, 0] + s1[1, 1])
-s2[2, 2] = poisson_ratio * (s2[0, 0] + s2[1, 1])
+# boundary conditions
+D = np.concatenate((basis1.get_dofs('top').all(),
+                    basis2.get_dofs('bottom').all() + N1))
+x = fbasis.zeros()
+x[basis1.get_dofs('top').all('u^2')] = -delta
 
-vonmises1 = np.sqrt(.5 * ((s1[0, 0] - s1[1, 1]) ** 2 +
-                          (s1[1, 1] - s1[2, 2]) ** 2 +
-                          (s1[2, 2] - s1[0, 0]) ** 2 +
-                          6. * s1[0, 1] ** 2))
+# Hessian of energy is assembled once
+K11 = elastic_energy.assemble(basis1, x=np.zeros(N1))[0]
+K22 = elastic_energy.assemble(basis2, x=np.zeros(basis2.N))[0]
 
-vonmises2 = np.sqrt(.5 * ((s2[0, 0] - s2[1, 1]) ** 2 +
-                          (s2[1, 1] - s2[2, 2]) ** 2 +
-                          (s2[2, 2] - s2[0, 0]) ** 2 +
-                          6. * s2[0, 1] ** 2))
+K = bmat([[K11, None],
+          [None, K22]])
+
+# semismooth Newton
+for itr in range(30):
+    # assemble Jacobian of the contact term
+    jac, rhs = nitsche.assemble(fbasis, x=x, x2=X2)
+    dx = solve(*enforce(K + jac, rhs - K @ x, D=D))
+    x += dx
+    print(f"iteration {itr + 1}: |dx| = {np.linalg.norm(dx):.2e}")
+    if np.linalg.norm(dx) < 1e-12:
+        break
+
+# postprocessing
+
+def von_mises(basis, u):
+    s = sigma(basis.interpolate(u))
+    s33 = nu * (s[0, 0] + s[1, 1])
+    vm = np.sqrt(0.5 * ((s[0, 0] - s[1, 1]) ** 2 + (s[1, 1] - s33) ** 2
+                        + (s33 - s[0, 0]) ** 2) + 3 * s[0, 1] ** 2)
+    return basis.with_element(ElementQuad1()).project(vm)
+
+# split solution and calculate von Mises stress
+x1, x2 = x[:N1], x[N1:]
+mises1, mises2 = von_mises(basis1, x1), von_mises(basis2, x2)
+mises = np.concatenate((mises1, mises2))
+
+# show both bodies in the same visualization
+basis_mises = Basis(MeshQuad.from_mesh(m1) + m2, ElementQuad1())
+
+# helper to plot contact force
+@Functional
+def multiplier_plotter(w):
+    gamma = alpha * w.h / mu
+    lamh = np.maximum(contact_pressure(w.u[0], w)
+                      - gap(w.u[0], w.u[1], w) / gamma, 0)
+
+    # mesh for plotting multiplier at every quadrature point
+    global mesh_mult, mult
+    mesh_mult = MeshLine(w.x[0].flatten())
+    mult = lamh.flatten()
+
+    # return per quadrature point array for integration
+    return lamh
+
+
+print("Total contact force: {}".format(
+    multiplier_plotter.assemble(fbasis, u=x, x2=X2)
+))
 
 
 def visualize():
-    from skfem.visuals.matplotlib import plot, draw
-    pdg1 = Basis(mdefo1, dg1.elem)
-    pdg2 = Basis(mdefo2, dg2.elem)
-    ax = plot(pdg1,
-              vonmises1,
-              shading='gouraud',
-              colorbar=r"$\sigma_{\mathrm{mises}}$")
-    draw(mdefo1, ax=ax)
-    plot(pdg2, vonmises2, ax=ax, nrefs=3, shading='gouraud')
-    draw(mdefo2, ax=ax)
-    return ax
-
+    return basis_mises.plot(mises, 'web', nrefs=3, cmap='turbo')
 
 if __name__ == "__main__":
     visualize().show()

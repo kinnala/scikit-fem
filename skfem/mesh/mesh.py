@@ -1394,6 +1394,8 @@ class Mesh:
             dimension.
 
         """
+        if callable(diffs):
+            diffs = diffs(self.doflocs)
         self._check_dim(diffs, 'diffs')
         return self._replace(
             doflocs=np.array([self.doflocs[itr] + diffs[itr]
