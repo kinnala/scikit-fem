@@ -407,6 +407,24 @@ assembled using :class:`~skfem.assembly.EdgeBasis`.
 
 See the source code of :exlink:`59` for more information.
 
+Example 60: Plate with a circular hole
+--------------------------------------
+
+This example computes the stiffness of a plate with a circular hole that is
+pulled by two frictionless grips.  The curved biquadratic mesh is built
+directly in the code, only the normal displacement is prescribed on the grip,
+the stiffness follows from the reaction force, i.e. the assembled residual on
+the grip, and the average stress over a small patch at the hole is evaluated
+using :class:`~skfem.assembly.Functional`.
+
+.. plot::
+   :caption: The stress :math:`\sigma_{xx}` in the quarter plate of Example 60.
+
+   from docs.examples.ex60 import visualize
+   visualize()
+
+See the source code of :exlink:`60` for more information.
+
 Fluid mechanics
 ===============
 
