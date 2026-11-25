@@ -150,7 +150,7 @@ def multiplier_plotter(w):
     mult = lamh.flatten()
 
     # return per quadrature point array for integration
-    return lamh
+    return lamh * w.n[1]
 
 
 print("Total contact force: {}".format(
