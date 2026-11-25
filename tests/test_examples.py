@@ -472,3 +472,12 @@ class TestEx59(TestCase):
         mid = (ex.x > 1.) & (ex.x < ex.L - 1.)
         self.assertLess(np.max(np.abs(ex.N[mid] - ex.N_beam(ex.x[mid]))
                                / ex.N_beam(ex.x[mid])), .03)
+
+
+class TestEx60(TestCase):
+
+    def runTest(self):
+        import docs.examples.ex60 as ex
+
+        # within 0.5 % of the certified 0.5912009869 <= K <= 0.5912009882
+        self.assertAlmostEqual(ex.stiffness, .5912010, delta=.005 * .5912010)
