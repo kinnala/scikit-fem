@@ -1593,6 +1593,13 @@ class Mesh:
             for projecting doflocs because trace may lead to a lower
             dimensional mesh.  Useful example is ``lambda p: p[1:]``.
 
+        Returns
+        -------
+        mesh : mtype
+            The trace mesh.
+        facets : ndarray
+            The normalized version of the input facet array.
+
         """
         facets = self.normalize_facets(facets)
         p, t, _ = self._reix(self.facets[:, facets])
