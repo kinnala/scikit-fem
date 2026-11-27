@@ -1099,7 +1099,8 @@ class Mesh:
         if not isinstance(other, cls):
             raise TypeError("Can only join meshes with same type.")
         p = np.hstack((self.p, other.p))
-        t = np.hstack((self.t, other.t + self.p.shape[1]))
+        t = np.hstack((self.dofs.element_dofs,
+                       other.dofs.element_dofs + self.doflocs.shape[1]))
         return cls(p, t)
 
     def __repr__(self):
@@ -1390,10 +1391,13 @@ class Mesh:
         Parameters
         ----------
         diffs
-            Translate the mesh by a vector. Must have same size as the mesh
-            dimension.
+            Translate the mesh by a vector.  Must have same size as the mesh
+            dimension.  If a callable, then doflocs are passed to it for
+            the creation of the bector.
 
         """
+        if callable(diffs):
+            diffs = diffs(self.doflocs)
         self._check_dim(diffs, 'diffs')
         return self._replace(
             doflocs=np.array([self.doflocs[itr] + diffs[itr]
@@ -1589,6 +1593,13 @@ class Mesh:
             Optional lambda for modifying doflocs before initializing.  Usually
             for projecting doflocs because trace may lead to a lower
             dimensional mesh.  Useful example is ``lambda p: p[1:]``.
+
+        Returns
+        -------
+        mesh : mtype
+            The trace mesh.
+        facets : ndarray
+            The normalized version of the input facet array.
 
         """
         facets = self.normalize_facets(facets)
