@@ -37,10 +37,10 @@ trans = lambda x: np.array([
     (R - np.sqrt(R ** 2 - x[0] ** 2)) * (1 - x[1] / 0.5)
 ])
 xs = np.concatenate((
-    -graded(0.5, 10)[:0:-1],  # symmetric wrt x = 0
-    graded(0.5, 10)
+    -graded(0.5, 5)[:0:-1],  # symmetric wrt x = 0
+    graded(0.5, 5)
 ))
-ys = graded(0.5, 8)
+ys = graded(0.5, 4)
 m1 = (MeshQuad2
       .from_mesh(MeshQuad.init_tensor(xs, ys).refined(nrefs))
       .with_defaults()
@@ -48,10 +48,10 @@ m1 = (MeshQuad2
 
 # block [-1, 1] x [-1, 0]
 xs = np.concatenate((
-    -graded(1.0, 13, 4.0)[:0:-1],
-    graded(1.0, 13, 4.0)
+    -graded(1.0, 6, 4.0)[:0:-1],
+    graded(1.0, 6, 4.0)
 ))
-ys = -graded(1.0, 25, 4.0)[::-1]
+ys = -graded(1.0, 12, 4.0)[::-1]
 m2 = (MeshQuad.init_tensor(xs, ys)
       .refined(nrefs)
       .with_defaults())
@@ -135,7 +135,7 @@ mises1, mises2 = von_mises(basis1, x1), von_mises(basis2, x2)
 mises = np.concatenate((mises1, mises2))
 
 # show both bodies in the same visualization
-basis_mises = Basis(MeshQuad.from_mesh(m1) + m2, ElementQuad1())
+basis_mises = Basis(m1 + MeshQuad2.from_mesh(m2), ElementQuad1())
 
 # helper to plot contact force
 @Functional
@@ -144,18 +144,30 @@ def multiplier_plotter(w):
     lamh = np.maximum(contact_pressure(w.u[0], w)
                       - gap(w.u[0], w.u[1], w) / gamma, 0)
 
-    # mesh for plotting multiplier at every quadrature point
-    global mesh_mult, mult
-    mesh_mult = MeshLine(w.x[0].flatten())
-    mult = lamh.flatten()
+    # basis for plotting multiplier
+    global basist, lamht
+    m1t, facets = m1.trace('bottom', MeshLine, lambda x: x[0])
+    basist = Basis(m1t, ElementLineP2())
+    lamh2 = fb1.with_element(ElementQuad2()).project(lamh)
+    fbasist = FacetBasis(m1, ElementQuad2(), facets=facets, intorder=4)
+    lamht = basist.project(fbasist.interpolate(lamh2))
 
     # return per quadrature point array for integration
-    return lamh * w.n[1]
+    return -lamh * w.n[1]
 
+# total force for Hertz comparison
+P = multiplier_plotter.assemble(fbasis, u=x, x2=X2)
+print("Total contact force: {}".format(P))
 
-print("Total contact force: {}".format(
-    multiplier_plotter.assemble(fbasis, u=x, x2=X2)
-))
+# Hertz pressure
+Es = E / (2 * (1 - nu ** 2))
+a = np.sqrt(4 * P * R / (np.pi * Es))
+p0 = 2 * P / (np.pi * a)
+hertz = lambda x: p0 * np.sqrt(np.clip(1 - (x / a) ** 2, 0, None))
+hertzt = basist.project(lambda x: hertz(x[0]))
+
+# ax = basist.plot(lamht, color='k-')
+# basist.plot(hertzt, ax=ax, nrefs=3, color='r-').show()
 
 
 def visualize():

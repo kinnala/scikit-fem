@@ -1099,7 +1099,8 @@ class Mesh:
         if not isinstance(other, cls):
             raise TypeError("Can only join meshes with same type.")
         p = np.hstack((self.p, other.p))
-        t = np.hstack((self.t, other.t + self.p.shape[1]))
+        t = np.hstack((self.dofs.element_dofs,
+                       other.dofs.element_dofs + self.doflocs.shape[1]))
         return cls(p, t)
 
     def __repr__(self):
