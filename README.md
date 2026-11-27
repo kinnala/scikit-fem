@@ -37,9 +37,9 @@ If you use the library in your research, you can cite the following article:
 
 The most recent release can be installed simply by
 ```
-pip install scikit-fem[all]
+pip install scikit-fem
 ```
-Remove `[all]` to not install the optional dependencies `meshio` for mesh
+Use `scikit-fem[all]` to install the optional dependencies `meshio` for mesh
 input/output, and `matplotlib` for creating simple visualizations.
 The minimal dependencies are `numpy` and `scipy`.
 You can also try the library in browser through [Pyodide](https://kinnala.github.io/skfem-demo/).
@@ -215,6 +215,7 @@ with respect to documented and/or tested features.
 
 ### Unreleased
 
+- Added: Support for Python 3.15.
 - Added: The library is now tested against Pyodide (a port of CPython to WebAssembly)
 - Added: `Mesh.save_npy/load_npy` with better performance for larger meshes (in comparison to `Mesh.save/load`)
 - Added: `Basis.interpolate_multiple` for a simultaneous interpolation of multiple solution vectors
@@ -237,6 +238,7 @@ with respect to documented and/or tested features.
 - Changed: `ElementVector` and `ElementComposite` are optimized via `BlockArray` and `BlockDiscreteField` that avoid storing explicit zeros
 - Changed: Accessing `Mesh.subdomains` or `Mesh.boundaries` with nonexisting tag will now raise `TagKeyError`
 - Changed: `Mesh.__add__` no more removes duplicate nodes (use explicit `Mesh.remove_duplicate_nodes()`)
+- Removed: Support for Python 3.10.
 - Removed: Obsolete projection functions `skfem.utils.project` and `skfem.utils.projection`, replaced by `Basis.project`
 - Removed: Dysfunctional visualization package `skfem.visuals.glvis`
 - Removed: The deprecated `FacetBasis.trace` method

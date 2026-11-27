@@ -15,9 +15,9 @@ hexahedral meshes as well as one-dimensional problems.
 
     .. code-block:: bash
 
-        pip install scikit-fem[all]
+        pip install scikit-fem
 
-    Remove ``[all]`` to not install the optional dependencies ``meshio`` and
+    Use ``scikit-fem[all]`` to install the optional dependencies ``meshio`` and
     ``matplotlib``.
 
 Table of contents
