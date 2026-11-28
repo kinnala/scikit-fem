@@ -38,9 +38,11 @@ class COOData:
             shape: Tuple[int, ...],
             local_shape: Optional[Tuple[int, ...]]
     ):
-        K = coo_matrix((data, (indices[0], indices[1])), shape=shape)
-        K.eliminate_zeros()
-        return K.tocsr()
+        # explicit zeros are kept on purpose: the elemental matrices are not
+        # exactly symmetric in floating point, so dropping exact zeros could
+        # make the sparsity pattern of a symmetric problem nonsymmetric
+        return coo_matrix((data, (indices[0], indices[1])),
+                          shape=shape).tocsr()
 
     def __radd__(self, other):
         return self.__add__(other)

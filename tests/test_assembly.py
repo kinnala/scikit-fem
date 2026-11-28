@@ -322,7 +322,8 @@ class NormalVectorTestHexS2(NormalVectorTestTri):
 class NormalVectorTestHex2(NormalVectorTestTri):
 
     case = (MeshHex(), ElementHex2())
-    intorder = 3
+    # 3x3 points per face are needed for a nonsingular facet mass matrix
+    intorder = 4
     test_integrate_volume = False
 
 
@@ -1034,3 +1035,22 @@ def test_composite_basis_split_indices():
     form = BilinearForm(lambda u, ut, v, vt, w: u * v)
     with pytest.raises(ValueError):
         form.assemble_blocks(b1 @ Basis(m, ElementTriP1()))
+
+
+@pytest.mark.parametrize(
+    "m,e",
+    [
+        (MeshTri.init_symmetric(), ElementTriP2()),
+        (MeshTet().refined(1), ElementTetP2()),
+    ]
+)
+def test_symmetric_sparsity_pattern(m, e):
+    # elemental matrices may contain an exact zero whose transpose is
+    # roundoff; the sparsity pattern must still be symmetric
+    from skfem.models.elasticity import linear_elasticity, lame_parameters
+    K = linear_elasticity(*lame_parameters(1e3, .3)).assemble(
+        Basis(m, ElementVector(e))
+    )
+    S = K.copy()
+    S.data[:] = 1.
+    assert (S - S.T).nnz == 0

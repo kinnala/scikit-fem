@@ -2110,7 +2110,7 @@ class CBilinearForm(_CFormMixin, BilinearForm):
         to :meth:`assemble` and cached (per pair of bases), and the local
         matrices are added directly into the CSR data array.  The resulting
         matrices then have identical sparsity patterns, including possible
-        explicit zeros.
+        explicit zeros, as with the default assembly.
 
     """
 

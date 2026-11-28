@@ -234,6 +234,7 @@ with respect to documented and/or tested features.
 - Deprecated: `COOData.solve`, instead use `solve` with `solver_iter_cg`, e.g., `solve(*condense(A, b, D=D), solver=solver_iter_cg())`
 - Deprecated: `Form.coo_data`, superseded by `Form.elemental`
 - Deprecated: `CellBasis.with_elements`, instead initialize a new basis, e.g., `Basis(basis.mesh, basis.elem, elements=elements)`
+- Changed: `BilinearForm.assemble` no longer calls `eliminate_zeros`, i.e. explicit zeros are now kept in the resulting matrix
 - Changed: `skfem.autodiff` was rewritten using built-in forward-mode dual number AD without the JAX dependency
 - Changed: `ElementVector` and `ElementComposite` are optimized via `BlockArray` and `BlockDiscreteField` that avoid storing explicit zeros
 - Changed: Accessing `Mesh.subdomains` or `Mesh.boundaries` with nonexisting tag will now raise `TagKeyError`

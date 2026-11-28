@@ -173,6 +173,8 @@ def test_enforce_handles_empty_rows():
         return 0. * u * v
 
     A = zero_form.assemble(basis)
+    # assembly keeps explicit zeros, drop them to get structurally empty rows
+    A.eliminate_zeros()
     D = m.boundary_nodes()
 
     # Confirm we really have empty rows in D (otherwise the test would
